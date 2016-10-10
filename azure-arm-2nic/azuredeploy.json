@@ -264,9 +264,9 @@
         "typeHandlerVersion": "1.2",
         "settings": {
           "fileUris": [
-            "https://raw.githubusercontent.com/sevedge/azure/master/2nic/configurenic.sh"
+            "https://cdn.f5.com/product/blackbox/staging/azure/configuremultinic.sh"
         ], 
-          "commandToExecute": "[concat('./configurenic.sh ', variables('subnet1PrivateAddress'), ' ', variables('defaultgw'), ' \"', variables('subnet2PrivateAddress'), '\"')]" 
+          "commandToExecute": "[concat('./configuremultinic.sh ', variables('subnet1PrivateAddress'), ' ', variables('defaultgw'), ' \"', variables('subnet2PrivateAddress'), '\"')]" 
         } 
       } 
     } 
