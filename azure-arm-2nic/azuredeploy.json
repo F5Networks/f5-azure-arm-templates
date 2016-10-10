@@ -264,7 +264,7 @@
         "typeHandlerVersion": "1.2",
         "settings": {
           "fileUris": [
-            "https://cdn.f5.com/product/blackbox/staging/azure/configuremultinic.sh"
+            "http://cdn.f5.com/product/blackbox/staging/azure/configuremultinic.sh"
         ], 
           "commandToExecute": "[concat('./configuremultinic.sh ', variables('subnet1PrivateAddress'), ' ', variables('defaultgw'), ' \"', variables('subnet2PrivateAddress'), '\"')]" 
         } 
