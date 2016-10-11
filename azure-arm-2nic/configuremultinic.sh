@@ -4,7 +4,8 @@
 # Parameter 1: MGMT IP
 # Parameter 2: Default GW
 # Parameter 3: List of Additional IP's
-# Example for 3 nic: ./configurenic.sh 10.0.1.5 10.0.1.1 "10.0.2.5 10.0.3.5"
+# Example for 3 nic: ./configuremultinic.sh 10.0.1.5 10.0.1.1 "10.0.2.5 10.0.3.5"
+
 
     echo "$(date +%c): Starting NIC Configuration for multi-NIC Deployment"
 ## Set DB Variables to allow for multi nic
