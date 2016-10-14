@@ -54,6 +54,13 @@
         "description": "Size of the VM"
       },
       "type": "string"
+    },
+    "licenseToken1": {
+      "type": "string",
+      "defaultValue": "REQUIRED",
+      "metadata": {
+        "description": "The license token for the F5 Big IP(BYOL)"
+      }
     }
   },
   "variables": {
@@ -250,6 +257,26 @@
         }
       }
     },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('vmName'),'/start')]",
+      "apiVersion": "2016-03-30",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "settings": {
+          "fileUris": [
+            "https://f5cloudlibs.blob.core.windows.net/archive/runScripts.js"
+          ],
+          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --onboard \" --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken1'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none --signal ONBOARD_DONE \")]"
+        }
+      }
+     },
     { 
       "type": "Microsoft.Compute/virtualMachines/extensions", 
       "name": "[concat(parameters('vmName'),'/configuremultinic')]", 
