@@ -284,7 +284,7 @@
       "location": "[variables('location')]",
       "dependsOn": [ 
         "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
-        "[concat(parameters('vmName'),'/start')]"
+        "[resourceID('Microsoft.Compute/virtualMachines/extensions', parameters('vmName'),'start')]"
       ], 
       "properties": { 
         "publisher": "Microsoft.OSTCExtensions",
