@@ -12,7 +12,7 @@ export PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin/"
     tmsh modify sys db provision.1nic value forced_enable
     tmsh modify sys db provision.1nicautoconfig value disable
     bigstart restart
-## Check bigstart tmm status in a while loop before moving on 
+## Check bigstart tmm status in a while loop before moving on
     sleep 10
     while [[ $(bigstart status tmm) == *down* ]]
         do
@@ -31,7 +31,7 @@ export PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin/"
             tmsh create net vlan vlan_$int interfaces add { 1.$int { untagged } }
             tmsh create net self self_$int address $nic/24 vlan vlan_$int allow-service default
             int=$((int+1))
-        done 
+        done
 
     tmsh save sys config > /dev/null 2>&1
     echo "$(date +%c): Ending NIC Configuration for multi-NIC Deployment"
