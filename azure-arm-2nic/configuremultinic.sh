@@ -32,7 +32,7 @@ export PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin/"
             tmsh create net self self_$int address $nic/24 vlan vlan_$int allow-service default
             int=$((int+1))
         done
-    tmsh save sys config > /dev/null 2>&1
+    tmsh save sys config > /dev/null 2>&1 &
 
     echo "$(date +%c): Ending NIC Configuration for multi-NIC Deployment"
     exit
