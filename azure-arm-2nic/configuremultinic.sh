@@ -6,7 +6,7 @@
 # Parameter 3: List of Additional IP's
 # Example for 3 nic: ./configuremultinic.sh 10.0.1.5 10.0.1.1 "10.0.2.5 10.0.3.5"
 
-
+	export PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin/"
     echo "$(date +%c): Starting NIC Configuration for multi-NIC Deployment"
 ## Set DB Variables to allow for multi nic
     tmsh modify sys db provision.1nic value forced_enable
@@ -32,8 +32,7 @@
             tmsh create net self self_$int address $nic/24 vlan vlan_$int allow-service default
             int=$((int+1))
         done 
-
-    tmsh save sys config
-    #reboot , is this needed?
+	#Temp commenting this out
+    #tmsh save sys config
     echo "$(date +%c): Ending NIC Configuration for multi-NIC Deployment"
     exit
