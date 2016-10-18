@@ -17,7 +17,7 @@
     },
     "dnsLabelPrefix": {
       "type": "string",
-      "defaultValue": "f52nic",
+      "defaultValue": "REQUIRED",
       "metadata": {
         "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
       }
@@ -69,6 +69,7 @@
 
     "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'samultinic')]",
     "storageAccountType": "Standard_LRS",
+    "availabilitySetName": "[concat(parameters('vmName'), '-availset')]",
 
     "nic1Name": "[concat(parameters('vmName'), '-mgmt1')]",
     "nic2Name": "[concat(parameters('vmName'), '-nic2')]",
@@ -93,7 +94,7 @@
     "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
 
     "singleQuote": "'",
-    "commandArgs": "[concat(variables('subnet1PrivateAddress'), ' ', variables('defaultgw'), ' \"', variables('subnet2PrivateAddress'), '\"')]"
+    "commandArgs": "[concat(variables('subnet1PrivateAddress'), ' ', variables('defaultgw'), ' \"', variables('subnet2PrivateAddress'), '\" ', parameters('adminUsername'), ' ', parameters('adminPassword'))]"
 
   },
   "resources": [
@@ -197,10 +198,17 @@
       }
     },
     {
+      "apiVersion": "[variables('apiVersion')]",
+      "location": "[resourceGroup().location]",
+      "name": "[variables('availabilitySetName')]",
+      "type": "Microsoft.Compute/availabilitySets"
+    },
+    {
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "[variables('apiVersion')]",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('nic1Name'))]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('nic2Name'))]"
       ],
@@ -236,6 +244,9 @@
               }
             }
           ]
+        },
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
         },
         "osProfile": {
           "computerName": "[parameters('vmName')]",
@@ -276,7 +287,7 @@
           "fileUris": [
             "https://f5cloudlibs.blob.core.windows.net/archive/runScripts.js"
           ],
-          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --onboard \" --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none --signal ONBOARD_DONE \" --script \" --wait-for ONBOARD_DONE --output /var/log/runScript.log --log-level debug --url http://cdn.f5.com/product/blackbox/staging/azure/configuremultinic.sh --cl-args ', variables('singleQuote'), variables('commandArgs'), variables('singleQuote'), '\"')]"
+          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --onboard \" --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseToken1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none --signal ONBOARD_DONE \" --script \" --wait-for ONBOARD_DONE --output /var/log/runScript.log --log-level debug --url http://cdn-prod-ore-f5.s3-website-us-west-2.amazonaws.com/product/blackbox/staging/azure/configuremultinic.sh --cl-args ', variables('singleQuote'), variables('commandArgs'), variables('singleQuote'), '\"')]"
         }
       }
      }
