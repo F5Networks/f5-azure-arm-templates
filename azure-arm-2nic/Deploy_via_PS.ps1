@@ -26,8 +26,8 @@ param(
   $parametersFilePath = "azuredeploy.parameters.json"
 )
 
-
-Write-Host Logging in...
+$timestamp = get-date -format g
+Write-Host "[$timestamp] Starting Script "
 Add-AzureRmAccount
 
 
@@ -39,4 +39,24 @@ $pwd = ConvertTo-SecureString -String $f5pwd -AsPlainText -Force
 $deployment = New-AzureRmResourceGroupDeployment -Name $deploymentName -ResourceGroupName $deploymentName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -adminPassword $pwd -dnsLabelPrefix $deploymentName -vmName "$vmName" -licenseToken1 "$licensetoken"
 
 $deployment
+
+
+#Send Email letting know if successfull or not
+$status = $deployment.ProvisioningState
+$type = "f5-arm-2nic"
+
+$timestamp = get-date -format g
+$EmailFrom = "discoveryeselabsauto@gmail.com"
+$EmailTo = "j.sevedge@f5.com" 
+$Subject = "[$timestamp] Notification for Azure Build Complete[$status]" 
+$Body = "This is a notification for automated azure builds.. `n `n Testing template of type: $type " 
+$SMTPServer = "smtp.gmail.com" 
+$SMTPClient = New-Object Net.Mail.SmtpClient($SmtpServer, 587) 
+$SMTPClient.EnableSsl = $true 
+$SMTPClient.Credentials = New-Object System.Net.NetworkCredential("discoveryeselabsauto", "P4ssw0rd!azure"); 
+$SMTPClient.Send($EmailFrom, $EmailTo, $Subject, $Body)
+
+Write-Host "Email Has been Sent to $EmailTo at $timestamp"
+
+Write-Host "[$timestamp] Ending Script"
 
