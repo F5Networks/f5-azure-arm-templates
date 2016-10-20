@@ -1,7 +1,5 @@
-f5-common-python
+f5-azure-arm-1nic
 ================
-
-|Build Status| |Docs Build Status|
 
 Introduction
 ------------
@@ -9,7 +7,7 @@ This project implements an ARM Template to deploy a base example of F5 in a 1 ni
 
 Documentation
 -------------
-Please see the project documentation on <Still being created>
+Please see the project documentation - This is still being created
 
 Installation
 ------------
@@ -24,7 +22,7 @@ Deploy via Azure deploy button below or via CLI Tools
 Powershell Usage
 -----
 
-.. code:: python
+.. code:: powershell
 
     param(
     [Parameter(Mandatory=$True)]
@@ -40,10 +38,10 @@ Powershell Usage
     $licenseToken,
 
     [string]
-    $EmailTo = "j.sevedge@f5.com",
+    $EmailTo = "email@example.com",
 
     [string]
-    $f5pwd = "P4ssw0rd!azure",
+    $f5pwd = "password",
 
     [string]
     $region = "West US",
@@ -128,11 +126,3 @@ completed and submitted the `F5 Contributor License Agreement
 <http://f5-openstack-docs.readthedocs.org/en/latest/cla_landing.html>`__
 to Openstack_CLA@f5.com prior to their code submission being included in this
 project.
-
-.. |Build Status| image:: https://travis-ci.org/F5Networks/f5-common-python.svg?branch=0.1
-    :target: https://travis-ci.org/F5Networks/f5-common-python
-    :alt: Build Status
-
-.. |Docs Build Status| image:: http://readthedocs.org/projects/f5-sdk/badge/?version=latest
-    :target: http://f5-sdk.readthedocs.org/en/latest/?badge=latest
-    :alt: Documentation Status
