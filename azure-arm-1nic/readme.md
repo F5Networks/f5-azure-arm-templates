@@ -22,8 +22,6 @@ Deploy via Azure deploy button below or via CLI Tools
 Powershell Usage
 -----
 
-.. code:: powershell
-
     param(
     [Parameter(Mandatory=$True)]
     [string]
@@ -69,6 +67,8 @@ Powershell Usage
     #Display Result
     $deployment
 
+
+
 Design Patterns
 ~~~~~~~~~~~~~~~
 
@@ -93,8 +93,9 @@ Test
 Before you open a pull request, your code must have passed a deployment into Azure with the intended result
 
 Unit Tests
-~~~~~~~~~~
+----
 Simply deploying the ARM template and completing use case fullfils a functional test
+~~~~~~~~~~
 
 
 Copyright
