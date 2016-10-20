@@ -31,11 +31,8 @@ param(
 
 $timestamp = get-date -format g
 Write-Host "[$timestamp] Starting Script "
-<<<<<<< HEAD
-=======
 
 #Connect to Azure, need to add automation capabilities
->>>>>>> develop
 Add-AzureRmAccount
 
 New-AzureRmResourceGroup -Name $deploymentName -Location "$region"
@@ -48,27 +45,18 @@ $deployment = New-AzureRmResourceGroupDeployment -Name $deploymentName -Resource
 $deployment
 
 
-<<<<<<< HEAD
-#Send Email letting know if successfull or not
-=======
 #Send Email letting know if successful or not
->>>>>>> develop
 $status = $deployment.ProvisioningState
-$type = "f5-arm-2nic"
+$type = "f5-arm-1nic"
 
 $timestamp = get-date -format g
-<<<<<<< HEAD
 $EmailFrom = "discoveryeselabsauto@gmail.com"
-$EmailTo = "j.sevedge@f5.com" 
-=======
-$EmailFrom = "discoveryeselabsauto@gmail.com" 
->>>>>>> develop
-$Subject = "[$timestamp] Notification for Azure Build Complete[$status]" 
-$Body = "This is a notification for automated azure builds.. `n `n Testing template of type: $type " 
-$SMTPServer = "smtp.gmail.com" 
-$SMTPClient = New-Object Net.Mail.SmtpClient($SmtpServer, 587) 
-$SMTPClient.EnableSsl = $true 
-$SMTPClient.Credentials = New-Object System.Net.NetworkCredential("discoveryeselabsauto", "P4ssw0rd!azure"); 
+$Subject = "[$timestamp] Notification for Azure Build Complete[$status]"
+$Body = "This is a notification for automated azure builds.. `n `n Testing template of type: $type "
+$SMTPServer = "smtp.gmail.com"
+$SMTPClient = New-Object Net.Mail.SmtpClient($SmtpServer, 587)
+$SMTPClient.EnableSsl = $true
+$SMTPClient.Credentials = New-Object System.Net.NetworkCredential("discoveryeselabsauto", "P4ssw0rd!azure");
 $SMTPClient.Send($EmailFrom, $EmailTo, $Subject, $Body)
 
 Write-Host "Email Has been Sent to $EmailTo at $timestamp"
