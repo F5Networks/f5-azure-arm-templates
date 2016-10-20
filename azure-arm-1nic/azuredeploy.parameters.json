@@ -12,7 +12,7 @@
             "value": "GEN-UNIQUE"
         },
         "vmName": {
-            "value": "f52nic"
+            "value": "f51nic"
         },
         "vmSize": {
             "value": "Standard_D2_v2"

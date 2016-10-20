@@ -24,7 +24,7 @@
     },
    "vmName": {
       "type": "string",
-      "defaultValue": "f52nic",
+      "defaultValue": "f51nic",
       "metadata": {
         "description": "Name of the VM"
       }
