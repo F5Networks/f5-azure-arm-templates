@@ -1,8 +1,9 @@
-f5-azure-arm-1nic
+**f5-azure-arm-1nic**
 ================
 
 Introduction
 ------------
+
 This project implements an ARM Template to deploy a base example of F5 in a 1 nic deployment.
 
 Documentation
@@ -21,7 +22,6 @@ Deploy via Azure deploy button below or via CLI Tools
 
 Powershell Usage
 -----
-
     # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
     # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
@@ -79,28 +79,40 @@ Powershell Usage
 
 Design Patterns
 ------------
+----------
 
 The goal is for the design patterns for all the iterative examples of F5 being deployed via ARM templates to closely match as much as possible.
 
 List of Patterns For Contributing Developers
 --------------------------------------------
+----------
 
-#. Still working on patterns to use
+
+ 1. Still working on patterns to use
 
 Filing Issues
 -------------
+----------
+
+
 See the Issues section of `Contributing <CONTRIBUTING.md>`__.
 
 Contributing
 ------------
+----------
+
+
 See `Contributing <CONTRIBUTING.md>`__
 
 Test
 ----
+----------
+
 Before you open a pull request, your code must have passed a deployment into Azure with the intended result
 
 Unit Tests
 ----
+----------
 Simply deploying the ARM template and completing use case fullfils a functional test
 
 
