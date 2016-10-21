@@ -14,7 +14,7 @@ Installation
 
 Deploy via Azure deploy button below or via CLI Tools
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsevedge%2Fazure-arm-2nic%2Fmaster%2Fazure-arm-2nic%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fsupported%2Fazure-arm-1nic%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
@@ -78,7 +78,7 @@ Powershell Usage
 
 
 Design Patterns
-~~~~~~~~~~~~~~~
+------------
 
 The goal is for the design patterns for all the iterative examples of F5 being deployed via ARM templates to closely match as much as possible.
 
@@ -86,7 +86,6 @@ List of Patterns For Contributing Developers
 --------------------------------------------
 
 #. Still working on patterns to use
-
 
 Filing Issues
 -------------
@@ -103,7 +102,7 @@ Before you open a pull request, your code must have passed a deployment into Azu
 Unit Tests
 ----
 Simply deploying the ARM template and completing use case fullfils a functional test
-~~~~~~~~~~
+
 
 
 Copyright
@@ -131,7 +130,4 @@ under the License.
 Contributor License Agreement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Individuals or business entities who contribute to this project must have
-completed and submitted the `F5 Contributor License Agreement
-<http://f5-openstack-docs.readthedocs.org/en/latest/cla_landing.html>`__
-to Openstack_CLA@f5.com prior to their code submission being included in this
-project.
+completed and submitted the `F5 Contributor License Agreement`

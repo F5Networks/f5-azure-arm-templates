@@ -1,6 +1,7 @@
 ﻿# Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
 # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
 # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
+# Example Command: .\Deploy_via_PS.ps1 -dnsLabelPrefix f51nicauto01 -vmName f51nic -licenseToken XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -EmailTo user@f5.com
 
 param(
   [Parameter(Mandatory=$True)]
