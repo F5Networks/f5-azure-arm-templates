@@ -1,9 +1,11 @@
-﻿#Start
+﻿# Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
+# the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
+# can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
 
 param(
   [Parameter(Mandatory=$True)]
   [string]
-  $deploymentName,
+  $dnsLabelPrefix,
 
   [Parameter(Mandatory=$True)]
   [string]
@@ -13,11 +15,15 @@ param(
   [string]
   $licenseToken,
 
+  [Parameter(Mandatory=$True)]
   [string]
-  $EmailTo = "j.sevedge@f5.com",
+  $EmailTo,
 
   [string]
-  $f5pwd = "P4ssw0rd!azure",
+  $adminPassword = "P4ssw0rd!azure",
+
+  [string]
+  $deploymentName = $dnsLabelPrefix,
 
   [string]
   $region = "West US",
@@ -31,47 +37,33 @@ param(
 
 $timestamp = get-date -format g
 Write-Host "[$timestamp] Starting Script "
-<<<<<<< HEAD
-=======
 
-#Connect to Azure, need to add automation capabilities
->>>>>>> develop
+# Connect to Azure, right now it is only interactive login
 Add-AzureRmAccount
 
+# Create Resource Group for ARM Deployment
 New-AzureRmResourceGroup -Name $deploymentName -Location "$region"
-Write-Host Resource Group $deploymentName created in $region
 
+# Create Arm Deployment
+$pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
+$deployment = New-AzureRmResourceGroupDeployment -Name $deploymentName -ResourceGroupName $deploymentName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -adminPassword $pwd -dnsLabelPrefix $dnsLabelPrefix -vmName "$vmName" -licenseToken1 "$licensetoken"
 
-$pwd = ConvertTo-SecureString -String $f5pwd -AsPlainText -Force
-$deployment = New-AzureRmResourceGroupDeployment -Name $deploymentName -ResourceGroupName $deploymentName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -adminPassword $pwd -dnsLabelPrefix $deploymentName -vmName "$vmName" -licenseToken1 "$licensetoken"
-
+# Print Output of Deployment to Console
 $deployment
 
-
-<<<<<<< HEAD
-#Send Email letting know if successfull or not
-=======
-#Send Email letting know if successful or not
->>>>>>> develop
+# Send Email letting deployer know if successful or not, placeholder utilizing arbitrary gmail account
 $status = $deployment.ProvisioningState
 $type = "f5-arm-2nic"
 
 $timestamp = get-date -format g
-<<<<<<< HEAD
 $EmailFrom = "discoveryeselabsauto@gmail.com"
-$EmailTo = "j.sevedge@f5.com" 
-=======
-$EmailFrom = "discoveryeselabsauto@gmail.com" 
->>>>>>> develop
-$Subject = "[$timestamp] Notification for Azure Build Complete[$status]" 
-$Body = "This is a notification for automated azure builds.. `n `n Testing template of type: $type " 
-$SMTPServer = "smtp.gmail.com" 
-$SMTPClient = New-Object Net.Mail.SmtpClient($SmtpServer, 587) 
-$SMTPClient.EnableSsl = $true 
-$SMTPClient.Credentials = New-Object System.Net.NetworkCredential("discoveryeselabsauto", "P4ssw0rd!azure"); 
+$Subject = "[$timestamp] Notification for Azure Build Complete[$status]"
+$Body = "This is a notification for automated azure builds.. `n `n Testing template of type: $type "
+$SMTPServer = "smtp.gmail.com"
+$SMTPClient = New-Object Net.Mail.SmtpClient($SmtpServer, 587)
+$SMTPClient.EnableSsl = $true
+$SMTPClient.Credentials = New-Object System.Net.NetworkCredential("discoveryeselabsauto", "P4ssw0rd!azure");
 $SMTPClient.Send($EmailFrom, $EmailTo, $Subject, $Body)
 
 Write-Host "Email Has been Sent to $EmailTo at $timestamp"
-
 Write-Host "[$timestamp] Ending Script"
-
