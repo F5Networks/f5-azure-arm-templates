@@ -65,7 +65,6 @@ $deployment
 $status = $deployment.ProvisioningState
 $type = "f5-arm-2nic"
 
-$timestamp = get-date -format g
 $EmailFrom = "discoveryeselabsauto@gmail.com"
 $Subject = "[$(get-date -format g)] Notification for Azure Build Complete[$status]"
 $Body = "This is a notification for automated azure builds.. `n `n Testing template of type: $type "
