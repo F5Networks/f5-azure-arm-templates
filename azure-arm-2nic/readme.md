@@ -4,7 +4,8 @@
 Introduction
 ------------
 
-This project implements an ARM Template to deploy a base example of F5 in a 2 nic deployment.
+This solution implements an ARM Template to deploy a base example of F5 in a 2 nic deployment.  This allows interface #1 to be used for mgmt and data-plane traffic from the internet,
+then interface #2 is connected into the Azure networks where traffic will be processed by the pool members in a traditional 2 arm design.
 
 Documentation
 -------------
@@ -13,7 +14,7 @@ Please see the project documentation - This is still being created
 Installation
 ------------
 
-Deploy via Azure deploy button below or via CLI Tools
+Deploy via Azure deploy button below, Powershell or via CLI Tools
 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fsupported%2Fazure-arm-2nic%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>

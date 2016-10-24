@@ -4,7 +4,8 @@
 Introduction
 ------------
 
-This project implements an ARM Template to deploy a base example of F5 in a 1 nic deployment.
+This solution implements an ARM Template to deploy a base example of F5 in a cloud-focused single nic deployment.  This is the standard "cloud" design where the Compute instance of
+F5 is running with a single interface, where both mgmt and dataplane traffic is processed.  This is a traditional model in the cloud where the deployment is considered 1 armed.
 
 Documentation
 -------------
@@ -13,11 +14,12 @@ Please see the project documentation - This is still being created
 Installation
 ------------
 
-Deploy via Azure deploy button below or via CLI Tools
+Deploy via Azure deploy button below, Powershell or via CLI Tools
 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fsupported%2Fazure-arm-1nic%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
+
 
 
 Powershell Usage
@@ -83,6 +85,7 @@ Powershell Usage
     $deployment
 
 
+
 Azure CLI(1.0) Usage
 -----
     #!/bin/bash
@@ -130,6 +133,7 @@ Azure CLI(1.0) Usage
     # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
     # such as can been done with Powershell...oh well!
     azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabelPrefix\":{\"value\":\"$dns_label_prefix\"},\"vmName\":{\"value\":\"$vm_name\"},\"vmSize\":{\"value\":\"$vm_size\"},\"licenseToken1\":{\"value\":\"$license_token\"}}"
+
 
 
 

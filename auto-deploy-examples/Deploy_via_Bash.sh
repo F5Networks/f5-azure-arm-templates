@@ -1,33 +1,51 @@
 #!/bin/bash
 
-# Example Script to automate deployment of ARM template(s) into Azure, using azure cli 1.0
+## Automation Version
 
-# Define Variables
-random_number=$(cat /dev/urandom | tr -dc '0-99999' | fold -w 8 | head -n 1)
-resource_group="f52nicauto$random_number"
-adminusername="azureuser"
-adminpassword="P4ssw0rd!azure"
-dnslabelprefix="f52nicauto$random_number"
-vmname="f52nicvm01"
-vmsize="Standard_D2_v2"
-licensetoken="XXXX-XXXX"
+# Script to deploy 1nic/2nic ARM template into Azure, using azure cli 1.0
+# Example Command: ./deploy_via_bash.sh -u azureuser -p 'yourpassword' -d f52nicdeploy01 -n f52nic -l XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -r f52nicdeploy01 -y adminstrator@domain.com -z 'yourpassword'
+
+# Assign Script Paramters and Define Variables
+# Specify static items, change these as needed or make them parameters (vm_size is already an optional paramter)
 region="westus"
 template_file="azuredeploy.json"
 parameter_file="azuredeploy.parameters.json"
+vm_size="Standard_D2_v2"
+
+while getopts u:p:d:n:s:l:r:y:z: option
+do	case "$option"  in
+        u) admin_username=$OPTARG;;
+        p) admin_password=$OPTARG;;
+	    d) dns_label_prefix=$OPTARG;;
+        n) vm_name=$OPTARG;;
+        s) vm_size=$OPTARG;;
+        l) license_token=$OPTARG;;
+        r) resource_group_name=$OPTARG;;
+		y) azure_user=$OPTARG;;
+		z) azure_pwd=$OPTARG;;
+    esac
+done
+# Check for Mandatory Args
+if [ ! "$admin_username" ] || [ ! "$admin_password" ] || [ ! "$dns_label_prefix" ] || [ ! "$vm_name" ] || [ ! "$license_token" ] || [ ! "$resource_group_name" ] || [ ! "$azure_user" ] || [ ! "$azure_pwd" ]
+then
+    echo "One of the mandatory parameters was not specified!"
+    exit 1
+fi
 
 
-# Login to Azure, for simplicity in this example using username and password directly in the script
-azure login -u administrator365@discoveryeselabs.com -p P4ssw0rd!
+# Login to Azure, for simplicity in this example using username and password as supplied as script arguments y and z
+azure login -u $azure_user -p $azure_pwd
 
 # Switch to ARM mode
 azure config mode arm
 
 # Create ARM Group
-azure group create -n $resource_group -l $region
+azure group create -n $resource_group_name -l $region
 
 # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
 # such as can been done with Powershell...oh well!
-azure group deployment create -f $template_file -g $resource_group -n $resource_group -p "{\"adminUsername\":{\"value\":\"$adminusername\"},\"adminPassword\":{\"value\":\"$adminpassword\"},\"dnsLabelPrefix\":{\"value\":\"$dnslabelprefix\"},\"vmName\":{\"value\":\"$vmname\"},\"vmSize\":{\"value\":\"$vmsize\"},\"licenseToken1\":{\"value\":\"$licensetoken\"}}"
+azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabelPrefix\":{\"value\":\"$dns_label_prefix\"},\"vmName\":{\"value\":\"$vm_name\"},\"vmSize\":{\"value\":\"$vm_size\"},\"licenseToken1\":{\"value\":\"$license_token\"}}"
 
 
-
+# Need to add checks to redirect ouput to file, then use grep or awk to determine status of deployment and perform an action
+# Then just need to schedule this script as a cron job, probably need to change template_file to be absolute instead of relative in that case
