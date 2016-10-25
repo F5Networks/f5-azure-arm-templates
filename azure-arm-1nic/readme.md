@@ -1,20 +1,26 @@
-**f5-azure-arm-1nic**
-================
+# f5-azure-arm-1nic
 
-Introduction
-------------
+[![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 
-This solution implements an ARM Template to deploy a base example of F5 in a cloud-focused single nic deployment.  This is the standard "cloud" design where the Compute instance of
-F5 is running with a single interface, where both mgmt and dataplane traffic is processed.  This is a traditional model in the cloud where the deployment is considered 1 armed.
+## Introduction
 
-Documentation
--------------
+This solution implements an ARM Template to deploy a base example of F5 in a cloud-focused single NIC deployment.  This is the standard Cloud design where the compute instance of
+F5 is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.
+
+## Documentation
+
 Please see the project documentation - This is still being created
 
-Installation
-------------
+## Installation
 
-Deploy via Azure deploy button below, Powershell or via CLI Tools
+You have three options for deploying this template: 
+  - Using the Azure deploy button 
+  - Using [PowerShell](#powershell)
+  - Using [CLI Tools](#cli)
+
+### <a name="azure"></a>Azure deploy button
+
+Use this button to deploy the template: 
 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fsupported%2Fazure-arm-1nic%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
@@ -22,11 +28,12 @@ Deploy via Azure deploy button below, Powershell or via CLI Tools
 
 
 
-Powershell Usage
------
-    # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
+### <a name="powershell"></a>PowerShell
+
+```powershell
+    # Params below match to parameters in the azuredeploy.json that are gen-unique, otherwise pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
-    # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
+    # can be supplied inline when running this script but if they are not then the default will be used as specified in the param arguments
     # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabelPrefix f51nicdeploy01 -vmName f51nic -licenseToken XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f51nicdeploy01
 
     param(
@@ -83,11 +90,12 @@ Powershell Usage
 
     # Print Output of Deployment to Console
     $deployment
+```
 
 
-
-Azure CLI(1.0) Usage
+### <a name="cli"></a>Azure CLI(1.0) Usage
 -----
+```
     #!/bin/bash
 
     # Script to deploy 1nic/2nic ARM template into Azure, using azure cli 1.0
@@ -131,59 +139,48 @@ Azure CLI(1.0) Usage
     azure group create -n $resource_group_name -l $region
 
     # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
-    # such as can been done with Powershell...oh well!
+    # such as can been done with PowerShell...oh well!
     azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabelPrefix\":{\"value\":\"$dns_label_prefix\"},\"vmName\":{\"value\":\"$vm_name\"},\"vmSize\":{\"value\":\"$vm_size\"},\"licenseToken1\":{\"value\":\"$license_token\"}}"
 
+```
 
 
+## Design Patterns
 
-Design Patterns
-------------
-----------
 
 The goal is for the design patterns for all the iterative examples of F5 being deployed via ARM templates to closely match as much as possible.
 
-List of Patterns For Contributing Developers
---------------------------------------------
-----------
+### List of Patterns For Contributing Developers
 
 
  1. Still working on patterns to use
 
-Filing Issues
--------------
-----------
-
+## Filing Issues
 
 See the Issues section of `Contributing <CONTRIBUTING.md>`__.
 
-Contributing
-------------
-----------
-
+## Contributing
 
 See `Contributing <CONTRIBUTING.md>`__
 
-Test
-----
-----------
+## Test
+
 
 Before you open a pull request, your code must have passed a deployment into Azure with the intended result
 
-Unit Tests
-----
-----------
-Simply deploying the ARM template and completing use case fullfils a functional test
+## Unit Tests
+
+Simply deploying the ARM template and completing use case fulfills a functional test
 
 
 
-Copyright
----------
+## Copyright
+
 Copyright 2014-2016 F5 Networks Inc.
 
 
-License
--------
+## License
+
 
 Apache V2.0
 ~~~~~~~~~~~
