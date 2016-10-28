@@ -19,6 +19,15 @@
         },
         "licenseToken1": {
         "value": "GEN-UNIQUE"
+        },
+        "tagValues": {
+            "value": {
+                "application": "APP",
+                "environment": "ENV",
+                "group": "GROUP",
+                "owner": "OWNER",
+                "cost": "COST"
+            }
         }
      }
 }

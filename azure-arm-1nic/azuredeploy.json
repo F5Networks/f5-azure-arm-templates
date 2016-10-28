@@ -61,6 +61,16 @@
       "metadata": {
         "description": "The license token for the F5 Big IP(BYOL)"
       }
+    },
+    "tagValues": {
+      "type": "object",
+      "defaultValue": {
+        "application": "APP",
+        "environment": "ENV",
+        "group": "GROUP",
+        "owner": "OWNER",
+        "cost": "COST"
+      }
     }
   },
   "variables": {
