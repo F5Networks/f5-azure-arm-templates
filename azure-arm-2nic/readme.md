@@ -26,7 +26,7 @@ Powershell Usage
     # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
     # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
-    # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabelPrefix f52nicdeploy01 -vmName f52nic -licenseToken XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f52nicdeploy01 -EmailTo user@f5.com
+    # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabel f52nicdeploy01 -instanceName f52nic -licenseKey1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f52nicdeploy01 -EmailTo user@f5.com
 
     param(
     [Parameter(Mandatory=$True)]
@@ -39,18 +39,21 @@ Powershell Usage
 
     [Parameter(Mandatory=$True)]
     [string]
-    $dnsLabelPrefix,
+    $dnsLabel,
 
     [Parameter(Mandatory=$True)]
     [string]
-    $vmName,
+    $instanceName,
 
     [string]
-    $vmSize = "Standard_D2_v2",
+    $instanceSize = "Standard_D2_v2",
 
     [Parameter(Mandatory=$True)]
     [string]
-    $licenseToken,
+    $licenseKey1,
+
+    [string]
+    $restrictedSrcAddress  = "*",
 
     [Parameter(Mandatory=$True)]
     [string]
@@ -78,7 +81,7 @@ Powershell Usage
 
     # Create Arm Deployment
     $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabelPrefix "$dnsLabelPrefix" -vmName "$vmName" -vmSize "$vmSize" -licenseToken1 "$licensetoken"
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceSize "$instanceSize" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress"
 
     # Print Output of Deployment to Console
     $deployment

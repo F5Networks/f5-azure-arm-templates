@@ -8,16 +8,16 @@
         "adminPassword": {
             "value": "GEN-UNIQUE"
         },
-        "dnsLabelPrefix": {
+        "dnsLabel": {
             "value": "GEN-UNIQUE"
         },
-        "vmName": {
+        "instanceName": {
             "value": "f51nic"
         },
-        "vmSize": {
+        "instanceSize": {
             "value": "Standard_D2_v2"
         },
-        "licenseToken1": {
+        "licenseKey1": {
         "value": "GEN-UNIQUE"
         },
         "tagValues": {
