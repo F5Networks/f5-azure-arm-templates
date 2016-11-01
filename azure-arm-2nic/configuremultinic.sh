@@ -35,5 +35,7 @@ export PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin/"
     #Save Config
     tmsh save sys config | echo "TMSH Config Save Completed"
 
-    echo "$(date +%c): Ending NIC Configuration for multi-NIC Deployment"
+    echo "$(date +%c): Ending NIC Configuration for multi-NIC Deployment, rebooting..."
+    # This is required
+    reboot
     exit
