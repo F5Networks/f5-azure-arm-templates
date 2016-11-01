@@ -55,6 +55,18 @@
       },
       "type": "string"
     },
+    "f5Sku": {
+      "defaultValue": "Best",
+      "allowedValues": [
+        "Good",
+        "Better",
+        "Best"
+      ],
+      "metadata": {
+        "description": "F5 SKU(IMAGE) to Deploy"
+      },
+      "type": "string"
+    },
     "licenseKey1": {
       "type": "string",
       "defaultValue": "REQUIRED",
@@ -86,11 +98,13 @@
 
     "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'samultinic')]",
     "storageAccountType": "Standard_LRS",
+    "f5SkuToLower": "[toLower(parameters('f5Sku'))]",
+    "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('f5SkuToLower'),'-byol')]",
     "availabilitySetName": "[concat(parameters('instanceName'), '-availset')]",
 
     "nic1Name": "[concat(parameters('instanceName'), '-mgmt1')]",
     "nic2Name": "[concat(parameters('instanceName'), '-nic2')]",
-    "defaultgw": "10.0.1.1",
+    "defaultGw": "10.0.1.1",
     "vnetName": "[concat(parameters('instanceName'), '-vnet')]",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
     "addressPrefix": "10.0.0.0/16",
@@ -108,7 +122,7 @@
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('dnsLabel'),'-nsg'))]",
 
     "singleQuote": "'",
-    "commandArgs": "[concat(variables('subnet1PrivateAddress'), ' ', variables('defaultgw'), ' \"', variables('subnet2PrivateAddress'), '\"')]"
+    "commandArgs": "[concat(variables('subnet1PrivateAddress'), ' ', variables('defaultGw'), ' \"', variables('subnet2PrivateAddress'), '\"')]"
 
   },
   "resources": [
@@ -318,7 +332,7 @@
         "costCenter": "[parameters('tagValues').cost]"
       },
 	  "plan": {
-      	"name": "f5-bigip-virtual-edition-best-byol",
+      	"name": "[variables('skuToUse')]",
         "publisher": "f5-networks",
         "product": "f5-big-ip"
       },
@@ -360,7 +374,7 @@
           "imageReference": {
             "publisher": "f5-networks",
             "offer": "f5-big-ip",
-            "sku": "f5-bigip-virtual-edition-best-byol",
+            "sku": "[variables('skuToUse')]",
             "version": "latest"
           },
           "osDisk": {

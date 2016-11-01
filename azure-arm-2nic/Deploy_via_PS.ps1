@@ -23,6 +23,9 @@ param(
   [string]
   $instanceSize = "Standard_D2_v2",
 
+  [string]
+  $f5Sku = "Best",
+
   [Parameter(Mandatory=$True)]
   [string]
   $licenseKey1,
@@ -56,7 +59,7 @@ New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
 
 # Create Arm Deployment
 $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
-$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceSize "$instanceSize" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress"
+$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceSize "$instanceSize" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -f5Sku "$f5Sku"
 
 # Print Output of Deployment to Console
 $deployment

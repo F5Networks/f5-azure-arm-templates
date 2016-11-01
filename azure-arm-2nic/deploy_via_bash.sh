@@ -9,6 +9,7 @@ region="westus"
 template_file="azuredeploy.json"
 parameter_file="azuredeploy.parameters.json"
 instance_size="Standard_D2_v2"
+f5_sku="Best"
 
 while getopts u:p:d:n:s:l:r:y:z: option
 do	case "$option"  in
@@ -17,6 +18,7 @@ do	case "$option"  in
 	    d) dns_label=$OPTARG;;
         n) instance_name=$OPTARG;;
         s) instance_size=$OPTARG;;
+        k) f5_sku=$OPTARG;;
         l) license_key_1=$OPTARG;;
         r) resource_group_name=$OPTARG;;
 		y) azure_user=$OPTARG;;
@@ -42,7 +44,7 @@ azure group create -n $resource_group_name -l $region
 
 # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
 # such as can been done with Powershell...oh well!
-azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"instanceName\":{\"value\":\"$instance_name\"},\"instanceSize\":{\"value\":\"$instance_size\"},\"licenseKey1\":{\"value\":\"$license_key_1\"}}"
+azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"instanceName\":{\"value\":\"$instance_name\"},\"instanceSize\":{\"value\":\"$instance_size\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"f5Sku\":{\"value\":\"$f5_sku\"}}"
 
 
 

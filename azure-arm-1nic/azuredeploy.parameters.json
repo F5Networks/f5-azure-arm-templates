@@ -17,6 +17,9 @@
         "instanceSize": {
             "value": "Standard_D2_v2"
         },
+        "f5Sku": {
+            "value": "Best"
+        },
         "licenseKey1": {
         "value": "GEN-UNIQUE"
         },
