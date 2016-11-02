@@ -95,6 +95,7 @@
   "variables": {
     "apiVersion": "2015-06-15",
     "location": "[resourceGroup().location]",
+    "f5CloudLibsTag": "v1.3.0",
 
     "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'samultinic')]",
     "storageAccountType": "Standard_LRS",
@@ -366,9 +367,10 @@
         "typeHandlerVersion": "2.0",
         "settings": {
           "fileUris": [
-            "https://f5cloudlibs.blob.core.windows.net/archive/runScripts.js"
+             "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/scripts/azure/runScripts.js')]",
+             "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', variables('f5CloudLibsTag'))]"
           ],
-          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --onboard \" --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none --signal ONBOARD_DONE \"')]"
+          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', variables('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none --signal ONBOARD_DONE \"')]"
         }
       }
      }
