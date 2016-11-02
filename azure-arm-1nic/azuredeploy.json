@@ -95,7 +95,7 @@
   "variables": {
     "apiVersion": "2015-06-15",
     "location": "[resourceGroup().location]",
-    "f5CloudLibsTag": "v1.1.0",
+    "f5CloudLibsTag": "v1.2.0",
 
     "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'samultinic')]",
     "storageAccountType": "Standard_LRS",
