@@ -69,11 +69,7 @@ Powershell Usage
     $templateFilePath = "azuredeploy.json",
 
     [string]
-    $parametersFilePath = "azuredeploy.parameters.json",
-
-    [Parameter(Mandatory=$True)]
-    [string]
-    $EmailTo
+    $parametersFilePath = "azuredeploy.parameters.json"
     )
 
     # Connect to Azure, right now it is only interactive login

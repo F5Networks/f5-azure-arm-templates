@@ -29,7 +29,7 @@
         "description": "Name of the VM"
       }
     },
-    "instanceSize": {
+    "instanceType": {
       "defaultValue": "Standard_D2_v2",
       "allowedValues": [
         "Standard_A4",
@@ -345,7 +345,7 @@
           }
         },
         "hardwareProfile": {
-          "vmSize": "[parameters('instanceSize')]"
+          "vmSize": "[parameters('instanceType')]"
         },
         "networkProfile": {
           "networkInterfaces": [
