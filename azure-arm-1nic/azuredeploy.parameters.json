@@ -14,7 +14,7 @@
         "instanceName": {
             "value": "f51nic"
         },
-        "instanceSize": {
+        "instanceType": {
             "value": "Standard_D2_v2"
         },
         "f5Sku": {
