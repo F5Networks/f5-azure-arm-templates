@@ -112,7 +112,7 @@
     "subnet1Name": "Frontend",
     "subnet1Id": "[concat(variables('vnetId'), '/subnets/', variables('subnet1Name'))]",
     "subnet1Prefix": "10.0.1.0/24",
-    "subnet1PrivateAddress": "10.0.1.5",
+    "subnet1PrivateAddress": "10.0.1.4",
     "subnet2Name": "Web",
     "subnet2Id": "[concat(variables('vnetId'), '/subnets/', variables('subnet2Name'))]",
     "subnet2Prefix": "10.0.2.0/24",

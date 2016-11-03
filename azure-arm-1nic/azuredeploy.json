@@ -111,7 +111,7 @@
     "subnet1Name": "MGMT_Frontend",
     "subnet1Id": "[concat(variables('vnetId'), '/subnets/', variables('subnet1Name'))]",
     "subnet1Prefix": "10.0.1.0/24",
-    "subnet1PrivateAddress": "10.0.1.5",
+    "subnet1PrivateAddress": "10.0.1.4",
     "publicIPAddressName": "[concat(parameters('dnsLabel'), '-pip')]",
     "publicIPAddressType": "Static",
     "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
