@@ -22,7 +22,7 @@ Deploy via Azure deploy button below, Powershell or via CLI Tools
 
 
 Powershell Usage
------
+```powershell
     # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
     # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
@@ -73,6 +73,17 @@ Powershell Usage
     )
 
     # Connect to Azure, right now it is only interactive login
+    try {
+        Write-Host "Checking if already logged in!"
+        Get-AzureRmSubscription | Out-Null
+        Write-Host "Already logged in, continuing..."
+        }
+        Catch {
+        Write-Host "Not logged in, please login..."
+        Login-AzureRmAccount
+        }
+
+    # Connect to Azure, right now it is only interactive login
     Login-AzureRmAccount
 
     # Create Resource Group for ARM Deployment
@@ -84,7 +95,7 @@ Powershell Usage
 
     # Print Output of Deployment to Console
     $deployment
-
+```
 
 Azure CLI(1.0) Usage
 -----
