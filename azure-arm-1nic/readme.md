@@ -33,6 +33,10 @@ Use this button to deploy the template:
 
 ```powershell
     # Params below match to parameters in the azuredeploy.json that are gen-unique, otherwise pointing to
+=======
+Powershell Usage
+```powershell
+    # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
     # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
     # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabel f51nicdeploy01 -instanceName f51nic -licenseKey1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f51nicdeploy01 -EmailTo user@f5.com
@@ -84,6 +88,17 @@ Use this button to deploy the template:
     )
 
     # Connect to Azure, right now it is only interactive login
+    try {
+        Write-Host "Checking if already logged in!"
+        Get-AzureRmSubscription | Out-Null
+        Write-Host "Already logged in, continuing..."
+        }
+        Catch {
+        Write-Host "Not logged in, please login..."
+        Login-AzureRmAccount
+        }
+
+    # Connect to Azure, right now it is only interactive login
     Login-AzureRmAccount
 
     # Create Resource Group for ARM Deployment
@@ -97,6 +112,7 @@ Use this button to deploy the template:
     $deployment
 ```
 
+=======
 
 ### <a name="cli"></a>Azure CLI(1.0) Usage
 -----
@@ -146,17 +162,13 @@ Use this button to deploy the template:
     azure group create -n $resource_group_name -l $region
 
     # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
-<<<<<<< HEAD
     # such as can been done with Powershell...oh well!
-<<<<<<< HEAD
     azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"instanceName\":{\"value\":\"$instance_name\"},\"instanceSize\":{\"value\":\"$instance_size\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"f5Sku\":{\"value\":\"$f5_sku\"}}"
 =======
     # such as can been done with PowerShell...oh well!
     azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabelPrefix\":{\"value\":\"$dns_label_prefix\"},\"vmName\":{\"value\":\"$vm_name\"},\"vmSize\":{\"value\":\"$vm_size\"},\"licenseToken1\":{\"value\":\"$license_token\"}}"
->>>>>>> 9934511c811cb92072596a2cf05c8259c87c244f
 =======
     azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"instanceName\":{\"value\":\"$instance_name\"},\"instanceType\":{\"value\":\"$instance_size\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"f5Sku\":{\"value\":\"$f5_sku\"}}"
->>>>>>> develop
 
 ```
 

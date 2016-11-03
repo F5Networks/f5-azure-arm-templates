@@ -52,6 +52,17 @@ param(
 )
 
 # Connect to Azure, right now it is only interactive login
+try {
+    Write-Host "Checking if already logged in!"
+    Get-AzureRmSubscription | Out-Null
+    Write-Host "Already logged in, continuing..."
+    }
+    Catch {
+    Write-Host "Not logged in, please login..."
+    Login-AzureRmAccount
+    }
+
+# Connect to Azure, right now it is only interactive login
 Login-AzureRmAccount
 
 # Create Resource Group for ARM Deployment

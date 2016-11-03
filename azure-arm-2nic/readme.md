@@ -32,6 +32,10 @@ Use this button to deploy the template:
 
 ```powershell
     # Params below match to parameters in the azuredeploy.json that are gen-unique, otherwise pointing to
+=======
+Powershell Usage
+```powershell
+    # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
     # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
     # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabel f52nicdeploy01 -instanceName f52nic -licenseKey1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f52nicdeploy01 -EmailTo user@f5.com
@@ -83,6 +87,17 @@ Use this button to deploy the template:
     )
 
     # Connect to Azure, right now it is only interactive login
+    try {
+        Write-Host "Checking if already logged in!"
+        Get-AzureRmSubscription | Out-Null
+        Write-Host "Already logged in, continuing..."
+        }
+        Catch {
+        Write-Host "Not logged in, please login..."
+        Login-AzureRmAccount
+        }
+
+    # Connect to Azure, right now it is only interactive login
     Login-AzureRmAccount
 
     # Create Resource Group for ARM Deployment
@@ -96,6 +111,7 @@ Use this button to deploy the template:
     $deployment
 ```
 
+=======
 
 ### <a name="cli"></a>Azure CLI(1.0) Usage
 -----
