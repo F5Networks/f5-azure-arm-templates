@@ -14,14 +14,14 @@ Please see the project documentation - This is still being created
 
 ## Installation
 
-You have three options for deploying this template: 
-  - Using the Azure deploy button 
+You have three options for deploying this template:
+  - Using the Azure deploy button
   - Using [PowerShell](#powershell)
   - Using [CLI Tools](#cli)
 
 ### <a name="azure"></a>Azure deploy button
 
-Use this button to deploy the template: 
+Use this button to deploy the template:
 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsevedge%2Ff5-azure-arm-templates%2Fmaster%2Fazure-arm-1nic%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
@@ -34,13 +34,10 @@ Use this button to deploy the template:
 ```powershell
     # Params below match to parameters in the azuredeploy.json that are gen-unique, otherwise pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
-<<<<<<< HEAD
     # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
     # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabel f51nicdeploy01 -instanceName f51nic -licenseKey1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f51nicdeploy01 -EmailTo user@f5.com
-=======
     # can be supplied inline when running this script but if they are not then the default will be used as specified in the param arguments
     # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabelPrefix f51nicdeploy01 -vmName f51nic -licenseToken XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f51nicdeploy01
->>>>>>> 9934511c811cb92072596a2cf05c8259c87c244f
 
     param(
     [Parameter(Mandatory=$True)]
