@@ -44,11 +44,7 @@ param(
   $templateFilePath = "azuredeploy.json",
 
   [string]
-  $parametersFilePath = "azuredeploy.parameters.json",
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $EmailTo
+  $parametersFilePath = "azuredeploy.parameters.json"
 )
 
 Write-Host "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged." -foregroundcolor green
@@ -74,20 +70,3 @@ $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -Resou
 
 # Print Output of Deployment to Console
 $deployment
-
-
-
-#### Internal Addition for F5 developer deployments
-# Send Email letting deployer know if successful or not, placeholder utilizing arbitrary gmail account for sending from
-$status = $deployment.ProvisioningState
-$type = "f5-arm-2nic"
-
-$EmailFrom = "discoveryeselabsauto@gmail.com"
-$Subject = "[$(get-date -format g)] Notification for Azure Build Complete[$status]"
-$Body = "This is a notification for automated azure builds.. `n `n Testing template of type: $type "
-$SMTPServer = "smtp.gmail.com"
-$SMTPClient = New-Object Net.Mail.SmtpClient($SmtpServer, 587)
-$SMTPClient.EnableSsl = $true
-$SMTPClient.Credentials = New-Object System.Net.NetworkCredential("discoveryeselabsauto", "P4ssw0rd!azure");
-$SMTPClient.Send($EmailFrom, $EmailTo, $Subject, $Body)
-#### End Internal Addition
