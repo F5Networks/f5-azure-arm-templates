@@ -1,4 +1,4 @@
-# f5-azure-arm-1nic
+# Deploying the BIG-IP VE in Azure - Single NIC
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 [![Doc Status](http://readthedocs.org/projects/f5-sdk/badge/?version=latest)](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html)
@@ -8,23 +8,9 @@
 This solution implements an ARM Template to deploy a base example of F5 in a cloud-focused single NIC deployment.  This is the standard Cloud design where the compute instance of
 F5 is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.
 
-## Template parameters
-
-| Parameter | Required | Description |
-| --- | --- | --- |
-| adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
-| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
-| instanceName | x | The hostname to be configured for the VM. |
-| instanceType | x | The desired Azure Virtual Machine instance size. |
-| f5Sku | x | The desired F5 image to deploy. |
-| licenseKey1 | x | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
-| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
-| tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
-
 ## Documentation
 
-Please see the project documentation - This is still being created
+The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html) decribes how to create the configuration manually without using the ARM template.
 
 ## Installation
 
@@ -41,7 +27,19 @@ Use this button to deploy the template:
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
+### Template parameters
 
+| Parameter | Required | Description |
+| --- | --- | --- |
+| adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
+| adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
+| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
+| instanceName | x | The hostname to be configured for the VM. |
+| instanceType | x | The desired Azure Virtual Machine instance size. |
+| f5Sku | x | The desired F5 image to deploy. |
+| licenseKey1 | x | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
+| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
+| tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
 ### <a name="powershell"></a>PowerShell
 
