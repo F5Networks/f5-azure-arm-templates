@@ -2,11 +2,7 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-<<<<<<< HEAD
-    "deploymentName": {
-=======
     "solutionDeploymentName": {
->>>>>>> develop
       "type": "string",
       "metadata": {
         "description": "A unique name for this deployment."
@@ -82,11 +78,7 @@
       "defaultValue": "REQUIRED",
       "metadata": {
         "description": "The license token for the second F5 BIG-IP VE. This field is required when deploying two or more devices."
-<<<<<<< HEAD
       }
-=======
-      }
->>>>>>> develop
     },
     "applicationProtocols": {
       "type": "string",
