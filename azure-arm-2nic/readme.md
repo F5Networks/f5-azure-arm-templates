@@ -95,9 +95,6 @@ Use this button to deploy the template:
         Login-AzureRmAccount
         }
 
-    # Connect to Azure, right now it is only interactive login
-    Login-AzureRmAccount
-
     # Create Resource Group for ARM Deployment
     New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
 
