@@ -51,6 +51,9 @@ param(
   $EmailTo
 )
 
+Write-Host "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged." -foregroundcolor green
+Start-Sleep -s 3
+
 # Connect to Azure, right now it is only interactive login
 try {
     Write-Host "Checking if already logged in!"

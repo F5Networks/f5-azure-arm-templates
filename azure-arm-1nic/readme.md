@@ -32,13 +32,10 @@ Use this button to deploy the template:
 ### <a name="powershell"></a>PowerShell
 
 ```powershell
-    # Params below match to parameters in the azuredeploy.json that are gen-unique, otherwise pointing to
     # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
     # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
     # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabel f51nicdeploy01 -instanceName f51nic -licenseKey1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f51nicdeploy01 -EmailTo user@f5.com
-    # can be supplied inline when running this script but if they are not then the default will be used as specified in the param arguments
-    # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabelPrefix f51nicdeploy01 -vmName f51nic -licenseToken XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f51nicdeploy01
 
     param(
     [Parameter(Mandatory=$True)]
@@ -83,6 +80,9 @@ Use this button to deploy the template:
     [string]
     $parametersFilePath = "azuredeploy.parameters.json"
     )
+
+    Write-Host "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged." -foregroundcolor green
+    Start-Sleep -s 3
 
     # Connect to Azure, right now it is only interactive login
     try {
@@ -139,7 +139,7 @@ Use this button to deploy the template:
         esac
     done
     # Check for Mandatory Args
-    if [ ! "$admin_username" ] || [ ! "$admin_password" ] || [ ! "$dns_label" ] || [ ! "$instance_name" ] || [ ! "$license_token" ] || [ ! "$resource_group_name" ] || [ ! "$azure_user" ] || [ ! "$azure_pwd" ]
+    if [ ! "$admin_username" ] || [ ! "$admin_password" ] || [ ! "$dns_label" ] || [ ! "$instance_name" ] || [ ! "$license_key_1" ] || [ ! "$resource_group_name" ] || [ ! "$azure_user" ] || [ ! "$azure_pwd" ]
     then
         echo "One of the mandatory parameters was not specified!"
         exit 1

@@ -32,13 +32,10 @@ Use this button to deploy the template:
 ### <a name="powershell"></a>PowerShell
 
 ```powershell
-    # Params below match to parameters in the azuredeploy.json that are gen-unique, otherwise pointing to
     # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
     # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
     # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabel f52nicdeploy01 -instanceName f52nic -licenseKey1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f52nicdeploy01 -EmailTo user@f5.com
-    # can be supplied inline when running this script but if they are not then the default will be used as specified in below param arguments
-    # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabelPrefix f52nicdeploy01 -vmName f52nic -licenseToken XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f52nicdeploy01 -EmailTo user@f5.com
 
     param(
     [Parameter(Mandatory=$True)]
@@ -58,7 +55,7 @@ Use this button to deploy the template:
     $instanceName,
 
     [string]
-    $instanceSize = "Standard_D2_v2",
+    $instanceType = "Standard_D2_v2",
 
     [string]
     $f5Sku = "Best",
@@ -84,6 +81,9 @@ Use this button to deploy the template:
     $parametersFilePath = "azuredeploy.parameters.json"
     )
 
+    Write-Host "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged." -foregroundcolor green
+    Start-Sleep -s 3
+
     # Connect to Azure, right now it is only interactive login
     try {
         Write-Host "Checking if already logged in!"
@@ -100,7 +100,7 @@ Use this button to deploy the template:
 
     # Create Arm Deployment
     $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceSize "$instanceSize" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -f5Sku "$f5Sku"
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -f5Sku "$f5Sku"
 
     # Print Output of Deployment to Console
     $deployment
@@ -139,7 +139,7 @@ Use this button to deploy the template:
         esac
     done
     # Check for Mandatory Args
-    if [ ! "$admin_username" ] || [ ! "$admin_password" ] || [ ! "$dns_label" ] || [ ! "$instance_name" ] || [ ! "$license_token" ] || [ ! "$resource_group_name" ] || [ ! "$azure_user" ] || [ ! "$azure_pwd" ]
+    if [ ! "$admin_username" ] || [ ! "$admin_password" ] || [ ! "$dns_label" ] || [ ! "$instance_name" ] || [ ! "$license_key_1" ] || [ ! "$resource_group_name" ] || [ ! "$azure_user" ] || [ ! "$azure_pwd" ]
     then
         echo "One of the mandatory parameters was not specified!"
         exit 1
