@@ -142,7 +142,6 @@ Use these buttons to deploy the template(s):
     $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
 
     # Create Arm Deployment
-    if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\templates\http\azuredeploy.json"; $parametersFilePath = ".\templates\http\azuredeploy.parameters.json" }
     $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -solutionDeploymentName "$solutionDeploymentName" -numberOfInstances "$numberOfInstances" -instanceType "$instanceType" -f5Sku "$f5Sku" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2" -restrictedSrcAddress "$restrictedSrcAddress"
 
     # Print Output of Deployment to Console
@@ -155,48 +154,7 @@ Use these buttons to deploy the template(s):
 ```
     #!/bin/bash
 
-    # Script to deploy 1nic/2nic ARM template into Azure, using azure cli 1.0
-    # Example Command: ./deploy_via_bash.sh -u azureuser -p 'yourpassword' -d f51nicdeploy01 -n f51nic -l XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -r f51nicdeploy01 -y adminstrator@domain.com -z 'yourpassword'
-
-    # Assign Script Paramters and Define Variables
-    # Specify static items, change these as needed or make them parameters (vm_size is already an optional paramter)
-    region="westus"
-    template_file="azuredeploy.json"
-    parameter_file="azuredeploy.parameters.json"
-    vm_size="Standard_D2_v2"
-
-    while getopts m:d:n:h:s:c:u:p: option
-     do	case "$option"  in
-             m) mode=$OPTARG;;
-             d) deployment=$OPTARG;;
-             n) pool_member=$OPTARG;;
-             h) pool_http_port=$OPTARG;;
-             s) pool_https_port=$OPTARG;;
-             c) thumbprint=$OPTARG;;
-             u) user=$OPTARG;;
-             p) passwd=$OPTARG;;
-         esac
-     done
-
-    # Check for Mandatory Args
-    if [ ! "$mode" ] || [ ! "$deployment" ] || [ ! "$user" ] || [ ! "$passwd" ]
-    then
-        echo "One of the mandatory parameters was not specified!"
-        exit 1
-    fi
-
-    # Login to Azure, for simplicity in this example using username and password as supplied as script arguments y and z
-    azure login -u $azure_user -p $azure_pwd
-
-    # Switch to ARM mode
-    azure config mode arm
-
-    # Create ARM Group
-    azure group create -n $resource_group_name -l $region
-
-    # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
-    # such as can been done with PowerShell...oh well!
-    azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$user\"},\"adminPassword\":{\"value\":\"$passwd\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"deploymentName\":{\"value\":\"$deployment_name\"},\"instanceSize\":{\"value\":\"$instance_size\"},\"licenseToken1\":{\"value\":\"$license_token\"}}"
+    # Example Script is coming...
 
 ```
 
