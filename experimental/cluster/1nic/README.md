@@ -25,7 +25,7 @@ You choose the license and corresponding Azure instance based on the number of c
 | --- | --- | --- |
 | deploymentName | x | A unique name for your application. |
 | numberOfInstances | x | The number of BIG-IPs that will be deployed in front of your application.  The only allowed value for this template is 2. |
-| instanceTypee | x | The desired Azure Virtual Machine instance size. |
+| instanceType | x | The desired Azure Virtual Machine instance size. |
 | f5Sku | x | The desired F5 image to deploy. |
 | adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
 | adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
