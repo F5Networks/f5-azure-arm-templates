@@ -25,21 +25,13 @@ You choose the license and corresponding Azure instance based on the number of c
 | --- | --- | --- |
 | deploymentName | x | A unique name for your application. |
 | numberOfInstances | x | The number of BIG-IPs that will be deployed in front of your application.  The only allowed value for this template is 2. |
-| instanceSize | x | The desired Azure Virtual Machine instance size. |
+| instanceTypee | x | The desired Azure Virtual Machine instance size. |
 | f5Sku | x | The desired F5 image to deploy. |
 | adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
 | adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
 | dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
 | licenseKey1 | x | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
 | licenseKey2 | x | The license token from the F5 licensing server. This license will be used for the second F5 BIG-IP. |
-| applicationProtocols | x | The protocol that will be used to configure the application virtual servers. The only allowed values for these templates are http, https, or https-offload. |
-| applicationAddress | x | The public IP address or DNS FQDN of the application that this BIG-IP will front. |
-| applicationPort | x | The unencrypted port that your application is listening on (for example, 80). This field is required in the http and https-offload deployment scenarios. |
-| applicationSecurePort | x | The encrypted port that your application is listening on (for example, 443). This field is required in the https deployment scenario. |
-| vaultName | x | The name of the Azure Key Vault where you have stored your SSL cert and key in .pfx format as a secret. This field is required in the https and https-offload deployment scenarios. |
-| vaultResourceGroup | x | The name of the Azure Resource Group where the previously entered Key Vault is located. This field is required in the https and https-offload deployment scenarios. |
-| secretUrl | x | The public URL of the Azure Key Vault secret where your SSL cert and key are stored in .pfx format. This field is required in the https and https-offload deployment scenarios. |
-| certThumbprint | x | The thumbprint of the SSL cert stored in Azure Key Vault. This field is required in the https and https-offload deployment scenarios. |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
@@ -65,21 +57,6 @@ Use these buttons to deploy the template(s):
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
-### HTTP ###
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fcluster%2F1nic%2Fhttp%2Fazuredeploy.json" target="_blank">
-    <img src="http://azuredeploy.net/deploybutton.png"/>
-</a>
-
-### HTTPS ###
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fcluster%2F1nic%2Fhttps%2Fazuredeploy.json" target="_blank">
-    <img src="http://azuredeploy.net/deploybutton.png"/>
-</a>
-
-### SSL OFFLOAD ###
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fcluster%2F1nic%2Fhttps-offload%2Fazuredeploy.json" target="_blank">
-    <img src="http://azuredeploy.net/deploybutton.png"/>
-</a>
-
 
 ### <a name="powershell"></a>PowerShell
 
@@ -88,8 +65,7 @@ Use these buttons to deploy the template(s):
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
     # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
     # Example Command: .\Deploy_via_PS.ps1 -solutionDeploymentName deploynamestring -numberOfInstances 2 -adminUsername azureuser -adminPassword password
-    # -dnsLabel dnslabestring -licenseKey1 XXXX-XXXX-XXXX-XXXX -licenseKey2 XXXX-XXXX-XXXX-XXXX -applicationProtocols https -applicationAddress web01.discovery.com -applicationPort OPTIONAL
-    # -applicationSecurePort 443 -vaultName keyvault -vaultResourceGroup keyvaultresourcegroup -secretUrl https://secreturl -certThumbprint XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -templateFilePath .\templates\https\azuredeploy.json
+    # -dnsLabel dnslabestring -licenseKey1 XXXX-XXXX-XXXX-XXXX -licenseKey2 XXXX-XXXX-XXXX-XXXX -templateFilePath .\templates\https\azuredeploy.json
     # -resourceGroupName rgname -parametersFilePath .\templates\https\azuredeploy.parameters.json
 
     param(
@@ -128,33 +104,6 @@ Use these buttons to deploy the template(s):
     [string]
     $licenseKey2,
 
-    [Parameter(Mandatory=$True)]
-    [ValidateSet("http","https","https-offload")]
-    [string]
-    $applicationProtocols,
-
-    [Parameter(Mandatory=$True)]
-    [string]
-    $applicationAddress,
-
-    [string]
-    $applicationPort = $(if($applicationProtocols -ne "https") { Read-Host -prompt "applicationPort"}),
-
-    [string]
-    $applicationSecurePort = $(if($applicationProtocols -ne "http") { Read-Host -prompt "applicationSecurePort"}),
-
-    [string]
-    $vaultName = $(if($applicationProtocols -ne "http") { Read-Host -prompt "vaultName"}),
-
-    [string]
-    $vaultResourceGroup = $(if($applicationProtocols -ne "http") { Read-Host -prompt "vaultResourceGroup"}),
-
-    [string]
-    $secretUrl = $(if($applicationProtocols -ne "http") { Read-Host -prompt "secretUrl"}),
-
-    [string]
-    $certThumbprint = $(if($applicationProtocols -ne "http") { Read-Host -prompt "certThumbprint"}),
-
     [string]
     $restrictedSrcAddress  = "*",
 
@@ -171,6 +120,9 @@ Use these buttons to deploy the template(s):
     [string]
     $parametersFilePath = "azuredeploy.parameters.json"
     )
+
+    Write-Host "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged." -foregroundcolor green
+    Start-Sleep -s 3
 
     # Connect to Azure, right now it is only interactive login
     try {
@@ -189,20 +141,9 @@ Use these buttons to deploy the template(s):
     # Create Arm Deployment
     $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
 
-    # Need to change parameters based on mode, also defaulting relative path if not specifically included in script execution
-    if ($applicationProtocols -eq "http") {
+    # Create Arm Deployment
     if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\templates\http\azuredeploy.json"; $parametersFilePath = ".\templates\http\azuredeploy.parameters.json" }
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -solutionDeploymentName "$solutionDeploymentName" -numberOfInstances "$numberOfInstances" -instanceType "$instanceType" -f5Sku "$f5Sku" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2" -applicationProtocols "$applicationProtocols" -applicationAddress "$applicationAddress" -restrictedSrcAddress "$restrictedSrcAddress"
-    } elseif ($applicationProtocols -eq "https-offload") {
-    if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\templates\https-offload\azuredeploy.json"; $parametersFilePath = ".\templates\https-offload\azuredeploy.parameters.json" }
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -solutionDeploymentName "$solutionDeploymentName" -numberOfInstances "$numberOfInstances" -instanceType "$instanceType" -f5Sku "$f5Sku" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2" -applicationProtocols "$applicationProtocols" -applicationAddress "$applicationAddress" -applicationSecurePort "$applicationSecurePort" -vaultName "$vaultName" -vaultResourceGroup "$vaultResourceGroup" -secretUrl "$secretUrl" -certThumbprint "$certThumbprint" -restrictedSrcAddress "$restrictedSrcAddress"
-    } elseif ($applicationProtocols -eq "https") {
-    if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\templates\https\azuredeploy.json"; $parametersFilePath = ".\templates\https\azuredeploy.parameters.json" }
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -solutionDeploymentName "$solutionDeploymentName" -numberOfInstances "$numberOfInstances" -instanceType "$instanceType" -f5Sku "$f5Sku" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2" -applicationProtocols "$applicationProtocols" -applicationAddress "$applicationAddress" -applicationSecurePort "$applicationSecurePort" -vaultName "$vaultName" -vaultResourceGroup "$vaultResourceGroup" -secretUrl "$secretUrl" -certThumbprint "$certThumbprint" -restrictedSrcAddress "$restrictedSrcAddress"
-    } else {
-    Write-Host "Uh oh, shouldn't get here as validating applicationProtocols variable in params!"
-    exit
-    }
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -solutionDeploymentName "$solutionDeploymentName" -numberOfInstances "$numberOfInstances" -instanceType "$instanceType" -f5Sku "$f5Sku" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2" -restrictedSrcAddress "$restrictedSrcAddress"
 
     # Print Output of Deployment to Console
     $deployment

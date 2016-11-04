@@ -2,8 +2,7 @@
 # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
 # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
 # Example Command: .\Deploy_via_PS.ps1 -solutionDeploymentName deploynamestring -numberOfInstances 2 -adminUsername azureuser -adminPassword password
-# -dnsLabel dnslabestring -licenseKey1 XXXX-XXXX-XXXX-XXXX -licenseKey2 XXXX-XXXX-XXXX-XXXX -applicationProtocols https -applicationAddress web01.discovery.com -applicationPort OPTIONAL
-# -applicationSecurePort 443 -vaultName keyvault -vaultResourceGroup keyvaultresourcegroup -secretUrl https://secreturl -certThumbprint XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -templateFilePath .\templates\https\azuredeploy.json
+# -dnsLabel dnslabestring -licenseKey1 XXXX-XXXX-XXXX-XXXX -licenseKey2 XXXX-XXXX-XXXX-XXXX -templateFilePath .\templates\https\azuredeploy.json
 # -resourceGroupName rgname -parametersFilePath .\templates\https\azuredeploy.parameters.json
 
 param(
@@ -42,33 +41,6 @@ param(
   [string]
   $licenseKey2,
 
-  [Parameter(Mandatory=$True)]
-  [ValidateSet("http","https","https-offload")]
-  [string]
-  $applicationProtocols,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $applicationAddress,
-
-  [string]
-  $applicationPort = $(if($applicationProtocols -ne "https") { Read-Host -prompt "applicationPort"}),
-
-  [string]
-  $applicationSecurePort = $(if($applicationProtocols -ne "http") { Read-Host -prompt "applicationSecurePort"}),
-
-  [string]
-  $vaultName = $(if($applicationProtocols -ne "http") { Read-Host -prompt "vaultName"}),
-
-  [string]
-  $vaultResourceGroup = $(if($applicationProtocols -ne "http") { Read-Host -prompt "vaultResourceGroup"}),
-
-  [string]
-  $secretUrl = $(if($applicationProtocols -ne "http") { Read-Host -prompt "secretUrl"}),
-
-  [string]
-  $certThumbprint = $(if($applicationProtocols -ne "http") { Read-Host -prompt "certThumbprint"}),
-
   [string]
   $restrictedSrcAddress  = "*",
 
@@ -106,20 +78,9 @@ New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
 # Create Arm Deployment
 $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
 
-# Need to change parameters based on mode, also defaulting relative path if not specifically included in script execution
-if ($applicationProtocols -eq "http") {
+# Create Arm Deployment
   if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\templates\http\azuredeploy.json"; $parametersFilePath = ".\templates\http\azuredeploy.parameters.json" }
-  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -solutionDeploymentName "$solutionDeploymentName" -numberOfInstances "$numberOfInstances" -instanceType "$instanceType" -f5Sku "$f5Sku" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2" -applicationProtocols "$applicationProtocols" -applicationAddress "$applicationAddress" -restrictedSrcAddress "$restrictedSrcAddress"
-} elseif ($applicationProtocols -eq "https-offload") {
-  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\templates\https-offload\azuredeploy.json"; $parametersFilePath = ".\templates\https-offload\azuredeploy.parameters.json" }
-  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -solutionDeploymentName "$solutionDeploymentName" -numberOfInstances "$numberOfInstances" -instanceType "$instanceType" -f5Sku "$f5Sku" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2" -applicationProtocols "$applicationProtocols" -applicationAddress "$applicationAddress" -applicationSecurePort "$applicationSecurePort" -vaultName "$vaultName" -vaultResourceGroup "$vaultResourceGroup" -secretUrl "$secretUrl" -certThumbprint "$certThumbprint" -restrictedSrcAddress "$restrictedSrcAddress"
-} elseif ($applicationProtocols -eq "https") {
-  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\templates\https\azuredeploy.json"; $parametersFilePath = ".\templates\https\azuredeploy.parameters.json" }
-  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -solutionDeploymentName "$solutionDeploymentName" -numberOfInstances "$numberOfInstances" -instanceType "$instanceType" -f5Sku "$f5Sku" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2" -applicationProtocols "$applicationProtocols" -applicationAddress "$applicationAddress" -applicationSecurePort "$applicationSecurePort" -vaultName "$vaultName" -vaultResourceGroup "$vaultResourceGroup" -secretUrl "$secretUrl" -certThumbprint "$certThumbprint" -restrictedSrcAddress "$restrictedSrcAddress"
-} else {
-  Write-Host "Uh oh, shouldn't get here as validating applicationProtocols variable in params!"
-  exit
-}
+  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -solutionDeploymentName "$solutionDeploymentName" -numberOfInstances "$numberOfInstances" -instanceType "$instanceType" -f5Sku "$f5Sku" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2" -restrictedSrcAddress "$restrictedSrcAddress"
 
 # Print Output of Deployment to Console
 $deployment
