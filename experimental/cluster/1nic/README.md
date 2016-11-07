@@ -21,11 +21,6 @@ You choose the license and corresponding Azure instance based on the number of c
 
 
 
-## Documentation
-
-Please see the project documentation - This is still being created
-
-
 ## Installation
 
 You have three options for deploying this template:
@@ -35,14 +30,14 @@ You have three options for deploying this template:
 
 ### <a name="azure"></a>Azure deploy button
 
-Use these buttons to deploy the template(s):
+Use the following button to deploy the template.  See the Template parameters section to see the information you need to succesfully deploy the template.
 
-### BASE (No application) ###
+**BASE (No application)**<br>
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fcluster%2F1nic%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
-## Template parameters
+### Template parameters
 
 | Parameter | Required | Description |
 | --- | --- | --- |
@@ -162,7 +157,7 @@ Use these buttons to deploy the template(s):
 
 ## Results
 
-This template creates a new resource group. Inside this new resource group it configures the following:
+This solution creates a new resource group. Inside this new resource group it configures the following:
 
 * Availability Set
 * Azure Load Balancer
