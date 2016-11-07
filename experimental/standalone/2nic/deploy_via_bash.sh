@@ -11,7 +11,7 @@ parameter_file="azuredeploy.parameters.json"
 instance_size="Standard_D2_v2"
 f5_sku="Best"
 
-while getopts u:p:d:n:s:l:r:y:z: option
+while getopts u:p:d:n:s:k:l:r:y:z: option
 do	case "$option"  in
         u) admin_username=$OPTARG;;
         p) admin_password=$OPTARG;;

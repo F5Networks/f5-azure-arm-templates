@@ -11,7 +11,7 @@
           "instanceType": {
                "value": "Standard_A4"
           },
-          "f5Sku": {
+          "imageName": {
                "value": "Best"
           },
           "adminUsername": {
