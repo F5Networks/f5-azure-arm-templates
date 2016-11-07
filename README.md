@@ -18,8 +18,13 @@ For additional information, including how the templates are generated, and assis
 
 ## List of F5 ARM templates for Azure deployments
 The following is a list of the current F5 Supported ARM templates:
-  - 1nic
-  - 2nic, etc  will update when templates are in their locations
+  - Deploying the BIG-IP VE in Azure - Single NIC<br>
+  <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fsupported%2Fazure-arm-1nic%2Fazuredeploy.json" target="_blank">
+    <img src="http://azuredeploy.net/deploybutton.png"/>
+    
+  - Deploying the BIG-IP VE in Azure - 2 NICs<br>
+  <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic%2Fazuredeploy.json" target="_blank">
+    <img src="http://azuredeploy.net/deploybutton.png"/>
 
 
 ### Copyright
