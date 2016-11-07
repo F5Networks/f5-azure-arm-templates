@@ -97,7 +97,7 @@
     "location": "[resourceGroup().location]",
     "f5CloudLibsTag": "v1.2.0",
 
-    "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'samultinic')]",
+    "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'sa1nic')]",
     "storageAccountType": "Standard_LRS",
     "f5SkuToLower": "[toLower(parameters('f5Sku'))]",
     "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('f5SkuToLower'),'-byol')]",
