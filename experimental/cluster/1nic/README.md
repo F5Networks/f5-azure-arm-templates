@@ -1,12 +1,12 @@
 # Azure BIG-IP VE HA Template
-
+[![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 ## Introduction
 
 You can deploy your web applications by creating a cluster of F5 BIG-IP VEs that uses the Local Traffic Manager™ (LTM®) module.
 
-When you deploy your applications by using a cluster of F5 BIG-IPs, the BIG-IP VE instances are all in Active status (not Active-Standby), and are used as a single device, for redundancy and scalability, rather than failover. If one device goes down, Azure will keep load balancing to the other.
+When you deploy your applications using a cluster of F5 BIG-IPs, the BIG-IP VE instances are all in Active status (not Active-Standby), and are used as a single device for redundancy and scalability, rather than failover. If one device goes down, Azure keeps load balancing to the other.
 
-The F5 BIG-IP VEs will be fully configured in front of your application.  When completed, the BIG-IPs will pass traffic through the newly created Azure Public IP.  After acceptance testing, you will want to complete the configuration by changing the DNS entry for your application to point at the newly created public IP address, and then lock down the Network Security Group rules to prevent any traffic from reaching your application except through the F5 BIG-IPs.
+Using this solution, the F5 BIG-IP VEs are fully configured in front of your application.  When complete, the BIG-IPs pass traffic through the newly created Azure Public IP.  After acceptance testing, you must complete the configuration by changing the DNS entry for your application to point at the newly created public IP address, and then lock down the Network Security Group rules to prevent any traffic from reaching your application except through the F5 BIG-IPs.
 
 Before you deploy web applications with an F5 BIG-IP, you need a license from F5.
 
@@ -19,21 +19,6 @@ You choose the license and corresponding Azure instance based on the number of c
 | 8 | 1 Gbps | A4 or A7 Standard or D4v2 |
 
 
-## Template parameters
-
-| Parameter | Required | Description |
-| --- | --- | --- |
-| deploymentName | x | A unique name for your application. |
-| numberOfInstances | x | The number of BIG-IPs that will be deployed in front of your application.  The only allowed value for this template is 2. |
-| instanceType | x | The desired Azure Virtual Machine instance size. |
-| f5Sku | x | The desired F5 image to deploy. |
-| adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
-| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
-| licenseKey1 | x | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
-| licenseKey2 | x | The license token from the F5 licensing server. This license will be used for the second F5 BIG-IP. |
-| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
-| tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
 
 ## Documentation
@@ -56,6 +41,23 @@ Use these buttons to deploy the template(s):
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fcluster%2F1nic%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
+
+## Template parameters
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| deploymentName | x | A unique name for your application. |
+| numberOfInstances | x | The number of BIG-IPs that will be deployed in front of your application.  The only allowed value for this template is 2. |
+| instanceType | x | The desired Azure Virtual Machine instance size. |
+| f5Sku | x | The desired F5 image to deploy. |
+| adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
+| adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
+| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
+| licenseKey1 | x | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
+| licenseKey2 | x | The license token from the F5 licensing server. This license will be used for the second F5 BIG-IP. |
+| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
+| tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
+
 
 
 ### <a name="powershell"></a>PowerShell
@@ -160,7 +162,7 @@ Use these buttons to deploy the template(s):
 
 ## Results
 
-This template will create a new resource group, and inside this new resource group it will configure the following:
+This template creates a new resource group. Inside this new resource group it configures the following:
 
 * Availability Set
 * Azure Load Balancer
@@ -174,9 +176,9 @@ This template will create a new resource group, and inside this new resource gro
 
 After the deployment successfully finishes, you can find the BIG-IP Management UI\SSH URLs by doing the following:
 
-* Find the resource group that was deployed, which is the same name as the "dnsLabel".  When you click on this object you will see the deployment status.
-* Click on the deployment status, and then the deployment.
-* In the "Outputs" section you will find the URL's and ports that you can use to connect to the F5 cluster.
+* Find the Resource Group that deployed, which is the same name as the "dnsLabel".  When you click this object you see the deployment status.
+* Click the Deployment Status, and then the Deployment.
+* In the "Outputs" area, you find the URLs and ports you can use to connect to the F5 cluster.
 
 ## Design Patterns
 
