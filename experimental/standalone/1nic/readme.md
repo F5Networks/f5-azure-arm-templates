@@ -126,7 +126,7 @@ Use this button to deploy the template:
     #!/bin/bash
 
     # Script to deploy 1nic/2nic ARM template into Azure, using azure cli 1.0
-    # Example Command: ./deploy_via_bash.sh -u azureuser -p 'yourpassword' -d f51nicdeploy01 -n f52nic -l XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -r f51nicdeploy01 -y adminstrator@domain.com -z 'yourpassword'
+    # Example Command: ./deploy_via_bash.sh -u azureuser -p 'yourpassword' -d f51nicdeploy01 -n f51nic -l XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -r f51nicdeploy01 -y adminstrator@domain.com -z 'yourpassword'
 
     # Assign Script Paramters and Define Variables
     # Specify static items, change these as needed or make them parameters (instance_size is already an optional paramter)
@@ -136,7 +136,7 @@ Use this button to deploy the template:
     instance_size="Standard_D2_v2"
     f5_sku="Best"
 
-    while getopts u:p:d:n:s:l:r:y:z: option
+    while getopts u:p:d:n:s:k:l:r:y:z: option
     do	case "$option"  in
             u) admin_username=$OPTARG;;
             p) admin_password=$OPTARG;;
