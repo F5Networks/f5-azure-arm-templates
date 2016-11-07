@@ -35,7 +35,7 @@
         "Standard_F4"
       ]
     },
-    "f5Sku": {
+    "imageName": {
       "defaultValue": "Best",
       "allowedValues": [
         "Good",
@@ -122,8 +122,8 @@
   "variables": {
     "f5CloudLibsTag": "v1.0.0",
     "location": "[resourceGroup().location]",
-    "f5SkuToLower": "[toLower(parameters('f5Sku'))]",
-    "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('f5SkuToLower'),'-byol')]",
+    "imageNameToLower": "[toLower(parameters('imageName'))]",
+    "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]",
     "virtualNetworkName": "[concat(parameters('dnsLabel'),'-vnet1')]",
     "vnetAddressPrefix": "10.10.0.0/16",
     "subnetName": "[concat(parameters('dnsLabel'),'-subnet1')]",
