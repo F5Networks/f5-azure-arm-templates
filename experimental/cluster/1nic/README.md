@@ -49,7 +49,7 @@ Use these buttons to deploy the template(s):
 | deploymentName | x | A unique name for your application. |
 | numberOfInstances | x | The number of BIG-IPs that will be deployed in front of your application.  The only allowed value for this template is 2. |
 | instanceType | x | The desired Azure Virtual Machine instance size. |
-| f5Sku | x | The desired F5 image to deploy. |
+| imageName | x | The desired F5 image to deploy. |
 | adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
 | adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
 | dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
@@ -84,7 +84,7 @@ Use these buttons to deploy the template(s):
     $instanceType = "Standard_D2_v2",
 
     [string]
-    $f5Sku = "Best",
+    $imageName = "Best",
 
     [Parameter(Mandatory=$True)]
     [string]
@@ -144,7 +144,7 @@ Use these buttons to deploy the template(s):
     $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
 
     # Create Arm Deployment
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -solutionDeploymentName "$solutionDeploymentName" -numberOfInstances "$numberOfInstances" -instanceType "$instanceType" -f5Sku "$f5Sku" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2" -restrictedSrcAddress "$restrictedSrcAddress"
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -solutionDeploymentName "$solutionDeploymentName" -numberOfInstances "$numberOfInstances" -instanceType "$instanceType" -imageName "$imageName" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2" -restrictedSrcAddress "$restrictedSrcAddress"
 
     # Print Output of Deployment to Console
     $deployment
