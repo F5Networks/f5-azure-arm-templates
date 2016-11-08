@@ -1,4 +1,4 @@
-# Azure BIG-IP VE HA Template
+# Deploying a BIG-IP VE Cluster in Azure - Single NIC
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 ## Introduction
 
