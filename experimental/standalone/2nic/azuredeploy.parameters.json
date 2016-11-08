@@ -17,7 +17,7 @@
         "instanceType": {
             "value": "Standard_D2_v2"
         },
-        "f5Sku": {
+        "imageName": {
             "value": "Best"
         },
         "licenseKey1": {

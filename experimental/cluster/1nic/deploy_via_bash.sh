@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script to deploy 1nic/2nic ARM template into Azure, using azure cli 1.0
-# Example Command: ./deploy_via_bash.sh -u azureuser -p 'yourpassword' -d f51nicdeploy01 -n f51nic -l XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -r f51nicdeploy01 -y adminstrator@domain.com -z 'yourpassword'
+# Example Command: ./deploy_via_bash.sh --sdname azureuser --nbrinstances 2 --adminusr azureuser --adminpwd 'password' --dnslabel label01 --key1 XXXX-XXXX --key2 XXXX-XXXX --rgname examplerg --azureusr loginuser --azurepwd loginpwd
 
 # Assign Script Paramters and Define Variables
 # Specify static items, change these as needed or make them parameters (instance_type is already an optional paramter)
@@ -10,14 +10,15 @@ template_file="azuredeploy.json"
 parameter_file="azuredeploy.parameters.json"
 instance_type="Standard_D2_v2"
 image_name="Best"
-tag_values=""
+restricted_source_address="*"
+tag_values="{\"application\":\"APP\",\"environment\":\"ENV\",\"group\":\"GROUP\",\"owner\":\"OWNER\",\"cost\":\"COST\"}"
 
 
-ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m --long sdname:,nbrinstances:,adminusr:,adminpwd:,insttype:,imgname:,dnslabel:,key1:,key2:,rstsrcaddr:,rgname:,azureuser:,azurepwd: -n $0 -- "$@"`
+ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m --long sdname:,nbrinstances:,adminusr:,adminpwd:,insttype:,imgname:,dnslabel:,key1:,key2:,rstsrcaddr:,rgname:,azureusr:,azurepwd: -n $0 -- "$@"`
 eval set -- "$ARGS"
 
 
-# Parse the command line arguments, only chacking full params
+# Parse the command line arguments, primarily checking full params as short params are just placeholders
 while true; do
     case "$1" in
         -a|--sdname)
@@ -53,7 +54,7 @@ while true; do
         -k|--rgname)
             resource_group_name=$2
             shift 2;;
-        -l|--azureuser)
+        -l|--azureusr)
             azure_user=$2
             shift 2;;
         -m|--azurepwd)
@@ -65,18 +66,15 @@ while true; do
     esac
 done
 
-
-echo "sdname: $sdname"
-
 # Check for Mandatory Args
-if [ ! "$solution_deployment_name" ] || [ ! "$number_of_instances" ] || [ ! "$admin_username" ] || [ ! "$admin_password" ] || [ ! "$license_key_1" ]  || [ ! "$license_key_2" ] || [ ! "$restricted_source_address" ] || [ ! "$resource_group_name" ] || [ ! "$azure_user" ] || [ ! "$azure_pwd" ]
+if [ ! "$solution_deployment_name" ] || [ ! "$number_of_instances" ] || [ ! "$admin_username" ] || [ ! "$admin_password" ] || [ ! "$dns_label" ] || [ ! "$license_key_1" ]  || [ ! "$license_key_2" ] || [ ! "$restricted_source_address" ] || [ ! "$resource_group_name" ] || [ ! "$azure_user" ] || [ ! "$azure_pwd" ]
 then
     echo "One of the mandatory parameters was not specified!"
     exit 1
 fi
 
 
-# Login to Azure, for simplicity in this example using username and password as supplied as script arguments y and z
+# Login to Azure, for simplicity in this example using username and password as supplied as script arguments --azureusr and --azurepwd
 azure login -u $azure_user -p $azure_pwd
 
 # Switch to ARM mode
@@ -87,7 +85,7 @@ azure group create -n $resource_group_name -l $region
 
 # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
 # such as can been done with Powershell...oh well!
-azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"solutionDeploymentName\":{\"value\":\"$solution_deployment_name\"},\"numberOfInstances\":{\"value\":\"$number_of_instances\"},\"instanceType\":{\"value\":\"$instance_type\"},\"imageName\":{\"value\":\"$image_name\"},\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"licenseKey2\":{\"value\":\"$license_key_2\"},\"restrictedSrcAddress\":{\"value\":\"$restricted_source_address\"},\"tagValues\":{\"value\":\"$tag_values\"}}"
+azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"solutionDeploymentName\":{\"value\":\"$solution_deployment_name\"},\"numberOfInstances\":{\"value\":$number_of_instances},\"instanceType\":{\"value\":\"$instance_type\"},\"imageName\":{\"value\":\"$image_name\"},\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"licenseKey2\":{\"value\":\"$license_key_2\"},\"restrictedSrcAddress\":{\"value\":\"$restricted_source_address\"},\"tagValues\":{\"value\":$tag_values}}"
 
 
 
