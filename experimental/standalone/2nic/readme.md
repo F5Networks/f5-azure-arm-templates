@@ -36,7 +36,7 @@ Use this button to deploy the template:
 | dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
 | instanceName | x | The hostname to be configured for the VM. |
 | instanceType | x | The desired Azure Virtual Machine instance size. |
-| f5Sku | x | The desired F5 image to deploy. |
+| imageName | x | The desired F5 image to deploy. |
 | licenseKey1 | x | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
@@ -71,7 +71,7 @@ Use this button to deploy the template:
     $instanceType = "Standard_D2_v2",
 
     [string]
-    $f5Sku = "Best",
+    $imageName = "Best",
 
     [Parameter(Mandatory=$True)]
     [string]
@@ -113,7 +113,7 @@ Use this button to deploy the template:
 
     # Create Arm Deployment
     $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -f5Sku "$f5Sku"
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"
 
     # Print Output of Deployment to Console
     $deployment
@@ -130,12 +130,12 @@ Use this button to deploy the template:
     # Example Command: ./deploy_via_bash.sh -u azureuser -p 'yourpassword' -d f52nicdeploy01 -n f52nic -l XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -r f52nicdeploy01 -y adminstrator@domain.com -z 'yourpassword'
 
     # Assign Script Paramters and Define Variables
-    # Specify static items, change these as needed or make them parameters (instance_size and f5_sku is already an optional paramter)
+    # Specify static items, change these as needed or make them parameters (instance_size and image_name is already an optional paramter)
     region="westus"
     template_file="azuredeploy.json"
     parameter_file="azuredeploy.parameters.json"
     instance_size="Standard_D2_v2"
-    f5_sku="Best"
+    image_name="Best"
 
     while getopts u:p:d:n:s:k:l:r:y:z: option
     do	case "$option"  in
@@ -144,7 +144,7 @@ Use this button to deploy the template:
             d) dns_label=$OPTARG;;
             n) instance_name=$OPTARG;;
             s) instance_size=$OPTARG;;
-            k) f5_sku=$OPTARG;;
+            k) image_name=$OPTARG;;
             l) license_key_1=$OPTARG;;
             r) resource_group_name=$OPTARG;;
             y) azure_user=$OPTARG;;
@@ -170,7 +170,7 @@ Use this button to deploy the template:
 
     # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
     # such as can been done with Powershell...oh well!
-    azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"instanceName\":{\"value\":\"$instance_name\"},\"instanceSize\":{\"value\":\"$instance_size\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"f5Sku\":{\"value\":\"$f5_sku\"}}"
+    azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"instanceName\":{\"value\":\"$instance_name\"},\"instanceSize\":{\"value\":\"$instance_size\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"imageName\":{\"value\":\"$image_name\"}}"
 
 ```
 

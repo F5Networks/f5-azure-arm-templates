@@ -1,12 +1,13 @@
 # Azure BIG-IP VE HA Template
-
+[![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 ## Introduction
+
 
 You can deploy your web applications by creating a cluster of F5 BIG-IP VEs that uses the Local Traffic Manager™ (LTM®) module.
 
-When you deploy your applications by using a cluster of F5 BIG-IPs, the BIG-IP VE instances are all in Active status (not Active-Standby), and are used as a single device, for redundancy and scalability, rather than failover. If one device goes down, Azure will keep load balancing to the other.
+When you deploy your applications by using a cluster of F5 BIG-IPs, the BIG-IP VE instances are all in Active status (not Active-Standby), and are used as a single device, for redundancy and scalability, rather than failover. If one device goes down, Azure keeps load balancing to the other.
 
-The F5 BIG-IP VEs will be fully configured in front of your application.  When completed, the BIG-IPs will pass traffic through the newly created Azure Public IP.  After acceptance testing, you will want to complete the configuration by changing the DNS entry for your application to point at the newly created public IP address, and then lock down the Network Security Group rules to prevent any traffic from reaching your application except through the F5 BIG-IPs.
+Using this solution, the F5 BIG-IP VEs are fully configured in front of your application.  When complete, the BIG-IPs pass traffic through the newly created Azure Public IP.  After acceptance testing, you must complete the configuration by changing the DNS entry for your application to point at the newly created public IP address, and then lock down the Network Security Group rules to prevent any traffic from reaching your application except through the F5 BIG-IPs.
 
 Before you deploy web applications with an F5 BIG-IP, you need a license from F5.
 

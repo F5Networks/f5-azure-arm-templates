@@ -55,7 +55,7 @@
       },
       "type": "string"
     },
-    "f5Sku": {
+    "imageName": {
       "defaultValue": "Best",
       "allowedValues": [
         "Good",
@@ -99,8 +99,8 @@
 
     "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'sa1nic')]",
     "storageAccountType": "Standard_LRS",
-    "f5SkuToLower": "[toLower(parameters('f5Sku'))]",
-    "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('f5SkuToLower'),'-byol')]",
+    "imageNameToLower": "[toLower(parameters('imageName'))]",
+    "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]",
     "availabilitySetName": "[concat(parameters('instanceName'), '-availset')]",
 
     "nic1Name": "[concat(parameters('instanceName'), '-mgmt1')]",
