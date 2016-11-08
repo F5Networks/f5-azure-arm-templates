@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to deploy 1nic/2nic ARM template into Azure, using azure cli 1.0
+# Bash Script to deploy ARM template into Azure, using azure cli 1.0
 # Example Command: ./deploy_via_bash.sh --sdname azureuser --nbrinstances 2 --adminusr azureuser --adminpwd 'password' --dnslabel label01 --key1 XXXX-XXXX --key2 XXXX-XXXX --rgname examplerg --azureusr loginuser --azurepwd loginpwd
 
 # Assign Script Paramters and Define Variables
@@ -74,7 +74,7 @@ then
 fi
 
 
-# Login to Azure, for simplicity in this example using username and password as supplied as script arguments --azureusr and --azurepwd
+# Login to Azure, for simplicity in this example using username and password supplied as script arguments --azureusr and --azurepwd
 azure login -u $azure_user -p $azure_pwd
 
 # Switch to ARM mode
