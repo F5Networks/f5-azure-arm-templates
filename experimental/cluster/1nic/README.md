@@ -1,8 +1,8 @@
-# Azure BIG-IP VE HA Template
+# Deploying a BIG-IP VE Cluster in Azure - Single NIC
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 ## Introduction
 
-You can deploy your web applications by creating a cluster of F5 BIG-IP VEs that uses the Local Traffic Manager™ (LTM®) module.
+This ARM template deploys a cluster of F5 BIG-IP VEs that ensures you have the highest level of availability for your applications. You can also enable F5's L4/L7 security features, access control, and intelligent traffic management.
 
 When you deploy your applications using a cluster of F5 BIG-IPs, the BIG-IP VE instances are all in Active status (not Active-Standby), and are used as a single device for redundancy and scalability, rather than failover. If one device goes down, Azure keeps load balancing to the other.
 
@@ -10,17 +10,10 @@ Using this solution, the F5 BIG-IP VEs are fully configured in front of your app
 
 Before you deploy web applications with an F5 BIG-IP, you need a license from F5.
 
-You choose the license and corresponding Azure instance based on the number of cores and throughput you need. The instances listed below are minimums; you can choose larger instances if you want.
-
-| Cores | Througput | Minimum Azure Instance |
-| --- | --- | --- |
-| 2 | 25 Mbps | D2_v2 |
-| 4 | 200 Mbps | A3 Standard or D3_v2 |
-| 8 | 1 Gbps | A4 or A7 Standard or D4v2 |
 
 ## Documentation
 
-Please see the project documentation - This is still being created
+See the project documentation - This is still being created
 
 
 ## Installation
