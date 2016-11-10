@@ -194,7 +194,7 @@ Use this button to deploy the template:
             fi
     done
 
-    # Login to Azure, for simplicity in this example using username and password as supplied as script arguments y and z
+    # Login to Azure, for simplicity in this example using username and password as supplied as script arguments --azureusr and --azurepwd
     azure login -u $azure_user -p $azure_pwd
 
     # Switch to ARM mode
