@@ -222,7 +222,11 @@ Use the following button to deploy the template.  See the Template parameters se
     done
 
     # Login to Azure, for simplicity in this example using username and password supplied as script arguments --azureusr and --azurepwd
-    azure login -u $azure_user -p $azure_pwd
+    # Perform Check to see if already logged in
+    azure account show > /dev/null 2>&1
+    if [[ $? != 0 ]] ; then
+            azure login -u $azure_user -p $azure_pwd
+    fi
 
     # Switch to ARM mode
     azure config mode arm
