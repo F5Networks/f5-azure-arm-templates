@@ -66,6 +66,9 @@ while true; do
     esac
 done
 
+echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
+sleep 3
+
 #If a required paramater is not passed, the script will prompt for it below
 required_variables="solution_deployment_name number_of_instances admin_username admin_password dns_label license_key_1 license_key_2 resource_group_name azure_user azure_pwd"
 for variable in $required_variables
