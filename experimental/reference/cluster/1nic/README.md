@@ -77,7 +77,7 @@ Use these buttons to deploy the template(s):
 </a>
 
 
-### <a name="powershell"></a>PowerShell
+### <a name="powershell"></a>PowerShell Script Example
 
 ```powershell
     # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to

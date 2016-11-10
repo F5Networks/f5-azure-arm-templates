@@ -50,15 +50,14 @@ Use the following button to deploy the template.  See the Template parameters se
 
 
 
-### <a name="powershell"></a>PowerShell
+### <a name="powershell"></a>PowerShell Script Example
 
 ```powershell
     # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
     # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
     # Example Command: .\Deploy_via_PS.ps1 -solutionDeploymentName deploynamestring -numberOfInstances 2 -adminUsername azureuser -adminPassword password
-    # -dnsLabel dnslabestring -licenseKey1 XXXX-XXXX-XXXX-XXXX -licenseKey2 XXXX-XXXX-XXXX-XXXX -templateFilePath .\templates\https\azuredeploy.json
-    # -resourceGroupName rgname -parametersFilePath .\templates\https\azuredeploy.parameters.json
+    # -dnsLabel dnslabestring -licenseKey1 XXXX-XXXX-XXXX-XXXX -licenseKey2 XXXX-XXXX-XXXX-XXXX
 
     param(
     [Parameter(Mandatory=$True)]
@@ -141,9 +140,9 @@ Use the following button to deploy the template.  See the Template parameters se
 ```
 
 
-### <a name="cli"></a>Azure CLI(1.0) Usage
+### <a name="cli"></a>Azure CLI(1.0) Script Example
 -----
-```
+```bash
     #!/bin/bash
 
     # Bash Script to deploy ARM template into Azure, using azure cli 1.0

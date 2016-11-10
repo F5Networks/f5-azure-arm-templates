@@ -2,8 +2,7 @@
 # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
 # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
 # Example Command: .\Deploy_via_PS.ps1 -solutionDeploymentName deploynamestring -numberOfInstances 2 -adminUsername azureuser -adminPassword password
-# -dnsLabel dnslabestring -licenseKey1 XXXX-XXXX-XXXX-XXXX -licenseKey2 XXXX-XXXX-XXXX-XXXX -templateFilePath .\templates\https\azuredeploy.json
-# -resourceGroupName rgname -parametersFilePath .\templates\https\azuredeploy.parameters.json
+# -dnsLabel dnslabestring -licenseKey1 XXXX-XXXX-XXXX-XXXX -licenseKey2 XXXX-XXXX-XXXX-XXXX
 
 param(
   [Parameter(Mandatory=$True)]

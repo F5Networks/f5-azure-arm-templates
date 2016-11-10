@@ -41,7 +41,7 @@ Use this button to deploy the template:
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
-### <a name="powershell"></a>PowerShell
+### <a name="powershell"></a>PowerShell Script Example
 
 ```powershell
     # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
@@ -120,9 +120,9 @@ Use this button to deploy the template:
 
 =======
 
-### <a name="cli"></a>Azure CLI(1.0) Usage
+### <a name="cli"></a>Azure CLI(1.0) Script Example
 -----
-```
+```bash
     #!/bin/bash
 
     # Bash Script to deploy an ARM template into Azure, using azure cli 1.0
@@ -212,7 +212,6 @@ Use this button to deploy the template:
     # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
     # such as can been done with Powershell...oh well!
     azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"instanceName\":{\"value\":\"$instance_name\"},\"instanceType\":{\"value\":\"$instance_type\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"imageName\":{\"value\":\"$image_name\"},\"restrictedSrcAddress\":{\"value\":\"$restricted_source_address\"},\"tagValues\":{\"value\":$tag_values}}"
-
 
 ```
 

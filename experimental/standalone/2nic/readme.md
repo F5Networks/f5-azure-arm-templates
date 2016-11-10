@@ -42,7 +42,7 @@ Use this button to deploy the template:
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
 
-### <a name="powershell"></a>PowerShell
+### <a name="powershell"></a>PowerShell Script Example
 
 ```powershell
     # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
@@ -121,9 +121,9 @@ Use this button to deploy the template:
 
 =======
 
-### <a name="cli"></a>Azure CLI(1.0) Usage
+### <a name="cli"></a>Azure CLI(1.0) Script Example
 -----
-```
+```bash
     #!/bin/bash
 
     # Bash Script to deploy an ARM template into Azure, using azure cli 1.0
