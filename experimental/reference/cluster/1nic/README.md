@@ -206,7 +206,7 @@ Use these buttons to deploy the template(s):
 
 
 ### <a name="cli"></a>Azure CLI(1.0) Usage
------
+
 ```
     #!/bin/bash
 

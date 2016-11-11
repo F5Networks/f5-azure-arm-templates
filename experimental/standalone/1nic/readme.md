@@ -121,7 +121,7 @@ Use this button to deploy the template:
 =======
 
 ### <a name="cli"></a>Azure CLI(1.0) Script Example
------
+
 ```bash
     #!/bin/bash
 
