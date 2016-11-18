@@ -578,7 +578,7 @@
     },
     "WebServer-URL-Through-F5 ": {
       "type": "string",
-      "value": "[concat('http://', parameters('dnsLabel'), variables('WebServerName'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+      "value": "[concat('http://', parameters('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
     }
   }
 }
