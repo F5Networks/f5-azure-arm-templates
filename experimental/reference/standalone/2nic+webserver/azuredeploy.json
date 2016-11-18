@@ -91,7 +91,7 @@
         "cost": "COST"
       }
     },
-    "WebServer": {
+    "webServer": {
       "defaultValue": "Both",
       "allowedValues": [
         "Linux",
@@ -135,13 +135,16 @@
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('dnsLabel'),'-nsg'))]",
 
 
-
     "subnet2PrivateAddressWindows": "10.0.2.5",
     "subnet2PrivateAddressLinux": "10.0.2.6",
     "singleQuoteWeb": "'",
     "WebServerPort": "80",
-    "commandArgsWeb": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressWindows'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'))]",
-    "webtemplatelink": "[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/master/experimental/reference/standalone/2nic%2Bwebserver/',parameters('WebServer'),'WebServer.json')]"
+    "Linux": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressLinux'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'))]",
+    "Windows": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressWindows'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'))]",
+    "Both": "[concat('-d ', parameters('instanceName'), ' -n \"', variables('subnet2PrivateAddressLinux'), variables('subnet2PrivateAddressWindows'), '\" -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'))]",
+    "commandArgsWeb": "[variables(parameters('webServer'))]",
+    "gitHubLocation": "https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/master/experimental/reference/standalone/2nic%2Bwebserver/",
+    "webtemplatelink": "[concat(variables('gitHubLocation'), parameters('webServer'),'WebServer.json')]"
   },
   "resources": [
     {
@@ -400,7 +403,7 @@
         "osProfile": {
           "computerName": "[parameters('instanceName')]",
           "adminUsername": "[parameters('adminUsername')]",
-		  "adminPassword": "[parameters('adminPassword')]"
+		      "adminPassword": "[parameters('adminPassword')]"
         },
         "storageProfile": {
           "imageReference": {
@@ -462,6 +465,9 @@
       "apiVersion": "2015-01-01",
       "name": "linkedTemplate",
       "type": "Microsoft.Resources/deployments",
+      "dependsOn": [
+          "[variables('vnetId')]"
+      ],
       "properties": {
         "mode": "incremental",
         "templateLink": {
@@ -471,12 +477,12 @@
         "parameters": {
             "privateAddressWindows":{"value": "[variables('subnet2PrivateAddressWindows')]"},
             "privateAddressLinux":{"value": "[variables('subnet2PrivateAddressLinux')]"},
-            "vnetName":{"value": "[variables('vnetName')]"},
             "webSubnetId":{"value": "[variables('subnet2Id')]"},
             "adminUsername":{"value": "[parameters('adminUsername')]"},
             "adminPassword":{"value": "[parameters('adminPassword')]"},
             "dnsLabel":{"value": "[parameters('dnsLabel')]"},
-            "instanceType":{"value": "[parameters('instanceType')]"}
+            "instanceType":{"value": "[parameters('instanceType')]"},
+            "gitHubLocation":{"value": "[variables('gitHubLocation')]"}
         }
       }
     }
@@ -485,10 +491,6 @@
     "MGMT-URL": {
       "type": "string",
       "value": "[concat('https://', parameters('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
-    },
-    "FQDN-WebServer": {
-      "type": "string",
-      "value": "[concat(parameters('dnsLabel'), variables('WebServerName'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
     },
     "WebServer-URL-Through-F5 ": {
       "type": "string",

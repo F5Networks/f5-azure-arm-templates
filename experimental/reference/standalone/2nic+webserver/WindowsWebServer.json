@@ -8,9 +8,6 @@
     "privateAddressLinux": {
       "type": "String"
     },
-    "vnetName": {
-      "type": "String"
-    },
     "webSubnetId": {
       "type": "String"
     },
@@ -25,10 +22,15 @@
     },
     "instanceType": {
       "type": "String"
+    },
+    "gitHubLocation": {
+      "type": "String"
     }
   },
   "variables": {
-    "WebServerNameWindows": "windowsweb01",
+    "storageAccountType": "Standard_LRS",
+    "publicIPAddressType": "Static",
+    "WebServerNameWindows": "winweb01",
     "WebServerPort": "80",
     "Nic1NameWindows": "[concat(variables('WebServerNameWindows'), '-nic1')]",
     "storageAccountNameWindows": "[concat(uniquestring(resourceGroup().id), variables('WebServerNameWindows'))]",
@@ -99,7 +101,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
-                        "https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/master/experimental/reference/standalone/2nic+webserver/Init-Web.ps1"
+                        "[concat(parameters('gitHubLocation'), 'Init-Web.ps1')]"
                     ],
                     "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('scriptFolderWindows'), '/', variables('scriptFileNameWindows'), ' ', variables('scriptParametersWindows'))]"
                 }
@@ -122,7 +124,6 @@
     "apiVersion": "2016-09-01",
     "location": "[resourceGroup().location]",
     "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', parameters('vnetName'))]",
         "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIPAddressNameWindows'))]"
     ],
     "properties": {
@@ -134,7 +135,7 @@
                         "id": "[parameters('webSubnetId')]"
                     },
                     "privateIPAllocationMethod": "Static",
-                    "privateIPAddress": "[variables('privateAddressWindows')]",
+                    "privateIPAddress": "[parameters('privateAddressWindows')]",
                     "publicIpAddress": {
                         "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIPAddressNameWindows'))]"
                     }
@@ -155,5 +156,11 @@
         "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
     }
   }
-  ]
+  ],
+  "outputs": {
+    "FQDN-Windows-WebServer": {
+      "type": "string",
+      "value": "[concat(parameters('dnsLabel'), variables('WebServerName'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+    }
+  }
 }
