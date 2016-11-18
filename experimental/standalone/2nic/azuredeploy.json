@@ -116,15 +116,11 @@
     "subnet2Name": "Web",
     "subnet2Id": "[concat(variables('vnetId'), '/subnets/', variables('subnet2Name'))]",
     "subnet2Prefix": "10.0.2.0/24",
-    "subnet2PrivateAddress": "10.0.2.5",
+    "subnet2PrivateAddress": "10.0.2.4",
     "publicIPAddressName": "[concat(parameters('dnsLabel'), '-pip')]",
     "publicIPAddressType": "Static",
     "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
-    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('dnsLabel'),'-nsg'))]",
-
-    "singleQuote": "'",
-    "commandArgs": "[concat(variables('subnet1PrivateAddress'), ' ', variables('defaultGw'), ' \"', variables('subnet2PrivateAddress'), '\"')]"
-
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('dnsLabel'),'-nsg'))]"
   },
   "resources": [
     {

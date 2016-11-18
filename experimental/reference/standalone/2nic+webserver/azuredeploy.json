@@ -116,15 +116,23 @@
     "subnet2Name": "Web",
     "subnet2Id": "[concat(variables('vnetId'), '/subnets/', variables('subnet2Name'))]",
     "subnet2Prefix": "10.0.2.0/24",
-    "subnet2PrivateAddress": "10.0.2.5",
+    "subnet2PrivateAddress": "10.0.2.4",
     "publicIPAddressName": "[concat(parameters('dnsLabel'), '-pip')]",
     "publicIPAddressType": "Static",
     "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('dnsLabel'),'-nsg'))]",
 
-    "singleQuote": "'",
-    "commandArgs": "[concat(variables('subnet1PrivateAddress'), ' ', variables('defaultGw'), ' \"', variables('subnet2PrivateAddress'), '\"')]"
-
+    "WebServerName": "web01",
+    "WebServerPort": "80",
+    "nic1NameWeb": "[concat(variables('WebServerName'), '-nic1')]",
+    "storageAccountNameWeb": "[concat(uniquestring(resourceGroup().id), variables('WebServerName'))]",
+    "publicIPAddressNameWeb": "[concat(variables('WebServerName'), '-pip')]",
+    "subnet2PrivateAddressWeb": "10.0.2.5",
+    "singleQuoteWeb": "'",
+    "commandArgsWeb": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressWeb'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'))]",
+    "scriptFolder": ".",
+    "scriptFileName": "Init-Web.ps1",
+    "scriptParameters": ""
   },
   "resources": [
     {
@@ -295,6 +303,20 @@
               "direction": "Inbound",
               "access": "Allow"
             }
+          },
+          {
+            "name": "traffic_allow_80",
+            "properties": {
+              "description": "",
+              "priority": 103,
+              "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "80",
+              "protocol": "TCP",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
           }
         ]
       }
@@ -423,15 +445,140 @@
              "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/scripts/azure/runScripts.js')]",
              "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', variables('f5CloudLibsTag'))]"
           ],
-          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', variables('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none --signal ONBOARD_DONE \"', ' --network \" --wait-for ONBOARD_DONE --output /var/log/network.log --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --multi-nic --default-gw ', variables('defaultGw'), ' --vlan vlan_mgmt,1.0 --vlan vlan_1,1.1 --self-ip self_mgmt,', variables('subnet1PrivateAddress'), ',vlan_mgmt --self-ip self_1,', variables('subnet2PrivateAddress'), ',vlan_1 --log-level debug --background --force-reboot --signal NETWORK_DONE \"')]"
+          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', variables('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none --signal ONBOARD_DONE \"', ' --network \" --wait-for ONBOARD_DONE --output /var/log/network.log --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --multi-nic --default-gw ', variables('defaultGw'), ' --vlan vlan_mgmt,1.0 --vlan vlan_1,1.1 --self-ip self_mgmt,', variables('subnet1PrivateAddress'), ',vlan_mgmt --self-ip self_1,', variables('subnet2PrivateAddress'), ',vlan_1 --log-level debug --background --force-reboot --signal NETWORK_DONE \" --script \" --wait-for NETWORK_DONE --output /var/log/runScript.log --log-level debug --background --url http://cdn-prod-ore-f5.s3-website-us-west-2.amazonaws.com/product/blackbox/staging/azure/deploy_iapp_http.sh --cl-args ', variables('singleQuoteWeb'), variables('commandArgsWeb'), variables('singleQuoteWeb'), '\"')]"
         }
       }
-     }
+     },
+    {
+    "name": "[variables('WebServerName')]",
+    "type": "Microsoft.Compute/virtualMachines",
+    "apiVersion": "2015-06-15",
+    "location": "[resourceGroup().location]",
+    "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('Nic1NameWeb'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountNameWeb'))]"
+    ],
+    "properties": {
+        "osProfile": {
+            "computerName": "[variables('WebServerName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]",
+            "windowsConfiguration": {
+                "provisionVmAgent": "true"
+            }
+        },
+        "hardwareProfile": {
+            "vmSize": "[parameters('instanceType')]"
+        },
+        "storageProfile": {
+            "imageReference": {
+                "publisher": "MicrosoftWindowsServer",
+                "offer": "WindowsServer",
+                "sku": "2012-R2-Datacenter",
+                "version": "latest"
+            },
+            "osDisk": {
+                "name": "[concat(variables('WebServerName'), '-osdisk')]",
+                "vhd": {
+                    "uri": "[concat(concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNameWeb')), '2015-06-15').primaryEndpoints['blob'], 'vhds/'), variables('storageAccountNameWeb'), '.vhd')]"
+                },
+                "createOption": "fromImage"
+            },
+            "dataDisks": []
+        },
+        "networkProfile": {
+            "networkInterfaces": [
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('Nic1NameWeb'))]"
+                }
+            ]
+        }
+    },
+    "resources": [
+        {
+            "type": "extensions",
+            "name": "webinit",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('WebServerName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.8",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/master/experimental/reference/standalone/2nic+webserver/Init-Web.ps1"
+                    ],
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('scriptFolder'), '/', variables('scriptFileName'), ' ', variables('scriptParameters'))]"
+                }
+            }
+        }
+    ]
+  },
+  {
+    "name": "[variables('storageAccountNameWeb')]",
+    "type": "Microsoft.Storage/storageAccounts",
+    "apiVersion": "2015-06-15",
+    "location": "[resourceGroup().location]",
+    "properties": {
+        "accountType": "[variables('storageAccountType')]"
+    }
+  },
+  {
+    "name": "[variables('Nic1NameWeb')]",
+    "type": "Microsoft.Network/networkInterfaces",
+    "apiVersion": "2016-09-01",
+    "location": "[resourceGroup().location]",
+    "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('vnetName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIPAddressNameWeb'))]"
+    ],
+    "properties": {
+        "ipConfigurations": [
+            {
+                "name": "[concat(variables('WebServerName'), '-ipconfig1')]",
+                "properties": {
+                    "subnet": {
+                        "id": "[variables('subnet2Id')]"
+                    },
+                    "privateIPAllocationMethod": "Static",
+                    "privateIPAddress": "[variables('subnet2PrivateAddressWeb')]",
+                    "publicIpAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIPAddressNameWeb'))]"
+                    }
+                }
+            }
+        ]
+    }
+  },
+  {
+    "name": "[variables('publicIPAddressNameWeb')]",
+    "type": "Microsoft.Network/publicIpAddresses",
+    "apiVersion": "2016-09-01",
+    "location": "[resourceGroup().location]",
+    "properties": {
+        "dnsSettings": {
+          "domainNameLabel": "[concat(parameters('dnsLabel'), variables('WebServerName'))]"
+        },
+        "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
+    }
+  }
   ],
   "outputs": {
     "MGMT-URL": {
       "type": "string",
       "value": "[concat('https://', parameters('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+    },
+    "FQDN-WebServer": {
+      "type": "string",
+      "value": "[concat(parameters('dnsLabel'), variables('WebServerName'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+    },
+    "WebServer-URL-Through-F5 ": {
+      "type": "string",
+      "value": "[concat('http://', parameters('dnsLabel'), variables('WebServerName'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
     }
   }
 }
