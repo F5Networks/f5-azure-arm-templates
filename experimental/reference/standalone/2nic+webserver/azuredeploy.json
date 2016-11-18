@@ -137,8 +137,9 @@
 
 
     "subnet2PrivateAddressWindows": "10.0.2.5",
-    "subnet2PrivateAddressWLinux": "10.0.2.6",
+    "subnet2PrivateAddressLinux": "10.0.2.6",
     "singleQuoteWeb": "'",
+    "WebServerPort": "80",
     "commandArgsWeb": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressWindows'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'))]",
     "webtemplatelink": "[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/master/experimental/reference/standalone/2nic%2Bwebserver/',parameters('WebServer'),'WebServer.json')]"
   },
