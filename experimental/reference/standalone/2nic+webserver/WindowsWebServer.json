@@ -1,0 +1,153 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "privateAddressWindows": {
+      "type": "String"
+    },
+    "privateAddressLinux": {
+      "type": "String"
+    },
+    "vnetName": {
+      "type": "String"
+    },
+    "webSubnetId": {
+      "type": "String"
+    },
+    "dnsLabel": {
+      "type": "String"
+    },
+    "instanceType": {
+      "type": "String"
+    }
+  },
+  "variables": {
+    "WebServerNameWindows": "windowsweb01",
+    "WebServerPort": "80",
+    "Nic1NameWindows": "[concat(variables('WebServerNameWindows'), '-nic1')]",
+    "storageAccountNameWindows": "[concat(uniquestring(resourceGroup().id), variables('WebServerNameWindows'))]",
+    "publicIPAddressNameWindows": "[concat(variables('WebServerNameWindows'), '-pip')]",
+    "scriptFolderWindows": ".",
+    "scriptFileNameWindows": "Init-Web.ps1",
+    "scriptParametersWindows": ""
+  },
+  "resources": [
+    {
+    "name": "[variables('WebServerNameWindows')]",
+    "type": "Microsoft.Compute/virtualMachines",
+    "apiVersion": "2015-06-15",
+    "location": "[resourceGroup().location]",
+    "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('Nic1NameWindows'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountNameWindows'))]"
+    ],
+    "properties": {
+        "osProfile": {
+            "computerName": "[variables('WebServerNameWindows')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]",
+            "windowsConfiguration": {
+                "provisionVmAgent": "true"
+            }
+        },
+        "hardwareProfile": {
+            "vmSize": "[parameters('instanceType')]"
+        },
+        "storageProfile": {
+            "imageReference": {
+                "publisher": "MicrosoftWindowsServer",
+                "offer": "WindowsServer",
+                "sku": "2012-R2-Datacenter",
+                "version": "latest"
+            },
+            "osDisk": {
+                "name": "[concat(variables('WebServerNameWindows'), '-osdisk')]",
+                "vhd": {
+                    "uri": "[concat(concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNameWindows')), '2015-06-15').primaryEndpoints['blob'], 'vhds/'), variables('storageAccountNameWindows'), '.vhd')]"
+                },
+                "createOption": "fromImage"
+            },
+            "dataDisks": []
+        },
+        "networkProfile": {
+            "networkInterfaces": [
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('Nic1NameWindows'))]"
+                }
+            ]
+        }
+    },
+    "resources": [
+        {
+            "type": "extensions",
+            "name": "webinit",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('WebServerNameWindows'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.8",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/master/experimental/reference/standalone/2nic+webserver/Init-Web.ps1"
+                    ],
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('scriptFolderWindows'), '/', variables('scriptFileNameWindows'), ' ', variables('scriptParametersWindows'))]"
+                }
+            }
+        }
+    ]
+  },
+  {
+    "name": "[variables('storageAccountNameWindows')]",
+    "type": "Microsoft.Storage/storageAccounts",
+    "apiVersion": "2015-06-15",
+    "location": "[resourceGroup().location]",
+    "properties": {
+        "accountType": "[variables('storageAccountType')]"
+    }
+  },
+  {
+    "name": "[variables('Nic1NameWindows')]",
+    "type": "Microsoft.Network/networkInterfaces",
+    "apiVersion": "2016-09-01",
+    "location": "[resourceGroup().location]",
+    "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', parameters('vnetName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIPAddressNameWindows'))]"
+    ],
+    "properties": {
+        "ipConfigurations": [
+            {
+                "name": "[concat(variables('WebServerNameWindows'), '-ipconfig1')]",
+                "properties": {
+                    "subnet": {
+                        "id": "[parameters('webSubnetId')]"
+                    },
+                    "privateIPAllocationMethod": "Static",
+                    "privateIPAddress": "[variables('privateAddressWindows')]",
+                    "publicIpAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIPAddressNameWindows'))]"
+                    }
+                }
+            }
+        ]
+    }
+  },
+  {
+    "name": "[variables('publicIPAddressNameWindows')]",
+    "type": "Microsoft.Network/publicIpAddresses",
+    "apiVersion": "2016-09-01",
+    "location": "[resourceGroup().location]",
+    "properties": {
+        "dnsSettings": {
+          "domainNameLabel": "[concat(parameters('dnsLabel'), variables('WebServerNameWindows'))]"
+        },
+        "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
+    }
+  }
+  ]
+}

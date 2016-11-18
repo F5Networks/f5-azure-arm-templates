@@ -1,4 +1,4 @@
-# Deploying the BIG-IP VE in Azure - Two NIC
+# Deploying the BIG-IP VE in Azure - Two NIC + Webserver(s)
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 [![Doc Status](http://readthedocs.org/projects/f5-sdk/badge/?version=latest)](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html)
