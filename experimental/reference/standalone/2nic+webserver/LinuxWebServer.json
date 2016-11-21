@@ -85,8 +85,8 @@
     }
   },
   {
-    "type": "Microsoft.Compute/virtualMachines/extensions",
     "name": "[concat(variables('WebServerNameLinux'),'/linuxweb01')]",
+    "type": "Microsoft.Compute/virtualMachines/extensions",
     "apiVersion": "2016-03-30",
     "location": "[resourceGroup().location]",
     "dependsOn": [
@@ -98,7 +98,7 @@
         "typeHandlerVersion": "2.0",
         "settings": {
             "fileUris": "[concat(parameters('gitHubLocation'), variables('scriptFileNameLinux'))]",
-            "commandToExecute": "[concat(variables('scriptFolderLinux'), '/', variables('scriptFileNameLinux'), ' ', variables('scriptParametersLinux')]"
+            "commandToExecute": "[concat(variables('scriptFolderLinux'), '/', variables('scriptFileNameLinux'), ' ', variables('scriptParametersLinux'))]"
         }
     }
   },
