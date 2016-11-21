@@ -62,14 +62,15 @@
             "imageReference": {
                 "publisher": "Canonical",
                 "offer": "UbuntuServer",
-                "sku": "15.10",
+                "sku": "16.04.0-LTS",
                 "version": "latest"
             },
             "osDisk": {
-                "name": "[concat(variables('WebServerNameLinux'), '-osdisk')]",
+                "name": "[concat(variables('WebServerNameLinux'), '-linuxosdisk')]",
                 "vhd": {
                     "uri": "[concat(concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNameLinux')), '2015-06-15').primaryEndpoints['blob'], 'vhds/'), variables('storageAccountNameLinux'), '.vhd')]"
                 },
+                "caching": "ReadWrite",
                 "createOption": "fromImage"
             },
             "dataDisks": []

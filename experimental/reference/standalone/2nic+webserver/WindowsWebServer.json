@@ -69,7 +69,7 @@
                 "version": "latest"
             },
             "osDisk": {
-                "name": "[concat(variables('WebServerNameWindows'), '-osdisk')]",
+                "name": "[concat(variables('WebServerNameWindows'), '-winosdisk')]",
                 "vhd": {
                     "uri": "[concat(concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNameWindows')), '2015-06-15').primaryEndpoints['blob'], 'vhds/'), variables('storageAccountNameWindows'), '.vhd')]"
                 },
