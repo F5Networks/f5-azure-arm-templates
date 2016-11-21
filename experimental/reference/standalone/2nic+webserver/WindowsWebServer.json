@@ -88,7 +88,7 @@
     "resources": [
         {
             "type": "extensions",
-            "name": "winwebinit",
+            "name": "webinit",
             "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "dependsOn": [
