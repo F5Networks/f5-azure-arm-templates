@@ -82,30 +82,25 @@
                 }
             ]
         }
-    },
-    "resources": [
-        {
-            "type": "extensions",
-            "name": "linuxwebinit",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('WebServerNameLinux'))]"
-            ],
-            "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.8",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                    "fileUris": [
-                        "[concat(parameters('gitHubLocation'), variables('scriptFileNameLinux'))]"
-                    ],
-                    "commandToExecute": "[concat(variables('scriptFolderLinux'), '/', variables('scriptFileNameLinux'), ' ', variables('scriptParametersLinux'))]"
-                }
-            }
+    }
+  },
+  {
+    "type": "Microsoft.Compute/virtualMachines/extensions",
+    "name": "[concat(variables('WebServerNameLinux'),'/linuxweb01')]",
+    "apiVersion": "2016-03-30",
+    "location": "[resourceGroup().location]",
+    "dependsOn": [
+    "[concat('Microsoft.Compute/virtualMachines/', variables('WebServerNameLinux'))]"
+    ],
+    "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "settings": {
+            "fileUris": "[concat(parameters('gitHubLocation'), variables('scriptFileNameLinux'))]",
+            "commandToExecute": "[concat(variables('scriptFolderLinux'), '/', variables('scriptFileNameLinux'), ' ', variables('scriptParametersLinux')]"
         }
-    ]
+    }
   },
   {
     "name": "[variables('storageAccountNameLinux')]",
