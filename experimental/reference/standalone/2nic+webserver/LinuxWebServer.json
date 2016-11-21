@@ -3,28 +3,28 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "privateAddressWindows": {
-      "type": "String"
+      "type": "string"
     },
     "privateAddressLinux": {
-      "type": "String"
+      "type": "string"
     },
     "webSubnetId": {
-      "type": "String"
+      "type": "string"
     },
     "adminUsername": {
-      "type": "String"
+      "type": "string"
     },
     "adminPassword": {
-      "type": "String"
+      "type": "securestring"
     },
     "dnsLabel": {
-      "type": "String"
+      "type": "string"
     },
     "instanceType": {
-      "type": "String"
+      "type": "string"
     },
     "gitHubLocation": {
-      "type": "String"
+      "type": "string"
     }
   },
   "variables": {
@@ -86,7 +86,7 @@
     "resources": [
         {
             "type": "extensions",
-            "name": "webinit",
+            "name": "linuxwebinit",
             "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "dependsOn": [
@@ -94,8 +94,8 @@
             ],
             "properties": {
                 "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.8",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
