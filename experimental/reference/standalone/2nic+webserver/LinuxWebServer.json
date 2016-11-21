@@ -99,7 +99,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
-                        "[concat(parameters('gitHubLocation'), 'Init-Web.ps1')]"
+                        "[concat(parameters('gitHubLocation'), variables('scriptFileNameLinux'))]"
                     ],
                     "commandToExecute": "[concat(variables('scriptFolderLinux'), '/', variables('scriptFileNameLinux'), ' ', variables('scriptParametersLinux'))]"
                 }

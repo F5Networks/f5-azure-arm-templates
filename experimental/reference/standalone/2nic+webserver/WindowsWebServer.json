@@ -101,7 +101,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
-                        "[concat(parameters('gitHubLocation'), 'Init-Web.ps1')]"
+                        "[concat(parameters('gitHubLocation'), variables('scriptFileNameWindows'))]"
                     ],
                     "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('scriptFolderWindows'), '/', variables('scriptFileNameWindows'), ' ', variables('scriptParametersWindows'))]"
                 }
