@@ -497,11 +497,11 @@
       "value": "[concat('http://', parameters('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
     },
     "FQDN-Windows-WebServer": {
-      "type": "string",
+      "type": "object",
       "value": "[reference('linkedTemplate').outputs.FQDNWindows]"
     },
     "FQDN-Linux-WebServer": {
-      "type": "string",
+      "type": "object",
       "value": "[reference('linkedTemplate').outputs.FQDNLinux]"
     }
   }
