@@ -158,11 +158,11 @@
   }
   ],
   "outputs": {
-    "FQDN-Windows-WebServer": {
+    "FQDNWindows": {
       "type": "string",
       "value": "[concat(parameters('dnsLabel'), variables('WebServerNameWindows'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
     },
-    "FQDN-Linux-WebServer": {
+    "FQDNLinux": {
       "type": "string",
       "value": "Not Deployed"
     }

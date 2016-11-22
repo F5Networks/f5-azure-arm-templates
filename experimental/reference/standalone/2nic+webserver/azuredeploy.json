@@ -498,11 +498,11 @@
     },
     "FQDN-Windows-WebServer": {
       "type": "string",
-      "value": "[reference('linkedTemplate').outputs.FQDN-Windows-WebServer]"
+      "value": "[reference('linkedTemplate').outputs.FQDNWindows]"
     },
     "FQDN-Linux-WebServer": {
       "type": "string",
-      "value": "[reference('linkedTemplate').outputs.FQDN-Linux-WebServer]"
+      "value": "[reference('linkedTemplate').outputs.FQDNLinux]"
     }
   }
 }
