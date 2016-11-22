@@ -160,7 +160,7 @@
   "outputs": {
     "FQDN-Windows-WebServer": {
       "type": "string",
-      "value": "[concat(parameters('dnsLabel'), variables('WebServerName'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+      "value": "[concat(parameters('dnsLabel'), variables('WebServerNameWindows'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
     }
   }
 }
