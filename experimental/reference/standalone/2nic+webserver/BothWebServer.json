@@ -284,7 +284,7 @@
     },
     "FQDNLinux": {
       "type": "string",
-      "value": "[concat(parameters('dnsLabel'), variables('WebServerNameWindows'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+      "value": "[concat(parameters('dnsLabel'), variables('WebServerNameLinux'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
     }
   }
 }
