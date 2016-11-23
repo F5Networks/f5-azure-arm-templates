@@ -143,7 +143,7 @@
     "Windows": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressWindows'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'))]",
     "Both": "[concat('-d ', parameters('instanceName'), ' -n \"', variables('subnet2PrivateAddressLinux'), ',', variables('subnet2PrivateAddressWindows'), '\" -h ', variables('WebServerPort'), ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'))]",
     "commandArgsWeb": "[variables(parameters('webServer'))]",
-    "gitHubLocation": "https://raw.githubusercontent.com/sevedge/f5-azure-arm-templates/master/experimental/reference/standalone/2nic%2Bwebserver/",
+    "gitHubLocation": "https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/master/experimental/reference/standalone/2nic%2Bwebserver/",
     "webtemplatelink": "[concat(variables('gitHubLocation'), parameters('webServer'),'WebServer.json')]"
   },
   "resources": [
