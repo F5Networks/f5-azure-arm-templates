@@ -17,6 +17,7 @@ vs_http_port="80"
 mode="http"
 device_group="none"
 traffic_group="traffic-group-local-only"
+pool_member_list=${pool_member//,/ }
 
 sleep 30
 
@@ -36,7 +37,7 @@ do
 done
 
 # pre-create node
-for unique_node in $pool_member
+for unique_node in $pool_member_list
 do
     if [[ $unique_node =~ $IP_REGEX ]]; then
         response_code=$(curl -sku $user:$passwd -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/ltm/node -d '{"name": "'"$unique_node"'","partition": "Common","address": "'"$unique_node"'"}' -o /dev/null)
@@ -50,7 +51,7 @@ done
 sleep 10
 
 # Create json blob of pool members
-for unique_member in $pool_member
+for unique_member in $pool_member_list
 do
     pool_members_json+='{"row":["'"$unique_member"'","'"80"'","0"]},'
 done
