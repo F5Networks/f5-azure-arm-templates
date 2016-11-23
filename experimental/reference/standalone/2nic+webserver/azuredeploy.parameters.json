@@ -31,6 +31,9 @@
                 "owner": "OWNER",
                 "cost": "COST"
             }
+        },
+        "webServer": {
+            "value": "Both"
         }
      }
 }
