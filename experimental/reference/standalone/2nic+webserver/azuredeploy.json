@@ -334,7 +334,7 @@
             "name": "traffic_allow_80",
             "properties": {
               "description": "",
-              "priority": 103,
+              "priority": 104,
               "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
               "sourcePortRange": "*",
               "destinationAddressPrefix": "*",
