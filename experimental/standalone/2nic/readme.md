@@ -8,7 +8,7 @@
 This solution implements an ARM Template to deploy a base example of F5 in a two NIC deployment.  In a two NIC implementation, interface #1 is for management and data-plane traffic from the Internet,
 and interface #2 is connected into the Azure networks where traffic is processed by the pool members in a traditional two-ARM design.
 
-See the [Configuration Example] section for a configuration diagram and description for this solution.
+See the [Configuration Example](#config) section for a configuration diagram and description for this solution.
 
 ## Documentation
 
