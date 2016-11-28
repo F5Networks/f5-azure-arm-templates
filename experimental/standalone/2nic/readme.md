@@ -221,6 +221,11 @@ Use this button to deploy the template:
 
 ## Configuration Example <a name="config">
 
+The following is a simple configuration diagram for this 2 NIC deployment.  In a 2 NIC scenario, one NIC is external and the other is internal.  It is important to note that you continue to have only one public IP address, and the external NIC is shared between management and data plane traffic.
+In this example, the External VLAN uses **eth0** and the Internal VLAN uses **eth1**.
+Note that while the Management Port shown in the following example is **443**, you can alternatively use **8443** in your configuration.
+![2 NIC configuration example](images/azure-2nic-sm.png)
+
 ## Design Patterns
 
 The goal is for the design patterns for all the iterative examples of F5 being deployed via ARM templates to closely match as much as possible.
