@@ -139,9 +139,9 @@
     "subnet2PrivateAddressLinux": "10.0.2.6",
     "singleQuoteWeb": "'",
     "WebServerPort": "80",
-    "Linux": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressLinux'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'))]",
-    "Windows": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressWindows'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'))]",
-    "Both": "[concat('-d ', parameters('instanceName'), ' -n \"', variables('subnet2PrivateAddressLinux'), ',', variables('subnet2PrivateAddressWindows'), '\" -h ', variables('WebServerPort'), ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'))]",
+    "Linux": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressLinux'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'), ' -c 8443')]",
+    "Windows": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressWindows'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'), ' -c 8443')]",
+    "Both": "[concat('-d ', parameters('instanceName'), ' -n \"', variables('subnet2PrivateAddressLinux'), ',', variables('subnet2PrivateAddressWindows'), '\" -h ', variables('WebServerPort'), ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'), ' -c 8443')]",
     "commandArgsWeb": "[variables(parameters('webServer'))]",
     "gitHubLocation": "https://raw.githubusercontent.com/sevedge/f5-azure-arm-templates/master/experimental/reference/standalone/2nic%2Bwebserver/",
     "webtemplatelink": "[concat(variables('gitHubLocation'), parameters('webServer'),'WebServer.json')]"
@@ -289,14 +289,14 @@
       "properties": {
         "securityRules": [
           {
-            "name": "mgmt_allow_443",
+            "name": "mgmt_allow_8443",
             "properties": {
               "description": "",
               "priority": 101,
               "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
               "sourcePortRange": "*",
               "destinationAddressPrefix": "*",
-              "destinationPortRange": "443",
+              "destinationPortRange": "8443",
               "protocol": "TCP",
               "direction": "Inbound",
               "access": "Allow"
@@ -311,6 +311,20 @@
               "sourcePortRange": "*",
               "destinationAddressPrefix": "*",
               "destinationPortRange": "22",
+              "protocol": "TCP",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
+          },
+          {
+            "name": "traffic_allow_443",
+            "properties": {
+              "description": "",
+              "priority": 103,
+              "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443",
               "protocol": "TCP",
               "direction": "Inbound",
               "access": "Allow"
