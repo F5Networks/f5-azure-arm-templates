@@ -1,9 +1,10 @@
 #!/bin/bash
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin/"
-# Default MGMT Port if not passed in as a script argument
+# Default MGMT and VS Port if not passed in as a script argument
 mgmt_port=443
+vs_http_port="80"
 
-while getopts d:n:h:u:p:v:c: option
+while getopts d:n:h:u:p:v:c:s: option
 do	case "$option"  in
         d) deployment=$OPTARG;;
 	    n) pool_member=$OPTARG;;
@@ -12,15 +13,17 @@ do	case "$option"  in
         p) passwd=$OPTARG;;
 		v) vs_ip=$OPTARG;;
 		c) mgmt_port=$OPTARG;;
+        s) vs_http_port=$OPTARG;;
     esac
 done
 
 IP_REGEX='^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
-vs_http_port="80"
-mode="http"
 device_group="none"
 traffic_group="traffic-group-local-only"
 pool_member_list=${pool_member//,/ }
+cert="/Common/default.crt"
+key="/Common/default.key"
+chain="/Common/ca-bundle.crt"
 
 sleep 30
 
@@ -61,8 +64,8 @@ done
 
 
 # deploy unencrypted application
-if [[ $mode == "http"  ]]; then
-     response_code=$(curl -sku $user:$passwd -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$mgmt_port/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment"'-'"$vs_http_port"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.http.v1.2.0rc4","trafficGroup":"'"$traffic_group"'","tables":[{"name":"pool__hosts","columnNames":["name"],"rows":[{"row":["'"$deployment"'"]}]},{"name":"pool__members","columnNames":["addr","port","connection_limit"],"rows":['"${pool_members_json%,}"']},{"name":"server_pools__servers"}],"variables":[{"name":"monitor__monitor","encrypted":"no","value":"/Common/http"},{"name":"pool__addr","encrypted":"no","value":"'"$vs_ip"'"},{"name":"pool__mask","encrypted":"no","value":"255.255.255.255"},{"name":"pool__persist","encrypted":"no","value":"/#do_not_use#"},{"name":"pool__port","encrypted":"no","value":"'"$vs_http_port"'"},{"name":"ssl__mode","encrypted":"no","value":"no_ssl"},{"name":"client__standard_caching_without_wa","encrypted":"no","value":"/#do_not_use#"}]}' -o /dev/null)
+if [[ $vs_http_port == "80"  ]]; then
+     response_code=$(curl -sku $user:$passwd -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$mgmt_port/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment"'-'"$vs_http_port"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"enabled","template":"/Common/f5.http.v1.2.0rc4","trafficGroup":"'"$traffic_group"'","tables":[{"name":"pool__hosts","columnNames":["name"],"rows":[{"row":["'"$deployment"'"]}]},{"name":"pool__members","columnNames":["addr","port","connection_limit"],"rows":['"${pool_members_json%,}"']},{"name":"server_pools__servers"}],"variables":[{"name":"monitor__monitor","encrypted":"no","value":"/Common/http"},{"name":"pool__addr","encrypted":"no","value":"'"$vs_ip"'"},{"name":"pool__mask","encrypted":"no","value":"255.255.255.255"},{"name":"pool__persist","encrypted":"no","value":"/#do_not_use#"},{"name":"pool__port","encrypted":"no","value":"'"$vs_http_port"'"},{"name":"ssl__mode","encrypted":"no","value":"no_ssl"},{"name":"client__standard_caching_without_wa","encrypted":"no","value":"/#do_not_use#"}]}' -o /dev/null)
 
      if [[ $response_code != 200  ]]; then
           echo "Failed to deploy unencrypted application; exiting with response code '"$response_code"'"
@@ -70,7 +73,15 @@ if [[ $mode == "http"  ]]; then
      fi
 fi
 
+# deploy encrypted(offload) application
+if [[ $vs_http_port == "443"  ]]; then
+     response_code=$(curl -sku $user:$passwd -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$mgmt_port/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment"'-'"$vs_http_port"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"enabled","template":"/Common/f5.http.v1.2.0rc4","trafficGroup":"'"$traffic_group"'","tables":[{"name":"pool__hosts","columnNames":["name"],"rows":[{"row":["'"$deployment"'"]}]},{"name":"pool__members","columnNames":["addr","port","connection_limit"],"rows":['"${pool_members_json%,}"']},{"name":"server_pools__servers"}],"variables":[{"name":"monitor__monitor","encrypted":"no","value":"/Common/http"},{"name":"pool__addr","encrypted":"no","value":"'"$vs_ip"'"},{"name":"pool__mask","encrypted":"no","value":"255.255.255.255"},{"name":"pool__persist","encrypted":"no","value":"/#do_not_use#"},{"name":"pool__port_secure","encrypted":"no","value":"'"$vs_http_port"'"},{"name":"pool__redirect_to_https","encrypted":"no","value":"no"},{"name":"client__standard_caching_without_wa","encrypted":"no","value":"/#do_not_use#"},{"name":"ssl__cert","encrypted":"no","value":"'"$cert"'"},{"name":"ssl__key","encrypted":"no","value":"'"$key"'"},{"name":"ssl__mode","encrypted":"no","value":"client_ssl"},{"name":"ssl__use_chain_cert","encrypted":"no","value":"'"$chain"'"}]}' -o /dev/null)
 
+     if [[ $response_code != 200  ]]; then
+          echo "Failed to deploy encrypted(offload) application; exiting with response code '"$response_code"'"
+          exit
+     fi
+fi
 
-echo "Deployment complete."
+echo "Deployment complete, vs port $vs_http_port chosen."
 exit

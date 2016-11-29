@@ -102,6 +102,17 @@
         "description": "Web Server(s) to be deployed behind F5"
       },
       "type": "string"
+    },
+    "vsPort": {
+      "defaultValue": "80",
+      "allowedValues": [
+        "80",
+        "443"
+      ],
+      "metadata": {
+        "description": "Virtual Server Port to Use on F5 to connect to the web server(s)"
+      },
+      "type": "string"
     }
   },
   "variables": {
@@ -139,9 +150,9 @@
     "subnet2PrivateAddressLinux": "10.0.2.6",
     "singleQuoteWeb": "'",
     "WebServerPort": "80",
-    "Linux": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressLinux'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'), ' -c 8443')]",
-    "Windows": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressWindows'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'), ' -c 8443')]",
-    "Both": "[concat('-d ', parameters('instanceName'), ' -n \"', variables('subnet2PrivateAddressLinux'), ',', variables('subnet2PrivateAddressWindows'), '\" -h ', variables('WebServerPort'), ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'), ' -c 8443')]",
+    "Linux": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressLinux'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'), ' -c 8443', ' -s ', parameters('vsPort'))]",
+    "Windows": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressWindows'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'), ' -c 8443', ' -s ', parameters('vsPort'))]",
+    "Both": "[concat('-d ', parameters('instanceName'), ' -n \"', variables('subnet2PrivateAddressLinux'), ',', variables('subnet2PrivateAddressWindows'), '\" -h ', variables('WebServerPort'), ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'), ' -c 8443', ' -s ', parameters('vsPort'))]",
     "commandArgsWeb": "[variables(parameters('webServer'))]",
     "gitHubLocation": "https://raw.githubusercontent.com/sevedge/f5-azure-arm-templates/master/experimental/reference/standalone/2nic%2Bwebserver/",
     "webtemplatelink": "[concat(variables('gitHubLocation'), parameters('webServer'),'WebServer.json')]"
