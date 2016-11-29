@@ -1,5 +1,8 @@
 # PowerShell Script to Initialize Webserver for 2nic+webserver Demo
 
+# Sleep for 30 seconds to allow network initialization before intalling Web Server Role
+Start-Sleep 30
+
 $webinstall = Install-WindowsFeature -Name "Web-Server" -IncludeAllSubFeature
 Write-Host "Result of Installing: $webinstall"
 

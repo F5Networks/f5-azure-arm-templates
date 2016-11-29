@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Sleep for 30 seconds to allow network initialization before intalling apache
+sleep 30
+
 apt-get -y update
 
 # install Apache2
