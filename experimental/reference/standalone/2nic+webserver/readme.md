@@ -38,6 +38,8 @@ Use this button to deploy the template:
 | instanceType | x | The desired Azure Virtual Machine instance size. |
 | imageName | x | The desired F5 image to deploy. |
 | licenseKey1 | x | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
+| webServer | x | The example web server to deploy. |
+| vsPort | x | The virtual server port to use when configuring the BIG-IP. |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
@@ -48,7 +50,7 @@ Use this button to deploy the template:
     # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
     # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
-    # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabel f52nicdeploy01 -instanceName f52nic -licenseKey1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f52nicdeploy01 -EmailTo user@f5.com
+    # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabel f52nicdeploy01 -instanceName f52nic -licenseKey1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -webServer Both -vsPort 443 -resourceGroupName f52nicdeploy01
 
     param(
     [Parameter(Mandatory=$True)]
@@ -79,6 +81,12 @@ Use this button to deploy the template:
 
     [string]
     $restrictedSrcAddress  = "*",
+
+    [string]
+    $webServer  = "Both",
+
+    [string]
+    $vsPort  = "443",
 
     [Parameter(Mandatory=$True)]
     [string]
@@ -113,7 +121,7 @@ Use this button to deploy the template:
 
     # Create Arm Deployment
     $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName" -webServer $webServer -vsPort $vsPort
 
     # Print Output of Deployment to Console
     $deployment

@@ -491,7 +491,7 @@
      },
     {
       "apiVersion": "2015-01-01",
-      "name": "linkedTemplate",
+      "name": "linkedTemplateWebServer",
       "type": "Microsoft.Resources/deployments",
       "dependsOn": [
           "[variables('vnetId')]"
@@ -525,12 +525,12 @@
       "value": "[concat(variables('httpType'), parameters('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
     },
     "FQDN-Windows-WebServer": {
-      "type": "object",
-      "value": "[reference('linkedTemplate').outputs.FQDNWindows]"
+      "type": "string",
+      "value": "[reference('linkedTemplateWebServer').outputs.FQDNWindows.value]"
     },
     "FQDN-Linux-WebServer": {
-      "type": "object",
-      "value": "[reference('linkedTemplate').outputs.FQDNLinux]"
+      "type": "string",
+      "value": "[reference('linkedTemplateWebServer').outputs.FQDNLinux.value]"
     }
   }
 }
