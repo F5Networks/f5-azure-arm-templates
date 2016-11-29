@@ -98,7 +98,7 @@
         "typeHandlerVersion": "2.0",
         "settings": {
             "fileUris": [
-                "[concat(parameters('gitHubLocation'), variables('scriptFileNameLinux'))]"
+                "[concat(parameters('gitHubLocation'), 'scripts/', variables('scriptFileNameLinux'))]"
             ],
             "commandToExecute": "[concat(variables('scriptFolderLinux'), '/', variables('scriptFileNameLinux'), ' ', variables('scriptParametersLinux'))]"
         }

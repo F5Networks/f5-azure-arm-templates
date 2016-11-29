@@ -110,7 +110,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
-                        "[concat(parameters('gitHubLocation'), variables('scriptFileNameWindows'))]"
+                        "[concat(parameters('gitHubLocation'), 'scripts/', variables('scriptFileNameWindows'))]"
                     ],
                     "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('scriptFolderWindows'), '/', variables('scriptFileNameWindows'), ' ', variables('scriptParametersWindows'))]"
                 }
@@ -223,7 +223,7 @@
         "typeHandlerVersion": "2.0",
         "settings": {
             "fileUris": [
-                "[concat(parameters('gitHubLocation'), variables('scriptFileNameLinux'))]"
+                "[concat(parameters('gitHubLocation'), 'scripts/', variables('scriptFileNameLinux'))]"
             ],
             "commandToExecute": "[concat(variables('scriptFolderLinux'), '/', variables('scriptFileNameLinux'), ' ', variables('scriptParametersLinux'))]"
         }

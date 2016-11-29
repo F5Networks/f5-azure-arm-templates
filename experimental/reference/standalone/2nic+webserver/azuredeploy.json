@@ -158,7 +158,7 @@
     "443": "https://",
     "httpType": "[variables(parameters('vsPort'))]",
     "gitHubLocation": "https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/master/experimental/reference/standalone/2nic%2Bwebserver/",
-    "webtemplatelink": "[concat(variables('gitHubLocation'), parameters('webServer'),'WebServer.json')]"
+    "webtemplatelink": "[concat(variables('gitHubLocation'),  'nested/',  parameters('webServer'),'WebServer.json')]"
   },
   "resources": [
     {
