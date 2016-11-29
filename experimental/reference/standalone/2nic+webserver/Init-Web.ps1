@@ -9,3 +9,7 @@ $destinationhtml = "C:\inetpub\wwwroot\Default.htm"
 
 $downloadhtml = Invoke-WebRequest $sourcehtml -OutFile $destinationhtml
 Write-Host "Download Result: $downloadhtml"
+
+# Replace Hostname with real host name
+$webserver = hostname
+(Get-Content $destinationhtml | ForEach-Object { $_ -replace "Hostname", "$webserver" } ) | Set-Content $destinationhtml
