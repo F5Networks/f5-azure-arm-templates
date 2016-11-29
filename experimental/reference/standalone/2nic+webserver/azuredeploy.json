@@ -154,6 +154,9 @@
     "Windows": "[concat('-d ', parameters('instanceName'), ' -n ', variables('subnet2PrivateAddressWindows'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'), ' -c 8443', ' -s ', parameters('vsPort'))]",
     "Both": "[concat('-d ', parameters('instanceName'), ' -n \"', variables('subnet2PrivateAddressLinux'), ',', variables('subnet2PrivateAddressWindows'), '\" -h ', variables('WebServerPort'), ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnet1PrivateAddress'), ' -c 8443', ' -s ', parameters('vsPort'))]",
     "commandArgsWeb": "[variables(parameters('webServer'))]",
+    "80": "http://",
+    "443": "https://",
+    "httpType": "[variables(parameters('vsPort'))]",
     "gitHubLocation": "https://raw.githubusercontent.com/sevedge/f5-azure-arm-templates/master/experimental/reference/standalone/2nic%2Bwebserver/",
     "webtemplatelink": "[concat(variables('gitHubLocation'), parameters('webServer'),'WebServer.json')]"
   },
@@ -519,7 +522,7 @@
     },
     "WebServer-URL-Through-F5 ": {
       "type": "string",
-      "value": "[concat('http://', parameters('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+      "value": "[concat(variables('httpType'), parameters('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
     },
     "FQDN-Windows-WebServer": {
       "type": "object",
