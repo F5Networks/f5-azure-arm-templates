@@ -74,23 +74,6 @@
         "description": "The license token for the F5 Big IP(BYOL)"
       }
     },
-    "restrictedSrcAddress": {
-      "type": "string",
-      "defaultValue": "*",
-      "metadata": {
-        "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources."
-      }
-    },
-    "tagValues": {
-      "type": "object",
-      "defaultValue": {
-        "application": "APP",
-        "environment": "ENV",
-        "group": "GROUP",
-        "owner": "OWNER",
-        "cost": "COST"
-      }
-    },
     "webServer": {
       "defaultValue": "Both",
       "allowedValues": [
@@ -113,6 +96,23 @@
         "description": "Virtual Server Port to Use on F5 to connect to the web server(s)"
       },
       "type": "string"
+    },
+    "restrictedSrcAddress": {
+      "type": "string",
+      "defaultValue": "*",
+      "metadata": {
+        "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources."
+      }
+    },
+    "tagValues": {
+      "type": "object",
+      "defaultValue": {
+        "application": "APP",
+        "environment": "ENV",
+        "group": "GROUP",
+        "owner": "OWNER",
+        "cost": "COST"
+      }
     }
   },
   "variables": {
