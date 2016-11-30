@@ -18,6 +18,7 @@ The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://suppo
 You have three options for deploying this template:
   - Using the Azure deploy button
   - Using [PowerShell](#powershell)
+  - Using [CLI Tools](#cli)
 
 ### <a name="azure"></a>Azure deploy button
 
@@ -126,6 +127,8 @@ Use this button to deploy the template:
     # Print Output of Deployment to Console
     $deployment
 ```
+
+### <a name="cli"></a>Azure CLI(1.0) Script Example
 
 ```bash
     #!/bin/bash
