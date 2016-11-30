@@ -117,6 +117,7 @@
   },
   "variables": {
     "apiVersion": "2015-06-15",
+    "apiVersionLinked": "2015-01-01",
     "location": "[resourceGroup().location]",
     "f5CloudLibsTag": "v1.2.0",
 
@@ -490,7 +491,7 @@
       }
      },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('apiVersionLinked')]",
       "name": "linkedTemplateWebServer",
       "type": "Microsoft.Resources/deployments",
       "dependsOn": [
