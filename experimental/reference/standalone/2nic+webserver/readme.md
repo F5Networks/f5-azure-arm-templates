@@ -5,7 +5,7 @@
 
 ## Introduction
 
-- This solution implements an ARM Template to deploy a full stack example of F5 in a two NIC deployment, it also deploys a web server and configures F5 to pass traffic to that web server.
+- This solution implements an ARM Template to deploy a full stack example of F5 in a two NIC deployment, it also deploys a web server(or servers) and configures F5 to pass traffic to that web server(or servers).
 
 - In a two NIC implementation, interface #1 is for management and data-plane traffic from the Internet, and interface #2 is connected into the Azure networks where traffic is processed by the pool members in a traditional two-ARM design.
 

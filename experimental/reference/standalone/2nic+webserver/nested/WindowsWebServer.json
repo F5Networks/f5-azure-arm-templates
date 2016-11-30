@@ -28,6 +28,7 @@
     }
   },
   "variables": {
+    "apiVersion": "2015-06-15",
     "storageAccountType": "Standard_LRS",
     "publicIPAddressType": "Static",
     "WebServerNameWindows": "winweb01",
@@ -43,7 +44,7 @@
     {
     "name": "[variables('WebServerNameWindows')]",
     "type": "Microsoft.Compute/virtualMachines",
-    "apiVersion": "2015-06-15",
+    "apiVersion": "[variables('apiVersion')]",
     "location": "[resourceGroup().location]",
     "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', variables('Nic1NameWindows'))]",
@@ -89,7 +90,7 @@
         {
             "type": "extensions",
             "name": "webinit",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "[variables('apiVersion')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[concat('Microsoft.Compute/virtualMachines/', variables('WebServerNameWindows'))]"
@@ -112,7 +113,7 @@
   {
     "name": "[variables('storageAccountNameWindows')]",
     "type": "Microsoft.Storage/storageAccounts",
-    "apiVersion": "2015-06-15",
+    "apiVersion": "[variables('apiVersion')]",
     "location": "[resourceGroup().location]",
     "properties": {
         "accountType": "[variables('storageAccountType')]"
@@ -121,7 +122,7 @@
   {
     "name": "[variables('Nic1NameWindows')]",
     "type": "Microsoft.Network/networkInterfaces",
-    "apiVersion": "2016-09-01",
+    "apiVersion": "[variables('apiVersion')]",
     "location": "[resourceGroup().location]",
     "dependsOn": [
         "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIPAddressNameWindows'))]"
@@ -147,7 +148,7 @@
   {
     "name": "[variables('publicIPAddressNameWindows')]",
     "type": "Microsoft.Network/publicIpAddresses",
-    "apiVersion": "2016-09-01",
+    "apiVersion": "[variables('apiVersion')]",
     "location": "[resourceGroup().location]",
     "properties": {
         "dnsSettings": {

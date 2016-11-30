@@ -28,6 +28,7 @@
     }
   },
   "variables": {
+    "apiVersion": "2015-06-15",
     "storageAccountType": "Standard_LRS",
     "publicIPAddressType": "Static",
     "WebServerNameLinux": "linuxweb01",
@@ -43,7 +44,7 @@
     {
     "name": "[variables('WebServerNameLinux')]",
     "type": "Microsoft.Compute/virtualMachines",
-    "apiVersion": "2015-06-15",
+    "apiVersion": "[variables('apiVersion')]",
     "location": "[resourceGroup().location]",
     "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', variables('Nic1NameLinux'))]",
@@ -87,7 +88,7 @@
   {
     "name": "[concat(variables('WebServerNameLinux'),'/webinit')]",
     "type": "Microsoft.Compute/virtualMachines/extensions",
-    "apiVersion": "2016-03-30",
+    "apiVersion": "[variables('apiVersion')]",
     "location": "[resourceGroup().location]",
     "dependsOn": [
     "[concat('Microsoft.Compute/virtualMachines/', variables('WebServerNameLinux'))]"
@@ -107,7 +108,7 @@
   {
     "name": "[variables('storageAccountNameLinux')]",
     "type": "Microsoft.Storage/storageAccounts",
-    "apiVersion": "2015-06-15",
+    "apiVersion": "[variables('apiVersion')]",
     "location": "[resourceGroup().location]",
     "properties": {
         "accountType": "[variables('storageAccountType')]"
@@ -116,7 +117,7 @@
   {
     "name": "[variables('Nic1NameLinux')]",
     "type": "Microsoft.Network/networkInterfaces",
-    "apiVersion": "2016-09-01",
+    "apiVersion": "[variables('apiVersion')]",
     "location": "[resourceGroup().location]",
     "dependsOn": [
         "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIPAddressNameLinux'))]"
@@ -142,7 +143,7 @@
   {
     "name": "[variables('publicIPAddressNameLinux')]",
     "type": "Microsoft.Network/publicIpAddresses",
-    "apiVersion": "2016-09-01",
+    "apiVersion": "[variables('apiVersion')]",
     "location": "[resourceGroup().location]",
     "properties": {
         "dnsSettings": {

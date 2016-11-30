@@ -471,7 +471,7 @@
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('instanceName'),'/start')]",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "[variables('apiVersion')]",
       "location": "[variables('location')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', parameters('instanceName'))]"
@@ -490,7 +490,7 @@
       }
      },
     {
-      "apiVersion": "2015-01-01",
+      "apiVersion": "[variables('apiVersion')]",
       "name": "linkedTemplateWebServer",
       "type": "Microsoft.Resources/deployments",
       "dependsOn": [
