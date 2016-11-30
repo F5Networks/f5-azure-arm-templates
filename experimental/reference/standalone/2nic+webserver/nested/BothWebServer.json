@@ -131,7 +131,7 @@
     {
     "name": "[variables('Nic1NameWindows')]",
     "type": "Microsoft.Network/networkInterfaces",
-    "apiVersion": "2[variables('apiVersion')]",
+    "apiVersion": "[variables('apiVersion')]",
     "location": "[resourceGroup().location]",
     "dependsOn": [
         "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIPAddressNameWindows'))]"
