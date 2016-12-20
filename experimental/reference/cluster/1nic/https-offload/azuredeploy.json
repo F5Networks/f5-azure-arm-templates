@@ -36,7 +36,7 @@
       ]
     },
     "imageName": {
-      "defaultValue": "Best",
+      "defaultValue": "Good",
       "allowedValues": [
         "Good",
         "Better",
