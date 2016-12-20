@@ -1,11 +1,11 @@
-# Deploying the BIG-IP VE in Azure - Two NIC
+# Deploying the BIG-IP VE in Azure - 2 NIC Limited
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 [![Doc Status](http://readthedocs.org/projects/f5-sdk/badge/?version=latest)](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html)
 
 ## Introduction
 
-This solution implements an ARM Template to deploy a base example of F5 in a two NIC deployment.  In a two NIC implementation, interface #1 is for management and data-plane traffic from the Internet,
+This solution implements an ARM Template to deploy a base example of F5 in a 2 NIC deployment.  In a 2 NIC implementation, interface #1 is for management and data-plane traffic from the Internet,
 and interface #2 is connected into the Azure networks where traffic is processed by the pool members in a traditional two-ARM design.
 
 See the [Configuration Example](#config) section for a configuration diagram and description for this solution.
@@ -25,7 +25,7 @@ You have three options for deploying this template:
 
 Use this button to deploy the template:
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic_limited%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
