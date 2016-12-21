@@ -264,6 +264,36 @@ Warning: F5 does not support the template if you change anything other than the 
 }
 ```
 
+## Deploying Custom Configuration to an Azure Virtual Machine 
+
+This sample code uses the CustomScript extension resource to configure the f5.ip_forwarding iApp on BIG-IP VE in Azure Resource Manager. 
+
+The CustomScript extension resource name must reference the Azure virtual machine name and must have a dependency on that virtual machine. You can use only one CustomScript extension resource per virtual machine; however, you can combine multiple semicolon-delimited commands in a single extension resource definition.
+
+Warning: F5 does not support the template if you change anything other than the CustomScript extension resource.
+
+```
+{
+     "type": "Microsoft.Compute/virtualMachines/extensions",
+     "name": "[concat(variables('virtualMachineName'),'/start')]",
+     "apiVersion": "2016-03-30",
+     "location": "[resourceGroup().location] "
+     "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/',variables('virtualMachineName'))]"
+     ],
+     "properties": {
+          "publisher": "Microsoft.Azure.Extensions",
+          "type": "CustomScript",
+          "typeHandlerVersion": "2.0",
+          "settings": {
+          },
+          "protectedSettings": {
+               "commandToExecute": "[concat('tmsh create sys application service my_deployment { device-group none template f5.ip_forwarding traffic-group none variables replace-all-with { basic__addr { value 0.0.0.0 } basic__forward_all { value No } basic__mask { value 0.0.0.0 } basic__port { value 0 } basic__vlan_listening { value default } options__advanced { value no }options__display_help { value hide } } }')]"
+          }
+     }
+}
+```
+
 ## Design Patterns
 
 The goal is for the design patterns for all the iterative examples of F5 being deployed via ARM templates to closely match as much as possible.
