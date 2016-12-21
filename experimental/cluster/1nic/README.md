@@ -270,7 +270,7 @@ The CustomScript extension resource name must reference the Azure virtual machin
 
 Warning: F5 does not support the template if you change anything other than the CustomScript extension resource.
 
-```{
+{
      "type": "Microsoft.Compute/virtualMachines/extensions",
      "name": "[concat(variables('virtualMachineName'),'/start')]",
      "apiVersion": "2016-03-30",
@@ -289,7 +289,7 @@ Warning: F5 does not support the template if you change anything other than the 
           }
      }
 }
-```
+
 
 ## Design Patterns
 
