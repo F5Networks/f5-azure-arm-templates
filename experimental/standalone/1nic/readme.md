@@ -1,18 +1,18 @@
 # Deploying the BIG-IP VE in Azure - Single NIC
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
-[![Doc Status](http://readthedocs.org/projects/f5-sdk/badge/?version=latest)](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html)
 
 ## Introduction
 
-This solution implements an ARM Template to deploy a base example of F5 in a cloud-focused single NIC deployment.  This is the standard Cloud design where the compute instance of
+This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard Cloud design where the compute instance of
 F5 is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.
 
-See the [Configuration Example](#config) section for a configuration diagram and description for this solution.
+See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
 
-## Documentation
+## Supported instance types and hypervisors
+  - For a list of supported Azure instance types for this solutions, see the **Azure instances for BIG-IP VE** section of https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/1.html#guid-71265d82-3a1a-43d2-bae5-892c184cc59b
 
-The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html) decribes how to create the configuration manually without using the ARM template.
+  - For a list versions of the BIG-IP Virtual Edition (VE) and F5 licenses that are supported on specific hypervisors and Microsoft Azure, see https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/ve-supported-hypervisor-matrix.html.
 
 ## Installation
 
@@ -225,6 +225,10 @@ Note that while the Management Port shown in the following example is **443**, y
 
 ![Single NIC configuration example](images/azure-1nic-sm.png)
 
+## Documentation
+
+The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html) decribes how to create the configuration manually without using the ARM template.
+
 ## Deploying Custom Configuration to an Azure Virtual Machine 
 
 This sample code uses the CustomScript extension resource to configure the f5.ip_forwarding iApp on BIG-IP VE in Azure Resource Manager. 
@@ -254,6 +258,7 @@ Warning: F5 does not support the template if you change anything other than the 
      }
 }
 ```
+
 
 ## Design Patterns
 
