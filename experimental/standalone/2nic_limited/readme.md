@@ -1,18 +1,22 @@
 # Deploying the BIG-IP VE in Azure - 2 NIC Limited
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
-[![Doc Status](http://readthedocs.org/projects/f5-sdk/badge/?version=latest)](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html)
 
 ## Introduction
 
-This solution implements an ARM Template to deploy a base example of F5 in a 2 NIC deployment.  In a 2 NIC implementation, interface #1 is for management and data-plane traffic from the Internet,
-and interface #2 is connected into the Azure networks where traffic is processed by the pool members in a traditional two-ARM design.
+This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and data-plane traffic from the Internet, and the second interface is connected into the Azure networks where traffic is processed by the pool members in a traditional two-ARM design. However, you continue to have only one public IP address, and the external NIC is shared between management and data plane traffic.
 
-See the [Configuration Example](#config) section for a configuration diagram and description for this solution.
+See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
 
-## Documentation
+## Supported instance types and hypervisors
+  - For a list of supported Azure instance types for this solutions, see the **Azure instances for BIG-IP VE** section of https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/1.html#guid-71265d82-3a1a-43d2-bae5-892c184cc59b
 
-The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html) decribes how to create the configuration manually without using the ARM template.
+  - For a list versions of the BIG-IP Virtual Edition (VE) and F5 licenses that are supported on specific hypervisors and Microsoft Azure, see https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/ve-supported-hypervisor-matrix.html.
+
+### Help 
+We encourage you to use our Slack channel for discussion and assistance on F5 CloudFormation templates.  This channel is typically monitored Monday-Friday 9-5 PST by F5 employees who will offer best-effort support.
+While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the supported directory.
+
 
 ## Installation
 
@@ -227,6 +231,10 @@ In this example, the External VLAN uses **eth0** and the Internal VLAN uses **et
 Note that while the Management Port shown in the following example is **443**, you can alternatively use **8443** in your configuration.
 
 ![2 NIC configuration example](images/azure-2nic-sm.png)
+
+## Documentation
+
+The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/4.html) decribes how to create the configuration manually without using the ARM template.
 
 ## Deploying Custom Configuration to an Azure Virtual Machine 
 
