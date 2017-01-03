@@ -24,7 +24,7 @@ param(
   $instanceType = "Standard_D2_v2",
 
   [string]
-  $imageName = "Best",
+  $imageName = "Good",
 
   [Parameter(Mandatory=$True)]
   [string]
