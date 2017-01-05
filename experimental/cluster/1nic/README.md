@@ -1,4 +1,4 @@
-# Deploying a BIG-IP VE Cluster in Azure - Single NIC
+# Deploying a BIG-IP VE ConfigSync Cluster in Azure - Single NIC
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 ## Introduction
 
@@ -8,13 +8,18 @@ When you deploy your applications using a cluster of F5 BIG-IPs, the BIG-IP VE i
 
 Using this solution, the F5 BIG-IP VEs are fully configured in front of your application.  When complete, the BIG-IPs pass traffic through the newly created Azure Public IP.  After acceptance testing, you must complete the configuration by changing the DNS entry for your application to point at the newly created public IP address, and then lock down the Network Security Group rules to prevent any traffic from reaching your application except through the F5 BIG-IPs.
 
-Before you deploy web applications with an F5 BIG-IP, you need a license from F5.
+Before you deploy web applications with an F5 BIG-IP VE, you need a license from F5.
 
+See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
 
-## Documentation
+## Supported instance types and hypervisors
+  - For a list of supported Azure instance types for this solutions, see the **Azure instances for BIG-IP VE** section of https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/1.html#guid-71265d82-3a1a-43d2-bae5-892c184cc59b
 
-See the project documentation - This is still being created
+  - For a list versions of the BIG-IP Virtual Edition (VE) and F5 licenses that are supported on specific hypervisors and Microsoft Azure, see https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/ve-supported-hypervisor-matrix.html.
 
+### Help 
+We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates.  This channel is typically monitored Monday-Friday 9-5 PST by F5 employees who will offer best-effort support.<br>
+While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.
 
 ## Installation
 
@@ -53,9 +58,9 @@ Use the following button to deploy the template.  See the Template parameters se
 ### <a name="powershell"></a>PowerShell Script Example
 
 ```powershell
-    # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
+    # Params below match to parameters in the azuredeploy.json that are gen-unique, otherwise pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
-    # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
+    # can be supplied inline when running this script but if they arent then the default will be used as specified in below param arguments
     # Example Command: .\Deploy_via_PS.ps1 -solutionDeploymentName deploynamestring -numberOfInstances 2 -adminUsername azureuser -adminPassword password
     # -dnsLabel dnslabestring -licenseKey1 XXXX-XXXX-XXXX-XXXX -licenseKey2 XXXX-XXXX-XXXX-XXXX
 
@@ -292,6 +297,14 @@ Warning: F5 does not support the template if you change anything other than the 
 }
 ```
 
+## Configuration Example <a name="config">
+
+The following is a simple configuration diagram for this deployment. In this diagram, the IP addresses are provided as examples.
+![2-NIC configuration example](images/azure-cluster-1nic.png)
+
+### Documentation
+The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/3.html) details how to create the configuration manually without using the ARM template.  This product manual also describes the F5 and Azure configuration in more detail.
+
 ## Design Patterns
 
 The goal is for the design patterns for all the iterative examples of F5 being deployed via ARM templates to closely match as much as possible.
@@ -324,7 +337,7 @@ Simply deploying the ARM template and completing use case fulfills a functional 
 
 ## Copyright
 
-Copyright 2014-2016 F5 Networks Inc.
+Copyright 2014-2017 F5 Networks Inc.
 
 ## License
 
