@@ -6,7 +6,7 @@
 
 This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and data-plane traffic from the Internet, and the second interface is connected into the Azure networks where traffic is processed by the pool members in a traditional two-ARM design. However, you continue to have only one public IP address, and the external NIC is shared between management and data plane traffic.
 
-See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
+See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution, as well as an important note about optionally changing the BIG-IP Management port.
 
 ## Supported instance types and hypervisors
   - For a list of supported Azure instance types for this solutions, see the **Azure instances for BIG-IP VE** section of https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/1.html#guid-71265d82-3a1a-43d2-bae5-892c184cc59b
@@ -51,9 +51,9 @@ Use this button to deploy the template:
 ### <a name="powershell"></a>PowerShell Script Example
 
 ```powershell
-    # Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
+    # Params below match to parameters in the azuredeploy.json that are gen-unique, otherwise pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
-    # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
+    # can be supplied inline when running this script but if they arent then the default will be used as specified in below param arguments
     # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabel f52nicdeploy01 -instanceName f52nic -licenseKey1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f52nicdeploy01 -EmailTo user@f5.com
 
     param(
@@ -135,7 +135,7 @@ Use this button to deploy the template:
     # Bash Script to deploy an ARM template into Azure, using azure cli 1.0
     # Example Command: ./deploy_via_bash.sh --adminusr azureuser --adminpwd 'yourpassword' --dnslabel f5dnslabel --instname f5vm01 --key1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX --rgname f5rgname --azureusr administrator@domain.com --azurepwd 'yourpassword'
 
-    # Assign Script Paramters and Define Variables
+    # Assign Script Parameters and Define Variables
     # Specify static items, change these as needed or make them parameters (instance_type is already an optional paramter)
     region="westus"
     template_file="azuredeploy.json"
@@ -194,7 +194,7 @@ Use this button to deploy the template:
     echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
     sleep 3
 
-    #If a required paramater is not passed, the script will prompt for it below
+    #If a required parameter is not passed, the script will prompt for it below
     required_variables="admin_username admin_password dns_label instance_name license_key_1 resource_group_name azure_user azure_pwd"
     for variable in $required_variables
             do
@@ -223,15 +223,16 @@ Use this button to deploy the template:
 
 ```
 
-## Configuration Example <a name="config">
+## <a name="config"></a>Configuration Example 
 
 The following is a simple configuration diagram for this 2 NIC deployment.  In a 2 NIC scenario, one NIC is external and the other is internal.  It is important to remember that you continue to have only one public IP address, and the external NIC is shared between management and data plane traffic.
 In this example, the External VLAN uses **eth0** and the Internal VLAN uses **eth1**.
 
-Note that while the Management Port shown in the following example is **443**, you can alternatively use **8443** in your configuration.
-
 ![2 NIC configuration example](images/azure-2nic-sm.png)
 
+### Changing the BIG-IP Configuration Utility (GUI) port
+The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.  
+***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly. 
 ## Documentation
 
 The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/4.html) decribes how to create the configuration manually without using the ARM template.
