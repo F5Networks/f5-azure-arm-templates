@@ -22,8 +22,8 @@ The following is a list of the current F5 ARM templates:
   <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F1nic%2Fazuredeploy.json" target="_blank">
   <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
-  - [Deploying the BIG-IP VE in Azure - 2 NICs](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental/standalone/2nic)<br>
-  <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic%2Fazuredeploy.json" target="_blank">
+  - [Deploying the BIG-IP VE in Azure - 2 NICs](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental/standalone/2nic_limited)<br>
+  <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic_limited%2Fazuredeploy.json" target="_blank">
   <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
   - [Deploying the BIG-IP VE in Azure - Single NIC (Cluster)](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental/cluster/1nic)<br>
