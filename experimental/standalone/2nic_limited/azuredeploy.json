@@ -96,6 +96,12 @@
     "apiVersion": "2015-06-15",
     "location": "[resourceGroup().location]",
     "f5CloudLibsTag": "v1.2.0",
+    "singleQuote": "'",
+    "expectedHash": "59e80e9eda0ba91f5a7dbbc448d694b6e7acf5d394ed3d35fd1fc39e8f95497f8ed908661c0982117d909dd80c9f6afef4f2a8603d208252195425727a4e92fe",
+
+    "verifyHash": "[concat(variables('singleQuote'), 'cli script /Common/verifyHash {\n    proc script::run {} {\n        if {[catch {\n            set file_path [lindex $tmsh::argv 1]\n            set expected_hash ', variables('expectedHash'), '\n            set computed_hash [lindex [exec /usr/bin/openssl dgst -r -sha512 $file_path] 0]\n            if { $expected_hash eq $computed_hash } {\n                exit 0\n            }\n            tmsh::log err {Hash does not match}\n            exit 1\n        }]} {\n            tmsh::log err {Unexpected error in verifyHash}\n            exit 1\n        }\n    }\n    script-signature GZy1YTh9NYgH6UXtXvyxEKCwPsyb3+jZWh1aj5ASuqbAsAjp1hAQ0EB4Nurfr3GAdD2dBNG3HBaYtTlhQDhn5ybWrNkUkLMeJ2gimUn0gI0ZbgPCGYuIGLkbA1Vyhhn4TV0wyxwc0dr6O1gT2LPypHu5k9hy2FipDUq0Rae76wV1BRFootSN5acEwhAZzi8CPFNSxWQGnfxIHpZerRnf857iEO9NqW2XwMdqr0w7Y9VlvpApfDa2uG28y7182f42ocjWYQvg6xkZJ0Er30BZgvLsCfDJfj647xCYm3OyD0VZSK3ZOMxl8mpMdb5poenxboG3Dw7OzKvi78CGfcxsvQ==\n}', variables('singleQuote'))]",
+
+    "installCloudLibs": "[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\ntmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\ntmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit\nfi\necho loaded verifyHash\necho verifying f5-cloud-libs.targ.gz\ntmsh run cli script verifyHash /config/cloud/f5-cloud-libs.tar.gz /config/cloud/f5-cloud-libs.tar.gz.f5sig\nif [ $? != 0 ]; then\necho f5-cloud-libs.tar.gz does not match signature f5-coud-libs.tar.gz.f5sig\nexit\nfi\necho verified f5-cloud-libs.tar.gz\necho expanding f5-cloud-libs.tar.gz\ntar xvfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud\ntouch /config/cloud/cloudLibsReady', variables('singleQuote'))]",
 
     "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'sa2nic')]",
     "storageAccountType": "Standard_LRS",
@@ -121,6 +127,9 @@
     "publicIPAddressType": "Static",
     "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('dnsLabel'),'-nsg'))]"
+
+
+
   },
   "resources": [
     {
@@ -416,10 +425,9 @@
         "typeHandlerVersion": "2.0",
         "settings": {
           "fileUris": [
-             "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/scripts/azure/runScripts.js')]",
-             "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', variables('f5CloudLibsTag'))]"
+            "https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/sign/dist/f5-cloud-libs.tar.gz"
           ],
-          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', variables('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none --signal ONBOARD_DONE \"', ' --network \" --wait-for ONBOARD_DONE --output /var/log/network.log --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --multi-nic --default-gw ', variables('defaultGw'), ' --vlan vlan_mgmt,1.0 --vlan vlan_1,1.1 --self-ip self_mgmt,', variables('subnet1PrivateAddress'), ',vlan_mgmt --self-ip self_1,', variables('subnet2PrivateAddress'), ',vlan_1 --log-level debug --background --force-reboot --signal NETWORK_DONE \"')]"
+          "commandToExecute": "[concat('install -b -m 755 /dev/null /config/verifyHash; install -b -m 755 /dev/null /config/installCloudLibs.sh; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; unset IFS; mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; bash /config/installCloudLibs.sh; f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --update-user user:admin,password:', parameters('adminPassword'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --multi-nic --default-gw ', variables('defaultGw'), ' --vlan vlan_mgmt,1.0 --vlan vlan_1,1.1 --self-ip self_mgmt,', variables('subnet1PrivateAddress'), ',vlan_mgmt --self-ip self_1,', variables('subnet2PrivateAddress'), ',vlan_1 --log-level debug --background --force-reboot')]"
         }
       }
      }
