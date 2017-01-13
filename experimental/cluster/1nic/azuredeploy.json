@@ -496,8 +496,7 @@
         "typeHandlerVersion": "2.0",
         "settings": {
           "fileUris": [
-            "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/scripts/azure/runScripts.js')]",
-            "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', variables('f5CloudLibsTag'))]"
+            "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]"
           ]
         },
       "protectedSettings": {
