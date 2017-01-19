@@ -1,15 +1,7 @@
 image: node:4
 
 stages:
-    - test
     - package
-
-test:
-    tags:
-        - docker-executor
-    stage: test
-    script:
-        - echo "Testing Build Process"
 
 package:
     tags:
