@@ -25,4 +25,4 @@ package:
     artifacts:
         name: f5-cloud-libs-$CI_BUILD_REF
         paths:
-            - dist/
+            - experimental/
