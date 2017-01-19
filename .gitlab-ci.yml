@@ -21,8 +21,8 @@ package:
     script:
         - cd experimental/standalone/1nic
         - hash=`openssl dgst -r -sha512 azuredeploy.json | cut -d ' ' -f 1`
-        - sed -i "s/INSERT_HASH_HERE/$hash/" verifyHash
+        - sed -i "s/INSERT_HASH_HERE/$hash/" templateHash
     artifacts:
-        name: f5-cloud-libs-$CI_BUILD_REF
+        name: f5-1nic-$CI_BUILD_REF
         paths:
             - experimental/
