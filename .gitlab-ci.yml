@@ -16,13 +16,16 @@ package:
         - docker-executor
     stage: package
     only:
-        - /^sevedge_build*/
+        - /^build_hash*/
         - triggers
     script:
-        - cd experimental/standalone/1nic
-        - hash=`openssl dgst -r -sha512 azuredeploy.json | cut -d ' ' -f 1`
-        - sed -i "s/INSERT_HASH_HERE/$hash/" templateHash
+        - 1nic_hash=`openssl dgst -r -sha512 /experimental/standalone/1nic/azuredeploy.json | cut -d ' ' -f 1`
+        - 2nic_hash=`openssl dgst -r -sha512 /experimental/standalone/2nic_limited/azuredeploy.json | cut -d ' ' -f 1`
+        - cluster_1nic_hash=`openssl dgst -r -sha512 /experimental/cluster/1nic/azuredeploy.json | cut -d ' ' -f 1`
+        - sed -i "s/INSERT_1NIC_HASH_HERE/$1nic_hash/" templateHash
+        - sed -i "s/INSERT_2NIC_HASH_HERE/$2nic_hash/" templateHash
+        - sed -i "s/INSERT_CLUSTER_1NIC_HASH_HERE/$cluster_1nic_hash/" templateHash
     artifacts:
         name: f5-1nic-$CI_BUILD_REF
         paths:
-            - experimental/
+            - /
