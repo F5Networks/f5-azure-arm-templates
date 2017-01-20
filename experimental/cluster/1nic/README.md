@@ -47,7 +47,7 @@ Use the following button to deploy the template.  See the Template parameters se
 | imageName | x | The desired F5 image to deploy. |
 | adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
 | adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
-| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
+| dnsLabel | x | Unique DNS name for the public IP address used to access the BIG-IPs for management (alphanumeric characters only). |
 | licenseKey1 | x | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
 | licenseKey2 | x | The license token from the F5 licensing server. This license will be used for the second F5 BIG-IP. |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
