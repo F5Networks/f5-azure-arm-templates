@@ -1,0 +1,25 @@
+image: node:4
+
+stages:
+    - package
+
+package:
+    tags:
+        - docker-executor
+    stage: package
+    only:
+        - /^build_hash*/
+        - triggers
+    script:
+        - cd supported
+        - echo -e "1nic Template Hash - INSERT_1NIC_HASH_HERE\n2nic Template Hash - INSERT_2NIC_HASH_HERE\nCluster 1nic Template Hash - INSERT_CLUSTER_1NIC_HASH_HERE" >> supportedTemplateHashes
+        - one_nic_hash=`openssl dgst -r -sha512 standalone/1nic/azuredeploy.json | cut -d ' ' -f 1`
+        - two_nic_hash=`openssl dgst -r -sha512 standalone/2nic_limited/azuredeploy.json | cut -d ' ' -f 1`
+        - cluster_one_nic_hash=`openssl dgst -r -sha512 cluster/1nic/azuredeploy.json | cut -d ' ' -f 1`
+        - sed -i "s/INSERT_1NIC_HASH_HERE/$one_nic_hash/" supportedTemplateHashes
+        - sed -i "s/INSERT_2NIC_HASH_HERE/$two_nic_hash/" supportedTemplateHashes
+        - sed -i "s/INSERT_CLUSTER_1NIC_HASH_HERE/$cluster_one_nic_hash/" supportedTemplateHashes
+    artifacts:
+        name: f5-arm-build-$CI_BUILD_REF
+        paths:
+            - supported/
