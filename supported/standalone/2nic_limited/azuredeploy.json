@@ -71,7 +71,7 @@
       "type": "string",
       "defaultValue": "REQUIRED",
       "metadata": {
-        "description": "The license token for the F5 Big IP(BYOL)"
+        "description": "The license token for the F5 BIG-IP(BYOL)"
       }
     },
     "restrictedSrcAddress": {
