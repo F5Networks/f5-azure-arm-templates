@@ -11,7 +11,7 @@ package:
         - /^build_hash*/
         - triggers
     script:
-        - cd experimental
+        - cd supported
         - echo -e "1nic Template Hash - INSERT_1NIC_HASH_HERE\n2nic Template Hash - INSERT_2NIC_HASH_HERE\nCluster 1nic Template Hash - INSERT_CLUSTER_1NIC_HASH_HERE" >> supportedTemplateHashes
         - one_nic_hash=`openssl dgst -r -sha512 standalone/1nic/azuredeploy.json | cut -d ' ' -f 1`
         - two_nic_hash=`openssl dgst -r -sha512 standalone/2nic_limited/azuredeploy.json | cut -d ' ' -f 1`
@@ -22,4 +22,4 @@ package:
     artifacts:
         name: f5-arm-build-$CI_BUILD_REF
         paths:
-            - experimental/
+            - supported/
