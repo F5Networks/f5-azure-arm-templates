@@ -11,12 +11,12 @@ package:
         - /^build_hash*/
         - triggers
     script:
-        - 1nic_hash=`openssl dgst -r -sha512 experimental/standalone/1nic/azuredeploy.json | cut -d ' ' -f 1`
-        - 2nic_hash=`openssl dgst -r -sha512 experimental/standalone/2nic_limited/azuredeploy.json | cut -d ' ' -f 1`
-        - cluster_1nic_hash=`openssl dgst -r -sha512 experimental/cluster/1nic/azuredeploy.json | cut -d ' ' -f 1`
-        - sed -i "s/INSERT_1NIC_HASH_HERE/$1nic_hash/" supportedTemplateHashes
-        - sed -i "s/INSERT_2NIC_HASH_HERE/$2nic_hash/" supportedTemplateHashes
-        - sed -i "s/INSERT_CLUSTER_1NIC_HASH_HERE/$cluster_1nic_hash/" supportedTemplateHashes
+        - one_nic_hash=`openssl dgst -r -sha512 experimental/standalone/1nic/azuredeploy.json | cut -d ' ' -f 1`
+        - two_nic_hash=`openssl dgst -r -sha512 experimental/standalone/2nic_limited/azuredeploy.json | cut -d ' ' -f 1`
+        - cluster_one_nic_hash=`openssl dgst -r -sha512 experimental/cluster/1nic/azuredeploy.json | cut -d ' ' -f 1`
+        - sed -i "s/INSERT_one_nic_hash_HERE/$one_nic_hash/" supportedTemplateHashes
+        - sed -i "s/INSERT_two_nic_hash_HERE/$two_nic_hash/" supportedTemplateHashes
+        - sed -i "s/INSERT_CLUSTER_one_nic_hash_HERE/$cluster_one_nic_hash/" supportedTemplateHashes
     artifacts:
         name: f5-arm-build-$CI_BUILD_REF
         paths:
