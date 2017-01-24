@@ -1,13 +1,16 @@
-# Deploying the BIG-IP VE in Azure - Single NIC
-
+# Deploying a BIG-IP VE ConfigSync Cluster in Azure - Single NIC
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
-
 ## Introduction
 
-This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard Cloud design where the compute instance of
-F5 is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.
+This ARM template deploys a cluster of F5 BIG-IP VEs that ensures you have the highest level of availability for your applications. You can also enable F5's L4/L7 security features, access control, and intelligent traffic management.
 
-See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution, as well as an important note about optionally changing the BIG-IP Management port.
+When you deploy your applications using a cluster of F5 BIG-IPs, the BIG-IP VE instances are all in Active status (not Active-Standby), and are used as a single device for redundancy and scalability, rather than failover. If one device goes down, Azure keeps load balancing to the other.
+
+Using this solution, the F5 BIG-IP VEs are fully configured in front of your application.  When complete, the BIG-IPs pass traffic through the newly created Azure Public IP.  After acceptance testing, you must complete the configuration by changing the DNS entry for your application to point at the newly created public IP address, and then lock down the Network Security Group rules to prevent any traffic from reaching your application except through the F5 BIG-IPs.
+
+Before you deploy web applications with an F5 BIG-IP VE, you need a license from F5.
+
+See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
 
 ## Security
 This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code. 
@@ -27,7 +30,6 @@ Because this template has been created and fully tested by F5 Networks, it is fu
 
 We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates.  This channel is typically monitored Monday-Friday 9-5 PST by F5 employees who will offer best-effort support. 
 
-
 ## Installation
 
 You have three options for deploying this template:
@@ -37,25 +39,30 @@ You have three options for deploying this template:
 
 ### <a name="azure"></a>Azure deploy button
 
-Use this button to deploy the template:
+Use the following button to deploy the template.  See the Template parameters section to see the information you need to succesfully deploy the template.
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fsupported%2Fstandalone%2F1nic%2Fazuredeploy.json" target="_blank">
+**BASE (No application)**<br>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fsupported%2Fcluster%2F1nic%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
-### Template parameters
+## Template parameters
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
-| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
-| instanceName | x | The hostname to be configured for the VM. |
+| deploymentName | x | A unique name for your application. |
+| numberOfInstances | x | The number of BIG-IPs that will be deployed in front of your application.  The only allowed value for this template is 2. |
 | instanceType | x | The desired Azure Virtual Machine instance size. |
 | imageName | x | The desired F5 image to deploy. |
+| adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
+| adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
+| dnsLabel | x | Unique DNS name for the public IP address used to access the BIG-IPs for management (alphanumeric characters only). |
 | licenseKey1 | x | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
+| licenseKey2 | x | The license token from the F5 licensing server. This license will be used for the second F5 BIG-IP. |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
+
+
 
 ### <a name="powershell"></a>PowerShell Script Example
 
@@ -63,9 +70,25 @@ Use this button to deploy the template:
     # Params below match to parameters in the azuredeploy.json that are gen-unique, otherwise pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
     # can be supplied inline when running this script but if they arent then the default will be used as specified in below param arguments
-    # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabel f51nicdeploy01 -instanceName f51nic -licenseKey1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f51nicdeploy01 -EmailTo user@f5.com
+    # Example Command: .\Deploy_via_PS.ps1 -solutionDeploymentName deploynamestring -numberOfInstances 2 -adminUsername azureuser -adminPassword password
+    # -dnsLabel dnslabestring -licenseKey1 XXXX-XXXX-XXXX-XXXX -licenseKey2 XXXX-XXXX-XXXX-XXXX
 
     param(
+    [Parameter(Mandatory=$True)]
+    [string]
+    $solutionDeploymentName,
+
+    [Parameter(Mandatory=$True)]
+    [ValidateSet("2")]
+    [string]
+    $numberOfInstances,
+
+    [string]
+    $instanceType = "Standard_D2_v2",
+
+    [string]
+    $imageName = "Best",
+
     [Parameter(Mandatory=$True)]
     [string]
     $adminUsername,
@@ -80,17 +103,11 @@ Use this button to deploy the template:
 
     [Parameter(Mandatory=$True)]
     [string]
-    $instanceName,
-
-    [string]
-    $instanceType = "Standard_D2_v2",
-
-    [string]
-    $imageName = "Best",
+    $licenseKey1,
 
     [Parameter(Mandatory=$True)]
     [string]
-    $licenseKey1,
+    $licenseKey2,
 
     [string]
     $restrictedSrcAddress  = "*",
@@ -128,24 +145,25 @@ Use this button to deploy the template:
 
     # Create Arm Deployment
     $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"
+
+    # Create Arm Deployment
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -solutionDeploymentName "$solutionDeploymentName" -numberOfInstances "$numberOfInstances" -instanceType "$instanceType" -imageName "$imageName" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2" -restrictedSrcAddress "$restrictedSrcAddress"
 
     # Print Output of Deployment to Console
     $deployment
 ```
 
-=======
 
 ### <a name="cli"></a>Azure CLI(1.0) Script Example
 
 ```bash
     #!/bin/bash
 
-    # Bash Script to deploy an ARM template into Azure, using azure cli 1.0
-    # Example Command: ./deploy_via_bash.sh --adminusr azureuser --adminpwd 'yourpassword' --dnslabel f5dnslabel --instname f5vm01 --key1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX --rgname f5rgname --azureusr administrator@domain.com --azurepwd 'yourpassword'
+    # Bash Script to deploy ARM template into Azure, using azure cli 1.0
+    # Example Command: ./deploy_via_bash.sh --sdname sdname01 --nbrinstances 2 --adminusr azureuser --adminpwd 'password' --dnslabel label01 --key1 XXXX-XXXX --key2 XXXX-XXXX --rgname examplerg --azureusr loginuser --azurepwd loginpwd
 
-    # Assign Script Parameters and Define Variables
-    # Specify static items, change these as needed or make them parameters (instance_type is already an optional parameter)
+    # Assign Script Paramters and Define Variables
+    # Specify static items, change these as needed or make them parameters (instance_type is already an optional paramter)
     region="westus"
     template_file="azuredeploy.json"
     parameter_file="azuredeploy.parameters.json"
@@ -154,24 +172,25 @@ Use this button to deploy the template:
     restricted_source_address="*"
     tag_values="{\"application\":\"APP\",\"environment\":\"ENV\",\"group\":\"GROUP\",\"owner\":\"OWNER\",\"cost\":\"COST\"}"
 
-    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k: --long adminusr:,adminpwd:,dnslabel:,instname:,insttype:,imgname:,key1:,rstsrcaddr:,rgname:,azureusr:,azurepwd: -n $0 -- "$@"`
+
+    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m: --long sdname:,nbrinstances:,adminusr:,adminpwd:,insttype:,imgname:,dnslabel:,key1:,key2:,rstsrcaddr:,rgname:,azureusr:,azurepwd: -n $0 -- "$@"`
     eval set -- "$ARGS"
 
 
     # Parse the command line arguments, primarily checking full params as short params are just placeholders
     while true; do
         case "$1" in
-            -a|--adminusr)
+            -a|--sdname)
+                solution_deployment_name=$2
+                shift 2;;
+            -b|--nbrinstances)
+                number_of_instances=$2
+                shift 2;;
+            -c|--adminusr)
                 admin_username=$2
                 shift 2;;
-            -b|--adminpwd)
+            -d|--adminpwd)
                 admin_password=$2
-                shift 2;;
-            -c|--dnslabel)
-                dns_label=$2
-                shift 2;;
-            -d|--instname)
-                instance_name=$2
                 shift 2;;
             -e|--insttype)
                 instance_type=$2
@@ -179,19 +198,25 @@ Use this button to deploy the template:
             -f|--imgname)
                 image_name=$2
                 shift 2;;
-            -g|--key1)
+            -g|--dnslabel)
+                dns_label=$2
+                shift 2;;
+            -h|--key1)
                 license_key_1=$2
                 shift 2;;
-            -h|--rstsrcaddr)
+            -i|--key2)
+                license_key_2=$2
+                shift 2;;
+            -j|--rstsrcaddr)
                 restricted_source_address=$2
                 shift 2;;
-            -i|--rgname)
+            -k|--rgname)
                 resource_group_name=$2
                 shift 2;;
-            -j|--azureusr)
+            -l|--azureusr)
                 azure_user=$2
                 shift 2;;
-            -k|--azurepwd)
+            -m|--azurepwd)
                 azure_pwd=$2
                 shift 2;;
             --)
@@ -203,8 +228,8 @@ Use this button to deploy the template:
     echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
     sleep 3
 
-    #If a required parameter is not passed, the script will prompt for it below
-    required_variables="admin_username admin_password dns_label instance_name license_key_1 resource_group_name azure_user azure_pwd"
+    #If a required paramater is not passed, the script will prompt for it below
+    required_variables="solution_deployment_name number_of_instances admin_username admin_password dns_label license_key_1 license_key_2 resource_group_name azure_user azure_pwd"
     for variable in $required_variables
             do
             if [ -v ${!variable} ] ; then
@@ -227,23 +252,29 @@ Use this button to deploy the template:
 
     # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
     # such as can been done with Powershell...oh well!
-    azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"instanceName\":{\"value\":\"$instance_name\"},\"instanceType\":{\"value\":\"$instance_type\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"imageName\":{\"value\":\"$image_name\"},\"restrictedSrcAddress\":{\"value\":\"$restricted_source_address\"},\"tagValues\":{\"value\":$tag_values}}"
+    azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"solutionDeploymentName\":{\"value\":\"$solution_deployment_name\"},\"numberOfInstances\":{\"value\":$number_of_instances},\"instanceType\":{\"value\":\"$instance_type\"},\"imageName\":{\"value\":\"$image_name\"},\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"licenseKey2\":{\"value\":\"$license_key_2\"},\"restrictedSrcAddress\":{\"value\":\"$restricted_source_address\"},\"tagValues\":{\"value\":$tag_values}}"
 
 ```
 
-## Configuration Example <a name="config">
+## Results
 
-The following is a simple configuration diagram for this single NIC deployment. In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.
+This template creates a new resource group. Inside this new resource group it configures the following:
 
-![Single NIC configuration example](images/azure-1nic-sm.png)
+* Availability Set
+* Azure Load Balancer
+* Network Security Group
+* Storage Account
+* Public IP Address
+* Network Interface objects for the F5 devices
+* F5 Virtual Machines
 
-### Changing the BIG-IP Configuration Utility (GUI) port
-The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.  
-***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly. 
+## Connecting to the management interface of the BIG-IP VEs
 
-## Documentation
+After the deployment successfully finishes, you can find the BIG-IP Management UI\SSH URLs by doing the following:
 
-The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html) decribes how to create the configuration manually without using the ARM template.
+* Find the Resource Group that deployed, which is the same name as the "dnsLabel".  When you click this object you see the deployment status.
+* Click the Deployment Status, and then the Deployment.
+* In the "Outputs" area, you find the URLs and ports you can use to connect to the F5 cluster.
 
 ## Deploying Custom Configuration to an Azure Virtual Machine 
 
@@ -275,6 +306,13 @@ Warning: F5 does not support the template if you change anything other than the 
 }
 ```
 
+## Configuration Example <a name="config">
+
+The following is a simple configuration diagram for this deployment. In this diagram, the IP addresses are provided as examples.
+![2-NIC configuration example](images/azure-cluster-1nic.png)
+
+### Documentation
+The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/3.html) details how to create the configuration manually without using the ARM template.  This product manual also describes the F5 and Azure configuration in more detail.
 
 ## Security Details <a name="securitydetail"></a>
 This section has the code snippet for each the lines you should ensure are present in your template file if you want to verify the integrity of the helper code in the template.
@@ -306,9 +344,7 @@ You have a choice when it comes to filing issues:
 
 Copyright 2014-2017 F5 Networks Inc.
 
-
 ## License
-
 
 Apache V2.0
 ~~~~~~~~~~~

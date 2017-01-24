@@ -1,9 +1,25 @@
 ﻿# Params below match to parameteres in the azuredeploy.json that are gen-unique, otherwsie pointing to
 # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
 # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
-# Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabel f52nicdeploy01 -instanceName f52nic -licenseKey1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f52nicdeploy01
+# Example Command: .\Deploy_via_PS.ps1 -solutionDeploymentName deploynamestring -numberOfInstances 2 -adminUsername azureuser -adminPassword password
+# -dnsLabel dnslabestring -licenseKey1 XXXX-XXXX-XXXX-XXXX -licenseKey2 XXXX-XXXX-XXXX-XXXX
 
 param(
+  [Parameter(Mandatory=$True)]
+  [string]
+  $solutionDeploymentName,
+
+  [Parameter(Mandatory=$True)]
+  [ValidateSet("2")]
+  [string]
+  $numberOfInstances,
+
+  [string]
+  $instanceType = "Standard_D2_v2",
+
+  [string]
+  $imageName = "Best",
+
   [Parameter(Mandatory=$True)]
   [string]
   $adminUsername,
@@ -18,17 +34,11 @@ param(
 
   [Parameter(Mandatory=$True)]
   [string]
-  $instanceName,
-
-  [string]
-  $instanceType = "Standard_D2_v2",
-
-  [string]
-  $imageName = "Good",
+  $licenseKey1,
 
   [Parameter(Mandatory=$True)]
   [string]
-  $licenseKey1,
+  $licenseKey2,
 
   [string]
   $restrictedSrcAddress  = "*",
@@ -66,7 +76,9 @@ New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
 
 # Create Arm Deployment
 $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
-$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"
+
+# Create Arm Deployment
+  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -solutionDeploymentName "$solutionDeploymentName" -numberOfInstances "$numberOfInstances" -instanceType "$instanceType" -imageName "$imageName" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2" -restrictedSrcAddress "$restrictedSrcAddress"
 
 # Print Output of Deployment to Console
 $deployment
