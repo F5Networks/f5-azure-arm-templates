@@ -121,40 +121,36 @@
     }, 
     "resources": [
         {
-            "name": "[variables('publicIPAddressName')]", 
-            "tags": {
-                "displayName": "PublicIPAddress", 
-                "environment": "[parameters('tagValues').environment]", 
-                "application": "[parameters('tagValues').application]", 
-                "costCenter": "[parameters('tagValues').cost]", 
-                "owner": "[parameters('tagValues').owner]", 
-                "group": "[parameters('tagValues').group]"
-            }, 
             "apiVersion": "[variables('apiVersion')]", 
             "location": "[resourceGroup().location]", 
-            "type": "Microsoft.Network/publicIPAddresses", 
+            "name": "[variables('publicIPAddressName')]", 
             "properties": {
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]", 
                 "dnsSettings": {
                     "domainNameLabel": "[parameters('dnsLabel')]"
                 }, 
-                "idleTimeoutInMinutes": 30
-            }
-        }, 
-        {
-            "name": "[variables('vnetName')]", 
+                "idleTimeoutInMinutes": 30, 
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+            }, 
             "tags": {
-                "displayName": "NetworkInterface", 
-                "environment": "[parameters('tagValues').environment]", 
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "owner": "[parameters('tagValues').owner]", 
-                "group": "[parameters('tagValues').group]"
+                "displayName": "PublicIPAddress", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
             }, 
+            "type": "Microsoft.Network/publicIPAddresses"
+        }, 
+        {
             "apiVersion": "[variables('apiVersion')]", 
             "location": "[resourceGroup().location]", 
-            "type": "Microsoft.Network/virtualNetworks", 
+            "name": "[variables('vnetName')]", 
             "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                }, 
                 "subnets": [
                     {
                         "name": "[variables('subnet1Name')]", 
@@ -162,156 +158,160 @@
                             "addressPrefix": "[variables('subnet1Prefix')]"
                         }
                     }
-                ], 
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[variables('addressPrefix')]"
-                    ]
-                }
-            }
-        }, 
-        {
-            "name": "[variables('nic1Name')]", 
+                ]
+            }, 
             "tags": {
-                "displayName": "PublicIPAddress", 
-                "environment": "[parameters('tagValues').environment]", 
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "owner": "[parameters('tagValues').owner]", 
-                "group": "[parameters('tagValues').group]"
+                "displayName": "NetworkInterface", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
             }, 
+            "type": "Microsoft.Network/virtualNetworks"
+        }, 
+        {
             "apiVersion": "[variables('apiVersion')]", 
-            "location": "[resourceGroup().location]", 
             "dependsOn": [
                 "[variables('vnetId')]", 
                 "[variables('publicIPAddressId')]", 
                 "[concat('Microsoft.Network/networkSecurityGroups/', parameters('dnsLabel'),'-nsg')]"
             ], 
-            "type": "Microsoft.Network/networkInterfaces", 
+            "location": "[resourceGroup().location]", 
+            "name": "[variables('nic1Name')]", 
             "properties": {
-                "networkSecurityGroup": {
-                    "id": "[variables('nsgID')]"
-                }, 
                 "ipConfigurations": [
                     {
                         "name": "[concat(parameters('instanceName'), '-ipconfig1')]", 
                         "properties": {
-                            "subnet": {
-                                "id": "[variables('subnet1Id')]"
-                            }, 
-                            "privateIPAllocationMethod": "Static", 
-                            "privateIPAddress": "[variables('subnet1PrivateAddress')]", 
                             "PublicIpAddress": {
                                 "Id": "[variables('publicIPAddressId')]"
+                            }, 
+                            "privateIPAddress": "[variables('subnet1PrivateAddress')]", 
+                            "privateIPAllocationMethod": "Static", 
+                            "subnet": {
+                                "id": "[variables('subnet1Id')]"
                             }
                         }
                     }
-                ]
-            }
-        }, 
-        {
-            "name": "[concat(parameters('dnsLabel'), '-nsg')]", 
+                ], 
+                "networkSecurityGroup": {
+                    "id": "[variables('nsgID')]"
+                }
+            }, 
             "tags": {
-                "displayName": "NetworkSecurityGroup", 
-                "environment": "[parameters('tagValues').environment]", 
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "owner": "[parameters('tagValues').owner]", 
-                "group": "[parameters('tagValues').group]"
+                "displayName": "PublicIPAddress", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
             }, 
+            "type": "Microsoft.Network/networkInterfaces"
+        }, 
+        {
             "apiVersion": "[variables('apiVersion')]", 
             "location": "[variables('location')]", 
-            "type": "Microsoft.Network/networkSecurityGroups", 
+            "name": "[concat(parameters('dnsLabel'), '-nsg')]", 
             "properties": {
                 "securityRules": [
                     {
                         "name": "mgmt_allow_443", 
                         "properties": {
-                            "priority": 101, 
                             "access": "Allow", 
-                            "direction": "Inbound", 
-                            "destinationPortRange": "443", 
                             "description": "", 
-                            "protocol": "TCP", 
                             "destinationAddressPrefix": "*", 
-                            "sourcePortRange": "*", 
-                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]"
+                            "destinationPortRange": "443", 
+                            "direction": "Inbound", 
+                            "priority": 101, 
+                            "protocol": "TCP", 
+                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", 
+                            "sourcePortRange": "*"
                         }
                     }, 
                     {
                         "name": "ssh_allow_22", 
                         "properties": {
-                            "priority": 102, 
                             "access": "Allow", 
-                            "direction": "Inbound", 
-                            "destinationPortRange": "22", 
                             "description": "", 
-                            "protocol": "TCP", 
                             "destinationAddressPrefix": "*", 
-                            "sourcePortRange": "*", 
-                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]"
+                            "destinationPortRange": "22", 
+                            "direction": "Inbound", 
+                            "priority": 102, 
+                            "protocol": "TCP", 
+                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", 
+                            "sourcePortRange": "*"
                         }
                     }
                 ]
-            }
+            }, 
+            "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
+                "displayName": "NetworkSecurityGroup", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
+            }, 
+            "type": "Microsoft.Network/networkSecurityGroups"
         }, 
         {
+            "apiVersion": "[variables('apiVersion')]", 
+            "location": "[resourceGroup().location]", 
+            "name": "[variables('availabilitySetName')]", 
             "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
                 "displayName": "AvailabilitySet", 
                 "environment": "[parameters('tagValues').environment]", 
-                "application": "[parameters('tagValues').application]", 
-                "costCenter": "[parameters('tagValues').cost]", 
-                "owner": "[parameters('tagValues').owner]", 
-                "group": "[parameters('tagValues').group]"
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
             }, 
-            "type": "Microsoft.Compute/availabilitySets", 
-            "location": "[resourceGroup().location]", 
-            "apiVersion": "[variables('apiVersion')]", 
-            "name": "[variables('availabilitySetName')]"
+            "type": "Microsoft.Compute/availabilitySets"
         }, 
         {
-            "name": "[variables('storageAccountName')]", 
-            "tags": {
-                "displayName": "StorageAccount", 
-                "environment": "[parameters('tagValues').environment]", 
-                "application": "[parameters('tagValues').application]", 
-                "costCenter": "[parameters('tagValues').cost]", 
-                "owner": "[parameters('tagValues').owner]", 
-                "group": "[parameters('tagValues').group]"
-            }, 
             "apiVersion": "[variables('apiVersion')]", 
             "location": "[resourceGroup().location]", 
-            "type": "Microsoft.Storage/storageAccounts", 
+            "name": "[variables('storageAccountName')]", 
             "properties": {
                 "accountType": "[variables('storageAccountType')]"
-            }
+            }, 
+            "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
+                "displayName": "StorageAccount", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
+            }, 
+            "type": "Microsoft.Storage/storageAccounts"
         }, 
         {
-            "location": "[resourceGroup().location]", 
+            "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]", 
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('nic1Name'))]"
             ], 
+            "location": "[resourceGroup().location]", 
+            "name": "[parameters('instanceName')]", 
             "plan": {
-                "publisher": "f5-networks", 
+                "name": "[variables('skuToUse')]", 
                 "product": "f5-big-ip", 
-                "name": "[variables('skuToUse')]"
+                "publisher": "f5-networks"
             }, 
-            "tags": {
-                "displayName": "VirtualMachine", 
-                "environment": "[parameters('tagValues').environment]", 
-                "application": "[parameters('tagValues').application]", 
-                "costCenter": "[parameters('tagValues').cost]", 
-                "owner": "[parameters('tagValues').owner]", 
-                "group": "[parameters('tagValues').group]"
-            }, 
-            "type": "Microsoft.Compute/virtualMachines", 
             "properties": {
-                "osProfile": {
-                    "adminUsername": "[parameters('adminUsername')]", 
-                    "computerName": "[parameters('instanceName')]", 
-                    "adminPassword": "[parameters('adminPassword')]"
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
+                }, 
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true, 
+                        "storageUri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net')]"
+                    }
+                }, 
+                "hardwareProfile": {
+                    "vmSize": "[parameters('instanceType')]"
                 }, 
                 "networkProfile": {
                     "networkInterfaces": [
@@ -323,59 +323,59 @@
                         }
                     ]
                 }, 
+                "osProfile": {
+                    "adminPassword": "[parameters('adminPassword')]", 
+                    "adminUsername": "[parameters('adminUsername')]", 
+                    "computerName": "[parameters('instanceName')]"
+                }, 
                 "storageProfile": {
                     "imageReference": {
-                        "sku": "[variables('skuToUse')]", 
+                        "offer": "f5-big-ip", 
                         "publisher": "f5-networks", 
-                        "version": "latest", 
-                        "offer": "f5-big-ip"
+                        "sku": "[variables('skuToUse')]", 
+                        "version": "latest"
                     }, 
                     "osDisk": {
                         "caching": "ReadWrite", 
+                        "createOption": "FromImage", 
+                        "name": "osdisk", 
                         "vhd": {
                             "uri": "[concat('http://',variables('storageAccountName'), '.blob.core.windows.net/vhds/', parameters('instanceName'), '.vhd')]"
-                        }, 
-                        "createOption": "FromImage", 
-                        "name": "osdisk"
+                        }
                     }
-                }, 
-                "diagnosticsProfile": {
-                    "bootDiagnostics": {
-                        "storageUri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net')]", 
-                        "enabled": true
-                    }
-                }, 
-                "hardwareProfile": {
-                    "vmSize": "[parameters('instanceType')]"
-                }, 
-                "availabilitySet": {
-                    "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
                 }
             }, 
-            "apiVersion": "[variables('apiVersion')]", 
-            "name": "[parameters('instanceName')]"
+            "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
+                "displayName": "VirtualMachine", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
+            }, 
+            "type": "Microsoft.Compute/virtualMachines"
         }, 
         {
-            "name": "[concat(parameters('instanceName'),'/start')]", 
             "apiVersion": "2016-03-30", 
-            "location": "[variables('location')]", 
             "dependsOn": [
                 "[concat('Microsoft.Compute/virtualMachines/', parameters('instanceName'))]"
             ], 
-            "type": "Microsoft.Compute/virtualMachines/extensions", 
+            "location": "[variables('location')]", 
+            "name": "[concat(parameters('instanceName'),'/start')]", 
             "properties": {
                 "protectedSettings": {
                     "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(parameters('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; rm -f /config/cloud/passwd')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
-                "typeHandlerVersion": "2.0", 
-                "type": "CustomScript", 
                 "settings": {
                     "fileUris": [
                         "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]"
                     ]
-                }
-            }
+                }, 
+                "type": "CustomScript", 
+                "typeHandlerVersion": "2.0"
+            }, 
+            "type": "Microsoft.Compute/virtualMachines/extensions"
         }
     ], 
     "outputs": {
