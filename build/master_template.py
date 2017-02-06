@@ -123,5 +123,5 @@ data['outputs']['MGMT-URL'] = { "type": "string", "value": "[concat('https://', 
 
 # Write modified template to appropriate location
 with open(createdfile, 'w') as finished:
-    json.dump(data, finished, indent=4, sort_keys=True, ensure_ascii=False)
+    json.dump(data, finished, indent=4, sort_keys=False, ensure_ascii=False)
     finished.close()
