@@ -1,7 +1,6 @@
 #/bin/bash
 
-# BIGIP ARM Templates(supported)- Standalone
-# 1nic, 2nic_limited
+# BIGIP ARM Templates - Standalone (1nic, 2nic_limited)
 
 # Experimental
 python '.\master_template.py' --template-name 1nic --license-type BYOL --template-location '../experimental/standalone/1nic/'

@@ -2,6 +2,22 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json", 
     "contentVersion": "1.0.0.0", 
     "parameters": {
+        "solutionDeploymentName": {
+            "type": "string", 
+            "metadata": {
+                "description": "A unique name for this deployment."
+            }
+        }, 
+        "numberOfInstances": {
+            "defaultValue": 2, 
+            "metadata": {
+                "description": "The number of BIG-IP VEs that will be deployed in front of your application."
+            }, 
+            "type": "int", 
+            "allowedValues": [
+                2
+            ]
+        }, 
         "adminUsername": {
             "defaultValue": "azureuser", 
             "type": "string", 
@@ -52,7 +68,9 @@
                 "Standard_D12_v2", 
                 "Standard_D13_v2", 
                 "Standard_D14_v2", 
-                "Standard_D15_v2"
+                "Standard_D15_v2", 
+                "Standard_F2", 
+                "Standard_F4"
             ]
         }, 
         "imageName": {
@@ -72,6 +90,13 @@
             "type": "string", 
             "metadata": {
                 "description": "The license token for the F5 BIG-IP(BYOL)"
+            }
+        }, 
+        "licenseKey2": {
+            "defaultValue": "REQUIRED", 
+            "type": "string", 
+            "metadata": {
+                "description": "The license token for the second F5 BIG-IP(BYOL). This field is required when deploying two or more devices"
             }
         }, 
         "restrictedSrcAddress": {
@@ -141,35 +166,6 @@
                 "owner": "[parameters('tagValues').owner]"
             }, 
             "type": "Microsoft.Network/publicIPAddresses"
-        }, 
-        {
-            "apiVersion": "[variables('apiVersion')]", 
-            "location": "[variables('location')]", 
-            "name": "[variables('vnetName')]", 
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[variables('addressPrefix')]"
-                    ]
-                }, 
-                "subnets": [
-                    {
-                        "name": "[variables('subnet1Name')]", 
-                        "properties": {
-                            "addressPrefix": "[variables('subnet1Prefix')]"
-                        }
-                    }
-                ]
-            }, 
-            "tags": {
-                "application": "[parameters('tagValues').application]", 
-                "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "PublicIPAddress", 
-                "environment": "[parameters('tagValues').environment]", 
-                "group": "[parameters('tagValues').group]", 
-                "owner": "[parameters('tagValues').owner]"
-            }, 
-            "type": "Microsoft.Network/virtualNetworks"
         }, 
         {
             "apiVersion": "[variables('apiVersion')]", 
@@ -315,14 +311,7 @@
                     "vmSize": "[parameters('instanceType')]"
                 }, 
                 "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic1Name'))]", 
-                            "properties": {
-                                "primary": true
-                            }
-                        }
-                    ]
+                    "networkInterfaces": ""
                 }, 
                 "osProfile": {
                     "adminPassword": "[parameters('adminPassword')]", 
@@ -365,7 +354,7 @@
             "name": "[concat(variables('instanceName'),'/start')]", 
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; rm -f /config/cloud/passwd')]"
+                    "commandToExecute": ""
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {

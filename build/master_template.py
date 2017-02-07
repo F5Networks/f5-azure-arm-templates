@@ -27,7 +27,7 @@ command_to_execute = ""
 
 # Static Variable Assignment
 content_version = '1.0.0.0'
-instance_type_list = "Standard_A4", "Standard_A9", "Standard_A11", "Standard_D2", "Standard_D3", "Standard_D4", "Standard_D12", "Standard_D13", "Standard_D14", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2"
+instance_type_list = "Standard_A4", "Standard_A9", "Standard_A11", "Standard_D2", "Standard_D3", "Standard_D4", "Standard_D12", "Standard_D13", "Standard_D14", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2", "Standard_F2", "Standard_F4"
 tags = { "displayName": "PublicIPAddress", "application": "[parameters('tagValues').application]", "environment": "[parameters('tagValues').environment]", "group": "[parameters('tagValues').group]", "owner": "[parameters('tagValues').owner]", "costCenter": "[parameters('tagValues').cost]" }
 api_version = "[variables('apiVersion')]"
 location = "[variables('location')]"
@@ -44,13 +44,19 @@ data['contentVersion'] = content_version
 data_params['contentVersion'] = content_version
 
 ## ARM Parameters ##
+if template_name == 'cluster_base':
+    data['parameters']['solutionDeploymentName'] = {"type": "string", "metadata": {"description": "A unique name for this deployment."}}
+    data['parameters']['numberOfInstances'] = {"type": "int", "defaultValue": 2, "allowedValues": [ 2 ], "metadata": { "description": "The number of BIG-IP VEs that will be deployed in front of your application." } }
+    data['parameters']['solutionDeploymentName'] = {"type": "string", "metadata": { "description": "A unique name for this deployment." } }
 data['parameters']['adminUsername'] = {"type": "string", "defaultValue": "azureuser", "metadata": {"description": "User name for the Virtual Machine."}}
-data['parameters']['adminPassword'] = { "type": "securestring", "metadata": { "description": "Password to login to the Virtual Machine." } }
-data['parameters']['dnsLabel'] = { "type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "Unique DNS Name for the Public IP used to access the Virtual Machine." } }
-data['parameters']['instanceName'] = { "type": "string", "defaultValue": "f5vm01", "metadata": { "description": "Name of the VM" } }
+data['parameters']['adminPassword'] = {"type": "securestring", "metadata": { "description": "Password to login to the Virtual Machine." } }
+data['parameters']['dnsLabel'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "Unique DNS Name for the Public IP used to access the Virtual Machine." } }
+data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": { "description": "Name of the VM"}}
 data['parameters']['instanceType'] = {"type": "string", "defaultValue": "Standard_D2_v2", "allowedValues": instance_type_list, "metadata": {"description": "Size of the VM"}}
-data['parameters']['imageName'] = { "type": "string", "defaultValue": "Good", "allowedValues": [ "Good", "Better", "Best" ], "metadata": { "description": "F5 SKU(IMAGE) to Deploy" }}
+data['parameters']['imageName'] = { "type": "string", "defaultValue": "Good", "allowedValues": [ "Good", "Better", "Best" ], "metadata": { "description": "F5 SKU(IMAGE) to Deploy"}}
 data['parameters']['licenseKey1'] = { "type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "The license token for the F5 BIG-IP(BYOL)" } }
+if template_name == 'cluster_base':
+    data['parameters']['licenseKey2'] = { "type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "The license token for the second F5 BIG-IP(BYOL). This field is required when deploying two or more devices" } }
 data['parameters']['restrictedSrcAddress'] = { "type": "string", "defaultValue": "*", "metadata": { "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources." } }
 data['parameters']['tagValues'] = { "type": "object", "defaultValue": { "application": "APP", "environment": "ENV", "group": "GROUP", "owner": "OWNER", "cost": "COST" } }
 
