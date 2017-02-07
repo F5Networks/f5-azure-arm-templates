@@ -8,15 +8,18 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-t", "--template-name", action="store", type="string", dest="template_name", help="Template Name: 1nic, 2nic_limited, base_cluster, etc..." )
 parser.add_option("-l", "--license-type", action="store", type="string", dest="license_type", default="BYOL", help="License Type: BYOL or PAYG" )
+parser.add_option("-z", "--template-location", action="store", type="string", dest="template_location", help="Template Location: such as ../experimental/standalone/1nic/" )
 
 (options, args) = parser.parse_args()
 template_name = options.template_name
 license_type = options.license_type
+template_location = options.template_location
 
 # Specify meta file and file to create(should be argument)
 metafile = 'base.azuredeploy.json'
-folderloc = './built_templates/'
-createdfile = folderloc + template_name + 'azuredeploy.json'
+metafile_params = 'base.azuredeploy.parameters.json'
+createdfile = template_location + 'azuredeploy.json'
+createdfile_params = template_location + 'azuredeploy.parameters.json'
 
 #Static Variable Defaults
 nic_reference = ""
@@ -29,13 +32,16 @@ tags = { "displayName": "PublicIPAddress", "application": "[parameters('tagValue
 api_version = "[variables('apiVersion')]"
 location = "[variables('location')]"
 
-# Open "Meta File" for modification
+# Load "Meta File(s)" for modification
 with open(metafile, 'r') as base:
     data = json.load(base, object_pairs_hook=OrderedDict)
+with open(metafile_params, 'r') as base_params:
+    data_params = json.load(base_params, object_pairs_hook=OrderedDict)
 
 
 ### Create/Modify ARM Objects ###
 data['contentVersion'] = content_version
+data_params['contentVersion'] = content_version
 
 ## ARM Parameters ##
 data['parameters']['adminUsername'] = {"type": "string", "defaultValue": "azureuser", "metadata": {"description": "User name for the Virtual Machine."}}
@@ -48,14 +54,20 @@ data['parameters']['licenseKey1'] = { "type": "string", "defaultValue": "REQUIRE
 data['parameters']['restrictedSrcAddress'] = { "type": "string", "defaultValue": "*", "metadata": { "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources." } }
 data['parameters']['tagValues'] = { "type": "object", "defaultValue": { "application": "APP", "environment": "ENV", "group": "GROUP", "owner": "OWNER", "cost": "COST" } }
 
+# Add Parameters into parameters file as well
+param_default_value = 'GEN_UNIQUE'
+for parameter in data['parameters']:
+    try:
+        data_params['parameters'][parameter] = {"value": data['parameters'][parameter]['defaultValue']}
+    except:
+        data_params['parameters'][parameter] = {"value": param_default_value}
 
 ## ARM Variables ##
 data['variables']['apiVersion'] = "2015-06-15"
 data['variables']['location'] = "[resourceGroup().location]"
 data['variables']['singleQuote'] = "'"
-data['variables']['f5CloudLibsTag'] = "v2.0.0"
-data['variables']['expectedHash'] = "8bb8ca730dce21dff6ec129a84bdb1689d703dc2b0227adcbd16757d5eeddd767fbe7d8d54cc147521ff2232bd42eebe78259069594d159eceb86a88ea137b73"
-data['variables']['verifyHash'] = '''[concat(variables('singleQuote'), 'cli script /Common/verifyHash {\nproc script::run {} {\n        if {[catch {\n            set file_path [lindex $tmsh::argv 1]\n            set expected_hash ', variables('expectedHash'), '\n            set computed_hash [lindex [exec /usr/bin/openssl dgst -r -sha512 $file_path] 0]\n            if { $expected_hash eq $computed_hash } {\n                exit 0\n            }\n            tmsh::log err {Hash does not match}\n            exit 1\n        }]} {\n            tmsh::log err {Unexpected error in verifyHash}\n            exit 1\n        }\n    }\n    script-signature fc3P5jEvm5pd4qgKzkpOFr9bNGzZFjo9pK0diwqe/LgXwpLlNbpuqoFG6kMSRnzlpL54nrnVKREf6EsBwFoz6WbfDMD3QYZ4k3zkY7aiLzOdOcJh2wECZM5z1Yve/9Vjhmpp4zXo4varPVUkHBYzzr8FPQiR6E7Nv5xOJM2ocUv7E6/2nRfJs42J70bWmGL2ZEmk0xd6gt4tRdksU3LOXhsipuEZbPxJGOPMUZL7o5xNqzU3PvnqZrLFk37bOYMTrZxte51jP/gr3+TIsWNfQEX47nxUcSGN2HYY2Fu+aHDZtdnkYgn5WogQdUAjVVBXYlB38JpX1PFHt1AMrtSIFg==\n}', variables('singleQuote'))]'''
+data['variables']['f5CloudLibsTag'] = "release-2.1.0"
+data['variables']['verifyHash'] = '''[concat(variables('singleQuote'), 'cli script /Common/verifyHash {\nproc script::run {} {\n        if {[catch {\n            set hashes(f5-cloud-libs.tar.gz) a6a9db3b89bbd014413706f22fa619c3717fac41fc99ffe875589c90e9b85a05cea227c134ea6e5b519c8fee0d12f2175368e75917f31f447ece3d92f31814af\n            set hashes(f5-cloud-libs-aws.tar.gz) 90058095cc536a057378a90ed19c3afe0cecd9034e1d1816745bd5ad837939623fad034ebd2ee9bdf594f33358b50c50f49a18c2ee7588ba89645142f2217330\n            set hashes(asm-policy-linux.tar.gz) 63b5c2a51ca09c43bd89af3773bbab87c71a6e7f6ad9410b229b4e0a1c483d46f1a9fff39d9944041b02ee9260724027414de592e99f4c2475415323e18a72e0\n            set hashes(f5.http.v1.2.0rc4.tmpl) 47c19a83ebfc7bd1e9e9c35f3424945ef8694aa437eedd17b6a387788d4db1396fefe445199b497064d76967b0d50238154190ca0bd73941298fc257df4dc034\n            set hashes(f5.http.v1.2.0rc6.tmpl) 811b14bffaab5ed0365f0106bb5ce5e4ec22385655ea3ac04de2a39bd9944f51e3714619dae7ca43662c956b5212228858f0592672a2579d4a87769186e2cbfe\n\n            set file_path [lindex $tmsh::argv 1]\n            set file_name [file tail $file_path]\n\n            if {![info exists hashes($file_name)]} {\n                tmsh::log err "No hash found for $file_name"\n                exit 1\n            }\n\n            set expected_hash $hashes($file_name)\n            set computed_hash [lindex [exec /usr/bin/openssl dgst -r -sha512 $file_path] 0]\n            if { $expected_hash eq $computed_hash } {\n                exit 0\n            }\n            tmsh::log err "Hash does not match for $file_path"\n            exit 1\n        }]} {\n            tmsh::log err {Unexpected error in verifyHash}\n            exit 1\n        }\n    }\n    script-signature OmyfJKVQkBj+Ks6SdIc2+UNxM2xFCK4MGizGysivShzeRof0EFlEUTQiZveZ4v2SElofUp5DMVKiTIIkM00kZ7LnwqvLYIOztDFNAtMGwO6/B/zA8jLhkfnA2xzxu9fFgFn3OEsc8QwbfFS1AqCMyyacbbiczJycHtu3z0a/8sqCgiZtcQ4iXqBP4fz+8HKLA36U0jpmW+z0gQQUwpiC+AfFWcAarXMtmpwLzScldnaZ5RLo0MG8EGrHmXiWjndSR/Ii9b3+vnHnceD6+sw7e7LXPvz+jV9/rFyEQOA1QNpv0Cy4SJcuY9NRjV9KNdBobJ5N+h2PZBlgaIdLMACAVQ==\n}', variables('singleQuote'))]'''
 data['variables']['installCloudLibs'] = "[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit\nfi\necho loaded verifyHash\necho verifying f5-cloud-libs.targ.gz\n/usr/bin/tmsh run cli script verifyHash /config/cloud/f5-cloud-libs.tar.gz\nif [ $? != 0 ]; then\necho f5-cloud-libs.tar.gz is not valid\nexit\nfi\necho verified f5-cloud-libs.tar.gz\necho expanding f5-cloud-libs.tar.gz\ntar xvfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud\ntouch /config/cloud/cloudLibsReady', variables('singleQuote'))]"
 data['variables']['storageAccountName'] = "[concat(uniquestring(resourceGroup().id), 'sabigip')]"
 data['variables']['storageAccountType'] = "Standard_LRS"
@@ -77,6 +89,7 @@ data['variables']['publicIPAddressName'] = "[concat(variables('dnsLabel'), '-pip
 data['variables']['publicIPAddressType'] = "Static"
 data['variables']['publicIPAddressId'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
 data['variables']['nsgID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg'))]"
+
 if template_name == '2nic_limited':
     data['variables']['subnet2Name'] = "Web"
     data['variables']['subnet2Id'] = "[concat(variables('vnetId'), '/subnets/', variables('subnet2Name'))]"
@@ -138,7 +151,10 @@ data['outputs']['MGMT-URL'] = { "type": "string", "value": "[concat('https://', 
 
 ### END Create/Modify ARM Objects ###
 
-# Write modified template to appropriate location
+# Write modified template(s) to appropriate location
 with open(createdfile, 'w') as finished:
     json.dump(data, finished, indent=4, sort_keys=False, ensure_ascii=False)
     finished.close()
+with open(createdfile_params, 'w') as finished_params:
+    json.dump(data_params, finished_params, indent=4, sort_keys=False, ensure_ascii=False)
+    finished_params.close()

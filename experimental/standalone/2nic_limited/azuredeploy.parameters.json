@@ -1,36 +1,39 @@
 {
-     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-     "contentVersion": "1.0.0.0",
-     "parameters": {
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
+    "contentVersion": "1.0.0.0", 
+    "parameters": {
         "adminUsername": {
             "value": "azureuser"
-        },
+        }, 
         "adminPassword": {
-            "value": "GEN-UNIQUE"
-        },
+            "value": "GEN_UNIQUE"
+        }, 
         "dnsLabel": {
-            "value": "GEN-UNIQUE"
-        },
+            "value": "REQUIRED"
+        }, 
         "instanceName": {
-            "value": "f52nic"
-        },
+            "value": "f5vm01"
+        }, 
         "instanceType": {
             "value": "Standard_D2_v2"
-        },
+        }, 
         "imageName": {
             "value": "Good"
-        },
+        }, 
         "licenseKey1": {
-        "value": "GEN-UNIQUE"
-        },
+            "value": "REQUIRED"
+        }, 
+        "restrictedSrcAddress": {
+            "value": "*"
+        }, 
         "tagValues": {
             "value": {
-                "application": "APP",
-                "environment": "ENV",
-                "group": "GROUP",
-                "owner": "OWNER",
-                "cost": "COST"
+                "environment": "ENV", 
+                "application": "APP", 
+                "cost": "COST", 
+                "group": "GROUP", 
+                "owner": "OWNER"
             }
         }
-     }
+    }
 }
