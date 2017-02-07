@@ -127,7 +127,7 @@
     "resources": [
         {
             "apiVersion": "[variables('apiVersion')]", 
-            "location": "[resourceGroup().location]", 
+            "location": "[variables('location')]", 
             "name": "[variables('publicIPAddressName')]", 
             "properties": {
                 "dnsSettings": {
@@ -148,7 +148,7 @@
         }, 
         {
             "apiVersion": "[variables('apiVersion')]", 
-            "location": "[resourceGroup().location]", 
+            "location": "[variables('location')]", 
             "name": "[variables('vnetName')]", 
             "properties": {
                 "addressSpace": {
@@ -174,7 +174,7 @@
             "tags": {
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "NetworkInterface", 
+                "displayName": "PublicIPAddress", 
                 "environment": "[parameters('tagValues').environment]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
@@ -188,7 +188,7 @@
                 "[variables('publicIPAddressId')]", 
                 "[concat('Microsoft.Network/networkSecurityGroups/', parameters('dnsLabel'),'-nsg')]"
             ], 
-            "location": "[resourceGroup().location]", 
+            "location": "[variables('location')]", 
             "name": "[variables('nic1Name')]", 
             "properties": {
                 "ipConfigurations": [
@@ -225,7 +225,7 @@
             "dependsOn": [
                 "[variables('vnetId')]"
             ], 
-            "location": "[resourceGroup().location]", 
+            "location": "[variables('location')]", 
             "name": "[variables('nic2Name')]", 
             "properties": {
                 "ipConfigurations": [
@@ -244,7 +244,7 @@
             "tags": {
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "NetworkInterface", 
+                "displayName": "PublicIPAddress", 
                 "environment": "[parameters('tagValues').environment]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
@@ -290,7 +290,7 @@
             "tags": {
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "NetworkSecurityGroup", 
+                "displayName": "PublicIPAddress", 
                 "environment": "[parameters('tagValues').environment]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
@@ -299,12 +299,12 @@
         }, 
         {
             "apiVersion": "[variables('apiVersion')]", 
-            "location": "[resourceGroup().location]", 
+            "location": "[variables('location')]", 
             "name": "[variables('availabilitySetName')]", 
             "tags": {
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "AvailabilitySet", 
+                "displayName": "PublicIPAddress", 
                 "environment": "[parameters('tagValues').environment]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
@@ -313,7 +313,7 @@
         }, 
         {
             "apiVersion": "[variables('apiVersion')]", 
-            "location": "[resourceGroup().location]", 
+            "location": "[variables('location')]", 
             "name": "[variables('storageAccountName')]", 
             "properties": {
                 "accountType": "[variables('storageAccountType')]"
@@ -321,7 +321,7 @@
             "tags": {
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "StorageAccount", 
+                "displayName": "PublicIPAddress", 
                 "environment": "[parameters('tagValues').environment]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
@@ -335,7 +335,7 @@
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('nic1Name'))]"
             ], 
-            "location": "[resourceGroup().location]", 
+            "location": "[variables('location')]", 
             "name": "[parameters('instanceName')]", 
             "plan": {
                 "name": "[variables('skuToUse')]", 
@@ -396,7 +396,7 @@
             "tags": {
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "VirtualMachine", 
+                "displayName": "PublicIPAddress", 
                 "environment": "[parameters('tagValues').environment]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
@@ -422,6 +422,14 @@
                 }, 
                 "type": "CustomScript", 
                 "typeHandlerVersion": "2.0"
+            }, 
+            "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
+                "displayName": "PublicIPAddress", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
             }, 
             "type": "Microsoft.Compute/virtualMachines/extensions"
         }
