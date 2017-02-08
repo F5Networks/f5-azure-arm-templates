@@ -34,11 +34,11 @@ location = "[variables('location')]"
 
 # Determine PAYG or BYOL variables
 sku_to_use = "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]"
-offer_to_use = "[concat('f5-big-ip')]"
+offer_to_use = "f5-big-ip"
 license1_command = "' --license ', parameters('licenseKey1'),"
 if license_type == 'PAYG':
     sku_to_use = "[concat('f5-bigip-virtual-edition-1g-', variables('imageNameToLower'),'-hourly')]"
-    offer_to_use = "[concat('f5-big-ip-hourly')]"
+    offer_to_use = "f5-big-ip-hourly"
     license1_command = ''
 
 
