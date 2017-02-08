@@ -78,6 +78,20 @@
                 "Best"
             ]
         }, 
+        "licenseKey1": {
+            "defaultValue": "REQUIRED", 
+            "type": "string", 
+            "metadata": {
+                "description": "The license token for the F5 BIG-IP(BYOL)"
+            }
+        }, 
+        "licenseKey2": {
+            "defaultValue": "REQUIRED", 
+            "type": "string", 
+            "metadata": {
+                "description": "The license token for the second F5 BIG-IP(BYOL). This field is required when deploying two or more devices"
+            }
+        }, 
         "restrictedSrcAddress": {
             "defaultValue": "*", 
             "type": "string", 
@@ -107,8 +121,8 @@
         "storageAccountType": "Standard_LRS", 
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
-        "skuToUse": "[concat('f5-bigip-virtual-edition-1g-', variables('imageNameToLower'),'-hourly')]", 
-        "offerToUse": "f5-big-ip-hourly", 
+        "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]", 
+        "offerToUse": "f5-big-ip", 
         "availabilitySetName": "[concat(variables('instanceName'), '-avset')]", 
         "nic1Name": "[concat(variables('instanceName'), '-mgmt1')]", 
         "defaultGw": "10.0.1.1", 
