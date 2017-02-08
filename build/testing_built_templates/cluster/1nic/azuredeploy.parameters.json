@@ -17,9 +17,6 @@
         "dnsLabel": {
             "value": "REQUIRED"
         }, 
-        "instanceName": {
-            "value": "f5vm01"
-        }, 
         "instanceType": {
             "value": "Standard_D2_v2"
         }, 
