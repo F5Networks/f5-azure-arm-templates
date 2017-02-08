@@ -107,7 +107,6 @@
         "instanceName": "[toLower(parameters('instanceName'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]", 
-        "offerToUse": "[concat('f5-big-ip')]", 
         "availabilitySetName": "[concat(variables('instanceName'), '-avset')]", 
         "nic1Name": "[concat(variables('instanceName'), '-mgmt1')]", 
         "defaultGw": "10.0.1.1", 
@@ -295,7 +294,7 @@
             "name": "[variables('instanceName')]", 
             "plan": {
                 "name": "[variables('skuToUse')]", 
-                "product": "[variables('offerToUse')]", 
+                "product": "f5-big-ip", 
                 "publisher": "f5-networks"
             }, 
             "properties": {
@@ -328,7 +327,7 @@
                 }, 
                 "storageProfile": {
                     "imageReference": {
-                        "offer": "[variables('offerToUse')]", 
+                        "offer": "f5-big-ip", 
                         "publisher": "f5-networks", 
                         "sku": "[variables('skuToUse')]", 
                         "version": "latest"

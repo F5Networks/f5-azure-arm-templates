@@ -114,11 +114,11 @@
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
         "vnetAddressPrefix": "10.0.0.0/16", 
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg'))]", 
+        "publicIPAddressName": "[concat(variables('dnsLabel'), '-pip')]", 
         "subnet1Name": "MGMT_Frontend", 
         "subnet1Id": "[concat(variables('vnetId'), '/subnets/', variables('subnet1Name'))]", 
         "subnet1Prefix": "10.0.1.0/24", 
         "subnet1PrivateAddress": "10.0.1.4", 
-        "publicIPAddressName": "[concat(variables('dnsLabel'), '-pip')]", 
         "publicIPAddressType": "Static", 
         "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]", 
         "subnet2Name": "Web", 
@@ -429,7 +429,7 @@
         }
     ], 
     "outputs": {
-        "MGMT-URL": {
+        "GUI-URL": {
             "type": "string", 
             "value": "[concat('https://', variables('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
         }

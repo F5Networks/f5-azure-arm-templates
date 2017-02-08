@@ -21,18 +21,28 @@ metafile_params = 'base.azuredeploy.parameters.json'
 createdfile = template_location + 'azuredeploy.json'
 createdfile_params = template_location + 'azuredeploy.parameters.json'
 
-#Static Variable Defaults
+# Static Variable Defaults
 nic_reference = ""
 command_to_execute = ""
 
-# Static Variable Assignment
+## Static Variable Assignment ##
 content_version = '1.0.0.0'
 instance_type_list = "Standard_A4", "Standard_A9", "Standard_A11", "Standard_D2", "Standard_D3", "Standard_D4", "Standard_D12", "Standard_D13", "Standard_D14", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2", "Standard_F2", "Standard_F4"
 tags = { "application": "[parameters('tagValues').application]", "environment": "[parameters('tagValues').environment]", "group": "[parameters('tagValues').group]", "owner": "[parameters('tagValues').owner]", "costCenter": "[parameters('tagValues').cost]" }
 api_version = "[variables('apiVersion')]"
 location = "[variables('location')]"
 
-# Load "Meta File(s)" for modification
+# Determine PAYG or BYOL variables
+sku_to_use = "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]"
+offer_to_use = "[concat('f5-big-ip')]"
+license1_command = "' --license ', parameters('licenseKey1'),"
+if license_type == 'PAYG':
+    sku_to_use = "[concat('f5-bigip-virtual-edition-1g-', variables('imageNameToLower'),'-hourly')]"
+    offer_to_use = "[concat('f5-big-ip-hourly')]"
+    license1_command = ''
+
+
+## Load "Meta File(s)" for modification ##
 with open(metafile, 'r') as base:
     data = json.load(base, object_pairs_hook=OrderedDict)
 with open(metafile_params, 'r') as base_params:
@@ -55,9 +65,10 @@ if template_name in ('1nic', '2nic_limited'):
     data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": { "description": "Name of the VM"}}
 data['parameters']['instanceType'] = {"type": "string", "defaultValue": "Standard_D2_v2", "allowedValues": instance_type_list, "metadata": {"description": "Size of the VM"}}
 data['parameters']['imageName'] = { "type": "string", "defaultValue": "Good", "allowedValues": [ "Good", "Better", "Best" ], "metadata": { "description": "F5 SKU(IMAGE) to Deploy"}}
-data['parameters']['licenseKey1'] = { "type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "The license token for the F5 BIG-IP(BYOL)" } }
-if template_name == 'cluster_base':
-    data['parameters']['licenseKey2'] = { "type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "The license token for the second F5 BIG-IP(BYOL). This field is required when deploying two or more devices" } }
+if license_type == 'BYOL':
+    data['parameters']['licenseKey1'] = { "type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "The license token for the F5 BIG-IP(BYOL)" } }
+    if template_name == 'cluster_base':
+        data['parameters']['licenseKey2'] = { "type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "The license token for the second F5 BIG-IP(BYOL). This field is required when deploying two or more devices" } }
 data['parameters']['restrictedSrcAddress'] = { "type": "string", "defaultValue": "*", "metadata": { "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources." } }
 data['parameters']['tagValues'] = { "type": "object", "defaultValue": { "application": "APP", "environment": "ENV", "group": "GROUP", "owner": "OWNER", "cost": "COST" } }
 
@@ -79,9 +90,11 @@ data['variables']['installCloudLibs'] = "[concat(variables('singleQuote'), '#!/b
 data['variables']['newStorageAccountName'] = "[concat(uniquestring(resourceGroup().id), 'stor')]"
 data['variables']['storageAccountType'] = "Standard_LRS"
 data['variables']['dnsLabel'] = "[toLower(parameters('dnsLabel'))]"
-data['variables']['instanceName'] = "[toLower(parameters('instanceName'))]"
+if template_name in ('1nic', '2nic_limited'):
+    data['variables']['instanceName'] = "[toLower(parameters('instanceName'))]"
 data['variables']['imageNameToLower'] = "[toLower(parameters('imageName'))]"
-data['variables']['skuToUse'] = "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]"
+data['variables']['skuToUse'] = sku_to_use
+data['variables']['offerToUse'] = offer_to_use
 data['variables']['availabilitySetName'] = "[concat(variables('instanceName'), '-avset')]"
 data['variables']['nic1Name'] = "[concat(variables('instanceName'), '-mgmt1')]"
 data['variables']['defaultGw'] = "10.0.1.1"
@@ -89,34 +102,33 @@ data['variables']['virtualNetworkName'] = "[concat(variables('instanceName'), '-
 data['variables']['vnetId'] = "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
 data['variables']['vnetAddressPrefix'] = "10.0.0.0/16"
 data['variables']['nsgID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg'))]"
+data['variables']['publicIPAddressName'] = "[concat(variables('dnsLabel'), '-pip')]"
+
 if template_name in ('1nic', '2nic_limited'):
     data['variables']['subnet1Name'] = "MGMT_Frontend"
     data['variables']['subnet1Id'] = "[concat(variables('vnetId'), '/subnets/', variables('subnet1Name'))]"
     data['variables']['subnet1Prefix'] = "10.0.1.0/24"
     data['variables']['subnet1PrivateAddress'] = "10.0.1.4"
-    data['variables']['publicIPAddressName'] = "[concat(variables('dnsLabel'), '-pip')]"
     data['variables']['publicIPAddressType'] = "Static"
     data['variables']['publicIPAddressId'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
-
 if template_name == '2nic_limited':
     data['variables']['subnet2Name'] = "Web"
     data['variables']['subnet2Id'] = "[concat(variables('vnetId'), '/subnets/', variables('subnet2Name'))]"
     data['variables']['subnet2Prefix'] = "10.0.2.0/24"
     data['variables']['subnet2PrivateAddress'] = "10.0.2.4"
     data['variables']['nic2Name'] = "[concat(variables('instanceName'), '-nic2')]"
-
 if template_name == 'cluster_base':
-    data['variables']['subnetName'] = "[concat(parameters('dnsLabel'),'-subNet')]"
+    data['variables']['subnetName'] = "[concat(variables('dnsLabel'),'-subNet')]"
     data['variables']['subnetPrefix'] = "10.10.1.0/24"
     data['variables']['ipAddress'] = "10.10.1."
-    data['variables']['nicNamePrefix'] = "[concat(parameters('dnsLabel'),'-nic')]"
-    data['variables']['loadBalancerName'] = "[concat(parameters('dnsLabel'),'-alb')]"
-    data['variables']['deviceNamePrefix'] = "[concat(parameters('dnsLabel'),'-device')]"
-    data['variables']['lbID'] = "[concat(parameters('dnsLabel'),'-alb')]"
+    data['variables']['nicNamePrefix'] = "[concat(variables('dnsLabel'),'-nic')]"
+    data['variables']['loadBalancerName'] = "[concat(variables('dnsLabel'),'-alb')]"
+    data['variables']['deviceNamePrefix'] = "[concat(variables('dnsLabel'),'-device')]"
+    data['variables']['lbID'] = "[concat(variables('dnsLabel'),'-alb')]"
     data['variables']['frontEndIPConfigID'] = "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]"
     data['variables']['guiMgtID'] = "[concat(variables('lbID'),'/inboundNatRules/guimgt')]"
     data['variables']['sshMgtID'] = "[concat(variables('lbID'),'/inboundNatRules/sshmgt')]"
-    data['variables']['publicIPID'] = "[resourceId('Microsoft.Network/publicIPAddresses',parameters('dnsLabel'))]"
+    data['variables']['publicIPID'] = "[resourceId('Microsoft.Network/publicIPAddresses',variables('dnsLabel'))]"
     data['variables']['subnetRef'] = "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
 
 
@@ -128,7 +140,7 @@ if template_name in ('1nic', '2nic_limited'):
     resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": api_version, "location": location, "name": "[variables('publicIPAddressName')]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[variables('dnsLabel')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
 
 if template_name == 'cluster_base':
-    resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/publicIPAddresses", "name": "[parameters('dnsLabel')]", "location": location, "tags": tags, "properties": { "publicIPAllocationMethod": "Dynamic", "dnsSettings": { "domainNameLabel": "[parameters('dnsLabel')]" } } }]
+    resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/publicIPAddresses", "name": "[variables('publicIPAddressName')]", "location": location, "tags": tags, "properties": { "publicIPAllocationMethod": "Dynamic", "dnsSettings": { "domainNameLabel": "[variables('dnsLabel')]" } } }]
 
 # Virtual Network Resources(s)
 if template_name == '1nic':
@@ -145,18 +157,18 @@ if template_name in ('1nic', '2nic_limited'):
 if template_name == '2nic_limited':
     resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": [ "[variables('vnetId')]" ], "location": location, "name": "[variables('nic2Name')]", "tags": tags, "properties": { "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-ipconfig2')]", "properties": { "privateIPAddress": "[variables('subnet2PrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('subnet2Id')]" } } } ] } }]
 if template_name == 'cluster_base':
-    resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkInterfaces", "name": "[concat(variables('nicNamePrefix'),copyindex())]", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/guimgt',copyindex())]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/sshmgt',copyindex())]", "[concat('Microsoft.Network/networkSecurityGroups/', parameters('dnsLabel'),'-nsg')]" ], "copy": { "count": "[parameters('numberOfInstances')]", "name": "niccopy" }, "properties": { "networkSecurityGroup": { "id": "[variables('nsgID')]" }, "ipConfigurations": [ { "name": "ipconfig1", "properties": { "privateIPAllocationMethod": "Static", "privateIPAddress": "[concat(variables('ipAddress'),add(4,copyindex()))]", "subnet": { "id": "[variables('subnetRef')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ], "loadBalancerInboundNatRules": [ { "id": "[concat(variables('lbID'), '/inboundNatRules/', 'guimgt',copyIndex())]" }, { "id": "[concat(variables('lbID'), '/inboundNatRules/', 'sshmgt',copyIndex())]" } ] } } ] } }]
+    resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkInterfaces", "name": "[concat(variables('nicNamePrefix'),copyindex())]", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/guimgt',copyindex())]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/sshmgt',copyindex())]", "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'),'-nsg')]" ], "copy": { "count": "[parameters('numberOfInstances')]", "name": "niccopy" }, "properties": { "networkSecurityGroup": { "id": "[variables('nsgID')]" }, "ipConfigurations": [ { "name": "ipconfig1", "properties": { "privateIPAllocationMethod": "Static", "privateIPAddress": "[concat(variables('ipAddress'),add(4,copyindex()))]", "subnet": { "id": "[variables('subnetRef')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ], "loadBalancerInboundNatRules": [ { "id": "[concat(variables('lbID'), '/inboundNatRules/', 'guimgt',copyIndex())]" }, { "id": "[concat(variables('lbID'), '/inboundNatRules/', 'sshmgt',copyIndex())]" } ] } } ] } }]
 
 # Network Security Group Resource(s)
 if template_name in ('1nic', '2nic_limited'):
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkSecurityGroups", "location": location, "name": "[concat(variables('dnsLabel'), '-nsg')]", "tags": tags, "properties": { "securityRules": [ { "name": "mgmt_allow_443", "properties": { "description": "", "priority": 101, "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "443", "protocol": "TCP", "direction": "Inbound", "access": "Allow" } }, { "name": "ssh_allow_22", "properties": { "description": "", "priority": 102, "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "22", "protocol": "TCP", "direction": "Inbound", "access": "Allow" } } ] } }]
 
 if template_name == 'cluster_base':
-    resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkSecurityGroups", "name": "[concat(parameters('dnsLabel'), '-nsg')]", "location": location, "tags": tags, "properties": { "securityRules": [ { "name": "mgmt_allow_443", "properties": { "description": "", "priority": 101, "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "443", "protocol": "TCP", "direction": "Inbound", "access": "Allow" } }, { "name": "ssh_allow_22", "properties": { "description": "", "priority": 102, "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "22", "protocol": "TCP", "direction": "Inbound", "access": "Allow" } } ] } }]
+    resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkSecurityGroups", "name": "[concat(variables('dnsLabel'), '-nsg')]", "location": location, "tags": tags, "properties": { "securityRules": [ { "name": "mgmt_allow_443", "properties": { "description": "", "priority": 101, "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "443", "protocol": "TCP", "direction": "Inbound", "access": "Allow" } }, { "name": "ssh_allow_22", "properties": { "description": "", "priority": 102, "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "22", "protocol": "TCP", "direction": "Inbound", "access": "Allow" } } ] } }]
 
 # Load Balancer Resource(s)
 if template_name == 'cluster_base':
-    resources_list += [{ "apiVersion": api_version, "dependsOn": [ "[concat('Microsoft.Network/publicIPAddresses/', parameters('dnsLabel'))]" ], "location": location, "tags": tags, "name": "[variables('loadBalancerName')]", "properties": { "frontendIPConfigurations": [ { "name": "loadBalancerFrontEnd", "properties": { "publicIPAddress": { "id": "[variables('publicIPID')]" } } } ], "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ] }, "type": "Microsoft.Network/loadBalancers" }]
+    resources_list += [{ "apiVersion": api_version, "dependsOn": [ "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]" ], "location": location, "tags": tags, "name": "[variables('loadBalancerName')]", "properties": { "frontendIPConfigurations": [ { "name": "loadBalancerFrontEnd", "properties": { "publicIPAddress": { "id": "[variables('publicIPID')]" } } } ], "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ] }, "type": "Microsoft.Network/loadBalancers" }]
 
 # Load Balancer Inbound NAT Rule(s)
 if template_name == 'cluster_base':
@@ -182,17 +194,20 @@ if template_name == '1nic':
 if template_name == '2nic_limited':
     nic_reference = [{ "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic1Name'))]", "properties": { "primary": True } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic2Name'))]", "properties": { "primary": False } }]
 if template_name in ('1nic', '2nic_limited'):
-    resources_list += [{"apiVersion": api_version, "type": "Microsoft.Compute/virtualMachines", "dependsOn": [ "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", "[concat('Microsoft.Network/networkInterfaces/', variables('nic1Name'))]" ], "location": location, "name": "[variables('instanceName')]", "tags": tags, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "f5-big-ip" }, "properties": { "diagnosticsProfile": { "bootDiagnostics": { "enabled": True, "storageUri": "[concat('http://',variables('newStorageAccountName'),'.blob.core.windows.net')]" } }, "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "networkProfile": { "networkInterfaces":  nic_reference }, "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]" }, "osProfile": { "computerName": "[variables('instanceName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "storageProfile": { "imageReference": { "publisher": "f5-networks", "offer": "f5-big-ip", "sku": "[variables('skuToUse')]", "version": "latest" }, "osDisk": { "caching": "ReadWrite", "createOption": "FromImage", "name": "osdisk", "vhd": { "uri": "[concat('http://',variables('newStorageAccountName'), '.blob.core.windows.net/vhds/', variables('instanceName'), '.vhd')]" } } } } }]
+    resources_list += [{"apiVersion": api_version, "type": "Microsoft.Compute/virtualMachines", "dependsOn": [ "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", "[concat('Microsoft.Network/networkInterfaces/', variables('nic1Name'))]" ], "location": location, "name": "[variables('instanceName')]", "tags": tags, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "[variables('offerToUse')]" }, "properties": { "diagnosticsProfile": { "bootDiagnostics": { "enabled": True, "storageUri": "[concat('http://',variables('newStorageAccountName'),'.blob.core.windows.net')]" } }, "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "networkProfile": { "networkInterfaces":  nic_reference }, "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]" }, "osProfile": { "computerName": "[variables('instanceName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "storageProfile": { "imageReference": { "publisher": "f5-networks", "offer": "[variables('offerToUse')]", "sku": "[variables('skuToUse')]", "version": "latest" }, "osDisk": { "caching": "ReadWrite", "createOption": "FromImage", "name": "osdisk", "vhd": { "uri": "[concat('http://',variables('newStorageAccountName'), '.blob.core.windows.net/vhds/', variables('instanceName'), '.vhd')]" } } } } }]
 
 if template_name == 'cluster_base':
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Compute/virtualMachines", "name": "[concat(variables('deviceNamePrefix'),copyindex())]", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Network/networkInterfaces/', variables('nicNamePrefix'), copyindex())]", "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]" ], "copy": { "count": "[parameters('numberOfInstances')]", "name": "devicecopy" }, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "f5-big-ip" }, "properties": { "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]" }, "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "osProfile": { "computerName": "[concat(variables('deviceNamePrefix'),copyindex())]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "storageProfile": { "imageReference": { "publisher": "f5-networks", "offer": "f5-big-ip", "sku": "[variables('skuToUse')]", "version": "latest" }, "osDisk": { "name": "[concat('osdisk',copyindex())]", "vhd": { "uri": "[concat('http://',variables('newStorageAccountName'),'.blob.core.windows.net/',variables('newStorageAccountName'),'/osDisk',copyindex(),'.vhd')]" }, "caching": "ReadWrite", "createOption": "FromImage" } }, "networkProfile": { "networkInterfaces": [ { "id": "[concat(resourceId('Microsoft.Network/networkInterfaces',variables('nicNamePrefix')),copyindex())]" } ] }, "diagnosticsProfile": { "bootDiagnostics": { "enabled": True, "storageUri": "[concat('http://',variables('newstorageAccountName'),'.blob.core.windows.net')]" } } } }]
 
 # Compute/VM Extension Resource(s)
 if template_name == '1nic':
-    command_to_execute = "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; rm -f /config/cloud/passwd')]"
+    command_to_execute = "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; rm -f /config/cloud/passwd')]"
 if template_name == '2nic_limited':
-    command_to_execute = "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --multi-nic --default-gw ', variables('defaultGw'), ' --vlan vlan_mgmt,1.0 --vlan vlan_1,1.1 --self-ip self_mgmt,', variables('subnet1PrivateAddress'), ',vlan_mgmt --self-ip self_1,', variables('subnet2PrivateAddress'), ',vlan_1 --log-level debug --background --force-reboot; rm -f /config/cloud/passwd')]"
+    command_to_execute = "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --multi-nic --default-gw ', variables('defaultGw'), ' --vlan vlan_mgmt,1.0 --vlan vlan_1,1.1 --self-ip self_mgmt,', variables('subnet1PrivateAddress'), ',vlan_mgmt --self-ip self_1,', variables('subnet2PrivateAddress'), ',vlan_1 --log-level debug --background --force-reboot; rm -f /config/cloud/passwd')]"
+
 if template_name in ('1nic', '2nic_limited'):
+    # String map license 1 if needed for BYOL
+    command_to_execute = command_to_execute.replace('<LICENSE1_COMMAND>', license1_command)
     resources_list += [{"apiVersion": "2016-03-30", "type": "Microsoft.Compute/virtualMachines/extensions", "name": "[concat(variables('instanceName'),'/start')]", "tags": tags, "location": location, "dependsOn": [ "[concat('Microsoft.Compute/virtualMachines/', variables('instanceName'))]" ], "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": [ "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]" ] }, "protectedSettings": { "commandToExecute": command_to_execute } } }]
 
 if template_name == 'cluster_base':
@@ -213,7 +228,7 @@ with open(temp_sort, 'r') as temp_sorted:
 
 ## ARM Outputs ##
 if template_name in ('1nic', '2nic_limited'):
-    data['outputs']['MGMT-URL'] = { "type": "string", "value": "[concat('https://', variables('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com')]" }
+    data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://', variables('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com')]" }
 if template_name == 'cluster_base':
     data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('publicIPID')).dnsSettings.fqdn,':8443')]" }
     data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('publicIPID')).dnsSettings.fqdn,' ',8022)]" }

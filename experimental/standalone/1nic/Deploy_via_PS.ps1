@@ -27,8 +27,12 @@ param(
   $imageName = "Good",
 
   [Parameter(Mandatory=$True)]
+  [ValidateSet("PAYG","BYOL")]
   [string]
-  $licenseKey1,
+  $licenseType,
+
+  [string]
+  $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),
 
   [string]
   $restrictedSrcAddress  = "*",
@@ -66,7 +70,15 @@ New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
 
 # Create Arm Deployment
 $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
-$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"
+if ($licenseType -eq "BYOL") {
+  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\azuredeploy.json"; $parametersFilePath = ".\BYOL\azuredeploy.parameters.json" }
+  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"
+} elseif ($licenseType -eq "PAYG") {
+  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }
+  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"
+} else {
+  Write-Error -Message "Uh oh, shouldn't make it here!  Please select valid license type..."
+}
 
 # Print Output of Deployment to Console
 $deployment

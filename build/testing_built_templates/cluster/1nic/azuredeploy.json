@@ -120,7 +120,6 @@
         "newStorageAccountName": "[concat(uniquestring(resourceGroup().id), 'stor')]", 
         "storageAccountType": "Standard_LRS", 
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
-        "instanceName": "[toLower(parameters('instanceName'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]", 
         "availabilitySetName": "[concat(variables('instanceName'), '-avset')]", 
@@ -130,27 +129,28 @@
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
         "vnetAddressPrefix": "10.0.0.0/16", 
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg'))]", 
-        "subnetName": "[concat(parameters('dnsLabel'),'-subNet')]", 
+        "publicIPAddressName": "[concat(variables('dnsLabel'), '-pip')]", 
+        "subnetName": "[concat(variables('dnsLabel'),'-subNet')]", 
         "subnetPrefix": "10.10.1.0/24", 
         "ipAddress": "10.10.1.", 
-        "nicNamePrefix": "[concat(parameters('dnsLabel'),'-nic')]", 
-        "loadBalancerName": "[concat(parameters('dnsLabel'),'-alb')]", 
-        "deviceNamePrefix": "[concat(parameters('dnsLabel'),'-device')]", 
-        "lbID": "[concat(parameters('dnsLabel'),'-alb')]", 
+        "nicNamePrefix": "[concat(variables('dnsLabel'),'-nic')]", 
+        "loadBalancerName": "[concat(variables('dnsLabel'),'-alb')]", 
+        "deviceNamePrefix": "[concat(variables('dnsLabel'),'-device')]", 
+        "lbID": "[concat(variables('dnsLabel'),'-alb')]", 
         "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]", 
         "guiMgtID": "[concat(variables('lbID'),'/inboundNatRules/guimgt')]", 
         "sshMgtID": "[concat(variables('lbID'),'/inboundNatRules/sshmgt')]", 
-        "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('dnsLabel'))]", 
+        "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('dnsLabel'))]", 
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
     }, 
     "resources": [
         {
             "apiVersion": "[variables('apiVersion')]", 
             "location": "[variables('location')]", 
-            "name": "[parameters('dnsLabel')]", 
+            "name": "[variables('publicIPAddressName')]", 
             "properties": {
                 "dnsSettings": {
-                    "domainNameLabel": "[parameters('dnsLabel')]"
+                    "domainNameLabel": "[variables('dnsLabel')]"
                 }, 
                 "publicIPAllocationMethod": "Dynamic"
             }, 
@@ -202,7 +202,7 @@
                 "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]", 
                 "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/guimgt',copyindex())]", 
                 "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/sshmgt',copyindex())]", 
-                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('dnsLabel'),'-nsg')]"
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'),'-nsg')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[concat(variables('nicNamePrefix'),copyindex())]", 
@@ -248,7 +248,7 @@
         {
             "apiVersion": "[variables('apiVersion')]", 
             "location": "[variables('location')]", 
-            "name": "[concat(parameters('dnsLabel'), '-nsg')]", 
+            "name": "[concat(variables('dnsLabel'), '-nsg')]", 
             "properties": {
                 "securityRules": [
                     {
@@ -293,7 +293,7 @@
         {
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
-                "[concat('Microsoft.Network/publicIPAddresses/', parameters('dnsLabel'))]"
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('loadBalancerName')]", 
