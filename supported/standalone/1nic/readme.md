@@ -10,7 +10,7 @@ F5 is running with a single interface, where both management and data plane traf
 See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution, as well as an important note about optionally changing the BIG-IP Management port.
 
 ## Security
-This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code. 
+This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
 In the *variables* section:
   - In the *verifyHash* variable: search for **script-signature** and then a hashed signature.
   - In the *installCloudLibs* variable: ensure this includes **tmsh run cli script verifyHash /config/cloud/f5-cloud-libs.tar.gz**.
@@ -22,10 +22,10 @@ Additionally, F5 provides checksums for all of our supported templates. For inst
 
   - For a list versions of the BIG-IP Virtual Edition (VE) and F5 licenses that are supported on specific hypervisors and Microsoft Azure, see https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/ve-supported-hypervisor-matrix.html.
 
-### Help 
+### Help
 Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from F5 Technical Support via your typical methods.
 
-We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates.  This channel is typically monitored Monday-Friday 9-5 PST by F5 employees who will offer best-effort support. 
+We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates.  This channel is typically monitored Monday-Friday 9-5 PST by F5 employees who will offer best-effort support.
 
 
 ## Installation
@@ -62,8 +62,8 @@ Use this button to deploy the template:
 ```powershell
     # Params below match to parameters in the azuredeploy.json that are gen-unique, otherwise pointing to
     # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
-    # can be supplied inline when running this script but if they arent then the default will be used as specified in below param arguments
-    # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabel f51nicdeploy01 -instanceName f51nic -licenseKey1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f51nicdeploy01 -EmailTo user@f5.com
+    # can be supplied inline when running this script but if they arent then the default will be used as specificed in below param arguments
+    # Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -adminPassword yourpassword -dnsLabel f5dnslabel01 -instanceName f5vm01 -licenseType BYOL -licenseKey1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX -resourceGroupName f5rg01
 
     param(
     [Parameter(Mandatory=$True)]
@@ -86,11 +86,15 @@ Use this button to deploy the template:
     $instanceType = "Standard_D2_v2",
 
     [string]
-    $imageName = "Best",
+    $imageName = "Good",
 
     [Parameter(Mandatory=$True)]
+    [ValidateSet("PAYG","BYOL")]
     [string]
-    $licenseKey1,
+    $licenseType,
+
+    [string]
+    $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),
 
     [string]
     $restrictedSrcAddress  = "*",
@@ -128,10 +132,19 @@ Use this button to deploy the template:
 
     # Create Arm Deployment
     $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
+    if ($licenseType -eq "BYOL") {
+    if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\azuredeploy.json"; $parametersFilePath = ".\BYOL\azuredeploy.parameters.json" }
     $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"
+    } elseif ($licenseType -eq "PAYG") {
+    if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"
+    } else {
+    Write-Error -Message "Uh oh, shouldn't make it here!  Please select valid license type..."
+    }
 
     # Print Output of Deployment to Console
     $deployment
+
 ```
 
 =======
@@ -142,19 +155,19 @@ Use this button to deploy the template:
     #!/bin/bash
 
     # Bash Script to deploy an ARM template into Azure, using azure cli 1.0
-    # Example Command: ./deploy_via_bash.sh --adminusr azureuser --adminpwd 'yourpassword' --dnslabel f5dnslabel --instname f5vm01 --key1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX --rgname f5rgname --azureusr administrator@domain.com --azurepwd 'yourpassword'
+    # Example Command: ./deploy_via_bash.sh --adminusr azureuser --adminpwd 'yourpassword' --dnslabel f5dnslabel --instname f5vm01 --rgname f5rgname --lictype payg --azureusr administrator@domain.com --azurepwd 'yourpassword'
 
-    # Assign Script Parameters and Define Variables
-    # Specify static items, change these as needed or make them parameters (instance_type is already an optional parameter)
+    # Assign Script Paramters and Define Variables
+    # Specify static items, change these as needed or make them parameters (instance_type is already an optional paramter)
     region="westus"
-    template_file="azuredeploy.json"
-    parameter_file="azuredeploy.parameters.json"
+    template_file="./PAYG/azuredeploy.json"
+    parameter_file="./PAYG/azuredeploy.parameters.json"
     instance_type="Standard_D2_v2"
     image_name="Best"
     restricted_source_address="*"
     tag_values="{\"application\":\"APP\",\"environment\":\"ENV\",\"group\":\"GROUP\",\"owner\":\"OWNER\",\"cost\":\"COST\"}"
 
-    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k: --long adminusr:,adminpwd:,dnslabel:,instname:,insttype:,imgname:,key1:,rstsrcaddr:,rgname:,azureusr:,azurepwd: -n $0 -- "$@"`
+    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l: --long adminusr:,adminpwd:,dnslabel:,instname:,insttype:,imgname:,lictype:,key1:,rstsrcaddr:,rgname:,azureusr:,azurepwd: -n $0 -- "$@"`
     eval set -- "$ARGS"
 
 
@@ -179,19 +192,22 @@ Use this button to deploy the template:
             -f|--imgname)
                 image_name=$2
                 shift 2;;
-            -g|--key1)
+            -g|--lictype)
+                license_type=$2
+                shift 2;;
+            -h|--key1)
                 license_key_1=$2
                 shift 2;;
-            -h|--rstsrcaddr)
+            -i|--rstsrcaddr)
                 restricted_source_address=$2
                 shift 2;;
-            -i|--rgname)
+            -j|--rgname)
                 resource_group_name=$2
                 shift 2;;
-            -j|--azureusr)
+            -k|--azureusr)
                 azure_user=$2
                 shift 2;;
-            -k|--azurepwd)
+            -l|--azurepwd)
                 azure_pwd=$2
                 shift 2;;
             --)
@@ -199,18 +215,25 @@ Use this button to deploy the template:
                 break;;
         esac
     done
-
-    echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
-    sleep 3
-
     #If a required parameter is not passed, the script will prompt for it below
-    required_variables="admin_username admin_password dns_label instance_name license_key_1 resource_group_name azure_user azure_pwd"
+    required_variables="admin_username admin_password dns_label instance_name license_type resource_group_name azure_user azure_pwd"
     for variable in $required_variables
             do
             if [ -v ${!variable} ] ; then
                     read -p "Please enter value for $variable:" $variable
             fi
     done
+    # Prompt for license key if not supplied and byol is selected
+    if [ $license_type == "byol" ]; then
+        if [ -v $license_key_1 ] ; then
+                read -p "Please enter value for license_key_1:" license_key_1
+        fi
+        template_file="./BYOL/azuredeploy.json"
+        parameter_file="./BYOL/azuredeploy.parameters.json"
+    fi
+
+    echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
+    sleep 3
 
     # Login to Azure, for simplicity in this example using username and password supplied as script arguments --azureusr and --azurepwd
     # Perform Check to see if already logged in
@@ -227,8 +250,14 @@ Use this button to deploy the template:
 
     # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
     # such as can been done with Powershell...oh well!
-    azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"instanceName\":{\"value\":\"$instance_name\"},\"instanceType\":{\"value\":\"$instance_type\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"imageName\":{\"value\":\"$image_name\"},\"restrictedSrcAddress\":{\"value\":\"$restricted_source_address\"},\"tagValues\":{\"value\":$tag_values}}"
-
+    if [ $license_type == "byol" ]; then
+        azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"instanceName\":{\"value\":\"$instance_name\"},\"instanceType\":{\"value\":\"$instance_type\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"imageName\":{\"value\":\"$image_name\"},\"restrictedSrcAddress\":{\"value\":\"$restricted_source_address\"},\"tagValues\":{\"value\":$tag_values}}"
+    elif [ $license_type == "payg" ]; then
+        azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"instanceName\":{\"value\":\"$instance_name\"},\"instanceType\":{\"value\":\"$instance_type\"},\"imageName\":{\"value\":\"$image_name\"},\"restrictedSrcAddress\":{\"value\":\"$restricted_source_address\"},\"tagValues\":{\"value\":$tag_values}}"
+    else
+        echo "Uh oh, shouldn't make it here! Ensure license type is either payg or byol"
+        exit 1
+    fi
 ```
 
 ## Configuration Example <a name="config">
@@ -238,16 +267,16 @@ The following is a simple configuration diagram for this single NIC deployment. 
 ![Single NIC configuration example](images/azure-1nic-sm.png)
 
 ### Changing the BIG-IP Configuration Utility (GUI) port
-The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.  
-***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly. 
+The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.
+***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
 
 ## Documentation
 
 The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html) decribes how to create the configuration manually without using the ARM template.
 
-## Deploying Custom Configuration to an Azure Virtual Machine 
+## Deploying Custom Configuration to an Azure Virtual Machine
 
-This sample code uses the CustomScript extension resource to configure the f5.ip_forwarding iApp on BIG-IP VE in Azure Resource Manager. 
+This sample code uses the CustomScript extension resource to configure the f5.ip_forwarding iApp on BIG-IP VE in Azure Resource Manager.
 
 The CustomScript extension resource name must reference the Azure virtual machine name and must have a dependency on that virtual machine. You can use only one CustomScript extension resource per virtual machine; however, you can combine multiple semicolon-delimited commands in a single extension resource definition.
 
@@ -295,7 +324,7 @@ Note the hashed script-signature may be different in your template.<br>
 
 
 ## Filing Issues
-If you find an issue, we would love to hear about it. 
+If you find an issue, we would love to hear about it.
 You have a choice when it comes to filing issues:
   - Use the **Issues** link on the GitHub menu bar in this repository for items such as enhancement or feature requests and non-urgent bug fixes. Tell us as much as you can about what you found and how you found it.
   - Contact F5 Technical support via your typical method for more time sensitive changes and other issues requiring immediate support.

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Bash Script to deploy an ARM template into Azure, using azure cli 1.0
-# Example Command: ./deploy_via_bash.sh --adminusr azureuser --adminpwd 'yourpassword' --dnslabel f5dnslabel --instname f5vm01 --key1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX --rgname f5rgname --azureusr administrator@domain.com --azurepwd 'yourpassword'
+# Example Command: ./deploy_via_bash.sh --adminusr azureuser --adminpwd 'yourpassword' --dnslabel f5dnslabel --instname f5vm01 --rgname f5rgname --lictype payg --azureusr administrator@domain.com --azurepwd 'yourpassword'
 
 # Assign Script Paramters and Define Variables
 # Specify static items, change these as needed or make them parameters (instance_type is already an optional paramter)
@@ -61,7 +61,7 @@ while true; do
             break;;
     esac
 done
-#If a required paramater is not passed, the script will prompt for it below
+#If a required parameter is not passed, the script will prompt for it below
 required_variables="admin_username admin_password dns_label instance_name license_type resource_group_name azure_user azure_pwd"
 for variable in $required_variables
         do
