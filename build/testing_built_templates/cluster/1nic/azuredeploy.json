@@ -145,7 +145,7 @@
     }, 
     "resources": [
         {
-            "apiVersion": "2015-06-15", 
+            "apiVersion": "[variables('apiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[parameters('dnsLabel')]", 
             "properties": {
@@ -157,7 +157,6 @@
             "tags": {
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "PublicIPAddress", 
                 "environment": "[parameters('tagValues').environment]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
@@ -165,7 +164,7 @@
             "type": "Microsoft.Network/publicIPAddresses"
         }, 
         {
-            "apiVersion": "2015-06-15", 
+            "apiVersion": "[variables('apiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[variables('virtualNetworkName')]", 
             "properties": {
@@ -186,7 +185,6 @@
             "tags": {
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "VirtualNetwork", 
                 "environment": "[parameters('tagValues').environment]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
@@ -194,7 +192,7 @@
             "type": "Microsoft.Network/virtualNetworks"
         }, 
         {
-            "apiVersion": "2015-06-15", 
+            "apiVersion": "[variables('apiVersion')]", 
             "copy": {
                 "count": "[parameters('numberOfInstances')]", 
                 "name": "niccopy"
@@ -241,7 +239,6 @@
             "tags": {
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "NetworkInterface", 
                 "environment": "[parameters('tagValues').environment]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
@@ -249,7 +246,7 @@
             "type": "Microsoft.Network/networkInterfaces"
         }, 
         {
-            "apiVersion": "2015-06-15", 
+            "apiVersion": "[variables('apiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[concat(parameters('dnsLabel'), '-nsg')]", 
             "properties": {
@@ -287,7 +284,6 @@
             "tags": {
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "NetworkSecurityGroup", 
                 "environment": "[parameters('tagValues').environment]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
@@ -295,7 +291,7 @@
             "type": "Microsoft.Network/networkSecurityGroups"
         }, 
         {
-            "apiVersion": "2015-06-15", 
+            "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
                 "[concat('Microsoft.Network/publicIPAddresses/', parameters('dnsLabel'))]"
             ], 
@@ -321,7 +317,6 @@
             "tags": {
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "LoadBalancer", 
                 "environment": "[parameters('tagValues').environment]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
@@ -329,7 +324,7 @@
             "type": "Microsoft.Network/loadBalancers"
         }, 
         {
-            "apiVersion": "2015-06-15", 
+            "apiVersion": "[variables('apiVersion')]", 
             "copy": {
                 "count": "[parameters('numberOfInstances')]", 
                 "name": "lbNatLoop"
@@ -351,13 +346,12 @@
             "type": "Microsoft.Network/loadBalancers/inboundNatRules"
         }, 
         {
-            "apiVersion": "2015-06-15", 
+            "apiVersion": "[variables('apiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[variables('availabilitySetName')]", 
             "tags": {
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "AvailabilitySet", 
                 "environment": "[parameters('tagValues').environment]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
@@ -365,7 +359,7 @@
             "type": "Microsoft.Compute/availabilitySets"
         }, 
         {
-            "apiVersion": "2015-06-15", 
+            "apiVersion": "[variables('apiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[variables('newStorageAccountName')]", 
             "properties": {
@@ -382,7 +376,7 @@
             "type": "Microsoft.Storage/storageAccounts"
         }, 
         {
-            "apiVersion": "2015-06-15", 
+            "apiVersion": "[variables('apiVersion')]", 
             "copy": {
                 "count": "[parameters('numberOfInstances')]", 
                 "name": "devicecopy"
@@ -444,7 +438,6 @@
             "tags": {
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "VirtualMachine", 
                 "environment": "[parameters('tagValues').environment]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
@@ -471,6 +464,13 @@
                 "type": "CustomScript", 
                 "typeHandlerVersion": "2.0"
             }, 
+            "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
+            }, 
             "type": "Microsoft.Compute/virtualMachines/extensions"
         }, 
         {
@@ -496,6 +496,13 @@
                 }, 
                 "type": "CustomScript", 
                 "typeHandlerVersion": "2.0"
+            }, 
+            "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
             }, 
             "type": "Microsoft.Compute/virtualMachines/extensions"
         }
