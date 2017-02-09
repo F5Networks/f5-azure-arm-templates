@@ -17,6 +17,9 @@
           "adminUsername": {
                "value": "azureuser"
           },
+          "adminPassword": {
+              "value": "GEN_UNIQUE"
+          },
           "dnsLabel": {
                "value": "GEN-UNIQUE"
           },
