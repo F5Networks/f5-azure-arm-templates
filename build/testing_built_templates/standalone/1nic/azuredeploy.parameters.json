@@ -20,6 +20,9 @@
         "imageName": {
             "value": "Good"
         }, 
+        "licenseKey1": {
+            "value": "REQUIRED"
+        }, 
         "restrictedSrcAddress": {
             "value": "*"
         }, 

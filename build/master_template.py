@@ -8,12 +8,14 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-t", "--template-name", action="store", type="string", dest="template_name", help="Template Name: 1nic, 2nic_limited, cluster_base, etc..." )
 parser.add_option("-l", "--license-type", action="store", type="string", dest="license_type", default="BYOL", help="License Type: BYOL or PAYG" )
-parser.add_option("-z", "--template-location", action="store", type="string", dest="template_location", help="Template Location: such as ../experimental/standalone/1nic/" )
+parser.add_option("-y", "--template-location", action="store", type="string", dest="template_location", help="Template Location: such as ../experimental/standalone/1nic/" )
+parser.add_option("-z", "--script-location", action="store", type="string", dest="script_location", help="Template Location: such as ../experimental/standalone/1nic/" )
 
 (options, args) = parser.parse_args()
 template_name = options.template_name
 license_type = options.license_type
 template_location = options.template_location
+script_location = options.template_location
 
 # Specify meta file and file to create(should be argument)
 metafile = 'base.azuredeploy.json'
@@ -242,3 +244,48 @@ with open(createdfile, 'w') as finished:
 with open(createdfile_params, 'w') as finished_params:
     json.dump(data_params, finished_params, indent=4, sort_keys=False, ensure_ascii=False)
     finished_params.close()
+
+
+
+
+
+### Update deployment scripts and write to appropriate location ###
+
+## PowerShell Script ##
+ps_meta_script = 'base.deploy_via_ps.ps1'
+ps_script_loc = script_location + 'Deploy_via_PS.ps1'
+param_array = []
+param_str = ''
+mandatory_cmd = ''
+
+# Create Dynamic Parameter Array
+for parameter in data['parameters']:
+    default_value = 'null'
+    mandatory = False
+    try:
+        if data['parameters'][parameter]['defaultValue'] != 'REQUIRED':
+            default_value = data['parameters'][parameter]['defaultValue']
+    except:
+        default_value = 'null'
+    if parameter in ('adminUsername', 'adminPassword', 'dnsLabel', 'instanceName'):
+        mandatory = True
+    param_array.append([parameter, default_value, mandatory])
+
+for ps_param in param_array:
+    print ps_param
+    mandatory_cmd = ''
+    if ps_param[2]:
+        mandatory_cmd = '[Parameter(Mandatory=$True)]'
+    param_str += '\n  ' + mandatory_cmd + '\n  [string]\n  $' + ps_param[0] + ',\n'
+
+#print param_str
+with open(ps_meta_script, 'r') as ps_script:
+    ps_script_str = ps_script.read()
+    # Map necessary script items
+    ps_script_str = ps_script_str.replace('<DYNAMIC_PARAMETERS>', param_str)
+    ps_script_str = ps_script_str.replace('<DEPLOYMENT_CREATE>', 'if ($licenseType -eq "BYOL") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\azuredeploy.json"; $parametersFilePath = ".\BYOL\azuredeploy.parameters.json" }\n  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"\n} elseif ($licenseType -eq "PAYG") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }\n  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"\n} else {\n  Write-Error -Message "Uh oh, something went wrong!  Please select valid license type..."\n}')
+    # Write to actual script location
+    with open(ps_script_loc, 'w') as ps_script_complete:
+        ps_script_complete.write(ps_script_str)
+
+# Bash Script
