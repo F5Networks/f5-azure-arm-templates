@@ -28,7 +28,7 @@ nic_reference = ""
 command_to_execute = ""
 
 ## Static Variable Assignment ##
-content_version = '1.0.0.0'
+content_version = '1.1.0.0'
 instance_type_list = "Standard_A4", "Standard_A9", "Standard_A11", "Standard_D2", "Standard_D3", "Standard_D4", "Standard_D12", "Standard_D13", "Standard_D14", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2", "Standard_F2", "Standard_F4"
 tags = { "application": "[parameters('tagValues').application]", "environment": "[parameters('tagValues').environment]", "group": "[parameters('tagValues').group]", "owner": "[parameters('tagValues').owner]", "costCenter": "[parameters('tagValues').cost]" }
 api_version = "[variables('apiVersion')]"
@@ -250,42 +250,42 @@ with open(createdfile_params, 'w') as finished_params:
 
 
 ### Update deployment scripts and write to appropriate location ###
-
-## PowerShell Script ##
-ps_meta_script = 'base.deploy_via_ps.ps1'
-ps_script_loc = script_location + 'Deploy_via_PS.ps1'
-param_array = []
-param_str = ''
-mandatory_cmd = ''
-
-# Create Dynamic Parameter Array
-for parameter in data['parameters']:
-    default_value = 'null'
-    mandatory = False
-    try:
-        if data['parameters'][parameter]['defaultValue'] != 'REQUIRED':
-            default_value = data['parameters'][parameter]['defaultValue']
-    except:
-        default_value = 'null'
-    if parameter in ('adminUsername', 'adminPassword', 'dnsLabel', 'instanceName'):
-        mandatory = True
-    param_array.append([parameter, default_value, mandatory])
-
-for ps_param in param_array:
-    print ps_param
+if False:
+    ## PowerShell Script ##
+    ps_meta_script = 'base.deploy_via_ps.ps1'
+    ps_script_loc = script_location + 'Deploy_via_PS.ps1'
+    param_array = []
+    param_str = ''
     mandatory_cmd = ''
-    if ps_param[2]:
-        mandatory_cmd = '[Parameter(Mandatory=$True)]'
-    param_str += '\n  ' + mandatory_cmd + '\n  [string]\n  $' + ps_param[0] + ',\n'
 
-#print param_str
-with open(ps_meta_script, 'r') as ps_script:
-    ps_script_str = ps_script.read()
-    # Map necessary script items
-    ps_script_str = ps_script_str.replace('<DYNAMIC_PARAMETERS>', param_str)
-    ps_script_str = ps_script_str.replace('<DEPLOYMENT_CREATE>', 'if ($licenseType -eq "BYOL") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\azuredeploy.json"; $parametersFilePath = ".\BYOL\azuredeploy.parameters.json" }\n  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"\n} elseif ($licenseType -eq "PAYG") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }\n  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"\n} else {\n  Write-Error -Message "Uh oh, something went wrong!  Please select valid license type..."\n}')
-    # Write to actual script location
-    with open(ps_script_loc, 'w') as ps_script_complete:
-        ps_script_complete.write(ps_script_str)
+    # Create Dynamic Parameter Array
+    for parameter in data['parameters']:
+        default_value = 'null'
+        mandatory = False
+        try:
+            if data['parameters'][parameter]['defaultValue'] != 'REQUIRED':
+                default_value = data['parameters'][parameter]['defaultValue']
+        except:
+            default_value = 'null'
+        if parameter in ('adminUsername', 'adminPassword', 'dnsLabel', 'instanceName'):
+            mandatory = True
+        param_array.append([parameter, default_value, mandatory])
 
-# Bash Script
+    for ps_param in param_array:
+        print ps_param
+        mandatory_cmd = ''
+        if ps_param[2]:
+            mandatory_cmd = '[Parameter(Mandatory=$True)]'
+        param_str += '\n  ' + mandatory_cmd + '\n  [string]\n  $' + ps_param[0] + ',\n'
+
+    #print param_str
+    with open(ps_meta_script, 'r') as ps_script:
+        ps_script_str = ps_script.read()
+        # Map necessary script items
+        ps_script_str = ps_script_str.replace('<DYNAMIC_PARAMETERS>', param_str)
+        ps_script_str = ps_script_str.replace('<DEPLOYMENT_CREATE>', 'if ($licenseType -eq "BYOL") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\azuredeploy.json"; $parametersFilePath = ".\BYOL\azuredeploy.parameters.json" }\n  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"\n} elseif ($licenseType -eq "PAYG") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }\n  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"\n} else {\n  Write-Error -Message "Uh oh, something went wrong!  Please select valid license type..."\n}')
+        # Write to actual script location
+        with open(ps_script_loc, 'w') as ps_script_complete:
+            ps_script_complete.write(ps_script_str)
+
+    # Bash Script
