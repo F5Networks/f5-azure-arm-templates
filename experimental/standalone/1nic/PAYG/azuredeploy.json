@@ -4,37 +4,32 @@
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser", 
-            "type": "string", 
             "metadata": {
                 "description": "User name for the Virtual Machine."
-            }
+            }, 
+            "type": "string"
         }, 
         "adminPassword": {
-            "type": "securestring", 
             "metadata": {
                 "description": "Password to login to the Virtual Machine."
-            }
+            }, 
+            "type": "securestring"
         }, 
         "dnsLabel": {
             "defaultValue": "REQUIRED", 
-            "type": "string", 
             "metadata": {
                 "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
-            }
+            }, 
+            "type": "string"
         }, 
         "instanceName": {
             "defaultValue": "f5vm01", 
-            "type": "string", 
             "metadata": {
                 "description": "Name of the VM"
-            }
+            }, 
+            "type": "string"
         }, 
         "instanceType": {
-            "defaultValue": "Standard_D2_v2", 
-            "metadata": {
-                "description": "Size of the VM"
-            }, 
-            "type": "string", 
             "allowedValues": [
                 "Standard_A4", 
                 "Standard_A9", 
@@ -55,32 +50,49 @@
                 "Standard_D15_v2", 
                 "Standard_F2", 
                 "Standard_F4"
-            ]
+            ], 
+            "defaultValue": "Standard_D2_v2", 
+            "metadata": {
+                "description": "Size of the VM"
+            }, 
+            "type": "string"
         }, 
         "imageName": {
-            "defaultValue": "Good", 
-            "metadata": {
-                "description": "F5 SKU(IMAGE) to Deploy"
-            }, 
-            "type": "string", 
             "allowedValues": [
                 "Good", 
                 "Better", 
                 "Best"
-            ]
+            ], 
+            "defaultValue": "Good", 
+            "metadata": {
+                "description": "F5 SKU(IMAGE) to Deploy"
+            }, 
+            "type": "string"
+        }, 
+        "licensedBandwidth": {
+            "allowedValues": [
+                "25m", 
+                "200m", 
+                "1g"
+            ], 
+            "defaultValue": "200m", 
+            "metadata": {
+                "description": "PAYG licensed bandwidth to allocate for this image."
+            }, 
+            "type": "string"
         }, 
         "restrictedSrcAddress": {
             "defaultValue": "*", 
-            "type": "string", 
             "metadata": {
                 "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources."
-            }
+            }, 
+            "type": "string"
         }, 
         "tagValues": {
             "defaultValue": {
-                "environment": "ENV", 
                 "application": "APP", 
                 "cost": "COST", 
+                "environment": "ENV", 
                 "group": "GROUP", 
                 "owner": "OWNER"
             }, 
@@ -99,7 +111,7 @@
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
         "instanceName": "[toLower(parameters('instanceName'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
-        "skuToUse": "[concat('f5-bigip-virtual-edition-1g-', variables('imageNameToLower'),'-hourly')]", 
+        "skuToUse": "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]", 
         "offerToUse": "f5-big-ip-hourly", 
         "availabilitySetName": "[concat(variables('instanceName'), '-avset')]", 
         "nic1Name": "[concat(variables('instanceName'), '-mgmt1')]", 

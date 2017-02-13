@@ -1,4 +1,5 @@
 #/usr/bin/python env
+import sys
 import os
 import json
 from collections import OrderedDict
@@ -8,22 +9,22 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-t", "--template-name", action="store", type="string", dest="template_name", help="Template Name: 1nic, 2nic_limited, cluster_base, etc..." )
 parser.add_option("-l", "--license-type", action="store", type="string", dest="license_type", default="BYOL", help="License Type: BYOL or PAYG" )
-parser.add_option("-y", "--template-location", action="store", type="string", dest="template_location", help="Template Location: such as ../experimental/standalone/1nic/" )
-parser.add_option("-z", "--script-location", action="store", type="string", dest="script_location", help="Template Location: such as ../experimental/standalone/1nic/" )
+parser.add_option("-q", "--template-location", action="store", type="string", dest="template_location", help="Template Location: such as ../experimental/standalone/1nic/PAYG/" )
+parser.add_option("-r", "--script-location", action="store", type="string", dest="script_location", help="Script Location: such as ../experimental/standalone/1nic/" )
 
 (options, args) = parser.parse_args()
 template_name = options.template_name
 license_type = options.license_type
 template_location = options.template_location
-script_location = options.template_location
+script_location = options.script_location
 
-# Specify meta file and file to create(should be argument)
+## Specify meta file and file to create(should be argument)
 metafile = 'base.azuredeploy.json'
 metafile_params = 'base.azuredeploy.parameters.json'
 createdfile = template_location + 'azuredeploy.json'
 createdfile_params = template_location + 'azuredeploy.parameters.json'
 
-# Static Variable Defaults
+## Static Variable Defaults
 nic_reference = ""
 command_to_execute = ""
 
@@ -34,12 +35,12 @@ tags = { "application": "[parameters('tagValues').application]", "environment": 
 api_version = "[variables('apiVersion')]"
 location = "[variables('location')]"
 
-# Determine PAYG or BYOL variables
+## Determine PAYG/BYOL variables
 sku_to_use = "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]"
 offer_to_use = "f5-big-ip"
 license1_command = "' --license ', parameters('licenseKey1'),"
 if license_type == 'PAYG':
-    sku_to_use = "[concat('f5-bigip-virtual-edition-1g-', variables('imageNameToLower'),'-hourly')]"
+    sku_to_use = "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]"
     offer_to_use = "f5-big-ip-hourly"
     license1_command = ''
 
@@ -51,38 +52,43 @@ with open(metafile_params, 'r') as base_params:
     data_params = json.load(base_params, object_pairs_hook=OrderedDict)
 
 
-### Create/Modify ARM Objects ###
+############### Create/Modify ARM Objects ###############
 data['contentVersion'] = content_version
 data_params['contentVersion'] = content_version
 
-## ARM Parameters ##
+########## ARM Parameters ##########
 if template_name == 'cluster_base':
     data['parameters']['solutionDeploymentName'] = {"type": "string", "metadata": {"description": "A unique name for this deployment."}}
     data['parameters']['numberOfInstances'] = {"type": "int", "defaultValue": 2, "allowedValues": [ 2 ], "metadata": { "description": "The number of BIG-IP VEs that will be deployed in front of your application." } }
-    data['parameters']['solutionDeploymentName'] = {"type": "string", "metadata": { "description": "A unique name for this deployment." } }
 data['parameters']['adminUsername'] = {"type": "string", "defaultValue": "azureuser", "metadata": {"description": "User name for the Virtual Machine."}}
 data['parameters']['adminPassword'] = {"type": "securestring", "metadata": { "description": "Password to login to the Virtual Machine." } }
 data['parameters']['dnsLabel'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "Unique DNS Name for the Public IP used to access the Virtual Machine." } }
 if template_name in ('1nic', '2nic_limited'):
     data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": { "description": "Name of the VM"}}
 data['parameters']['instanceType'] = {"type": "string", "defaultValue": "Standard_D2_v2", "allowedValues": instance_type_list, "metadata": {"description": "Size of the VM"}}
-data['parameters']['imageName'] = { "type": "string", "defaultValue": "Good", "allowedValues": [ "Good", "Better", "Best" ], "metadata": { "description": "F5 SKU(IMAGE) to Deploy"}}
+data['parameters']['imageName'] = {"type": "string", "defaultValue": "Good", "allowedValues": [ "Good", "Better", "Best" ], "metadata": { "description": "F5 SKU(IMAGE) to Deploy"}}
 if license_type == 'BYOL':
-    data['parameters']['licenseKey1'] = { "type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "The license token for the F5 BIG-IP(BYOL)" } }
+    data['parameters']['licenseKey1'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "The license token for the F5 BIG-IP(BYOL)" } }
     if template_name == 'cluster_base':
-        data['parameters']['licenseKey2'] = { "type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "The license token for the second F5 BIG-IP(BYOL). This field is required when deploying two or more devices" } }
-data['parameters']['restrictedSrcAddress'] = { "type": "string", "defaultValue": "*", "metadata": { "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources." } }
-data['parameters']['tagValues'] = { "type": "object", "defaultValue": { "application": "APP", "environment": "ENV", "group": "GROUP", "owner": "OWNER", "cost": "COST" } }
+        for license_key in ['licenseKey2']:
+            data['parameters'][license_key] = {"type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "The license token for the F5 BIG-IP(BYOL). This field is required when deploying two or more devices" } }
+elif license_type == 'PAYG':
+    data['parameters']['licensedBandwidth'] = {"type": "string", "defaultValue": "200m", "allowedValues": [ "25m", "200m", "1g" ], "metadata": { "description": "PAYG licensed bandwidth to allocate for this image."}}
+data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": "*", "metadata": { "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources." } }
+data['parameters']['tagValues'] = {"type": "object", "defaultValue": { "application": "APP", "environment": "ENV", "group": "GROUP", "owner": "OWNER", "cost": "COST" } }
 
-# Add Parameters into parameters file as well
-param_default_value = 'GEN_UNIQUE'
+# Post parameter add modifications
 for parameter in data['parameters']:
+    # Sort azuredeploy.json parameters alphabetically
+    sorted_param = json.dumps(data['parameters'][parameter], sort_keys=True, ensure_ascii=False)
+    data['parameters'][parameter] = json.loads(sorted_param, object_pairs_hook=OrderedDict)
+    # Add parameters into parameters file as well
     try:
         data_params['parameters'][parameter] = {"value": data['parameters'][parameter]['defaultValue']}
     except:
-        data_params['parameters'][parameter] = {"value": param_default_value}
+        data_params['parameters'][parameter] = {"value": 'GEN_UNIQUE'}
 
-## ARM Variables ##
+########## ARM Variables ##########
 data['variables']['apiVersion'] = "2015-06-15"
 data['variables']['location'] = "[resourceGroup().location]"
 data['variables']['singleQuote'] = "'"
@@ -134,8 +140,7 @@ if template_name == 'cluster_base':
     data['variables']['subnetRef'] = "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
 
 
-## ARM Resources ##
-
+########## ARM Resources ##########
 resources_list = []
 # Public IP Resource(s)
 if template_name in ('1nic', '2nic_limited'):
@@ -220,7 +225,7 @@ if template_name == 'cluster_base':
     command_to_execute = "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', concat(variables('ipAddress'), 5), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('deviceNamePrefix'), copyindex(1), '.azuresecurity.com'), ' --ntp pool.ntp.org --license ', parameters('licenseKey2'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module afm:none; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', concat(variables('ipAddress'), 5), ' -u admin --password-url file:///config/cloud/passwd --config-sync-ip ', concat(variables('ipAddress'), 5), ' --join-group --device-group Sync --sync --remote-host ', concat(variables('ipAddress'), 4), ' --remote-user admin --remote-password-url file:///config/cloud/passwd; rm -f /config/cloud/passwd')]"
     resources_list += [{ "type": "Microsoft.Compute/virtualMachines/extensions", "copy": { "name": "extensionLoop", "count": "[sub(parameters('numberOfInstances'), 1)]" }, "name": "[concat(variables('deviceNamePrefix'),add(copyindex(),1),'/start')]", "apiVersion": "2016-03-30", "tags": tags, "location": location, "dependsOn": [ "[concat('Microsoft.Compute/virtualMachines/',variables('deviceNamePrefix'),add(copyindex(),1))]" ], "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": [ "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]" ] }, "protectedSettings": { "commandToExecute": command_to_execute } } }]
 
-# Sort resources section - Expand to choose order of resources instead of just alphabetical?
+## Sort resources section - Expand to choose order of resources instead of just alphabetical?
 temp_sort = 'temp_sort.json'
 with open(temp_sort, 'w') as temp_sorting:
     json.dump(resources_list, temp_sorting, sort_keys=True, indent=4, ensure_ascii=False)
@@ -228,64 +233,104 @@ with open(temp_sort, 'r') as temp_sorted:
     data['resources'] = json.load(temp_sorted, object_pairs_hook=OrderedDict)
     temp_sorted.close(); os.remove(temp_sort)
 
-## ARM Outputs ##
+########## ARM Outputs ##########
 if template_name in ('1nic', '2nic_limited'):
     data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://', variables('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com')]" }
 if template_name == 'cluster_base':
     data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('publicIPID')).dnsSettings.fqdn,':8443')]" }
     data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('publicIPID')).dnsSettings.fqdn,' ',8022)]" }
 
-### END Create/Modify ARM Objects ###
+############### End Create/Modify ARM Template Objects ###############
 
-# Write modified template(s) to appropriate location
+## Write modified template(s) to appropriate location
 with open(createdfile, 'w') as finished:
     json.dump(data, finished, indent=4, sort_keys=False, ensure_ascii=False)
-    finished.close()
 with open(createdfile_params, 'w') as finished_params:
     json.dump(data_params, finished_params, indent=4, sort_keys=False, ensure_ascii=False)
-    finished_params.close()
 
 
 
 
-
+############### Create/Modify Scripts ###############
 ### Update deployment scripts and write to appropriate location ###
-if False:
-    ## PowerShell Script ##
-    ps_meta_script = 'base.deploy_via_ps.ps1'
-    ps_script_loc = script_location + 'Deploy_via_PS.ps1'
-    param_array = []
-    param_str = ''
-    mandatory_cmd = ''
+if script_location:
+    if template_name in ('1nic', '2nic', 'cluster_base'):
+        # Create Dynamic Parameter Array
+        param_array = []
+        license_type_flag = True
+        # Add license type parameter to determine template to run
+        param_array.append(['licenseType', 'BYOL', True])
+        for parameter in data['parameters']:
+            default_value = None; mandatory = True
+            try:
+                if data['parameters'][parameter]['defaultValue'] != 'REQUIRED':
+                    default_value = data['parameters'][parameter]['defaultValue']
+            except:
+                default_value = None
+            # Specify parameters that arent mandatory
+            if parameter in ('restrictedSrcAddress', 'tagValues'):
+                mandatory = False
+            param_array.append([parameter, default_value, mandatory])
 
-    # Create Dynamic Parameter Array
-    for parameter in data['parameters']:
-        default_value = 'null'
-        mandatory = False
-        try:
-            if data['parameters'][parameter]['defaultValue'] != 'REQUIRED':
-                default_value = data['parameters'][parameter]['defaultValue']
-        except:
-            default_value = 'null'
-        if parameter in ('adminUsername', 'adminPassword', 'dnsLabel', 'instanceName'):
-            mandatory = True
-        param_array.append([parameter, default_value, mandatory])
+        ## PowerShell Script ##
+        param_str = ''; mandatory_cmd = ''; default_value = ''
+        ps_meta_script = 'base.deploy_via_ps.ps1'
+        ps_script_loc = script_location + 'Deploy_via_PS.ps1'
+        base_ex = '## Example Command: .\Deploy_via_PS.ps1 '
+        for ps_param in param_array:
+            mandatory_cmd = ''; param_value = ',\n'
+            if ps_param[2]:
+                mandatory_cmd = '\n  [Parameter(Mandatory=$True)]'
+            # Handle special case of license key/bandwidth PS input needed in both PAYG/BYOL
+            if 'licenseKey' in ps_param[0]:
+                mandatory_cmd = ''
+                # Stick licensedBandwidth in prior to licenseKey(s) in BYOL scenario
+                default_bandwidth = ' = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),\n'
+                param_str += mandatory_cmd + '\n  [string]\n  $' + 'licensedBandwidth' + default_bandwidth
 
-    for ps_param in param_array:
-        print ps_param
-        mandatory_cmd = ''
-        if ps_param[2]:
-            mandatory_cmd = '[Parameter(Mandatory=$True)]'
-        param_str += '\n  ' + mandatory_cmd + '\n  [string]\n  $' + ps_param[0] + ',\n'
+                param_value = ' = $(if($licenseType -eq "BYOL") { Read-Host -prompt "' + ps_param[0] + '"}),\n'
+                param_str += mandatory_cmd + '\n  [string]\n  $' + ps_param[0] + param_value
+                continue
+            elif 'licensedBandwidth' in ps_param[0]:
+                mandatory_cmd = ''
+                param_value = ' = $(if($licenseType -eq "PAYG") { Read-Host -prompt "' + ps_param[0] + '"}),\n'
+                param_str += mandatory_cmd + '\n  [string]\n  $' + ps_param[0] + param_value
+                # Stick licenseKey(s) in after licensedBandwidth in PAYG scenario
+                for license_key in ['licenseKey1']:
+                    default_license = ' = $(if($licenseType -eq "BYOL") { Read-Host -prompt "' + license_key + '"}),\n'
+                    param_str += mandatory_cmd + '\n  [string]\n  $' + license_key + default_license
+                continue
+            # Specify parameters that should have a default value
+            if ps_param[0] in ('restrictedSrcAddress'):
+                param_value = ' = "' + ps_param[1] + '",\n'
+            # Specify any parameters that should be skipped
+            if ps_param[0] in ('tagValues'):
+                continue
+            param_str += mandatory_cmd + '\n  [string]\n  $' + ps_param[0] + param_value
+            # Add param to example command
+            if ps_param[1]:
+                base_ex += '-' + ps_param[0] + ' ' + ps_param[1] + ' '
+            else:
+                base_ex += '-' + ps_param[0] + ' ' + '<value> '
 
-    #print param_str
-    with open(ps_meta_script, 'r') as ps_script:
-        ps_script_str = ps_script.read()
-        # Map necessary script items
-        ps_script_str = ps_script_str.replace('<DYNAMIC_PARAMETERS>', param_str)
-        ps_script_str = ps_script_str.replace('<DEPLOYMENT_CREATE>', 'if ($licenseType -eq "BYOL") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\azuredeploy.json"; $parametersFilePath = ".\BYOL\azuredeploy.parameters.json" }\n  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"\n} elseif ($licenseType -eq "PAYG") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }\n  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"\n} else {\n  Write-Error -Message "Uh oh, something went wrong!  Please select valid license type..."\n}')
-        # Write to actual script location
-        with open(ps_script_loc, 'w') as ps_script_complete:
-            ps_script_complete.write(ps_script_str)
+        # Add any additional example command script parameters
+        for named_param in ['resourceGroupName']:
+            base_ex += '-' + named_param + ' ' + '<value> '
+        with open(ps_meta_script, 'r') as ps_script:
+            ps_script_str = ps_script.read()
+            # Map necessary script items, handle encoding
+            ex_cmd = base_ex.encode("utf8")
+            param_str = param_str.encode("utf8")
+            deploy_cmd = 'if ($licenseType -eq "BYOL") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\\azuredeploy.json"; $parametersFilePath = ".\BYOL\\azuredeploy.parameters.json" }\n  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -licenseKey1 "$licenseKey1" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"\n} elseif ($licenseType -eq "PAYG") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\\azuredeploy.json"; $parametersFilePath = ".\PAYG\\azuredeploy.parameters.json" }\n  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -restrictedSrcAddress "$restrictedSrcAddress" -imageName "$imageName"\n} else {\n  Write-Error -Message "Uh oh, something went wrong!  Please select valid license type of PAYG or BYOL."\n}'
+            ps_script_str = ps_script_str.replace('<EXAMPLE_CMD>', ex_cmd)
+            ps_script_str = ps_script_str.replace('<DYNAMIC_PARAMETERS>', param_str)
+            ps_script_str = ps_script_str.replace('<DEPLOYMENT_CREATE>', deploy_cmd)
+            # Write to actual script location
+            with open(ps_script_loc, 'w') as ps_script_complete:
+                ps_script_complete.write(ps_script_str)
+        ## End PowerShell Script ##
 
-    # Bash Script
+        ## Bash Script ##
+
+        ## End Bash Script ##
+############### End Create/Modify Scripts ###############
