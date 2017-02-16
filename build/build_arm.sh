@@ -21,3 +21,7 @@ python '.\master_template.py' --template-name 2nic_limited --license-type BYOL -
 # Experimental
 python '.\master_template.py' --template-name cluster_base --license-type PAYG --template-location '../experimental/cluster/1nic/PAYG/' --script-location '../experimental/cluster/1nic/'
 python '.\master_template.py' --template-name cluster_base --license-type BYOL --template-location '../experimental/cluster/1nic/BYOL/' --script-location '../experimental/cluster/1nic/'
+
+# Supported
+python '.\master_template.py' --template-name cluster_base --license-type PAYG --template-location '../supported/cluster/1nic/PAYG/' --script-location '../supported/cluster/1nic/'
+python '.\master_template.py' --template-name cluster_base --license-type BYOL --template-location '../supported/cluster/1nic/BYOL/' --script-location '../supported/cluster/1nic/'
