@@ -108,25 +108,25 @@
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]", 
         "offerToUse": "f5-big-ip", 
-        "availabilitySetName": "[concat(variables('instanceName'), '-avset')]", 
-        "nic1Name": "[concat(variables('instanceName'), '-mgmt1')]", 
+        "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
+        "nicName": "[concat(variables('dnsLabel'), '-nic')]", 
         "defaultGw": "10.0.1.1", 
-        "virtualNetworkName": "[concat(variables('instanceName'), '-vnet')]", 
+        "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]", 
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
         "vnetAddressPrefix": "10.0.0.0/16", 
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg'))]", 
         "publicIPAddressName": "[concat(variables('dnsLabel'), '-pip')]", 
-        "subnet1Name": "MGMT_Frontend", 
-        "subnet1Id": "[concat(variables('vnetId'), '/subnets/', variables('subnet1Name'))]", 
-        "subnet1Prefix": "10.0.1.0/24", 
-        "subnet1PrivateAddress": "10.0.1.4", 
         "publicIPAddressType": "Static", 
+        "subnetName": "[concat(variables('dnsLabel'),'-subnet')]", 
+        "subnetId": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]", 
+        "subnetPrefix": "10.0.1.0/24", 
+        "subnetPrivateAddress": "10.0.1.4", 
         "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]", 
-        "subnet2Name": "Web", 
+        "subnet2Name": "[concat(variables('dnsLabel'),'-subnet2')]", 
         "subnet2Id": "[concat(variables('vnetId'), '/subnets/', variables('subnet2Name'))]", 
         "subnet2Prefix": "10.0.2.0/24", 
         "subnet2PrivateAddress": "10.0.2.4", 
-        "nic2Name": "[concat(variables('instanceName'), '-nic2')]"
+        "nic2Name": "[concat(variables('dnsLabel'), '-nic2')]"
     }, 
     "resources": [
         {
@@ -161,9 +161,9 @@
                 }, 
                 "subnets": [
                     {
-                        "name": "[variables('subnet1Name')]", 
+                        "name": "[variables('subnetName')]", 
                         "properties": {
-                            "addressPrefix": "[variables('subnet1Prefix')]"
+                            "addressPrefix": "[variables('subnetPrefix')]"
                         }
                     }, 
                     {
@@ -191,7 +191,7 @@
                 "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'),'-nsg')]"
             ], 
             "location": "[variables('location')]", 
-            "name": "[variables('nic1Name')]", 
+            "name": "[variables('nicName')]", 
             "properties": {
                 "ipConfigurations": [
                     {
@@ -200,10 +200,10 @@
                             "PublicIpAddress": {
                                 "Id": "[variables('publicIPAddressId')]"
                             }, 
-                            "privateIPAddress": "[variables('subnet1PrivateAddress')]", 
+                            "privateIPAddress": "[variables('subnetPrivateAddress')]", 
                             "privateIPAllocationMethod": "Static", 
                             "subnet": {
-                                "id": "[variables('subnet1Id')]"
+                                "id": "[variables('subnetId')]"
                             }
                         }
                     }
@@ -330,7 +330,7 @@
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", 
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
-                "[concat('Microsoft.Network/networkInterfaces/', variables('nic1Name'))]"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('instanceName')]", 
@@ -355,7 +355,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic1Name'))]", 
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]", 
                             "properties": {
                                 "primary": true
                             }
@@ -408,7 +408,7 @@
             "name": "[concat(variables('instanceName'),'/start')]", 
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --multi-nic --default-gw ', variables('defaultGw'), ' --vlan vlan_mgmt,1.0 --vlan vlan_1,1.1 --self-ip self_mgmt,', variables('subnet1PrivateAddress'), ',vlan_mgmt --self-ip self_1,', variables('subnet2PrivateAddress'), ',vlan_1 --log-level debug --background --force-reboot; rm -f /config/cloud/passwd')]"
+                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnetPrivateAddress'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('subnetPrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --multi-nic --default-gw ', variables('defaultGw'), ' --vlan vlan_mgmt,1.0 --vlan vlan_1,1.1 --self-ip self_mgmt,', variables('subnetPrivateAddress'), ',vlan_mgmt --self-ip self_1,', variables('subnet2PrivateAddress'), ',vlan_1 --log-level debug --background --force-reboot; rm -f /config/cloud/passwd')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {
@@ -433,6 +433,10 @@
         "GUI-URL": {
             "type": "string", 
             "value": "[concat('https://', variables('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+        }, 
+        "SSH-URL": {
+            "type": "string", 
+            "value": "[concat(variables('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com', ' ',22)]"
         }
     }
 }

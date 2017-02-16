@@ -28,9 +28,9 @@
         }, 
         "tagValues": {
             "value": {
-                "environment": "ENV", 
                 "application": "APP", 
                 "cost": "COST", 
+                "environment": "ENV", 
                 "group": "GROUP", 
                 "owner": "OWNER"
             }

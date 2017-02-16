@@ -4,6 +4,8 @@
 <EXAMPLE_CMD>
 
 param(
+
+<LICENSE_PARAMETERS>
 <DYNAMIC_PARAMETERS>
   [Parameter(Mandatory=$True)]
   [string]

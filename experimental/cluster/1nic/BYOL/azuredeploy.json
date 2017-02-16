@@ -2,12 +2,6 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json", 
     "contentVersion": "1.1.0.0", 
     "parameters": {
-        "solutionDeploymentName": {
-            "metadata": {
-                "description": "A unique name for this deployment."
-            }, 
-            "type": "string"
-        }, 
         "numberOfInstances": {
             "allowedValues": [
                 2
@@ -123,26 +117,24 @@
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]", 
         "offerToUse": "f5-big-ip", 
-        "availabilitySetName": "[concat(variables('instanceName'), '-avset')]", 
-        "nic1Name": "[concat(variables('instanceName'), '-mgmt1')]", 
+        "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
+        "nicName": "[concat(variables('dnsLabel'), '-nic')]", 
         "defaultGw": "10.0.1.1", 
-        "virtualNetworkName": "[concat(variables('instanceName'), '-vnet')]", 
+        "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]", 
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
         "vnetAddressPrefix": "10.0.0.0/16", 
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg'))]", 
         "publicIPAddressName": "[concat(variables('dnsLabel'), '-pip')]", 
-        "subnetName": "[concat(variables('dnsLabel'),'-subNet')]", 
-        "subnetPrefix": "10.10.1.0/24", 
-        "ipAddress": "10.10.1.", 
-        "nicNamePrefix": "[concat(variables('dnsLabel'),'-nic')]", 
+        "publicIPAddressType": "Static", 
+        "subnetName": "[concat(variables('dnsLabel'),'-subnet')]", 
+        "subnetId": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]", 
+        "subnetPrefix": "10.0.1.0/24", 
+        "ipAddress": "10.0.1.", 
         "loadBalancerName": "[concat(variables('dnsLabel'),'-alb')]", 
         "deviceNamePrefix": "[concat(variables('dnsLabel'),'-device')]", 
-        "lbID": "[concat(variables('dnsLabel'),'-alb')]", 
+        "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]", 
         "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]", 
-        "guiMgtID": "[concat(variables('lbID'),'/inboundNatRules/guimgt')]", 
-        "sshMgtID": "[concat(variables('lbID'),'/inboundNatRules/sshmgt')]", 
-        "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('dnsLabel'))]", 
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
+        "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
     }, 
     "resources": [
         {
@@ -153,7 +145,8 @@
                 "dnsSettings": {
                     "domainNameLabel": "[variables('dnsLabel')]"
                 }, 
-                "publicIPAllocationMethod": "Dynamic"
+                "idleTimeoutInMinutes": 30, 
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
             }, 
             "tags": {
                 "application": "[parameters('tagValues').application]", 
@@ -206,7 +199,7 @@
                 "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'),'-nsg')]"
             ], 
             "location": "[variables('location')]", 
-            "name": "[concat(variables('nicNamePrefix'),copyindex())]", 
+            "name": "[concat(variables('nicName'),copyindex())]", 
             "properties": {
                 "ipConfigurations": [
                     {
@@ -228,7 +221,7 @@
                             "privateIPAddress": "[concat(variables('ipAddress'),add(4,copyindex()))]", 
                             "privateIPAllocationMethod": "Static", 
                             "subnet": {
-                                "id": "[variables('subnetRef')]"
+                                "id": "[variables('subnetId')]"
                             }
                         }
                     }
@@ -348,6 +341,28 @@
         }, 
         {
             "apiVersion": "[variables('apiVersion')]", 
+            "copy": {
+                "count": "[parameters('numberOfInstances')]", 
+                "name": "lbNatLoop"
+            }, 
+            "dependsOn": [
+                "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
+            ], 
+            "location": "[variables('location')]", 
+            "name": "[concat(variables('loadBalancerName'),'/sshmgt', copyIndex())]", 
+            "properties": {
+                "backendPort": 22, 
+                "enableFloatingIP": false, 
+                "frontendIPConfiguration": {
+                    "id": "[variables('frontEndIPConfigID')]"
+                }, 
+                "frontendPort": "[copyIndex(8022)]", 
+                "protocol": "tcp"
+            }, 
+            "type": "Microsoft.Network/loadBalancers/inboundNatRules"
+        }, 
+        {
+            "apiVersion": "[variables('apiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[variables('availabilitySetName')]", 
             "tags": {
@@ -364,12 +379,11 @@
             "location": "[variables('location')]", 
             "name": "[variables('newStorageAccountName')]", 
             "properties": {
-                "accountType": "Standard_LRS"
+                "accountType": "[variables('storageAccountType')]"
             }, 
             "tags": {
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
-                "displayName": "StorageAccount", 
                 "environment": "[parameters('tagValues').environment]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
@@ -383,7 +397,7 @@
                 "name": "devicecopy"
             }, 
             "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', variables('nicNamePrefix'), copyindex())]", 
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'), copyindex())]", 
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]"
             ], 
@@ -391,7 +405,7 @@
             "name": "[concat(variables('deviceNamePrefix'),copyindex())]", 
             "plan": {
                 "name": "[variables('skuToUse')]", 
-                "product": "f5-big-ip", 
+                "product": "[variables('offerToUse')]", 
                 "publisher": "f5-networks"
             }, 
             "properties": {
@@ -410,7 +424,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[concat(resourceId('Microsoft.Network/networkInterfaces',variables('nicNamePrefix')),copyindex())]"
+                            "id": "[concat(resourceId('Microsoft.Network/networkInterfaces',variables('nicName')),copyindex())]"
                         }
                     ]
                 }, 
@@ -421,7 +435,7 @@
                 }, 
                 "storageProfile": {
                     "imageReference": {
-                        "offer": "f5-big-ip", 
+                        "offer": "[variables('offerToUse')]", 
                         "publisher": "f5-networks", 
                         "sku": "[variables('skuToUse')]", 
                         "version": "latest"
@@ -454,7 +468,7 @@
             "name": "[concat(variables('deviceNamePrefix'),0,'/start')]", 
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', concat(variables('ipAddress'), 4), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('deviceNamePrefix'), 0, '.azuresecurity.com'), ' --ntp pool.ntp.org --license ', parameters('licenseKey1'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module afm:none; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', concat(variables('ipAddress'), 4), ' -u admin --password-url file:///config/cloud/passwd --config-sync-ip ', concat(variables('ipAddress'), 4), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(variables('deviceNamePrefix'), 0, '.azuresecurity.com'), ' --auto-sync --save-on-auto-sync; rm -f /config/cloud/passwd')]"
+                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', concat(variables('ipAddress'), 4), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('deviceNamePrefix'), 0, '.azuresecurity.com'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module afm:none; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', concat(variables('ipAddress'), 4), ' -u admin --password-url file:///config/cloud/passwd --config-sync-ip ', concat(variables('ipAddress'), 4), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(variables('deviceNamePrefix'), 0, '.azuresecurity.com'), ' --auto-sync --save-on-auto-sync; rm -f /config/cloud/passwd')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {
@@ -487,7 +501,7 @@
             "name": "[concat(variables('deviceNamePrefix'),add(copyindex(),1),'/start')]", 
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', concat(variables('ipAddress'), 5), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('deviceNamePrefix'), copyindex(1), '.azuresecurity.com'), ' --ntp pool.ntp.org --license ', parameters('licenseKey2'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module afm:none; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', concat(variables('ipAddress'), 5), ' -u admin --password-url file:///config/cloud/passwd --config-sync-ip ', concat(variables('ipAddress'), 5), ' --join-group --device-group Sync --sync --remote-host ', concat(variables('ipAddress'), 4), ' --remote-user admin --remote-password-url file:///config/cloud/passwd; rm -f /config/cloud/passwd')]"
+                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', concat(variables('ipAddress'), 5), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('deviceNamePrefix'), copyindex(1), '.azuresecurity.com'), ' --license ', parameters('licenseKey2'), ' --ntp pool.ntp.org --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module afm:none; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', concat(variables('ipAddress'), 5), ' -u admin --password-url file:///config/cloud/passwd --config-sync-ip ', concat(variables('ipAddress'), 5), ' --join-group --device-group Sync --sync --remote-host ', concat(variables('ipAddress'), 4), ' --remote-user admin --remote-password-url file:///config/cloud/passwd; rm -f /config/cloud/passwd')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {
