@@ -30,7 +30,7 @@ command_to_execute = ""
 
 ## Static Variable Assignment ##
 content_version = '1.1.0.0'
-instance_type_list = "Standard_A4", "Standard_A9", "Standard_A11", "Standard_D2", "Standard_D3", "Standard_D4", "Standard_D12", "Standard_D13", "Standard_D14", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2", "Standard_F2", "Standard_F4"
+instance_type_list = "Standard_A2", "Standard_A3", "Standard_A4", "Standard_A9", "Standard_A11", "Standard_D2", "Standard_D3", "Standard_D4", "Standard_D12", "Standard_D13", "Standard_D14", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2", "Standard_F2", "Standard_F4"
 tags = { "application": "[parameters('tagValues').application]", "environment": "[parameters('tagValues').environment]", "group": "[parameters('tagValues').group]", "owner": "[parameters('tagValues').owner]", "costCenter": "[parameters('tagValues').cost]" }
 api_version = "[variables('apiVersion')]"
 location = "[variables('location')]"
@@ -191,6 +191,7 @@ if template_name == 'cluster_base':
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Compute/virtualMachines", "name": "[concat(variables('deviceNamePrefix'),copyindex())]", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'), copyindex())]", "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]" ], "copy": { "count": "[parameters('numberOfInstances')]", "name": "devicecopy" }, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "[variables('offerToUse')]" }, "properties": { "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]" }, "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "osProfile": { "computerName": "[concat(variables('deviceNamePrefix'),copyindex())]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "storageProfile": { "imageReference": { "publisher": "f5-networks", "offer": "[variables('offerToUse')]", "sku": "[variables('skuToUse')]", "version": "latest" }, "osDisk": { "name": "[concat('osdisk',copyindex())]", "vhd": { "uri": "[concat('http://',variables('newStorageAccountName'),'.blob.core.windows.net/',variables('newStorageAccountName'),'/osDisk',copyindex(),'.vhd')]" }, "caching": "ReadWrite", "createOption": "FromImage" } }, "networkProfile": { "networkInterfaces": [ { "id": "[concat(resourceId('Microsoft.Network/networkInterfaces',variables('nicName')),copyindex())]" } ] }, "diagnosticsProfile": { "bootDiagnostics": { "enabled": True, "storageUri": "[concat('http://',variables('newstorageAccountName'),'.blob.core.windows.net')]" } } } }]
 
 ## Compute/VM Extension Resource(s) ##
+command_to_execute = ''; command_to_execute2 = ''
 if template_name == '1nic':
     command_to_execute = "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnetPrivateAddress'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; rm -f /config/cloud/passwd')]"
 if template_name == '2nic_limited':
@@ -199,9 +200,9 @@ if template_name == 'cluster_base':
     # Two Extensions for Cluster
     command_to_execute = "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', concat(variables('ipAddress'), 4), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('deviceNamePrefix'), 0, '.azuresecurity.com'), <LICENSE1_COMMAND> ' --ntp pool.ntp.org --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module afm:none; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', concat(variables('ipAddress'), 4), ' -u admin --password-url file:///config/cloud/passwd --config-sync-ip ', concat(variables('ipAddress'), 4), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(variables('deviceNamePrefix'), 0, '.azuresecurity.com'), ' --auto-sync --save-on-auto-sync; rm -f /config/cloud/passwd')]"
     command_to_execute2 = "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', parameters('adminPassword'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', concat(variables('ipAddress'), 5), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('deviceNamePrefix'), copyindex(1), '.azuresecurity.com'), <LICENSE2_COMMAND> ' --ntp pool.ntp.org --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module afm:none; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', concat(variables('ipAddress'), 5), ' -u admin --password-url file:///config/cloud/passwd --config-sync-ip ', concat(variables('ipAddress'), 5), ' --join-group --device-group Sync --sync --remote-host ', concat(variables('ipAddress'), 4), ' --remote-user admin --remote-password-url file:///config/cloud/passwd; rm -f /config/cloud/passwd')]"
-    # String map license 1/2 if needed for BYOL
-    command_to_execute = command_to_execute.replace('<LICENSE1_COMMAND>', license1_command)
-    command_to_execute2 = command_to_execute2.replace('<LICENSE2_COMMAND>', license2_command)
+# String map license 1/2 if needed for BYOL
+command_to_execute = command_to_execute.replace('<LICENSE1_COMMAND>', license1_command)
+command_to_execute2 = command_to_execute2.replace('<LICENSE2_COMMAND>', license2_command)
 
 if template_name in ('1nic', '2nic_limited'):
     resources_list += [{"apiVersion": "2016-03-30", "type": "Microsoft.Compute/virtualMachines/extensions", "name": "[concat(variables('instanceName'),'/start')]", "tags": tags, "location": location, "dependsOn": [ "[concat('Microsoft.Compute/virtualMachines/', variables('instanceName'))]" ], "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": [ "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]" ] }, "protectedSettings": { "commandToExecute": command_to_execute } } }]
@@ -237,6 +238,9 @@ with open(createdfile_params, 'w') as finished_params:
 
 
 
+
+
+
 ############### Create/Modify Scripts ###############
 ### Update deployment scripts and write to appropriate location ###
 if script_location:
@@ -258,7 +262,7 @@ if script_location:
             param_array.append([parameter, default_value, mandatory, skip_param])
 
         #### PowerShell Script ####
-        param_str = ''; mandatory_cmd = ''; default_value = ''; payg_cmd = ''; byol_cmd = ''; add_bw = True; deploy_cmd_params = ''
+        param_str = ''; mandatory_cmd = ''; default_value = ''; payg_cmd = ''; byol_cmd = ''; deploy_cmd_params = ''
         ps_meta_script = 'base.deploy_via_ps.ps1'
         ps_script_loc = script_location + 'Deploy_via_PS.ps1'
         base_ex = '## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth ' + default_payg_bw + ' '
@@ -273,16 +277,16 @@ if script_location:
             if ps_param[0] in ('restrictedSrcAddress'):
                 param_value = ' = "' + ps_param[1] + '",\n'
             param_str += mandatory_cmd + '\n  [string]\n  $' + ps_param[0] + param_value
-            # Add param to example command
-            if ps_param[1]:
-                base_ex += '-' + ps_param[0] + ' ' + str(ps_param[1]) + ' '
-            else:
-                base_ex += '-' + ps_param[0] + ' ' + '<value> '
             # Add parameter to deployment command - License params have already been skipped
             if ps_param[0] == 'adminPassword':
                 deploy_cmd_params += '-' + ps_param[0] + ' $pwd '
             else:
                 deploy_cmd_params += '-' + ps_param[0] + ' "$' + ps_param[0] + '" '
+            # Add param to example command
+            if ps_param[1]:
+                base_ex += '-' + ps_param[0] + ' ' + str(ps_param[1]) + ' '
+            else:
+                base_ex += '-' + ps_param[0] + ' ' + '<value> '
 
         # Create license parameters, expand to be a for loop?
         license2_param = ''
@@ -313,7 +317,89 @@ if script_location:
             ps_script_complete.write(ps_script_str)
         #### End PowerShell Script ####
 
-        #### Bash Script ####
 
+        #### Bash Script ####
+        param_str = ''; mandatory_cmd = ''; default_value = ''; payg_cmd = ''; byol_cmd = ''; deploy_cmd_params = '"{'; getopt_parser = ''; bash_mandatory_variables = ''
+        bash_shorthand_args = ['e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+        bash_meta_script = 'base.deploy_via_bash.sh'
+        bash_script_loc = script_location + 'deploy_via_bash.sh'
+        bash_base_ex = '## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth ' + default_payg_bw
+        getopt_start = 'ARGS=`getopt -o '; getopt_params_long = ' --long ';  getopt_end = ' -n $0 -- "$@"`'; short_param_count = 0
+        getopt_params_short = 'a:b:c:d:'; bash_base_params = 'resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,'
+        # Create license parameters, expand to be a for loop?
+        bash_license2_param = ''
+        license2_check = ''
+        license_args = ['licensedBandwidth','licenseKey1']
+        if template_name in ('cluster_base'):
+            bash_license2_param = 'licenseKey2:,'
+            license_args.append('licenseKey2')
+            license2_check += '    if [ -v $licenseKey2 ] ; then\n            read -p "Please enter value for licenseKey2:" licenseKey2\n    fi\n'
+        bash_license_params = bash_base_params + 'licensedBandwidth:,licenseKey1:,' + bash_license2_param
+        for license_arg in license_args:
+            getopt_parser += '\n        -' + bash_shorthand_args[0] + '|--' + license_arg+ ')\n            ' + license_arg + '=$2\n            shift 2;;'
+            getopt_params_short += bash_shorthand_args[0] + ':'
+            del bash_shorthand_args[0]
+        getopt_params_long += bash_license_params
+        # Create license check section
+        license_check = '# Prompt for license key if not supplied and BYOL is selected\nif [ $licenseType == "BYOL" ]; then\n    if [ -v $licenseKey1 ] ; then\n            read -p "Please enter value for licenseKey1:" licenseKey1\n    fi\n' + license2_check + '    template_file="./BYOL/azuredeploy.json"\n    parameter_file="./BYOL/azuredeploy.parameters.json"\nfi\n'
+        license_check += '# Prompt for license key if not supplied and PAYG is selected\nif [ $licenseType == "PAYG" ]; then\n    if [ -v $licensedBandwidth ] ; then\n            read -p "Please enter value for licensedBandwidth:" licensedBandwidth\n    fi\n    template_file="./PAYG/azuredeploy.json"\n    parameter_file="./PAYG/azuredeploy.parameters.json"\nfi'
+
+        for bash_param in param_array:
+            mandatory_cmd = ''; param_value = ',\n'
+            # Specify any parameters that should be skipped, or are mandatory
+            if bash_param[3]:
+                continue
+            if bash_param[2]:
+                bash_mandatory_variables += bash_param[0] + ' '
+            # Need to build the getopt command
+            getopt_params_long += bash_param[0] + ':,'
+            getopt_parser += '\n        -' + bash_shorthand_args[0] + '|--' + bash_param[0] + ')\n            ' + bash_param[0] + '=$2\n            shift 2;;'
+            # Need to include single letter params
+            getopt_params_short += bash_shorthand_args[0] + ':'
+            del bash_shorthand_args[0]
+            # Add parameter to deployment command - License params have already been skipped
+            deploy_cmd_params += '\\"' + bash_param[0] + '\\":{\\"value\\":\\"$' + bash_param[0] + '\\"},'
+            # Add param to example command
+            if bash_param[1]:
+                bash_base_ex += ' --' + bash_param[0] + ' ' + str(bash_param[1])
+            else:
+                bash_base_ex += ' --' + bash_param[0] + ' <value>'
+
+        # Compile getopts command
+        getopt_params_long = getopt_params_long[:-1]
+        getopt_cmd = getopt_start + getopt_params_short + getopt_params_long + getopt_end
+        # Add any additional example command script parameters
+        for named_param in ['resourceGroupName','azureLoginUser','azureLoginPassword']:
+            bash_base_ex += ' --' + named_param + ' <value>'
+        # Add any additional mandatory parameters
+        for required_param in ['resourceGroupName', 'licenseType']:
+            bash_mandatory_variables += required_param + ' '
+        # Add any additional parameters to the deployment command
+        for addtl_param in ['tagValues']:
+            deploy_cmd_params += '\\"' + addtl_param + '\\":{\\"value\\":\\"$' + addtl_param + '\\"},'
+
+        # Map necessary script items, handle encoding
+        with open(bash_meta_script, 'r') as bash_script:
+            bash_script_str = bash_script.read()
+        bash_ex_cmd = bash_base_ex.encode("utf8")
+        param_str = param_str.encode("utf8")
+        create_cmd = 'azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p '
+        if template_name in ('1nic', '2nic_limited'):
+            byol_cmd =  create_cmd + deploy_cmd_params + '\\"licenseKey1\\":{\\"value\\":\\"$licenseKey1\\"}}"'
+            payg_cmd = create_cmd + deploy_cmd_params + '\\"licensedBandwidth\\":{\\"value\\":\\"$licensedBandwidth\\"}}"'
+        if template_name in ('cluster_base'):
+            byol_cmd = create_cmd + deploy_cmd_params + '\\"licenseKey1\\":{\\"value\\":\\"$licenseKey1\\"},\\"licenseKey2\\":{\\"value\\":\\"$licenseKey2\\"}}"'
+            payg_cmd = create_cmd + deploy_cmd_params + '\\"licensedBandwidth\\":{\\"value\\":\\"$licensedBandwidth\\"}}"'
+        deploy_cmd = 'if [ $licenseType == "BYOL" ]; then\n    ' + byol_cmd + '\nelif [ $licenseType == "PAYG" ]; then\n    ' + payg_cmd + '\nelse\n    echo "Uh oh, shouldn\'t make it here! Ensure license type is either PAYG or BYOL"\n    exit 1\nfi'
+
+        bash_script_str = bash_script_str.replace('<EXAMPLE_CMD>', bash_ex_cmd)
+        bash_script_str = bash_script_str.replace('<PARAMETERS>', getopt_cmd)
+        bash_script_str = bash_script_str.replace('<PARAMETERS_1>', getopt_parser)
+        bash_script_str = bash_script_str.replace('<REQUIRED_PARAMETERS>', bash_mandatory_variables)
+        bash_script_str = bash_script_str.replace('<LICENSE_CHECK>', license_check)
+        bash_script_str = bash_script_str.replace('<DEPLOYMENT_CREATE>', deploy_cmd)
+        # Write to actual script location
+        with open(bash_script_loc, 'w') as bash_script_complete:
+            bash_script_complete.write(bash_script_str)
         #### End Bash Script ####
 ############### End Create/Modify Scripts ###############

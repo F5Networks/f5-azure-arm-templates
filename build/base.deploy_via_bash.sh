@@ -1,76 +1,40 @@
 #!/bin/bash
 
-# Bash Script to deploy ARM template into Azure, using azure cli 1.0
-# Example Command: ./deploy_via_bash.sh --sdname sdname01 --nbrinstances 2 --adminusr azureuser --adminpwd 'password' --dnslabel label01 --key1 XXXX-XXXX --key2 XXXX-XXXX --rgname examplerg --azureusr loginuser --azurepwd loginpwd
+## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
+<EXAMPLE_CMD>
 
 # Assign Script Paramters and Define Variables
-# Specify static items, change these as needed or make them parameters (instance_type is already an optional paramter)
+# Specify static items, change these as needed or make them parameters
 region="westus"
-template_file="azuredeploy.json"
-parameter_file="azuredeploy.parameters.json"
-instance_type="Standard_D2_v2"
-image_name="Best"
-restricted_source_address="*"
-tag_values="{\"application\":\"APP\",\"environment\":\"ENV\",\"group\":\"GROUP\",\"owner\":\"OWNER\",\"cost\":\"COST\"}"
+restrictedSrcAddress="*"
+tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-
-ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m: --long sdname:,nbrinstances:,adminusr:,adminpwd:,insttype:,imgname:,dnslabel:,key1:,key2:,rstsrcaddr:,rgname:,azureusr:,azurepwd: -n $0 -- "$@"`
+<PARAMETERS>
 eval set -- "$ARGS"
-
 
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
 while true; do
     case "$1" in
-        -a|--sdname)
-            solution_deployment_name=$2
+        -a|--resourceGroupName)
+            resourceGroupName=$2
             shift 2;;
-        -b|--nbrinstances)
-            number_of_instances=$2
+        -b|--azureLoginUser)
+            azureLoginUser=$2
             shift 2;;
-        -c|--adminusr)
-            admin_username=$2
+        -c|--azureLoginPassword)
+            azureLoginPassword=$2
             shift 2;;
-        -d|--adminpwd)
-            admin_password=$2
-            shift 2;;
-        -e|--insttype)
-            instance_type=$2
-            shift 2;;
-        -f|--imgname)
-            image_name=$2
-            shift 2;;
-        -g|--dnslabel)
-            dns_label=$2
-            shift 2;;
-        -h|--key1)
-            license_key_1=$2
-            shift 2;;
-        -i|--key2)
-            license_key_2=$2
-            shift 2;;
-        -j|--rstsrcaddr)
-            restricted_source_address=$2
-            shift 2;;
-        -k|--rgname)
-            resource_group_name=$2
-            shift 2;;
-        -l|--azureusr)
-            azure_user=$2
-            shift 2;;
-        -m|--azurepwd)
-            azure_pwd=$2
-            shift 2;;
+        -d|--licenseType)
+            licenseType=$2
+            shift 2;;<PARAMETERS_1>
         --)
             shift
             break;;
     esac
 done
 
-echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
-sleep 3
-
 #If a required paramater is not passed, the script will prompt for it below
-required_variables="solution_deployment_name number_of_instances admin_username admin_password dns_label license_key_1 license_key_2 resource_group_name azure_user azure_pwd"
+required_variables="<REQUIRED_PARAMETERS>"
 for variable in $required_variables
         do
         if [ -v ${!variable} ] ; then
@@ -78,20 +42,24 @@ for variable in $required_variables
         fi
 done
 
-# Login to Azure, for simplicity in this example using username and password supplied as script arguments --azureusr and --azurepwd
+<LICENSE_CHECK>
+
+echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
+sleep 3
+
+# Login to Azure, for simplicity in this example using username and password supplied as script arguments --azureLoginUser and --azureLoginPassword
 # Perform Check to see if already logged in
 azure account show > /dev/null 2>&1
 if [[ $? != 0 ]] ; then
-        azure login -u $azure_user -p $azure_pwd
+        azure login -u $azureLoginUser -p $azureLoginPassword
 fi
-
 
 # Switch to ARM mode
 azure config mode arm
 
 # Create ARM Group
-azure group create -n $resource_group_name -l $region
+azure group create -n $resourceGroupName -l $region
 
 # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
 # such as can been done with Powershell...oh well!
-azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"solutionDeploymentName\":{\"value\":\"$solution_deployment_name\"},\"numberOfInstances\":{\"value\":$number_of_instances},\"instanceType\":{\"value\":\"$instance_type\"},\"imageName\":{\"value\":\"$image_name\"},\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"licenseKey2\":{\"value\":\"$license_key_2\"},\"restrictedSrcAddress\":{\"value\":\"$restricted_source_address\"},\"tagValues\":{\"value\":$tag_values}}"
+<DEPLOYMENT_CREATE>
