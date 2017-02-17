@@ -376,7 +376,7 @@ if script_location:
             bash_mandatory_variables += required_param + ' '
         # Add any additional parameters to the deployment command
         for addtl_param in ['tagValues']:
-            deploy_cmd_params += '\\"' + addtl_param + '\\":{\\"value\\":\\"$' + addtl_param + '\\"},'
+            deploy_cmd_params += '\\"' + addtl_param + '\\":{\\"value\\":$' + addtl_param + '},'
 
         # Map necessary script items, handle encoding
         with open(bash_meta_script, 'r') as bash_script:
