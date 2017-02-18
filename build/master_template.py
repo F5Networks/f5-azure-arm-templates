@@ -244,7 +244,6 @@ with open(createdfile_params, 'w') as finished_params:
 
 
 
-
 ############### Create/Modify Scripts ###############
 ### Update deployment scripts and write to appropriate location ###
 if script_location:
@@ -365,7 +364,10 @@ if script_location:
             deploy_cmd_params += '\\"' + bash_param[0] + '\\":{\\"value\\":\\"$' + bash_param[0] + '\\"},'
             # Add param to example command
             if bash_param[1]:
-                bash_base_ex += ' --' + bash_param[0] + ' ' + str(bash_param[1])
+                # Add quotes around restrictedSrcAddress
+                if bash_param[0] == 'restrictedSrcAddress':
+                    bash_param[1] = '"' + str(bash_param[1]) + '"'
+                bash_base_ex += ' --' + bash_param[0] + ' ' + str(bash_param[1]) + ''
             else:
                 bash_base_ex += ' --' + bash_param[0] + ' <value>'
 
