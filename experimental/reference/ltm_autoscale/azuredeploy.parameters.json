@@ -1,0 +1,51 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
+    "contentVersion": "1.1.0.0", 
+    "parameters": {
+        "vmScaleSetCapacity": {
+            "value": 2
+        }, 
+        "adminUsername": {
+            "value": "azureuser"
+        }, 
+        "adminPassword": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "dnsLabel": {
+            "value": "REQUIRED"
+        }, 
+        "instanceType": {
+            "value": "Standard_D2_v2"
+        }, 
+        "imageName": {
+            "value": "Good"
+        }, 
+        "licensedBandwidth": {
+            "value": "200m"
+        }, 
+        "subscriptionId": {
+            "value": "7aa18216-6c77-40de-82a4-f14bcb08c3a0"
+        }, 
+        "tenantId": {
+            "value": "mshimkusf5.onmicrosoft.com"
+        }, 
+        "clientId": {
+            "value": "6b8b2c61-8509-4d64-a93e-9855dac815b5"
+        }, 
+        "servicePrincipalSecret": {
+            "value": "TypXSeu6NQNc4i6nNLYkkDtQiQAf1okiCigtEeQvg0c="
+        }, 
+        "restrictedSrcAddress": {
+            "value": "*"
+        }, 
+        "tagValues": {
+            "value": {
+                "application": "APP", 
+                "cost": "COST", 
+                "environment": "ENV", 
+                "group": "GROUP", 
+                "owner": "OWNER"
+            }
+        }
+    }
+}

@@ -7,10 +7,10 @@ from optparse import OptionParser
 
 # Process Script Parameters
 parser = OptionParser()
-parser.add_option("-t", "--template-name", action="store", type="string", dest="template_name", help="Template Name: 1nic, 2nic_limited, cluster_base, etc..." )
+parser.add_option("-n", "--template-name", action="store", type="string", dest="template_name", help="Template Name: 1nic, 2nic_limited, cluster_base, etc..." )
 parser.add_option("-l", "--license-type", action="store", type="string", dest="license_type", default="BYOL", help="License Type: BYOL or PAYG" )
-parser.add_option("-q", "--template-location", action="store", type="string", dest="template_location", help="Template Location: such as ../experimental/standalone/1nic/PAYG/" )
-parser.add_option("-r", "--script-location", action="store", type="string", dest="script_location", help="Script Location: such as ../experimental/standalone/1nic/" )
+parser.add_option("-t", "--template-location", action="store", type="string", dest="template_location", help="Template Location: such as ../experimental/standalone/1nic/PAYG/" )
+parser.add_option("-s", "--script-location", action="store", type="string", dest="script_location", help="Script Location: such as ../experimental/standalone/1nic/" )
 
 (options, args) = parser.parse_args()
 template_name = options.template_name
@@ -33,6 +33,10 @@ content_version = '1.1.0.0'
 instance_type_list = "Standard_A2", "Standard_A3", "Standard_A4", "Standard_A9", "Standard_A11", "Standard_D2", "Standard_D3", "Standard_D4", "Standard_D12", "Standard_D13", "Standard_D14", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2", "Standard_F2", "Standard_F4"
 tags = { "application": "[parameters('tagValues').application]", "environment": "[parameters('tagValues').environment]", "group": "[parameters('tagValues').group]", "owner": "[parameters('tagValues').owner]", "costCenter": "[parameters('tagValues').cost]" }
 api_version = "[variables('apiVersion')]"
+compute_api_version = "[variables('computeApiVersion')]"
+network_api_version = "[variables('networkApiVersion')]"
+storage_api_version = "[variables('storageApiVersion')]"
+insights_api_version = "[variables('insightsApiVersion')]"
 location = "[variables('location')]"
 default_payg_bw = '200m'
 
@@ -62,6 +66,8 @@ data_params['contentVersion'] = content_version
 ########## ARM Parameters ##########
 if template_name == 'cluster_base':
     data['parameters']['numberOfInstances'] = {"type": "int", "defaultValue": 2, "allowedValues": [ 2 ], "metadata": { "description": "The number of BIG-IP VEs that will be deployed in front of your application." } }
+if template_name == 'ltm_autoscale':
+    data['parameters']['vmScaleSetCapacity'] = {"type": "int", "defaultValue": 2, "allowedValues": [1, 2, 3, 4], "metadata": { "description": "The number of BIG-IP VEs that will be deployed in the VM Scale Set(Capacity)" } }
 data['parameters']['adminUsername'] = {"type": "string", "defaultValue": "azureuser", "metadata": {"description": "User name for the Virtual Machine."}}
 data['parameters']['adminPassword'] = {"type": "securestring", "metadata": { "description": "Password to login to the Virtual Machine." } }
 data['parameters']['dnsLabel'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "Unique DNS Name for the Public IP used to access the Virtual Machine." } }
@@ -76,6 +82,11 @@ if license_type == 'BYOL':
             data['parameters'][license_key] = {"type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "The license token for the F5 BIG-IP(BYOL). This field is required when deploying two or more devices" } }
 elif license_type == 'PAYG':
     data['parameters']['licensedBandwidth'] = {"type": "string", "defaultValue": default_payg_bw, "allowedValues": [ "25m", "200m", "1g" ], "metadata": { "description": "PAYG licensed bandwidth to allocate for this image."}}
+if template_name == 'ltm_autoscale':
+    data['parameters']['subscriptionId'] = { "type": "string", "defaultValue": "7aa18216-6c77-40de-82a4-f14bcb08c3a0", "metadata": { "description": "Your Azure subscription ID" } }
+    data['parameters']['tenantId'] = { "type": "string", "defaultValue": "mshimkusf5.onmicrosoft.com", "metadata": { "description": "Your Azure service principal application tenant ID" } }
+    data['parameters']['clientId'] = { "type": "string", "defaultValue": "6b8b2c61-8509-4d64-a93e-9855dac815b5", "metadata": { "description": "Your Azure service principal application client ID" } }
+    data['parameters']['servicePrincipalSecret'] = { "type": "securestring", "defaultValue": "TypXSeu6NQNc4i6nNLYkkDtQiQAf1okiCigtEeQvg0c=", "metadata": { "description": "Your Azure service principal application secret" } }
 data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": "*", "metadata": { "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources." } }
 data['parameters']['tagValues'] = {"type": "object", "defaultValue": { "application": "APP", "environment": "ENV", "group": "GROUP", "owner": "OWNER", "cost": "COST" } }
 
@@ -92,6 +103,14 @@ for parameter in data['parameters']:
 
 ########## ARM Variables ##########
 data['variables']['apiVersion'] = "2015-06-15"
+data['variables']['computeApiVersion'] = "2015-06-15"
+data['variables']['networkApiVersion'] = "2015-06-15"
+data['variables']['storageApiVersion'] = "2015-06-15"
+if template_name in ('ltm_autoscale'):
+    data['variables']['computeApiVersion'] = "2016-04-30-preview"
+    data['variables']['networkApiVersion'] = "2016-06-01"
+    data['variables']['storageApiVersion'] = "2015-06-15"
+    data['variables']['insightsApiVersion'] = "2015-04-01"
 data['variables']['location'] = "[resourceGroup().location]"
 data['variables']['singleQuote'] = "'"
 data['variables']['f5CloudLibsTag'] = "v2.1.0"
@@ -100,8 +119,6 @@ data['variables']['installCloudLibs'] = "[concat(variables('singleQuote'), '#!/b
 data['variables']['newStorageAccountName'] = "[concat(uniquestring(resourceGroup().id), 'stor')]"
 data['variables']['storageAccountType'] = "Standard_LRS"
 data['variables']['dnsLabel'] = "[toLower(parameters('dnsLabel'))]"
-if template_name in ('1nic', '2nic_limited'):
-    data['variables']['instanceName'] = "[toLower(parameters('instanceName'))]"
 data['variables']['imageNameToLower'] = "[toLower(parameters('imageName'))]"
 data['variables']['skuToUse'] = sku_to_use
 data['variables']['offerToUse'] = offer_to_use
@@ -113,6 +130,7 @@ data['variables']['vnetId'] = "[resourceId('Microsoft.Network/virtualNetworks', 
 data['variables']['vnetAddressPrefix'] = "10.0.0.0/16"
 data['variables']['nsgID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg'))]"
 data['variables']['publicIPAddressName'] = "[concat(variables('dnsLabel'), '-pip')]"
+data['variables']['publicIPAddressId'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
 data['variables']['publicIPAddressType'] = "Static"
 data['variables']['subnetName'] = "[concat(variables('dnsLabel'),'-subnet')]"
 data['variables']['subnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]"
@@ -120,34 +138,36 @@ data['variables']['subnetPrefix'] = "10.0.1.0/24"
 
 if template_name in ('1nic', '2nic_limited'):
     data['variables']['subnetPrivateAddress'] = "10.0.1.4"
-    data['variables']['publicIPAddressId'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+    data['variables']['instanceName'] = "[toLower(parameters('instanceName'))]"
 if template_name == '2nic_limited':
     data['variables']['subnet2Name'] = "[concat(variables('dnsLabel'),'-subnet2')]"
     data['variables']['subnet2Id'] = "[concat(variables('vnetId'), '/subnets/', variables('subnet2Name'))]"
     data['variables']['subnet2Prefix'] = "10.0.2.0/24"
     data['variables']['subnet2PrivateAddress'] = "10.0.2.4"
     data['variables']['nic2Name'] = "[concat(variables('dnsLabel'), '-nic2')]"
-if template_name == 'cluster_base':
+if template_name in ('cluster_base', 'ltm_autoscale'):
     data['variables']['ipAddress'] = "10.0.1."
     data['variables']['loadBalancerName'] = "[concat(variables('dnsLabel'),'-alb')]"
     data['variables']['deviceNamePrefix'] = "[concat(variables('dnsLabel'),'-device')]"
     data['variables']['lbID'] = "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]"
     data['variables']['frontEndIPConfigID'] = "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]"
-    data['variables']['publicIPID'] = "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+if template_name in ('ltm_autoscale'):
+    data['variables']['vmssName'] = "[concat(parameters('dnsLabel'),'-vmss')]"
+    data['variables']['newDataStorageAccountName'] = "[concat(parameters('dnsLabel'),'data000')]"
 
 
 ########## ARM Resources ##########
 resources_list = []
 ## Public IP Resource(s) ##
-if template_name in ('1nic', '2nic_limited', 'cluster_base'):
-    resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": api_version, "location": location, "name": "[variables('publicIPAddressName')]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[variables('dnsLabel')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
+if template_name in ('1nic', '2nic_limited', 'cluster_base', 'ltm_autoscale'):
+    resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[variables('publicIPAddressName')]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[variables('dnsLabel')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
 
 ## Virtual Network Resources(s) ##
-if template_name in ('1nic', 'cluster_base'):
+if template_name in ('1nic', 'cluster_base', 'ltm_autoscale'):
     subnets = [{ "name": "[variables('subnetName')]", "properties": { "addressPrefix": "[variables('subnetPrefix')]" } }]
 if template_name == '2nic_limited':
     subnets = [{ "name": "[variables('subnetName')]", "properties": { "addressPrefix": "[variables('subnetPrefix')]" } }, { "name": "[variables('subnet2Name')]", "properties": { "addressPrefix": "[variables('subnet2Prefix')]" } }]
-if template_name in ('1nic', '2nic_limited', 'cluster_base'):
+if template_name in ('1nic', '2nic_limited', 'cluster_base', 'ltm_autoscale'):
     resources_list += [{ "type": "Microsoft.Network/virtualNetworks", "apiVersion": api_version, "location": location, "name": "[variables('virtualNetworkName')]", "tags": tags, "properties": { "addressSpace": { "addressPrefixes": [ "[variables('vnetAddressPrefix')]" ] }, "subnets": subnets } }]
 
 ## Network Interface Resource(s) ##
@@ -164,7 +184,9 @@ if template_name in ('1nic', '2nic_limited', 'cluster_base'):
 
 ## Load Balancer Resource(s) ##
 if template_name == 'cluster_base':
-    resources_list += [{ "apiVersion": api_version, "dependsOn": [ "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]" ], "location": location, "tags": tags, "name": "[variables('loadBalancerName')]", "properties": { "frontendIPConfigurations": [ { "name": "loadBalancerFrontEnd", "properties": { "publicIPAddress": { "id": "[variables('publicIPID')]" } } } ], "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ] }, "type": "Microsoft.Network/loadBalancers" }]
+    resources_list += [{ "apiVersion": api_version, "dependsOn": [ "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]" ], "location": location, "tags": tags, "name": "[variables('loadBalancerName')]", "properties": { "frontendIPConfigurations": [ { "name": "loadBalancerFrontEnd", "properties": { "publicIPAddress": { "id": "[variables('publicIPAddressId')]" } } } ], "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ] }, "type": "Microsoft.Network/loadBalancers" }]
+if template_name == 'ltm_autoscale':
+    resources_list += [{ "apiVersion": "[variables('networkApiVersion')]", "name": "[variables('loadBalancerName')]", "type": "Microsoft.Network/loadBalancers", "location": "[variables('location')]", "dependsOn": [ "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]" ], "properties": { "frontendIPConfigurations": [ { "name": "loadBalancerFrontEnd", "properties": { "publicIPAddress": { "id": "[variables('publicIPAddressID')]" } } } ], "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ], "inboundNatPools": [ { "name": "sshnatpool", "properties": { "frontendIPConfiguration": { "id": "[variables('frontEndIPConfigID')]" }, "protocol": "tcp", "frontendPortRangeStart": 50000, "frontendPortRangeEnd": 50100, "backendPort": 22 } }, { "name": "mgmtnatpool", "properties": { "frontendIPConfiguration": { "id": "[variables('frontEndIPConfigID')]" }, "protocol": "tcp", "frontendPortRangeStart": 50101, "frontendPortRangeEnd": 50200, "backendPort": 443 } } ] } }]
 
 ## Load Balancer Inbound NAT Rule(s) ##
 if template_name == 'cluster_base':
@@ -176,8 +198,10 @@ if template_name in ('1nic', '2nic_limited', 'cluster_base'):
     resources_list += [{ "apiVersion": api_version, "location": location, "name": "[variables('availabilitySetName')]", "tags": tags, "type": "Microsoft.Compute/availabilitySets" }]
 
 ## Storage Account Resource(s) ##
-if template_name in ('1nic', '2nic_limited', 'cluster_base'):
-    resources_list += [{ "type": "Microsoft.Storage/storageAccounts", "apiVersion": api_version, "location": location, "name": "[variables('newStorageAccountName')]", "tags": tags, "properties": { "accountType": "[variables('storageAccountType')]" } }]
+if template_name in ('1nic', '2nic_limited', 'cluster_base', 'ltm_autoscale'):
+    resources_list += [{ "type": "Microsoft.Storage/storageAccounts", "apiVersion": storage_api_version, "location": location, "name": "[variables('newStorageAccountName')]", "tags": tags, "properties": { "accountType": "[variables('storageAccountType')]" } }]
+if template_name in ('ltm_autoscale'):
+    resources_list += [{ "type": "Microsoft.Storage/storageAccounts", "apiVersion": storage_api_version, "location": location, "name": "[variables('newDataStorageAccountName')]", "tags": tags, "properties": { "accountType": "[variables('storageAccountType')]" } }]
 
 ## Compute/VM Resource(s) ##
 if template_name == '1nic':
@@ -215,6 +239,15 @@ if template_name == 'cluster_base':
     resources_list += [{ "type": "Microsoft.Compute/virtualMachines/extensions", "name": "[concat(variables('deviceNamePrefix'),0,'/start')]", "apiVersion": "2016-03-30", "tags": tags, "location": location, "dependsOn": [ "[concat('Microsoft.Compute/virtualMachines/',variables('deviceNamePrefix'),0)]" ], "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": [ "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]" ] }, "protectedSettings": { "commandToExecute": command_to_execute } } }]
     resources_list += [{ "type": "Microsoft.Compute/virtualMachines/extensions", "copy": { "name": "extensionLoop", "count": "[sub(parameters('numberOfInstances'), 1)]" }, "name": "[concat(variables('deviceNamePrefix'),add(copyindex(),1),'/start')]", "apiVersion": "2016-03-30", "tags": tags, "location": location, "dependsOn": [ "[concat('Microsoft.Compute/virtualMachines/',variables('deviceNamePrefix'),add(copyindex(),1))]" ], "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": [ "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]" ] }, "protectedSettings": { "commandToExecute": command_to_execute2 } } }]
 
+## Compute VM Scale Set(s) ##
+if template_name == 'ltm_autoscale':
+    resources_list += [{ "type": "Microsoft.Compute/virtualMachineScaleSets", "apiVersion": "[variables('computeApiVersion')]", "name": "[variables('vmssName')]", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]" ], "sku": { "name": "[parameters('instanceType')]", "tier": "Standard", "capacity": "[parameters('vmScaleSetCapacity')]" }, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "[variables('offerToUse')]" }, "properties": { "upgradePolicy": { "mode": "Manual" }, "virtualMachineProfile": { "storageProfile": { "osDisk": { "vhdContainers": [ "[concat('https://', variables('newStorageAccountName'), '.blob.core.windows.net/vmss1')]" ], "name": "vmssosdisk", "caching": "ReadOnly", "createOption": "FromImage" }, "imageReference": { "publisher": "f5-networks", "offer": "[variables('offerToUse')]", "sku": "[variables('skuToUse')]", "version": "latest" } }, "osProfile": { "computerNamePrefix": "[variables('vmssName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "networkProfile": { "networkInterfaceConfigurations": [ { "name": "nic1", "properties": { "primary": "true", "ipConfigurations": [ { "name": "ip1", "properties": { "subnet": { "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]" } ], "loadBalancerInboundNatPools": [ { "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/sshnatpool')]" }, { "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/mgmtnatpool')]" } ] } } ] } } ] }, "extensionProfile": { "extensions": [ { "name":"main", "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": [ "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/scripts/azure/runScripts.js')]", "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', variables('f5CloudLibsTag'))]", "https://raw.githubusercontent.com/edwoodjrjr/scriptdump/master/main.sh" ] }, "protectedSettings": { "commandToExecute": "[concat('bash main.sh -i ', parameters('subscriptionId'), ' -r ', resourceGroup().name, ' -v ', variables('vmssName'), ' -t ', parameters('tenantId'), ' -c ', parameters('clientId'), ' -p ', parameters('servicePrincipalSecret'), ' -u ', parameters('adminUsername'), ' -x ', parameters('adminPassword'), ' -s ', variables('f5CloudLibsTag'))]" } } } ] } }, "overprovision": "false" } }]
+
+## Compute VM Scale Set(s) AutoScale Settings ##
+if template_name == 'ltm_autoscale':
+    resources_list += [{ "type": "Microsoft.Insights/autoscaleSettings", "apiVersion": "[variables('insightsApiVersion')]", "name": "autoscalehost", "location": location, "dependsOn": [ "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]" ], "properties": { "name": "autoscalehost", "targetResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "enabled": True, "profiles": [ { "name": "Profile1", "capacity": { "minimum": "1", "maximum": "10", "default": "1" }, "rules": [ { "metricTrigger": { "metricName": "Percentage CPU", "metricNamespace": "", "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "PT5M", "timeAggregation": "Average", "operator": "GreaterThan", "threshold": 60.0 }, "scaleAction": { "direction": "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } }, { "metricTrigger": { "metricName": "Percentage CPU", "metricNamespace": "", "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "PT5M", "timeAggregation": "Average", "operator": "LessThan", "threshold": 30.0 }, "scaleAction": { "direction": "Decrease", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } } ] } ] } }]
+
+
 ## Sort resources section - Expand to choose order of resources instead of just alphabetical?
 temp_sort = 'temp_sort.json'
 with open(temp_sort, 'w') as temp_sorting:
@@ -228,8 +261,8 @@ if template_name in ('1nic', '2nic_limited'):
     data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://', variables('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com')]" }
     data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(variables('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com', ' ',22)]" }
 if template_name == 'cluster_base':
-    data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('publicIPID')).dnsSettings.fqdn,':8443')]" }
-    data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('publicIPID')).dnsSettings.fqdn,' ',8022)]" }
+    data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('publicIPAddressId')).dnsSettings.fqdn,':8443')]" }
+    data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('publicIPAddressId')).dnsSettings.fqdn,' ',8022)]" }
 
 ############### End Create/Modify ARM Template Objects ###############
 

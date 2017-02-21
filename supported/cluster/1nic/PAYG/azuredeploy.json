@@ -106,6 +106,9 @@
     }, 
     "variables": {
         "apiVersion": "2015-06-15", 
+        "computeApiVersion": "2015-06-15", 
+        "networkApiVersion": "2015-06-15", 
+        "storageApiVersion": "2015-06-15", 
         "location": "[resourceGroup().location]", 
         "singleQuote": "'", 
         "f5CloudLibsTag": "v2.1.0", 
@@ -125,6 +128,7 @@
         "vnetAddressPrefix": "10.0.0.0/16", 
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg'))]", 
         "publicIPAddressName": "[concat(variables('dnsLabel'), '-pip')]", 
+        "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]", 
         "publicIPAddressType": "Static", 
         "subnetName": "[concat(variables('dnsLabel'),'-subnet')]", 
         "subnetId": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]", 
@@ -133,12 +137,11 @@
         "loadBalancerName": "[concat(variables('dnsLabel'),'-alb')]", 
         "deviceNamePrefix": "[concat(variables('dnsLabel'),'-device')]", 
         "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]", 
-        "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]", 
-        "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+        "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]"
     }, 
     "resources": [
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[variables('publicIPAddressName')]", 
             "properties": {
@@ -302,7 +305,7 @@
                         "name": "loadBalancerFrontEnd", 
                         "properties": {
                             "publicIPAddress": {
-                                "id": "[variables('publicIPID')]"
+                                "id": "[variables('publicIPAddressId')]"
                             }
                         }
                     }
@@ -375,7 +378,7 @@
             "type": "Microsoft.Compute/availabilitySets"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('storageApiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[variables('newStorageAccountName')]", 
             "properties": {
@@ -525,11 +528,11 @@
     "outputs": {
         "GUI-URL": {
             "type": "string", 
-            "value": "[concat('https://',reference(variables('publicIPID')).dnsSettings.fqdn,':8443')]"
+            "value": "[concat('https://',reference(variables('publicIPAddressId')).dnsSettings.fqdn,':8443')]"
         }, 
         "SSH-URL": {
             "type": "string", 
-            "value": "[concat(reference(variables('publicIPID')).dnsSettings.fqdn,' ',8022)]"
+            "value": "[concat(reference(variables('publicIPAddressId')).dnsSettings.fqdn,' ',8022)]"
         }
     }
 }

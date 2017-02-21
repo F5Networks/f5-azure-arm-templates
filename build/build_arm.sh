@@ -25,3 +25,8 @@ python '.\master_template.py' --template-name cluster_base --license-type BYOL -
 # Supported
 python '.\master_template.py' --template-name cluster_base --license-type PAYG --template-location '../supported/cluster/1nic/PAYG/' --script-location '../supported/cluster/1nic/'
 python '.\master_template.py' --template-name cluster_base --license-type BYOL --template-location '../supported/cluster/1nic/BYOL/' --script-location '../supported/cluster/1nic/'
+
+## BIGIP ARM Template - LTM AutoScale
+
+# Reference
+python '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --template-location '../experimental/reference/ltm_autoscale/' --script-location '../experimental/reference/ltm_autoscale/'

@@ -103,6 +103,9 @@
     }, 
     "variables": {
         "apiVersion": "2015-06-15", 
+        "computeApiVersion": "2015-06-15", 
+        "networkApiVersion": "2015-06-15", 
+        "storageApiVersion": "2015-06-15", 
         "location": "[resourceGroup().location]", 
         "singleQuote": "'", 
         "f5CloudLibsTag": "v2.1.0", 
@@ -111,7 +114,6 @@
         "newStorageAccountName": "[concat(uniquestring(resourceGroup().id), 'stor')]", 
         "storageAccountType": "Standard_LRS", 
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
-        "instanceName": "[toLower(parameters('instanceName'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]", 
         "offerToUse": "f5-big-ip-hourly", 
@@ -123,16 +125,17 @@
         "vnetAddressPrefix": "10.0.0.0/16", 
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg'))]", 
         "publicIPAddressName": "[concat(variables('dnsLabel'), '-pip')]", 
+        "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]", 
         "publicIPAddressType": "Static", 
         "subnetName": "[concat(variables('dnsLabel'),'-subnet')]", 
         "subnetId": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]", 
         "subnetPrefix": "10.0.1.0/24", 
         "subnetPrivateAddress": "10.0.1.4", 
-        "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+        "instanceName": "[toLower(parameters('instanceName'))]"
     }, 
     "resources": [
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[variables('publicIPAddressName')]", 
             "properties": {
@@ -276,7 +279,7 @@
             "type": "Microsoft.Compute/availabilitySets"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('storageApiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[variables('newStorageAccountName')]", 
             "properties": {
