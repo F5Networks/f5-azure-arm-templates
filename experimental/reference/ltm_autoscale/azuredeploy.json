@@ -90,28 +90,24 @@
             "type": "string"
         }, 
         "subscriptionId": {
-            "defaultValue": "7aa18216-6c77-40de-82a4-f14bcb08c3a0", 
             "metadata": {
                 "description": "Your Azure subscription ID"
             }, 
             "type": "string"
         }, 
         "tenantId": {
-            "defaultValue": "mshimkusf5.onmicrosoft.com", 
             "metadata": {
                 "description": "Your Azure service principal application tenant ID"
             }, 
             "type": "string"
         }, 
         "clientId": {
-            "defaultValue": "6b8b2c61-8509-4d64-a93e-9855dac815b5", 
             "metadata": {
                 "description": "Your Azure service principal application client ID"
             }, 
             "type": "string"
         }, 
         "servicePrincipalSecret": {
-            "defaultValue": "TypXSeu6NQNc4i6nNLYkkDtQiQAf1okiCigtEeQvg0c=", 
             "metadata": {
                 "description": "Your Azure service principal application secret"
             }, 

@@ -26,7 +26,7 @@ while true; do
             shift 2;;
         -d|--licenseType)
             licenseType=$2
-            shift 2;;<PARAMETERS_1>
+            shift 2;;<LICENSE_PARAMETERS><DYNAMIC_PARAMETERS>
         --)
             shift
             break;;

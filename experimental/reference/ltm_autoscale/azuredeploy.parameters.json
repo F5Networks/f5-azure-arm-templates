@@ -24,16 +24,16 @@
             "value": "200m"
         }, 
         "subscriptionId": {
-            "value": "7aa18216-6c77-40de-82a4-f14bcb08c3a0"
+            "value": "GEN_UNIQUE"
         }, 
         "tenantId": {
-            "value": "mshimkusf5.onmicrosoft.com"
+            "value": "GEN_UNIQUE"
         }, 
         "clientId": {
-            "value": "6b8b2c61-8509-4d64-a93e-9855dac815b5"
+            "value": "GEN_UNIQUE"
         }, 
         "servicePrincipalSecret": {
-            "value": "TypXSeu6NQNc4i6nNLYkkDtQiQAf1okiCigtEeQvg0c="
+            "value": "GEN_UNIQUE"
         }, 
         "restrictedSrcAddress": {
             "value": "*"
