@@ -413,7 +413,7 @@
               "publisher": "f5-networks",
               "offer": "f5-big-ip",
               "sku": "[variables('skuToUse')]",
-              "version": "latest"
+              "version": "12.1.21"
           },
           "osDisk": {
             "name": "[concat('osdisk',copyindex())]",
