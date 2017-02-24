@@ -39,7 +39,7 @@ try {
 New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
 
 # Create Arm Deployment
-$pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
+<PWD_CMD><SPS_CMD>
 <DEPLOYMENT_CREATE>
 
 # Print Output of Deployment to Console

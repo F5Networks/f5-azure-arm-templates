@@ -2,7 +2,7 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json", 
     "contentVersion": "1.1.0.0", 
     "parameters": {
-        "vmScaleSetCapacity": {
+        "vmScaleSetCount": {
             "allowedValues": [
                 1, 
                 2, 
@@ -11,7 +11,44 @@
             ], 
             "defaultValue": 2, 
             "metadata": {
-                "description": "The number of BIG-IP VEs that will be deployed in the VM Scale Set(Capacity)"
+                "description": "The number of BIG-IP VEs that will be deployed into the VM Scale Set(Capacity)"
+            }, 
+            "type": "int"
+        }, 
+        "scaleOutThroughput": {
+            "allowedValues": [
+                50, 
+                55, 
+                60, 
+                65, 
+                70, 
+                75, 
+                80, 
+                85, 
+                90, 
+                95
+            ], 
+            "defaultValue": 90, 
+            "metadata": {
+                "description": "The percentange of 'Network In' Throughput to scale out on.  This will be factored from the image bandwidth size chosen."
+            }, 
+            "type": "int"
+        }, 
+        "scaleInThroughput": {
+            "allowedValues": [
+                5, 
+                10, 
+                15, 
+                20, 
+                25, 
+                30, 
+                35, 
+                40, 
+                45
+            ], 
+            "defaultValue": 5, 
+            "metadata": {
+                "description": "The percentange of 'Network In' Throughput to scale in on.  This will be factored from the image bandwidth size chosen."
             }, 
             "type": "int"
         }, 
@@ -89,12 +126,6 @@
             }, 
             "type": "string"
         }, 
-        "subscriptionId": {
-            "metadata": {
-                "description": "Your Azure subscription ID"
-            }, 
-            "type": "string"
-        }, 
         "tenantId": {
             "metadata": {
                 "description": "Your Azure service principal application tenant ID"
@@ -167,7 +198,16 @@
         "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]", 
         "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]", 
         "vmssName": "[concat(parameters('dnsLabel'),'-vmss')]", 
-        "newDataStorageAccountName": "[concat(parameters('dnsLabel'),'data000')]"
+        "newDataStorageAccountName": "[concat(parameters('dnsLabel'),'data000')]", 
+        "subscriptionID": "[subscription().subscriptionId]", 
+        "tenantID": "[subscription().tenantId]", 
+        "25m": 26214400, 
+        "200m": 209715200, 
+        "1g": 1073741824, 
+        "scaleOutCalc": "[mul(variables(parameters('licensedBandwidth')), parameters('scaleOutThroughput'))]", 
+        "scaleInCalc": "[mul(variables(parameters('licensedBandwidth')), parameters('scaleInThroughput'))]", 
+        "scaleOutNetwork": "[div(variables('scaleOutCalc'), 100)]", 
+        "scaleInNetwork": "[div(variables('scaleInCalc'), 100)]"
     }, 
     "resources": [
         {
@@ -192,6 +232,9 @@
         }, 
         {
             "apiVersion": "[variables('apiVersion')]", 
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'),'-nsg')]"
+            ], 
             "location": "[variables('location')]", 
             "name": "[variables('virtualNetworkName')]", 
             "properties": {
@@ -204,7 +247,10 @@
                     {
                         "name": "[variables('subnetName')]", 
                         "properties": {
-                            "addressPrefix": "[variables('subnetPrefix')]"
+                            "addressPrefix": "[variables('subnetPrefix')]", 
+                            "networkSecurityGroup": {
+                                "id": "[variables('nsgID')]"
+                            }
                         }
                     }
                 ]
@@ -217,6 +263,51 @@
                 "owner": "[parameters('tagValues').owner]"
             }, 
             "type": "Microsoft.Network/virtualNetworks"
+        }, 
+        {
+            "apiVersion": "[variables('apiVersion')]", 
+            "location": "[variables('location')]", 
+            "name": "[concat(variables('dnsLabel'), '-nsg')]", 
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "mgmt_allow_443", 
+                        "properties": {
+                            "access": "Allow", 
+                            "description": "", 
+                            "destinationAddressPrefix": "*", 
+                            "destinationPortRange": "443", 
+                            "direction": "Inbound", 
+                            "priority": 101, 
+                            "protocol": "TCP", 
+                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", 
+                            "sourcePortRange": "*"
+                        }
+                    }, 
+                    {
+                        "name": "ssh_allow_22", 
+                        "properties": {
+                            "access": "Allow", 
+                            "description": "", 
+                            "destinationAddressPrefix": "*", 
+                            "destinationPortRange": "22", 
+                            "direction": "Inbound", 
+                            "priority": 102, 
+                            "protocol": "TCP", 
+                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", 
+                            "sourcePortRange": "*"
+                        }
+                    }
+                ]
+            }, 
+            "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
+            }, 
+            "type": "Microsoft.Network/networkSecurityGroups"
         }, 
         {
             "apiVersion": "[variables('networkApiVersion')]", 
@@ -250,7 +341,7 @@
                                 "id": "[variables('frontEndIPConfigID')]"
                             }, 
                             "frontendPortRangeEnd": 50100, 
-                            "frontendPortRangeStart": 50000, 
+                            "frontendPortRangeStart": 50001, 
                             "protocol": "tcp"
                         }
                     }, 
@@ -267,6 +358,13 @@
                         }
                     }
                 ]
+            }, 
+            "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
             }, 
             "type": "Microsoft.Network/loadBalancers"
         }, 
@@ -327,7 +425,7 @@
                                 "name": "main", 
                                 "properties": {
                                     "protectedSettings": {
-                                        "commandToExecute": "[concat('bash main.sh -i ', parameters('subscriptionId'), ' -r ', resourceGroup().name, ' -v ', variables('vmssName'), ' -t ', parameters('tenantId'), ' -c ', parameters('clientId'), ' -p ', parameters('servicePrincipalSecret'), ' -u ', parameters('adminUsername'), ' -x ', parameters('adminPassword'), ' -s ', variables('f5CloudLibsTag'))]"
+                                        "commandToExecute": "[concat('bash main.sh -r ', resourceGroup().name, ' -v ', variables('vmssName'), ' -t ', parameters('tenantId'), ' -c ', parameters('clientId'), ' -p ', parameters('servicePrincipalSecret'), ' -u ', parameters('adminUsername'), ' -x ', parameters('adminPassword'), ' -s ', variables('f5CloudLibsTag'))]"
                                     }, 
                                     "publisher": "Microsoft.Azure.Extensions", 
                                     "settings": {
@@ -354,19 +452,19 @@
                                             "properties": {
                                                 "loadBalancerBackendAddressPools": [
                                                     {
-                                                        "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]"
+                                                        "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]"
                                                     }
                                                 ], 
                                                 "loadBalancerInboundNatPools": [
                                                     {
-                                                        "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/sshnatpool')]"
+                                                        "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/sshnatpool')]"
                                                     }, 
                                                     {
-                                                        "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/mgmtnatpool')]"
+                                                        "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/mgmtnatpool')]"
                                                     }
                                                 ], 
                                                 "subnet": {
-                                                    "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]"
+                                                    "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]"
                                                 }
                                             }
                                         }
@@ -400,7 +498,7 @@
                 }
             }, 
             "sku": {
-                "capacity": "[parameters('vmScaleSetCapacity')]", 
+                "capacity": "[parameters('vmScaleSetCount')]", 
                 "name": "[parameters('instanceType')]", 
                 "tier": "Standard"
             }, 
@@ -426,20 +524,20 @@
                 "profiles": [
                     {
                         "capacity": {
-                            "default": "1", 
+                            "default": "[parameters('vmScaleSetCount')]", 
                             "maximum": "10", 
-                            "minimum": "1"
+                            "minimum": "[parameters('vmScaleSetCount')]"
                         }, 
                         "name": "Profile1", 
                         "rules": [
                             {
                                 "metricTrigger": {
-                                    "metricName": "Percentage CPU", 
+                                    "metricName": "Network In", 
                                     "metricNamespace": "", 
-                                    "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", 
+                                    "metricResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", 
                                     "operator": "GreaterThan", 
                                     "statistic": "Average", 
-                                    "threshold": 60.0, 
+                                    "threshold": "[variables('scaleOutNetwork')]", 
                                     "timeAggregation": "Average", 
                                     "timeGrain": "PT1M", 
                                     "timeWindow": "PT5M"
@@ -453,12 +551,12 @@
                             }, 
                             {
                                 "metricTrigger": {
-                                    "metricName": "Percentage CPU", 
+                                    "metricName": "Network In", 
                                     "metricNamespace": "", 
-                                    "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", 
+                                    "metricResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", 
                                     "operator": "LessThan", 
                                     "statistic": "Average", 
-                                    "threshold": 30.0, 
+                                    "threshold": "[variables('scaleInNetwork')]", 
                                     "timeAggregation": "Average", 
                                     "timeGrain": "PT1M", 
                                     "timeWindow": "PT5M"
@@ -473,10 +571,19 @@
                         ]
                     }
                 ], 
-                "targetResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]"
+                "targetResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]"
             }, 
             "type": "Microsoft.Insights/autoscaleSettings"
         }
     ], 
-    "outputs": {}
+    "outputs": {
+        "GUI-URL": {
+            "type": "string", 
+            "value": "[concat('https://',reference(variables('publicIPAddressId')).dnsSettings.fqdn,':50101', ' - 50200')]"
+        }, 
+        "SSH-URL": {
+            "type": "string", 
+            "value": "[concat(reference(variables('publicIPAddressId')).dnsSettings.fqdn,' ',50001, ' - 50100')]"
+        }
+    }
 }

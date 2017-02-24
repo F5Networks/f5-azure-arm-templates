@@ -1,7 +1,7 @@
 ﻿## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
-## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetCapacity 2 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_D2_v2 -imageName Good -subscriptionId <value> -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -restrictedSrcAddress "*"-resourceGroupName <value> 
+## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetCount 2 -scaleOutThroughput 90 -scaleInThroughput 5 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_D2_v2 -imageName Good -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -restrictedSrcAddress "*"-resourceGroupName <value> 
 
 param(
 
@@ -17,7 +17,15 @@ param(
 
   [Parameter(Mandatory=$True)]
   [string]
-  $vmScaleSetCapacity,
+  $vmScaleSetCount,
+
+  [Parameter(Mandatory=$True)]
+  [string]
+  $scaleOutThroughput,
+
+  [Parameter(Mandatory=$True)]
+  [string]
+  $scaleInThroughput,
 
   [Parameter(Mandatory=$True)]
   [string]
@@ -38,10 +46,6 @@ param(
   [Parameter(Mandatory=$True)]
   [string]
   $imageName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $subscriptionId,
 
   [Parameter(Mandatory=$True)]
   [string]
@@ -91,7 +95,8 @@ New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
 
 # Create Arm Deployment
 $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
-$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -vmScaleSetCapacity "$vmScaleSetCapacity" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceType "$instanceType" -imageName "$imageName" -subscriptionId "$subscriptionId" -tenantId "$tenantId" -clientId "$clientId" -servicePrincipalSecret "$servicePrincipalSecret" -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
+$sps = ConvertTo-SecureString -String $servicePrincipalSecret -AsPlainText -Force
+$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -vmScaleSetCount "$vmScaleSetCount" -scaleOutThroughput "$scaleOutThroughput" -scaleInThroughput "$scaleInThroughput" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceType "$instanceType" -imageName "$imageName" -tenantId "$tenantId" -clientId "$clientId" -servicePrincipalSecret $sps -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
 
 # Print Output of Deployment to Console
 $deployment

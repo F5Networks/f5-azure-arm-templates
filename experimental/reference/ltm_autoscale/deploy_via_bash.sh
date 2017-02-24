@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --vmScaleSetCapacity 2 --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceType Standard_D2_v2 --imageName Good --subscriptionId <value> --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --vmScaleSetCount 2 --scaleOutThroughput 90 --scaleInThroughput 5 --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceType Standard_D2_v2 --imageName Good --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 # Assign Script Paramters and Define Variables
 # Specify static items, change these as needed or make them parameters
@@ -9,7 +9,7 @@ region="westus"
 restrictedSrcAddress="*"
 tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,vmScaleSetCapacity:,adminUsername:,adminPassword:,dnsLabel:,instanceType:,imageName:,subscriptionId:,tenantId:,clientId:,servicePrincipalSecret:,restrictedSrcAddress: -n $0 -- "$@"`
+ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,vmScaleSetCount:,scaleOutThroughput:,scaleInThroughput:,adminUsername:,adminPassword:,dnsLabel:,instanceType:,imageName:,tenantId:,clientId:,servicePrincipalSecret:,restrictedSrcAddress: -n $0 -- "$@"`
 eval set -- "$ARGS"
 
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
@@ -33,37 +33,40 @@ while true; do
         -f|--licenseKey1)
             licenseKey1=$2
             shift 2;;
-        -g|--vmScaleSetCapacity)
-            vmScaleSetCapacity=$2
+        -g|--vmScaleSetCount)
+            vmScaleSetCount=$2
             shift 2;;
-        -h|--adminUsername)
+        -h|--scaleOutThroughput)
+            scaleOutThroughput=$2
+            shift 2;;
+        -i|--scaleInThroughput)
+            scaleInThroughput=$2
+            shift 2;;
+        -j|--adminUsername)
             adminUsername=$2
             shift 2;;
-        -i|--adminPassword)
+        -k|--adminPassword)
             adminPassword=$2
             shift 2;;
-        -j|--dnsLabel)
+        -l|--dnsLabel)
             dnsLabel=$2
             shift 2;;
-        -k|--instanceType)
+        -m|--instanceType)
             instanceType=$2
             shift 2;;
-        -l|--imageName)
+        -n|--imageName)
             imageName=$2
             shift 2;;
-        -m|--subscriptionId)
-            subscriptionId=$2
-            shift 2;;
-        -n|--tenantId)
+        -o|--tenantId)
             tenantId=$2
             shift 2;;
-        -o|--clientId)
+        -p|--clientId)
             clientId=$2
             shift 2;;
-        -p|--servicePrincipalSecret)
+        -q|--servicePrincipalSecret)
             servicePrincipalSecret=$2
             shift 2;;
-        -q|--restrictedSrcAddress)
+        -r|--restrictedSrcAddress)
             restrictedSrcAddress=$2
             shift 2;;
         --)
@@ -73,7 +76,7 @@ while true; do
 done
 
 #If a required paramater is not passed, the script will prompt for it below
-required_variables="vmScaleSetCapacity adminUsername adminPassword dnsLabel instanceType imageName subscriptionId tenantId clientId servicePrincipalSecret resourceGroupName licenseType "
+required_variables="vmScaleSetCount scaleOutThroughput scaleInThroughput adminUsername adminPassword dnsLabel instanceType imageName tenantId clientId servicePrincipalSecret resourceGroupName licenseType "
 for variable in $required_variables
         do
         if [ -v ${!variable} ] ; then
@@ -116,4 +119,4 @@ azure group create -n $resourceGroupName -l $region
 
 # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
 # such as can been done with Powershell...oh well!
-azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetCapacity\":{\"value\":\"$vmScaleSetCapacity\"},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"subscriptionId\":{\"value\":\"$subscriptionId\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
+azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetCount\":{\"value\":\"$vmScaleSetCount\"},\"scaleOutThroughput\":{\"value\":\"$scaleOutThroughput\"},\"scaleInThroughput\":{\"value\":\"$scaleInThroughput\"},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"

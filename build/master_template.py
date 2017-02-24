@@ -68,7 +68,9 @@ data_params['contentVersion'] = content_version
 if template_name == 'cluster_base':
     data['parameters']['numberOfInstances'] = {"type": "int", "defaultValue": 2, "allowedValues": [ 2 ], "metadata": { "description": "The number of BIG-IP VEs that will be deployed in front of your application." } }
 if template_name == 'ltm_autoscale':
-    data['parameters']['vmScaleSetCapacity'] = {"type": "int", "defaultValue": 2, "allowedValues": [1, 2, 3, 4], "metadata": { "description": "The number of BIG-IP VEs that will be deployed in the VM Scale Set(Capacity)" } }
+    data['parameters']['vmScaleSetCount'] = {"type": "int", "defaultValue": 2, "allowedValues": [1, 2, 3, 4], "metadata": { "description": "The number of BIG-IP VEs that will be deployed into the VM Scale Set(Capacity)" } }
+    data['parameters']['scaleOutThroughput'] = {"type": "int", "defaultValue": 90, "allowedValues": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95], "metadata": { "description": "The percentange of 'Network In' Throughput to scale out on.  This will be factored from the image bandwidth size chosen." } }
+    data['parameters']['scaleInThroughput'] = {"type": "int", "defaultValue": 5, "allowedValues": [5, 10, 15, 20, 25, 30, 35, 40, 45], "metadata": { "description": "The percentange of 'Network In' Throughput to scale in on.  This will be factored from the image bandwidth size chosen." } }
 data['parameters']['adminUsername'] = {"type": "string", "defaultValue": "azureuser", "metadata": {"description": "User name for the Virtual Machine."}}
 data['parameters']['adminPassword'] = {"type": "securestring", "metadata": { "description": "Password to login to the Virtual Machine." } }
 data['parameters']['dnsLabel'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "Unique DNS Name for the Public IP used to access the Virtual Machine." } }
@@ -84,7 +86,6 @@ if license_type == 'BYOL':
 elif license_type == 'PAYG':
     data['parameters']['licensedBandwidth'] = {"type": "string", "defaultValue": default_payg_bw, "allowedValues": [ "25m", "200m", "1g" ], "metadata": { "description": "PAYG licensed bandwidth to allocate for this image."}}
 if template_name == 'ltm_autoscale':
-    data['parameters']['subscriptionId'] = { "type": "string", "metadata": { "description": "Your Azure subscription ID" } }
     data['parameters']['tenantId'] = { "type": "string", "metadata": { "description": "Your Azure service principal application tenant ID" } }
     data['parameters']['clientId'] = { "type": "string", "metadata": { "description": "Your Azure service principal application client ID" } }
     data['parameters']['servicePrincipalSecret'] = { "type": "securestring", "metadata": { "description": "Your Azure service principal application secret" } }
@@ -155,6 +156,15 @@ if template_name in ('cluster_base', 'ltm_autoscale'):
 if template_name in ('ltm_autoscale'):
     data['variables']['vmssName'] = "[concat(parameters('dnsLabel'),'-vmss')]"
     data['variables']['newDataStorageAccountName'] = "[concat(parameters('dnsLabel'),'data000')]"
+    data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
+    data['variables']['tenantID'] = "[subscription().tenantId]"
+    data['variables']['25m'] = 26214400
+    data['variables']['200m'] = 209715200
+    data['variables']['1g'] = 1073741824
+    data['variables']['scaleOutCalc'] = "[mul(variables(parameters('licensedBandwidth')), parameters('scaleOutThroughput'))]"
+    data['variables']['scaleInCalc'] = "[mul(variables(parameters('licensedBandwidth')), parameters('scaleInThroughput'))]"
+    data['variables']['scaleOutNetwork'] = "[div(variables('scaleOutCalc'), 100)]"
+    data['variables']['scaleInNetwork'] = "[div(variables('scaleInCalc'), 100)]"
 
 
 ########## ARM Resources ##########
@@ -164,12 +174,16 @@ if template_name in ('1nic', '2nic_limited', 'cluster_base', 'ltm_autoscale'):
     resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[variables('publicIPAddressName')]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[variables('dnsLabel')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
 
 ## Virtual Network Resources(s) ##
-if template_name in ('1nic', 'cluster_base', 'ltm_autoscale'):
+if template_name in ('1nic', 'cluster_base'):
     subnets = [{ "name": "[variables('subnetName')]", "properties": { "addressPrefix": "[variables('subnetPrefix')]" } }]
 if template_name == '2nic_limited':
     subnets = [{ "name": "[variables('subnetName')]", "properties": { "addressPrefix": "[variables('subnetPrefix')]" } }, { "name": "[variables('subnet2Name')]", "properties": { "addressPrefix": "[variables('subnet2Prefix')]" } }]
-if template_name in ('1nic', '2nic_limited', 'cluster_base', 'ltm_autoscale'):
+if template_name in ('1nic', '2nic_limited', 'cluster_base'):
     resources_list += [{ "type": "Microsoft.Network/virtualNetworks", "apiVersion": api_version, "location": location, "name": "[variables('virtualNetworkName')]", "tags": tags, "properties": { "addressSpace": { "addressPrefixes": [ "[variables('vnetAddressPrefix')]" ] }, "subnets": subnets } }]
+
+if template_name in ('ltm_autoscale'):
+    subnets = [{ "name": "[variables('subnetName')]", "properties": { "addressPrefix": "[variables('subnetPrefix')]", "networkSecurityGroup": {"id": "[variables('nsgID')]"} } }]
+    resources_list += [{ "type": "Microsoft.Network/virtualNetworks", "apiVersion": api_version, "dependsOn": [ "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'),'-nsg')]" ], "location": location, "name": "[variables('virtualNetworkName')]", "tags": tags, "properties": { "addressSpace": { "addressPrefixes": [ "[variables('vnetAddressPrefix')]" ] }, "subnets": subnets } }]
 
 ## Network Interface Resource(s) ##
 if template_name in ('1nic', '2nic_limited'):
@@ -180,14 +194,14 @@ if template_name == 'cluster_base':
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkInterfaces", "name": "[concat(variables('nicName'),copyindex())]", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/guimgt',copyindex())]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/sshmgt',copyindex())]", "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'),'-nsg')]" ], "copy": { "count": "[parameters('numberOfInstances')]", "name": "niccopy" }, "properties": { "networkSecurityGroup": { "id": "[variables('nsgID')]" }, "ipConfigurations": [ { "name": "ipconfig1", "properties": { "privateIPAllocationMethod": "Static", "privateIPAddress": "[concat(variables('ipAddress'),add(4,copyindex()))]", "subnet": { "id": "[variables('subnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ], "loadBalancerInboundNatRules": [ { "id": "[concat(variables('lbID'), '/inboundNatRules/', 'guimgt',copyIndex())]" }, { "id": "[concat(variables('lbID'), '/inboundNatRules/', 'sshmgt',copyIndex())]" } ] } } ] } }]
 
 ## Network Security Group Resource(s) ##
-if template_name in ('1nic', '2nic_limited', 'cluster_base'):
+if template_name in ('1nic', '2nic_limited', 'cluster_base', 'ltm_autoscale'):
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkSecurityGroups", "location": location, "name": "[concat(variables('dnsLabel'), '-nsg')]", "tags": tags, "properties": { "securityRules": [ { "name": "mgmt_allow_443", "properties": { "description": "", "priority": 101, "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "443", "protocol": "TCP", "direction": "Inbound", "access": "Allow" } }, { "name": "ssh_allow_22", "properties": { "description": "", "priority": 102, "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "22", "protocol": "TCP", "direction": "Inbound", "access": "Allow" } } ] } }]
 
 ## Load Balancer Resource(s) ##
 if template_name == 'cluster_base':
     resources_list += [{ "apiVersion": api_version, "dependsOn": [ "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]" ], "location": location, "tags": tags, "name": "[variables('loadBalancerName')]", "properties": { "frontendIPConfigurations": [ { "name": "loadBalancerFrontEnd", "properties": { "publicIPAddress": { "id": "[variables('publicIPAddressId')]" } } } ], "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ] }, "type": "Microsoft.Network/loadBalancers" }]
 if template_name == 'ltm_autoscale':
-    resources_list += [{ "apiVersion": "[variables('networkApiVersion')]", "name": "[variables('loadBalancerName')]", "type": "Microsoft.Network/loadBalancers", "location": "[variables('location')]", "dependsOn": [ "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]" ], "properties": { "frontendIPConfigurations": [ { "name": "loadBalancerFrontEnd", "properties": { "publicIPAddress": { "id": "[variables('publicIPAddressID')]" } } } ], "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ], "inboundNatPools": [ { "name": "sshnatpool", "properties": { "frontendIPConfiguration": { "id": "[variables('frontEndIPConfigID')]" }, "protocol": "tcp", "frontendPortRangeStart": 50000, "frontendPortRangeEnd": 50100, "backendPort": 22 } }, { "name": "mgmtnatpool", "properties": { "frontendIPConfiguration": { "id": "[variables('frontEndIPConfigID')]" }, "protocol": "tcp", "frontendPortRangeStart": 50101, "frontendPortRangeEnd": 50200, "backendPort": 443 } } ] } }]
+    resources_list += [{ "apiVersion": network_api_version, "name": "[variables('loadBalancerName')]", "type": "Microsoft.Network/loadBalancers", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]" ], "properties": { "frontendIPConfigurations": [ { "name": "loadBalancerFrontEnd", "properties": { "publicIPAddress": { "id": "[variables('publicIPAddressID')]" } } } ], "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ], "inboundNatPools": [ { "name": "sshnatpool", "properties": { "frontendIPConfiguration": { "id": "[variables('frontEndIPConfigID')]" }, "protocol": "tcp", "frontendPortRangeStart": 50001, "frontendPortRangeEnd": 50100, "backendPort": 22 } }, { "name": "mgmtnatpool", "properties": { "frontendIPConfiguration": { "id": "[variables('frontEndIPConfigID')]" }, "protocol": "tcp", "frontendPortRangeStart": 50101, "frontendPortRangeEnd": 50200, "backendPort": 443 } } ] } }]
 
 ## Load Balancer Inbound NAT Rule(s) ##
 if template_name == 'cluster_base':
@@ -242,11 +256,11 @@ if template_name == 'cluster_base':
 
 ## Compute VM Scale Set(s) ##
 if template_name == 'ltm_autoscale':
-    resources_list += [{ "type": "Microsoft.Compute/virtualMachineScaleSets", "apiVersion": "[variables('computeApiVersion')]", "name": "[variables('vmssName')]", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]" ], "sku": { "name": "[parameters('instanceType')]", "tier": "Standard", "capacity": "[parameters('vmScaleSetCapacity')]" }, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "[variables('offerToUse')]" }, "properties": { "upgradePolicy": { "mode": "Manual" }, "virtualMachineProfile": { "storageProfile": { "osDisk": { "vhdContainers": [ "[concat('https://', variables('newStorageAccountName'), '.blob.core.windows.net/vmss1')]" ], "name": "vmssosdisk", "caching": "ReadOnly", "createOption": "FromImage" }, "imageReference": { "publisher": "f5-networks", "offer": "[variables('offerToUse')]", "sku": "[variables('skuToUse')]", "version": "latest" } }, "osProfile": { "computerNamePrefix": "[variables('vmssName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "networkProfile": { "networkInterfaceConfigurations": [ { "name": "nic1", "properties": { "primary": "true", "ipConfigurations": [ { "name": "ip1", "properties": { "subnet": { "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]" } ], "loadBalancerInboundNatPools": [ { "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/sshnatpool')]" }, { "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/mgmtnatpool')]" } ] } } ] } } ] }, "extensionProfile": { "extensions": [ { "name":"main", "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": [ "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/scripts/azure/runScripts.js')]", "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', variables('f5CloudLibsTag'))]", "https://raw.githubusercontent.com/edwoodjrjr/scriptdump/master/main.sh" ] }, "protectedSettings": { "commandToExecute": "[concat('bash main.sh -i ', parameters('subscriptionId'), ' -r ', resourceGroup().name, ' -v ', variables('vmssName'), ' -t ', parameters('tenantId'), ' -c ', parameters('clientId'), ' -p ', parameters('servicePrincipalSecret'), ' -u ', parameters('adminUsername'), ' -x ', parameters('adminPassword'), ' -s ', variables('f5CloudLibsTag'))]" } } } ] } }, "overprovision": "false" } }]
+    resources_list += [{ "type": "Microsoft.Compute/virtualMachineScaleSets", "apiVersion": compute_api_version, "name": "[variables('vmssName')]", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]" ], "sku": { "name": "[parameters('instanceType')]", "tier": "Standard", "capacity": "[parameters('vmScaleSetCount')]" }, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "[variables('offerToUse')]" }, "properties": { "upgradePolicy": { "mode": "Manual" }, "virtualMachineProfile": { "storageProfile": { "osDisk": { "vhdContainers": [ "[concat('https://', variables('newStorageAccountName'), '.blob.core.windows.net/vmss1')]" ], "name": "vmssosdisk", "caching": "ReadOnly", "createOption": "FromImage" }, "imageReference": { "publisher": "f5-networks", "offer": "[variables('offerToUse')]", "sku": "[variables('skuToUse')]", "version": "latest" } }, "osProfile": { "computerNamePrefix": "[variables('vmssName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "networkProfile": { "networkInterfaceConfigurations": [ { "name": "nic1", "properties": { "primary": "true", "ipConfigurations": [ { "name": "ip1", "properties": { "subnet": { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]" } ], "loadBalancerInboundNatPools": [ { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/sshnatpool')]" }, { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/mgmtnatpool')]" } ] } } ] } } ] }, "extensionProfile": { "extensions": [ { "name":"main", "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": [ "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/scripts/azure/runScripts.js')]", "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', variables('f5CloudLibsTag'))]", "https://raw.githubusercontent.com/edwoodjrjr/scriptdump/master/main.sh" ] }, "protectedSettings": { "commandToExecute": "[concat('bash main.sh -r ', resourceGroup().name, ' -v ', variables('vmssName'), ' -t ', parameters('tenantId'), ' -c ', parameters('clientId'), ' -p ', parameters('servicePrincipalSecret'), ' -u ', parameters('adminUsername'), ' -x ', parameters('adminPassword'), ' -s ', variables('f5CloudLibsTag'))]" } } } ] } }, "overprovision": "false" } }]
 
 ## Compute VM Scale Set(s) AutoScale Settings ##
 if template_name == 'ltm_autoscale':
-    resources_list += [{ "type": "Microsoft.Insights/autoscaleSettings", "apiVersion": "[variables('insightsApiVersion')]", "name": "autoscalehost", "location": location, "dependsOn": [ "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]" ], "properties": { "name": "autoscalehost", "targetResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "enabled": True, "profiles": [ { "name": "Profile1", "capacity": { "minimum": "1", "maximum": "10", "default": "1" }, "rules": [ { "metricTrigger": { "metricName": "Percentage CPU", "metricNamespace": "", "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "PT5M", "timeAggregation": "Average", "operator": "GreaterThan", "threshold": 60.0 }, "scaleAction": { "direction": "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } }, { "metricTrigger": { "metricName": "Percentage CPU", "metricNamespace": "", "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "PT5M", "timeAggregation": "Average", "operator": "LessThan", "threshold": 30.0 }, "scaleAction": { "direction": "Decrease", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } } ] } ] } }]
+    resources_list += [{ "type": "Microsoft.Insights/autoscaleSettings", "apiVersion": "[variables('insightsApiVersion')]", "name": "autoscalehost", "location": location, "dependsOn": [ "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]" ], "properties": { "name": "autoscalehost", "targetResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "enabled": True, "profiles": [ { "name": "Profile1", "capacity": { "minimum": "[parameters('vmScaleSetCount')]", "maximum": "10", "default": "[parameters('vmScaleSetCount')]" }, "rules": [ { "metricTrigger": { "metricName": "Network In", "metricNamespace": "", "metricResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "PT5M", "timeAggregation": "Average", "operator": "GreaterThan", "threshold": "[variables('scaleOutNetwork')]" }, "scaleAction": { "direction": "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } }, { "metricTrigger": { "metricName": "Network In", "metricNamespace": "", "metricResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "PT5M", "timeAggregation": "Average", "operator": "LessThan", "threshold": "[variables('scaleInNetwork')]" }, "scaleAction": { "direction": "Decrease", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } } ] } ] } }]
 
 
 ## Sort resources section - Expand to choose order of resources instead of just alphabetical?
@@ -264,6 +278,9 @@ if template_name in ('1nic', '2nic_limited'):
 if template_name == 'cluster_base':
     data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('publicIPAddressId')).dnsSettings.fqdn,':8443')]" }
     data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('publicIPAddressId')).dnsSettings.fqdn,' ',8022)]" }
+if template_name == 'ltm_autoscale':
+    data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('publicIPAddressId')).dnsSettings.fqdn,':50101', ' - 50200')]" }
+    data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('publicIPAddressId')).dnsSettings.fqdn,' ',50001, ' - 50100')]" }
 
 ############### End Create/Modify ARM Template Objects ###############
 
@@ -307,14 +324,14 @@ if script_location:
             param_str = ''; mandatory_cmd = ''; default_value = ''; payg_cmd = ''; byol_cmd = ''; deploy_cmd_params = ''; script_dash = ' -'
             meta_script = 'base.deploy_via_ps.ps1'; script_loc = script_location + 'Deploy_via_PS.ps1'
             base_ex = '## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth ' + default_payg_bw
-            license2_param = ''
+            license2_param = ''; pwd_cmd = ''; sps_cmd = ''
         elif language == 'bash':
             param_str = ''; mandatory_cmd = ''; default_value = ''; payg_cmd = ''; byol_cmd = ''; deploy_cmd_params = '"{'; script_dash = ' --'
             meta_script = 'base.deploy_via_bash.sh'; script_loc = script_location + 'deploy_via_bash.sh'
             base_ex = '## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth ' + default_payg_bw
-            getopt_start = 'ARGS=`getopt -o '; getopt_params_long = ' --long ';  getopt_end = ' -n $0 -- "$@"`'; short_param_count = 0
+            getopt_start = 'ARGS=`getopt -o '; getopt_params_long = ' --long ';  getopt_end = ' -n $0 -- "$@"`'
             getopt_params_short = 'a:b:c:d:'; base_params = 'resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,'
-            mandatory_variables = ''; license2_param = ''; license2_check = ''; license_params = ''
+            mandatory_variables = ''; license2_param = ''; license2_check = ''; license_params = ''; pwd_cmd = ''; sps_cmd = ''
             bash_shorthand_args = ['e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
             # Need to add bash license params prior to dynamic parameters
             # Create license parameters, expand to be a for loop?
@@ -344,13 +361,17 @@ if script_location:
                     mandatory_cmd = '\n  [Parameter(Mandatory=$True)]'
                 elif language == 'bash':
                     mandatory_variables += parameter[0] + ' '
-            # Specify non-mandatory parameters that should have a default value
+            # Specify non-mandatory parameters default value
             if parameter[2] == False:
                 param_value = ' = "' + str(parameter[1]) + '",\n'
             if language == 'powershell':
                 param_str += mandatory_cmd + '\n  [string]\n  $' + parameter[0] + param_value
                 if parameter[0] == 'adminPassword':
                     deploy_cmd_params += '-' + parameter[0] + ' $pwd '
+                    pwd_cmd = '$pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force'
+                elif parameter[0] == 'servicePrincipalSecret':
+                    deploy_cmd_params += '-' + parameter[0] + ' $sps '
+                    sps_cmd = '\n$sps = ConvertTo-SecureString -String $servicePrincipalSecret -AsPlainText -Force'
                 else:
                     deploy_cmd_params += '-' + parameter[0] + ' "$' + parameter[0] + '" '
             elif language == 'bash':
@@ -358,7 +379,6 @@ if script_location:
                 # Need to build the getopt command
                 getopt_params_long += parameter[0] + ':,'
                 param_str += '\n        -' + bash_shorthand_args[0] + '|--' + parameter[0] + ')\n            ' + parameter[0] + '=$2\n            shift 2;;'
-                # Need to include single letter params
                 getopt_params_short += bash_shorthand_args[0] + ':'
                 del bash_shorthand_args[0]
             # Add param to example command
@@ -380,9 +400,6 @@ if script_location:
             # Add any additional example command script parameters
             for named_param in ['resourceGroupName']:
                 base_ex += '-' + named_param + ' ' + '<value> '
-            # Map necessary script items, handle encoding
-            ex_cmd = base_ex.encode("utf8")
-            param_str = param_str.encode("utf8")
             if template_name in ('1nic', '2nic_limited'):
                 byol_cmd =  deploy_cmd_params + ' -licenseKey1 "$licenseKey1"'
                 payg_cmd = deploy_cmd_params + ' -licensedBandwidth "$licensedBandwidth"'
@@ -408,9 +425,6 @@ if script_location:
             # Add any additional parameters to the deployment command
             for addtl_param in ['tagValues']:
                 deploy_cmd_params += '\\"' + addtl_param + '\\":{\\"value\\":$' + addtl_param + '},'
-            # Map necessary script items, handle encoding
-            ex_cmd = base_ex.encode("utf8")
-            param_str = param_str.encode("utf8")
             create_cmd = 'azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p '
             if template_name in ('1nic', '2nic_limited'):
                 byol_cmd =  create_cmd + deploy_cmd_params + '\\"licenseKey1\\":{\\"value\\":\\"$licenseKey1\\"}}"'
@@ -421,10 +435,14 @@ if script_location:
             deploy_cmd = 'if [ $licenseType == "BYOL" ]; then\n    ' + byol_cmd + '\nelif [ $licenseType == "PAYG" ]; then\n    ' + payg_cmd + '\nelse\n    echo "Uh oh, shouldn\'t make it here! Ensure license type is either PAYG or BYOL"\n    exit 1\nfi'
             if template_name in ('ltm_autoscale'):
                 deploy_cmd = create_cmd + deploy_cmd_params + '\\"licensedBandwidth\\":{\\"value\\":\\"$licensedBandwidth\\"}}"'
-
+        # Map necessary script items, handle encoding
+        ex_cmd = base_ex.encode("utf8")
+        param_str = param_str.encode("utf8")
         # Map script as needed
         script_str = script_str.replace('<EXAMPLE_CMD>', ex_cmd)
         script_str = script_str.replace('<DEPLOYMENT_CREATE>', deploy_cmd)
+        script_str = script_str.replace('<PWD_CMD>', pwd_cmd)
+        script_str = script_str.replace('<SPS_CMD>', sps_cmd)
         script_str = script_str.replace('<LICENSE_PARAMETERS>', license_params)
         script_str = script_str.replace('<DYNAMIC_PARAMETERS>', param_str)
         if language == 'bash':
@@ -435,9 +453,10 @@ if script_location:
         with open(script_loc, 'w') as script_complete:
             script_complete.write(script_str)
         ## End Script_Creation Proc
-        return 'Script Created'
+        return language + 'Script Created'
 
     # Need to manually add templates to create scripts for now as a 'check'...
     if template_name in ('1nic', '2nic_limited', 'cluster_base', 'ltm_autoscale'):
         for script_language in ('powershell', 'bash'):
             script_creation(script_language)
+############### END Create/Modify Scripts ###############
