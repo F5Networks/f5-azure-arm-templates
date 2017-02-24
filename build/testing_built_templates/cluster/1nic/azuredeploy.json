@@ -429,7 +429,7 @@
                         "offer": "f5-big-ip", 
                         "publisher": "f5-networks", 
                         "sku": "[variables('skuToUse')]", 
-                        "version": "latest"
+                        "version": "12.1.21"
                     }, 
                     "osDisk": {
                         "caching": "ReadWrite", 
