@@ -271,12 +271,12 @@
             "properties": {
                 "securityRules": [
                     {
-                        "name": "mgmt_allow_443", 
+                        "name": "mgmt_allow_8443", 
                         "properties": {
                             "access": "Allow", 
                             "description": "", 
                             "destinationAddressPrefix": "*", 
-                            "destinationPortRange": "443", 
+                            "destinationPortRange": "8443", 
                             "direction": "Inbound", 
                             "priority": 101, 
                             "protocol": "TCP", 
@@ -348,7 +348,7 @@
                     {
                         "name": "mgmtnatpool", 
                         "properties": {
-                            "backendPort": 443, 
+                            "backendPort": 8443, 
                             "frontendIPConfiguration": {
                                 "id": "[variables('frontEndIPConfigID')]"
                             }, 
@@ -484,7 +484,7 @@
                             "offer": "[variables('offerToUse')]", 
                             "publisher": "f5-networks", 
                             "sku": "[variables('skuToUse')]", 
-                            "version": "latest"
+                            "version": "13.0.000"
                         }, 
                         "osDisk": {
                             "caching": "ReadOnly", 
