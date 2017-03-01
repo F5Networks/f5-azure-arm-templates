@@ -9,7 +9,7 @@
             "value": 90
         }, 
         "scaleInThroughput": {
-            "value": 5
+            "value": 10
         }, 
         "adminUsername": {
             "value": "azureuser"

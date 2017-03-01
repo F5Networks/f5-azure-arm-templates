@@ -1,7 +1,7 @@
 ﻿## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
-## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetCount 2 -scaleOutThroughput 90 -scaleInThroughput 5 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_D2_v2 -imageName Good -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -restrictedSrcAddress "*"-resourceGroupName <value> 
+## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetCount 2 -scaleOutThroughput 90 -scaleInThroughput 10 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_D2_v2 -imageName Good -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -restrictedSrcAddress "*"-resourceGroupName <value> 
 
 param(
 
