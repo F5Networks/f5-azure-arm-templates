@@ -20,6 +20,9 @@
         "imageName": {
             "value": "Good"
         }, 
+        "bigIpVersion": {
+            "value": "13.0.000"
+        }, 
         "licensedBandwidth": {
             "value": "200m"
         }, 

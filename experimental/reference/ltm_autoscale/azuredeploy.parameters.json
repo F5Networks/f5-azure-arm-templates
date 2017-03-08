@@ -2,14 +2,23 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
     "contentVersion": "1.1.2.0", 
     "parameters": {
-        "vmScaleSetCount": {
+        "vmScaleSetMinCount": {
             "value": 2
+        }, 
+        "vmScaleSetMaxCount": {
+            "value": 4
         }, 
         "scaleOutThroughput": {
             "value": 90
         }, 
         "scaleInThroughput": {
             "value": 10
+        }, 
+        "scaleTimeWindow": {
+            "value": 10
+        }, 
+        "scaleNotificationEmail": {
+            "value": "mail@example.com"
         }, 
         "adminUsername": {
             "value": "azureuser"
@@ -25,6 +34,9 @@
         }, 
         "imageName": {
             "value": "Good"
+        }, 
+        "bigIpVersion": {
+            "value": "13.0.000"
         }, 
         "licensedBandwidth": {
             "value": "200m"
