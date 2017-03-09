@@ -417,7 +417,11 @@ if script_location:
                 else:
                     deploy_cmd_params += '-' + parameter[0] + ' "$' + parameter[0] + '" '
             elif language == 'bash':
-                deploy_cmd_params += '\\"' + parameter[0] + '\\":{\\"value\\":\\"$' + parameter[0] + '\\"},'
+                # Handle bash quoting for int's in ARM template create command
+                if type(parameter[1]) == int:
+                    deploy_cmd_params += '\\"' + parameter[0] + '\\":{\\"value\\":$' + parameter[0] + '},'
+                else:
+                    deploy_cmd_params += '\\"' + parameter[0] + '\\":{\\"value\\":\\"$' + parameter[0] + '\\"},'
                 # Need to build the getopt command
                 getopt_params_long += parameter[0] + ':,'
                 param_str += '\n        -' + bash_shorthand_args[0] + '|--' + parameter[0] + ')\n            ' + parameter[0] + '=$2\n            shift 2;;'
