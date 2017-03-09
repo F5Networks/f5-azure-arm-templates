@@ -51,13 +51,13 @@ if template_name in ('ltm_autoscale'):
 
 ## Set BIG-IP versions to allow
 default_big_ip_version = '13.0.000'
-allowed_big_ip_versions = ["13.0.000"]
+allowed_big_ip_versions = ["latest", "13.0.000"]
 # Acount for difference in PAYG and BYOL in 12.1 release
 if license_type == 'PAYG':
     allowed_big_ip_versions += ["12.1.22"]
 elif license_type == 'BYOL':
     allowed_big_ip_versions += ["12.1.21"]
-version_port_map = { "13.0.000": { "Port": 8443 }, "12.1.21": { "Port": 443 }, "12.1.22": { "Port": 443 }, "443": { "Port": 443 } }
+version_port_map = { "latest": { "Port": 8443 }, "13.0.000": { "Port": 8443 }, "12.1.21": { "Port": 443 }, "12.1.22": { "Port": 443 }, "443": { "Port": 443 } }
 
 ## Determine PAYG/BYOL variables
 sku_to_use = "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]"
@@ -126,6 +126,8 @@ for parameter in data['parameters']:
         data_params['parameters'][parameter] = {"value": 'GEN_UNIQUE'}
 
 ########## ARM Variables ##########
+data['variables']['bigIpNicPortMap'] = { "1": { "Port": "[parameters('bigIpVersion')]" }, "2": { "Port": "443" }, "3": { "Port": "443" }, "4": { "Port": "443" }, "5": { "Port": "443" }, "6": { "Port": "443" } }
+data['variables']['bigIpVersionPortMap'] = version_port_map
 data['variables']['apiVersion'] = "2015-06-15"
 data['variables']['computeApiVersion'] = "2015-06-15"
 data['variables']['networkApiVersion'] = "2015-06-15"
@@ -148,8 +150,6 @@ data['variables']['dnsLabel'] = "[toLower(parameters('dnsLabel'))]"
 data['variables']['imageNameToLower'] = "[toLower(parameters('imageName'))]"
 data['variables']['skuToUse'] = sku_to_use
 data['variables']['offerToUse'] = offer_to_use
-data['variables']['bigIpNicPortMap'] = { "1": { "Port": "[parameters('bigIpVersion')]" }, "2": { "Port": "443" }, "3": { "Port": "443" }, "4": { "Port": "443" } }
-data['variables']['bigIpVersionPortMap'] = version_port_map
 data['variables']['bigIpNicPortValue'] = "[variables('bigIpNicPortMap')['1'].Port]"
 data['variables']['bigIpMgmtPort'] = "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]"
 data['variables']['availabilitySetName'] = "[concat(variables('dnsLabel'), '-avset')]"
@@ -301,7 +301,7 @@ if template_name == 'ltm_autoscale':
 
 ## Compute VM Scale Set(s) AutoScale Settings ##
 if template_name == 'ltm_autoscale':
-    resources_list += [{ "type": "Microsoft.Insights/autoscaleSettings", "apiVersion": "[variables('insightsApiVersion')]", "name": "autoscalehost", "location": location, "dependsOn": [ "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]" ], "properties": { "name": "autoscalehost", "targetResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "enabled": True, "profiles": [ { "name": "Profile1", "capacity": { "minimum": "[parameters('vmScaleSetMinCount')]", "maximum": "[parameters('vmScaleSetMaxCount')]", "default": "[parameters('vmScaleSetMinCount')]" }, "rules": [ { "metricTrigger": { "metricName": "Network Out", "metricNamespace": "", "metricResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "[variables('timeWindow')]", "timeAggregation": "Average", "operator": "GreaterThan", "threshold": "[variables('scaleOutNetworkBytes')]" }, "scaleAction": { "direction": "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } }, { "metricTrigger": { "metricName": "Network Out", "metricNamespace": "", "metricResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "[variables('timeWindow')]", "timeAggregation": "Average", "operator": "LessThan", "threshold": "[variables('scaleInNetworkBytes')]" }, "scaleAction": { "direction": "Decrease", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } } ], "notifications": [ { "operation": "Scale", "email": { "sendToSubscriptionAdministrator": False, "sendToSubscriptionCoAdministrators": False, "customEmails": "" } } ] } ] } }]
+    resources_list += [{ "type": "Microsoft.Insights/autoscaleSettings", "apiVersion": "[variables('insightsApiVersion')]", "name": "autoscaleconfig", "location": location, "dependsOn": [ "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]" ], "properties": { "name": "autoscaleconfig", "targetResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "enabled": True, "profiles": [ { "name": "Profile1", "capacity": { "minimum": "[parameters('vmScaleSetMinCount')]", "maximum": "[parameters('vmScaleSetMaxCount')]", "default": "[parameters('vmScaleSetMinCount')]" }, "rules": [ { "metricTrigger": { "metricName": "Network Out", "metricNamespace": "", "metricResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "[variables('timeWindow')]", "timeAggregation": "Average", "operator": "GreaterThan", "threshold": "[variables('scaleOutNetworkBytes')]" }, "scaleAction": { "direction": "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } }, { "metricTrigger": { "metricName": "Network Out", "metricNamespace": "", "metricResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "[variables('timeWindow')]", "timeAggregation": "Average", "operator": "LessThan", "threshold": "[variables('scaleInNetworkBytes')]" }, "scaleAction": { "direction": "Decrease", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } } ], "notifications": [ { "operation": "Scale", "email": { "sendToSubscriptionAdministrator": False, "sendToSubscriptionCoAdministrators": False, "customEmails": "" } } ] } ] } }]
 
 
 ## Sort resources section - Expand to choose order of resources instead of just alphabetical?
@@ -361,19 +361,19 @@ if script_location:
 
     # Create Proc for script creation - Supporting Powershell and Bash
     def script_creation(language):
-        param_str = ''; mandatory_cmd = ''; default_value = ''; payg_cmd = ''; byol_cmd = ''
+        param_str = ''; mandatory_cmd = ''; default_value = ''; payg_cmd = ''; byol_cmd = ''; pwd_cmd = ''; sps_cmd = ''; license2_param = ''
         if language == 'powershell':
             deploy_cmd_params = ''; script_dash = ' -'
             meta_script = 'base.deploy_via_ps.ps1'; script_loc = script_location + 'Deploy_via_PS.ps1'
             base_ex = '## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth ' + default_payg_bw
-            license2_param = ''; pwd_cmd = ''; sps_cmd = ''
+            license2_param = ''
         elif language == 'bash':
             deploy_cmd_params = '"{'; script_dash = ' --'; license_check = ''; license2_check = ''
             meta_script = 'base.deploy_via_bash.sh'; script_loc = script_location + 'deploy_via_bash.sh'
             base_ex = '## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth ' + default_payg_bw
             getopt_start = 'ARGS=`getopt -o '; getopt_params_long = ' --long ';  getopt_end = ' -n $0 -- "$@"`'
             getopt_params_short = 'a:b:c:d:'; base_params = 'resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,'
-            mandatory_variables = ''; license2_param = ''; license_params = ''; pwd_cmd = ''; sps_cmd = ''
+            mandatory_variables = ''; license_params = ''
             bash_shorthand_args = ['e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
             # Need to add bash license params prior to dynamic parameters
             # Create license parameters, expand to be a for loop?

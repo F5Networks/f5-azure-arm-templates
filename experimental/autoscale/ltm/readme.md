@@ -1,4 +1,4 @@
-# Deploying BIG-IP VE(s) in an Azure VM Scale Set with auto scaling enabled
+# Deploying LTM-provisioned BIG-IP VE(s) in an Azure VM Scale Set with auto scaling enabled
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 
@@ -60,7 +60,7 @@ Use this button to deploy the template:
 | licenseKey1 | | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
 | licensedBandwidth | | PAYG licensed bandwidth(Mbps) image to deploy. |
 | tenantId | | Your Azure service principal application tenant ID |
-| clientId | | Your Azure service principal application client ID. |
+| clientId | | Your Azure service principal application client(application) ID. |
 | servicePrincipalSecret | | Your Azure service principal application secret. |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
@@ -312,19 +312,80 @@ Use this button to deploy the template:
 
     # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
     # such as can been done with Powershell...oh well!
-    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetMinCount\":{\"value\":\"$vmScaleSetMinCount\"},\"vmScaleSetMaxCount\":{\"value\":\"$vmScaleSetMaxCount\"},\"scaleOutThroughput\":{\"value\":\"$scaleOutThroughput\"},\"scaleInThroughput\":{\"value\":\"$scaleInThroughput\"},\"scaleTimeWindow\":{\"value\":\"$scaleTimeWindow\"},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetMinCount\":{\"value\":$vmScaleSetMinCount},\"vmScaleSetMaxCount\":{\"value\":$vmScaleSetMaxCount},\"scaleOutThroughput\":{\"value\":$scaleOutThroughput},\"scaleInThroughput\":{\"value\":$scaleInThroughput},\"scaleTimeWindow\":{\"value\":$scaleTimeWindow},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
 
 ```
 
 ## Configuration Example <a name="config">
 
-The following is a simple configuration diagram for this single NIC deployment. In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.
+The following is a simple configuration diagram for this Azure VM Scale Set auto scale deployment. In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer.  The Azure Load Balancer processes both management and data plane traffic into the BIG-IP's which then distribute the traffic to web/application servers according to normal F5 patterns.
 
-![Single NIC configuration example](images/azure-1nic-sm.png)
+![VM Scale Set Auto Scale configuration example](images/azure-1nic-sm.png)
+
+### Post-Deployment Azure Configuration
+This solution deploys an ARM template that fully configures BIG-IP(s) and handles clustering(DSC) and Azure creation of objects needed for management of those BIG-IP's.  However, once deployed the assumption is configuration will be performed on the BIG-IP(s) to create virtual servers, pools, etc... to be used for processing application traffic.  Since at deployment time that information is unknown ensure the below is done for each unique service to allow traffic to reach the BIG-IP(s) in the VM Scale Set.
+
+Post-deployment items(example application on port 443)
+1) Add a "Health Probe" to the ALB(Azure Load Balancer) for port 443, you can choose tcp or http depending on your needs.  - This will query each BIG-IP at that port to determine if it is available for traffic.
+2) Add a "Load Balancing Rule" to the ALB where the port is 443 and the backend port is also 443(assuming you are using same port on the BIG-IP), make sure the backend pool is selected(there should only be one backend pool which was created and will be managed by the VM Scale set)
+3) Add an "Inbound Security Rule" to the Network Security Group(NSG) for port 443 as the NSG is added to the subnet where the BIG-IP(s) live - You could optionally just remove the NSG from the subnet as the VM Scale Set is fronted by the ALB.
+
+### Service Principal Authentication
+This solution requires read-only access to the VM Scale Set information to determine how the BIG-IP cluster should be configured as a result of the dynamics of new VBIG-IP's being scaled up/down.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication for all the reasons service prinicpals are utilized instead of a user account.  Below provides information/links on the options for configuring a service principal within Azure if this is the first time it is needed in a subscription.
+
+_Ensure that however the creation of the service principal occurs to verify it only has read access and limit it as much as possible prior to this template being deployed and used by the VM scale set within the resource group selected(new or existing)._
+
+The end result should be posession of a client(application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some troubleshooting post-deployment if the service principal is in fact not fully configured.
+
+#### 1. Azure Portal
+
+Follow the steps outlined in the [Azure Portal documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-group-create-service-principal-portal/) to generate the service principal.
+
+#### 2. Azure CLI
+
+This method can be used with either the [Azure CLI v2.0 (Python)](https://github.com/Azure/azure-cli) or the [Azure Cross-Platform CLI (npm module)](https://github.com/Azure/azure-xplat-cli).
+
+_Using the Python Azure CLI v2.0 - requires just one step_
+```shell
+$ az ad sp create-for-rbac
+```
+
+_Using the Node.js cross-platform CLI - requires additional steps for setting up_
+https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal-cli
+
+#### 3. Azure PowerShell
+Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
+
+
+### Additional Optional Configuration Items
+Here are some post-deployment options that are entirely optional but are useful to add based on your needs, examples below for your enjoyment!
+
+#### Configure Scale Event Notifications
+You can add notifications when scale up/down events happen in the form of either email or webhooks, below shows an example of adding an email address that will receive an email from Azure whenever a scale up/down events occurs.
+
+Browse to  the [Azure Resource Explorer](https://resources.azure.com), log in and navigate down to the created auto scale settings(Subscriptions -> Resource Groups -> "resource group deployed into" -> Providers -> Microsoft.Insights -> Autoscalesettings -> autoscaleconfig).  From here select "Edit"(Need to select Read/Write at the top of the screen) and replace the current notifications json key with the below, just update the emails to be used below.  Select PUT and notifications will now be sent to the email addresses listed.
+
+```json
+    "notifications": [
+      {
+        "operation": "Scale",
+        "email": {
+          "sendToSubscriptionAdministrator": false,
+          "sendToSubscriptionCoAdministrators": false,
+          "customEmails": [
+            "email@f5.com"
+          ]
+        },
+        "webhooks": null
+      }
+    ]
+```
 
 ### Changing the BIG-IP Configuration Utility (GUI) port
 The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.
+***Important***: The default port provisioned is dependent on 1) what BIG-IP version you choose to deploy as well as 2) how many nics are configured on that BIG-IP.  v13.0.000 and above in a single-nic configuration utilizes port 8443, all older BIG-IP versions, as well as newer(then v13.0.000) versions with multiple interfaces will default to 443 on the MGMT interface.
 ***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
+
 
 ## Documentation
 

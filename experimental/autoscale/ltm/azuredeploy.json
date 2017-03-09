@@ -145,6 +145,7 @@
         }, 
         "bigIpVersion": {
             "allowedValues": [
+                "latest", 
                 "13.0.000", 
                 "12.1.22"
             ], 
@@ -203,6 +204,43 @@
         }
     }, 
     "variables": {
+        "bigIpNicPortMap": {
+            "1": {
+                "Port": "[parameters('bigIpVersion')]"
+            }, 
+            "2": {
+                "Port": "443"
+            }, 
+            "3": {
+                "Port": "443"
+            }, 
+            "4": {
+                "Port": "443"
+            }, 
+            "5": {
+                "Port": "443"
+            }, 
+            "6": {
+                "Port": "443"
+            }
+        }, 
+        "bigIpVersionPortMap": {
+            "12.1.21": {
+                "Port": 443
+            }, 
+            "12.1.22": {
+                "Port": 443
+            }, 
+            "13.0.000": {
+                "Port": 8443
+            }, 
+            "443": {
+                "Port": 443
+            }, 
+            "latest": {
+                "Port": 8443
+            }
+        }, 
         "apiVersion": "2015-06-15", 
         "computeApiVersion": "2016-04-30-preview", 
         "networkApiVersion": "2016-06-01", 
@@ -220,34 +258,6 @@
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]", 
         "offerToUse": "f5-big-ip-hourly", 
-        "bigIpNicPortMap": {
-            "1": {
-                "Port": "[parameters('bigIpVersion')]"
-            }, 
-            "2": {
-                "Port": "443"
-            }, 
-            "3": {
-                "Port": "443"
-            }, 
-            "4": {
-                "Port": "443"
-            }
-        }, 
-        "bigIpVersionPortMap": {
-            "12.1.21": {
-                "Port": 443
-            }, 
-            "12.1.22": {
-                "Port": 443
-            }, 
-            "13.0.000": {
-                "Port": 8443
-            }, 
-            "443": {
-                "Port": 443
-            }
-        }, 
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['1'].Port]", 
         "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
@@ -603,10 +613,10 @@
                 "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]"
             ], 
             "location": "[variables('location')]", 
-            "name": "autoscalehost", 
+            "name": "autoscaleconfig", 
             "properties": {
                 "enabled": true, 
-                "name": "autoscalehost", 
+                "name": "autoscaleconfig", 
                 "profiles": [
                     {
                         "capacity": {
