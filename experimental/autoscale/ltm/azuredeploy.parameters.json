@@ -17,9 +17,6 @@
         "scaleTimeWindow": {
             "value": 10
         }, 
-        "scaleNotificationEmail": {
-            "value": "mail@example.com"
-        }, 
         "adminUsername": {
             "value": "azureuser"
         }, 

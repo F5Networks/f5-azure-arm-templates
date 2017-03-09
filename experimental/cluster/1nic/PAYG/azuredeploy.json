@@ -8,27 +8,27 @@
             ], 
             "defaultValue": 2, 
             "metadata": {
-                "description": "The number of BIG-IP VEs that will be deployed in front of your application."
+                "description": "The number of BIG-IP VEs that will be deployed in front of your application"
             }, 
             "type": "int"
         }, 
         "adminUsername": {
             "defaultValue": "azureuser", 
             "metadata": {
-                "description": "User name for the Virtual Machine."
+                "description": "User name for the Virtual Machine"
             }, 
             "type": "string"
         }, 
         "adminPassword": {
             "metadata": {
-                "description": "Password to login to the Virtual Machine."
+                "description": "Password to login to the Virtual Machine"
             }, 
             "type": "securestring"
         }, 
         "dnsLabel": {
             "defaultValue": "REQUIRED", 
             "metadata": {
-                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine"
             }, 
             "type": "string"
         }, 
@@ -93,14 +93,14 @@
             ], 
             "defaultValue": "200m", 
             "metadata": {
-                "description": "PAYG licensed bandwidth to allocate for this image."
+                "description": "PAYG licensed bandwidth(Mbps) image to deploy"
             }, 
             "type": "string"
         }, 
         "restrictedSrcAddress": {
             "defaultValue": "*", 
             "metadata": {
-                "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources."
+                "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources"
             }, 
             "type": "string"
         }, 

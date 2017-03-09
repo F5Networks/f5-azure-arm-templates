@@ -46,7 +46,7 @@
             ], 
             "defaultValue": 90, 
             "metadata": {
-                "description": "The percentange of 'Network Out' Throughput to scale out on.  This will be factored from the image bandwidth size chosen."
+                "description": "The percentange of 'Network Out' Throughput to scale out on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen"
             }, 
             "type": "int"
         }, 
@@ -64,7 +64,7 @@
             ], 
             "defaultValue": 10, 
             "metadata": {
-                "description": "The percentange of 'Network Out' Throughput to scale in on.  This will be factored in conjunction with the PAYG image bandwidth size chosen."
+                "description": "The percentange of 'Network Out' Throughput to scale in on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen"
             }, 
             "type": "int"
         }, 
@@ -77,34 +77,27 @@
             ], 
             "defaultValue": 10, 
             "metadata": {
-                "description": "The time window required to trigger a scale event(up and down), this is used to determine the amount of time needed for a threshold to be breached as well as to prevent flapping."
+                "description": "The time window required to trigger a scale event(up and down), this is used to determine the amount of time needed for a threshold to be breached as well as to prevent flapping"
             }, 
             "type": "int"
-        }, 
-        "scaleNotificationEmail": {
-            "defaultValue": "mail@example.com", 
-            "metadata": {
-                "description": "Specify an Email Address that will receive notifications when auto scale events occur"
-            }, 
-            "type": "string"
         }, 
         "adminUsername": {
             "defaultValue": "azureuser", 
             "metadata": {
-                "description": "User name for the Virtual Machine."
+                "description": "User name for the Virtual Machine"
             }, 
             "type": "string"
         }, 
         "adminPassword": {
             "metadata": {
-                "description": "Password to login to the Virtual Machine."
+                "description": "Password to login to the Virtual Machine"
             }, 
             "type": "securestring"
         }, 
         "dnsLabel": {
             "defaultValue": "REQUIRED", 
             "metadata": {
-                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine"
             }, 
             "type": "string"
         }, 
@@ -169,7 +162,7 @@
             ], 
             "defaultValue": "200m", 
             "metadata": {
-                "description": "PAYG licensed bandwidth to allocate for this image."
+                "description": "PAYG licensed bandwidth(Mbps) image to deploy"
             }, 
             "type": "string"
         }, 
@@ -194,7 +187,7 @@
         "restrictedSrcAddress": {
             "defaultValue": "*", 
             "metadata": {
-                "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources."
+                "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources"
             }, 
             "type": "string"
         }, 
@@ -283,8 +276,10 @@
         "1g": 1073741824, 
         "scaleOutCalc": "[mul(variables(parameters('licensedBandwidth')), parameters('scaleOutThroughput'))]", 
         "scaleInCalc": "[mul(variables(parameters('licensedBandwidth')), parameters('scaleInThroughput'))]", 
-        "scaleOutNetwork": "[div(variables('scaleOutCalc'), 100)]", 
-        "scaleInNetwork": "[div(variables('scaleInCalc'), 100)]", 
+        "scaleOutNetworkBits": "[div(variables('scaleOutCalc'), 100)]", 
+        "scaleInNetworkBits": "[div(variables('scaleInCalc'), 100)]", 
+        "scaleOutNetworkBytes": "[div(variables('scaleOutNetworkBits'), 8)]", 
+        "scaleInNetworkBytes": "[div(variables('scaleInNetworkBits'), 8)]", 
         "timeWindow": "[concat('PT', parameters('scaleTimeWindow'), 'M')]", 
         "lbTcpProbeName80": "tcp_probe_80", 
         "lbTcpProbeId80": "[concat(variables('lbID'),'/probes/',variables('lbTcpProbeName80'))]"
@@ -377,20 +372,6 @@
                             "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", 
                             "sourcePortRange": "*"
                         }
-                    }, 
-                    {
-                        "name": "traffic_allow_80", 
-                        "properties": {
-                            "access": "Allow", 
-                            "description": "", 
-                            "destinationAddressPrefix": "*", 
-                            "destinationPortRange": "80", 
-                            "direction": "Inbound", 
-                            "priority": 110, 
-                            "protocol": "TCP", 
-                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", 
-                            "sourcePortRange": "*"
-                        }
                     }
                 ]
             }, 
@@ -452,26 +433,7 @@
                         }
                     }
                 ], 
-                "loadBalancingRules": [
-                    {
-                        "name": "tcp_lb_80", 
-                        "properties": {
-                            "backendAddressPool": {
-                                "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
-                            }, 
-                            "backendPort": 80, 
-                            "enableFloatingIP": false, 
-                            "frontendIPConfiguration": {
-                                "id": "[variables('frontEndIPConfigID')]"
-                            }, 
-                            "frontendPort": 80, 
-                            "probe": {
-                                "id": "[variables('lbTcpProbeId80')]"
-                            }, 
-                            "protocol": "tcp"
-                        }
-                    }
-                ], 
+                "loadBalancingRules": "", 
                 "probes": [
                     {
                         "name": "[variables('lbTcpProbeName80')]", 
@@ -656,9 +618,7 @@
                         "notifications": [
                             {
                                 "email": {
-                                    "customEmails": [
-                                        "[parameters('scaleNotificationEmail')]"
-                                    ], 
+                                    "customEmails": "", 
                                     "sendToSubscriptionAdministrator": false, 
                                     "sendToSubscriptionCoAdministrators": false
                                 }, 
@@ -673,7 +633,7 @@
                                     "metricResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", 
                                     "operator": "GreaterThan", 
                                     "statistic": "Average", 
-                                    "threshold": "[variables('scaleOutNetwork')]", 
+                                    "threshold": "[variables('scaleOutNetworkBytes')]", 
                                     "timeAggregation": "Average", 
                                     "timeGrain": "PT1M", 
                                     "timeWindow": "[variables('timeWindow')]"
@@ -692,7 +652,7 @@
                                     "metricResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", 
                                     "operator": "LessThan", 
                                     "statistic": "Average", 
-                                    "threshold": "[variables('scaleInNetwork')]", 
+                                    "threshold": "[variables('scaleInNetworkBytes')]", 
                                     "timeAggregation": "Average", 
                                     "timeGrain": "PT1M", 
                                     "timeWindow": "[variables('timeWindow')]"

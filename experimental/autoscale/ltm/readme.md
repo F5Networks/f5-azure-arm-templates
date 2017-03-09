@@ -1,16 +1,15 @@
-# Deploying the BIG-IP VE in Azure - 2 NIC Limited
+# Deploying BIG-IP VE(s) in an Azure VM Scale Set with auto scaling enabled
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 
 ## Introduction
 
-This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and data-plane traffic from the Internet, and the second interface is connected into the Azure networks where traffic is processed by the pool members in a traditional two-ARM design. However, you continue to have only one public IP address, and the external NIC is shared between management and data plane traffic.
+This solution uses an ARM template to launch the deployment of F5 BIG-IP VE(s) in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure LB to the BIG-IP VE(cluster) and then to the application servers. The BIG-IP(s) are configured in single-nic mode.
 
 See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution, as well as an important note about optionally changing the BIG-IP Management port.
 
 ## Security
 This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
-
 In the *variables* section:
   - In the *verifyHash* variable: search for **script-signature** and then a hashed signature.
   - In the *installCloudLibs* variable: ensure this includes **tmsh run cli script verifyHash /config/cloud/f5-cloud-libs.tar.gz**.
@@ -24,8 +23,8 @@ Additionally, F5 provides checksums for all of our supported templates. For inst
 
 ### Help
 We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates.  This channel is typically monitored Monday-Friday 9-5 PST by F5 employees who will offer best-effort support.<br>
-
 While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.
+
 
 
 ## Installation
@@ -39,25 +38,32 @@ You have three options for deploying this template:
 
 Use this button to deploy the template:
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic_limited%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fautoscale%2Fltm%2Fazuredeploy.json" target="_blank">
+    <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
 ### Template parameters
 
 | Parameter | Required | Description |
 | --- | --- | --- |
+| vmScaleSetMinCount | x | The minimum(and default) number of BIG-IP VEs that will be deployed into the VM Scale Set. |
+| vmScaleSetMaxCount | x | The number of maximum BIG-IP VEs that can be deployed into the VM Scale Set. |
+| scaleOutThroughput | x | The percentange of 'Network Out' Throughput to scale out on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen. |
+| scaleInThroughput | x | The percentange of 'Network Out' Throughput to scale in on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen. |
+| scaleTimeWindow | x | The time window required to trigger a scale event(up and down), this is used to determine the amount of time needed for a threshold to be breached as well as to prevent flapping. |
 | adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
 | adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
 | dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
-| instanceName | x | The hostname to be configured for the VM. |
 | instanceType | x | The desired Azure Virtual Machine instance size. |
 | imageName | x | The desired F5 image to deploy. |
 | bigIpVersion | x | F5 BIG-IP Version to use. |
 | licenseKey1 | | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
 | licensedBandwidth | | PAYG licensed bandwidth(Mbps) image to deploy. |
+| tenantId | | Your Azure service principal application tenant ID |
+| clientId | | Your Azure service principal application client ID. |
+| servicePrincipalSecret | | Your Azure service principal application secret. |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
-
 
 ### <a name="powershell"></a>PowerShell Script Example
 
@@ -65,7 +71,7 @@ Use this button to deploy the template:
     ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
     ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
     ## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
-    ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceName f5vm01 -instanceType Standard_D2_v2 -imageName Good -bigIpVersion 13.0.000 -restrictedSrcAddress "*"-resourceGroupName <value>
+    ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -scaleOutThroughput 90 -scaleInThroughput 10 -scaleTimeWindow 10 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_D2_v2 -imageName Good -bigIpVersion 13.0.000 -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -restrictedSrcAddress "*"-resourceGroupName <value>
 
     param(
 
@@ -81,6 +87,26 @@ Use this button to deploy the template:
 
     [Parameter(Mandatory=$True)]
     [string]
+    $vmScaleSetMinCount,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $vmScaleSetMaxCount,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $scaleOutThroughput,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $scaleInThroughput,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $scaleTimeWindow,
+
+    [Parameter(Mandatory=$True)]
+    [string]
     $adminUsername,
 
     [Parameter(Mandatory=$True)]
@@ -93,10 +119,6 @@ Use this button to deploy the template:
 
     [Parameter(Mandatory=$True)]
     [string]
-    $instanceName,
-
-    [Parameter(Mandatory=$True)]
-    [string]
     $instanceType,
 
     [Parameter(Mandatory=$True)]
@@ -106,6 +128,18 @@ Use this button to deploy the template:
     [Parameter(Mandatory=$True)]
     [string]
     $bigIpVersion,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $tenantId,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $clientId,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $servicePrincipalSecret,
 
     [string]
     $restrictedSrcAddress = "*",
@@ -143,15 +177,8 @@ Use this button to deploy the template:
 
     # Create Arm Deployment
     $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
-    if ($licenseType -eq "BYOL") {
-    if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\azuredeploy.json"; $parametersFilePath = ".\BYOL\azuredeploy.parameters.json" }
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -restrictedSrcAddress "$restrictedSrcAddress"  -licenseKey1 "$licenseKey1"
-    } elseif ($licenseType -eq "PAYG") {
-    if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
-    } else {
-    Write-Error -Message "Uh oh, something went wrong!  Please select valid license type of PAYG or BYOL."
-    }
+    $sps = ConvertTo-SecureString -String $servicePrincipalSecret -AsPlainText -Force
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -vmScaleSetMinCount "$vmScaleSetMinCount" -vmScaleSetMaxCount "$vmScaleSetMaxCount" -scaleOutThroughput "$scaleOutThroughput" -scaleInThroughput "$scaleInThroughput" -scaleTimeWindow "$scaleTimeWindow" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -tenantId "$tenantId" -clientId "$clientId" -servicePrincipalSecret $sps -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
 
     # Print Output of Deployment to Console
     $deployment
@@ -166,7 +193,7 @@ Use this button to deploy the template:
     #!/bin/bash
 
     ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-    ## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D2_v2 --imageName Good --bigIpVersion 13.0.000 --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+    ## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --vmScaleSetMinCount 2 --vmScaleSetMaxCount 4 --scaleOutThroughput 90 --scaleInThroughput 10 --scaleTimeWindow 10 --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceType Standard_D2_v2 --imageName Good --bigIpVersion 13.0.000 --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
     # Assign Script Paramters and Define Variables
     # Specify static items, change these as needed or make them parameters
@@ -174,7 +201,7 @@ Use this button to deploy the template:
     restrictedSrcAddress="*"
     tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,adminUsername:,adminPassword:,dnsLabel:,instanceName:,instanceType:,imageName:,bigIpVersion:,restrictedSrcAddress: -n $0 -- "$@"`
+    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,vmScaleSetMinCount:,vmScaleSetMaxCount:,scaleOutThroughput:,scaleInThroughput:,scaleTimeWindow:,adminUsername:,adminPassword:,dnsLabel:,instanceType:,imageName:,bigIpVersion:,tenantId:,clientId:,servicePrincipalSecret:,restrictedSrcAddress: -n $0 -- "$@"`
     eval set -- "$ARGS"
 
     # Parse the command line arguments, primarily checking full params as short params are just placeholders
@@ -198,28 +225,49 @@ Use this button to deploy the template:
             -f|--licenseKey1)
                 licenseKey1=$2
                 shift 2;;
-            -g|--adminUsername)
+            -g|--vmScaleSetMinCount)
+                vmScaleSetMinCount=$2
+                shift 2;;
+            -h|--vmScaleSetMaxCount)
+                vmScaleSetMaxCount=$2
+                shift 2;;
+            -i|--scaleOutThroughput)
+                scaleOutThroughput=$2
+                shift 2;;
+            -j|--scaleInThroughput)
+                scaleInThroughput=$2
+                shift 2;;
+            -k|--scaleTimeWindow)
+                scaleTimeWindow=$2
+                shift 2;;
+            -l|--adminUsername)
                 adminUsername=$2
                 shift 2;;
-            -h|--adminPassword)
+            -m|--adminPassword)
                 adminPassword=$2
                 shift 2;;
-            -i|--dnsLabel)
+            -n|--dnsLabel)
                 dnsLabel=$2
                 shift 2;;
-            -j|--instanceName)
-                instanceName=$2
-                shift 2;;
-            -k|--instanceType)
+            -o|--instanceType)
                 instanceType=$2
                 shift 2;;
-            -l|--imageName)
+            -p|--imageName)
                 imageName=$2
                 shift 2;;
-            -m|--bigIpVersion)
+            -q|--bigIpVersion)
                 bigIpVersion=$2
                 shift 2;;
-            -n|--restrictedSrcAddress)
+            -r|--tenantId)
+                tenantId=$2
+                shift 2;;
+            -s|--clientId)
+                clientId=$2
+                shift 2;;
+            -t|--servicePrincipalSecret)
+                servicePrincipalSecret=$2
+                shift 2;;
+            -u|--restrictedSrcAddress)
                 restrictedSrcAddress=$2
                 shift 2;;
             --)
@@ -229,7 +277,7 @@ Use this button to deploy the template:
     done
 
     #If a required paramater is not passed, the script will prompt for it below
-    required_variables="adminUsername adminPassword dnsLabel instanceName instanceType imageName bigIpVersion resourceGroupName licenseType "
+    required_variables="vmScaleSetMinCount vmScaleSetMaxCount scaleOutThroughput scaleInThroughput scaleTimeWindow adminUsername adminPassword dnsLabel instanceType imageName bigIpVersion tenantId clientId servicePrincipalSecret resourceGroupName licenseType "
     for variable in $required_variables
             do
             if [ -v ${!variable} ] ; then
@@ -237,21 +285,13 @@ Use this button to deploy the template:
             fi
     done
 
-    # Prompt for license key if not supplied and BYOL is selected
-    if [ $licenseType == "BYOL" ]; then
-        if [ -v $licenseKey1 ] ; then
-                read -p "Please enter value for licenseKey1:" licenseKey1
-        fi
-        template_file="./BYOL/azuredeploy.json"
-        parameter_file="./BYOL/azuredeploy.parameters.json"
-    fi
     # Prompt for licensed bandwidth if not supplied and PAYG is selected
     if [ $licenseType == "PAYG" ]; then
         if [ -v $licensedBandwidth ] ; then
                 read -p "Please enter value for licensedBandwidth:" licensedBandwidth
         fi
-        template_file="./PAYG/azuredeploy.json"
-        parameter_file="./PAYG/azuredeploy.parameters.json"
+        template_file="./azuredeploy.json"
+        parameter_file="./azuredeploy.parameters.json"
     fi
 
     echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
@@ -272,29 +312,23 @@ Use this button to deploy the template:
 
     # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
     # such as can been done with Powershell...oh well!
-    if [ $licenseType == "BYOL" ]; then
-        azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licenseKey1\":{\"value\":\"$licenseKey1\"}}"
-    elif [ $licenseType == "PAYG" ]; then
-        azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
-    else
-        echo "Uh oh, shouldn't make it here! Ensure license type is either PAYG or BYOL"
-        exit 1
-    fi
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetMinCount\":{\"value\":\"$vmScaleSetMinCount\"},\"vmScaleSetMaxCount\":{\"value\":\"$vmScaleSetMaxCount\"},\"scaleOutThroughput\":{\"value\":\"$scaleOutThroughput\"},\"scaleInThroughput\":{\"value\":\"$scaleInThroughput\"},\"scaleTimeWindow\":{\"value\":\"$scaleTimeWindow\"},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
+
 ```
 
-## <a name="config"></a>Configuration Example
+## Configuration Example <a name="config">
 
-The following is a simple configuration diagram for this 2 NIC deployment.  In a 2 NIC scenario, one NIC is external and the other is internal.  It is important to remember that you continue to have only one public IP address, and the external NIC is shared between management and data plane traffic.
-In this example, the External VLAN uses **eth0** and the Internal VLAN uses **eth1**.
+The following is a simple configuration diagram for this single NIC deployment. In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.
 
-![2 NIC configuration example](images/azure-2nic-sm.png)
+![Single NIC configuration example](images/azure-1nic-sm.png)
 
 ### Changing the BIG-IP Configuration Utility (GUI) port
 The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.
 ***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
+
 ## Documentation
 
-The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/4.html) decribes how to create the configuration manually without using the ARM template.
+The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html) decribes how to create the configuration manually without using the ARM template.
 
 ## Deploying Custom Configuration to an Azure Virtual Machine
 
@@ -325,6 +359,7 @@ Warning: F5 does not support the template if you change anything other than the 
      }
 }
 ```
+
 
 ## Security Details <a name="securitydetail"></a>
 This section has the code snippet for each the lines you should ensure are present in your template file if you want to verify the integrity of the helper code in the template.

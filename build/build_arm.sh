@@ -29,4 +29,4 @@ python '.\master_template.py' --template-name cluster_base --license-type BYOL -
 ## BIGIP ARM Template - LTM AutoScale
 
 # Reference
-python '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --template-location '../experimental/reference/ltm_autoscale/' --script-location '../experimental/reference/ltm_autoscale/'
+python '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --template-location '../experimental/autoscale/ltm/' --script-location '../experimental/autoscale/ltm/'
