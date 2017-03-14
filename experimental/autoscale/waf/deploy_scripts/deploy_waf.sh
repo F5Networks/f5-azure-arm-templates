@@ -46,7 +46,7 @@ template_location=$script_loc
 
 for template in f5.http.v1.2.0rc7.tmpl f5.policy_creator.tmpl
 do
-     curl -sk -u $user:$(passwd) -X POST -H "Content-type: application/json" https://localhost/mgmt/tm/util/bash -d '{ "command":"run","utilCmdArgs":"-c \"cp $template_location/$template /config/$template\"" }'
+     curl -sk -u $user:$(passwd) -X POST -H "Content-type: application/json" https://localhost/mgmt/tm/util/bash -d '{ "command":"run","utilCmdArgs":"-c \"cp '$template_location'/'$template' /config/'$template'\"" }'
      response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/config -d '{"command": "load","name": "merge","options": [ { "file": "/config/'"$template"'" } ] }' -o /dev/null)
      if [[ $response_code != 200  ]]; then
           echo "Failed to install iApp template; exiting with response code '"$response_code"'"
@@ -129,7 +129,7 @@ if [[ $mode == "https" || $mode == "http-https" || $mode == "https-offload" ]]; 
 
      certificate_location=$ssl_cert
 
-     curl -sk -u $user:$(passwd) -X POST -H "Content-type: application/json" https://localhost/mgmt/tm/util/bash -d '{ "command":"run","utilCmdArgs":"-c \"curl -k -s -f --retry 5 --retry-delay 10 --retry-max-time 10 -o /config/tmp.pfx $certificate_location\"" }'
+     curl -sk -u $user:$(passwd) -X POST -H "Content-type: application/json" https://localhost/mgmt/tm/util/bash -d '{ "command":"run","utilCmdArgs":"-c \"curl -k -s -f --retry 5 --retry-delay 10 --retry-max-time 10 -o /config/tmp.pfx '$certificate_location'\"" }'
 
      response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/crypto/pkcs12 -d '{"command": "install","name": "wafCert","options": [ { "from-local-file": "/config/tmp.pfx" }, { "passphrase": "'"$ssl_passwd"'" } ] }' -o /dev/null)
 
