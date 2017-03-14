@@ -5,7 +5,7 @@ function passwd() {
   echo | awk '{print $1}' /config/mypass
 }
 
-while getopts m:d:n:j:k:h:s:t:l:a:c:r:o:u:p: option
+while getopts m:d:n:j:k:h:s:t:l:a:c:r:o:v:u: option
 do	case "$option"  in
         m) mode=$OPTARG;;
         d) deployment=$OPTARG;;
@@ -20,6 +20,7 @@ do	case "$option"  in
         c) ssl_cert=$OPTARG;;
         r) ssl_passwd=$OPTARG;;
         o) rewrite=$OPTARG;;
+        v) script_loc=$OPTARG;;
         u) user=$OPTARG;;
     esac
 done
@@ -41,7 +42,7 @@ else
 fi
 
 # install iApp templates
-template_location="/var/lib/waagent/custom-script/download/0"
+template_location=$script_loc
 
 for template in f5.http.v1.2.0rc7.tmpl f5.policy_creator.tmpl
 do
