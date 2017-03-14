@@ -1,4 +1,4 @@
-# Deploy LTM-provisioned BIG-IP VE(s) in an Azure VM Scale Set with auto scaling enabled
+# Deploy ASM-provisioned BIG-IP VE(s) in an Azure VM Scale Set with auto scaling enabled
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 

@@ -167,6 +167,98 @@
             }, 
             "type": "string"
         }, 
+        "solutionDeploymentName": {
+            "metadata": {
+                "description": "A unique name for this deployment."
+            }, 
+            "type": "string"
+        }, 
+        "applicationProtocols": {
+            "allowedValues": [
+                "http", 
+                "https", 
+                "http-https", 
+                "https-offload"
+            ], 
+            "defaultValue": "http-https", 
+            "metadata": {
+                "description": "The protocol(s) used by your application."
+            }, 
+            "type": "string"
+        }, 
+        "applicationAddress": {
+            "metadata": {
+                "description": "The public IP address or DNS FQDN of the application that this WAF will protect."
+            }, 
+            "type": "string"
+        }, 
+        "applicationServiceFqdn": {
+            "defaultValue": "NOT_SPECIFIED", 
+            "metadata": {
+                "description": "If deploying in front of an Azure App Service, the FQDN of the public application."
+            }, 
+            "type": "string"
+        }, 
+        "applicationPort": {
+            "defaultValue": "80", 
+            "metadata": {
+                "description": "If deploying an HTTP application, the port on which your service listens for unencrypted traffic. This field is not required when deploying https only."
+            }, 
+            "type": "string"
+        }, 
+        "applicationSecurePort": {
+            "defaultValue": "443", 
+            "metadata": {
+                "description": "If deploying an HTTPS application, the port on which your service listens for encrypted traffic. This field is not required when deploying http only."
+            }, 
+            "type": "string"
+        }, 
+        "sslCert": {
+            "defaultValue": "NOT_SPECIFIED", 
+            "metadata": {
+                "description": "The SSL certificate .pfx file corresponding to public facing VIP."
+            }, 
+            "type": "string"
+        }, 
+        "sslPswd": {
+            "defaultValue": "NOT_SPECIFIED", 
+            "metadata": {
+                "description": "The SSL certificate .pfx password corresponding to the certificate provided above."
+            }, 
+            "type": "securestring"
+        }, 
+        "applicationType": {
+            "allowedValues": [
+                "Windows", 
+                "Linux"
+            ], 
+            "defaultValue": "Linux", 
+            "metadata": {
+                "description": "Is your application running on a Linux OS or a Windows OS?"
+            }, 
+            "type": "string"
+        }, 
+        "blockingLevel": {
+            "allowedValues": [
+                "low", 
+                "medium", 
+                "high", 
+                "off", 
+                "custom"
+            ], 
+            "defaultValue": "medium", 
+            "metadata": {
+                "description": "Please select how aggressive you would like the blocking level of this WAF to be.  Remember that the more aggressive the blocking level, the more potential there is for false-positives that the WAF might detect. Select Custom to specify your own security policy below."
+            }, 
+            "type": "string"
+        }, 
+        "customPolicy": {
+            "defaultValue": "NOT_SPECIFIED", 
+            "metadata": {
+                "description": "Specify the publicly available URL of a custom ASM security policy in XML format. This policy will be applied in place of the standard High/Medium/Low policy as indicated above."
+            }, 
+            "type": "string"
+        }, 
         "tenantId": {
             "metadata": {
                 "description": "Your Azure service principal application tenant ID"
@@ -292,7 +384,14 @@
         "scaleInNetworkBits": "[div(variables('scaleInCalc'), 100)]", 
         "scaleOutNetworkBytes": "[div(variables('scaleOutNetworkBits'), 8)]", 
         "scaleInNetworkBytes": "[div(variables('scaleInNetworkBits'), 8)]", 
-        "timeWindow": "[concat('PT', parameters('scaleTimeWindow'), 'M')]"
+        "timeWindow": "[concat('PT', parameters('scaleTimeWindow'), 'M')]", 
+        "lbTcpProbeNameHttp": "tcp_probe_http", 
+        "lbTcpProbeIdHttp": "[concat(variables('lbID'),'/probes/',variables('lbTcpProbeNameHttp'))]", 
+        "lbTcpProbeNameHttps": "tcp_probe_https", 
+        "lbTcpProbeIdHttps": "[concat(variables('lbID'),'/probes/',variables('lbTcpProbeNameHttps'))]", 
+        "httpBackendPort": 880, 
+        "httpsBackendPort": 8445, 
+        "commandArgs": "[concat('-m ', parameters('applicationProtocols'), ' -d ', parameters('solutionDeploymentName'), ' -n ', parameters('applicationAddress'), ' -j 880 -k 8445 -h ', parameters('applicationPort'), ' -s ', parameters('applicationSecurePort'), ' -t ', toLower(parameters('applicationType')), ' -l ', toLower(parameters('blockingLevel')), ' -a ', parameters('customPolicy'), ' -c ', parameters('sslCert'), ' -r ', parameters('sslPswd'), ' -o ', parameters('applicationServiceFqdn'), ' -u ', parameters('adminUsername'))]"
     }, 
     "resources": [
         {
@@ -382,6 +481,34 @@
                             "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", 
                             "sourcePortRange": "*"
                         }
+                    }, 
+                    {
+                        "name": "app_allow_http", 
+                        "properties": {
+                            "access": "Allow", 
+                            "description": "", 
+                            "destinationAddressPrefix": "*", 
+                            "destinationPortRange": "[variables('httpBackendPort')]", 
+                            "direction": "Inbound", 
+                            "priority": 110, 
+                            "protocol": "TCP", 
+                            "sourceAddressPrefix": "*", 
+                            "sourcePortRange": "*"
+                        }
+                    }, 
+                    {
+                        "name": "app_allow_https", 
+                        "properties": {
+                            "access": "Allow", 
+                            "description": "", 
+                            "destinationAddressPrefix": "*", 
+                            "destinationPortRange": "[variables('httpsBackendPort')]", 
+                            "direction": "Inbound", 
+                            "priority": 111, 
+                            "protocol": "TCP", 
+                            "sourceAddressPrefix": "*", 
+                            "sourcePortRange": "*"
+                        }
                     }
                 ]
             }, 
@@ -443,8 +570,64 @@
                         }
                     }
                 ], 
-                "loadBalancingRules": "", 
-                "probes": ""
+                "loadBalancingRules": [
+                    {
+                        "Name": "app-http", 
+                        "properties": {
+                            "backendAddressPool": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+                            }, 
+                            "backendPort": "[variables('httpBackendPort')]", 
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
+                            }, 
+                            "frontendPort": "[parameters('applicationPort')]", 
+                            "idleTimeoutInMinutes": 15, 
+                            "probe": {
+                                "id": "[variables('lbTcpProbeIdHttp')]"
+                            }, 
+                            "protocol": "Tcp"
+                        }
+                    }, 
+                    {
+                        "Name": "app-https", 
+                        "properties": {
+                            "backendAddressPool": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+                            }, 
+                            "backendPort": "[variables('httpsBackendPort')]", 
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
+                            }, 
+                            "frontendPort": "[parameters('applicationSecurePort')]", 
+                            "idleTimeoutInMinutes": 15, 
+                            "probe": {
+                                "id": "[variables('lbTcpProbeIdHttps')]"
+                            }, 
+                            "protocol": "Tcp"
+                        }
+                    }
+                ], 
+                "probes": [
+                    {
+                        "name": "[variables('lbTcpProbeNameHttp')]", 
+                        "properties": {
+                            "intervalInSeconds": 15, 
+                            "numberOfProbes": 3, 
+                            "port": "[variables('httpBackendPort')]", 
+                            "protocol": "Tcp"
+                        }
+                    }, 
+                    {
+                        "name": "[variables('lbTcpProbeNameHttps')]", 
+                        "properties": {
+                            "intervalInSeconds": 15, 
+                            "numberOfProbes": 3, 
+                            "port": "[variables('httpsBackendPort')]", 
+                            "protocol": "Tcp"
+                        }
+                    }
+                ]
             }, 
             "tags": {
                 "application": "[parameters('tagValues').application]", 
@@ -512,13 +695,14 @@
                                 "name": "main", 
                                 "properties": {
                                     "protectedSettings": {
-                                        "commandToExecute": "[concat('mkdir -p /config/cloud/node_modules; AZURE_CREDENTIALS_FILE=/config/cloud/azCredentials; BIG_IP_CREDENTIALS_FILE=/config/cloud/bigIpCredentials; /usr/bin/install -m 400 /dev/null $AZURE_CREDENTIALS_FILE; /usr/bin/install -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; echo ', parameters('adminPassword'), ' > $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\"}', variables('singleQuote'), ' > $AZURE_CREDENTIALS_FILE; cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; bash /config/installCloudLibs.sh; bash /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/autoscale.sh --resourceGroup ', resourceGroup().name, ' --vmssName ', variables('vmssName'), ' --userName ', parameters('adminUsername'), ' --password $BIG_IP_CREDENTIALS_FILE --azureSecretFile $AZURE_CREDENTIALS_FILE --managementPort ', variables('bigIpMgmtPort'))]"
+                                        "commandToExecute": "[concat('mkdir -p /config/cloud/node_modules; AZURE_CREDENTIALS_FILE=/config/cloud/azCredentials; BIG_IP_CREDENTIALS_FILE=/config/cloud/bigIpCredentials; /usr/bin/install -m 400 /dev/null $AZURE_CREDENTIALS_FILE; /usr/bin/install -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; echo ', parameters('adminPassword'), ' > $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\"}', variables('singleQuote'), ' > $AZURE_CREDENTIALS_FILE; cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; bash /config/installCloudLibs.sh; bash /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/autoscalewaf.sh --resourceGroup ', resourceGroup().name, ' --vmssName ', variables('vmssName'), ' --userName ', parameters('adminUsername'), ' --password $BIG_IP_CREDENTIALS_FILE --azureSecretFile $AZURE_CREDENTIALS_FILE --managementPort ', variables('bigIpMgmtPort'), ' --wafScriptArgs ', variables('singleQuote'), variables('commandArgs'), variables('singleQuote'))]"
                                     }, 
                                     "publisher": "Microsoft.Azure.Extensions", 
                                     "settings": {
                                         "fileUris": [
                                             "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]", 
-                                            "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs-azure/', variables('f5CloudLibsAzureTag'), '/dist/f5-cloud-libs-azure.tar.gz')]"
+                                            "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs-azure/', variables('f5CloudLibsAzureTag'), '/dist/f5-cloud-libs-azure.tar.gz')]", 
+                                            "[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/', variables('f5NetworksTag'), '/experimental/autoscale/waf/deploy_scripts/deploy_waf.sh')]"
                                         ]
                                     }, 
                                     "type": "CustomScript", 

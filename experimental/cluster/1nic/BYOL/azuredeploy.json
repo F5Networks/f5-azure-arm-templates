@@ -341,7 +341,7 @@
             "type": "Microsoft.Network/networkSecurityGroups"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]", 
             "dependsOn": [
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
             ], 

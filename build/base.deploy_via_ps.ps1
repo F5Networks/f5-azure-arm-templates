@@ -39,7 +39,7 @@ try {
 New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
 
 # Create Arm Deployment
-<PWD_CMD><SPS_CMD>
+<PWD_CMD><SPS_CMD><SSL_PWD_CMD>
 <DEPLOYMENT_CREATE>
 
 # Print Output of Deployment to Console
