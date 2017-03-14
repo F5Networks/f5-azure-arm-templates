@@ -45,7 +45,7 @@ template_location="/var/lib/waagent/custom-script/download/0"
 
 for template in f5.http.v1.2.0rc7.tmpl f5.policy_creator.tmpl
 do
-     cp $template_location/$template /config/$template
+     curl -sk -u $user:$(passwd) -X POST -H "Content-type: application/json" https://localhost/mgmt/tm/util/bash -d '{ "command":"run","utilCmdArgs":"-c \"cp $template_location/$template /config/$template\"" }'
      response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/config -d '{"command": "load","name": "merge","options": [ { "file": "/config/'"$template"'" } ] }' -o /dev/null)
      if [[ $response_code != 200  ]]; then
           echo "Failed to install iApp template; exiting with response code '"$response_code"'"
@@ -56,24 +56,8 @@ done
 
 # deploy logging profiles
 # profile names
-deployment_name="azure-log"
-asm_log_name="/Common/${deployment_name}.app/${deployment_name}_lp_asm_remote"
-dos_log_name="/Common/${deployment_name}.app/${deployment_name}_lp_l7dos_remote"
-local_asm_log_name="/Common/${deployment_name}.app/${deployment_name}_lp_asm_local"
-
-#check for existence of previously deployed logging app
-response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X GET -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/application/service/~Common~$deployment_name.app~$deployment_name -o /dev/null)
-
-if [[ $response_code != 200  ]]; then
-     response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment_name"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.asm_log_creator_t2","trafficGroup":"none"}' -o /dev/null)
-
-     if [[ $response_code != 200  ]]; then
-          echo "Failed to install logging profiles; exiting with response code '"$response_code"'"
-          exit 1
-     fi
-else
-     echo "Logging deployment already exists, continuing deployment"
-fi
+dos_log_name="/Common/local-dos"
+local_asm_log_name="/Common/Log\ illegal\ requests"
 
 # download canned or custom security policy and create accompanying ltm policy
 custom_policy="none"
@@ -126,7 +110,7 @@ sleep 10
 
 # deploy unencrypted application
 if [[ $mode == "http" || $mode == "http-https" ]]; then
-     response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment"'-'"$vs_http_port"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.http.v1.2.0rc7","trafficGroup":"none","tables":[{"name":"pool__hosts","columnNames":["name"],"rows":[{"row":["'"$deployment"'"]}]},{"name":"pool__members","columnNames":["addr","port","connection_limit"],"rows":[{"row":["'"$pool_member"'","'"$pool_http_port"'","0"]}]},{"name":"server_pools__servers"}],"lists":[{"name":"asm__security_logging","value":["'"$asm_log_name"'","'"$local_asm_log_name"'", "'"$dos_log_name"'"]}],"variables":[{"name":"asm__use_asm","value":"'"$ltm_policy_name"'"},{"name":"monitor__monitor","value":"/Common/http"},{"name":"pool__addr","value":"0.0.0.0"},{"name":"pool__mask","value":"0.0.0.0"},{"name":"pool__persist","value":"/#cookie#"},{"name":"pool__port","value":"'"$vs_http_port"'"},{"name":"pool__profiles","value":"'"$l7dos_name $rewrite_profile_name"'"},{"name":"ssl__mode","value":"no_ssl"}]}' -o /dev/null)
+     response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment"'-'"$vs_http_port"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.http.v1.2.0rc7","trafficGroup":"none","tables":[{"name":"pool__hosts","columnNames":["name"],"rows":[{"row":["'"$deployment"'"]}]},{"name":"pool__members","columnNames":["addr","port","connection_limit"],"rows":[{"row":["'"$pool_member"'","'"$pool_http_port"'","0"]}]},{"name":"server_pools__servers"}],"lists":[{"name":"asm__security_logging","value":["'"$local_asm_log_name"'", "'"$dos_log_name"'"]}],"variables":[{"name":"asm__use_asm","value":"'"$ltm_policy_name"'"},{"name":"monitor__monitor","value":"/Common/http"},{"name":"pool__addr","value":"0.0.0.0"},{"name":"pool__mask","value":"0.0.0.0"},{"name":"pool__persist","value":"/#cookie#"},{"name":"pool__port","value":"'"$vs_http_port"'"},{"name":"pool__profiles","value":"'"$l7dos_name $rewrite_profile_name"'"},{"name":"ssl__mode","value":"no_ssl"}]}' -o /dev/null)
 
      if [[ $response_code != 200  ]]; then
           echo "Failed to deploy unencrypted application; exiting with response code '"$response_code"'"
@@ -144,7 +128,7 @@ if [[ $mode == "https" || $mode == "http-https" || $mode == "https-offload" ]]; 
 
      certificate_location=$ssl_cert
 
-     curl -k -s -f --retry 5 --retry-delay 10 --retry-max-time 10 -o /config/tmp.pfx $certificate_location
+     curl -sk -u $user:$(passwd) -X POST -H "Content-type: application/json" https://localhost/mgmt/tm/util/bash -d '{ "command":"run","utilCmdArgs":"-c \"curl -k -s -f --retry 5 --retry-delay 10 --retry-max-time 10 -o /config/tmp.pfx $certificate_location\"" }'
 
      response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/crypto/pkcs12 -d '{"command": "install","name": "wafCert","options": [ { "from-local-file": "/config/tmp.pfx" }, { "passphrase": "'"$ssl_passwd"'" } ] }' -o /dev/null)
 
@@ -164,7 +148,7 @@ fi
 
 # deploy encrypted application
 if [[ $mode == "https" || $mode == "http-https" ]]; then
-     response_code=$(curl -sk -u $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment"'-'"$vs_https_port"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.http.v1.2.0rc7","trafficGroup":"none","tables":[{"name":"pool__hosts","columnNames":["name"],"rows":[{"row":["'"$deployment"'"]}]},{"name":"pool__members","columnNames":["addr","port_secure","connection_limit"],"rows":[{"row":["'"$pool_member"'","'"$pool_https_port"'","0"]}]},{"name":"server_pools__servers"}],"lists":[{"name":"asm__security_logging","value":["'"$asm_log_name"'","'"$local_asm_log_name"'", "'"$dos_log_name"'"]}],"variables":[{"name":"asm__use_asm","value":"'"$ltm_policy_name"'"},{"name":"monitor__monitor","value":"/Common/https"},{"name":"pool__addr","value":"0.0.0.0"},{"name":"pool__mask","value":"0.0.0.0"},{"name":"pool__persist","value":"/#cookie#"},{"name":"pool__port","value":"'"$vs_http_port"'"},{"name":"pool__port_secure","value":"'"$vs_https_port"'"},{"name":"pool__redirect_to_https","value":"'"$do_redirect"'"},{"name":"pool__redirect_port","value":"'"$vs_http_port"'"},{"name":"pool__redirect_to_port","value":"'"$pool_https_port"'"},{"name":"pool__profiles","value":"'"$l7dos_name $rewrite_profile_name"'"},{"name":"ssl__cert","value":"/Common/wafCert.crt"},{"name":"ssl__key","value":"/Common/wafCert.key"},{"name":"ssl__mode","value":"client_ssl_server_ssl"},{"name":"ssl__server_ssl_profile","value":"/#default#"},{"name":"ssl__use_chain_cert","value":"'"$chain"'"}]}' -o /dev/null)
+     response_code=$(curl -sk -u $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment"'-'"$vs_https_port"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.http.v1.2.0rc7","trafficGroup":"none","tables":[{"name":"pool__hosts","columnNames":["name"],"rows":[{"row":["'"$deployment"'"]}]},{"name":"pool__members","columnNames":["addr","port_secure","connection_limit"],"rows":[{"row":["'"$pool_member"'","'"$pool_https_port"'","0"]}]},{"name":"server_pools__servers"}],"lists":[{"name":"asm__security_logging","value":["'"$local_asm_log_name"'", "'"$dos_log_name"'"]}],"variables":[{"name":"asm__use_asm","value":"'"$ltm_policy_name"'"},{"name":"monitor__monitor","value":"/Common/https"},{"name":"pool__addr","value":"0.0.0.0"},{"name":"pool__mask","value":"0.0.0.0"},{"name":"pool__persist","value":"/#cookie#"},{"name":"pool__port","value":"'"$vs_http_port"'"},{"name":"pool__port_secure","value":"'"$vs_https_port"'"},{"name":"pool__redirect_to_https","value":"'"$do_redirect"'"},{"name":"pool__redirect_port","value":"'"$vs_http_port"'"},{"name":"pool__redirect_to_port","value":"'"$pool_https_port"'"},{"name":"pool__profiles","value":"'"$l7dos_name $rewrite_profile_name"'"},{"name":"ssl__cert","value":"/Common/wafCert.crt"},{"name":"ssl__key","value":"/Common/wafCert.key"},{"name":"ssl__mode","value":"client_ssl_server_ssl"},{"name":"ssl__server_ssl_profile","value":"/#default#"},{"name":"ssl__use_chain_cert","value":"'"$chain"'"}]}' -o /dev/null)
 
      if [[ $response_code != 200  ]]; then
           echo "Failed to deploy encrypted application; exiting with response code '"$response_code"'"
@@ -176,7 +160,7 @@ fi
 
 # deploy offloaded application
 if [[ $mode == "https-offload" ]]; then
-     response_code=$(curl -sk -u $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment"'-'"$vs_https_port"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.http.v1.2.0rc7","trafficGroup":"none","tables":[{"name":"pool__hosts","columnNames":["name"],"rows":[{"row":["'"$deployment"'"]}]},{"name":"pool__members","columnNames":["addr","port","connection_limit"],"rows":[{"row":["'"$pool_member"'","'"$pool_http_port"'","0"]}]},{"name":"server_pools__servers"}],"lists":[{"name":"asm__security_logging","value":["'"$asm_log_name"'","'"$local_asm_log_name"'", "'"$dos_log_name"'"]}],"variables":[{"name":"asm__use_asm","value":"'"$ltm_policy_name"'"},{"name":"monitor__monitor","value":"/Common/http"},{"name":"pool__addr","value":"0.0.0.0"},{"name":"pool__mask","value":"0.0.0.0"},{"name":"pool__persist","value":"/#cookie#"},{"name":"pool__port_secure","value":"'"$vs_https_port"'"},{"name":"pool__redirect_to_https","value":"'"$do_redirect"'"},{"name":"pool__redirect_port","value":"'"$vs_http_port"'"},{"name":"pool__redirect_to_port","value":"'"$pool_https_port"'"},{"name":"pool__profiles","value":"'"$l7dos_name $rewrite_profile_name"'"},{"name":"ssl__cert","value":"/Common/wafCert.crt"},{"name":"ssl__key","value":"/Common/wafCert.key"},{"name":"ssl__mode","value":"client_ssl"},{"name":"ssl__use_chain_cert","value":"'"$chain"'"}]}' -o /dev/null)
+     response_code=$(curl -sk -u $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment"'-'"$vs_https_port"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.http.v1.2.0rc7","trafficGroup":"none","tables":[{"name":"pool__hosts","columnNames":["name"],"rows":[{"row":["'"$deployment"'"]}]},{"name":"pool__members","columnNames":["addr","port","connection_limit"],"rows":[{"row":["'"$pool_member"'","'"$pool_http_port"'","0"]}]},{"name":"server_pools__servers"}],"lists":[{"name":"asm__security_logging","value":["'"$local_asm_log_name"'", "'"$dos_log_name"'"]}],"variables":[{"name":"asm__use_asm","value":"'"$ltm_policy_name"'"},{"name":"monitor__monitor","value":"/Common/http"},{"name":"pool__addr","value":"0.0.0.0"},{"name":"pool__mask","value":"0.0.0.0"},{"name":"pool__persist","value":"/#cookie#"},{"name":"pool__port_secure","value":"'"$vs_https_port"'"},{"name":"pool__redirect_to_https","value":"'"$do_redirect"'"},{"name":"pool__redirect_port","value":"'"$vs_http_port"'"},{"name":"pool__redirect_to_port","value":"'"$pool_https_port"'"},{"name":"pool__profiles","value":"'"$l7dos_name $rewrite_profile_name"'"},{"name":"ssl__cert","value":"/Common/wafCert.crt"},{"name":"ssl__key","value":"/Common/wafCert.key"},{"name":"ssl__mode","value":"client_ssl"},{"name":"ssl__use_chain_cert","value":"'"$chain"'"}]}' -o /dev/null)
 
      if [[ $response_code != 200  ]]; then
           echo "Failed to deploy SSL offloaded application; exiting with response code '"$response_code"'"
