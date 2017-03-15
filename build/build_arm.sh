@@ -29,4 +29,4 @@ python '.\master_template.py' --template-name ltm_autoscale --license-type PAYG 
 
 ## BIGIP ARM Template - LTM AutoScale
 # Experimental
-python '.\master_template.py' --template-name waf_autoscale --license-type PAYG --template-location '../experimental/autoscale/waf/' --script-location '../experimental/autoscale/waf/'
+python '.\master_template.py' --template-name waf_autoscale --license-type PAYG --template-location '../experimental/autoscale/waf/' --script-location '../experimental/autoscale/waf/' --solution-location 'experimental'
