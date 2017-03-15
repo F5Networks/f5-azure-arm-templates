@@ -1,4 +1,4 @@
-sys application template /Common/f5.policy_creator_t2 {
+sys application template /Common/f5.policy_creator {
     actions {
         definition {
             html-help {
@@ -35,6 +35,8 @@ sys application template /Common/f5.policy_creator_t2 {
                set custom 1
 			set asm_level "$custom_asm_policy" 
           } else {
+               puts "Deploying... Standard ASM policy from ${asm_policy_location}/asm-policy.tar.gz"
+               exec /bin/tar xf ${asm_policy_location}/asm-policy.tar.gz -C $asm_policy_location
                set custom 0
           }
 
@@ -49,8 +51,7 @@ sys application template /Common/f5.policy_creator_t2 {
                
 			if { $unique_level == "none" } { continue }
 			
-			#Download ASM asm_policy and load it
-               
+			#Download ASM asm_policy and load it               
                puts "Deploying... Downloading ASM Policy: $asm_url"
                
                if { $custom } {
@@ -67,8 +68,7 @@ sys application template /Common/f5.policy_creator_t2 {
                
 			tmsh_exe "load asm policy /Common/${asm_name}-security_policy overwrite file /tmp/${asm_name}.xml"
 
-			#Set asm asm_policy to active and blocking
-               
+			#Set asm asm_policy to active and blocking              
 			tmsh_exe "modify asm policy /Common/${asm_name}-security_policy active blocking-mode $blocking_mode"
 		}
 	}

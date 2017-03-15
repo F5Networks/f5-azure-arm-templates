@@ -5,7 +5,7 @@ function passwd() {
   echo | awk '{print $1}' /config/cloud/bigIpCredentials
 }
 
-while getopts m:d:n:j:k:h:s:t:l:a:c:r:o:v:u: option
+while getopts m:d:n:j:k:h:s:t:l:a:c:r:o:u: option
 do	case "$option"  in
         m) mode=$OPTARG;;
         d) deployment=$OPTARG;;
@@ -20,7 +20,6 @@ do	case "$option"  in
         c) ssl_cert=$OPTARG;;
         r) ssl_passwd=$OPTARG;;
         o) rewrite=$OPTARG;;
-        v) script_loc=$OPTARG;;
         u) user=$OPTARG;;
     esac
 done
@@ -43,11 +42,11 @@ else
 fi
 
 # install iApp templates
-template_location=$script_loc
+template_location="/var/lib/waagent/custom-script/download/0"
 
 for template in f5.http.v1.2.0rc7.tmpl f5.policy_creator.tmpl
 do
-     curl -sk -u $user:$(passwd) -X POST -H "Content-type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/util/bash -d '{ "command":"run","utilCmdArgs":"-c \"curl -k -s -f --retry 5 --retry-delay 10 --retry-max-time 10 -o /config/'$template' '$template_location'/'$template'\"" }'
+     curl -sk -u $user:$(passwd) -X POST -H "Content-type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/util/bash -d '{ "command":"run","utilCmdArgs":"-c \"cp '$template_location'/'$template' /config/'$template'\"" }'
      response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/sys/config -d '{"command": "load","name": "merge","options": [ { "file": "/config/'"$template"'" } ] }' -o /dev/null)
      if [[ $response_code != 200  ]]; then
           echo "Failed to install iApp template; exiting with response code '"$response_code"'"
@@ -90,7 +89,7 @@ else
      rewrite_profile_name=""
 fi
 
-response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment_name"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.policy_creator_t2","trafficGroup":"none","lists":[],"variables":[{"name":"variables__deployment","value":"'"$deployment"'"},{"name":"variables__type","value":"'"$type"'"},{"name":"variables__level","value":"'"$level"'"},{"name":"variables__do_asm","value":"true"},{"name":"variables__do_l7dos","value":"true"},{"name":"variables__custom_asm_policy","value":"'"$custom_policy"'"},{"name":"variables__do_uri_rewrite","value":"'"$rewrite_fqdn"'"},{"name":"variables__server_host","value":"'"$server_host"'"},{"name":"variables__rewrite_scheme","value":"'"$scheme"'"}]}' -o /dev/null)
+response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment_name"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.policy_creator","trafficGroup":"none","lists":[],"variables":[{"name":"variables__deployment","value":"'"$deployment"'"},{"name":"variables__type","value":"'"$type"'"},{"name":"variables__level","value":"'"$level"'"},{"name":"variables__do_asm","value":"true"},{"name":"variables__do_l7dos","value":"true"},{"name":"variables__custom_asm_policy","value":"'"$custom_policy"'"},{"name":"variables__do_uri_rewrite","value":"'"$rewrite_fqdn"'"},{"name":"variables__server_host","value":"'"$server_host"'"},{"name":"variables__rewrite_scheme","value":"'"$scheme"'"}]}' -o /dev/null)
 
 if [[ $response_code != 200  ]]; then
      echo "Failed to install LTM policy; exiting with response code '"$response_code"'"
