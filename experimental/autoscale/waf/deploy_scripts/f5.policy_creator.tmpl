@@ -74,12 +74,13 @@ sys application template /Common/f5.policy_creator {
 	}
 
 	iapp::template start
-	set ::L7DOS_FAIL {"You have entered an invalid answer for the question. Please, try again.<br>%DOSL7.captcha.image% %DOSL7.captcha.change%<br><b>What code is in the image\?</b>%DOSL7.captcha.solution%<br>%DOSL7.captcha.submit%"}
-     set ::L7DOS_FIRST {"This question is for testing whether you are a human visitor and to prevent automated spam submission.<br>%DOSL7.captcha.image% %DOSL7.captcha.change%<br><b>What code is in the image\?</b>%DOSL7.captcha.solution%<br>%DOSL7.captcha.submit%"}
+	set ::L7DOS_FAIL {"You have entered an invalid answer for the question. Please, try again.<br>%DOSL7.captcha.image% %DOSL7.captcha.change% [expr { $is_v13_0 ? "%DOSL7.captcha.support_id%" : "" }]<br><b>What code is in the image\?</b>%DOSL7.captcha.solution%<br>%DOSL7.captcha.submit%"}
+     set ::L7DOS_FIRST {"This question is for testing whether you are a human visitor and to prevent automated spam submission.<br>%DOSL7.captcha.image% %DOSL7.captcha.change% [expr { $is_v13_0 ? "%DOSL7.captcha.support_id%" : "" }]<br><b>What code is in the image\?</b>%DOSL7.captcha.solution%<br>%DOSL7.captcha.submit%"}
 	set app $tmsh::app_name
 	set app_service "app-service none"
 	set is_v12_0 [iapp::tmos_version >= 12.0]
 	set is_v12_1 [iapp::tmos_version >= 12.1]
+     set is_v13_0 [iapp::tmos_version >= 13.0]
 	set legacy ""
 
 	#Set variables, if they dont exist then use defaults
@@ -133,8 +134,8 @@ sys application template /Common/f5.policy_creator {
 			 application replace-all-with \{ $l7dos_name \{ \
 			 bot-defense \{ mode disabled \} \
 			 captcha-response \{ failure \{ body $::L7DOS_FAIL type custom \} first \{ body $::L7DOS_FIRST type custom \} \} \
-			 ip-whitelist none \
-			 heavy-urls \{ automatic-detection disabled protection disabled \} \
+                [expr { $is_v13_0 ? "" : "ip-whitelist none" }] \
+			 heavy-urls \{ automatic-detection disabled [expr { $is_v13_0 ? "" : "protection disabled" }] \} \
 			 [expr { $is_v12_0 ? "stress-based" : "latency-based" }] \{ mode blocking $tps_medium \} \
 			 tps-based \{ mode blocking $tps_medium \} $app_service \} \} \}]}
           off {[iapp::conf create security dos profile $l7dos_name \{ \
@@ -142,8 +143,8 @@ sys application template /Common/f5.policy_creator {
 			 application replace-all-with \{ $l7dos_name \{ \
 			 bot-defense \{ mode disabled \} \
 			 captcha-response \{ failure \{ body $::L7DOS_FAIL type custom \} first \{ body $::L7DOS_FIRST type custom \} \} \
-			 ip-whitelist none \
-			 heavy-urls \{ automatic-detection disabled protection disabled \} \
+			 [expr { $is_v13_0 ? "" : "ip-whitelist none" }] \
+			 heavy-urls \{ automatic-detection disabled [expr { $is_v13_0 ? "" : "protection disabled" }] \} \
 			 [expr { $is_v12_0 ? "stress-based" : "latency-based" }] \{ mode transparent $tps_high \} \
 			 tps-based \{ mode transparent $tps_high \} $app_service \} \} \}]}
 		low {[iapp::conf create security dos profile $l7dos_name \{ \
@@ -151,8 +152,8 @@ sys application template /Common/f5.policy_creator {
 			 application replace-all-with \{ $l7dos_name \{ \
 			 bot-defense \{ mode disabled \} \
 			 captcha-response \{ failure \{ body $::L7DOS_FAIL type custom \} first \{ body $::L7DOS_FIRST type custom \} \} \
-			 ip-whitelist none \
-			 heavy-urls \{ automatic-detection disabled protection disabled \} \
+			 [expr { $is_v13_0 ? "" : "ip-whitelist none" }] \
+			 heavy-urls \{ automatic-detection disabled [expr { $is_v13_0 ? "" : "protection disabled" }] \} \
 			 [expr { $is_v12_0 ? "stress-based" : "latency-based" }] \{ mode blocking $tps_low \} \
 			 tps-based \{ mode blocking $tps_low \} $app_service \} \} \}]}
 		medium {[iapp::conf create security dos profile $l7dos_name \{ \
@@ -160,8 +161,8 @@ sys application template /Common/f5.policy_creator {
 			 application replace-all-with \{ $l7dos_name \{ \
 			 bot-defense \{ mode disabled \} \
 			 captcha-response \{ failure \{ body $::L7DOS_FAIL type custom \} first \{ body $::L7DOS_FIRST type custom \} \} \
-			 ip-whitelist none \
-			 heavy-urls \{ automatic-detection disabled protection disabled \} \
+			 [expr { $is_v13_0 ? "" : "ip-whitelist none" }] \
+			 heavy-urls \{ automatic-detection disabled [expr { $is_v13_0 ? "" : "protection disabled" }] \} \
 			 [expr { $is_v12_0 ? "stress-based" : "latency-based" }] \{ mode blocking $tps_medium \} \
 			 tps-based \{ mode blocking $tps_medium \} $app_service \} \} \}]}
 		high {[iapp::conf create security dos profile $l7dos_name \{ \
@@ -170,8 +171,8 @@ sys application template /Common/f5.policy_creator {
 			 bot-defense \{ mode during-attacks \} \
 			 bot-signatures \{ categories replace-all-with \{ $bot_categories \} check enabled \} \
 			 captcha-response \{ failure \{ body $::L7DOS_FAIL type custom \} first \{ body $::L7DOS_FIRST type custom \} \} \
-			 ip-whitelist none \
-			 heavy-urls \{ automatic-detection disabled protection disabled \} \
+			 [expr { $is_v13_0 ? "" : "ip-whitelist none" }] \
+			 heavy-urls \{ automatic-detection disabled [expr { $is_v13_0 ? "" : "protection disabled" }] \} \
 			 [expr { $is_v12_0 ? "stress-based" : "latency-based" }] \{ mode blocking $tps_high geo-rate-limiting enabled site-rate-limiting enabled \} \
 			 tps-based \{ mode blocking $tps_high geo-rate-limiting enabled site-rate-limiting enabled \} $app_service \} \} \}]}
 		*    {}
