@@ -133,13 +133,11 @@
         }, 
         "imageName": {
             "allowedValues": [
-                "Good", 
-                "Better", 
                 "Best"
             ], 
-            "defaultValue": "Good", 
+            "defaultValue": "Best", 
             "metadata": {
-                "description": "F5 SKU(IMAGE) to Deploy"
+                "description": "F5 SKU(IMAGE) to Deploy, 'Best' is the only option as ASM is required"
             }, 
             "type": "string"
         }, 
@@ -705,7 +703,8 @@
                                             "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs-azure/', variables('f5CloudLibsAzureTag'), '/dist/f5-cloud-libs-azure.tar.gz')]", 
                                             "[concat(variables('f5NetworksSolutionScripts'), 'deploy_waf.sh')]", 
                                             "[concat(variables('f5NetworksSolutionScripts'), 'f5.http.v1.2.0rc7.tmpl')]", 
-                                            "[concat(variables('f5NetworksSolutionScripts'), 'f5.policy_creator.tmpl')]"
+                                            "[concat(variables('f5NetworksSolutionScripts'), 'f5.policy_creator.tmpl')]", 
+                                            "[concat(variables('f5NetworksSolutionScripts'), 'asm-policy.tar.gz')]"
                                         ]
                                     }, 
                                     "type": "CustomScript", 

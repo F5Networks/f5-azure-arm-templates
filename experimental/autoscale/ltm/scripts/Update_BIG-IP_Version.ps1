@@ -22,10 +22,24 @@ param(
   $newBigIpVersion
 
 )
+Write-Host "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged." -foregroundcolor green
+Start-Sleep -s 3
+
+# Connect to Azure, right now it is only interactive login
+try {
+    Write-Host "Checking if already logged in!"
+    Get-AzureRmSubscription | Out-Null
+    Write-Host "Already logged in, continuing..."
+    }
+    Catch {
+    Write-Host "Not logged in, please login..."
+    Login-AzureRmAccount
+    }
+
+Write-Host "Connecting to vm scale set '$vmScaleSetName' in resource group '$resourceGroupName' with the purpose of upgrading from '$oldBigIpVersion' to '$newBigIpVersion'"
 
 # Get the current VM Scale Set Settings
 $vmss = Get-AzureRmVmss -ResourceGroupName $resourceGroupName -VMScaleSetName $vmScaleSetName
-$vmss
 
 if ($oldBigIpVersion -eq $vmss.virtualMachineProfile.storageProfile.imageReference.version ) {
     Write-Output "Confirmed version upgrading from is $oldBigIpVersion"
