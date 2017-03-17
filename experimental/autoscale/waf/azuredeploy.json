@@ -151,7 +151,7 @@
             ], 
             "defaultValue": "13.0.000", 
             "metadata": {
-                "description": "F5 Big-IP Version to use"
+                "description": "F5 BIG-IP Version to use"
             }, 
             "type": "string"
         }, 
@@ -340,7 +340,7 @@
         "insightsApiVersion": "2015-04-01", 
         "location": "[resourceGroup().location]", 
         "singleQuote": "'", 
-        "f5CloudLibsTag": "azureUcs", 
+        "f5CloudLibsTag": "develop", 
         "f5CloudLibsAzureTag": "storage", 
         "f5NetworksTag": "develop", 
         "f5NetworksSolutionScripts": "[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/', variables('f5NetworksTag'), '/experimental/autoscale/waf/deploy_scripts/')]", 
