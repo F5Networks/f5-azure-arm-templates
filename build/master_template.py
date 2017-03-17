@@ -34,9 +34,9 @@ command_to_execute = ""
 content_version = '1.1.2.0'
 f5_networks_tag = 'develop'
 f5_cloud_libs_tag = 'v2.1.0'
-f5_cloud_libs_azure_tag = 'storage'
+f5_cloud_libs_azure_tag = 'develop'
 install_cloud_libs = "[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit\nfi\necho loaded verifyHash\necho verifying f5-cloud-libs.targ.gz\n/usr/bin/tmsh run cli script verifyHash /config/cloud/f5-cloud-libs.tar.gz\nif [ $? != 0 ]; then\necho f5-cloud-libs.tar.gz is not valid\nexit\nfi\necho verified f5-cloud-libs.tar.gz\necho expanding f5-cloud-libs.tar.gz\ntar xvfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud\ntouch /config/cloud/cloudLibsReady', variables('singleQuote'))]"
-instance_type_list = "Standard_A2", "Standard_A3", "Standard_A4", "Standard_A9", "Standard_A11", "Standard_D2", "Standard_D3", "Standard_D4", "Standard_D12", "Standard_D13", "Standard_D14", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2", "Standard_F2", "Standard_F4"
+instance_type_list = ["Standard_A2", "Standard_A3", "Standard_A4", "Standard_A5", "Standard_A6", "Standard_A7", "Standard_A8", "Standard_A9", "Standard_D2", "Standard_D3", "Standard_D4", "Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2", "Standard_F2", "Standard_F4", "Standard_F8"]
 tags = { "application": "[parameters('tagValues').application]", "environment": "[parameters('tagValues').environment]", "group": "[parameters('tagValues').group]", "owner": "[parameters('tagValues').owner]", "costCenter": "[parameters('tagValues').cost]" }
 tag_values = {"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}
 api_version = "[variables('apiVersion')]"
@@ -47,12 +47,18 @@ insights_api_version = "[variables('insightsApiVersion')]"
 location = "[variables('location')]"
 default_payg_bw = '200m'
 
-# Change Static Assignment as needed
+## Change Static Assignment as needed ##
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
-    f5_cloud_libs_tag = 'azureUcs'
+    f5_cloud_libs_tag = 'develop'
     install_cloud_libs = "[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\n#echo loading verifyHash script\n#/usr/bin/tmsh load sys config merge file /config/verifyHash\n#if [ $? != 0 ]; then\n#echo cannot validate signature of /config/verifyHash\n#exit\n#fi\n#echo loaded verifyHash\n#echo verifying f5-cloud-libs.targ.gz\n#/usr/bin/tmsh run cli script verifyHash /config/cloud/f5-cloud-libs.tar.gz\n#if [ $? != 0 ]; then\n#echo f5-cloud-libs.tar.gz is not valid\n#exit\n#fi\n#echo verified f5-cloud-libs.tar.gz\necho expanding f5-cloud-libs.tar.gz\ntar xvfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud/node_modules\necho expanding f5-cloud-libs-azure.tar.gz\ntar xvfz /config/cloud/f5-cloud-libs-azure.tar.gz -C /config/cloud/node_modules/f5-cloud-libs/node_modules\ntouch /config/cloud/cloudLibsReady', variables('singleQuote'))]"
 
-## Set BIG-IP versions to allow
+# Update allowed instances available based on solution
+if template_name in ('waf_autoscale'):
+    disallowed_instance_list = ["Standard_A2", "Standard_F2"]
+    for instance in disallowed_instance_list:
+        instance_type_list.remove(instance)
+
+## Set BIG-IP versions to allow ##
 default_big_ip_version = '13.0.000'
 allowed_big_ip_versions = ["latest", "13.0.000"]
 # Acount for difference in PAYG and BYOL in 12.1 release
@@ -105,7 +111,7 @@ data['parameters']['imageName'] = {"type": "string", "defaultValue": "Good", "al
 # WAF-like templates need the 'Best' Image, stil prompt as a parameter so they are aware of what they are paying for with PAYG
 if template_name in ('waf_autoscale'):
     data['parameters']['imageName'] = {"type": "string", "defaultValue": "Best", "allowedValues": [ "Best" ], "metadata": { "description": "F5 SKU(IMAGE) to Deploy, 'Best' is the only option as ASM is required"}}
-data['parameters']['bigIpVersion'] = {"type": "string", "defaultValue": default_big_ip_version, "allowedValues": allowed_big_ip_versions, "metadata": { "description": "F5 Big-IP Version to use"}}
+data['parameters']['bigIpVersion'] = {"type": "string", "defaultValue": default_big_ip_version, "allowedValues": allowed_big_ip_versions, "metadata": { "description": "F5 BIG-IP Version to use"}}
 if license_type == 'BYOL':
     data['parameters']['licenseKey1'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "The license token for the F5 BIG-IP(BYOL)" } }
     if template_name == 'cluster_base':

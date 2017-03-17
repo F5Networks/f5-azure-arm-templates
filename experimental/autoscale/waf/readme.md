@@ -1,4 +1,4 @@
-# Deploy ASM-provisioned BIG-IP VE(s) in an Azure VM Scale Set with auto scaling enabled
+# Deploy LTM+ASM-provisioned BIG-IP VE(s) in an Azure VM Scale Set with auto scaling enabled - WAF
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 
@@ -71,7 +71,7 @@ Use this button to deploy the template:
     ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
     ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
     ## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
-    ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -scaleOutThroughput 90 -scaleInThroughput 10 -scaleTimeWindow 10 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_D2_v2 -imageName Good -bigIpVersion 13.0.000 -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -restrictedSrcAddress "*"-resourceGroupName <value>
+    ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -scaleOutThroughput 90 -scaleInThroughput 10 -scaleTimeWindow 10 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_D2_v2 -imageName Best -bigIpVersion 13.0.000 -solutionDeploymentName <value> -applicationProtocols http-https -applicationAddress <value> -applicationServiceFqdn NOT_SPECIFIED -applicationPort 80 -applicationSecurePort 443 -sslCert NOT_SPECIFIED -sslPswd NOT_SPECIFIED -applicationType Linux -blockingLevel medium -customPolicy NOT_SPECIFIED -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -restrictedSrcAddress "*" -resourceGroupName <value>
 
     param(
 
@@ -131,6 +131,50 @@ Use this button to deploy the template:
 
     [Parameter(Mandatory=$True)]
     [string]
+    $solutionDeploymentName,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $applicationProtocols,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $applicationAddress,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $applicationServiceFqdn,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $applicationPort,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $applicationSecurePort,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $sslCert,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $sslPswd,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $applicationType,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $blockingLevel,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $customPolicy,
+
+    [Parameter(Mandatory=$True)]
+    [string]
     $tenantId,
 
     [Parameter(Mandatory=$True)]
@@ -178,7 +222,8 @@ Use this button to deploy the template:
     # Create Arm Deployment
     $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
     $sps = ConvertTo-SecureString -String $servicePrincipalSecret -AsPlainText -Force
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -vmScaleSetMinCount "$vmScaleSetMinCount" -vmScaleSetMaxCount "$vmScaleSetMaxCount" -scaleOutThroughput "$scaleOutThroughput" -scaleInThroughput "$scaleInThroughput" -scaleTimeWindow "$scaleTimeWindow" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -tenantId "$tenantId" -clientId "$clientId" -servicePrincipalSecret $sps -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
+    $sslpwd = ConvertTo-SecureString -String $sslPswd -AsPlainText -Force
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -vmScaleSetMinCount "$vmScaleSetMinCount" -vmScaleSetMaxCount "$vmScaleSetMaxCount" -scaleOutThroughput "$scaleOutThroughput" -scaleInThroughput "$scaleInThroughput" -scaleTimeWindow "$scaleTimeWindow" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -solutionDeploymentName "$solutionDeploymentName" -applicationProtocols "$applicationProtocols" -applicationAddress "$applicationAddress" -applicationServiceFqdn "$applicationServiceFqdn" -applicationPort "$applicationPort" -applicationSecurePort "$applicationSecurePort" -sslCert "$sslCert" -sslPswd $sslpwd -applicationType "$applicationType" -blockingLevel "$blockingLevel" -customPolicy "$customPolicy" -tenantId "$tenantId" -clientId "$clientId" -servicePrincipalSecret $sps -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
 
     # Print Output of Deployment to Console
     $deployment
@@ -193,7 +238,7 @@ Use this button to deploy the template:
     #!/bin/bash
 
     ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-    ## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --vmScaleSetMinCount 2 --vmScaleSetMaxCount 4 --scaleOutThroughput 90 --scaleInThroughput 10 --scaleTimeWindow 10 --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceType Standard_D2_v2 --imageName Good --bigIpVersion 13.0.000 --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+    ## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --vmScaleSetMinCount 2 --vmScaleSetMaxCount 4 --scaleOutThroughput 90 --scaleInThroughput 10 --scaleTimeWindow 10 --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceType Standard_D2_v2 --imageName Best --bigIpVersion 13.0.000 --solutionDeploymentName <value> --applicationProtocols http-https --applicationAddress <value> --applicationServiceFqdn NOT_SPECIFIED --applicationPort 80 --applicationSecurePort 443 --sslCert NOT_SPECIFIED --sslPswd NOT_SPECIFIED --applicationType Linux --blockingLevel medium --customPolicy NOT_SPECIFIED --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
     # Assign Script Paramters and Define Variables
     # Specify static items, change these as needed or make them parameters
@@ -201,7 +246,7 @@ Use this button to deploy the template:
     restrictedSrcAddress="*"
     tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,vmScaleSetMinCount:,vmScaleSetMaxCount:,scaleOutThroughput:,scaleInThroughput:,scaleTimeWindow:,adminUsername:,adminPassword:,dnsLabel:,instanceType:,imageName:,bigIpVersion:,tenantId:,clientId:,servicePrincipalSecret:,restrictedSrcAddress: -n $0 -- "$@"`
+    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x:y:z:aa:bb:cc:dd:ee:ff: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,vmScaleSetMinCount:,vmScaleSetMaxCount:,scaleOutThroughput:,scaleInThroughput:,scaleTimeWindow:,adminUsername:,adminPassword:,dnsLabel:,instanceType:,imageName:,bigIpVersion:,solutionDeploymentName:,applicationProtocols:,applicationAddress:,applicationServiceFqdn:,applicationPort:,applicationSecurePort:,sslCert:,sslPswd:,applicationType:,blockingLevel:,customPolicy:,tenantId:,clientId:,servicePrincipalSecret:,restrictedSrcAddress: -n $0 -- "$@"`
     eval set -- "$ARGS"
 
     # Parse the command line arguments, primarily checking full params as short params are just placeholders
@@ -258,16 +303,49 @@ Use this button to deploy the template:
             -q|--bigIpVersion)
                 bigIpVersion=$2
                 shift 2;;
-            -r|--tenantId)
+            -r|--solutionDeploymentName)
+                solutionDeploymentName=$2
+                shift 2;;
+            -s|--applicationProtocols)
+                applicationProtocols=$2
+                shift 2;;
+            -t|--applicationAddress)
+                applicationAddress=$2
+                shift 2;;
+            -u|--applicationServiceFqdn)
+                applicationServiceFqdn=$2
+                shift 2;;
+            -v|--applicationPort)
+                applicationPort=$2
+                shift 2;;
+            -w|--applicationSecurePort)
+                applicationSecurePort=$2
+                shift 2;;
+            -x|--sslCert)
+                sslCert=$2
+                shift 2;;
+            -y|--sslPswd)
+                sslPswd=$2
+                shift 2;;
+            -z|--applicationType)
+                applicationType=$2
+                shift 2;;
+            -aa|--blockingLevel)
+                blockingLevel=$2
+                shift 2;;
+            -bb|--customPolicy)
+                customPolicy=$2
+                shift 2;;
+            -cc|--tenantId)
                 tenantId=$2
                 shift 2;;
-            -s|--clientId)
+            -dd|--clientId)
                 clientId=$2
                 shift 2;;
-            -t|--servicePrincipalSecret)
+            -ee|--servicePrincipalSecret)
                 servicePrincipalSecret=$2
                 shift 2;;
-            -u|--restrictedSrcAddress)
+            -ff|--restrictedSrcAddress)
                 restrictedSrcAddress=$2
                 shift 2;;
             --)
@@ -277,7 +355,7 @@ Use this button to deploy the template:
     done
 
     #If a required paramater is not passed, the script will prompt for it below
-    required_variables="vmScaleSetMinCount vmScaleSetMaxCount scaleOutThroughput scaleInThroughput scaleTimeWindow adminUsername adminPassword dnsLabel instanceType imageName bigIpVersion tenantId clientId servicePrincipalSecret resourceGroupName licenseType "
+    required_variables="vmScaleSetMinCount vmScaleSetMaxCount scaleOutThroughput scaleInThroughput scaleTimeWindow adminUsername adminPassword dnsLabel instanceType imageName bigIpVersion solutionDeploymentName applicationProtocols applicationAddress applicationServiceFqdn applicationPort applicationSecurePort sslCert sslPswd applicationType blockingLevel customPolicy tenantId clientId servicePrincipalSecret resourceGroupName licenseType "
     for variable in $required_variables
             do
             if [ -v ${!variable} ] ; then
@@ -312,7 +390,7 @@ Use this button to deploy the template:
 
     # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
     # such as can been done with Powershell...oh well!
-    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetMinCount\":{\"value\":$vmScaleSetMinCount},\"vmScaleSetMaxCount\":{\"value\":$vmScaleSetMaxCount},\"scaleOutThroughput\":{\"value\":$scaleOutThroughput},\"scaleInThroughput\":{\"value\":$scaleInThroughput},\"scaleTimeWindow\":{\"value\":$scaleTimeWindow},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetMinCount\":{\"value\":$vmScaleSetMinCount},\"vmScaleSetMaxCount\":{\"value\":$vmScaleSetMaxCount},\"scaleOutThroughput\":{\"value\":$scaleOutThroughput},\"scaleInThroughput\":{\"value\":$scaleInThroughput},\"scaleTimeWindow\":{\"value\":$scaleTimeWindow},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"solutionDeploymentName\":{\"value\":\"$solutionDeploymentName\"},\"applicationProtocols\":{\"value\":\"$applicationProtocols\"},\"applicationAddress\":{\"value\":\"$applicationAddress\"},\"applicationServiceFqdn\":{\"value\":\"$applicationServiceFqdn\"},\"applicationPort\":{\"value\":\"$applicationPort\"},\"applicationSecurePort\":{\"value\":\"$applicationSecurePort\"},\"sslCert\":{\"value\":\"$sslCert\"},\"sslPswd\":{\"value\":\"$sslPswd\"},\"applicationType\":{\"value\":\"$applicationType\"},\"blockingLevel\":{\"value\":\"$blockingLevel\"},\"customPolicy\":{\"value\":\"$customPolicy\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
 
 ```
 
@@ -325,17 +403,17 @@ The following is a simple configuration diagram for this Azure VM Scale Set auto
 ### Post-Deployment Azure Configuration
 This solution deploys an ARM template that fully configures BIG-IP(s) and handles clustering(DSC) and Azure creation of objects needed for management of those BIG-IP's.  However, once deployed the assumption is configuration will be performed on the BIG-IP(s) to create virtual servers, pools, etc... to be used for processing application traffic.  Since at deployment time that information is unknown ensure the below is done for each unique service to allow traffic to reach the BIG-IP(s) in the VM Scale Set.
 
-Post-deployment items(example application on port 443)
+# Post-deployment tasks(example application on port 443)
 1) Add a "Health Probe" to the ALB(Azure Load Balancer) for port 443, you can choose tcp or http depending on your needs.  - This will query each BIG-IP at that port to determine if it is available for traffic.
 2) Add a "Load Balancing Rule" to the ALB where the port is 443 and the backend port is also 443(assuming you are using same port on the BIG-IP), make sure the backend pool is selected(there should only be one backend pool which was created and will be managed by the VM Scale set)
 3) Add an "Inbound Security Rule" to the Network Security Group(NSG) for port 443 as the NSG is added to the subnet where the BIG-IP(s) live - You could optionally just remove the NSG from the subnet as the VM Scale Set is fronted by the ALB.
 
 ### Service Principal Authentication
-This solution requires read-only access to the VM Scale Set information to determine how the BIG-IP cluster should be configured as a result of the dynamics of new VBIG-IP's being scaled up/down.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication for all the reasons service prinicpals are utilized instead of a user account.  Below provides information/links on the options for configuring a service principal within Azure if this is the first time it is needed in a subscription.
+This solution requires read-only access to the VM Scale Set information to determine how the BIG-IP cluster should be configured as a result of the dynamics of new VBIG-IP's being scaled up/down.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication for all the reasons service principals are utilized instead of a user account.  Below provides information/links on the options for configuring a service principal within Azure if this is the first time it is needed in a subscription.
 
 _Ensure that however the creation of the service principal occurs to verify it only has read access and limit it as much as possible prior to this template being deployed and used by the VM scale set within the resource group selected(new or existing)._
 
-The end result should be posession of a client(application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some troubleshooting post-deployment if the service principal is in fact not fully configured.
+The end result should be possession of a client(application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some troubleshooting post-deployment if the service principal is in fact not fully configured.
 
 #### 1. Azure Portal
 
@@ -358,7 +436,25 @@ Follow the steps outlined in the [Azure Powershell documentation](https://docs.m
 
 
 ### Additional Optional Configuration Items
-Here are some post-deployment options that are entirely optional but are useful to add based on your needs, examples below for your enjoyment!
+Here are some post-deployment options that are entirely optional but could be useful based on your needs.
+
+#### BIG-IP Lifecycle Management
+As new BIG-IP versions come out, existing VM scale sets can be upgraded to use those images using the following methodology. Layout of tasks summarized below, then listed individually.
+
+Since the VM scale set was initially deployed the assumption is that different types of BIG-IP objects have been created(virtual servers, pools, etc...) and as such when the VM scale set is upgraded those need to be restored onto the new BIG-IP(s).  How this works is when the template was initially deployed a storage account was created in the same resource group as the VM scale set, it's name will end with "data000".(The name of storage accounts have to be globally unique so the prefix is a unique string).  Inside this storage account a container was created called "backup".  Save a UCS of the current BIG-IP(s) configuration, then upload that ucs into the previously mentioned container. When upgrading the BIG-IP(s) the provisioning will check that container for a ucs and if one(or more) does it will pick the one that was created/modified the latest.  Once the UCS is ready to go then the VM Scale Set "model" will need to be updated to use the newer BIG-IP version.
+
+This can be accomplished a couple different ways, two that will be covered here is by utilizing the ARM template re-deploy functionality and via a powershell script.  A powershell script example of this is included in the scripts folder of this directory, the re-deploy of the template simply involves going into the resource group the ARM template was initially deployed into, clicking on the succeeded deployment and selecting the option to re-deploy template.  Re-select(if not already selected) all the same variables used during initial deployment and ONLY CHANGE the big ip version to be the new BIG-IP version.  Once the re-deployment completes the VM Scale Set model will be updated to reference the new image chosen.
+
+The final step is to navigate to the VM Scale Set and select the "instances" pane. The "Latest Model" column for each VM should now have a caution sign instead of saying "Yes".  Simply select all(or one at a time, if doing so start with instance ID 0 and work up) of the instances and click the "Upgrade" action button.
+
+
+Checklist of Steps for Image Upgrade
+1) Save UCS of current cluster(or standalone) BIG-IP configuration
+2) Upload UCS into the 'backup' container of the storage account ending in 'data000' - It is a Blob container
+3) Update the VM Scale Set Model to the new BIG-IP version needed - Powershell script example in scripts folder of this directory OR via re-deploying the template using all the same parameters except for the BIG-IP version
+4) Navigate to the VM Scale Set instances pane and verify the 'Latest model' does not say Yes - It will have a caution sign instead of the word Yes
+5) Upgrade the Instances - All instances can be selected at once OR doing them one at a time starting with instance ID 0 is the preferred methodology
+
 
 #### Configure Scale Event Notifications
 You can add notifications when scale up/down events happen in the form of either email or webhooks, below shows an example of adding an email address that will receive an email from Azure whenever a scale up/down events occurs.
@@ -381,7 +477,7 @@ Browse to  the [Azure Resource Explorer](https://resources.azure.com), log in an
     ]
 ```
 
-### Changing the BIG-IP Configuration Utility (GUI) port
+#### Changing the BIG-IP Configuration Utility (GUI) port
 The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.
 ***Important***: The default port provisioned is dependent on 1) what BIG-IP version you choose to deploy as well as 2) how many nics are configured on that BIG-IP.  v13.0.000 and above in a single-nic configuration utilizes port 8443, all older BIG-IP versions, as well as newer(then v13.0.000) versions with multiple interfaces will default to 443 on the MGMT interface.
 ***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
