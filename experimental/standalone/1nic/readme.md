@@ -12,7 +12,7 @@ You can choose to deploy the BIG-IP VE with your own F5 BIG-IP license (BYOL), o
 
 
 ## Prerequisites and configuration notes 
-  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **$** or **#**. 
+  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**. 
   - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
@@ -58,7 +58,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | Parameter | Required | Description |
 | --- | --- | --- |
 | adminUsername | x | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IP VEs. This must not include **$** or **#**.  Remember this password; you will need it later. |
+| adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#**.  Remember this password; you will need it later. |
 | dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
 | instanceName | x | The hostname to be configured for the VM. |
 | instanceType | x | The desired Azure Virtual Machine instance size. |
