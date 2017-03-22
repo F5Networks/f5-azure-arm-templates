@@ -31,7 +31,7 @@ nic_reference = ""
 command_to_execute = ""
 
 ## Static Variable Assignment ##
-content_version = '1.1.2.0'
+content_version = '2.0.0.0'
 f5_networks_tag = 'release-2.0.0.0'
 f5_cloud_libs_tag = 'release-2.3.0'
 f5_cloud_libs_azure_tag = 'release-1.0.0'
