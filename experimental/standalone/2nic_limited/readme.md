@@ -6,8 +6,14 @@
 
 This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and data-plane traffic from the Internet, and the second interface is connected into the Azure networks where traffic is processed by the pool members in a traditional two-ARM design. However, you continue to have only one public IP address, and the external NIC is shared between management and data plane traffic.
 
-See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution, as well as an important note about optionally changing the BIG-IP Management port.
+You can choose to deploy the BIG-IP VE with your own F5 BIG-IP license (BYOL), or use Pay as You Go (PAYG) licensing.
 
+## Prerequisites and configuration notes 
+  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**. 
+  - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
+  - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
+  - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
+  
 ## Security
 This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
 
@@ -35,26 +41,29 @@ You have three options for deploying this template:
   - Using [PowerShell](#powershell)
   - Using [CLI Tools](#cli)
 
-### <a name="azure"></a>Azure deploy button
+### <a name="azure"></a>Azure deploy buttons
 
-Use this button to deploy the template:
+Use the appropriate button, depending on whether you are using BYOL or PAYG licensing:
+  - **BYOL** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic_limited%2FBYOL%2Fazuredeploy.json">
+    <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
+    
+  - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperiemental%2Fstandalone%2F2nic_limited%2FPAYG%2Fazuredeploy.json">
+   <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic_limited%2Fazuredeploy.json" target="_blank">
-</a>
 
 ### Template parameters
 
 | Parameter | Required | Description |
 | --- | --- | --- |
 | adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
+| adminPassword | x | A strong password for the BIG-IPs.  This must not include **#**.  Remember this password; you will need it later. |
 | dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
 | instanceName | x | The hostname to be configured for the VM. |
 | instanceType | x | The desired Azure Virtual Machine instance size. |
 | imageName | x | The desired F5 image to deploy. |
 | bigIpVersion | x | F5 BIG-IP Version to use. |
-| licenseKey1 | | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
-| licensedBandwidth | | PAYG licensed bandwidth(Mbps) image to deploy. |
+| licenseKey1 | | For BYOL only. The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
+| licensedBandwidth | | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
