@@ -162,7 +162,7 @@
                     {
                         "name": "[variables('subnet1Name')]",
                         "properties": {
-                            "addressPrefix": "[variables('subnet1Prefix')]"
+                            "addressPrefix": "[variables('subnetPrefix')]"
                         }
                     },
                     {
@@ -202,7 +202,7 @@
                             "privateIPAddress": "[variables('subnet1PrivateAddress')]",
                             "privateIPAllocationMethod": "Static",
                             "subnet": {
-                                "id": "[variables('subnet1Id')]"
+                                "id": "[variables('subnetId')]"
                             }
                         }
                     }

@@ -1,0 +1,96 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
+    "contentVersion": "2.0.0.0", 
+    "parameters": {
+        "vmScaleSetMinCount": {
+            "value": 2
+        }, 
+        "vmScaleSetMaxCount": {
+            "value": 4
+        }, 
+        "scaleOutThroughput": {
+            "value": 90
+        }, 
+        "scaleInThroughput": {
+            "value": 10
+        }, 
+        "scaleTimeWindow": {
+            "value": 10
+        }, 
+        "adminUsername": {
+            "value": "azureuser"
+        }, 
+        "adminPassword": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "dnsLabel": {
+            "value": "REQUIRED"
+        }, 
+        "instanceType": {
+            "value": "Standard_D2_v2"
+        }, 
+        "imageName": {
+            "value": "Best"
+        }, 
+        "bigIpVersion": {
+            "value": "13.0.000"
+        }, 
+        "licensedBandwidth": {
+            "value": "200m"
+        }, 
+        "solutionDeploymentName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "applicationProtocols": {
+            "value": "http-https"
+        }, 
+        "applicationAddress": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "applicationServiceFqdn": {
+            "value": "NOT_SPECIFIED"
+        }, 
+        "applicationPort": {
+            "value": "80"
+        }, 
+        "applicationSecurePort": {
+            "value": "443"
+        }, 
+        "sslCert": {
+            "value": "NOT_SPECIFIED"
+        }, 
+        "sslPswd": {
+            "value": "NOT_SPECIFIED"
+        }, 
+        "applicationType": {
+            "value": "Linux"
+        }, 
+        "blockingLevel": {
+            "value": "medium"
+        }, 
+        "customPolicy": {
+            "value": "NOT_SPECIFIED"
+        }, 
+        "tenantId": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "clientId": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "servicePrincipalSecret": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "restrictedSrcAddress": {
+            "value": "*"
+        }, 
+        "tagValues": {
+            "value": {
+                "application": "APP", 
+                "cost": "COST", 
+                "environment": "ENV", 
+                "group": "GROUP", 
+                "owner": "OWNER"
+            }
+        }
+    }
+}

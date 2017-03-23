@@ -53,8 +53,10 @@ Use the following button to deploy the template.  See the Template parameters se
 | adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
 | adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
 | dnsLabel | x | Unique DNS name for the public IP address used to access the BIG-IPs for management (alphanumeric characters only). |
-| licenseKey1 | x | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
+| bigIpVersion | x | F5 BIG-IP Version to use. |
+| licenseKey1 | | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
 | licenseKey2 | x | The license token from the F5 licensing server. This license will be used for the second F5 BIG-IP. |
+| licensedBandwidth | | PAYG licensed bandwidth(Mbps) image to deploy. |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
@@ -63,27 +65,29 @@ Use the following button to deploy the template.  See the Template parameters se
 ### <a name="powershell"></a>PowerShell Script Example
 
 ```powershell
-    # Params below match to parameters in the azuredeploy.json that are gen-unique, otherwise pointing to
-    # the azuredeploy.parameters.json file for default values.  Some options below are mandatory, some(such as deployment password for BIG IP)
-    # can be supplied inline when running this script but if they arent then the default will be used as specified in below param arguments
-    # Example Command: .\Deploy_via_PS.ps1 -solutionDeploymentName deploynamestring -numberOfInstances 2 -adminUsername azureuser -adminPassword password
-    # -dnsLabel dnslabestring -licenseKey1 XXXX-XXXX-XXXX-XXXX -licenseKey2 XXXX-XXXX-XXXX-XXXX
+    ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
+    ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
+    ## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
+    ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -numberOfInstances 2 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_D2_v2 -imageName Good -bigIpVersion 13.0.000 -restrictedSrcAddress "*"-resourceGroupName <value>
 
     param(
-    [Parameter(Mandatory=$True)]
-    [string]
-    $solutionDeploymentName,
 
     [Parameter(Mandatory=$True)]
-    [ValidateSet("2")]
+    [string]
+    $licenseType,
+
+    [string]
+    $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),
+
+    [string]
+    $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),
+
+    [string]
+    $licenseKey2 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey2"}),
+
+    [Parameter(Mandatory=$True)]
     [string]
     $numberOfInstances,
-
-    [string]
-    $instanceType = "Standard_D2_v2",
-
-    [string]
-    $imageName = "Best",
 
     [Parameter(Mandatory=$True)]
     [string]
@@ -99,14 +103,18 @@ Use the following button to deploy the template.  See the Template parameters se
 
     [Parameter(Mandatory=$True)]
     [string]
-    $licenseKey1,
+    $instanceType,
 
     [Parameter(Mandatory=$True)]
     [string]
-    $licenseKey2,
+    $imageName,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $bigIpVersion,
 
     [string]
-    $restrictedSrcAddress  = "*",
+    $restrictedSrcAddress = "*",
 
     [Parameter(Mandatory=$True)]
     [string]
@@ -141,9 +149,15 @@ Use the following button to deploy the template.  See the Template parameters se
 
     # Create Arm Deployment
     $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
-
-    # Create Arm Deployment
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -solutionDeploymentName "$solutionDeploymentName" -numberOfInstances "$numberOfInstances" -instanceType "$instanceType" -imageName "$imageName" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2" -restrictedSrcAddress "$restrictedSrcAddress"
+    if ($licenseType -eq "BYOL") {
+    if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\azuredeploy.json"; $parametersFilePath = ".\BYOL\azuredeploy.parameters.json" }
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -numberOfInstances "$numberOfInstances" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -restrictedSrcAddress "$restrictedSrcAddress"  -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2"
+    } elseif ($licenseType -eq "PAYG") {
+    if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -numberOfInstances "$numberOfInstances" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
+    } else {
+    Write-Error -Message "Uh oh, something went wrong!  Please select valid license type of PAYG or BYOL."
+    }
 
     # Print Output of Deployment to Console
     $deployment
@@ -155,65 +169,65 @@ Use the following button to deploy the template.  See the Template parameters se
 ```bash
     #!/bin/bash
 
-    # Bash Script to deploy ARM template into Azure, using azure cli 1.0
-    # Example Command: ./deploy_via_bash.sh --sdname sdname01 --nbrinstances 2 --adminusr azureuser --adminpwd 'password' --dnslabel label01 --key1 XXXX-XXXX --key2 XXXX-XXXX --rgname examplerg --azureusr loginuser --azurepwd loginpwd
+    ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
+    ## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --numberOfInstances 2 --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceType Standard_D2_v2 --imageName Good --bigIpVersion 13.0.000 --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
     # Assign Script Paramters and Define Variables
-    # Specify static items, change these as needed or make them parameters (instance_type is already an optional paramter)
+    # Specify static items, change these as needed or make them parameters
     region="westus"
-    template_file="azuredeploy.json"
-    parameter_file="azuredeploy.parameters.json"
-    instance_type="Standard_D2_v2"
-    image_name="Best"
-    restricted_source_address="*"
-    tag_values="{\"application\":\"APP\",\"environment\":\"ENV\",\"group\":\"GROUP\",\"owner\":\"OWNER\",\"cost\":\"COST\"}"
+    restrictedSrcAddress="*"
+    tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-
-    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m: --long sdname:,nbrinstances:,adminusr:,adminpwd:,insttype:,imgname:,dnslabel:,key1:,key2:,rstsrcaddr:,rgname:,azureusr:,azurepwd: -n $0 -- "$@"`
+    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,licenseKey2:,numberOfInstances:,adminUsername:,adminPassword:,dnsLabel:,instanceType:,imageName:,bigIpVersion:,restrictedSrcAddress: -n $0 -- "$@"`
     eval set -- "$ARGS"
-
 
     # Parse the command line arguments, primarily checking full params as short params are just placeholders
     while true; do
         case "$1" in
-            -a|--sdname)
-                solution_deployment_name=$2
+            -a|--resourceGroupName)
+                resourceGroupName=$2
                 shift 2;;
-            -b|--nbrinstances)
-                number_of_instances=$2
+            -b|--azureLoginUser)
+                azureLoginUser=$2
                 shift 2;;
-            -c|--adminusr)
-                admin_username=$2
+            -c|--azureLoginPassword)
+                azureLoginPassword=$2
                 shift 2;;
-            -d|--adminpwd)
-                admin_password=$2
+            -d|--licenseType)
+                licenseType=$2
                 shift 2;;
-            -e|--insttype)
-                instance_type=$2
+            -e|--licensedBandwidth)
+                licensedBandwidth=$2
                 shift 2;;
-            -f|--imgname)
-                image_name=$2
+            -f|--licenseKey1)
+                licenseKey1=$2
                 shift 2;;
-            -g|--dnslabel)
-                dns_label=$2
+            -g|--licenseKey2)
+                licenseKey2=$2
                 shift 2;;
-            -h|--key1)
-                license_key_1=$2
+            -h|--numberOfInstances)
+                numberOfInstances=$2
                 shift 2;;
-            -i|--key2)
-                license_key_2=$2
+            -i|--adminUsername)
+                adminUsername=$2
                 shift 2;;
-            -j|--rstsrcaddr)
-                restricted_source_address=$2
+            -j|--adminPassword)
+                adminPassword=$2
                 shift 2;;
-            -k|--rgname)
-                resource_group_name=$2
+            -k|--dnsLabel)
+                dnsLabel=$2
                 shift 2;;
-            -l|--azureusr)
-                azure_user=$2
+            -l|--instanceType)
+                instanceType=$2
                 shift 2;;
-            -m|--azurepwd)
-                azure_pwd=$2
+            -m|--imageName)
+                imageName=$2
+                shift 2;;
+            -n|--bigIpVersion)
+                bigIpVersion=$2
+                shift 2;;
+            -o|--restrictedSrcAddress)
+                restrictedSrcAddress=$2
                 shift 2;;
             --)
                 shift
@@ -221,11 +235,8 @@ Use the following button to deploy the template.  See the Template parameters se
         esac
     done
 
-    echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
-    sleep 3
-
     #If a required paramater is not passed, the script will prompt for it below
-    required_variables="solution_deployment_name number_of_instances admin_username admin_password dns_label license_key_1 license_key_2 resource_group_name azure_user azure_pwd"
+    required_variables="numberOfInstances adminUsername adminPassword dnsLabel instanceType imageName bigIpVersion resourceGroupName licenseType "
     for variable in $required_variables
             do
             if [ -v ${!variable} ] ; then
@@ -233,22 +244,52 @@ Use the following button to deploy the template.  See the Template parameters se
             fi
     done
 
-    # Login to Azure, for simplicity in this example using username and password supplied as script arguments --azureusr and --azurepwd
+    # Prompt for license key if not supplied and BYOL is selected
+    if [ $licenseType == "BYOL" ]; then
+        if [ -v $licenseKey1 ] ; then
+                read -p "Please enter value for licenseKey1:" licenseKey1
+        fi
+        if [ -v $licenseKey2 ] ; then
+                read -p "Please enter value for licenseKey2:" licenseKey2
+        fi
+        template_file="./BYOL/azuredeploy.json"
+        parameter_file="./BYOL/azuredeploy.parameters.json"
+    fi
+    # Prompt for licensed bandwidth if not supplied and PAYG is selected
+    if [ $licenseType == "PAYG" ]; then
+        if [ -v $licensedBandwidth ] ; then
+                read -p "Please enter value for licensedBandwidth:" licensedBandwidth
+        fi
+        template_file="./PAYG/azuredeploy.json"
+        parameter_file="./PAYG/azuredeploy.parameters.json"
+    fi
+
+    echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
+    sleep 3
+
+    # Login to Azure, for simplicity in this example using username and password supplied as script arguments --azureLoginUser and --azureLoginPassword
     # Perform Check to see if already logged in
     azure account show > /dev/null 2>&1
     if [[ $? != 0 ]] ; then
-            azure login -u $azure_user -p $azure_pwd
+            azure login -u $azureLoginUser -p $azureLoginPassword
     fi
 
     # Switch to ARM mode
     azure config mode arm
 
     # Create ARM Group
-    azure group create -n $resource_group_name -l $region
+    azure group create -n $resourceGroupName -l $region
 
     # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
     # such as can been done with Powershell...oh well!
-    azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"solutionDeploymentName\":{\"value\":\"$solution_deployment_name\"},\"numberOfInstances\":{\"value\":$number_of_instances},\"instanceType\":{\"value\":\"$instance_type\"},\"imageName\":{\"value\":\"$image_name\"},\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"licenseKey2\":{\"value\":\"$license_key_2\"},\"restrictedSrcAddress\":{\"value\":\"$restricted_source_address\"},\"tagValues\":{\"value\":$tag_values}}"
+    if [ $licenseType == "BYOL" ]; then
+        azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"numberOfInstances\":{\"value\":\"$numberOfInstances\"},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licenseKey1\":{\"value\":\"$licenseKey1\"},\"licenseKey2\":{\"value\":\"$licenseKey2\"}}"
+    elif [ $licenseType == "PAYG" ]; then
+        azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"numberOfInstances\":{\"value\":\"$numberOfInstances\"},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
+    else
+        echo "Uh oh, shouldn't make it here! Ensure license type is either PAYG or BYOL"
+        exit 1
+    fi
 
 ```
 
