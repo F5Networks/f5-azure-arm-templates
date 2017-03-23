@@ -62,7 +62,7 @@ Use this button to deploy the template:
 | bigIpVersion | x | F5 BIG-IP Version to use. |
 | licensedBandwidth | | PAYG licensed bandwidth(Mbps) image to deploy. |
 | solutionDeploymentName | x | A simple name for your application. |
-| applicationProtocols | x | The protocol that will be used to configure the application virtual servers. The only allowed values for these templates are http, https, or https-offload. |
+| applicationProtocols | x | The protocol that will be used to configure the application virtual servers. The only allowed values for these templates are http, https, http-https or https-offload. |
 | applicationAddress | x | The public IP address or DNS FQDN of the application that this WAF will protect. |
 | applicationServiceFqdn | x | The external FQDN used by clients to access the Azure App Service. |
 | applicationPort | x | The unencrypted port that your application is listening on (for example, 80). This field is required in the http and https-offload deployment scenarios. |
