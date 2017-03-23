@@ -61,5 +61,4 @@ azure config mode arm
 azure group create -n $resourceGroupName -l $region
 
 # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
-# such as can been done with Powershell...oh well!
 <DEPLOYMENT_CREATE>
