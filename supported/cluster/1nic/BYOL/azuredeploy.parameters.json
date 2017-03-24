@@ -1,10 +1,7 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "1.0.0.0", 
+    "contentVersion": "2.0.0.0", 
     "parameters": {
-        "solutionDeploymentName": {
-            "value": "GEN_UNIQUE"
-        }, 
         "numberOfInstances": {
             "value": 2
         }, 
@@ -17,14 +14,14 @@
         "dnsLabel": {
             "value": "REQUIRED"
         }, 
-        "instanceName": {
-            "value": "f5vm01"
-        }, 
         "instanceType": {
             "value": "Standard_D2_v2"
         }, 
         "imageName": {
             "value": "Good"
+        }, 
+        "bigIpVersion": {
+            "value": "13.0.000"
         }, 
         "licenseKey1": {
             "value": "REQUIRED"
@@ -37,9 +34,9 @@
         }, 
         "tagValues": {
             "value": {
-                "environment": "ENV", 
                 "application": "APP", 
                 "cost": "COST", 
+                "environment": "ENV", 
                 "group": "GROUP", 
                 "owner": "OWNER"
             }

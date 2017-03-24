@@ -9,6 +9,15 @@ F5 is running with a single interface, where both management and data plane traf
 
 See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution, as well as an important note about optionally changing the BIG-IP Management port.
 
+
+
+## Prerequisites and configuration notes
+  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **$** or **#**.
+  - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
+  - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
+  - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
+
+
 ## Security
 This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
 In the *variables* section:
@@ -37,16 +46,13 @@ You have three options for deploying this template:
 
 ### <a name="azure"></a>Azure deploy button
 
-Use this button to deploy the template:
 
-## BYOL
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F1nic%2FBYOL%2Fazuredeploy.json" target="_blank">
-    <img src="http://azuredeploy.net/deploybutton.png"/>
-</a>
-## PAYG(Hourly)
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F1nic%2FPAYG%2Fazuredeploy.json" target="_blank">
-    <img src="http://azuredeploy.net/deploybutton.png"/>
-</a>
+Use the appropriate button, depending on whether you are using BYOL or PAYG licensing:
+  - **BYOL** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F1nic%2FBYOL%2Fazuredeploy.json">
+    <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
+
+  - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F1nic%2FPAYG%2Fazuredeploy.json">
+    <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
 ### Template parameters
 
@@ -95,6 +101,9 @@ Use this button to deploy the template:
 
     [Parameter(Mandatory=$True)]
     [ValidateSet("PAYG","BYOL")]
+    [string]
+    $licenseType,
+
     [string]
     $licenseType,
 
@@ -152,7 +161,6 @@ Use this button to deploy the template:
 
 ```
 
-=======
 
 ### <a name="cli"></a>Azure CLI(1.0) Script Example
 
@@ -232,6 +240,18 @@ Use this button to deploy the template:
     if [ $license_type == "byol" ]; then
         if [ -v $license_key_1 ] ; then
                 read -p "Please enter value for license_key_1:" license_key_1
+        fi
+        template_file="./BYOL/azuredeploy.json"
+        parameter_file="./BYOL/azuredeploy.parameters.json"
+    fi
+
+    echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
+    sleep 3
+
+    # Prompt for license key if not supplied and BYOL is selected
+    if [ $licenseType == "BYOL" ]; then
+        if [ -v $licenseKey1 ] ; then
+                read -p "Please enter value for licenseKey1:" licenseKey1
         fi
         template_file="./BYOL/azuredeploy.json"
         parameter_file="./BYOL/azuredeploy.parameters.json"
