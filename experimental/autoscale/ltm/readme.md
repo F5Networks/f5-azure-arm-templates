@@ -4,9 +4,13 @@
 
 ## Introduction
 
-This solution uses an ARM template to launch the deployment of F5 BIG-IP VE(s) in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure LB to the BIG-IP VE(cluster) and then to the application servers. The BIG-IP(s) are configured in single-nic mode.
+This solution uses an ARM template to launch the deployment of F5 BIG-IP VE(s) in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode.
 
-See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution, as well as an important note about optionally changing the BIG-IP Management port.
+
+## Prerequisites and configuration notes 
+  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#** or **'** (single quote). 
+  - See the [Configuration Example](#config) section for a configuration diagram and description for this solution.
+  - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
 
 ## Security
 This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
@@ -48,16 +52,15 @@ Use this button to deploy the template:
 | --- | --- | --- |
 | vmScaleSetMinCount | x | The minimum(and default) number of BIG-IP VEs that will be deployed into the VM Scale Set. |
 | vmScaleSetMaxCount | x | The number of maximum BIG-IP VEs that can be deployed into the VM Scale Set. |
-| scaleOutThroughput | x | The percentange of 'Network Out' Throughput to scale out on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen. |
-| scaleInThroughput | x | The percentange of 'Network Out' Throughput to scale in on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen. |
+| scaleOutThroughput | x | The percentage of 'Network Out' Throughput to scale out on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen. |
+| scaleInThroughput | x | The percentage of 'Network Out' Throughput to scale in on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen. |
 | scaleTimeWindow | x | The time window required to trigger a scale event(up and down), this is used to determine the amount of time needed for a threshold to be breached as well as to prevent flapping. |
 | adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
+| adminPassword | x | A strong password for the BIG-IPs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
 | dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
 | instanceType | x | The desired Azure Virtual Machine instance size. |
 | imageName | x | The desired F5 image to deploy. |
 | bigIpVersion | x | F5 BIG-IP Version to use. |
-| licenseKey1 | | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
 | licensedBandwidth | | PAYG licensed bandwidth(Mbps) image to deploy. |
 | tenantId | | Your Azure service principal application tenant ID |
 | clientId | | Your Azure service principal application client(application) ID. |
@@ -276,7 +279,7 @@ Use this button to deploy the template:
         esac
     done
 
-    #If a required paramater is not passed, the script will prompt for it below
+    #If a required parameter is not passed, the script will prompt for it below
     required_variables="vmScaleSetMinCount vmScaleSetMaxCount scaleOutThroughput scaleInThroughput scaleTimeWindow adminUsername adminPassword dnsLabel instanceType imageName bigIpVersion tenantId clientId servicePrincipalSecret resourceGroupName licenseType "
     for variable in $required_variables
             do
@@ -318,20 +321,20 @@ Use this button to deploy the template:
 
 ## Configuration Example <a name="config">
 
-The following is a simple configuration diagram for this Azure VM Scale Set auto scale deployment. In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer.  The Azure Load Balancer processes both management and data plane traffic into the BIG-IP's which then distribute the traffic to web/application servers according to normal F5 patterns.
+The following is a simple configuration diagram for this Azure VM Scale Set auto scale deployment. In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer.  The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.
 
-![VM Scale Set Auto Scale configuration example](images/azure-1nic-sm.png)
+![VM Scale Set Auto Scale configuration example](images/azure-autoscale-ltm.png)
 
 ### Post-Deployment Azure Configuration
-This solution deploys an ARM template that fully configures BIG-IP(s) and handles clustering(DSC) and Azure creation of objects needed for management of those BIG-IP's.  However, once deployed the assumption is configuration will be performed on the BIG-IP(s) to create virtual servers, pools, etc... to be used for processing application traffic.  Since at deployment time that information is unknown ensure the below is done for each unique service to allow traffic to reach the BIG-IP(s) in the VM Scale Set.
+This solution deploys an ARM template that fully configures BIG-IP VE(s) and handles clustering (DSC) and Azure creation of objects needed for management of those BIG-IP VEs.  However, once deployed the assumption is configuration will be performed on the BIG-IP VE(s) to create virtual servers, pools, and other objects used for processing application traffic.  Because that information is unknown at deployment time, ensure the following tasks are done for each unique service to allow traffic to reach the BIG-IP(s) in the VM Scale Set.
 
 # Post-deployment tasks(example application on port 443)
-1) Add a "Health Probe" to the ALB(Azure Load Balancer) for port 443, you can choose tcp or http depending on your needs.  - This will query each BIG-IP at that port to determine if it is available for traffic.
-2) Add a "Load Balancing Rule" to the ALB where the port is 443 and the backend port is also 443(assuming you are using same port on the BIG-IP), make sure the backend pool is selected(there should only be one backend pool which was created and will be managed by the VM Scale set)
-3) Add an "Inbound Security Rule" to the Network Security Group(NSG) for port 443 as the NSG is added to the subnet where the BIG-IP(s) live - You could optionally just remove the NSG from the subnet as the VM Scale Set is fronted by the ALB.
+  1. Add a "Health Probe" to the ALB(Azure Load Balancer) for port 443, you can choose TCP or HTTP depending on your needs.  This queries each BIG-IP at that port to determine if it is available for traffic.
+  2. Add a "Load Balancing Rule" to the ALB where the port is 443 and the backend port is also 443 (assuming you are using same port on the BIG-IP), make sure the backend pool is selected (there should only be one backend pool which was created and is managed by the VM Scale set)
+  3. Add an "Inbound Security Rule" to the Network Security Group(NSG) for port 443 as the NSG is added to the subnet where the BIG-IP VE(s) are deployed - You could optionally just remove the NSG from the subnet as the VM Scale Set is fronted by the ALB.
 
 ### Service Principal Authentication
-This solution requires read-only access to the VM Scale Set information to determine how the BIG-IP cluster should be configured as a result of the dynamics of new VBIG-IP's being scaled up/down.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication for all the reasons service principals are utilized instead of a user account.  Below provides information/links on the options for configuring a service principal within Azure if this is the first time it is needed in a subscription.
+This solution requires read-only access to the VM Scale Set information to determine how the BIG-IP cluster should be configured as a result of the dynamics of new BIG-IP VEs being scaled up/down.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication for all the reasons service principals are utilized instead of a user account.  The following provides information/links on the options for configuring a service principal within Azure if this is the first time it is needed in a subscription.
 
 _Ensure that however the creation of the service principal occurs to verify it only has read access and limit it as much as possible prior to this template being deployed and used by the VM scale set within the resource group selected(new or existing)._
 
@@ -357,31 +360,32 @@ https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-aut
 Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
 
 
-### Additional Optional Configuration Items
+## Additional Optional Configuration Items
 Here are some post-deployment options that are entirely optional but could be useful based on your needs.
 
-#### BIG-IP Lifecycle Management
-As new BIG-IP versions come out, existing VM scale sets can be upgraded to use those images using the following methodology. Layout of tasks summarized below, then listed individually.
+### BIG-IP Lifecycle Management
+As new BIG-IP versions are released, existing VM scale sets can be upgraded to use those new images. In an existing implementation, we assume you have created different types of BIG-IP configuration objects (such as virtual servers, pools, and monitors), and you want to retain this BIG-IP configuration after an upgrade. This section describes the process of upgrading and retaining the configuration.
 
-Since the VM scale set was initially deployed the assumption is that different types of BIG-IP objects have been created(virtual servers, pools, etc...) and as such when the VM scale set is upgraded those need to be restored onto the new BIG-IP(s).  How this works is when the template was initially deployed a storage account was created in the same resource group as the VM scale set, it's name will end with "data000".(The name of storage accounts have to be globally unique so the prefix is a unique string).  Inside this storage account a container was created called "backup".  Save a UCS of the current BIG-IP(s) configuration, then upload that ucs into the previously mentioned container. When upgrading the BIG-IP(s) the provisioning will check that container for a ucs and if one(or more) does it will pick the one that was created/modified the latest.  Once the UCS is ready to go then the VM Scale Set "model" will need to be updated to use the newer BIG-IP version.
+When this ARM template was initially deployed, a storage account was created in the same Resource Group as the VM scale set. This account name ends with **data000*** (the name of storage accounts have to be globally unique, so the prefix is a unique string). In this storage account, the template created a container named **backup**.  We use this backup container to hold backup [UCS](https://support.f5.com/csp/article/K13132) configuration files. Once the UCS is present in the container, you update the scale set "model" to use the newer BIG-IP version. Once the scale set is updated, you upgrade the BIG-IP VE(s). As a part of this upgrade, the provisioning checks the backup container for a UCS file and if one exists, it uploads the configuration (if more than one exists, it uses the latest). 
 
-This can be accomplished a couple different ways, two that will be covered here is by utilizing the ARM template re-deploy functionality and via a powershell script.  A powershell script example of this is included in the scripts folder of this directory, the re-deploy of the template simply involves going into the resource group the ARM template was initially deployed into, clicking on the succeeded deployment and selecting the option to re-deploy template.  Re-select(if not already selected) all the same variables used during initial deployment and ONLY CHANGE the big ip version to be the new BIG-IP version.  Once the re-deployment completes the VM Scale Set model will be updated to reference the new image chosen.
+**To upgrade the BIG-IP VE Image**
+  1. Save a UCS backup file of the current BIG-IP configuration (cluster or standalone). 
+     - From the CLI command: ```# tmsh save /sys ucs /var/tmp/original.ucs```
+     - From the Configuration utility: **System > Archives > Create**
+     
+  2. Upload the UCS into the **backup** container of the storage account ending in **data000** (it is a Blob container)
+  3. Update the VM Scale Set Model to the new BIG-IP version.
+     - From PowerShell: Use the PowerShell script in the **scripts** folder in this directory. 
+     - Using the Azure redeploy functionality: From the Resource Group where the ARM template was initially deployed, click the successful deployment and then select to redeploy the template. If necessary, re-select all the same variables, and **only change** the BIG-IP version to the latest.
+  4. Upgrade the Instances 
+     1. In Azure, navigate to the VM Scale Set instances pane and verify the *Latest model* does not say **Yes** (it should have a caution sign instead of the word Yes)
+     2. Select either all instances at once or each instance one at a time (starting with instance ID 0 and working up).
+     3. Click the **Upgrade** action button.
 
-The final step is to navigate to the VM Scale Set and select the "instances" pane. The "Latest Model" column for each VM should now have a caution sign instead of saying "Yes".  Simply select all(or one at a time, if doing so start with instance ID 0 and work up) of the instances and click the "Upgrade" action button.
+### Configure Scale Event Notifications
+You can add notifications when scale up/down events happen, either in the form of email or webhooks. The following shows an example of adding an email address that receives an email from Azure whenever a scale up/down event occurs.
 
-
-Checklist of Steps for Image Upgrade
-1) Save UCS of current cluster(or standalone) BIG-IP configuration
-2) Upload UCS into the 'backup' container of the storage account ending in 'data000' - It is a Blob container
-3) Update the VM Scale Set Model to the new BIG-IP version needed - Powershell script example in scripts folder of this directory OR via re-deploying the template using all the same parameters except for the BIG-IP version
-4) Navigate to the VM Scale Set instances pane and verify the 'Latest model' does not say Yes - It will have a caution sign instead of the word Yes
-5) Upgrade the Instances - All instances can be selected at once OR doing them one at a time starting with instance ID 0 is the preferred methodology
-
-
-#### Configure Scale Event Notifications
-You can add notifications when scale up/down events happen in the form of either email or webhooks, below shows an example of adding an email address that will receive an email from Azure whenever a scale up/down events occurs.
-
-Browse to  the [Azure Resource Explorer](https://resources.azure.com), log in and navigate down to the created auto scale settings(Subscriptions -> Resource Groups -> "resource group deployed into" -> Providers -> Microsoft.Insights -> Autoscalesettings -> autoscaleconfig).  From here select "Edit"(Need to select Read/Write at the top of the screen) and replace the current notifications json key with the below, just update the emails to be used below.  Select PUT and notifications will now be sent to the email addresses listed.
+Log in to the [Azure Resource Explorer](https://resources.azure.com) and then navigate to the Auto Scale settings (**Subscriptions > Resource Groups >** *resource group where deployed* **> Providers > Microsoft.Insights > Autoscalesettings > autoscaleconfig**).  At the top of the screen click Read/Write, and then from the Auto Scale settings, click **Edit**.  Replace the current **notifications** json key with the example below, making sure to update the email address(es). Select PUT and notifications will be sent to the email addresses listed.
 
 ```json
     "notifications": [
@@ -399,15 +403,13 @@ Browse to  the [Azure Resource Explorer](https://resources.azure.com), log in an
     ]
 ```
 
-#### Changing the BIG-IP Configuration Utility (GUI) port
+
+
+### Changing the BIG-IP Configuration utility (GUI) port
 The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.
-***Important***: The default port provisioned is dependent on 1) what BIG-IP version you choose to deploy as well as 2) how many nics are configured on that BIG-IP.  v13.0.000 and above in a single-nic configuration utilizes port 8443, all older BIG-IP versions, as well as newer(then v13.0.000) versions with multiple interfaces will default to 443 on the MGMT interface.
-***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
+<br>***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP. BIG-IP v13.0.000 and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.
+<br>***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
 
-
-## Documentation
-
-The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html) decribes how to create the configuration manually without using the ARM template.
 
 ## Deploying Custom Configuration to an Azure Virtual Machine
 

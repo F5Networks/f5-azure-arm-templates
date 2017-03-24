@@ -10,7 +10,7 @@ You can choose to deploy the BIG-IP VE with your own F5 BIG-IP license (BYOL), o
 
 
 ## Prerequisites and configuration notes 
-  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**. 
+  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **#** or **'** (single quote). 
   - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
@@ -57,7 +57,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | Parameter | Required | Description |
 | --- | --- | --- |
 | adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IPs VEs.   This must not include **#**.  Remember this password, you will need it later. |
+| adminPassword | x | A strong password for the BIG-IPs VEs.   This must not include **#** or **'** (single quote).  Remember this password, you will need it later. |
 | dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
 | instanceName | x | The hostname to be configured for the VM. |
 | instanceType | x | The desired Azure Virtual Machine instance size. |
@@ -301,8 +301,8 @@ In this example, the External VLAN uses **eth0** and the Internal VLAN uses **et
 
 ### Changing the BIG-IP Configuration Utility (GUI) port
 The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.
-***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP.  BIG-IP v13.0.000 and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.
-***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
+<br>***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP.  BIG-IP v13.0.000 and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.
+<br>***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
 
 ## Documentation
 

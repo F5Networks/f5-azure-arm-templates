@@ -2,15 +2,18 @@
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 ## Introduction
 
-This ARM template deploys a cluster of F5 BIG-IP VEs that ensures you have the highest level of availability for your applications. You can also enable F5's L4/L7 security features, access control, and intelligent traffic management.
+This ARM template deploys a cluster of F5 BIG-IP Virtual Editions (VEs) that ensures you have the highest level of availability for your applications. You can also enable F5's L4/L7 security features, access control, and intelligent traffic management.
 
 When you deploy your applications using a cluster of F5 BIG-IPs, the BIG-IP VE instances are all in Active status (not Active-Standby), and are used as a single device for redundancy and scalability, rather than failover. If one device goes down, Azure keeps load balancing to the other.
 
-Using this solution, the F5 BIG-IP VEs are fully configured in front of your application.  When complete, the BIG-IPs pass traffic through the newly created Azure Public IP.  After acceptance testing, you must complete the configuration by changing the DNS entry for your application to point at the newly created public IP address, and then lock down the Network Security Group rules to prevent any traffic from reaching your application except through the F5 BIG-IPs.
+Using this solution, the F5 BIG-IP VEs are fully configured in front of your application.  When complete, the BIG-IPs pass traffic through the newly created Azure Public IP.  After acceptance testing, you must complete the configuration by changing the DNS entry for your application to point at the newly created public IP address, and then lock down the Network Security Group rules to prevent any traffic from reaching your application except through the F5 BIG-IP VEs.
 
-Before you deploy web applications with an F5 BIG-IP VE, you need a license from F5.
+You can choose to deploy the BIG-IP VE with your own F5 BIG-IP license (BYOL), or use Pay as You Go (PAYG) licensing.
 
-See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
+## Prerequisites and configuration notes 
+  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **#** or **'** (single quote). 
+  - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
+  - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
 
 ## Security
 This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
@@ -33,18 +36,21 @@ We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.c
 ## Installation
 
 You have three options for deploying this template:
-  - Using the Azure deploy button
+  - Using the Azure deploy buttons
   - Using [PowerShell](#powershell)
   - Using [CLI Tools](#cli)
 
 ### <a name="azure"></a>Azure deploy button
 
-Use the following button to deploy the template.  See the Template parameters section to see the information you need to succesfully deploy the template.
+Use the appropriate button, depending on whether you are using BYOL or PAYG licensing.  See the Template parameters section to see the information you need to succesfully deploy the template.
 
-**BASE (No application)**<br>
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fsupported%2Fcluster%2F1nic%2Fazuredeploy.json" target="_blank">
+**BYOL**<br>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fsupported%2Fcluster%2F1nic%2FBYOL%2Fazuredeploy.json">
+    <img src="http://azuredeploy.net/deploybutton.png"/></a>
+
+**PAYG**<br>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fsupported%2Fcluster%2F1nic%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/>
-</a>
 
 ## Template parameters
 
@@ -55,12 +61,12 @@ Use the following button to deploy the template.  See the Template parameters se
 | instanceType | x | The desired Azure Virtual Machine instance size. |
 | imageName | x | The desired F5 image to deploy. |
 | adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IPs. Remember this password; you will need it later. |
+| adminPassword | x | A strong password for the BIG-IPs. Do not use **#** or **'** (single quote). Remember this password, you will need it later. |
 | dnsLabel | x | Unique DNS name for the public IP address used to access the BIG-IPs for management (alphanumeric characters only). |
 | bigIpVersion | x | F5 BIG-IP Version to use. |
-| licenseKey1 | | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
-| licenseKey2 | x | The license token from the F5 licensing server. This license will be used for the second F5 BIG-IP. |
-| licensedBandwidth | | PAYG licensed bandwidth(Mbps) image to deploy. |
+| licenseKey1 | | For BYOL only: The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
+| licenseKey2 | x | For BYOL only: The license token from the F5 licensing server. This license will be used for the second F5 BIG-IP. |
+| licensedBandwidth | | PAYG only: licensed bandwidth(Mbps) image to deploy. |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 

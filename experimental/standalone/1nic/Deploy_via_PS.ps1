@@ -86,7 +86,7 @@ if ($licenseType -eq "BYOL") {
   if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }
   $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
 } else {
-  Write-Error -Message "Uh oh, something went wrong!  Please select valid license type of PAYG or BYOL."
+  Write-Error -Message "Please select a valid license type of PAYG or BYOL."
 }
 
 # Print Output of Deployment to Console

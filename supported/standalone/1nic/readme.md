@@ -12,7 +12,7 @@ You can choose to deploy the BIG-IP VE with your own F5 BIG-IP license (BYOL), o
 
 
 ## Prerequisites and configuration notes 
-  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**. 
+  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **#** or **'** (single quote). 
   - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
@@ -60,7 +60,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | Parameter | Required | Description |
 | --- | --- | --- |
 | adminUsername | x | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#**. Remember this password, you will need it later. |
+| adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
 | dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
 | instanceName | x | The hostname to be configured for the VM. |
 | instanceType | x | The desired Azure Virtual Machine instance size. |
@@ -180,7 +180,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
     ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
     ## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D2_v2 --imageName Good --bigIpVersion 13.0.000 --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
-    # Assign Script Paramters and Define Variables
+    # Assign Script Parameters and Define Variables
     # Specify static items, change these as needed or make them parameters
     region="westus"
     restrictedSrcAddress="*"
@@ -301,8 +301,8 @@ The following is a simple configuration diagram for this single NIC deployment. 
 ![Single NIC configuration example](images/azure-1nic-sm.png)
 
 ### Changing the BIG-IP Configuration utility (GUI) port
-The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.
-***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP. BIG-IP v13.0.000 and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.
+The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>
+***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP. BIG-IP v13.0.000 and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.<br>
 ***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
 
 ## Documentation

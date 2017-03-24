@@ -50,6 +50,13 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
   - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperiemental%2Fstandalone%2F2nic_limited%2FPAYG%2Fazuredeploy.json">
    <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic_limited%2Fazuredeploy.json" target="_blank">
+</a>
+## PAYG(Hourly)
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic_limited%2FPAYG%2Fazuredeploy.json" target="_blank">
+    <img src="http://azuredeploy.net/deploybutton.png"/>
+</a>
+
 
 ### Template parameters
 
@@ -113,6 +120,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
     $imageName,
 
     [Parameter(Mandatory=$True)]
+    [ValidateSet("PAYG","BYOL")]
     [string]
     $bigIpVersion,
 
@@ -167,7 +175,6 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 
 ```
 
-=======
 
 ### <a name="cli"></a>Azure CLI(1.0) Script Example
 
@@ -245,6 +252,17 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
                     read -p "Please enter value for $variable:" $variable
             fi
     done
+    # Prompt for license key if not supplied and byol is selected
+    if [ $license_type == "byol" ]; then
+        if [ -v $license_key_1 ] ; then
+                read -p "Please enter value for license_key_1:" license_key_1
+        fi
+        template_file="./BYOL/azuredeploy.json"
+        parameter_file="./BYOL/azuredeploy.parameters.json"
+    fi
+
+    echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
+    sleep 3
 
     # Prompt for license key if not supplied and BYOL is selected
     if [ $licenseType == "BYOL" ]; then
