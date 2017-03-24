@@ -6,11 +6,11 @@
 
 This solution uses an ARM template to launch the deployment of F5 BIG-IP VE(s) in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure LB to the BIG-IP VE(cluster) and then to the application servers. The BIG-IP(s) are configured in single-nic mode.
 
-## Prerequisites and configuration notes 
-  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#** or **'** (single quote). 
+## Prerequisites and configuration notes
+  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#** or **'** (single quote).
   - See the [Configuration Example](#config) section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
-  
+
 ## Security
 This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
 In the *variables* section:
@@ -61,6 +61,17 @@ Use this button to deploy the template:
 | imageName | x | The desired F5 image to deploy. |
 | bigIpVersion | x | F5 BIG-IP Version to use. |
 | licensedBandwidth | | PAYG licensed bandwidth(Mbps) image to deploy. |
+| solutionDeploymentName | x | A simple name for your application. |
+| applicationProtocols | x | The protocol that will be used to configure the application virtual servers. The only allowed values for these templates are http, https, http-https or https-offload. |
+| applicationAddress | x | The public IP address or DNS FQDN of the application that this WAF will protect. |
+| applicationServiceFqdn | x | The external FQDN used by clients to access the Azure App Service. |
+| applicationPort | x | The unencrypted port that your application is listening on (for example, 80). This field is required in the http and https-offload deployment scenarios. |
+| applicationSecurePort | x | The encrypted port that your application is listening on (for example, 443). This field is required in the https deployment scenario. |
+| sslCert | x | The url to the cert that should be used, this must be publicly accessible. |
+| sslPswd | x | The password for the SSL Cert. |
+| applicationType | x | The operating system on which your application is running. (Linux OS or Windows OS). |
+| blockingLevel | x | The level of traffic you want to flag as insecure. All applications behind the WAF will use this level. The higher the level, the more traffic that is blocked. The lower the level, the more chances that unsecure traffic will make it through to your application. See the Security blocking levels topic for more information. |
+| customPolicy |  | The URL of a custom ASM security policy, in XML format, that you would like to apply to the deployment. |
 | tenantId | | Your Azure service principal application tenant ID |
 | clientId | | Your Azure service principal application client(application) ID. |
 | servicePrincipalSecret | | Your Azure service principal application secret. |
@@ -400,7 +411,7 @@ Use this button to deploy the template:
 
 The following is a simple configuration diagram for this Azure VM Scale Set auto scale deployment. In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer.  The Azure Load Balancer processes both management and data plane traffic into the BIG-IP's which then distribute the traffic to web/application servers according to normal F5 patterns.
 
-![VM Scale Set Auto Scale configuration example](images/azure-1nic-sm.png)
+![VM Scale Set Auto Scale configuration example](images/azure-autoscale-waf.png)
 
 ## Post-Deployment Azure Configuration
 This solution deploys an ARM template that fully configures BIG-IP VE(s) and handles clustering (DSC) and Azure creation of objects needed for management of those BIG-IP VEs.  However, once deployed the assumption is configuration will be performed on the BIG-IP VE(s) to create virtual servers, pools, and other objects used for processing application traffic.  Because that information is unknown at deployment time, ensure the following tasks are done for each unique service to allow traffic to reach the BIG-IP(s) in the VM Scale Set.
@@ -443,18 +454,18 @@ Here are some post-deployment options that are entirely optional but could be us
 ### BIG-IP Lifecycle Management
 As new BIG-IP versions are released, existing VM scale sets can be upgraded to use those new images. In an existing implementation, we assume you have created different types of BIG-IP configuration objects (such as virtual servers, pools, and monitors), and you want to retain this BIG-IP configuration after an upgrade. This section describes the process of upgrading and retaining the configuration.
 
-When this ARM template was initially deployed, a storage account was created in the same Resource Group as the VM scale set. This account name ends with **data000*** (the name of storage accounts have to be globally unique, so the prefix is a unique string). In this storage account, the template created a container named **backup**.  We use this backup container to hold backup [UCS](https://support.f5.com/csp/article/K13132) configuration files. Once the UCS is present in the container, you update the scale set "model" to use the newer BIG-IP version. Once the scale set is updated, you upgrade the BIG-IP VE(s). As a part of this upgrade, the provisioning checks the backup container for a UCS file and if one exists, it uploads the configuration (if more than one exists, it uses the latest). 
+When this ARM template was initially deployed, a storage account was created in the same Resource Group as the VM scale set. This account name ends with **data000*** (the name of storage accounts have to be globally unique, so the prefix is a unique string). In this storage account, the template created a container named **backup**.  We use this backup container to hold backup [UCS](https://support.f5.com/csp/article/K13132) configuration files. Once the UCS is present in the container, you update the scale set "model" to use the newer BIG-IP version. Once the scale set is updated, you upgrade the BIG-IP VE(s). As a part of this upgrade, the provisioning checks the backup container for a UCS file and if one exists, it uploads the configuration (if more than one exists, it uses the latest).
 
 **To upgrade the BIG-IP VE Image**
-  1. Save a UCS backup file of the current BIG-IP configuration (cluster or standalone). 
+  1. Save a UCS backup file of the current BIG-IP configuration (cluster or standalone).
      - From the CLI command: ```# tmsh save /sys ucs /var/tmp/original.ucs```
      - From the Configuration utility: **System > Archives > Create**
-     
+
   2. Upload the UCS into the **backup** container of the storage account ending in **data000** (it is a Blob container)
   3. Update the VM Scale Set Model to the new BIG-IP version.
-     - From PowerShell: Use the PowerShell script in the **scripts** folder in this directory. 
+     - From PowerShell: Use the PowerShell script in the **scripts** folder in this directory.
      - Using the Azure redeploy functionality: From the Resource Group where the ARM template was initially deployed, click the successful deployment and then select to redeploy the template. If necessary, re-select all the same variables, and **only change** the BIG-IP version to the latest.
-  4. Upgrade the Instances 
+  4. Upgrade the Instances
      1. In Azure, navigate to the VM Scale Set instances pane and verify the *Latest model* does not say **Yes** (it should have a caution sign instead of the word Yes)
      2. Select either all instances at once or each instance one at a time (starting with instance ID 0 and working up).
      3. Click the **Upgrade** action button.
@@ -518,6 +529,39 @@ Warning: F5 does not support the template if you change anything other than the 
      }
 }
 ```
+
+### BIG-IP WAF additional information
+
+#### Overview of WAF utilization
+You can secure your web applications by creating a web application firewall (WAF) that uses the Local Traffic Manager™ (LTM®) and Application Security Manager™ (ASM™) modules. In this Azure template, the BIG-IP® VE instances are configured as a WAF for you, complete with traffic monitoring in Azure. The F5 WAF solution has more than 2600 signatures at its disposal to identify and block unwanted traffic.
+
+When you secure your applications by using an F5 WAF, the BIG-IP VE instances are all in Active status (not Active-Standby), and are used as a single WAF, for redundancy and scalability, rather than failover. If one WAF goes down, Azure will keep load balancing to the other(s).
+
+The F5 WAFs will be fully configured in front of your application with the base Security Blocking template that you choose.  When completed, the WAFs will pass traffic through the newly created Azure Public IP.  After acceptance testing, you will want to complete the configuration by changing the DNS entry for your application to point at the newly created public IP address, and then lock down the Network Security Group rules to prevent any traffic from reaching your application except through the F5 WAFs.
+
+#### Security blocking levels
+The security blocking level you choose when you create the WAF determines how much traffic is blocked and alerted by the F5 WAF.
+
+Attack signatures are rules that identify attacks on a web application and its components. The WAF has at least 2600 attack signatures available. The higher the security level you choose, the more traffic that is blocked by these signatures.
+
+| Level | Details |
+| --- | --- | --- |
+| Off | Select this option to utilize ASM, but set it to transparent mode. |
+| Low | The fewest attack signatures enabled. There is a greater chance of possible security violations making it through to the web applications, but a lesser chance of false positives. |
+| Medium | A balance between logging too many violations and too many false positives. |
+| High | The most attack signatures enabled. A large number of false positives may be recorded; you must correct these alerts for your application to function correctly. |
+| Custom | Select this option to use your own custom ASM security policy (see below). |
+
+
+#### Viewing and clearing security violations
+
+From the BIG-IP Management UI, you can view and accept/ignore detected security violations:
+
+* Click Security > Event Logs > Application > Requests
+* From the Requests List, select the illegal request you want to view
+* Select an action to be performed for future occurences of this violation
+* From the top menu, click Apply Policy to apply the changes
+
 
 
 ## Security Details <a name="securitydetail"></a>

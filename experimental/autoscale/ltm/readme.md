@@ -323,7 +323,7 @@ Use this button to deploy the template:
 
 The following is a simple configuration diagram for this Azure VM Scale Set auto scale deployment. In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer.  The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.
 
-![VM Scale Set Auto Scale configuration example](images/azure-1nic-sm.png)
+![VM Scale Set Auto Scale configuration example](images/azure-autoscale-ltm.png)
 
 ### Post-Deployment Azure Configuration
 This solution deploys an ARM template that fully configures BIG-IP VE(s) and handles clustering (DSC) and Azure creation of objects needed for management of those BIG-IP VEs.  However, once deployed the assumption is configuration will be performed on the BIG-IP VE(s) to create virtual servers, pools, and other objects used for processing application traffic.  Because that information is unknown at deployment time, ensure the following tasks are done for each unique service to allow traffic to reach the BIG-IP(s) in the VM Scale Set.

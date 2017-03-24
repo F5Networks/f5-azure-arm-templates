@@ -183,7 +183,12 @@
         "subnetId": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]", 
         "subnetPrefix": "10.0.1.0/24", 
         "subnetPrivateAddress": "10.0.1.4", 
-        "instanceName": "[toLower(parameters('instanceName'))]"
+        "instanceName": "[toLower(parameters('instanceName'))]", 
+        "subnet2Name": "[concat(variables('dnsLabel'),'-subnet2')]", 
+        "subnet2Id": "[concat(variables('vnetId'), '/subnets/', variables('subnet2Name'))]", 
+        "subnet2Prefix": "10.0.2.0/24", 
+        "subnet2PrivateAddress": "10.0.2.4", 
+        "nic2Name": "[concat(variables('dnsLabel'), '-nic2')]"
     }, 
     "resources": [
         {
@@ -221,6 +226,12 @@
                         "name": "[variables('subnetName')]", 
                         "properties": {
                             "addressPrefix": "[variables('subnetPrefix')]"
+                        }
+                    }, 
+                    {
+                        "name": "[variables('subnet2Name')]", 
+                        "properties": {
+                            "addressPrefix": "[variables('subnet2Prefix')]"
                         }
                     }
                 ]
@@ -262,6 +273,36 @@
                 "networkSecurityGroup": {
                     "id": "[variables('nsgID')]"
                 }
+            }, 
+            "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
+            }, 
+            "type": "Microsoft.Network/networkInterfaces"
+        }, 
+        {
+            "apiVersion": "[variables('apiVersion')]", 
+            "dependsOn": [
+                "[variables('vnetId')]"
+            ], 
+            "location": "[variables('location')]", 
+            "name": "[variables('nic2Name')]", 
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "[concat(variables('instanceName'), '-ipconfig2')]", 
+                        "properties": {
+                            "privateIPAddress": "[variables('subnet2PrivateAddress')]", 
+                            "privateIPAllocationMethod": "Static", 
+                            "subnet": {
+                                "id": "[variables('subnet2Id')]"
+                            }
+                        }
+                    }
+                ]
             }, 
             "tags": {
                 "application": "[parameters('tagValues').application]", 
@@ -380,6 +421,12 @@
                             "properties": {
                                 "primary": true
                             }
+                        }, 
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic2Name'))]", 
+                            "properties": {
+                                "primary": false
+                            }
                         }
                     ]
                 }, 
@@ -423,7 +470,7 @@
             "name": "[concat(variables('instanceName'),'/start')]", 
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; rm -f /config/cloud/passwd')]"
+                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('subnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --multi-nic --default-gw ', variables('defaultGw'), ' --vlan vlan_mgmt,1.0 --vlan vlan_1,1.1 --self-ip self_1nic,', variables('subnetPrivateAddress'), ',vlan_mgmt --self-ip self_2nic,', variables('subnet2PrivateAddress'), ',vlan_1 --log-level debug --force-reboot; rm -f /config/cloud/passwd')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {

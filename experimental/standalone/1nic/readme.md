@@ -11,14 +11,14 @@ You can choose to deploy the BIG-IP VE with your own F5 BIG-IP license (BYOL), o
 
 
 
-## Prerequisites and configuration notes 
-  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **$** or **#**. 
+## Prerequisites and configuration notes
+  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **$** or **#**.
   - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
 
 
-## Security 
+## Security
 This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
 In the *variables* section:
   - In the *verifyHash* variable: search for **script-signature** and then a hashed signature.
@@ -46,10 +46,14 @@ You have three options for deploying this solution:
 
 ### <a name="azure"></a>Azure deploy buttons
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> release-2.0.0.0
 Use the appropriate button, depending on whether you are using BYOL or PAYG licensing:
   - **BYOL** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F1nic%2FBYOL%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
-    
+
   - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperiemental%2Fstandalone%2F1nic%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
@@ -172,7 +176,6 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 
 ```
 
-=======
 
 ### <a name="cli"></a>Azure CLI(1.0) Script Example
 
