@@ -1,57 +1,61 @@
 #!/bin/bash
 
-# Bash Script to deploy an ARM template into Azure, using azure cli 1.0
-# Example Command: ./deploy_via_bash.sh --adminusr azureuser --adminpwd 'yourpassword' --dnslabel f5dnslabel --instname f5vm01 --key1 XXXXX-XXXXX-XXXXX-XXXXX-XXXXX --rgname f5rgname --azureusr administrator@domain.com --azurepwd 'yourpassword'
+## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
+## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D2_v2 --imageName Good --bigIpVersion 13.0.000 --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 # Assign Script Paramters and Define Variables
-# Specify static items, change these as needed or make them parameters (instance_type is already an optional paramter)
+# Specify static items, change these as needed or make them parameters
 region="westus"
-template_file="azuredeploy.json"
-parameter_file="azuredeploy.parameters.json"
-instance_type="Standard_D2_v2"
-image_name="Best"
-restricted_source_address="*"
-tag_values="{\"application\":\"APP\",\"environment\":\"ENV\",\"group\":\"GROUP\",\"owner\":\"OWNER\",\"cost\":\"COST\"}"
+restrictedSrcAddress="*"
+tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k: --long adminusr:,adminpwd:,dnslabel:,instname:,insttype:,imgname:,key1:,rstsrcaddr:,rgname:,azureusr:,azurepwd: -n $0 -- "$@"`
+ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,adminUsername:,adminPassword:,dnsLabel:,instanceName:,instanceType:,imageName:,bigIpVersion:,restrictedSrcAddress: -n $0 -- "$@"`
 eval set -- "$ARGS"
-
 
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
 while true; do
     case "$1" in
-        -a|--adminusr)
-            admin_username=$2
+        -a|--resourceGroupName)
+            resourceGroupName=$2
             shift 2;;
-        -b|--adminpwd)
-            admin_password=$2
+        -b|--azureLoginUser)
+            azureLoginUser=$2
             shift 2;;
-        -c|--dnslabel)
-            dns_label=$2
+        -c|--azureLoginPassword)
+            azureLoginPassword=$2
             shift 2;;
-        -d|--instname)
-            instance_name=$2
+        -d|--licenseType)
+            licenseType=$2
             shift 2;;
-        -e|--insttype)
-            instance_type=$2
+        -e|--licensedBandwidth)
+            licensedBandwidth=$2
             shift 2;;
-        -f|--imgname)
-            image_name=$2
+        -f|--licenseKey1)
+            licenseKey1=$2
             shift 2;;
-        -g|--key1)
-            license_key_1=$2
+        -g|--adminUsername)
+            adminUsername=$2
             shift 2;;
-        -h|--rstsrcaddr)
-            restricted_source_address=$2
+        -h|--adminPassword)
+            adminPassword=$2
             shift 2;;
-        -i|--rgname)
-            resource_group_name=$2
+        -i|--dnsLabel)
+            dnsLabel=$2
             shift 2;;
-        -j|--azureusr)
-            azure_user=$2
+        -j|--instanceName)
+            instanceName=$2
             shift 2;;
-        -k|--azurepwd)
-            azure_pwd=$2
+        -k|--instanceType)
+            instanceType=$2
+            shift 2;;
+        -l|--imageName)
+            imageName=$2
+            shift 2;;
+        -m|--bigIpVersion)
+            bigIpVersion=$2
+            shift 2;;
+        -n|--restrictedSrcAddress)
+            restrictedSrcAddress=$2
             shift 2;;
         --)
             shift
@@ -59,11 +63,8 @@ while true; do
     esac
 done
 
-echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
-sleep 3
-
 #If a required paramater is not passed, the script will prompt for it below
-required_variables="admin_username admin_password dns_label instance_name license_key_1 resource_group_name azure_user azure_pwd"
+required_variables="adminUsername adminPassword dnsLabel instanceName instanceType imageName bigIpVersion resourceGroupName licenseType "
 for variable in $required_variables
         do
         if [ -v ${!variable} ] ; then
@@ -71,19 +72,45 @@ for variable in $required_variables
         fi
 done
 
-# Login to Azure, for simplicity in this example using username and password supplied as script arguments --azureusr and --azurepwd
+# Prompt for license key if not supplied and BYOL is selected
+if [ $licenseType == "BYOL" ]; then
+    if [ -v $licenseKey1 ] ; then
+            read -p "Please enter value for licenseKey1:" licenseKey1
+    fi
+    template_file="./BYOL/azuredeploy.json"
+    parameter_file="./BYOL/azuredeploy.parameters.json"
+fi
+# Prompt for licensed bandwidth if not supplied and PAYG is selected
+if [ $licenseType == "PAYG" ]; then
+    if [ -v $licensedBandwidth ] ; then
+            read -p "Please enter value for licensedBandwidth:" licensedBandwidth
+    fi
+    template_file="./PAYG/azuredeploy.json"
+    parameter_file="./PAYG/azuredeploy.parameters.json"
+fi
+
+echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
+sleep 3
+
+# Login to Azure, for simplicity in this example using username and password supplied as script arguments --azureLoginUser and --azureLoginPassword
 # Perform Check to see if already logged in
 azure account show > /dev/null 2>&1
 if [[ $? != 0 ]] ; then
-        azure login -u $azure_user -p $azure_pwd
+        azure login -u $azureLoginUser -p $azureLoginPassword
 fi
 
 # Switch to ARM mode
 azure config mode arm
 
 # Create ARM Group
-azure group create -n $resource_group_name -l $region
+azure group create -n $resourceGroupName -l $region
 
 # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
-# such as can been done with Powershell...oh well!
-azure group deployment create -f $template_file -g $resource_group_name -n $resource_group_name -p "{\"adminUsername\":{\"value\":\"$admin_username\"},\"adminPassword\":{\"value\":\"$admin_password\"},\"dnsLabel\":{\"value\":\"$dns_label\"},\"instanceName\":{\"value\":\"$instance_name\"},\"instanceType\":{\"value\":\"$instance_type\"},\"licenseKey1\":{\"value\":\"$license_key_1\"},\"imageName\":{\"value\":\"$image_name\"},\"restrictedSrcAddress\":{\"value\":\"$restricted_source_address\"},\"tagValues\":{\"value\":$tag_values}}"
+if [ $licenseType == "BYOL" ]; then
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licenseKey1\":{\"value\":\"$licenseKey1\"}}"
+elif [ $licenseType == "PAYG" ]; then
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
+else
+    echo "Please select a valid license type of PAYG or BYOL."
+    exit 1
+fi
