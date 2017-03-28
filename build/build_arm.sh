@@ -8,8 +8,8 @@ python '.\master_template.py' --template-name 1nic --license-type BYOL --templat
 python '.\master_template.py' --template-name 2nic_limited --license-type PAYG --template-location '../experimental/standalone/2nic_limited/PAYG/' --script-location '../experimental/standalone/2nic_limited/'
 python '.\master_template.py' --template-name 2nic_limited --license-type BYOL --template-location '../experimental/standalone/2nic_limited/BYOL/' --script-location '../experimental/standalone/2nic_limited/'
 
-python '.\master_template.py' --template-name multi_nic --license-type PAYG --template-location '../experimental/standalone/multi_nic/PAYG/' --script-location '../experimental/standalone/multi_nic/'
-python '.\master_template.py' --template-name multi_nic --license-type BYOL --template-location '../experimental/standalone/multi_nic/BYOL/' --script-location '../experimental/standalone/multi_nic/'
+python '.\master_template.py' --template-name 3_nic --license-type PAYG --template-location '../experimental/standalone/3_nic/PAYG/' --script-location '../experimental/standalone/3_nic/'
+python '.\master_template.py' --template-name 3_nic --license-type BYOL --template-location '../experimental/standalone/3_nic/BYOL/' --script-location '../experimental/standalone/3_nic/'
 
 # Supported
 python '.\master_template.py' --template-name 1nic --license-type PAYG --template-location '../supported/standalone/1nic/PAYG/' --script-location '../supported/standalone/1nic/'

@@ -79,7 +79,7 @@
             "allowedValues": [
                 "latest", 
                 "13.0.000", 
-                "12.1.21"
+                "12.1.22"
             ], 
             "defaultValue": "13.0.000", 
             "metadata": {
@@ -87,10 +87,15 @@
             }, 
             "type": "string"
         }, 
-        "licenseKey1": {
-            "defaultValue": "REQUIRED", 
+        "licensedBandwidth": {
+            "allowedValues": [
+                "25m", 
+                "200m", 
+                "1g"
+            ], 
+            "defaultValue": "200m", 
             "metadata": {
-                "description": "The license token for the F5 BIG-IP(BYOL)"
+                "description": "PAYG licensed bandwidth(Mbps) image to deploy"
             }, 
             "type": "string"
         }, 
@@ -180,8 +185,8 @@
         "storageAccountType": "Standard_LRS", 
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
-        "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]", 
-        "offerToUse": "f5-big-ip", 
+        "skuToUse": "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]", 
+        "offerToUse": "f5-big-ip-hourly", 
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['1'].Port]", 
         "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
@@ -338,7 +343,8 @@
         {
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
-                "[variables('vnetId')]"
+                "[variables('vnetId')]", 
+                "[concat(variables('nsgID'), '2')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('extNicName')]", 
@@ -357,7 +363,10 @@
                             }
                         }
                     }
-                ]
+                ], 
+                "networkSecurityGroup": {
+                    "id": "[concat(variables('nsgID'), '2')]"
+                }
             }, 
             "tags": {
                 "application": "[parameters('tagValues').application]", 
@@ -433,6 +442,22 @@
                         }
                     }
                 ]
+            }, 
+            "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
+            }, 
+            "type": "Microsoft.Network/networkSecurityGroups"
+        }, 
+        {
+            "apiVersion": "[variables('apiVersion')]", 
+            "location": "[variables('location')]", 
+            "name": "[concat(variables('dnsLabel'), '-nsg2')]", 
+            "properties": {
+                "securityRules": ""
             }, 
             "tags": {
                 "application": "[parameters('tagValues').application]", 
@@ -563,7 +588,7 @@
             "name": "[concat(variables('instanceName'),'/start')]", 
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('subnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --multi-nic --default-gw ', variables('defaultGw'), ' --vlan vlan_mgmt,1.0 --vlan external,1.1 --vlan internal,1.2 --self-ip self_1nic,', variables('subnetPrivateAddress'), ',vlan_mgmt --self-ip self_2nic,', variables('extSubnetPrivateAdress'), ',external --self-ip self_3nic,', variables('intSubnetPrivateAdress'), ',internal --log-level debug --force-reboot; rm -f /config/cloud/passwd')]"
+                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'),  ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('subnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --multi-nic --default-gw ', variables('defaultGw'), ' --vlan vlan_mgmt,1.0 --vlan external,1.1 --vlan internal,1.2 --self-ip self_1nic,', variables('subnetPrivateAddress'), ',vlan_mgmt --self-ip self_2nic,', variables('extSubnetPrivateAdress'), ',external --self-ip self_3nic,', variables('intSubnetPrivateAdress'), ',internal --log-level debug --force-reboot; rm -f /config/cloud/passwd')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {
