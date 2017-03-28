@@ -244,7 +244,7 @@
             "dependsOn": [
                 "[variables('vnetId')]", 
                 "[variables('publicIPAddressId')]", 
-                "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'),'-nsg')]"
+                "[variables('nsgID')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('nicName')]", 

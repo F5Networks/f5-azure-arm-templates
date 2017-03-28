@@ -255,7 +255,7 @@
             "dependsOn": [
                 "[variables('vnetId')]", 
                 "[variables('publicIPAddressId')]", 
-                "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'),'-nsg')]"
+                "[variables('nsgID')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('nicName')]", 
@@ -397,7 +397,8 @@
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", 
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
-                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]", 
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nic2Name'))]"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('instanceName')]", 

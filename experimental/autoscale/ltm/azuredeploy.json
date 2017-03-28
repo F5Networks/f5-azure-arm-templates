@@ -326,7 +326,7 @@
         {
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
-                "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'),'-nsg')]"
+                "[variables('nsgID')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('virtualNetworkName')]", 

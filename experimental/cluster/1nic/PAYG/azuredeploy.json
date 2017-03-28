@@ -256,7 +256,7 @@
                 "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]", 
                 "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/guimgt',copyindex())]", 
                 "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/sshmgt',copyindex())]", 
-                "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'),'-nsg')]"
+                "[variables('nsgID')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[concat(variables('nicName'),copyindex())]", 
