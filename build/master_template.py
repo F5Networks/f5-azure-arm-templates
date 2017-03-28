@@ -47,6 +47,7 @@ insights_api_version = "[variables('insightsApiVersion')]"
 location = "[variables('location')]"
 default_payg_bw = '200m'
 nic_port_map = "[variables('bigIpNicPortMap')['1'].Port]"
+default_instance = "Standard_D2_v2"
 
 ## Change Static Assignment as needed ##
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
@@ -68,6 +69,7 @@ if template_name in ('waf_autoscale'):
         instance_type_list.remove(instance)
 # This solution requires a minimum of 3 nic's, some instance types only support two
 if template_name in ('3_nic'):
+    default_instance = "Standard_D3_v2"
     disallowed_instance_list = ["Standard_D2", "Standard_D2_v2"]
     for instance in disallowed_instance_list:
         instance_type_list.remove(instance)
@@ -119,9 +121,11 @@ if template_name in ('ltm_autoscale', 'waf_autoscale'):
 data['parameters']['adminUsername'] = {"type": "string", "defaultValue": "azureuser", "metadata": {"description": "User name for the Virtual Machine"}}
 data['parameters']['adminPassword'] = {"type": "securestring", "metadata": { "description": "Password to login to the Virtual Machine" } }
 data['parameters']['dnsLabel'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "Unique DNS Name for the Public IP used to access the Virtual Machine" } }
+if template_name in ('3_nic'):
+    data['parameters']['dnsLabelPrefix'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "Unique DNS Name prefix for the Public IP(s) used to access the data plan for application traffic objects(Virtual Servers, etc...)" } }
 if template_name in ('1nic', '2nic_limited', '3_nic'):
     data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": { "description": "Name of the VM"}}
-data['parameters']['instanceType'] = {"type": "string", "defaultValue": "Standard_D2_v2", "allowedValues": instance_type_list, "metadata": {"description": "Size of the VM"}}
+data['parameters']['instanceType'] = {"type": "string", "defaultValue": default_instance, "allowedValues": instance_type_list, "metadata": {"description": "Size of the VM"}}
 data['parameters']['imageName'] = {"type": "string", "defaultValue": "Good", "allowedValues": [ "Good", "Better", "Best" ], "metadata": { "description": "F5 SKU(IMAGE) to Deploy"}}
 # WAF-like templates need the 'Best' Image, stil prompt as a parameter so they are aware of what they are paying for with PAYG
 if template_name in ('waf_autoscale'):
@@ -136,7 +140,7 @@ elif license_type == 'PAYG':
     data['parameters']['licensedBandwidth'] = {"type": "string", "defaultValue": default_payg_bw, "allowedValues": [ "25m", "200m", "1g" ], "metadata": { "description": "PAYG licensed bandwidth(Mbps) image to deploy"}}
 
 if template_name in ('3_nic'):
-    data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8], "metadata": { "description": "The number of external interfaces to deploy for this BIG-IP, the default(and minimum) is to deploy 2 interfaces, one for management and one for traffic." } }
+    data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8], "metadata": { "description": "The number of public/private IP's to deployfor the app traffic nic on the BIG-IP, the default(and minimum) is to deploy 1 public IP(One public/private IP will be deployed on the management nic regardless)" } }
 if template_name in ('waf_autoscale'):
     data['parameters']['solutionDeploymentName'] = { "type": "string", "metadata": { "description": "A unique name for this deployment." } }
     data['parameters']['applicationProtocols'] = { "type": "string", "defaultValue": "http-https", "metadata": { "description": "The protocol(s) used by your application." }, "allowedValues" : [ "http", "https", "http-https", "https-offload" ] }
@@ -221,10 +225,12 @@ if template_name in ('2nic_limited'):
     data['variables']['subnet2PrivateAddress'] = "10.0.2.4"
     data['variables']['nic2Name'] = "[concat(variables('dnsLabel'), '-nic2')]"
 if template_name in ('3_nic'):
+    data['variables']['dnsLabelPrefix'] = "[toLower(parameters('dnsLabelPrefix'))]"
+    data['variables']['nsg2ID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabelPrefix'),'-nsg2'))]"
     data['variables']['publicIPAddressNamePrefix'] = "[variables('publicIPAddressName')]"
     data['variables']['publicIPAddressIdPrefix'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
-    data['variables']['extNicName'] = "[concat(variables('dnsLabel'), '-nic2')]"
-    data['variables']['extSubnetName'] = "[concat(variables('dnsLabel'),'-subnet2')]"
+    data['variables']['extNicName'] = "[concat(variables('dnsLabelPrefix'), '-nic2')]"
+    data['variables']['extSubnetName'] = "[concat(variables('dnsLabelPrefix'),'-subnet2')]"
     data['variables']['extSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('extsubnetName'))]"
     data['variables']['extSubnetPrefix'] = "10.0.2.0/24"
     data['variables']['extSubnetPrivateAdress'] = "10.0.2.4"
@@ -233,6 +239,7 @@ if template_name in ('3_nic'):
     data['variables']['intSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]"
     data['variables']['intSubnetPrefix'] = "10.0.3.0/24"
     data['variables']['intSubnetPrivateAdress'] = "10.0.3.4"
+    data['variables']['ipconfigArray'] = [{ "name": "[concat(variables('instanceName'), '-ipconfig2')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 2)]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAdress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig3')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 3)]" }, "primary": False, "privateIPAllocationMethod": "Dynamic", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig4')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 4)]" }, "primary": False, "privateIPAllocationMethod": "Dynamic", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig5')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 5)]" }, "primary": False, "privateIPAllocationMethod": "Dynamic", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig6')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 6)]" }, "primary": False, "privateIPAllocationMethod": "Dynamic", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig7')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 7)]" }, "primary": False, "privateIPAllocationMethod": "Dynamic", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig8')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 8)]" }, "primary": False, "privateIPAllocationMethod": "Dynamic", "subnet": { "id": "[variables('extSubnetId')]" } } }]
 if template_name in ('cluster_base', 'ltm_autoscale', 'waf_autoscale'):
     data['variables']['ipAddress'] = "10.0.1."
     data['variables']['loadBalancerName'] = "[concat(variables('dnsLabel'),'-alb')]"
@@ -274,7 +281,7 @@ resources_list = []
 if template_name in ('1nic', '2nic_limited', '3_nic', 'cluster_base', 'ltm_autoscale', 'waf_autoscale'):
     resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[variables('publicIPAddressName')]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[variables('dnsLabel')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
 if template_name in ('3_nic'):
-    resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('publicIPAddressNamePrefix'), copyIndex(2))]", "copy": { "count": "[parameters('numberOfExternalIps')]", "name": "pipcopy"}, "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabel'), copyIndex(1))]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
+    resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('publicIPAddressNamePrefix'), copyIndex(2))]", "copy": { "count": "[parameters('numberOfExternalIps')]", "name": "pipcopy"}, "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabelPrefix'), copyIndex(1))]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
 
 ## Virtual Network Resources(s) ##
 if template_name in ('1nic', 'cluster_base'):
@@ -296,7 +303,7 @@ if template_name in ('1nic', '2nic_limited', '3_nic'):
 if template_name in ('2nic_limited'):
     resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": [ "[variables('vnetId')]" ], "location": location, "name": "[variables('nic2Name')]", "tags": tags, "properties": { "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-ipconfig2')]", "properties": { "privateIPAddress": "[variables('subnet2PrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('subnet2Id')]" } } } ] } }]
 if template_name in ('3_nic'):
-    resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": [ "[variables('vnetId')]", "[concat(variables('nsgID'), '2')]" ], "location": location, "name": "[variables('extNicName')]", "tags": tags, "properties": { "networkSecurityGroup": { "id": "[concat(variables('nsgID'), '2')]" }, "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-ipconfig2')]", "properties": { "privateIPAddress": "[variables('extSubnetPrivateAdress')]", "privateIPAllocationMethod": "Static", "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 2)]" }, "subnet": { "id": "[variables('extSubnetId')]" } } } ] } }, { "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": [ "[variables('vnetId')]" ], "location": location, "name": "[variables('intNicName')]", "tags": tags, "properties": { "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-ipconfig3')]", "properties": { "privateIPAddress": "[variables('intSubnetPrivateAdress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('intSubnetId')]" } } } ] } } ]
+    resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": [ "[variables('vnetId')]", "[concat(variables('nsg2ID'))]" ], "location": location, "name": "[variables('extNicName')]", "tags": tags, "properties": { "networkSecurityGroup": { "id": "[concat(variables('nsg2ID'))]" }, "ipConfigurations": "[take(variables('ipconfigArray'),parameters('numberofExternalIps'))]" } }, { "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": [ "[variables('vnetId')]" ], "location": location, "name": "[variables('intNicName')]", "tags": tags, "properties": { "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-ipconfigint1')]", "properties": { "privateIPAddress": "[variables('intSubnetPrivateAdress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('intSubnetId')]" } } } ] } } ]
 if template_name == 'cluster_base':
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkInterfaces", "name": "[concat(variables('nicName'),copyindex())]", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/guimgt',copyindex())]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/sshmgt',copyindex())]", "[variables('nsgID')]" ], "copy": { "count": "[parameters('numberOfInstances')]", "name": "niccopy" }, "properties": { "networkSecurityGroup": { "id": "[variables('nsgID')]" }, "ipConfigurations": [ { "name": "ipconfig1", "properties": { "privateIPAllocationMethod": "Static", "privateIPAddress": "[concat(variables('ipAddress'),add(4,copyindex()))]", "subnet": { "id": "[variables('subnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ], "loadBalancerInboundNatRules": [ { "id": "[concat(variables('lbID'), '/inboundNatRules/', 'guimgt',copyIndex())]" }, { "id": "[concat(variables('lbID'), '/inboundNatRules/', 'sshmgt',copyIndex())]" } ] } } ] } }]
 
@@ -308,7 +315,7 @@ if template_name in ('waf_autoscale'):
 if template_name in ('1nic', '2nic_limited', '3_nic', 'cluster_base', 'ltm_autoscale', 'waf_autoscale'):
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkSecurityGroups", "location": location, "name": "[concat(variables('dnsLabel'), '-nsg')]", "tags": tags, "properties": { "securityRules": nsg_security_rules } }]
 if template_name in ('3_nic'):
-    resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkSecurityGroups", "location": location, "name": "[concat(variables('dnsLabel'), '-nsg2')]", "tags": tags, "properties": { "securityRules": "" } }]
+    resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkSecurityGroups", "location": location, "name": "[concat(variables('dnsLabelPrefix'), '-nsg2')]", "tags": tags, "properties": { "securityRules": "" } }]
 
 ## Load Balancer Resource(s) ##
 probes_to_use = ""; lb_rules_to_use = ""

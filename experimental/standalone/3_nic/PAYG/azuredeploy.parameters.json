@@ -11,11 +11,14 @@
         "dnsLabel": {
             "value": "REQUIRED"
         }, 
+        "dnsLabelPrefix": {
+            "value": "REQUIRED"
+        }, 
         "instanceName": {
             "value": "f5vm01"
         }, 
         "instanceType": {
-            "value": "Standard_D2_v2"
+            "value": "Standard_D3_v2"
         }, 
         "imageName": {
             "value": "Good"
