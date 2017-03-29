@@ -86,7 +86,7 @@
             "allowedValues": [
                 "latest", 
                 "13.0.000", 
-                "12.1.22"
+                "12.1.21"
             ], 
             "defaultValue": "13.0.000", 
             "metadata": {
@@ -94,15 +94,10 @@
             }, 
             "type": "string"
         }, 
-        "licensedBandwidth": {
-            "allowedValues": [
-                "25m", 
-                "200m", 
-                "1g"
-            ], 
-            "defaultValue": "200m", 
+        "licenseKey1": {
+            "defaultValue": "REQUIRED", 
             "metadata": {
-                "description": "PAYG licensed bandwidth(Mbps) image to deploy"
+                "description": "The license token for the F5 BIG-IP(BYOL)"
             }, 
             "type": "string"
         }, 
@@ -199,13 +194,13 @@
         "storageAccountType": "Standard_LRS", 
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
-        "skuToUse": "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]", 
-        "offerToUse": "f5-big-ip-hourly", 
+        "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]", 
+        "offerToUse": "f5-big-ip", 
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['3'].Port]", 
         "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
         "nicName": "[concat(variables('dnsLabel'), '-nic')]", 
-        "defaultGw": "10.0.1.1", 
+        "defaultGw": "[concat(parameters('vnetAddressPrefix'),'.3.1')]", 
         "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]", 
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
         "vnetAddressPrefix": "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]", 
@@ -219,11 +214,11 @@
         "subnetPrivateAddress": "[concat(parameters('vnetAddressPrefix'), '.1.4')]", 
         "instanceName": "[toLower(parameters('instanceName'))]", 
         "dnsLabelPrefix": "[toLower(parameters('dnsLabelPrefix'))]", 
-        "nsg2ID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabelPrefix'),'-nsg2'))]", 
+        "nsg2ID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg2'))]", 
         "publicIPAddressNamePrefix": "[variables('publicIPAddressName')]", 
         "publicIPAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]", 
-        "extNicName": "[concat(variables('dnsLabelPrefix'), '-nic2')]", 
-        "extSubnetName": "[concat(variables('dnsLabelPrefix'),'-subnet2')]", 
+        "extNicName": "[concat(variables('dnsLabel'), '-nic2')]", 
+        "extSubnetName": "[concat(variables('dnsLabel'),'-subnet2')]", 
         "extSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('extsubnetName'))]", 
         "extSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.2.0/24')]", 
         "extSubnetPrivateAdress": "[concat(parameters('vnetAddressPrefix'), '.2.4')]", 
@@ -558,7 +553,7 @@
         {
             "apiVersion": "[variables('apiVersion')]", 
             "location": "[variables('location')]", 
-            "name": "[concat(variables('dnsLabelPrefix'), '-nsg2')]", 
+            "name": "[concat(variables('dnsLabel'), '-nsg2')]", 
             "properties": {
                 "securityRules": ""
             }, 
@@ -691,7 +686,7 @@
             "name": "[concat(variables('instanceName'),'/start')]", 
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'),  ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('subnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --vlan external,1.1 --vlan internal,1.2 --self-ip self_2nic,', variables('extSubnetPrivateAdress'), ',external --self-ip self_3nic,', variables('intSubnetPrivateAdress'), ',internal --log-level debug; rm -f /config/cloud/passwd')]"
+                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('subnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --default-gw ', variables('defaultGw'), ' --vlan external,1.1 --vlan internal,1.2 --self-ip self_2nic,', variables('extSubnetPrivateAdress'), ',external --self-ip self_3nic,', variables('intSubnetPrivateAdress'), ',internal --log-level debug; rm -f /config/cloud/passwd')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {
