@@ -123,6 +123,13 @@
             }, 
             "type": "int"
         }, 
+        "vnetAddressPrefix": {
+            "defaultValue": "10.0", 
+            "metadata": {
+                "description": "The start of the CIDR block used by the BIG-IP's when create the Vnet and subnets.  What is supplied MUST be just the first two octets of the /16 virtual network that will be created.  Such as '10.0' or 192.168', etc..."
+            }, 
+            "type": "string"
+        }, 
         "restrictedSrcAddress": {
             "defaultValue": "*", 
             "metadata": {
@@ -194,22 +201,22 @@
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]", 
         "offerToUse": "f5-big-ip-hourly", 
-        "bigIpNicPortValue": "[variables('bigIpNicPortMap')['1'].Port]", 
+        "bigIpNicPortValue": "[variables('bigIpNicPortMap')['3'].Port]", 
         "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
         "nicName": "[concat(variables('dnsLabel'), '-nic')]", 
         "defaultGw": "10.0.1.1", 
         "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]", 
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
-        "vnetAddressPrefix": "10.0.0.0/16", 
+        "vnetAddressPrefix": "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]", 
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg'))]", 
         "publicIPAddressName": "[concat(variables('dnsLabel'), '-pip')]", 
         "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]", 
         "publicIPAddressType": "Static", 
         "subnetName": "[concat(variables('dnsLabel'),'-subnet')]", 
         "subnetId": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]", 
-        "subnetPrefix": "10.0.1.0/24", 
-        "subnetPrivateAddress": "10.0.1.4", 
+        "subnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.1.0/24')]", 
+        "subnetPrivateAddress": "[concat(parameters('vnetAddressPrefix'), '.1.4')]", 
         "instanceName": "[toLower(parameters('instanceName'))]", 
         "dnsLabelPrefix": "[toLower(parameters('dnsLabelPrefix'))]", 
         "nsg2ID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabelPrefix'),'-nsg2'))]", 
@@ -218,13 +225,14 @@
         "extNicName": "[concat(variables('dnsLabelPrefix'), '-nic2')]", 
         "extSubnetName": "[concat(variables('dnsLabelPrefix'),'-subnet2')]", 
         "extSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('extsubnetName'))]", 
-        "extSubnetPrefix": "10.0.2.0/24", 
-        "extSubnetPrivateAdress": "10.0.2.4", 
+        "extSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.2.0/24')]", 
+        "extSubnetPrivateAdress": "[concat(parameters('vnetAddressPrefix'), '.2.4')]", 
+        "extSubnetPrivateAdressPrefix": "[concat(parameters('vnetAddressPrefix'), '.2.')]", 
         "intNicName": "[concat(variables('dnsLabel'), '-nic3')]", 
         "intSubnetName": "[concat(variables('dnsLabel'),'-subnet3')]", 
         "intSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]", 
-        "intSubnetPrefix": "10.0.3.0/24", 
-        "intSubnetPrivateAdress": "10.0.3.4", 
+        "intSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.3.0/24')]", 
+        "intSubnetPrivateAdress": "[concat(parameters('vnetAddressPrefix'), '.3.4')]", 
         "ipconfigArray": [
             {
                 "name": "[concat(variables('instanceName'), '-ipconfig2')]", 
@@ -247,7 +255,8 @@
                         "Id": "[concat(variables('publicIPAddressIdPrefix'), 3)]"
                     }, 
                     "primary": false, 
-                    "privateIPAllocationMethod": "Dynamic", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 5)]", 
+                    "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
                     }
@@ -260,7 +269,8 @@
                         "Id": "[concat(variables('publicIPAddressIdPrefix'), 4)]"
                     }, 
                     "primary": false, 
-                    "privateIPAllocationMethod": "Dynamic", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 6)]", 
+                    "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
                     }
@@ -273,7 +283,8 @@
                         "Id": "[concat(variables('publicIPAddressIdPrefix'), 5)]"
                     }, 
                     "primary": false, 
-                    "privateIPAllocationMethod": "Dynamic", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 7)]", 
+                    "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
                     }
@@ -286,7 +297,8 @@
                         "Id": "[concat(variables('publicIPAddressIdPrefix'), 6)]"
                     }, 
                     "primary": false, 
-                    "privateIPAllocationMethod": "Dynamic", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 8)]", 
+                    "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
                     }
@@ -299,7 +311,8 @@
                         "Id": "[concat(variables('publicIPAddressIdPrefix'), 7)]"
                     }, 
                     "primary": false, 
-                    "privateIPAllocationMethod": "Dynamic", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 9)]", 
+                    "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
                     }
@@ -312,7 +325,8 @@
                         "Id": "[concat(variables('publicIPAddressIdPrefix'), 8)]"
                     }, 
                     "primary": false, 
-                    "privateIPAllocationMethod": "Dynamic", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 10)]", 
+                    "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
                     }
@@ -677,7 +691,7 @@
             "name": "[concat(variables('instanceName'),'/start')]", 
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'),  ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('subnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --multi-nic --default-gw ', variables('defaultGw'), ' --vlan vlan_mgmt,1.0 --vlan external,1.1 --vlan internal,1.2 --self-ip self_1nic,', variables('subnetPrivateAddress'), ',vlan_mgmt --self-ip self_2nic,', variables('extSubnetPrivateAdress'), ',external --self-ip self_3nic,', variables('intSubnetPrivateAdress'), ',internal --log-level debug --force-reboot; rm -f /config/cloud/passwd')]"
+                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> /config/cloud/passwd; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'),  ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('subnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --vlan external,1.1 --vlan internal,1.2 --self-ip self_2nic,', variables('extSubnetPrivateAdress'), ',external --self-ip self_3nic,', variables('intSubnetPrivateAdress'), ',internal --log-level debug; rm -f /config/cloud/passwd')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {

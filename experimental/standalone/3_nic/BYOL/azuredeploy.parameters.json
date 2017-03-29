@@ -32,6 +32,9 @@
         "numberOfExternalIps": {
             "value": 1
         }, 
+        "vnetAddressPrefix": {
+            "value": "10.0"
+        }, 
         "restrictedSrcAddress": {
             "value": "*"
         }, 
