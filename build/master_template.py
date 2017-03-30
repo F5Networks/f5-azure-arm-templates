@@ -285,7 +285,7 @@ resources_list = []
 if template_name in ('1nic', '2nic', '3nic', 'cluster_base', 'ltm_autoscale', 'waf_autoscale'):
     resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[variables('publicIPAddressName')]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[variables('dnsLabel')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
 if template_name in ('2nic', '3nic'):
-    resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('publicIPAddressNamePrefix'), copyIndex(2))]", "copy": { "count": "[variables('numberOfExternalIps')]", "name": "pipcopy"}, "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabelPrefix'), copyIndex(1))]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
+    resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('publicIPAddressNamePrefix'), copyIndex(2))]", "copy": { "count": "[parameters('numberOfExternalIps')]", "name": "pipcopy"}, "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabelPrefix'), copyIndex(1))]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
 
 ## Virtual Network Resources(s) ##
 if template_name in ('1nic', 'cluster_base'):

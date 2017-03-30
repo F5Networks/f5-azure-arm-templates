@@ -363,7 +363,7 @@
         {
             "apiVersion": "[variables('networkApiVersion')]", 
             "copy": {
-                "count": "[variables('numberOfExternalIps')]", 
+                "count": "[parameters('numberOfExternalIps')]", 
                 "name": "pipcopy"
             }, 
             "location": "[variables('location')]", 
