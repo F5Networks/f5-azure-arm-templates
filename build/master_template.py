@@ -69,7 +69,7 @@ if template_name in ('waf_autoscale'):
 # This solution requires a minimum of 3 nic's, some instance types only support two
 if template_name in ('3nic'):
     default_instance = "Standard_D3_v2"
-    disallowed_instance_list = ["Standard_D2", "Standard_D2_v2"]
+    disallowed_instance_list = ["Standard_D2", "Standard_D2_v2", "Standard_F2"]
     for instance in disallowed_instance_list:
         instance_type_list.remove(instance)
 
