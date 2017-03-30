@@ -141,7 +141,7 @@ elif license_type == 'PAYG':
     data['parameters']['licensedBandwidth'] = {"type": "string", "defaultValue": default_payg_bw, "allowedValues": [ "25m", "200m", "1g" ], "metadata": { "description": "PAYG licensed bandwidth(Mbps) image to deploy"}}
 
 if template_name in ('2nic', '3nic'):
-    data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [0, 1, 2, 3, 4, 5, 6, 7, 8], "metadata": { "description": "The number of public/private IP's to deploy for the application traffic(external) nic on the BIG-IP to be used for virtual servers." } }
+    data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8], "metadata": { "description": "The number of public/private IP's to deploy for the application traffic(external) nic on the BIG-IP to be used for virtual servers." } }
     data['parameters']['vnetAddressPrefix'] = {"type": "string", "defaultValue": "10.0", "metadata": { "description": "The start of the CIDR block used by the BIG-IP's when create the Vnet and subnets.  What is supplied MUST be just the first two octets of the /16 virtual network that will be created.  Such as '10.0' or 192.168', etc..." } }
 if template_name in ('waf_autoscale'):
     data['parameters']['solutionDeploymentName'] = { "type": "string", "metadata": { "description": "A unique name for this deployment." } }
