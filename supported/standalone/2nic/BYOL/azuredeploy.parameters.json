@@ -11,6 +11,9 @@
         "dnsLabel": {
             "value": "REQUIRED"
         }, 
+        "dnsLabelPrefix": {
+            "value": "REQUIRED"
+        }, 
         "instanceName": {
             "value": "f5vm01"
         }, 
@@ -23,8 +26,14 @@
         "bigIpVersion": {
             "value": "13.0.000"
         }, 
-        "licensedBandwidth": {
-            "value": "200m"
+        "licenseKey1": {
+            "value": "REQUIRED"
+        }, 
+        "numberOfExternalIps": {
+            "value": 1
+        }, 
+        "vnetAddressPrefix": {
+            "value": "10.0"
         }, 
         "restrictedSrcAddress": {
             "value": "*"

@@ -102,6 +102,7 @@
         }, 
         "numberOfExternalIps": {
             "allowedValues": [
+                0, 
                 1, 
                 2, 
                 3, 
@@ -113,7 +114,7 @@
             ], 
             "defaultValue": 1, 
             "metadata": {
-                "description": "The number of public/private IP's to deployfor the app traffic nic on the BIG-IP, the default(and minimum) is to deploy 1 public IP(One public/private IP will be deployed on the management nic regardless)"
+                "description": "The number of public/private IP's to deploy for the application traffic(external) nic on the BIG-IP to be used for virtual servers."
             }, 
             "type": "int"
         }, 
@@ -198,8 +199,8 @@
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['3'].Port]", 
         "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
-        "nicName": "[concat(variables('dnsLabel'), '-nic')]", 
-        "defaultGw": "[concat(parameters('vnetAddressPrefix'),'.3.1')]", 
+        "nicName": "[concat(variables('dnsLabel'), '-mgmt0')]", 
+        "defaultGw": "[concat(parameters('vnetAddressPrefix'),'.2.1')]", 
         "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]", 
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
         "vnetAddressPrefix": "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]", 
@@ -216,26 +217,38 @@
         "nsg2ID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg2'))]", 
         "publicIPAddressNamePrefix": "[variables('publicIPAddressName')]", 
         "publicIPAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]", 
-        "extNicName": "[concat(variables('dnsLabel'), '-nic2')]", 
+        "extNicName": "[concat(variables('dnsLabel'), '-ext0')]", 
         "extSubnetName": "[concat(variables('dnsLabel'),'-subnet2')]", 
         "extSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('extsubnetName'))]", 
         "extSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.2.0/24')]", 
         "extSubnetPrivateAdress": "[concat(parameters('vnetAddressPrefix'), '.2.4')]", 
         "extSubnetPrivateAdressPrefix": "[concat(parameters('vnetAddressPrefix'), '.2.')]", 
-        "intNicName": "[concat(variables('dnsLabel'), '-nic3')]", 
+        "intNicName": "[concat(variables('dnsLabel'), '-int0')]", 
         "intSubnetName": "[concat(variables('dnsLabel'),'-subnet3')]", 
         "intSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]", 
         "intSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.3.0/24')]", 
         "intSubnetPrivateAdress": "[concat(parameters('vnetAddressPrefix'), '.3.4')]", 
+        "numberOfExternalIps": "[add(parameters('numberOfExternalIps'), 1)]", 
         "ipconfigArray": [
+            {
+                "name": "[concat(variables('instanceName'), '-ipconfig1')]", 
+                "properties": {
+                    "primary": true, 
+                    "privateIPAddress": "[variables('extSubnetPrivateAdress')]", 
+                    "privateIPAllocationMethod": "Static", 
+                    "subnet": {
+                        "id": "[variables('extSubnetId')]"
+                    }
+                }
+            }, 
             {
                 "name": "[concat(variables('instanceName'), '-ipconfig2')]", 
                 "properties": {
                     "PublicIpAddress": {
                         "Id": "[concat(variables('publicIPAddressIdPrefix'), 2)]"
                     }, 
-                    "primary": true, 
-                    "privateIPAddress": "[variables('extSubnetPrivateAdress')]", 
+                    "primary": false, 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 5)]", 
                     "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
@@ -249,7 +262,7 @@
                         "Id": "[concat(variables('publicIPAddressIdPrefix'), 3)]"
                     }, 
                     "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 5)]", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 6)]", 
                     "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
@@ -263,7 +276,7 @@
                         "Id": "[concat(variables('publicIPAddressIdPrefix'), 4)]"
                     }, 
                     "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 6)]", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 7)]", 
                     "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
@@ -277,7 +290,7 @@
                         "Id": "[concat(variables('publicIPAddressIdPrefix'), 5)]"
                     }, 
                     "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 7)]", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 8)]", 
                     "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
@@ -291,7 +304,7 @@
                         "Id": "[concat(variables('publicIPAddressIdPrefix'), 6)]"
                     }, 
                     "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 8)]", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 9)]", 
                     "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
@@ -305,7 +318,7 @@
                         "Id": "[concat(variables('publicIPAddressIdPrefix'), 7)]"
                     }, 
                     "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 9)]", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 10)]", 
                     "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
@@ -319,7 +332,7 @@
                         "Id": "[concat(variables('publicIPAddressIdPrefix'), 8)]"
                     }, 
                     "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 10)]", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 11)]", 
                     "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
@@ -352,7 +365,7 @@
         {
             "apiVersion": "[variables('networkApiVersion')]", 
             "copy": {
-                "count": "[parameters('numberOfExternalIps')]", 
+                "count": "[variables('numberOfExternalIps')]", 
                 "name": "pipcopy"
             }, 
             "location": "[variables('location')]", 
@@ -460,7 +473,7 @@
             "location": "[variables('location')]", 
             "name": "[variables('extNicName')]", 
             "properties": {
-                "ipConfigurations": "[take(variables('ipconfigArray'),parameters('numberofExternalIps'))]", 
+                "ipConfigurations": "[take(variables('ipconfigArray'),variables('numberofExternalIps'))]", 
                 "networkSecurityGroup": {
                     "id": "[concat(variables('nsg2ID'))]"
                 }
@@ -484,7 +497,7 @@
             "properties": {
                 "ipConfigurations": [
                     {
-                        "name": "[concat(variables('instanceName'), '-ipconfigint1')]", 
+                        "name": "[concat(variables('instanceName'), '-ipconfig1')]", 
                         "properties": {
                             "privateIPAddress": "[variables('intSubnetPrivateAdress')]", 
                             "privateIPAllocationMethod": "Static", 

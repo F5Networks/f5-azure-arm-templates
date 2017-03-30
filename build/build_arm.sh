@@ -1,12 +1,12 @@
 #/bin/bash
 
 #### Experimental ####
-## BIGIP ARM Templates - Standalone (1nic, 2nic_limited, 3nic)
+## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic)
 python '.\master_template.py' --template-name 1nic --license-type PAYG --template-location '../experimental/standalone/1nic/PAYG/' --script-location '../experimental/standalone/1nic/'
 python '.\master_template.py' --template-name 1nic --license-type BYOL --template-location '../experimental/standalone/1nic/BYOL/' --script-location '../experimental/standalone/1nic/'
 
-python '.\master_template.py' --template-name 2nic_limited --license-type PAYG --template-location '../experimental/standalone/2nic_limited/PAYG/' --script-location '../experimental/standalone/2nic_limited/'
-python '.\master_template.py' --template-name 2nic_limited --license-type BYOL --template-location '../experimental/standalone/2nic_limited/BYOL/' --script-location '../experimental/standalone/2nic_limited/'
+python '.\master_template.py' --template-name 2nic --license-type PAYG --template-location '../experimental/standalone/2nic/PAYG/' --script-location '../experimental/standalone/2nic/'
+python '.\master_template.py' --template-name 2nic --license-type BYOL --template-location '../experimental/standalone/2nic/BYOL/' --script-location '../experimental/standalone/2nic/'
 
 python '.\master_template.py' --template-name 3nic --license-type PAYG --template-location '../experimental/standalone/3nic/PAYG/' --script-location '../experimental/standalone/3nic/'
 python '.\master_template.py' --template-name 3nic --license-type BYOL --template-location '../experimental/standalone/3nic/BYOL/' --script-location '../experimental/standalone/3nic/'
@@ -25,12 +25,12 @@ python '.\master_template.py' --template-name waf_autoscale --license-type PAYG 
 
 
 #### Supported ####
-## BIGIP ARM Templates - Standalone (1nic, 2nic_limited, 3nic)
+## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic)
 python '.\master_template.py' --template-name 1nic --license-type PAYG --template-location '../supported/standalone/1nic/PAYG/' --script-location '../supported/standalone/1nic/'
 python '.\master_template.py' --template-name 1nic --license-type BYOL --template-location '../supported/standalone/1nic/BYOL/' --script-location '../supported/standalone/1nic/'
 
-python '.\master_template.py' --template-name 2nic_limited --license-type PAYG --template-location '../supported/standalone/2nic_limited/PAYG/' --script-location '../supported/standalone/2nic_limited/'
-python '.\master_template.py' --template-name 2nic_limited --license-type BYOL --template-location '../supported/standalone/2nic_limited/BYOL/' --script-location '../supported/standalone/2nic_limited/'
+python '.\master_template.py' --template-name 2nic --license-type PAYG --template-location '../supported/standalone/2nic/PAYG/' --script-location '../supported/standalone/2nic/'
+python '.\master_template.py' --template-name 2nic --license-type BYOL --template-location '../supported/standalone/2nic/BYOL/' --script-location '../supported/standalone/2nic/'
 
 python '.\master_template.py' --template-name 3nic --license-type PAYG --template-location '../supported/standalone/3nic/PAYG/' --script-location '../supported/standalone/3nic/'
 python '.\master_template.py' --template-name 3nic --license-type BYOL --template-location '../supported/standalone/3nic/BYOL/' --script-location '../supported/standalone/3nic/'
