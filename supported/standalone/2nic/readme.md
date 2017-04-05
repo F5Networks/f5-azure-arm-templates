@@ -65,6 +65,8 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | bigIpVersion | x | F5 BIG-IP Version to use. |
 | licenseKey1 | | For BYOL only. The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
 | licensedBandwidth | | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
+| numberOfExternalIps | x | The number of public/private IP's to deploy for the application traffic(external) nic on the BIG-IP to be used for virtual servers. |
+| vnetAddressPrefix | x | The start of the CIDR block(/16) used by the BIG-IP's when creating the vnet and subnets.  What is supplied MUST be just the first two octets of the /16 virtual network that will be created.  Such as '10.0', '10.100', 192.168', etc... |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
@@ -74,8 +76,8 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 ```powershell
     ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
     ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
-    ## be supplied inline when running this script but if they aren't then the default will be used as specified below.   ##
-    ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceName f5vm01 -instanceType Standard_D2_v2 -imageName Good -bigIpVersion 13.0.000 -restrictedSrcAddress "*"-resourceGroupName <value>
+    ## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
+    ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -dnsLabelPrefix <value> -instanceName f5vm01 -instanceType Standard_D2_v2 -imageName Good -bigIpVersion 13.0.000 -numberOfExternalIps 1 -vnetAddressPrefix 10.0 -restrictedSrcAddress "*" -resourceGroupName <value>
 
     param(
 
@@ -103,6 +105,10 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 
     [Parameter(Mandatory=$True)]
     [string]
+    $dnsLabelPrefix,
+
+    [Parameter(Mandatory=$True)]
+    [string]
     $instanceName,
 
     [Parameter(Mandatory=$True)]
@@ -116,6 +122,14 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
     [Parameter(Mandatory=$True)]
     [string]
     $bigIpVersion,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $numberOfExternalIps,
+
+    [Parameter(Mandatory=$True)]
+    [string]
+    $vnetAddressPrefix,
 
     [string]
     $restrictedSrcAddress = "*",
@@ -155,12 +169,12 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
     $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
     if ($licenseType -eq "BYOL") {
     if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\azuredeploy.json"; $parametersFilePath = ".\BYOL\azuredeploy.parameters.json" }
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -restrictedSrcAddress "$restrictedSrcAddress"  -licenseKey1 "$licenseKey1"
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -dnsLabelPrefix "$dnsLabelPrefix" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -numberOfExternalIps "$numberOfExternalIps" -vnetAddressPrefix "$vnetAddressPrefix" -restrictedSrcAddress "$restrictedSrcAddress"  -licenseKey1 "$licenseKey1"
     } elseif ($licenseType -eq "PAYG") {
     if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -dnsLabelPrefix "$dnsLabelPrefix" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -numberOfExternalIps "$numberOfExternalIps" -vnetAddressPrefix "$vnetAddressPrefix" -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
     } else {
-    Write-Error -Message "Uh oh, something went wrong!  Please select valid license type of PAYG or BYOL."
+    Write-Error -Message "Please select a valid license type of PAYG or BYOL."
     }
 
     # Print Output of Deployment to Console
@@ -176,15 +190,15 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
     #!/bin/bash
 
     ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-    ## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D2_v2 --imageName Good --bigIpVersion 13.0.000 --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+    ## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --dnsLabelPrefix <value> --instanceName f5vm01 --instanceType Standard_D2_v2 --imageName Good --bigIpVersion 13.0.000 --numberOfExternalIps 1 --vnetAddressPrefix 10.0 --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
-    # Assign Script Parameters and Define Variables
+    # Assign Script Paramters and Define Variables
     # Specify static items, change these as needed or make them parameters
     region="westus"
     restrictedSrcAddress="*"
     tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,adminUsername:,adminPassword:,dnsLabel:,instanceName:,instanceType:,imageName:,bigIpVersion:,restrictedSrcAddress: -n $0 -- "$@"`
+    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,adminUsername:,adminPassword:,dnsLabel:,dnsLabelPrefix:,instanceName:,instanceType:,imageName:,bigIpVersion:,numberOfExternalIps:,vnetAddressPrefix:,restrictedSrcAddress: -n $0 -- "$@"`
     eval set -- "$ARGS"
 
     # Parse the command line arguments, primarily checking full params as short params are just placeholders
@@ -217,19 +231,28 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
             -i|--dnsLabel)
                 dnsLabel=$2
                 shift 2;;
-            -j|--instanceName)
+            -j|--dnsLabelPrefix)
+                dnsLabelPrefix=$2
+                shift 2;;
+            -k|--instanceName)
                 instanceName=$2
                 shift 2;;
-            -k|--instanceType)
+            -l|--instanceType)
                 instanceType=$2
                 shift 2;;
-            -l|--imageName)
+            -m|--imageName)
                 imageName=$2
                 shift 2;;
-            -m|--bigIpVersion)
+            -n|--bigIpVersion)
                 bigIpVersion=$2
                 shift 2;;
-            -n|--restrictedSrcAddress)
+            -o|--numberOfExternalIps)
+                numberOfExternalIps=$2
+                shift 2;;
+            -p|--vnetAddressPrefix)
+                vnetAddressPrefix=$2
+                shift 2;;
+            -q|--restrictedSrcAddress)
                 restrictedSrcAddress=$2
                 shift 2;;
             --)
@@ -238,8 +261,8 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
         esac
     done
 
-    #If a required parameter is not passed, the script will prompt for it below
-    required_variables="adminUsername adminPassword dnsLabel instanceName instanceType imageName bigIpVersion resourceGroupName licenseType "
+    #If a required paramater is not passed, the script will prompt for it below
+    required_variables="adminUsername adminPassword dnsLabel dnsLabelPrefix instanceName instanceType imageName bigIpVersion numberOfExternalIps vnetAddressPrefix resourceGroupName licenseType "
     for variable in $required_variables
             do
             if [ -v ${!variable} ] ; then
@@ -281,13 +304,12 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
     azure group create -n $resourceGroupName -l $region
 
     # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
-    # such as can been done with Powershell...oh well!
     if [ $licenseType == "BYOL" ]; then
-        azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licenseKey1\":{\"value\":\"$licenseKey1\"}}"
+        azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"dnsLabelPrefix\":{\"value\":\"$dnsLabelPrefix\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licenseKey1\":{\"value\":\"$licenseKey1\"}}"
     elif [ $licenseType == "PAYG" ]; then
-        azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
+        azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"dnsLabelPrefix\":{\"value\":\"$dnsLabelPrefix\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
     else
-        echo "Uh oh, shouldn't make it here! Ensure license type is either PAYG or BYOL"
+        echo "Please select a valid license type of PAYG or BYOL."
         exit 1
     fi
 ```

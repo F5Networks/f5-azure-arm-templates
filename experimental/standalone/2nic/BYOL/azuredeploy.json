@@ -207,7 +207,7 @@
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
         "vnetAddressPrefix": "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]", 
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg'))]", 
-        "publicIPAddressName": "[concat(variables('dnsLabel'), '-pip')]", 
+        "publicIPAddressName": "[concat(variables('dnsLabel'), '-mgmt-pip')]", 
         "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]", 
         "publicIPAddressType": "Static", 
         "subnetName": "[concat(variables('dnsLabel'),'-subnet')]", 
@@ -217,8 +217,8 @@
         "instanceName": "[toLower(parameters('instanceName'))]", 
         "dnsLabelPrefix": "[toLower(parameters('dnsLabelPrefix'))]", 
         "nsg2ID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg2'))]", 
-        "publicIPAddressNamePrefix": "[variables('publicIPAddressName')]", 
-        "publicIPAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]", 
+        "publicIPAddressNamePrefix": "[concat(variables('dnsLabel'), '-ext-pip')]", 
+        "publicIPAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressNamePrefix'))]", 
         "extNicName": "[concat(variables('dnsLabel'), '-ext0')]", 
         "extSubnetName": "[concat(variables('dnsLabel'),'-subnet2')]", 
         "extSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('extsubnetName'))]", 
@@ -230,6 +230,9 @@
             {
                 "name": "[concat(variables('instanceName'), '-ipconfig1')]", 
                 "properties": {
+                    "PublicIpAddress": {
+                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 2)]"
+                    }, 
                     "primary": true, 
                     "privateIPAddress": "[variables('extSubnetPrivateAdress')]", 
                     "privateIPAllocationMethod": "Static", 
@@ -242,7 +245,7 @@
                 "name": "[concat(variables('instanceName'), '-ipconfig2')]", 
                 "properties": {
                     "PublicIpAddress": {
-                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 2)]"
+                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 3)]"
                     }, 
                     "primary": false, 
                     "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 5)]", 
@@ -256,7 +259,7 @@
                 "name": "[concat(variables('instanceName'), '-ipconfig3')]", 
                 "properties": {
                     "PublicIpAddress": {
-                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 3)]"
+                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 4)]"
                     }, 
                     "primary": false, 
                     "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 6)]", 
@@ -270,7 +273,7 @@
                 "name": "[concat(variables('instanceName'), '-ipconfig4')]", 
                 "properties": {
                     "PublicIpAddress": {
-                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 4)]"
+                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 5)]"
                     }, 
                     "primary": false, 
                     "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 7)]", 
@@ -284,7 +287,7 @@
                 "name": "[concat(variables('instanceName'), '-ipconfig5')]", 
                 "properties": {
                     "PublicIpAddress": {
-                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 5)]"
+                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 6)]"
                     }, 
                     "primary": false, 
                     "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 8)]", 
@@ -298,7 +301,7 @@
                 "name": "[concat(variables('instanceName'), '-ipconfig6')]", 
                 "properties": {
                     "PublicIpAddress": {
-                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 6)]"
+                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 7)]"
                     }, 
                     "primary": false, 
                     "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 9)]", 
@@ -312,7 +315,7 @@
                 "name": "[concat(variables('instanceName'), '-ipconfig7')]", 
                 "properties": {
                     "PublicIpAddress": {
-                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 7)]"
+                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 8)]"
                     }, 
                     "primary": false, 
                     "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 10)]", 
@@ -326,7 +329,7 @@
                 "name": "[concat(variables('instanceName'), '-ipconfig8')]", 
                 "properties": {
                     "PublicIpAddress": {
-                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 8)]"
+                        "Id": "[concat(variables('publicIPAddressIdPrefix'), 9)]"
                     }, 
                     "primary": false, 
                     "privateIPAddress": "[concat(variables('extSubnetPrivateAdressPrefix'), 11)]", 
@@ -362,7 +365,7 @@
         {
             "apiVersion": "[variables('networkApiVersion')]", 
             "copy": {
-                "count": "[parameters('numberOfExternalIps')]", 
+                "count": "[variables('numberOfExternalIps')]", 
                 "name": "pipcopy"
             }, 
             "location": "[variables('location')]", 
@@ -459,7 +462,8 @@
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
                 "[variables('vnetId')]", 
-                "[concat(variables('nsg2ID'))]"
+                "[concat(variables('nsg2ID'))]", 
+                "pipcopy"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('extNicName')]", 

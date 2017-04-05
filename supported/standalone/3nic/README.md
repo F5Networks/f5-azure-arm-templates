@@ -68,7 +68,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | bigIpVersion | x | F5 BIG-IP version you want to use. |
 | licenseKey1 | | For BYOL only. The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
 | licensedBandwidth | | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
-| numberOfExternalIps | x | The number of public/private IP's to deployfor the app traffic nic on the BIG-IP, the default(and minimum) is to deploy 1 public IP(One public/private IP will be deployed on the management nic regardless) |
+| numberOfExternalIps | x | The number of public/private IP's to deploy for the application traffic(external) nic on the BIG-IP to be used for virtual servers. |
 | vnetAddressPrefix | x | The start of the CIDR block(/16) used by the BIG-IP's when creating the vnet and subnets.  What is supplied MUST be just the first two octets of the /16 virtual network that will be created.  Such as '10.0', '10.100', 192.168', etc... |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
