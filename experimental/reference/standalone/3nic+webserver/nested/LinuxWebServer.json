@@ -30,7 +30,7 @@
   "variables": {
     "apiVersion": "2015-06-15",
     "storageAccountType": "Standard_LRS",
-    "publicIPAddressType": "Static",
+    "publicIPAddressType": "Dynamic",
     "WebServerNameLinux": "linuxweb01",
     "WebServerPort": "80",
     "Nic1NameLinux": "[concat(variables('WebServerNameLinux'), '-nic1')]",
