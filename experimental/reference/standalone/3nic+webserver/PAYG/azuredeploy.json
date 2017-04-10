@@ -258,20 +258,24 @@
         "intSubnetPrivateAdress": "[concat(parameters('vnetAddressPrefix'), '.3.4')]",
         "numberOfExternalIps": "[add(parameters('numberOfExternalIps'), 1)]",
 
+
 "apiVersionLinked": "2015-01-01",
+"extSubnetPrivateAdressVip": "[concat(parameters('vnetAddressPrefix'), '.2.5')]",
+"dnsLabelVip": "[concat(variables('dnsLabelPrefix'), '2')]",
 "intPrivateAddressWindows": "[concat(parameters('vnetAddressPrefix'), '.3.100')]",
 "intPrivateAddressLinux": "[concat(parameters('vnetAddressPrefix'), '.3.101')]",
 "singleQuoteWeb": "'",
 "WebServerPort": "80",
-"Linux": "[concat('-d ', variables('instanceName'), ' -n ', variables('intPrivateAddressLinux'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnetPrivateAddress'), ' -c ', variables('bigIpMgmtPort'), ' -s ', parameters('vsPort'))]",
-"Windows": "[concat('-d ', variables('instanceName'), ' -n ', variables('intPrivateAddressWindows'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnetPrivateAddress'), ' -c ', variables('bigIpMgmtPort'), ' -s ', parameters('vsPort'))]",
-"Both": "[concat('-d ', variables('instanceName'), ' -n \"', variables('intPrivateAddressLinux'), ',', variables('intPrivateAddressWindows'), '\" -h ', variables('WebServerPort'), ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('subnetPrivateAddress'), ' -c ', variables('bigIpMgmtPort'), ' -s ', parameters('vsPort'))]",
+"Linux": "[concat('-d ', variables('instanceName'), ' -n ', variables('intPrivateAddressLinux'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('extSubnetPrivateAdressVip'), ' -c ', variables('bigIpMgmtPort'), ' -s ', parameters('vsPort'))]",
+"Windows": "[concat('-d ', variables('instanceName'), ' -n ', variables('intPrivateAddressWindows'), ' -h ', variables('WebServerPort'),  ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('extSubnetPrivateAdressVip'), ' -c ', variables('bigIpMgmtPort'), ' -s ', parameters('vsPort'))]",
+"Both": "[concat('-d ', variables('instanceName'), ' -n \"', variables('intPrivateAddressLinux'), ',', variables('intPrivateAddressWindows'), '\" -h ', variables('WebServerPort'), ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'), ' -v ', variables('extSubnetPrivateAdressVip'), ' -c ', variables('bigIpMgmtPort'), ' -s ', parameters('vsPort'))]",
 "commandArgsWeb": "[variables(parameters('webServer'))]",
 "80": "http://",
 "443": "https://",
 "httpType": "[variables(parameters('vsPort'))]",
 "gitHubLocation": "https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/sevedge/experimental/reference/standalone/3nic%2Bwebserver/",
 "webtemplatelink": "[concat(variables('gitHubLocation'),  'nested/',  parameters('webServer'),'WebServer.json')]",
+
 
         "ipconfigArray": [
             {
@@ -598,39 +602,7 @@
                             "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
                             "sourcePortRange": "*"
                         }
-                    },
-
-
-                              {
-            "name": "traffic_allow_443",
-            "properties": {
-              "description": "",
-              "priority": 103,
-              "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "443",
-              "protocol": "TCP",
-              "direction": "Inbound",
-              "access": "Allow"
-            }
-          },
-          {
-            "name": "traffic_allow_80",
-            "properties": {
-              "description": "",
-              "priority": 104,
-              "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "80",
-              "protocol": "TCP",
-              "direction": "Inbound",
-              "access": "Allow"
-            }
-          }
-
-
+                    }
                 ]
             },
             "tags": {
@@ -647,7 +619,36 @@
             "location": "[variables('location')]",
             "name": "[concat(variables('dnsLabel'), '-nsg2')]",
             "properties": {
-                "securityRules": ""
+                "securityRules": [
+{
+"name": "traffic_allow_443",
+"properties": {
+    "description": "",
+    "priority": 103,
+    "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
+    "sourcePortRange": "*",
+    "destinationAddressPrefix": "*",
+    "destinationPortRange": "443",
+    "protocol": "TCP",
+    "direction": "Inbound",
+    "access": "Allow"
+}
+},
+{
+"name": "traffic_allow_80",
+"properties": {
+    "description": "",
+    "priority": 104,
+    "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
+    "sourcePortRange": "*",
+    "destinationAddressPrefix": "*",
+    "destinationPortRange": "80",
+    "protocol": "TCP",
+    "direction": "Inbound",
+    "access": "Allow"
+}
+}
+                ]
             },
             "tags": {
                 "application": "[parameters('tagValues').application]",
@@ -840,7 +841,7 @@
 
 "WebServer-URL-Through-F5 ": {
     "type": "string",
-    "value": "[concat(variables('httpType'), variables('dnsLabel'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+    "value": "[concat(variables('httpType'), variables('dnsLabelVip'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
 },
 "FQDN-Windows-WebServer": {
     "type": "string",
