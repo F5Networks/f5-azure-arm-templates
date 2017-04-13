@@ -253,7 +253,7 @@
         "defaultGw": "[parameters('defaultGw')]", 
         "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]", 
         "vnetId": "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]", 
-        "vnetAddressPrefix": "10.0.0.0/16", 
+        "vnetAddressPrefix": "NOT_USED", 
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg'))]", 
         "publicIPAddressName": "[concat(variables('dnsLabel'), '-mgmt-pip')]", 
         "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]", 
