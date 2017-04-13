@@ -1,24 +1,22 @@
-# Deploying the BIG-IP VE in Azure - 3 NIC(Traditional Deployment; Existing Networking Stack)
+# Deploying the BIG-IP VE in Azure - 2 NIC(New Networking Stack)
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 
 ## Introduction
 
-This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the compute instance of F5 is running with a management, front-end application traffic(Virtual Server) and back-end application interfaces.  As a result of Azure now supporting multiple public-IP's to multiple private IP's per NIC this template is now fully functional.  As an additional item this template allows for the selection of additional Public/Private IP's to be created for the external "application" NIC to be utilized for passing traffic into virtual servers in a more traditional fashion.
+This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3nic template minus the NIC meant to connect directly to backend webserver.
 
 You can choose to deploy the BIG-IP VE with your own F5 BIG-IP license (BYOL), or use Pay as You Go (PAYG) licensing.
 
-
-
 ## Prerequisites and configuration notes
-  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **#** or **'** (single quote).
+  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.
   - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
 
-
 ## Security
 This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
+
 In the *variables* section:
   - In the *verifyHash* variable: search for **script-signature** and then a hashed signature.
   - In the *installCloudLibs* variable: ensure this includes **tmsh run cli script verifyHash /config/cloud/f5-cloud-libs.tar.gz**.
@@ -31,63 +29,46 @@ Additionally, F5 provides checksums for all of our supported templates. For inst
   - For a list versions of the BIG-IP Virtual Edition (VE) and F5 licenses that are supported on specific hypervisors and Microsoft Azure, see https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/ve-supported-hypervisor-matrix.html.
 
 ### Help
-Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from F5 Technical Support.
+We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates.  This channel is typically monitored Monday-Friday 9-5 PST by F5 employees who will offer best-effort support.<br>
 
-
-
-We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates.  This channel is typically monitored Monday-Friday 9-5 PST by F5 employees who will offer best-effort support.
+While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.
 
 
 ## Installation
 
-You have three options for deploying this solution:
-  - Using the Azure deploy buttons
+You have three options for deploying this template:
+  - Using the Azure deploy button
   - Using [PowerShell](#powershell)
   - Using [CLI Tools](#cli)
 
 ### <a name="azure"></a>Azure deploy buttons
 
 Use the appropriate button, depending on whether you are using BYOL or PAYG licensing:
-New Networking Stack
-  - **BYOL** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F3nic%2Fnew_stack%2FBYOL%2Fazuredeploy.json">
+  - **BYOL** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic%2FBYOL%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
-  - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F3nic%2Fnew_stack%2PAYG%2Fazuredeploy.json">
-    <img src="http://azuredeploy.net/deploybutton.png"/></a>
+  - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic%2FPAYG%2Fazuredeploy.json">
+   <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-Existing Networking Stack
-  - **BYOL** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F3nic%2Fexisting_stack%2FBYOL%2Fazuredeploy.json">
-    <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
-
-  - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F3nic%2Fexisting_stack%2PAYG%2Fazuredeploy.json">
-    <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
 ### Template parameters
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| adminUsername | x | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
+| adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
+| adminPassword | x | A strong password for the BIG-IPs.  This must not include **#**.  Remember this password; you will need it later. |
 | dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
-| dnsLabelPrefix | x | Unique DNS Name prefix for the Public IP(s) used to access the data plan for application traffic objects(Virtual Servers, etc...) |
 | instanceName | x | The hostname to be configured for the VM. |
 | instanceType | x | The desired Azure Virtual Machine instance size. |
 | imageName | x | The desired F5 image to deploy. |
-| bigIpVersion | x | F5 BIG-IP version you want to use. |
+| bigIpVersion | x | F5 BIG-IP Version to use. |
 | licenseKey1 | | For BYOL only. The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
 | licensedBandwidth | | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
 | numberOfExternalIps | x | The number of public/private IP's to deploy for the application traffic(external) nic on the BIG-IP to be used for virtual servers. |
-| vnetName | x | The name of the existing virtual network that you want to connect the BIG-IP's to. |
-| vnetResourceGroupName | x | The name of the resource group that contains the Virtual Network the BIG-IP will be placed into. |
-| mgmtSubnetName | x | Name of the existing mgmt subnet - with external acccess to Internet. |
-| mgmtIpAddress | x | MGMT subnet IP Address to use for the BIG-IP management IP. |
-| externalSubnetName | x | Name of the existing external subnet - with external acccess to Internet. |
-| externalIpAddressRangeStart | x | Depending on how many public/private IP's selected in numberOfExternalIps this should be the starting range to be used as the private IP, minimum of 1 for the self IP of the external subnet.  Such as inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 being used for the self IP as well as 10.100.1.51 and 10.100.1.52 being configured as static IPs for VIPs |
-| internalSubnetName | x | Name of the existing internal subnet. |
-| internalIpAddress | x | Internal subnet IP Address to use for the BIG-IP internal self IP. |
-| defaultGw | x | Default GW for the BIG-IP(Ensure this can live within one of the addresses created above). |
+| vnetAddressPrefix | x | The start of the CIDR block(/16) used by the BIG-IP's when creating the vnet and subnets.  What is supplied MUST be just the first two octets of the /16 virtual network that will be created.  Such as '10.0', '10.100', 192.168', etc... |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
+
 
 ### <a name="powershell"></a>PowerShell Script Example
 
@@ -95,7 +76,7 @@ Existing Networking Stack
     ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
     ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
     ## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
-    ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -dnsLabelPrefix <value> -instanceName f5vm01 -instanceType Standard_D3_v2 -imageName Good -bigIpVersion 13.0.000 -numberOfExternalIps 1 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddress <value> -externalSubnetName <value> -externalIpAddressRangeStart <value> -internalSubnetName <value> -internalIpAddress <value> -defaultGw <value> -restrictedSrcAddress "*" -resourceGroupName <value>
+    ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -dnsLabelPrefix <value> -instanceName f5vm01 -instanceType Standard_D2_v2 -imageName Good -bigIpVersion 13.0.000 -numberOfExternalIps 1 -vnetAddressPrefix 10.0 -restrictedSrcAddress "*" -resourceGroupName <value>
 
     param(
 
@@ -147,39 +128,7 @@ Existing Networking Stack
 
     [Parameter(Mandatory=$True)]
     [string]
-    $vnetName,
-
-    [Parameter(Mandatory=$True)]
-    [string]
-    $vnetResourceGroupName,
-
-    [Parameter(Mandatory=$True)]
-    [string]
-    $mgmtSubnetName,
-
-    [Parameter(Mandatory=$True)]
-    [string]
-    $mgmtIpAddress,
-
-    [Parameter(Mandatory=$True)]
-    [string]
-    $externalSubnetName,
-
-    [Parameter(Mandatory=$True)]
-    [string]
-    $externalIpAddressRangeStart,
-
-    [Parameter(Mandatory=$True)]
-    [string]
-    $internalSubnetName,
-
-    [Parameter(Mandatory=$True)]
-    [string]
-    $internalIpAddress,
-
-    [Parameter(Mandatory=$True)]
-    [string]
-    $defaultGw,
+    $vnetAddressPrefix,
 
     [string]
     $restrictedSrcAddress = "*",
@@ -219,10 +168,10 @@ Existing Networking Stack
     $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
     if ($licenseType -eq "BYOL") {
     if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\azuredeploy.json"; $parametersFilePath = ".\BYOL\azuredeploy.parameters.json" }
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -dnsLabelPrefix "$dnsLabelPrefix" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -numberOfExternalIps "$numberOfExternalIps" -vnetName "$vnetName" -vnetResourceGroupName "$vnetResourceGroupName" -mgmtSubnetName "$mgmtSubnetName" -mgmtIpAddress "$mgmtIpAddress" -externalSubnetName "$externalSubnetName" -externalIpAddressRangeStart "$externalIpAddressRangeStart" -internalSubnetName "$internalSubnetName" -internalIpAddress "$internalIpAddress" -defaultGw "$defaultGw" -restrictedSrcAddress "$restrictedSrcAddress"  -licenseKey1 "$licenseKey1"
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -dnsLabelPrefix "$dnsLabelPrefix" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -numberOfExternalIps "$numberOfExternalIps" -vnetAddressPrefix "$vnetAddressPrefix" -restrictedSrcAddress "$restrictedSrcAddress"  -licenseKey1 "$licenseKey1"
     } elseif ($licenseType -eq "PAYG") {
     if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -dnsLabelPrefix "$dnsLabelPrefix" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -numberOfExternalIps "$numberOfExternalIps" -vnetName "$vnetName" -vnetResourceGroupName "$vnetResourceGroupName" -mgmtSubnetName "$mgmtSubnetName" -mgmtIpAddress "$mgmtIpAddress" -externalSubnetName "$externalSubnetName" -externalIpAddressRangeStart "$externalIpAddressRangeStart" -internalSubnetName "$internalSubnetName" -internalIpAddress "$internalIpAddress" -defaultGw "$defaultGw" -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
+    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -dnsLabelPrefix "$dnsLabelPrefix" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -numberOfExternalIps "$numberOfExternalIps" -vnetAddressPrefix "$vnetAddressPrefix" -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
     } else {
     Write-Error -Message "Please select a valid license type of PAYG or BYOL."
     }
@@ -232,7 +181,6 @@ Existing Networking Stack
 
 ```
 
-=======
 
 ### <a name="cli"></a>Azure CLI(1.0) Script Example
 
@@ -240,7 +188,7 @@ Existing Networking Stack
     #!/bin/bash
 
     ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-    ## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --dnsLabelPrefix <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.000 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --mgmtIpAddress <value> --externalSubnetName <value> --externalIpAddressRangeStart <value> --internalSubnetName <value> --internalIpAddress <value> --defaultGw <value> --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+    ## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --dnsLabelPrefix <value> --instanceName f5vm01 --instanceType Standard_D2_v2 --imageName Good --bigIpVersion 13.0.000 --numberOfExternalIps 1 --vnetAddressPrefix 10.0 --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
     # Assign Script Paramters and Define Variables
     # Specify static items, change these as needed or make them parameters
@@ -248,7 +196,7 @@ Existing Networking Stack
     restrictedSrcAddress="*"
     tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x:y: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,adminUsername:,adminPassword:,dnsLabel:,dnsLabelPrefix:,instanceName:,instanceType:,imageName:,bigIpVersion:,numberOfExternalIps:,vnetName:,vnetResourceGroupName:,mgmtSubnetName:,mgmtIpAddress:,externalSubnetName:,externalIpAddressRangeStart:,internalSubnetName:,internalIpAddress:,defaultGw:,restrictedSrcAddress: -n $0 -- "$@"`
+    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,adminUsername:,adminPassword:,dnsLabel:,dnsLabelPrefix:,instanceName:,instanceType:,imageName:,bigIpVersion:,numberOfExternalIps:,vnetAddressPrefix:,restrictedSrcAddress: -n $0 -- "$@"`
     eval set -- "$ARGS"
 
     # Parse the command line arguments, primarily checking full params as short params are just placeholders
@@ -299,34 +247,10 @@ Existing Networking Stack
             -o|--numberOfExternalIps)
                 numberOfExternalIps=$2
                 shift 2;;
-            -p|--vnetName)
-                vnetName=$2
+            -p|--vnetAddressPrefix)
+                vnetAddressPrefix=$2
                 shift 2;;
-            -q|--vnetResourceGroupName)
-                vnetResourceGroupName=$2
-                shift 2;;
-            -r|--mgmtSubnetName)
-                mgmtSubnetName=$2
-                shift 2;;
-            -s|--mgmtIpAddress)
-                mgmtIpAddress=$2
-                shift 2;;
-            -t|--externalSubnetName)
-                externalSubnetName=$2
-                shift 2;;
-            -u|--externalIpAddressRangeStart)
-                externalIpAddressRangeStart=$2
-                shift 2;;
-            -v|--internalSubnetName)
-                internalSubnetName=$2
-                shift 2;;
-            -w|--internalIpAddress)
-                internalIpAddress=$2
-                shift 2;;
-            -x|--defaultGw)
-                defaultGw=$2
-                shift 2;;
-            -y|--restrictedSrcAddress)
+            -q|--restrictedSrcAddress)
                 restrictedSrcAddress=$2
                 shift 2;;
             --)
@@ -336,7 +260,7 @@ Existing Networking Stack
     done
 
     #If a required paramater is not passed, the script will prompt for it below
-    required_variables="adminUsername adminPassword dnsLabel dnsLabelPrefix instanceName instanceType imageName bigIpVersion numberOfExternalIps vnetName vnetResourceGroupName mgmtSubnetName mgmtIpAddress externalSubnetName externalIpAddressRangeStart internalSubnetName internalIpAddress defaultGw resourceGroupName licenseType "
+    required_variables="adminUsername adminPassword dnsLabel dnsLabelPrefix instanceName instanceType imageName bigIpVersion numberOfExternalIps vnetAddressPrefix resourceGroupName licenseType "
     for variable in $required_variables
             do
             if [ -v ${!variable} ] ; then
@@ -379,29 +303,30 @@ Existing Networking Stack
 
     # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
     if [ $licenseType == "BYOL" ]; then
-        azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"dnsLabelPrefix\":{\"value\":\"$dnsLabelPrefix\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddress\":{\"value\":\"$mgmtIpAddress\"},\"externalSubnetName\":{\"value\":\"$externalSubnetName\"},\"externalIpAddressRangeStart\":{\"value\":\"$externalIpAddressRangeStart\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddress\":{\"value\":\"$internalIpAddress\"},\"defaultGw\":{\"value\":\"$defaultGw\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licenseKey1\":{\"value\":\"$licenseKey1\"}}"
+        azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"dnsLabelPrefix\":{\"value\":\"$dnsLabelPrefix\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licenseKey1\":{\"value\":\"$licenseKey1\"}}"
     elif [ $licenseType == "PAYG" ]; then
-        azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"dnsLabelPrefix\":{\"value\":\"$dnsLabelPrefix\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddress\":{\"value\":\"$mgmtIpAddress\"},\"externalSubnetName\":{\"value\":\"$externalSubnetName\"},\"externalIpAddressRangeStart\":{\"value\":\"$externalIpAddressRangeStart\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddress\":{\"value\":\"$internalIpAddress\"},\"defaultGw\":{\"value\":\"$defaultGw\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
+        azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"dnsLabelPrefix\":{\"value\":\"$dnsLabelPrefix\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
     else
         echo "Please select a valid license type of PAYG or BYOL."
         exit 1
     fi
 ```
 
-## Configuration Example <a name="config">
+## <a name="config"></a>Configuration Example
 
-The following is a simple configuration diagram for this single NIC deployment. In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.
+The following is a simple configuration diagram for this 2 NIC deployment.  In a 2 NIC scenario, one NIC is external and the other is internal.  It is important to remember that you continue to have only one public IP address, and the external NIC is shared between management and data plane traffic.
+In this example, the External VLAN uses **eth0** and the Internal VLAN uses **eth1**.
 
-![Single NIC configuration example](images/azure-1nic-sm.png)
+![2 NIC configuration example](images/azure-2nic-sm.png)
 
-### Changing the BIG-IP Configuration utility (GUI) port
-The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>
-***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP. BIG-IP v13.0.000 and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.<br>
+### Changing the BIG-IP Configuration Utility (GUI) port
+The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.
+***Important***: The default port provisioned is dependent on 1) what BIG-IP version you choose to deploy as well as 2) how many nics are configured on that BIG-IP.  v13.0.000 and above in a single-nic configuration utilizes port 8443, all older BIG-IP versions, as well as newer(then v13.0.000) versions with multiple interfaces will default to 443 on the MGMT interface.
 ***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
 
 ## Documentation
 
-The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html) describes how to create the configuration manually without using the ARM template.
+The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/4.html) decribes how to create the configuration manually without using the ARM template.
 
 ## Deploying Custom Configuration to an Azure Virtual Machine
 
@@ -432,7 +357,6 @@ Warning: F5 does not support the template if you change anything other than the 
      }
 }
 ```
-
 
 ## Security Details <a name="securitydetail"></a>
 This section has the code snippet for each the lines you should ensure are present in your template file if you want to verify the integrity of the helper code in the template.

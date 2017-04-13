@@ -492,7 +492,9 @@
         {
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
-                "[variables('vnetId')]"
+                "[variables('vnetId')]", 
+                "[concat(variables('nsg2ID'))]", 
+                "pipcopy"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('intNicName')]", 

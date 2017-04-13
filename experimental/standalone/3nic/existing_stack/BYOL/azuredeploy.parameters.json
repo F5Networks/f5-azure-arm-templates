@@ -32,8 +32,32 @@
         "numberOfExternalIps": {
             "value": 1
         }, 
-        "vnetAddressPrefix": {
-            "value": "10.0"
+        "vnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "vnetResourceGroupName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "mgmtSubnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "mgmtIpAddress": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "externalSubnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "externalIpAddressRangeStart": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "internalSubnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "internalIpAddress": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "defaultGw": {
+            "value": "GEN_UNIQUE"
         }, 
         "restrictedSrcAddress": {
             "value": "*"

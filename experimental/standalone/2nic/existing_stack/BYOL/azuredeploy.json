@@ -38,6 +38,7 @@
         }, 
         "instanceType": {
             "allowedValues": [
+                "Standard_A2", 
                 "Standard_A3", 
                 "Standard_A4", 
                 "Standard_A5", 
@@ -45,12 +46,14 @@
                 "Standard_A7", 
                 "Standard_A8", 
                 "Standard_A9", 
+                "Standard_D2", 
                 "Standard_D3", 
                 "Standard_D4", 
                 "Standard_D11", 
                 "Standard_D12", 
                 "Standard_D13", 
                 "Standard_D14", 
+                "Standard_D2_v2", 
                 "Standard_D3_v2", 
                 "Standard_D4_v2", 
                 "Standard_D5_v2", 
@@ -59,10 +62,11 @@
                 "Standard_D13_v2", 
                 "Standard_D14_v2", 
                 "Standard_D15_v2", 
+                "Standard_F2", 
                 "Standard_F4", 
                 "Standard_F8"
             ], 
-            "defaultValue": "Standard_D3_v2", 
+            "defaultValue": "Standard_D2_v2", 
             "metadata": {
                 "description": "Size of the VM"
             }, 
@@ -152,18 +156,6 @@
             }, 
             "type": "string"
         }, 
-        "internalSubnetName": {
-            "metadata": {
-                "description": "Name of the existing internal subnet."
-            }, 
-            "type": "string"
-        }, 
-        "internalIpAddress": {
-            "metadata": {
-                "description": "Internal subnet IP Address to use for the BIG-IP internal self IP."
-            }, 
-            "type": "string"
-        }, 
         "defaultGw": {
             "metadata": {
                 "description": "Default GW for the BIG-IP(Ensure this can live within one of the addresses created above)."
@@ -241,7 +233,7 @@
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]", 
         "offerToUse": "f5-big-ip", 
-        "bigIpNicPortValue": "[variables('bigIpNicPortMap')['3'].Port]", 
+        "bigIpNicPortValue": "[variables('bigIpNicPortMap')['2'].Port]", 
         "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
         "nicName": "[concat(variables('dnsLabel'), '-mgmt0')]", 
@@ -277,10 +269,6 @@
         "extSubnetPrivateAddressSuffix5": "[add(variables('extSubnetPrivateAddressSuffixInt'), 5)]", 
         "extSubnetPrivateAddressSuffix6": "[add(variables('extSubnetPrivateAddressSuffixInt'), 6)]", 
         "extSubnetPrivateAddressSuffix7": "[add(variables('extSubnetPrivateAddressSuffixInt'), 7)]", 
-        "intNicName": "[concat(variables('dnsLabel'), '-int0')]", 
-        "intSubnetName": "[parameters('internalSubnetName')]", 
-        "intSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]", 
-        "intSubnetPrivateAdress": "[parameters('internalIpAddress')]", 
         "numberOfExternalIps": "[add(parameters('numberOfExternalIps'), 1)]", 
         "ipconfigArray": [
             {
@@ -504,37 +492,6 @@
         }, 
         {
             "apiVersion": "[variables('apiVersion')]", 
-            "dependsOn": [
-                "[concat(variables('nsg2ID'))]", 
-                "pipcopy"
-            ], 
-            "location": "[variables('location')]", 
-            "name": "[variables('intNicName')]", 
-            "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "[concat(variables('instanceName'), '-ipconfig1')]", 
-                        "properties": {
-                            "privateIPAddress": "[variables('intSubnetPrivateAdress')]", 
-                            "privateIPAllocationMethod": "Static", 
-                            "subnet": {
-                                "id": "[variables('intSubnetId')]"
-                            }
-                        }
-                    }
-                ]
-            }, 
-            "tags": {
-                "application": "[parameters('tagValues').application]", 
-                "costCenter": "[parameters('tagValues').cost]", 
-                "environment": "[parameters('tagValues').environment]", 
-                "group": "[parameters('tagValues').group]", 
-                "owner": "[parameters('tagValues').owner]"
-            }, 
-            "type": "Microsoft.Network/networkInterfaces"
-        }, 
-        {
-            "apiVersion": "[variables('apiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[concat(variables('dnsLabel'), '-nsg')]", 
             "properties": {
@@ -629,8 +586,7 @@
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", 
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]", 
-                "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]", 
-                "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'))]"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('instanceName')]", 
@@ -662,12 +618,6 @@
                         }, 
                         {
                             "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('extNicName'))]", 
-                            "properties": {
-                                "primary": false
-                            }
-                        }, 
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('intNicName'))]", 
                             "properties": {
                                 "primary": false
                             }
@@ -714,7 +664,7 @@
             "name": "[concat(variables('instanceName'),'/start')]", 
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; mkdir -p /config/cloud/node_modules; BIG_IP_CREDENTIALS_FILE=/config/cloud/passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> $BIG_IP_CREDENTIALS_FILE; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('subnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --default-gw ', variables('defaultGw'), ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAdress'), ',vlan:internal --log-level debug; rm -f /config/cloud/passwd')]"
+                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; mkdir -p /config/cloud/node_modules; BIG_IP_CREDENTIALS_FILE=/config/cloud/passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> $BIG_IP_CREDENTIALS_FILE; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('subnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('subnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --default-gw ', variables('defaultGw'), ' --vlan name:external,nic:1.1 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), ',vlan:external --log-level debug; rm -f /config/cloud/passwd')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {

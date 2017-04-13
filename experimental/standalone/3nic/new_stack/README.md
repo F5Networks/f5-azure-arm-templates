@@ -1,4 +1,4 @@
-# Deploying the BIG-IP VE in Azure - 3 NIC(Traditional Deployment)
+# Deploying the BIG-IP VE in Azure - 3 NIC(Traditional Deployment; New Networking Stack)
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 
