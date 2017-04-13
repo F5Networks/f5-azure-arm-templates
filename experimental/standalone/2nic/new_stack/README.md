@@ -44,11 +44,11 @@ You have three options for deploying this template:
 ### <a name="azure"></a>Azure deploy buttons
 
 Use the appropriate button, depending on whether you are using BYOL or PAYG licensing:
-  - **BYOL** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic%2FBYOL%2Fazuredeploy.json">
+  - **BYOL** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic%2Fnew_stack%2FBYOL%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
-  - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic%2FPAYG%2Fazuredeploy.json">
-   <img src="http://azuredeploy.net/deploybutton.png"/></a>
+  - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Fstandalone%2F2nic%2Fnew_stack%2PAYG%2Fazuredeploy.json">
+    <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
 
 ### Template parameters
@@ -314,8 +314,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 
 ## <a name="config"></a>Configuration Example
 
-The following is a simple configuration diagram for this 2 NIC deployment.  In a 2 NIC scenario, one NIC is external and the other is internal.  It is important to remember that you continue to have only one public IP address, and the external NIC is shared between management and data plane traffic.
-In this example, the External VLAN uses **eth0** and the Internal VLAN uses **eth1**.
+The following is a simple configuration diagram for this 2 NIC deployment.  In a 2 NIC scenario, one NIC is for management and one is for external.  This is in a more traditional deployment model where data-plane and management traffic is seperate.
 
 ![2 NIC configuration example](images/azure-2nic-sm.png)
 
