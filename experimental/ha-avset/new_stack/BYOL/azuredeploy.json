@@ -175,7 +175,7 @@
           }
      }, 
      "variables": {
-          "baseUrl": "https://raw.githubusercontent.com/edwoodjrjr/f5-azure-ha/develop/byol",
+          "baseUrl": "https://raw.githubusercontent.com/edwoodjrjr/f5-azure-arm-templates/develop/experimental/ha-avset/new_stack/BYOL",
           "location": "[resourceGroup().location]",
           "subscriptionID": "[subscription().subscriptionId]", 
           "resourceGroupName": "[resourceGroup().name]",
