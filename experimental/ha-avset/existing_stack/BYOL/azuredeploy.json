@@ -117,13 +117,54 @@
                }, 
                "type": "int"
           }, 
-          "vnetAddressPrefix": {
-               "defaultValue": "10.0", 
+          "vnetName": {
                "metadata": {
-                    "description": "The start of the CIDR block used by the BIG-IP's when create the Vnet and subnets.  What is supplied MUST be just the first two octets of the /16 virtual network that will be created.  Such as '10.0' or 192.168', etc..."
+                    "description": "The name of the existing virtual network that you want to connect the BIG-IP's to."
                }, 
                "type": "string"
           }, 
+          "vnetResourceGroupName": {
+               "metadata": {
+                    "description": "The name of the resource group that contains the Virtual Network the BIG-IP will be placed into."
+               }, 
+               "type": "string"
+          }, 
+          "mgmtSubnetName": {
+               "metadata": {
+                    "description": "Name of the existing mgmt subnet - with external acccess to Internet."
+               }, 
+               "type": "string"
+          }, 
+          "mgmtIpAddress": {
+               "metadata": {
+                    "description": "MGMT subnet IP Address to use for the BIG-IP management IP."
+               }, 
+               "type": "string"
+          }, 
+          "externalSubnetName": {
+               "metadata": {
+                    "description": "Name of the existing external subnet - with external acccess to Internet."
+               }, 
+               "type": "string"
+          }, 
+          "externalIpAddressRangeStart": {
+               "metadata": {
+                    "description": "Depending on how many public/private IP's selected in numberOfExternalIps this should be the starting range to be used as the private IP, minimum of 1 for the self IP of the external subnet.  Such as inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 being used for the self IP as well as 10.100.1.51 and 10.100.1.52 being configured as static IPs for VIPs"
+               }, 
+               "type": "string"
+          }, 
+          "internalSubnetName": {
+               "metadata": {
+                    "description": "Name of the existing internal subnet."
+               }, 
+               "type": "string"
+          }, 
+          "internalIpAddress": {
+               "metadata": {
+                    "description": "Internal subnet IP Address to use for the BIG-IP internal self IP."
+               }, 
+               "type": "string"
+          },
           "restrictedSrcAddress": {
                "defaultValue": "*", 
                "metadata": {
@@ -272,7 +313,7 @@
           "intSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.3.0/24')]", 
           "intSubnetPrivateAddress0": "[concat(parameters('vnetAddressPrefix'), '.3.4')]",
           "intSubnetPrivateAddress1": "[concat(parameters('vnetAddressPrefix'), '.3.5')]",
-                   
+          
           "selfIpConfigArray": [
                {
                     "name": "[concat(variables('dnsLabel'), '-self-ipconfig')]", 
@@ -550,7 +591,7 @@
                }, 
                "type": "Microsoft.Storage/storageAccounts"
           },
-                   
+          
           {
                "apiVersion": "[variables('networkApiVersion')]", 
                "dependsOn": [
