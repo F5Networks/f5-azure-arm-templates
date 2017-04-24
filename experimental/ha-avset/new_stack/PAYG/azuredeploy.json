@@ -245,8 +245,6 @@
           "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
           "vnetAddressCidr": "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]",
           
-          "defaultGw": "[concat(parameters('vnetAddressPrefix'),'.2.1')]",
-          
           "mgmtNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-mgmt-nsg'))]",
           "extNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-ext-nsg'))]",
           

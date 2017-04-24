@@ -135,9 +135,9 @@
                }, 
                "type": "string"
           }, 
-          "mgmtIpAddress": {
+          "mgmtIpAddressRangeStart": {
                "metadata": {
-                    "description": "MGMT subnet IP Address to use for the BIG-IP management IP."
+                    "description": "The static private IP address you would like to assign to the management self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."
                }, 
                "type": "string"
           }, 
@@ -147,21 +147,27 @@
                }, 
                "type": "string"
           }, 
-          "externalIpAddressRangeStart": {
+          "externalIpPrimaryAddressRangeStart": {
                "metadata": {
-                    "description": "Depending on how many public/private IP's selected in numberOfExternalIps this should be the starting range to be used as the private IP, minimum of 1 for the self IP of the external subnet.  Such as inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 being used for the self IP as well as 10.100.1.51 and 10.100.1.52 being configured as static IPs for VIPs"
+                    "description": "The static private IP address you would like to assign to the external self IP (primary) of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."
                }, 
                "type": "string"
           }, 
+          "externalIpSecondaryAddressRangeStart": {
+               "metadata": {
+                    "description": "The static private IP address (secondary) you would like to assign to the first shared Azure public IP. An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses for external virtual servers."
+               }, 
+               "type": "string"
+          },
           "internalSubnetName": {
                "metadata": {
                     "description": "Name of the existing internal subnet."
                }, 
                "type": "string"
           }, 
-          "internalIpAddress": {
+          "internalIpAddressRangeStart": {
                "metadata": {
-                    "description": "Internal subnet IP Address to use for the BIG-IP internal self IP."
+                    "description": "The static private IP address you would like to assign to the internal self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."
                }, 
                "type": "string"
           },
@@ -284,36 +290,50 @@
           "bigIpNicPortValue": "[variables('bigIpNicPortMap')['3'].Port]", 
           "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
           
-          "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]", 
-          "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
-          "vnetAddressCidr": "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]",
-          
-          "defaultGw": "[concat(parameters('vnetAddressPrefix'),'.2.1')]",
+          "publicIPAddressType": "Static",
           
           "mgmtNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-mgmt-nsg'))]",
           "extNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-ext-nsg'))]",
           
-          "publicIPAddressType": "Static",  
+          "vnetId": "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]", 
           
-          "mgmtSubnetName": "[concat(variables('dnsLabel'),'-mgmt-subnet')]", 
-          "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]", 
-          "mgmtSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.1.0/24')]", 
-          "mgmtSubnetPrivateAddress0": "[concat(parameters('vnetAddressPrefix'), '.1.4')]",
-          "mgmtSubnetPrivateAddress1": "[concat(parameters('vnetAddressPrefix'), '.1.5')]",
+          "mgmtSubnetId": "[concat(variables('vnetID'),'/subnets/',parameters('mgmtSubnetName'))]", 
+          "mgmtSubnetPrivateAddress0": "[parameters('mgmtIpAddressRangeStart')]",           
+          "mgmtSubnetPrivateAddressPrefixArray": "[split(parameters('mgmtIpAddressRangeStart'), '.')]", 
+          "mgmtSubnetPrivateAddressPrefix": "[concat(variables('mgmtSubnetPrivateAddressPrefixArray')[0], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[1], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[2], '.')]", 
+          "mgmtSubnetPrivateAddressSuffixInt": "[int(variables('mgmtSubnetPrivateAddressPrefixArray')[3])]", 
+          "mgmtSubnetPrivateAddressSuffix": "[add(variables('mgmtSubnetPrivateAddressSuffixInt'), 1)]", 
+          "mgmtSubnetPrivateAddress1": "[concat(variables('mgmtSubnetPrivateAddressPrefix'), variables('mgmtSubnetPrivateAddressSuffix'))]", 
+         
+          "extSubnetId": "[concat(variables('vnetId'), '/subnets/', parameters('externalSubnetName'))]",  
+          "extSubnetPrivatePrimaryAddress0": "[parameters('externalIpPrimaryAddressRangeStart')]",           
+          "extSubnetPrivatePrimaryAddressPrefixArray": "[split(parameters('externalIpPrimaryAddressRangeStart'), '.')]", 
+          "extSubnetPrivatePrimaryAddressPrefix": "[concat(variables('extSubnetPrivatePrimaryAddressPrefixArray')[0], '.', variables('extSubnetPrivatePrimaryAddressPrefixArray')[1], '.', variables('extSubnetPrivatePrimaryAddressPrefixArray')[2], '.')]", 
+          "extSubnetPrivatePrimaryAddressSuffixInt": "[int(variables('extSubnetPrivatePrimaryAddressPrefixArray')[3])]", 
+          "extSubnetPrivatePrimaryAddressSuffix": "[add(variables('extSubnetPrivatePrimaryAddressSuffixInt'), 1)]", 
+          "extSubnetPrivatePrimaryAddress1": "[concat(variables('extSubnetPrivatePrimaryAddressPrefix'), variables('extSubnetPrivatePrimaryAddressSuffix'))]", 
           
-          "extSubnetName": "[concat(variables('dnsLabel'),'-ext-subnet')]", 
-          "extSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('extSubnetName'))]", 
-          "extSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.2.0/24')]", 
-          "extSubnetPrivateAddressPrefix": "[concat(parameters('vnetAddressPrefix'), '.2.')]",
-          "extSubnetPrivateAddress0": "[concat(parameters('vnetAddressPrefix'), '.2.4')]", 
-          "extSubnetPrivateAddress1": "[concat(parameters('vnetAddressPrefix'), '.2.5')]", 
+          "extSubnetPrivateSecondaryAddress": "[parameters('externalIpSecondaryAddressRangeStart')]", 
+          "extSubnetPrivateSecondaryAddressPrefixArray": "[split(parameters('externalIpSecondaryAddressRangeStart'), '.')]", 
+          "extSubnetPrivateSecondaryAddressPrefix": "[concat(variables('extSubnetPrivateSecondaryAddressPrefixArray')[0], '.', variables('extSubnetPrivateSecondaryAddressPrefixArray')[1], '.', variables('extSubnetPrivateSecondaryAddressPrefixArray')[2], '.')]", 
+          "extSubnetPrivateSecondaryAddressSuffixInt": "[int(variables('extSubnetPrivateSecondaryAddressPrefixArray')[3])]", 
+          "extSubnetPrivateSecondaryAddressSuffix0": "[variables('extSubnetPrivateSecondaryAddressSuffixInt')]", 
+          "extSubnetPrivateSecondaryAddressSuffix1": "[add(variables('extSubnetPrivateSecondaryAddressSuffixInt'), 1)]", 
+          "extSubnetPrivateSecondaryAddressSuffix2": "[add(variables('extSubnetPrivateSecondaryAddressSuffixInt'), 2)]", 
+          "extSubnetPrivateSecondaryAddressSuffix3": "[add(variables('extSubnetPrivateSecondaryAddressSuffixInt'), 3)]", 
+          "extSubnetPrivateSecondaryAddressSuffix4": "[add(variables('extSubnetPrivateSecondaryAddressSuffixInt'), 4)]", 
+          "extSubnetPrivateSecondaryAddressSuffix5": "[add(variables('extSubnetPrivateSecondaryAddressSuffixInt'), 5)]", 
+          "extSubnetPrivateSecondaryAddressSuffix6": "[add(variables('extSubnetPrivateSecondaryAddressSuffixInt'), 6)]", 
+          "extSubnetPrivateSecondaryAddressSuffix7": "[add(variables('extSubnetPrivateSecondaryAddressSuffixInt'), 7)]", 
           
-          "intSubnetName": "[concat(variables('dnsLabel'),'-int-subnet')]", 
-          "intSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('intSubnetName'))]", 
-          "intSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.3.0/24')]", 
-          "intSubnetPrivateAddress0": "[concat(parameters('vnetAddressPrefix'), '.3.4')]",
-          "intSubnetPrivateAddress1": "[concat(parameters('vnetAddressPrefix'), '.3.5')]",
-          
+          "intSubnetId": "[concat(variables('vnetId'), '/subnets/', parameters('internalSubnetName'))]",          
+          "intSubnetPrivateAddress0": "[parameters('internalIpAddressRangeStart')]",           
+          "intSubnetPrivateAddressPrefixArray": "[split(parameters('internalIpAddressRangeStart'), '.')]", 
+          "intSubnetPrivateAddressPrefix": "[concat(variables('intSubnetPrivateAddressPrefixArray')[0], '.', variables('intSubnetPrivateAddressPrefixArray')[1], '.', variables('intSubnetPrivateAddressPrefixArray')[2], '.')]", 
+          "intSubnetPrivateAddressSuffixInt": "[int(variables('intSubnetPrivateAddressPrefixArray')[3])]", 
+          "intSubnetPrivateAddressSuffix": "[add(variables('intSubnetPrivateAddressSuffixInt'), 1)]", 
+          "intSubnetPrivateAddress1": "[concat(variables('intSubnetPrivateAddressPrefix'), variables('intSubnetPrivateAddressSuffix'))]",  
+                    
           "selfIpConfigArray": [
                {
                     "name": "[concat(variables('dnsLabel'), '-self-ipconfig')]", 
@@ -322,7 +342,7 @@
                               "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('dnsLabel'), '-self-pip0'))]"
                          }, 
                          "primary": true, 
-                         "privateIPAddress": "[variables('extSubnetPrivateAddress0')]", 
+                         "privateIPAddress": "[variables('extSubnetPrivatePrimaryAddress0')]", 
                          "privateIPAllocationMethod": "Static", 
                          "subnet": {
                               "id": "[variables('extSubnetId')]"
@@ -336,7 +356,7 @@
                               "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('dnsLabel'), '-self-pip1'))]"
                          }, 
                          "primary": true, 
-                         "privateIPAddress": "[variables('extSubnetPrivateAddress1')]", 
+                         "privateIPAddress": "[variables('extSubnetPrivatePrimaryAddress1')]", 
                          "privateIPAllocationMethod": "Static", 
                          "subnet": {
                               "id": "[variables('extSubnetId')]"
@@ -353,7 +373,7 @@
                               "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('dnsLabel'), '-ext-pip0'))]"
                          }, 
                          "primary": false, 
-                         "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 10)]", 
+                         "privateIPAddress": "[concat(variables('extSubnetPrivateSecondaryAddressPrefix'), variables('extSubnetPrivateSecondaryAddressSuffix0'))]",
                          "privateIPAllocationMethod": "Static", 
                          "subnet": {
                               "id": "[variables('extSubnetId')]"
@@ -367,7 +387,7 @@
                               "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('dnsLabel'), '-ext-pip1'))]"
                          }, 
                          "primary": false, 
-                         "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 11)]", 
+                         "privateIPAddress": "[concat(variables('extSubnetPrivateSecondaryAddressPrefix'), variables('extSubnetPrivateSecondaryAddressSuffix1'))]",
                          "privateIPAllocationMethod": "Static", 
                          "subnet": {
                               "id": "[variables('extSubnetId')]"
@@ -381,7 +401,7 @@
                               "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('dnsLabel'), '-ext-pip2'))]"
                          }, 
                          "primary": false, 
-                         "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 12)]", 
+                         "privateIPAddress": "[concat(variables('extSubnetPrivateSecondaryAddressPrefix'), variables('extSubnetPrivateSecondaryAddressSuffix2'))]",
                          "privateIPAllocationMethod": "Static", 
                          "subnet": {
                               "id": "[variables('extSubnetId')]"
@@ -395,7 +415,7 @@
                               "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('dnsLabel'), '-ext-pip3'))]"
                          }, 
                          "primary": false, 
-                         "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 13)]", 
+                         "privateIPAddress": "[concat(variables('extSubnetPrivateSecondaryAddressPrefix'), variables('extSubnetPrivateSecondaryAddressSuffix3'))]",
                          "privateIPAllocationMethod": "Static", 
                          "subnet": {
                               "id": "[variables('extSubnetId')]"
@@ -409,7 +429,7 @@
                               "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('dnsLabel'), '-ext-pip4'))]"
                          }, 
                          "primary": false, 
-                         "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 14)]", 
+                         "privateIPAddress": "[concat(variables('extSubnetPrivateSecondaryAddressPrefix'), variables('extSubnetPrivateSecondaryAddressSuffix4'))]",
                          "privateIPAllocationMethod": "Static", 
                          "subnet": {
                               "id": "[variables('extSubnetId')]"
@@ -423,7 +443,7 @@
                               "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('dnsLabel'), '-ext-pip5'))]"
                          }, 
                          "primary": false, 
-                         "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 15)]", 
+                         "privateIPAddress": "[concat(variables('extSubnetPrivateSecondaryAddressPrefix'), variables('extSubnetPrivateSecondaryAddressSuffix5'))]", 
                          "privateIPAllocationMethod": "Static", 
                          "subnet": {
                               "id": "[variables('extSubnetId')]"
@@ -437,7 +457,7 @@
                               "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('dnsLabel'), '-ext-pip6'))]"
                          }, 
                          "primary": false, 
-                         "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 16)]", 
+                         "privateIPAddress": "[concat(variables('extSubnetPrivateSecondaryAddressPrefix'), variables('extSubnetPrivateSecondaryAddressSuffix6'))]",
                          "privateIPAllocationMethod": "Static", 
                          "subnet": {
                               "id": "[variables('extSubnetId')]"
@@ -451,7 +471,7 @@
                               "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('dnsLabel'), '-ext-pip7'))]"
                          }, 
                          "primary": false, 
-                         "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 17)]", 
+                         "privateIPAddress": "[concat(variables('extSubnetPrivateSecondaryAddressPrefix'), variables('extSubnetPrivateSecondaryAddressSuffix7'))]",
                          "privateIPAllocationMethod": "Static", 
                          "subnet": {
                               "id": "[variables('extSubnetId')]"
@@ -461,46 +481,6 @@
           ]
      }, 
      "resources": [
-          {
-               "apiVersion": "[variables('networkApiVersion')]", 
-               "location": "[variables('location')]", 
-               "name": "[variables('virtualNetworkName')]", 
-               "properties": {
-                    "addressSpace": {
-                         "addressPrefixes": [
-                              "[variables('vnetAddressCidr')]"
-                         ]
-                    }, 
-                    "subnets": [
-                         {
-                              "name": "[variables('mgmtSubnetName')]", 
-                              "properties": {
-                                   "addressPrefix": "[variables('mgmtSubnetPrefix')]"
-                              }
-                         }, 
-                         {
-                              "name": "[variables('extSubnetName')]", 
-                              "properties": {
-                                   "addressPrefix": "[variables('extSubnetPrefix')]"
-                              }
-                         }, 
-                         {
-                              "name": "[variables('intSubnetName')]", 
-                              "properties": {
-                                   "addressPrefix": "[variables('intSubnetPrefix')]"
-                              }
-                         }
-                    ]
-               }, 
-               "tags": {
-                    "application": "[parameters('tagValues').application]", 
-                    "costCenter": "[parameters('tagValues').cost]", 
-                    "environment": "[parameters('tagValues').environment]", 
-                    "group": "[parameters('tagValues').group]", 
-                    "owner": "[parameters('tagValues').owner]"
-               }, 
-               "type": "Microsoft.Network/virtualNetworks"
-          }, 
           {
                "apiVersion": "[variables('networkApiVersion')]", 
                "location": "[variables('location')]", 
@@ -595,8 +575,7 @@
           {
                "apiVersion": "[variables('networkApiVersion')]", 
                "dependsOn": [
-                    "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'), '-mgmt-nsg')]",
-                    "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+                    "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'), '-mgmt-nsg')]"
                ],
                "location": "[variables('location')]", 
                "name": "[concat(variables('dnsLabel'), '-mgmt-pip0')]", 
@@ -619,8 +598,7 @@
           {
                "apiVersion": "[variables('networkApiVersion')]", 
                "dependsOn": [
-                    "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'), '-mgmt-nsg')]",
-                    "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+                    "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'), '-mgmt-nsg')]"
                ],
                "location": "[variables('location')]", 
                "name": "[concat(variables('dnsLabel'), '-mgmt-pip1')]",  
@@ -644,8 +622,7 @@
           {
                "apiVersion": "[variables('networkApiVersion')]", 
                "dependsOn": [
-                    "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'), '-ext-nsg')]",
-                    "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+                    "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'), '-ext-nsg')]"
                ],
                "location": "[variables('location')]", 
                "name": "[concat(variables('dnsLabel'), '-self-pip0')]", 
@@ -665,8 +642,7 @@
           {
                "apiVersion": "[variables('networkApiVersion')]", 
                "dependsOn": [
-                    "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'), '-ext-nsg')]",
-                    "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+                    "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'), '-ext-nsg')]"
                ],
                "location": "[variables('location')]", 
                "name": "[concat(variables('dnsLabel'), '-self-pip1')]", 
@@ -691,8 +667,7 @@
                     "name": "extpipcopy"
                }, 
                "dependsOn": [
-                    "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'), '-ext-nsg')]",
-                    "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+                    "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'), '-ext-nsg')]"
                ],
                "location": "[variables('location')]", 
                "name": "[concat(variables('dnsLabel'), '-ext-pip', copyIndex())]", 
@@ -833,9 +808,6 @@
           
           {
                "apiVersion": "[variables('networkApiVersion')]", 
-               "dependsOn": [
-                    "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-               ],
                "location": "[variables('location')]", 
                "name": "[concat(variables('dnsLabel'), '-int-nic0')]",  
                "properties": {
@@ -864,9 +836,6 @@
           },  
           {
                "apiVersion": "[variables('networkApiVersion')]", 
-               "dependsOn": [
-                    "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-               ],
                "location": "[variables('location')]", 
                "name": "[concat(variables('dnsLabel'), '-int-nic1')]",   
                "properties": {
@@ -893,8 +862,7 @@
                }, 
                "type": "Microsoft.Network/networkInterfaces"
           },
-          
-          
+                  
           {
                "apiVersion": "[variables('computeApiVersion')]",
                "dependsOn": [
@@ -1068,7 +1036,7 @@
                "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '0/start')]", 
                "properties": {
                     "protectedSettings": {
-                         "commandToExecute": "[concat('mkdir -p /config/cloud/node_modules && cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; /usr/bin/install -b -m 400 /dev/null /config/cloud/azCredentials; /usr/bin/install -b -m 755 /dev/null /config/cloud/managedRoutes; /usr/bin/install -b -m 755 /dev/null /config/cloud/routeTableTag; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' > /config/verifyHash; echo -e ', variables('installCloudLibs'), ' > /config/installCloudLibs.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' > /config/cloud/passwd; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"resourceGroup\": \"', variables('resourceGroupName'), '\"}', variables('singleQuote'), ' > /config/cloud/azCredentials; echo -e ', parameters('managedRoutes'), ' > /config/cloud/managedRoutes; echo -e ', parameters('routeTableTag'), ' > /config/cloud/routeTableTag; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress0'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '0.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress0'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress0'), ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress0'), ',vlan:internal --log-level debug; cp failoverProvider.js /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts; npm install --prefix /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure async icontrol; echo ', variables('singleQuote'), '/usr/bin/f5-rest-node --use-strict /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/failoverProvider.js', variables('singleQuote'), ' >> /config/failover/active; echo ', variables('singleQuote'), '/usr/bin/f5-rest-node --use-strict /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/failoverProvider.js', variables('singleQuote'), ' >> /config/failover/tgrefresh; tmsh modify cm device ', concat(variables('instanceName'), '0.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress0'), ' port 1026 } }; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress0'), ' -u admin --password-url file:///config/cloud/passwd --config-sync-ip ', variables('intSubnetPrivateAddress0'), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(variables('instanceName'), '0.', resourceGroup().location, '.cloudapp.azure.com'), ' --network-failover --auto-sync --save-on-auto-sync; rm -f /config/cloud/passwd')]"
+                         "commandToExecute": "[concat('mkdir -p /config/cloud/node_modules && cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; /usr/bin/install -b -m 400 /dev/null /config/cloud/azCredentials; /usr/bin/install -b -m 755 /dev/null /config/cloud/managedRoutes; /usr/bin/install -b -m 755 /dev/null /config/cloud/routeTableTag; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' > /config/verifyHash; echo -e ', variables('installCloudLibs'), ' > /config/installCloudLibs.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' > /config/cloud/passwd; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"resourceGroup\": \"', variables('resourceGroupName'), '\"}', variables('singleQuote'), ' > /config/cloud/azCredentials; echo -e ', parameters('managedRoutes'), ' > /config/cloud/managedRoutes; echo -e ', parameters('routeTableTag'), ' > /config/cloud/routeTableTag; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress0'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '0.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress0'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivatePrimaryAddress0'), ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress0'), ',vlan:internal --log-level debug; cp failoverProvider.js /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts; npm install --prefix /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure async icontrol; echo ', variables('singleQuote'), '/usr/bin/f5-rest-node --use-strict /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/failoverProvider.js', variables('singleQuote'), ' >> /config/failover/active; echo ', variables('singleQuote'), '/usr/bin/f5-rest-node --use-strict /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/failoverProvider.js', variables('singleQuote'), ' >> /config/failover/tgrefresh; tmsh modify cm device ', concat(variables('instanceName'), '0.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress0'), ' port 1026 } }; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress0'), ' -u admin --password-url file:///config/cloud/passwd --config-sync-ip ', variables('intSubnetPrivateAddress0'), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(variables('instanceName'), '0.', resourceGroup().location, '.cloudapp.azure.com'), ' --network-failover --auto-sync --save-on-auto-sync; rm -f /config/cloud/passwd')]"
                     }, 
                     "publisher": "Microsoft.Azure.Extensions", 
                     "settings": {
@@ -1100,7 +1068,7 @@
                "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '1/start')]", 
                "properties": {
                     "protectedSettings": {
-                         "commandToExecute": "[concat('mkdir -p /config/cloud/node_modules && cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; /usr/bin/install -b -m 400 /dev/null /config/cloud/azCredentials; /usr/bin/install -b -m 755 /dev/null /config/cloud/managedRoutes; /usr/bin/install -b -m 755 /dev/null /config/cloud/routeTableTag; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' > /config/verifyHash; echo -e ', variables('installCloudLibs'), ' > /config/installCloudLibs.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' > /config/cloud/passwd; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"resourceGroup\": \"', variables('resourceGroupName'), '\"}', variables('singleQuote'), ' > /config/cloud/azCredentials; echo -e ', parameters('managedRoutes'), ' > /config/cloud/managedRoutes; echo -e ', parameters('routeTableTag'), ' > /config/cloud/routeTableTag; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress1'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '1.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey2'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress1'), ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress1'), ',vlan:internal --log-level debug; cp failoverProvider.js /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts; npm install --prefix /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure async icontrol; echo ', variables('singleQuote'), '/usr/bin/f5-rest-node --use-strict /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/failoverProvider.js', variables('singleQuote'), ' >> /config/failover/active; echo ', variables('singleQuote'), '/usr/bin/f5-rest-node --use-strict /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/failoverProvider.js', variables('singleQuote'), ' >> /config/failover/tgrefresh; tmsh modify cm device ', concat(variables('instanceName'), '1.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress1'), ' port 1026 } }; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress1'), ' -u admin --password-url file:///config/cloud/passwd --config-sync-ip ', variables('intSubnetPrivateAddress1'), ' --join-group --device-group Sync --sync --remote-host ', variables('mgmtSubnetPrivateAddress0'), ' --remote-user admin --remote-password-url file:///config/cloud/passwd; rm -f /config/cloud/passwd; exit 0')]"
+                         "commandToExecute": "[concat('mkdir -p /config/cloud/node_modules && cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; /usr/bin/install -b -m 400 /dev/null /config/cloud/azCredentials; /usr/bin/install -b -m 755 /dev/null /config/cloud/managedRoutes; /usr/bin/install -b -m 755 /dev/null /config/cloud/routeTableTag; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' > /config/verifyHash; echo -e ', variables('installCloudLibs'), ' > /config/installCloudLibs.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' > /config/cloud/passwd; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"resourceGroup\": \"', variables('resourceGroupName'), '\"}', variables('singleQuote'), ' > /config/cloud/azCredentials; echo -e ', parameters('managedRoutes'), ' > /config/cloud/managedRoutes; echo -e ', parameters('routeTableTag'), ' > /config/cloud/routeTableTag; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress1'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '1.', resourceGroup().location, '.cloudapp.azure.com'), ' --license ', parameters('licenseKey2'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivatePrimaryAddress1'), ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress1'), ',vlan:internal --log-level debug; cp failoverProvider.js /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts; npm install --prefix /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure async icontrol; echo ', variables('singleQuote'), '/usr/bin/f5-rest-node --use-strict /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/failoverProvider.js', variables('singleQuote'), ' >> /config/failover/active; echo ', variables('singleQuote'), '/usr/bin/f5-rest-node --use-strict /config/cloud/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/failoverProvider.js', variables('singleQuote'), ' >> /config/failover/tgrefresh; tmsh modify cm device ', concat(variables('instanceName'), '1.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress1'), ' port 1026 } }; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress1'), ' -u admin --password-url file:///config/cloud/passwd --config-sync-ip ', variables('intSubnetPrivateAddress1'), ' --join-group --device-group Sync --sync --remote-host ', variables('mgmtSubnetPrivateAddress0'), ' --remote-user admin --remote-password-url file:///config/cloud/passwd; rm -f /config/cloud/passwd')]"
                     }, 
                     "publisher": "Microsoft.Azure.Extensions", 
                     "settings": {
