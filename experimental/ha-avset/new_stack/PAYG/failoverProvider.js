@@ -21,7 +21,7 @@ var iControl = require('icontrol');
 var bigip = new iControl({
      host: 'localhost',
      proto: 'https',
-     port: 443,
+     port: 8443,
      strict: false,
      debug: false
 });
