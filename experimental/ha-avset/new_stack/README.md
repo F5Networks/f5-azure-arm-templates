@@ -9,7 +9,7 @@ This solution uses an ARM template to launch a two BIG-IP VEs in an Active/Stand
 Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise-like" cloud design where the compute instance of F5 is running with a management interface, a front-end application traffic (Virtual Server) interface, and back-end application interface.  This template is a result of Azure now supporting multiple public IP addresses to multiple private IP addresses per NIC.  This template also has the ability to create specify additional Public/Private IP addresses for the external "application" NIC to be used for passing traffic to virtual servers in a more traditional fashion.
 
 You can choose to deploy the BIG-IP VE with your own F5 BIG-IP license (BYOL), or use Pay as You Go (PAYG) licensing.
-This README file is for the ARM template in an existing stack.  If you want to deploy into an existing stack, see https://gitswarm.f5net.com/cloudsolutions/f5-azure-arm-templates/tree/master/experimental/ha-avset/existing_stack/README.md
+This README file is for the ARM template in an existing stack.  If you want to deploy into an existing stack, see https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental/ha-avset/existing_stack/README.md
 
 
 

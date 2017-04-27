@@ -9,7 +9,7 @@ This solution uses an ARM template to launch a two BIG-IP VEs in an Active/Stand
 Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise-like" cloud design where the compute instance of F5 is running with a management interface, a front-end application traffic (Virtual Server) interface, and back-end application interface.  This template is a result of Azure now supporting multiple public IP addresses to multiple private IP addresses per NIC.  This template also has the ability to create specify additional Public/Private IP addresses for the external "application" NIC to be used for passing traffic to virtual servers in a more traditional fashion.
 
 You can choose to deploy the BIG-IP VE with your own F5 BIG-IP license (BYOL), or use Pay as You Go (PAYG) licensing.
-This README file is for the ARM template in an existing stack.  If you want to deploy into a new stack, see https://gitswarm.f5net.com/cloudsolutions/f5-azure-arm-templates/tree/master/experimental/ha-avset/new_stack/README.md
+This README file is for the ARM template in an existing stack.  If you want to deploy into a new stack, see https://github.com/F5Networks/cloudsolutions/f5-azure-arm-templates/tree/master/experimental/ha-avset/new_stack/README.md
 
 
 
@@ -62,7 +62,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | --- | --- | --- |
 | adminUsername | x | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
 | adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
-| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IP VEs for management. |
+| dnsLabel | x | Unique DNS label that is used as a part of the hostname for the public IP address used to access the BIG-IP VEs for management. You can find the DNS label by clicking the resource group, then the public IP address(es) that end with "-mgmt-pip" and looking at the DNS label of each. |
 | instanceName | x | The hostname to be configured for the VM. |
 | instanceType | x | The Azure Virtual Machine instance size you want to use. |
 | imageName | x | The F5 image you want to deploy. |
@@ -85,8 +85,8 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | clientId | x | Your Azure service principal application client ID. |
 | servicePrincipalSecret | x | Your Azure service principal application secret. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
-| managedRoutes | x | A comma-delimited list of UDR destinations to be managed by this cluster. |
-| routeTableTag | x | Azure tag to identify the route tables to be managed by this cluster. |
+| managedRoutes | | A comma-delimited list of UDR destinations to be managed by this cluster. |
+| routeTableTag | | Azure tag to identify the route tables to be managed by this cluster. This can be any single word, in order for the routes to be managed by BIG-IP, you must create a tag on the route table with the key "f5_ha" and the value of the routeTable tag (for example f5_a:myRoute).|
 
 
 ### <a name="powershell"></a>PowerShell Script Example
