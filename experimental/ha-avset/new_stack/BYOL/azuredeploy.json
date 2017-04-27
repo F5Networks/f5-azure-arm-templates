@@ -196,13 +196,13 @@
                     "Port": 443
                }, 
                "13.0.000": {
-                    "Port": 8443
+                    "Port": 443
                }, 
                "443": {
                     "Port": 443
                }, 
                "latest": {
-                    "Port": 8443
+                    "Port": 443
                }
           },                
           "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
