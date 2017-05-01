@@ -50,9 +50,6 @@
         "externalIpAddressRangeStart": {
             "value": "GEN_UNIQUE"
         }, 
-        "defaultGw": {
-            "value": "GEN_UNIQUE"
-        }, 
         "restrictedSrcAddress": {
             "value": "*"
         }, 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --dnsLabelPrefix <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.000 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --mgmtIpAddress <value> --externalSubnetName <value> --externalIpAddressRangeStart <value> --internalSubnetName <value> --internalIpAddress <value> --defaultGw <value> --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --dnsLabelPrefix <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.000 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --mgmtIpAddress <value> --externalSubnetName <value> --externalIpAddressRangeStart <value> --internalSubnetName <value> --internalIpAddress <value> --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 # Assign Script Paramters and Define Variables
 # Specify static items, change these as needed or make them parameters
@@ -9,7 +9,7 @@ region="westus"
 restrictedSrcAddress="*"
 tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x:y: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,adminUsername:,adminPassword:,dnsLabel:,dnsLabelPrefix:,instanceName:,instanceType:,imageName:,bigIpVersion:,numberOfExternalIps:,vnetName:,vnetResourceGroupName:,mgmtSubnetName:,mgmtIpAddress:,externalSubnetName:,externalIpAddressRangeStart:,internalSubnetName:,internalIpAddress:,defaultGw:,restrictedSrcAddress: -n $0 -- "$@"`
+ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,adminUsername:,adminPassword:,dnsLabel:,dnsLabelPrefix:,instanceName:,instanceType:,imageName:,bigIpVersion:,numberOfExternalIps:,vnetName:,vnetResourceGroupName:,mgmtSubnetName:,mgmtIpAddress:,externalSubnetName:,externalIpAddressRangeStart:,internalSubnetName:,internalIpAddress:,restrictedSrcAddress: -n $0 -- "$@"`
 eval set -- "$ARGS"
 
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
@@ -84,10 +84,7 @@ while true; do
         -w|--internalIpAddress)
             internalIpAddress=$2
             shift 2;;
-        -x|--defaultGw)
-            defaultGw=$2
-            shift 2;;
-        -y|--restrictedSrcAddress)
+        -x|--restrictedSrcAddress)
             restrictedSrcAddress=$2
             shift 2;;
         --)
@@ -97,7 +94,7 @@ while true; do
 done
 
 #If a required paramater is not passed, the script will prompt for it below
-required_variables="adminUsername adminPassword dnsLabel dnsLabelPrefix instanceName instanceType imageName bigIpVersion numberOfExternalIps vnetName vnetResourceGroupName mgmtSubnetName mgmtIpAddress externalSubnetName externalIpAddressRangeStart internalSubnetName internalIpAddress defaultGw resourceGroupName licenseType "
+required_variables="adminUsername adminPassword dnsLabel dnsLabelPrefix instanceName instanceType imageName bigIpVersion numberOfExternalIps vnetName vnetResourceGroupName mgmtSubnetName mgmtIpAddress externalSubnetName externalIpAddressRangeStart internalSubnetName internalIpAddress resourceGroupName licenseType "
 for variable in $required_variables
         do
         if [ -v ${!variable} ] ; then
@@ -140,9 +137,9 @@ azure group create -n $resourceGroupName -l $region
 
 # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
 if [ $licenseType == "BYOL" ]; then
-    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"dnsLabelPrefix\":{\"value\":\"$dnsLabelPrefix\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddress\":{\"value\":\"$mgmtIpAddress\"},\"externalSubnetName\":{\"value\":\"$externalSubnetName\"},\"externalIpAddressRangeStart\":{\"value\":\"$externalIpAddressRangeStart\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddress\":{\"value\":\"$internalIpAddress\"},\"defaultGw\":{\"value\":\"$defaultGw\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licenseKey1\":{\"value\":\"$licenseKey1\"}}"
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"dnsLabelPrefix\":{\"value\":\"$dnsLabelPrefix\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddress\":{\"value\":\"$mgmtIpAddress\"},\"externalSubnetName\":{\"value\":\"$externalSubnetName\"},\"externalIpAddressRangeStart\":{\"value\":\"$externalIpAddressRangeStart\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddress\":{\"value\":\"$internalIpAddress\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licenseKey1\":{\"value\":\"$licenseKey1\"}}"
 elif [ $licenseType == "PAYG" ]; then
-    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"dnsLabelPrefix\":{\"value\":\"$dnsLabelPrefix\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddress\":{\"value\":\"$mgmtIpAddress\"},\"externalSubnetName\":{\"value\":\"$externalSubnetName\"},\"externalIpAddressRangeStart\":{\"value\":\"$externalIpAddressRangeStart\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddress\":{\"value\":\"$internalIpAddress\"},\"defaultGw\":{\"value\":\"$defaultGw\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"dnsLabelPrefix\":{\"value\":\"$dnsLabelPrefix\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddress\":{\"value\":\"$mgmtIpAddress\"},\"externalSubnetName\":{\"value\":\"$externalSubnetName\"},\"externalIpAddressRangeStart\":{\"value\":\"$externalIpAddressRangeStart\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddress\":{\"value\":\"$internalIpAddress\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
 else
     echo "Please select a valid license type of PAYG or BYOL."
     exit 1
