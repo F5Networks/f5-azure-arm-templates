@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --dnsLabelPrefix <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.000 --numberOfExternalIps 1 --vnetAddressPrefix 10.0 --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.000 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --vnetAddressPrefix <value> --restrictedSrcAddress "*" --managedRoutes <value> --routeTableTag <value> --tenantId <value> --clientId <value> --secret <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 # Assign Script Paramters and Define Variables
 # Specify static items, change these as needed or make them parameters
@@ -9,7 +9,7 @@ region="westus"
 restrictedSrcAddress="*"
 tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,adminUsername:,adminPassword:,dnsLabel:,dnsLabelPrefix:,instanceName:,instanceType:,imageName:,bigIpVersion:,numberOfExternalIps:,vnetAddressPrefix:,restrictedSrcAddress: -n $0 -- "$@"`
+ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,licenseKey2:,adminUsername:,adminPassword:,dnsLabel:,instanceName:,instanceType:,imageName:,bigIpVersion:,numberOfExternalIps:,vnetAddressPrefix:,restrictedSrcAddress:,managedRoutes:,routeTableTag:,tenantId:,clientId:,secret: -n $0 -- "$@"`
 eval set -- "$ARGS"
 
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
@@ -33,17 +33,17 @@ while true; do
         -f|--licenseKey1)
             licenseKey1=$2
             shift 2;;
-        -g|--adminUsername)
+        -g|--licenseKey2)
+            licenseKey2=$2
+            shift 2;;
+        -h|--adminUsername)
             adminUsername=$2
             shift 2;;
-        -h|--adminPassword)
+        -i|--adminPassword)
             adminPassword=$2
             shift 2;;
-        -i|--dnsLabel)
+        -j|--dnsLabel)
             dnsLabel=$2
-            shift 2;;
-        -j|--dnsLabelPrefix)
-            dnsLabelPrefix=$2
             shift 2;;
         -k|--instanceName)
             instanceName=$2
@@ -66,6 +66,21 @@ while true; do
         -q|--restrictedSrcAddress)
             restrictedSrcAddress=$2
             shift 2;;
+        -r|--managedRoutes)
+            managedRoutes=$2
+            shift 2;;
+        -s|--routeTableTag)
+            routeTableTag=$2
+            shift 2;;
+        -t|--tenantId)
+            tenantId=$2
+            shift 2;;
+        -u|--clientId)
+            clientId=$2
+            shift 2;;
+        -v|--secret)
+            secret=$2
+            shift 2;;
         --)
             shift
             break;;
@@ -73,7 +88,7 @@ while true; do
 done
 
 #If a required paramater is not passed, the script will prompt for it below
-required_variables="adminUsername adminPassword dnsLabel dnsLabelPrefix instanceName instanceType imageName bigIpVersion numberOfExternalIps vnetAddressPrefix resourceGroupName licenseType "
+required_variables="adminUsername adminPassword dnsLabel instanceName instanceType imageName bigIpVersion numberOfExternalIps vnetAddressPrefix resourceGroupName licenseType tenantId clientId secret "
 for variable in $required_variables
         do
         if [ -v ${!variable} ] ; then
@@ -85,6 +100,9 @@ done
 if [ $licenseType == "BYOL" ]; then
     if [ -v $licenseKey1 ] ; then
             read -p "Please enter value for licenseKey1:" licenseKey1
+    fi
+    if [ -v $licenseKey2 ] ; then
+            read -p "Please enter value for licenseKey2:" licenseKey2
     fi
     template_file="./BYOL/azuredeploy.json"
     parameter_file="./BYOL/azuredeploy.parameters.json"
@@ -116,9 +134,9 @@ azure group create -n $resourceGroupName -l $region
 
 # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
 if [ $licenseType == "BYOL" ]; then
-    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"dnsLabelPrefix\":{\"value\":\"$dnsLabelPrefix\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licenseKey1\":{\"value\":\"$licenseKey1\"}}"
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"licenseKey1\":{\"value\":\"$licenseKey1\"},\"licenseKey2\":{\"value\":\"$licenseKey2\"},\"numberOfExternalIps\":{\"value\": $numberOfExternalIps},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"managedRoutes\":{\"value\":\"$managedRoutes\"},\"routeTableTag\":{\"value\":\"$routeTableTag\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$secret\"}}"
 elif [ $licenseType == "PAYG" ]; then
-    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"dnsLabelPrefix\":{\"value\":\"$dnsLabelPrefix\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p   "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"licenseKey1\":{\"value\":\"$licenseKey1\"},\"licenseKey2\":{\"value\":\"$licenseKey2\"},\"numberOfExternalIps\":{\"value\": $numberOfExternalIps},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"managedRoutes\":{\"value\":\"$managedRoutes\"},\"routeTableTag\":{\"value\":\"$routeTableTag\"},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$secret\"}}"
 else
     echo "Please select a valid license type of PAYG or BYOL."
     exit 1
