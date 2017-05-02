@@ -1,15 +1,15 @@
-# Deploying the BIG-IP VE in Azure - 2 NIC(New Networking Stack)
+# Deploying the BIG-IP VE in Azure - 2 NIC (New Networking Stack)
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 
 ## Introduction
 
-This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3nic template minus the NIC meant to connect directly to backend webserver.
+This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in a new networking stack in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3-NIC template without the NIC for  connecting directly to backend webservers.
 
 You can choose to deploy the BIG-IP VE with your own F5 BIG-IP license (BYOL), or use Pay as You Go (PAYG) licensing.
 
 ## Prerequisites and configuration notes
-  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.
+  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **#** or **'** (single quote).
   - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
@@ -55,18 +55,18 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IPs.  This must not include **#**.  Remember this password; you will need it later. |
-| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
-| instanceName | x | The hostname to be configured for the VM. |
-| instanceType | x | The desired Azure Virtual Machine instance size. |
-| imageName | x | The desired F5 image to deploy. |
-| bigIpVersion | x | F5 BIG-IP Version to use. |
+| adminUsername | x | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
+| adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote).  Remember this password, you will need it later. |
+| dnsLabel | x | Unique DNS Name for the public IP address used to access access the BIG-IP VEs for management. |
+| instanceName | x | The hostname you want to use for the Virtual Machine. |
+| instanceType | x | Azure instance size of the Virtual Machine.  |
+| imageName | x | The F5 image you want to deploy. |
+| bigIpVersion | x | F5 BIG-IP version you want to use. |
 | licenseKey1 | | For BYOL only. The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
-| licensedBandwidth | | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
-| numberOfExternalIps | x | The number of public/private IP's to deploy for the application traffic(external) nic on the BIG-IP to be used for virtual servers. |
-| vnetAddressPrefix | x | The start of the CIDR block(/16) used by the BIG-IP's when creating the vnet and subnets.  What is supplied MUST be just the first two octets of the /16 virtual network that will be created.  Such as '10.0', '10.100', 192.168', etc... |
-| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
+| licensedBandwidth | | For PAYG only.  The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| numberOfExternalIps | x | The number of public/private IP address you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
+| vnetAddressPrefix | x | The start of the CIDR block(/16) used by the BIG-IP VEs when creating the VNET and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
+| restrictedSrcAddress | x | This field restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
 
@@ -408,4 +408,4 @@ under the License.
 Contributor License Agreement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Individuals or business entities who contribute to this project must have
-completed and submitted the `F5 Contributor License Agreement`
+completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html).

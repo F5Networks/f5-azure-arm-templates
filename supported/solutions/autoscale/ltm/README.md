@@ -1,10 +1,10 @@
-# Deploy LTM-provisioned BIG-IP VE(s) in an Azure VM Scale Set with auto scaling enabled - LTM-Only
+# Deploying BIG-IP LTM VE(s) for Auto Scaling in an Azure VM Scale Set
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 
 ## Introduction
 
-This solution uses an ARM template to launch the deployment of F5 BIG-IP VE(s) in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode.
+This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE LTM instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM only.
 
 
 ## Prerequisites and configuration notes
@@ -26,8 +26,9 @@ Additionally, F5 provides checksums for all of our supported templates. For inst
   - For a list versions of the BIG-IP Virtual Edition (VE) and F5 licenses that are supported on specific hypervisors and Microsoft Azure, see https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/ve-supported-hypervisor-matrix.html.
 
 ### Help
-We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates.  This channel is typically monitored Monday-Friday 9-5 PST by F5 employees who will offer best-effort support.<br>
-While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.
+Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from F5 Technical Support.
+
+We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates.  This channel is typically monitored Monday-Friday 9-5 PST by F5 employees who will offer best-effort support.
 
 
 
@@ -50,22 +51,22 @@ Use this button to deploy the template:
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| vmScaleSetMinCount | x | The minimum(and default) number of BIG-IP VEs that will be deployed into the VM Scale Set. |
-| vmScaleSetMaxCount | x | The number of maximum BIG-IP VEs that can be deployed into the VM Scale Set. |
-| scaleOutThroughput | x | The percentage of 'Network Out' Throughput to scale out on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen. |
-| scaleInThroughput | x | The percentage of 'Network Out' Throughput to scale in on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen. |
-| scaleTimeWindow | x | The time window required to trigger a scale event(up and down), this is used to determine the amount of time needed for a threshold to be breached as well as to prevent flapping. |
-| adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IPs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
-| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
-| instanceType | x | The desired Azure Virtual Machine instance size. |
-| imageName | x | The desired F5 image to deploy. |
-| bigIpVersion | x | F5 BIG-IP Version to use. |
-| licensedBandwidth | | PAYG licensed bandwidth(Mbps) image to deploy. |
-| tenantId | | Your Azure service principal application tenant ID |
-| clientId | | Your Azure service principal application client(application) ID. |
+| vmScaleSetMinCount | x | The minimum (and default) number of BIG-IP VEs that will be deployed into the VM Scale Set. |
+| vmScaleSetMaxCount | x | The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set. |
+| scaleOutThroughput | x | The percentage of 'Network Out' throughput that triggers a Scale Out event.  This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you choose. |
+| scaleInThroughput | x | The percentage of 'Network Out' throughput that triggers a Scale In event.  This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you choose. |
+| scaleTimeWindow | x | The time window required to trigger a scale event (in and out). This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). |
+| adminUsername | x | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
+| adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
+| dnsLabel | x | Unique DNS Name for the Public IP address used to access access the BIG-IP VEs for management. |
+| instanceType | x | Azure instance size of the Virtual Machine. |
+| imageName | x | The F5 image you want to deploy. |
+| bigIpVersion | x | F5 BIG-IP version you want to use. |
+| licensedBandwidth | | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| tenantId | | Your Azure service principal application tenant ID. |
+| clientId | | Your Azure service principal application client (application) ID. |
 | servicePrincipalSecret | | Your Azure service principal application secret. |
-| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
+| restrictedSrcAddress | x | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
 ### <a name="powershell"></a>PowerShell Script Example
@@ -357,7 +358,7 @@ _Using the Node.js cross-platform CLI - requires additional steps for setting up
 https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal-cli
 
 #### 3. Azure PowerShell
-Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
+Follow the steps outlined in the [Azure PowerShell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
 
 
 ## Additional Optional Configuration Items
@@ -493,4 +494,4 @@ under the License.
 Contributor License Agreement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Individuals or business entities who contribute to this project must have
-completed and submitted the `F5 Contributor License Agreement`
+completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html)

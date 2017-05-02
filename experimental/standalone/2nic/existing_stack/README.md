@@ -1,21 +1,21 @@
-# Deploying the BIG-IP VE in Azure - 2 NIC
+# Deploying the BIG-IP VE in Azure - 2 NIC (Existing Stack)
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 
 ## Introduction
 
-This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3nic template minus the NIC meant to connect directly to backend webserver.
+This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in an existing networking stack in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3nic template minus the NIC meant to connect directly to backend webserver.
 
 You can choose to deploy the BIG-IP VE with your own F5 BIG-IP license (BYOL), or use Pay as You Go (PAYG) licensing.
 
 ## Prerequisites and configuration notes
-  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.
-  - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
+  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **#** or **'** (single quote).
+  - If you are deploying the BYOL (Bring Your Own License) template, you must have a valid BIG-IP license token.
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
 
 ## Security
-This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
+This ARM template downloads helper code to configure the BIG-IP system. If you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
 
 In the *variables* section:
   - In the *verifyHash* variable: search for **script-signature** and then a hashed signature.
@@ -56,25 +56,23 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IPs.  This must not include **#**.  Remember this password; you will need it later. |
-| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
-| instanceName | x | The hostname to be configured for the VM. |
-| instanceType | x | The desired Azure Virtual Machine instance size. |
-| imageName | x | The desired F5 image to deploy. |
-| bigIpVersion | x | F5 BIG-IP Version to use. |
+| adminUsername | x | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
+| adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote).  Remember this password, you will need it later. |
+| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IP VEs for management. |
+| instanceName | x | The hostname you want to use for the Virtual Machine. |
+| instanceType | x | Azure instance size of the Virtual Machine.  |
+| imageName | x | The F5 image you want to deploy. |
+| bigIpVersion | x | F5 BIG-IP version you want to use. |
 | licenseKey1 | | For BYOL only. The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
-| licensedBandwidth | | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
-| numberOfExternalIps | x | The number of public/private IP's to deploy for the application traffic(external) nic on the BIG-IP to be used for virtual servers. |
-192.168', etc... |
-| vnetName | x | The name of the existing virtual network that you want to connect the BIG-IP's to. |
-| vnetResourceGroupName | x | The name of the resource group that contains the Virtual Network the BIG-IP will be placed into. |
-| mgmtSubnetName | x | Name of the existing mgmt subnet - with external acccess to Internet. |
+| licensedBandwidth | | For PAYG only.  The amount of licensed bandwidth (Mbps) you want the PAYG image to use.  |
+| numberOfExternalIps | x | The number of public/private IP address you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
+| vnetName | x | The name of the existing virtual network to which you want to connect the BIG-IP VE. |
+| vnetResourceGroupName | x | The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed. |
+| mgmtSubnetName | x | Name of the existing MGMT subnet - with external access to Internet. |
 | mgmtIpAddress | x | MGMT subnet IP Address to use for the BIG-IP management IP. |
-| externalSubnetName | x | Name of the existing external subnet - with external acccess to Internet. |
-| externalIpAddressRangeStart | x | Depending on how many public/private IP's selected in numberOfExternalIps this should be the starting range to be used as the private IP, minimum of 1 for the self IP of the external subnet.  Such as inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 being used for the self IP as well as 10.100.1.51 and 10.100.1.52 being configured as static IPs for VIPs |
-| defaultGw | x | Default GW for the BIG-IP(Ensure this can live within one of the addresses created above). |
-| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
+| externalSubnetName | x | Name of the existing external subnet - with external access to Internet. |
+| externalIpAddressRangeStart | x | The starting range you want to use for the private IP address(es).  This depends on how many public/private IP addresses you selected in 'numberOfExternalIps'.  For example, if you enter 10.100.1.50 here and chose 2 for numberOfExternalIps, then 10.100.1.50 is used for the BIG-IP VE self IP address, and 10.100.1.51 and 10.100.1.52 are created as static IP addresses for use as virtual servers. |
+| restrictedSrcAddress | x | This field restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
 
@@ -83,7 +81,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 ```powershell
     ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
     ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
-    ## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
+    ## be supplied inline when running this script but if they are not then the default will be used as specified below.   ##
     ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -dnsLabelPrefix <value> -instanceName f5vm01 -instanceType Standard_D2_v2 -imageName Good -bigIpVersion 13.0.000 -numberOfExternalIps 1 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddress <value> -externalSubnetName <value> -externalIpAddressRangeStart <value> -defaultGw <value> -restrictedSrcAddress "*" -resourceGroupName <value>
 
     param(
@@ -310,7 +308,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
         esac
     done
 
-    #If a required paramater is not passed, the script will prompt for it below
+    #If a required parameter is not passed, the script will prompt for it below
     required_variables="adminUsername adminPassword dnsLabel dnsLabelPrefix instanceName instanceType imageName bigIpVersion numberOfExternalIps vnetName vnetResourceGroupName mgmtSubnetName mgmtIpAddress externalSubnetName externalIpAddressRangeStart defaultGw resourceGroupName licenseType "
     for variable in $required_variables
             do
@@ -365,19 +363,19 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 
 ## <a name="config"></a>Configuration Example
 
-The following is a simple configuration diagram for this 2 NIC deployment.  In a 2 NIC scenario, one NIC is for management and one is for external.  This is in a more traditional deployment model where data-plane and management traffic is seperate.
+The following is a simple configuration diagram for this 2-NIC deployment.  In a 2-NIC scenario, one NIC is for management and one is for external.  This is in a more traditional deployment model where data-plane and management traffic are separate.
 
 ![2 NIC configuration example](images/azure-2nic-sm.png)
 
 
-### Changing the BIG-IP Configuration Utility (GUI) port
+### Changing the BIG-IP Configuration utility (GUI) port
 The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.
-***Important***: The default port provisioned is dependent on 1) what BIG-IP version you choose to deploy as well as 2) how many nics are configured on that BIG-IP.  v13.0.000 and above in a single-nic configuration utilizes port 8443, all older BIG-IP versions, as well as newer(then v13.0.000) versions with multiple interfaces will default to 443 on the MGMT interface.
-***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
+<br>***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP.  BIG-IP v13.0.000 and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.
+<br>***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
 
 ## Documentation
 
-The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/4.html) decribes how to create the configuration manually without using the ARM template.
+The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/4.html) describes how to create the configuration manually without using the ARM template.
 
 ## Deploying Custom Configuration to an Azure Virtual Machine
 
@@ -460,4 +458,4 @@ under the License.
 Contributor License Agreement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Individuals or business entities who contribute to this project must have
-completed and submitted the `F5 Contributor License Agreement`
+completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html).

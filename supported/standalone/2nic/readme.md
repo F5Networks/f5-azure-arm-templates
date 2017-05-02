@@ -57,16 +57,16 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | Parameter | Required | Description |
 | --- | --- | --- |
 | adminUsername | x | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IPs VEs.   This must not include **#** or **'** (single quote).  Remember this password, you will need it later. |
+| adminPassword | x | A strong password for the BIG-IP VEs.   This must not include **#** or **'** (single quote).  Remember this password, you will need it later. |
 | dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IP VEs for management. |
-| instanceName | x | The hostname to be configured for the VM. |
+| instanceName | x | The hostname you want to use for the Virtual Machine. |
 | instanceType | x | The Azure Virtual Machine instance size you want to use. |
 | imageName | x | The F5 image you want to deploy. |
 | bigIpVersion | x | F5 BIG-IP version you want to use. |
 | licenseKey1 | | For BYOL only. The license token from the F5 licensing server. This license is used for the first F5 BIG-IP VE. |
-| licensedBandwidth | | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
-| numberOfExternalIps | x | The number of public/private IPs to deploy for the application traffic (external) NIC on the BIG-IP to be used for virtual servers. |
-| vnetAddressPrefix | x | The start of the CIDR block(/16) used by the BIG-IP VEs when creating the VNET and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168' |
+| licensedBandwidth | | For PAYG only. The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| numberOfExternalIps | x | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP to be used for virtual servers. |
+| vnetAddressPrefix | x | The start of the CIDR block(/16) used by the BIG-IP VEs when creating the VNET and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or an asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
@@ -411,4 +411,4 @@ under the License.
 Contributor License Agreement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Individuals or business entities who contribute to this project must have
-completed and submitted the `F5 Contributor License Agreement`
+completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html).

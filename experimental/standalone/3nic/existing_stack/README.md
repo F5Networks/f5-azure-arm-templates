@@ -1,10 +1,12 @@
-# Deploying the BIG-IP VE in Azure - 3 NIC(Traditional Deployment; Existing Networking Stack)
+# Deploying the BIG-IP VE in Azure - 3 NIC (Traditional Deployment, Existing Networking Stack)
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 
 ## Introduction
 
-This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the compute instance of F5 is running with a management, front-end application traffic(Virtual Server) and back-end application interfaces.  As a result of Azure now supporting multiple public-IP's to multiple private IP's per NIC this template is now fully functional.  As an additional item this template allows for the selection of additional Public/Private IP's to be created for the external "application" NIC to be utilized for passing traffic into virtual servers in a more traditional fashion.
+This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in an existing stack in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the compute instance of F5 is running with a management, front-end application traffic(Virtual Server) and back-end application interfaces.  
+
+This template is a result of Azure adding support for multiple public/private IP addresses for each NIC.  This template also has the ability to create specify additional Public/Private IP addresses for the external "application" NIC to be used for passing traffic to virtual servers in a more traditional fashion.
 
 You can choose to deploy the BIG-IP VE with your own F5 BIG-IP license (BYOL), or use Pay as You Go (PAYG) licensing.
 
@@ -59,25 +61,23 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | --- | --- | --- |
 | adminUsername | x | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
 | adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
-| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
-| dnsLabelPrefix | x | Unique DNS Name prefix for the Public IP(s) used to access the data plan for application traffic objects(Virtual Servers, etc...) |
-| instanceName | x | The hostname to be configured for the VM. |
-| instanceType | x | The desired Azure Virtual Machine instance size. |
-| imageName | x | The desired F5 image to deploy. |
+| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IP VEs for management. |
+| dnsLabelPrefix | x | Unique DNS Name prefix for the Public IP address(es) used to access the data plan for application traffic objects (such as virtual servers and pools). |
+| instanceName | x | The hostname you want to use for the Virtual Machine. |
+| instanceType | x | Azure instance size of the Virtual Machine. |
+| imageName | x | The F5 image you want to deploy. |
 | bigIpVersion | x | F5 BIG-IP version you want to use. |
 | licenseKey1 | | For BYOL only. The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
-| licensedBandwidth | | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
-| numberOfExternalIps | x | The number of public/private IP's to deploy for the application traffic(external) nic on the BIG-IP to be used for virtual servers. |
-| vnetName | x | The name of the existing virtual network that you want to connect the BIG-IP's to. |
-| vnetResourceGroupName | x | The name of the resource group that contains the Virtual Network the BIG-IP will be placed into. |
-| mgmtSubnetName | x | Name of the existing mgmt subnet - with external acccess to Internet. |
+| licensedBandwidth | | For PAYG only. The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| numberOfExternalIps | x | The number of public/private IP address you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
+| vnetName | x | The name of the existing virtual network to which you want to connect the BIG-IP VEs. |
+| vnetResourceGroupName | x | The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed. |
+| mgmtSubnetName | x | Name of the existing MGMT subnet - with external access to Internet. |
 | mgmtIpAddress | x | MGMT subnet IP Address to use for the BIG-IP management IP. |
-| externalSubnetName | x | Name of the existing external subnet - with external acccess to Internet. |
-| externalIpAddressRangeStart | x | Depending on how many public/private IP's selected in numberOfExternalIps this should be the starting range to be used as the private IP, minimum of 1 for the self IP of the external subnet.  Such as inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 being used for the self IP as well as 10.100.1.51 and 10.100.1.52 being configured as static IPs for VIPs |
-| internalSubnetName | x | Name of the existing internal subnet. |
-| internalIpAddress | x | Internal subnet IP Address to use for the BIG-IP internal self IP. |
-| defaultGw | x | Default GW for the BIG-IP(Ensure this can live within one of the addresses created above). |
-| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
+| externalSubnetName | x | Name of the existing external subnet - with external access to Internet. |
+| externalIpAddressRangeStart | x | The starting range you want to use for the private IP address(es).  This depends on how many public/private IP addresses you selected in 'numberOfExternalIps'.  For example, if you enter 10.100.1.50 here and chose 2 for numberOfExternalIps, then 10.100.1.50 is used for the BIG-IP VE self IP address, and 10.100.1.51 and 10.100.1.52 are created as static IP addresses for use as virtual servers. |
+| internalIpAddress | x | Internal subnet IP Address to use for the BIG-IP internal self IP address. |
+| restrictedSrcAddress | x | This field restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
 ### <a name="powershell"></a>PowerShell Script Example
@@ -476,4 +476,4 @@ under the License.
 Contributor License Agreement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Individuals or business entities who contribute to this project must have
-completed and submitted the `F5 Contributor License Agreement`
+completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html).

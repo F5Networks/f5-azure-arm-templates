@@ -1,10 +1,12 @@
-# Deploying the BIG-IP VE in Azure - 3 NIC(Traditional Deployment)
+# Deploying the BIG-IP VE in Azure - 3 NIC (Traditional Deployment)
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 
 ## Introduction
 
-This solution uses an ARM template to launch a 3-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise-like" cloud design where the compute instance of F5 is running with a management interface, a front-end application traffic (Virtual Server) interface, and back-end application interface.  This template is a result of Azure now supporting multiple public IP addresses to multiple private IP addresses per NIC.  This template also has the ability to create specify additional Public/Private IP addresses for the external "application" NIC to be used for passing traffic to virtual servers in a more traditional fashion.
+This solution uses an ARM template to launch a 3-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise-like" cloud design where the compute instance of F5 is running with a management interface, a front-end application traffic (Virtual Server) interface, and back-end application interface.  
+
+This template is a result of Azure adding support for multiple public/private IP addresses for each NIC.  This template also has the ability to create specify additional Public/Private IP addresses for the external "application" NIC to be used for passing traffic to virtual servers in a more traditional fashion.
 
 You can choose to deploy the BIG-IP VE with your own F5 BIG-IP license (BYOL), or use Pay as You Go (PAYG) licensing.
 
@@ -62,7 +64,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
 | dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IP VEs for management. |
 | dnsLabelPrefix | x | Unique DNS Name prefix for the Public IP(s) used to access the data plan for application traffic objects(Virtual Servers, etc...) |
-| instanceName | x | The hostname to be configured for the VM. |
+| instanceName | x | The hostname you want to use for the Virtual Machine. |
 | instanceType | x | The Azure Virtual Machine instance size you want to use. |
 | imageName | x | The F5 image you want to deploy. |
 | bigIpVersion | x | F5 BIG-IP version you want to use. |
@@ -413,4 +415,4 @@ under the License.
 Contributor License Agreement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Individuals or business entities who contribute to this project must have
-completed and submitted the `F5 Contributor License Agreement`
+completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html).
