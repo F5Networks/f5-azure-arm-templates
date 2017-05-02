@@ -8,27 +8,27 @@
             ], 
             "defaultValue": 2, 
             "metadata": {
-                "description": "The number of BIG-IP VEs that will be deployed in front of your application"
+                "description": "The number of BIG-IP VEs that will be deployed in front of your application(s)."
             }, 
             "type": "int"
         }, 
         "adminUsername": {
             "defaultValue": "azureuser", 
             "metadata": {
-                "description": "User name for the Virtual Machine"
+                "description": "User name for the Virtual Machine."
             }, 
             "type": "string"
         }, 
         "adminPassword": {
             "metadata": {
-                "description": "Password to login to the Virtual Machine"
+                "description": "Password to login to the Virtual Machine."
             }, 
             "type": "securestring"
         }, 
         "dnsLabel": {
             "defaultValue": "REQUIRED", 
             "metadata": {
-                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine"
+                "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine"
             }, 
             "type": "string"
         }, 
@@ -64,7 +64,7 @@
             ], 
             "defaultValue": "Standard_D2_v2", 
             "metadata": {
-                "description": "Size of the VM"
+                "description": "Azure instance size of the Virtual Machine."
             }, 
             "type": "string"
         }, 
@@ -76,7 +76,7 @@
             ], 
             "defaultValue": "Good", 
             "metadata": {
-                "description": "F5 SKU(IMAGE) to Deploy"
+                "description": "F5 SKU (IMAGE) to you want to deploy."
             }, 
             "type": "string"
         }, 
@@ -88,28 +88,28 @@
             ], 
             "defaultValue": "13.0.000", 
             "metadata": {
-                "description": "F5 BIG-IP Version to use"
+                "description": "F5 BIG-IP version you want to use."
             }, 
             "type": "string"
         }, 
         "licenseKey1": {
             "defaultValue": "REQUIRED", 
             "metadata": {
-                "description": "The license token for the F5 BIG-IP(BYOL)"
+                "description": "The license token for the F5 BIG-IP VE (BYOL)"
             }, 
             "type": "string"
         }, 
         "licenseKey2": {
             "defaultValue": "REQUIRED", 
             "metadata": {
-                "description": "The license token for the F5 BIG-IP(BYOL). This field is required when deploying two or more devices"
+                "description": "The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices."
             }, 
             "type": "string"
         }, 
         "restrictedSrcAddress": {
             "defaultValue": "*", 
             "metadata": {
-                "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources"
+                "description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources"
             }, 
             "type": "string"
         }, 

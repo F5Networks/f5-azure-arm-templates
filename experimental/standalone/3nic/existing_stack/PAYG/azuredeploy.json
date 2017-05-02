@@ -5,34 +5,34 @@
         "adminUsername": {
             "defaultValue": "azureuser", 
             "metadata": {
-                "description": "User name for the Virtual Machine"
+                "description": "User name for the Virtual Machine."
             }, 
             "type": "string"
         }, 
         "adminPassword": {
             "metadata": {
-                "description": "Password to login to the Virtual Machine"
+                "description": "Password to login to the Virtual Machine."
             }, 
             "type": "securestring"
         }, 
         "dnsLabel": {
             "defaultValue": "REQUIRED", 
             "metadata": {
-                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine"
+                "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine"
             }, 
             "type": "string"
         }, 
         "dnsLabelPrefix": {
             "defaultValue": "REQUIRED", 
             "metadata": {
-                "description": "Unique DNS Name prefix for the Public IP(s) used to access the data plan for application traffic objects(Virtual Servers, etc...)"
+                "description": "Unique DNS Name prefix for the Public IP address(es) used to access the data plan for application traffic objects (such as virtual servers and pools)."
             }, 
             "type": "string"
         }, 
         "instanceName": {
             "defaultValue": "f5vm01", 
             "metadata": {
-                "description": "Name of the VM"
+                "description": "Name of the Virtual Machine."
             }, 
             "type": "string"
         }, 
@@ -64,7 +64,7 @@
             ], 
             "defaultValue": "Standard_D3_v2", 
             "metadata": {
-                "description": "Size of the VM"
+                "description": "Azure instance size of the Virtual Machine."
             }, 
             "type": "string"
         }, 
@@ -76,7 +76,7 @@
             ], 
             "defaultValue": "Good", 
             "metadata": {
-                "description": "F5 SKU(IMAGE) to Deploy"
+                "description": "F5 SKU (IMAGE) to you want to deploy."
             }, 
             "type": "string"
         }, 
@@ -88,7 +88,7 @@
             ], 
             "defaultValue": "13.0.000", 
             "metadata": {
-                "description": "F5 BIG-IP Version to use"
+                "description": "F5 BIG-IP version you want to use."
             }, 
             "type": "string"
         }, 
@@ -100,7 +100,7 @@
             ], 
             "defaultValue": "200m", 
             "metadata": {
-                "description": "PAYG licensed bandwidth(Mbps) image to deploy"
+                "description": "The amount of licensed bandwidth (Mbps) you want the PAYG image to use."
             }, 
             "type": "string"
         }, 
@@ -117,43 +117,43 @@
             ], 
             "defaultValue": 1, 
             "metadata": {
-                "description": "The number of public/private IP's to deploy for the application traffic(external) nic on the BIG-IP to be used for virtual servers."
+                "description": "The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers."
             }, 
             "type": "int"
         }, 
         "vnetName": {
             "metadata": {
-                "description": "The name of the existing virtual network that you want to connect the BIG-IP's to."
+                "description": "The name of the existing virtual network to which you want to connect the BIG-IP VEs."
             }, 
             "type": "string"
         }, 
         "vnetResourceGroupName": {
             "metadata": {
-                "description": "The name of the resource group that contains the Virtual Network the BIG-IP will be placed into."
+                "description": "The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed."
             }, 
             "type": "string"
         }, 
         "mgmtSubnetName": {
             "metadata": {
-                "description": "Name of the existing mgmt subnet - with external acccess to Internet."
+                "description": "Name of the existing MGMT subnet - with external access to the Internet."
             }, 
             "type": "string"
         }, 
         "mgmtIpAddress": {
             "metadata": {
-                "description": "MGMT subnet IP Address to use for the BIG-IP management IP."
+                "description": "MGMT subnet IP Address to use for the BIG-IP management IP address."
             }, 
             "type": "string"
         }, 
         "externalSubnetName": {
             "metadata": {
-                "description": "Name of the existing external subnet - with external acccess to Internet."
+                "description": "Name of the existing external subnet - with external access to Internet."
             }, 
             "type": "string"
         }, 
         "externalIpAddressRangeStart": {
             "metadata": {
-                "description": "Depending on how many public/private IP's selected in numberOfExternalIps this should be the starting range to be used as the private IP, minimum of 1 for the self IP of the external subnet.  Such as inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 being used for the self IP as well as 10.100.1.51 and 10.100.1.52 being configured as static IPs for VIPs"
+                "description": "The starting range you want to use for the private IP address(es).  This depends on how many public/private IP addresses you selected in 'numberOfExternalIps'.  For example, if you enter 10.100.1.50 here and chose 2 for numberOfExternalIps, then 10.100.1.50 is used for the BIG-IP VE self IP address, and 10.100.1.51 and 10.100.1.52 are created as static IP addresses for use as virtual servers."
             }, 
             "type": "string"
         }, 
@@ -165,14 +165,14 @@
         }, 
         "internalIpAddress": {
             "metadata": {
-                "description": "Internal subnet IP Address to use for the BIG-IP internal self IP."
+                "description": "Internal subnet IP address you want to use for the BIG-IP internal self IP address."
             }, 
             "type": "string"
         }, 
         "restrictedSrcAddress": {
             "defaultValue": "*", 
             "metadata": {
-                "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources"
+                "description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources"
             }, 
             "type": "string"
         }, 

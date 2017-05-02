@@ -13,7 +13,7 @@
             ], 
             "defaultValue": 2, 
             "metadata": {
-                "description": "The minimum(and default) number of BIG-IP VEs that will be deployed into the VM Scale Set"
+                "description": "The minimum (and default) number of BIG-IP VEs that will be deployed into the VM Scale Set."
             }, 
             "type": "int"
         }, 
@@ -29,7 +29,7 @@
             ], 
             "defaultValue": 4, 
             "metadata": {
-                "description": "The number of maximum BIG-IP VEs that can be deployed into the VM Scale Set"
+                "description": "The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set."
             }, 
             "type": "int"
         }, 
@@ -48,7 +48,7 @@
             ], 
             "defaultValue": 90, 
             "metadata": {
-                "description": "The percentange of 'Network Out' Throughput to scale out on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen"
+                "description": "The percentage of 'Network Out' throughput that triggers a Scale Out event.  This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you choose."
             }, 
             "type": "int"
         }, 
@@ -66,7 +66,7 @@
             ], 
             "defaultValue": 10, 
             "metadata": {
-                "description": "The percentange of 'Network Out' Throughput to scale in on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen"
+                "description": "The percentage of 'Network Out' throughput that triggers a Scale In event.  This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you choose."
             }, 
             "type": "int"
         }, 
@@ -79,27 +79,27 @@
             ], 
             "defaultValue": 10, 
             "metadata": {
-                "description": "The time window required to trigger a scale event(up and down), this is used to determine the amount of time needed for a threshold to be breached as well as to prevent flapping"
+                "description": "The time window required to trigger a scale event (in and out). This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping)."
             }, 
             "type": "int"
         }, 
         "adminUsername": {
             "defaultValue": "azureuser", 
             "metadata": {
-                "description": "User name for the Virtual Machine"
+                "description": "User name for the Virtual Machine."
             }, 
             "type": "string"
         }, 
         "adminPassword": {
             "metadata": {
-                "description": "Password to login to the Virtual Machine"
+                "description": "Password to login to the Virtual Machine."
             }, 
             "type": "securestring"
         }, 
         "dnsLabel": {
             "defaultValue": "REQUIRED", 
             "metadata": {
-                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine"
+                "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine"
             }, 
             "type": "string"
         }, 
@@ -133,7 +133,7 @@
             ], 
             "defaultValue": "Standard_D2_v2", 
             "metadata": {
-                "description": "Size of the VM"
+                "description": "Azure instance size of the Virtual Machine."
             }, 
             "type": "string"
         }, 
@@ -143,7 +143,7 @@
             ], 
             "defaultValue": "Best", 
             "metadata": {
-                "description": "F5 SKU(IMAGE) to Deploy, 'Best' is the only option as ASM is required"
+                "description": "F5 SKU (IMAGE) you want to deploy. 'Best' is the only option because ASM is required."
             }, 
             "type": "string"
         }, 
@@ -155,7 +155,7 @@
             ], 
             "defaultValue": "13.0.000", 
             "metadata": {
-                "description": "F5 BIG-IP Version to use"
+                "description": "F5 BIG-IP version you want to use."
             }, 
             "type": "string"
         }, 
@@ -167,7 +167,7 @@
             ], 
             "defaultValue": "200m", 
             "metadata": {
-                "description": "PAYG licensed bandwidth(Mbps) image to deploy"
+                "description": "The amount of licensed bandwidth (Mbps) you want the PAYG image to use."
             }, 
             "type": "string"
         }, 
@@ -199,35 +199,35 @@
         "applicationServiceFqdn": {
             "defaultValue": "NOT_SPECIFIED", 
             "metadata": {
-                "description": "If deploying in front of an Azure App Service, the FQDN of the public application."
+                "description": "If you are deploying in front of an Azure App Service, the FQDN of the public application."
             }, 
             "type": "string"
         }, 
         "applicationPort": {
             "defaultValue": "80", 
             "metadata": {
-                "description": "If deploying an HTTP application, the port on which your service listens for unencrypted traffic. This field is not required when deploying https only."
+                "description": "If you are deploying an HTTP application, the port on which your service listens for unencrypted traffic. This field is not required when deploying HTTPS only."
             }, 
             "type": "string"
         }, 
         "applicationSecurePort": {
             "defaultValue": "443", 
             "metadata": {
-                "description": "If deploying an HTTPS application, the port on which your service listens for encrypted traffic. This field is not required when deploying http only."
+                "description": "If you are deploying an HTTPS application, the port on which your service listens for encrypted traffic. This field is not required when deploying HTTP only."
             }, 
             "type": "string"
         }, 
         "sslCert": {
             "defaultValue": "NOT_SPECIFIED", 
             "metadata": {
-                "description": "The SSL certificate .pfx file corresponding to public facing VIP."
+                "description": "The SSL certificate .pfx file corresponding to public facing virtual server."
             }, 
             "type": "string"
         }, 
         "sslPswd": {
             "defaultValue": "NOT_SPECIFIED", 
             "metadata": {
-                "description": "The SSL certificate .pfx password corresponding to the certificate provided above."
+                "description": "The SSL certificate .pfx password corresponding to the certificate you entered."
             }, 
             "type": "securestring"
         }, 
@@ -252,39 +252,39 @@
             ], 
             "defaultValue": "medium", 
             "metadata": {
-                "description": "Please select how aggressive you would like the blocking level of this WAF to be.  Remember that the more aggressive the blocking level, the more potential there is for false-positives that the WAF might detect. Select Custom to specify your own security policy below."
+                "description": "Select how aggressive you want the blocking level of this WAF.  Remember that the more aggressive the blocking level, the more potential there is for false-positives that the WAF might detect. Select Custom to specify your own security policy."
             }, 
             "type": "string"
         }, 
         "customPolicy": {
             "defaultValue": "NOT_SPECIFIED", 
             "metadata": {
-                "description": "Specify the publicly available URL of a custom ASM security policy in XML format. This policy will be applied in place of the standard High/Medium/Low policy as indicated above."
+                "description": "Specify the publicly available URL of a custom ASM security policy in XML format. This policy will be applied in place of the standard High/Medium/Low policy."
             }, 
             "type": "string"
         }, 
         "tenantId": {
             "metadata": {
-                "description": "Your Azure service principal application tenant ID"
+                "description": "Your Azure service principal application tenant ID."
             }, 
             "type": "string"
         }, 
         "clientId": {
             "metadata": {
-                "description": "Your Azure service principal application client ID"
+                "description": "Your Azure service principal application client ID."
             }, 
             "type": "string"
         }, 
         "servicePrincipalSecret": {
             "metadata": {
-                "description": "Your Azure service principal application secret"
+                "description": "Your Azure service principal application secret."
             }, 
             "type": "securestring"
         }, 
         "restrictedSrcAddress": {
             "defaultValue": "*", 
             "metadata": {
-                "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources"
+                "description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources"
             }, 
             "type": "string"
         }, 

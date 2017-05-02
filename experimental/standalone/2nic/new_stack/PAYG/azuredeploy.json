@@ -5,34 +5,34 @@
         "adminUsername": {
             "defaultValue": "azureuser", 
             "metadata": {
-                "description": "User name for the Virtual Machine"
+                "description": "User name for the Virtual Machine."
             }, 
             "type": "string"
         }, 
         "adminPassword": {
             "metadata": {
-                "description": "Password to login to the Virtual Machine"
+                "description": "Password to login to the Virtual Machine."
             }, 
             "type": "securestring"
         }, 
         "dnsLabel": {
             "defaultValue": "REQUIRED", 
             "metadata": {
-                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine"
+                "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine"
             }, 
             "type": "string"
         }, 
         "dnsLabelPrefix": {
             "defaultValue": "REQUIRED", 
             "metadata": {
-                "description": "Unique DNS Name prefix for the Public IP(s) used to access the data plan for application traffic objects(Virtual Servers, etc...)"
+                "description": "Unique DNS Name prefix for the Public IP address(es) used to access the data plan for application traffic objects (such as virtual servers and pools)."
             }, 
             "type": "string"
         }, 
         "instanceName": {
             "defaultValue": "f5vm01", 
             "metadata": {
-                "description": "Name of the VM"
+                "description": "Name of the Virtual Machine."
             }, 
             "type": "string"
         }, 
@@ -68,7 +68,7 @@
             ], 
             "defaultValue": "Standard_D2_v2", 
             "metadata": {
-                "description": "Size of the VM"
+                "description": "Azure instance size of the Virtual Machine."
             }, 
             "type": "string"
         }, 
@@ -80,7 +80,7 @@
             ], 
             "defaultValue": "Good", 
             "metadata": {
-                "description": "F5 SKU(IMAGE) to Deploy"
+                "description": "F5 SKU (IMAGE) to you want to deploy."
             }, 
             "type": "string"
         }, 
@@ -92,7 +92,7 @@
             ], 
             "defaultValue": "13.0.000", 
             "metadata": {
-                "description": "F5 BIG-IP Version to use"
+                "description": "F5 BIG-IP version you want to use."
             }, 
             "type": "string"
         }, 
@@ -104,7 +104,7 @@
             ], 
             "defaultValue": "200m", 
             "metadata": {
-                "description": "PAYG licensed bandwidth(Mbps) image to deploy"
+                "description": "The amount of licensed bandwidth (Mbps) you want the PAYG image to use."
             }, 
             "type": "string"
         }, 
@@ -121,21 +121,21 @@
             ], 
             "defaultValue": 1, 
             "metadata": {
-                "description": "The number of public/private IP's to deploy for the application traffic(external) nic on the BIG-IP to be used for virtual servers."
+                "description": "The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers."
             }, 
             "type": "int"
         }, 
         "vnetAddressPrefix": {
             "defaultValue": "10.0", 
             "metadata": {
-                "description": "The start of the CIDR block used by the BIG-IP's when create the Vnet and subnets.  What is supplied MUST be just the first two octets of the /16 virtual network that will be created.  Such as '10.0' or 192.168', etc..."
+                "description": "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'."
             }, 
             "type": "string"
         }, 
         "restrictedSrcAddress": {
             "defaultValue": "*", 
             "metadata": {
-                "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources"
+                "description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources"
             }, 
             "type": "string"
         }, 
