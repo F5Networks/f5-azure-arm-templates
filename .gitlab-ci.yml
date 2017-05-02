@@ -12,15 +12,15 @@ package:
         - triggers
     script:
         - cd supported
-        - echo -e "1nic(PAYG) Template Hash - `openssl dgst -r -sha512 standalone/1nic/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
-        - echo -e "1nic(BYOL) Template Hash - `openssl dgst -r -sha512 standalone/1nic/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
-        - echo -e "2nic(PAYG) Template Hash - `openssl dgst -r -sha512 standalone/2nic/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
-        - echo -e "2nic(BYOL) Template Hash - `openssl dgst -r -sha512 standalone/2nic/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
-        - echo -e "3nic(PAYG) Template Hash - `openssl dgst -r -sha512 standalone/3nic/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
-        - echo -e "3nic(BYOL) Template Hash - `openssl dgst -r -sha512 standalone/3nic/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
-        - echo -e "Cluster 1nic(PAYG) Template Hash - `openssl dgst -r -sha512 cluster/1nic/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
-        - echo -e "Cluster 1nic(BYOL) Template Hash - `openssl dgst -r -sha512 cluster/1nic/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
-        - echo -e "AutoScale LTM(PAYG) Template Hash - `openssl dgst -r -sha512 solutions/autoscale/ltm/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
+        - echo "1nic(PAYG) Template Hash - `openssl dgst -r -sha512 standalone/1nic/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
+        - echo "1nic(BYOL) Template Hash - `openssl dgst -r -sha512 standalone/1nic/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
+        - echo "2nic(PAYG) Template Hash - `openssl dgst -r -sha512 standalone/2nic/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
+        - echo "2nic(BYOL) Template Hash - `openssl dgst -r -sha512 standalone/2nic/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
+        - echo "3nic(PAYG) Template Hash - `openssl dgst -r -sha512 standalone/3nic/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
+        - echo "3nic(BYOL) Template Hash - `openssl dgst -r -sha512 standalone/3nic/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
+        - echo "Cluster 1nic(PAYG) Template Hash - `openssl dgst -r -sha512 cluster/1nic/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
+        - echo "Cluster 1nic(BYOL) Template Hash - `openssl dgst -r -sha512 cluster/1nic/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
+        - echo "AutoScale LTM(PAYG) Template Hash - `openssl dgst -r -sha512 solutions/autoscale/ltm/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
     artifacts:
         name: f5-arm-build-$CI_BUILD_REF
         paths:
