@@ -355,7 +355,7 @@ Warning: F5 does not support the template if you change anything other than the 
 
 ## Configuration Example <a name="config">
 
-The following is a simple configuration diagram for this deployment. In this diagram, the IP addresses are provided as examples.
+The following is a simple configuration diagram for this deployment. In this diagram, the IP addresses are provided as examples.<br>
 ![2-NIC configuration example](images/azure-cluster-1nic.png)
 
 ### Documentation

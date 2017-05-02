@@ -1,0 +1,63 @@
+{
+     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
+     "contentVersion": "2.0.0.0", 
+     "parameters": {
+          "adminUsername": {
+               "value": "azureuser"
+          }, 
+          "adminPassword": {
+               "value": "GEN_UNIQUE"
+          }, 
+          "dnsLabel": {
+               "value": "REQUIRED"
+          },  
+          "instanceName": {
+               "value": "f5vm"
+          }, 
+          "instanceType": {
+               "value": "Standard_D3_v2"
+          }, 
+          "imageName": {
+               "value": "Good"
+          }, 
+          "bigIpVersion": {
+               "value": "13.0.000"
+          }, 
+          "licensedBandwidth": {
+               "value": "200m"
+          },
+          "numberOfExternalIps": {
+               "value": 1
+          }, 
+          "vnetAddressPrefix": {
+               "value": "GEN_UNIQUE"
+          }, 
+          "restrictedSrcAddress": {
+               "value": "*"
+          }, 
+          "tenantId": {
+               "value": "GEN_UNIQUE"
+          }, 
+          "clientId": {
+               "value": "GEN_UNIQUE"
+          }, 
+          "servicePrincipalSecret": {
+               "value": "GEN_UNIQUE"
+          },
+          "tagValues": {
+               "value": {
+                    "application": "APP", 
+                    "cost": "COST", 
+                    "environment": "ENV", 
+                    "group": "GROUP", 
+                    "owner": "OWNER"
+               }
+          },
+          "managedRoutes": {
+               "value": "NOT_SPECIFIED"
+          },
+          "routeTableTag": {
+               "value": "NOT_SPECIFIED"
+          }
+     }
+}
