@@ -63,14 +63,14 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | adminUsername | x | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
 | adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
 | dnsLabel | x | Unique DNS label that is used as a part of the hostname for the public IP address used to access the BIG-IP VEs for management. You can find the DNS label by clicking the resource group, then the public IP address(es) that end with "-mgmt-pip" and looking at the DNS label of each. |
-| instanceName | x | The hostname to be configured for the VM. |
+| instanceName | x | The hostname you want to use for the Virtual Machine. |
 | instanceType | x | The Azure Virtual Machine instance size you want to use. |
 | imageName | x | The F5 image you want to deploy. |
 | bigIpVersion | x | F5 BIG-IP version you want to use. |
 | licenseKey1 | | For BYOL only. The license token from the F5 licensing server. This license is used for the first F5 BIG-IP VE. |
 | licenseKey2 | | For BYOL only. The license token from the F5 licensing server. This license is used for the second F5 BIG-IP VE. |
-| licensedBandwidth | | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
-| numberOfExternalIps | x | The number of public/private IPs to deploy for the application traffic (external) NIC on the BIG-IP to be used for virtual servers. |
+| licensedBandwidth | | For PAYG only. The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| numberOfExternalIps | x | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP to be used for virtual servers. |
 | vnetName | x | The name of the existing virtual network in which you want to connect the BIG-IP VEs. |
 | vnetResourceGroupName | x | The name of the resource group that contains the Virtual Network in which the BIG-IP will be placed. |
 | mgmtSubnetName | x | Name of the existing management subnet - with external access to Internet. |
@@ -92,112 +92,154 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 ### <a name="powershell"></a>PowerShell Script Example
 
 ```powershell
-    ## Script parameters being asked for match to parameters in the azuredeploy.json file, otherwise pointing to the ##
-    ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
-    ## be supplied inline when running this script but if they aren't then the default will be used as specified below.   ##
-    ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -dnsLabelPrefix <value> -instanceName f5vm01 -instanceType Standard_D3_v2 -imageName Good -bigIpVersion 13.0.000 -numberOfExternalIps 1 -vnetAddressPrefix 10.0 -restrictedSrcAddress "*" -resourceGroupName <value>
+    ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
+## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
+## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
+## Example Command: .\Deploy_via_PS.ps1 --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.000 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --mgmtIpAddressRangeStart <value> --externalSubnetName <value> --externalIpPrimaryAddressRangeStart <value> --externalIpSecondaryAddressRangeStart <value> --internalSubnetName <value> --internalIpAddressRangeStart <value> --restrictedSrcAddress "*" --managedRoutes <value> --routeTableTag <value> --tenantId <value> --clientId <value> --secret <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value> 
 
-    param(
+param(
 
-    [Parameter(Mandatory=$True)]
-    [string]
-    $licenseType,
+  [Parameter(Mandatory=$True)]
+  [string]
+  $licenseType,
 
-    [string]
-    $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),
+  [string]
+  $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),
 
-    [string]
-    $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),
+  [string]
+  $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),
+  
+  [string]
+  $licenseKey2 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey2"}),
 
-    [Parameter(Mandatory=$True)]
-    [string]
-    $adminUsername,
+  [Parameter(Mandatory=$True)]
+  [string]
+  $adminUsername,
 
-    [Parameter(Mandatory=$True)]
-    [string]
-    $adminPassword,
+  [Parameter(Mandatory=$True)]
+  [string]
+  $adminPassword,
 
-    [Parameter(Mandatory=$True)]
-    [string]
-    $dnsLabel,
+  [Parameter(Mandatory=$True)]
+  [string]
+  $dnsLabel,
 
-    [Parameter(Mandatory=$True)]
-    [string]
-    $dnsLabelPrefix,
+  [Parameter(Mandatory=$True)]
+  [string]
+  $instanceName,
 
-    [Parameter(Mandatory=$True)]
-    [string]
-    $instanceName,
+  [Parameter(Mandatory=$True)]
+  [string]
+  $instanceType,
 
-    [Parameter(Mandatory=$True)]
-    [string]
-    $instanceType,
+  [Parameter(Mandatory=$True)]
+  [string]
+  $imageName,
 
-    [Parameter(Mandatory=$True)]
-    [string]
-    $imageName,
+  [Parameter(Mandatory=$True)]
+  [string]
+  $bigIpVersion,
 
-    [Parameter(Mandatory=$True)]
-    [string]
-    $bigIpVersion,
+  [Parameter(Mandatory=$True)]
+  [string]
+  $numberOfExternalIps,
 
-    [Parameter(Mandatory=$True)]
-    [string]
-    $numberOfExternalIps,
+  [Parameter(Mandatory=$True)]
+  [string]
+  $vnetName,
 
-    [Parameter(Mandatory=$True)]
-    [string]
-    $vnetAddressPrefix,
+  [Parameter(Mandatory=$True)]
+  [string]
+  $vnetResourceGroupName,
 
-    [string]
-    $restrictedSrcAddress = "*",
+  [Parameter(Mandatory=$True)]
+  [string]
+  $mgmtSubnetName,
 
-    [Parameter(Mandatory=$True)]
-    [string]
-    $resourceGroupName,
+  [Parameter(Mandatory=$True)]
+  [string]
+  $mgmtIpAddressRangeStart,
 
-    [string]
-    $region = "West US",
+  [Parameter(Mandatory=$True)]
+  [string]
+  $externalSubnetName,
 
-    [string]
-    $templateFilePath = "azuredeploy.json",
+  [Parameter(Mandatory=$True)]
+  [string]
+  $externalIpPrimaryAddressRangeStart,
+  
+  [Parameter(Mandatory=$True)]
+  [string]
+  $externalIpSecondaryAddressRangeStart,
 
-    [string]
-    $parametersFilePath = "azuredeploy.parameters.json"
-    )
+  [Parameter(Mandatory=$True)]
+  [string]
+  $internalSubnetName,
 
-    Write-Host "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged." -foregroundcolor green
-    Start-Sleep -s 3
+  [Parameter(Mandatory=$True)]
+  [string]
+  $internalIpAddressRangeStart,
 
-    # Connect to Azure, right now it is only interactive login
-    try {
-        Write-Host "Checking if already logged in!"
-        Get-AzureRmSubscription | Out-Null
-        Write-Host "Already logged in, continuing..."
-        }
-        Catch {
-        Write-Host "Not logged in, please login..."
-        Login-AzureRmAccount
-        }
+  [string]
+  $restrictedSrcAddress = "*",
+  
+  [Parameter(Mandatory=$True)]
+  [string]
+  $tenantId,
+  
+  [Parameter(Mandatory=$True)]
+  [string]
+  $clientId,
+  
+  [Parameter(Mandatory=$True)]
+  [string]
+  $secret,
 
-    # Create Resource Group for ARM Deployment
-    New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
+  [Parameter(Mandatory=$True)]
+  [string]
+  $resourceGroupName,
 
-    # Create Arm Deployment
-    $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
-    if ($licenseType -eq "BYOL") {
-    if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\azuredeploy.json"; $parametersFilePath = ".\BYOL\azuredeploy.parameters.json" }
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -dnsLabelPrefix "$dnsLabelPrefix" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -numberOfExternalIps "$numberOfExternalIps" -vnetAddressPrefix "$vnetAddressPrefix" -restrictedSrcAddress "$restrictedSrcAddress"  -licenseKey1 "$licenseKey1"
-    } elseif ($licenseType -eq "PAYG") {
-    if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }
-    $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -dnsLabelPrefix "$dnsLabelPrefix" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -numberOfExternalIps "$numberOfExternalIps" -vnetAddressPrefix "$vnetAddressPrefix" -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
-    } else {
-    Write-Error -Message "Please select a valid license type of PAYG or BYOL."
+  [string]
+  $region = "West US",
+
+  [string]
+  $templateFilePath = "azuredeploy.json",
+
+  [string]
+  $parametersFilePath = "azuredeploy.parameters.json"
+)
+
+Write-Host "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged." -foregroundcolor green
+Start-Sleep -s 3
+
+# Connect to Azure, right now it is only interactive login
+try {
+    Write-Host "Checking if already logged in!"
+    Get-AzureRmSubscription | Out-Null
+    Write-Host "Already logged in, continuing..."
+    }
+    Catch {
+    Write-Host "Not logged in, please login..."
+    Login-AzureRmAccount
     }
 
-    # Print Output of Deployment to Console
-    $deployment
+# Create Resource Group for ARM Deployment
+New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
 
+# Create Arm Deployment
+$pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
+if ($licenseType -eq "BYOL") {
+  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\azuredeploy.json"; $parametersFilePath = ".\BYOL\azuredeploy.parameters.json" }
+  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -numberOfExternalIps "$numberOfExternalIps" -vnetName "$vnetName" -vnetResourceGroupName "$vnetResourceGroupName" -mgmtSubnetName "$mgmtSubnetName" -mgmtIpAddressRangeStart "$mgmtIpAddressRangeStart" -externalSubnetName "$externalSubnetName" -externalIpPrimaryAddressRangeStart "$externalIpPrimaryAddressRangeStart" -externalIpSecondaryAddressRangeStart "$externalIpSecondaryAddressRangeStart" -internalSubnetName "$internalSubnetName" -internalIpAddressRangeStart "$internalIpAddressRangeStart" -restrictedSrcAddress "$restrictedSrcAddress" -licenseKey1 "$licenseKey1 -licenseKey2 "$licenseKey2"
+} elseif ($licenseType -eq "PAYG") {
+  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }
+  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -numberOfExternalIps "$numberOfExternalIps" -vnetName "$vnetName" -vnetResourceGroupName "$vnetResourceGroupName" -mgmtSubnetName "$mgmtSubnetName" -mgmtIpAddressRangeStart "$mgmtIpAddressRangeStart" -externalSubnetName "$externalSubnetName" -externalIpPrimaryAddressRangeStart "$externalIpPrimaryAddressRangeStart" -externalIpSecondaryAddressRangeStart "$externalIpSecondaryAddressRangeStart" -internalSubnetName "$internalSubnetName" -internalIpAddressRangeStart "$internalIpAddressRangeStart" -restrictedSrcAddress "$restrictedSrcAddress" -licensedBandwidth "$licensedBandwidth"
+} else {
+  Write-Error -Message "Please select a valid license type of PAYG or BYOL."
+}
+
+# Print Output of Deployment to Console
+$deployment
 ```
 
 =======
@@ -207,129 +249,171 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 ```bash
     #!/bin/bash
 
-    ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-    ## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --dnsLabelPrefix <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.000 --numberOfExternalIps 1 --vnetAddressPrefix 10.0 --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
+## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.000 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --mgmtIpAddressRangeStart <value> --externalSubnetName <value> --externalIpPrimaryAddressRangeStart <value> --externalIpSecondaryAddressRangeStart <value> --internalSubnetName <value> --internalIpAddressRangeStart <value> --restrictedSrcAddress "*" --managedRoutes <value> --routeTableTag <value> --tenantId <value> --clientId <value> --secret <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
-    # Assign Script Parameters and Define Variables
-    # Specify static items, change these as needed or make them parameters
-    region="westus"
-    restrictedSrcAddress="*"
-    tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
+# Assign Script Parameters and Define Variables
+# Specify static items, change these as needed or make them parameters
+region="westus"
+restrictedSrcAddress="*"
+tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,adminUsername:,adminPassword:,dnsLabel:,dnsLabelPrefix:,instanceName:,instanceType:,imageName:,bigIpVersion:,numberOfExternalIps:,vnetAddressPrefix:,restrictedSrcAddress: -n $0 -- "$@"`
-    eval set -- "$ARGS"
+ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x:y:z:aa:bb:cc:dd: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,licenseKey2:,adminUsername:,adminPassword:,dnsLabel:,instanceName:,instanceType:,imageName:,bigIpVersion:,numberOfExternalIps:,vnetName:,vnetResourceGroupName:,mgmtSubnetName:,mgmtIpAddressRangeStart:,externalSubnetName:,externalIpPrimaryAddressRangeStart:,externalIpSecondaryAddressRangeStart:,internalSubnetName:,internalIpAddressRangeStart:,restrictedSrcAddress:,managedRoutes:,routeTableTag:,tenantId:,clientId:,secret: -n $0 -- "$@"`
+eval set -- "$ARGS"
 
-    # Parse the command line arguments, primarily checking full params as short params are just placeholders
-    while true; do
-        case "$1" in
-            -a|--resourceGroupName)
-                resourceGroupName=$2
-                shift 2;;
-            -b|--azureLoginUser)
-                azureLoginUser=$2
-                shift 2;;
-            -c|--azureLoginPassword)
-                azureLoginPassword=$2
-                shift 2;;
-            -d|--licenseType)
-                licenseType=$2
-                shift 2;;
-            -e|--licensedBandwidth)
-                licensedBandwidth=$2
-                shift 2;;
-            -f|--licenseKey1)
-                licenseKey1=$2
-                shift 2;;
-            -g|--adminUsername)
-                adminUsername=$2
-                shift 2;;
-            -h|--adminPassword)
-                adminPassword=$2
-                shift 2;;
-            -i|--dnsLabel)
-                dnsLabel=$2
-                shift 2;;
-            -j|--dnsLabelPrefix)
-                dnsLabelPrefix=$2
-                shift 2;;
-            -k|--instanceName)
-                instanceName=$2
-                shift 2;;
-            -l|--instanceType)
-                instanceType=$2
-                shift 2;;
-            -m|--imageName)
-                imageName=$2
-                shift 2;;
-            -n|--bigIpVersion)
-                bigIpVersion=$2
-                shift 2;;
-            -o|--numberOfExternalIps)
-                numberOfExternalIps=$2
-                shift 2;;
-            -p|--vnetAddressPrefix)
-                vnetAddressPrefix=$2
-                shift 2;;
-            -q|--restrictedSrcAddress)
-                restrictedSrcAddress=$2
-                shift 2;;
-            --)
-                shift
-                break;;
-        esac
-    done
+# Parse the command line arguments, primarily checking full params as short params are just placeholders
+while true; do
+    case "$1" in
+        -a|--resourceGroupName)
+            resourceGroupName=$2
+            shift 2;;
+        -b|--azureLoginUser)
+            azureLoginUser=$2
+            shift 2;;
+        -c|--azureLoginPassword)
+            azureLoginPassword=$2
+            shift 2;;
+        -d|--licenseType)
+            licenseType=$2
+            shift 2;;
+        -e|--licensedBandwidth)
+            licensedBandwidth=$2
+            shift 2;;
+        -f|--licenseKey1)
+            licenseKey1=$2
+            shift 2;;
+        -g|--licenseKey2)
+            licenseKey2=$2
+            shift 2;;
+        -h|--adminUsername)
+            adminUsername=$2
+            shift 2;;
+        -i|--adminPassword)
+            adminPassword=$2
+            shift 2;;
+        -j|--dnsLabel)
+            dnsLabel=$2
+            shift 2;;
+        -k|--instanceName)
+            instanceName=$2
+            shift 2;;
+        -l|--instanceType)
+            instanceType=$2
+            shift 2;;
+        -m|--imageName)
+            imageName=$2
+            shift 2;;
+        -n|--bigIpVersion)
+            bigIpVersion=$2
+            shift 2;;
+        -o|--numberOfExternalIps)
+            numberOfExternalIps=$2
+            shift 2;;
+        -p|--vnetName)
+            vnetName=$2
+            shift 2;;
+        -q|--vnetResourceGroupName)
+            vnetResourceGroupName=$2
+            shift 2;;
+        -r|--mgmtSubnetName)
+            mgmtSubnetName=$2
+            shift 2;;
+        -s|--mgmtIpAddressRangeStart)
+            mgmtIpAddressRangeStart=$2
+            shift 2;;
+        -t|--externalSubnetName)
+            externalSubnetName=$2
+            shift 2;;
+        -u|--externalIpPrimaryAddressRangeStart)
+            externalIpPrimaryAddressRangeStart=$2
+            shift 2;;
+        -v|--externalIpSecondaryAddressRangeStart)
+            externalIpSecondaryAddressRangeStart=$2
+            shift 2;;
+        -w|--internalSubnetName)
+            internalSubnetName=$2
+            shift 2;;
+        -x|--internalIpAddressRangeStart)
+            internalIpAddressRangeStart=$2
+            shift 2;;
+        -y|--restrictedSrcAddress)
+            restrictedSrcAddress=$2
+            shift 2;;
+        -z|--managedRoutes)
+            managedRoutes=$2
+            shift 2;;
+        -aa|--routeTableTag)
+            routeTableTag=$2
+            shift 2;;
+        -bb|--tenantId)
+            tenantId=$2
+            shift 2;;
+        -cc|--clientId)
+            clientId=$2
+            shift 2;;
+        -dd|--secret)
+            secret=$2
+            shift 2;;
+        --)
+            shift
+            break;;
+    esac
+done
 
-    #If a required parameter is not passed, the script will prompt for it below
-    required_variables="adminUsername adminPassword dnsLabel dnsLabelPrefix instanceName instanceType imageName bigIpVersion numberOfExternalIps vnetAddressPrefix resourceGroupName licenseType "
-    for variable in $required_variables
-            do
-            if [ -v ${!variable} ] ; then
-                    read -p "Please enter value for $variable:" $variable
-            fi
-    done
-
-    # Prompt for license key if not supplied and BYOL is selected
-    if [ $licenseType == "BYOL" ]; then
-        if [ -v $licenseKey1 ] ; then
-                read -p "Please enter value for licenseKey1:" licenseKey1
+#If a required parameter is not passed, the script will prompt for it below
+required_variables="adminUsername adminPassword dnsLabel instanceName instanceType imageName bigIpVersion numberOfExternalIps vnetName vnetResourceGroupName mgmtSubnetName mgmtIpAddressRangeStart externalSubnetName externalIpPrimaryAddressRangeStart externalIpSecondaryAddressRangeStart internalSubnetName internalIpAddressRangeStart resourceGroupName licenseType tenantId clientId secret "
+for variable in $required_variables
+        do
+        if [ -v ${!variable} ] ; then
+                read -p "Please enter value for $variable:" $variable
         fi
-        template_file="./BYOL/azuredeploy.json"
-        parameter_file="./BYOL/azuredeploy.parameters.json"
+done
+
+# Prompt for license key if not supplied and BYOL is selected
+if [ $licenseType == "BYOL" ]; then
+    if [ -v $licenseKey1 ] ; then
+            read -p "Please enter value for licenseKey1:" licenseKey1
     fi
-    # Prompt for licensed bandwidth if not supplied and PAYG is selected
-    if [ $licenseType == "PAYG" ]; then
-        if [ -v $licensedBandwidth ] ; then
-                read -p "Please enter value for licensedBandwidth:" licensedBandwidth
-        fi
-        template_file="./PAYG/azuredeploy.json"
-        parameter_file="./PAYG/azuredeploy.parameters.json"
+    if [ -v $licenseKey2 ] ; then
+            read -p "Please enter value for licenseKey2:" licenseKey2
     fi
-
-    echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
-    sleep 3
-
-    # Login to Azure, for simplicity in this example using username and password supplied as script arguments --azureLoginUser and --azureLoginPassword
-    # Perform Check to see if already logged in
-    azure account show > /dev/null 2>&1
-    if [[ $? != 0 ]] ; then
-            azure login -u $azureLoginUser -p $azureLoginPassword
+    template_file="./BYOL/azuredeploy.json"
+    parameter_file="./BYOL/azuredeploy.parameters.json"
+fi
+# Prompt for licensed bandwidth if not supplied and PAYG is selected
+if [ $licenseType == "PAYG" ]; then
+    if [ -v $licensedBandwidth ] ; then
+            read -p "Please enter value for licensedBandwidth:" licensedBandwidth
     fi
+    template_file="./PAYG/azuredeploy.json"
+    parameter_file="./PAYG/azuredeploy.parameters.json"
+fi
 
-    # Switch to ARM mode
-    azure config mode arm
+echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
+sleep 3
 
-    # Create ARM Group
-    azure group create -n $resourceGroupName -l $region
+# Login to Azure, for simplicity in this example using username and password supplied as script arguments --azureLoginUser and --azureLoginPassword
+# Perform Check to see if already logged in
+azure account show > /dev/null 2>&1
+if [[ $? != 0 ]] ; then
+        azure login -u $azureLoginUser -p $azureLoginPassword
+fi
 
-    # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
-    if [ $licenseType == "BYOL" ]; then
-        azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"dnsLabelPrefix\":{\"value\":\"$dnsLabelPrefix\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licenseKey1\":{\"value\":\"$licenseKey1\"}}"
-    elif [ $licenseType == "PAYG" ]; then
-        azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"dnsLabelPrefix\":{\"value\":\"$dnsLabelPrefix\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
-    else
-        echo "Please select a valid license type of PAYG or BYOL."
-        exit 1
-    fi
+# Switch to ARM mode
+azure config mode arm
+
+# Create ARM Group
+azure group create -n $resourceGroupName -l $region
+
+# Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
+if [ $licenseType == "BYOL" ]; then
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"licenseKey1\":{\"value\":\"$licenseKey1\"},\"licenseKey2\":{\"value\":\"$licenseKey2\"},\"numberOfExternalIps\":{\"value\": $numberOfExternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddressRangeStart\":{\"value\":\"$mgmtIpAddressRangeStart\"},\"externalSubnetName\":{\"value\":\"$externalSubnetName\"},\"externalIpPrimaryAddressRangeStart\":{\"value\":\"$externalIpPrimaryAddressRangeStart\"},\"externalIpSecondaryAddressRangeStart\":{\"value\":\"$externalIpSecondaryAddressRangeStart\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddressRangeStart\":{\"value\":\"$internalIpAddressRangeStart\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"managedRoutes\":{\"value\":\"$managedRoutes\"},\"routeTableTag\":{\"value\":\"$routeTableTag\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$secret\"}}"
+elif [ $licenseType == "PAYG" ]; then
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p   "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"licenseKey1\":{\"value\":\"$licenseKey1\"},\"licenseKey2\":{\"value\":\"$licenseKey2\"},\"numberOfExternalIps\":{\"value\": $numberOfExternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddressRangeStart\":{\"value\":\"$mgmtIpAddressRangeStart\"},\"externalSubnetName\":{\"value\":\"$externalSubnetName\"},\"externalIpPrimaryAddressRangeStart\":{\"value\":\"$externalIpPrimaryAddressRangeStart\"},\"externalIpSecondaryAddressRangeStart\":{\"value\":\"$externalIpSecondaryAddressRangeStart\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddressRangeStart\":{\"value\":\"$internalIpAddressRangeStart\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"managedRoutes\":{\"value\":\"$managedRoutes\"},\"routeTableTag\":{\"value\":\"$routeTableTag\"},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$secret\"}}"
+else
+    echo "Please select a valid license type of PAYG or BYOL."
+    exit 1
+fi
 ```
 
 ## Configuration Example <a name="config">
