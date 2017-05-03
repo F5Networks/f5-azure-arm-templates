@@ -357,9 +357,10 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 
 ## <a name="config"></a>Configuration Example
 
-The following is a simple configuration diagram for this 2-NIC deployment.  In a 2-NIC scenario, one NIC is for management and one is for external.  This is in a more traditional deployment model where data-plane and management traffic are separate.
+The following is a simple configuration diagram for this 2-NIC deployment.  In a 2-NIC scenario, one NIC is for management and one is for external.  This is in a more traditional deployment model where data-plane and management traffic are separate.<br>
+The IP addresses in this example may be different in your implementation.
 
-![2 NIC configuration example](images/azure-2nic-sm.png)
+![2 NIC configuration example](images/azure-2-nic.png)
 
 
 ### Changing the BIG-IP Configuration utility (GUI) port

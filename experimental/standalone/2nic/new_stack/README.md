@@ -314,9 +314,10 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 
 ## <a name="config"></a>Configuration Example
 
-The following is a simple configuration diagram for this 2 NIC deployment.  In a 2 NIC scenario, one NIC is for management and one is for external.  This is in a more traditional deployment model where data-plane and management traffic is seperate.
+The following is a simple configuration diagram for this 2 NIC deployment.  In a 2 NIC scenario, one NIC is for management and one is for external.  This is in a more traditional deployment model where data-plane and management traffic is separate.<br>
+The IP addresses in this example may be different in your implementation.
 
-![2 NIC configuration example](images/azure-2nic-sm.png)
+![2 NIC configuration example](images/azure-2-nic.png)
 
 ### Changing the BIG-IP Configuration Utility (GUI) port
 The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.
