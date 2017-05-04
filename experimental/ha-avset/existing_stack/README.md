@@ -6,7 +6,7 @@
 
 This solution uses an ARM template to launch a two BIG-IP VEs in an Active/Standby configuration with network failover enabled in an existing stack. Each pair of BIG-IP VEs is deployed in an Azure Availability Set, and can therefore be spread across different update and fault domains. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.
 
-Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise-like" cloud design where the compute instance of F5 is running with a management interface, a front-end application traffic (Virtual Server) interface, and back-end application interface.  This template is a result of Azure now supporting multiple public IP addresses to multiple private IP addresses per NIC.  This template also has the ability to create specify additional Public/Private IP addresses for the external "application" NIC to be used for passing traffic to virtual servers in a more traditional fashion.
+Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise-like" cloud design where the compute instance of F5 is running with a management interface, a front-end application traffic (Virtual Server) interface, and back-end application interface.  This template is a result of Azure now supporting multiple public IP addresses to multiple private IP addresses per NIC.  This template also has the ability to create specify additional Public/Private IP addresses for the external "application" NIC to be used for passing traffic to virtual servers in a more traditional fashion. In the event the active BIG-IP VE become unavailable, traffic seamlessly shifts to the standby BIG-IP VE using network failover.
 
 You can choose to deploy the BIG-IP VE with your own F5 BIG-IP license (BYOL), or use Pay as You Go (PAYG) licensing.
 This README file is for the ARM template in an existing stack.  If you want to deploy into a new stack, see https://github.com/F5Networks/cloudsolutions/f5-azure-arm-templates/tree/master/experimental/ha-avset/new_stack/README.md
@@ -17,8 +17,7 @@ This README file is for the ARM template in an existing stack.  If you want to d
   - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **#** or **'** (single quote).
   - If you are deploying the BYOL template, you must have two valid BIG-IP license tokens.
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
-  - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
-
+  - The management port for the BIG-IP Configuration utility is **8443**.  This allows you to use 443 for application traffic.
 
 ## Security
 This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
@@ -94,7 +93,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 ```powershell
     ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
-## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
+## be supplied inline when running this script but if they aren't then the default will be used as specified below.   ##
 ## Example Command: .\Deploy_via_PS.ps1 --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.000 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --mgmtIpAddressRangeStart <value> --externalSubnetName <value> --externalIpPrimaryAddressRangeStart <value> --externalIpSecondaryAddressRangeStart <value> --internalSubnetName <value> --internalIpAddressRangeStart <value> --restrictedSrcAddress "*" --managedRoutes <value> --routeTableTag <value> --tenantId <value> --clientId <value> --secret <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value> 
 
 param(
@@ -423,10 +422,6 @@ The IP addresses in this example may be different in your implementation.
 
 ![Configuration example](../images/azure-multi-nic-ha.png)
 
-### Changing the BIG-IP Configuration utility (GUI) port
-The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>
-<br>***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP. BIG-IP v13.0.000 and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.<br>
-<br>***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
 
 ## Documentation
 
@@ -456,7 +451,7 @@ Warning: F5 does not support the template if you change anything other than the 
           "settings": {
           },
           "protectedSettings": {
-               "commandToExecute": "[concat('tmsh create sys application service my_deployment { device-group none template f5.ip_forwarding traffic-group none variables replace-all-with { basic__addr { value 0.0.0.0 } basic__forward_all { value No } basic__mask { value 0.0.0.0 } basic__port { value 0 } basic__vlan_listening { value default } options__advanced { value no }options__display_help { value hide } } }')]"
+               "commandToExecute": "[concat('tmsh create sys application service my_deployment { device-group none template f5.ip_forwarding traffic-group none variables replace-all-with { basic__addr { value 0.0.0.0 } basic__forward_all { value No } basic__mask { value 0.0.0.0 } basic__port { value 0 } basic__vlan_listening { value internal } options__advanced { value no }options__display_help { value hide } } }')]"
           }
      }
 }
