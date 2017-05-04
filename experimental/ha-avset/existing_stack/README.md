@@ -418,9 +418,10 @@ fi
 
 ## Configuration Example <a name="config">
 
-The following is a simple configuration diagram for this 3 NIC deployment.  In a 3 NIC scenario one NIC is for management, one is for external, and one for internal.  This is in a more traditional deployment model where data-plane and management traffic are separate.
+The following is a configuration diagram for this deployment.  In this configuration, each BIG-IP VE has 3 NICs, one for management, one for external, and one for internal.  This is in a more traditional deployment model where data-plane and management traffic are separate.  Should the active BIG-IP VE become unavailable, traffic seamlessly shifts to the standby BIG-IP VE using network failover.<br>
+The IP addresses in this example may be different in your implementation.
 
-![3 NIC configuration example](images/azure-3nic-sm.png)
+![Configuration example](../images/azure-multi-nic-ha.png)
 
 ### Changing the BIG-IP Configuration utility (GUI) port
 The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>
