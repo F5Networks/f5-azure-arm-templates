@@ -34,7 +34,7 @@ command_to_execute = ""
 
 ## Static Variable Assignment ##
 content_version = '3.0.0.0'
-f5_networks_tag = 'release-3.0.0.0'
+f5_networks_tag = 'v3.0.0.0'
 f5_cloud_libs_tag = 'v3.0.2'
 f5_cloud_libs_azure_tag = 'v1.1.1'
 

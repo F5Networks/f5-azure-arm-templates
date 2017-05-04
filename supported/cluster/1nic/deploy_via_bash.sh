@@ -66,7 +66,7 @@ while true; do
     esac
 done
 
-#If a required paramater is not passed, the script will prompt for it below
+#If a required parameter is not passed, the script will prompt for it below
 required_variables="numberOfInstances adminUsername adminPassword dnsLabel instanceType imageName bigIpVersion resourceGroupName licenseType "
 for variable in $required_variables
         do

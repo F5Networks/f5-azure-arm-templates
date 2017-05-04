@@ -81,9 +81,8 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 ```powershell
     ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
     ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
-    ## be supplied inline when running this script but if they are not then the default will be used as specified below.   ##
+    ## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
     ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -dnsLabelPrefix <value> -instanceName f5vm01 -instanceType Standard_D2_v2 -imageName Good -bigIpVersion 13.0.000 -numberOfExternalIps 1 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddress <value> -externalSubnetName <value> -externalIpAddressRangeStart <value> -restrictedSrcAddress "*" -resourceGroupName <value>
-
 
     param(
 
@@ -302,8 +301,8 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
         esac
     done
 
-    #If a required parameter is not passed, the script will prompt for it below
-    required_variables="adminUsername adminPassword dnsLabel dnsLabelPrefix instanceName instanceType imageName bigIpVersion numberOfExternalIps vnetName vnetResourceGroupName mgmtSubnetName mgmtIpAddress externalSubnetName externalIpAddressRangeStart defaultGw resourceGroupName licenseType "
+    #If a required paramater is not passed, the script will prompt for it below
+    required_variables="adminUsername adminPassword dnsLabel dnsLabelPrefix instanceName instanceType imageName bigIpVersion numberOfExternalIps vnetName vnetResourceGroupName mgmtSubnetName mgmtIpAddress externalSubnetName externalIpAddressRangeStart resourceGroupName licenseType "
     for variable in $required_variables
             do
             if [ -v ${!variable} ] ; then
