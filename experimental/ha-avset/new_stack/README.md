@@ -85,8 +85,8 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | clientId | x | Your Azure service principal application client ID. |
 | servicePrincipalSecret | x | Your Azure service principal application secret. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
-| managedRoutes | | A comma-delimited list of UDR destinations to be managed by this cluster. |
-| routeTableTag | | Azure tag to identify the route tables to be managed by this cluster. This can be any single word, in order for the routes to be managed by BIG-IP, you must create a tag on the route table with the key "f5_ha" and the value of the routeTable tag (for example f5_a:myRoute). |
+| managedRoutes | | A comma-delimited list of UDR destinations to be managed by this cluster (for example 192.168.0.0/24,192.168.1.0/24,192.168.2.0/24). |
+| routeTableTag | | Azure tag to identify the route tables to be managed by this cluster. This can be any single word, in order for the routes to be managed by BIG-IP, you must create a tag on the route table with the key "f5_ha" and the value of the routeTable tag (for example f5_ha:myRoute). |
 
 
 ### <a name="powershell"></a>PowerShell Script Example

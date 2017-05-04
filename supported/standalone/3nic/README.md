@@ -50,10 +50,10 @@ You have three options for deploying this solution:
 ### <a name="azure"></a>Azure deploy buttons
 
 Use the appropriate button, depending on whether you are using BYOL or PAYG licensing:
-  - **BYOL** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fsupported%2Fstandalone%2F3nic%2FBYOL%2Fazuredeploy.json">
+  - **BYOL** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.0.0.0%2Fsupported%2Fstandalone%2F3nic%2FBYOL%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
-  - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fsupported%2Fstandalone%2F3nic%2FPAYG%2Fazuredeploy.json">
+  - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.0.0.0%2Fsupported%2Fstandalone%2F3nic%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
 ### Template parameters
@@ -69,7 +69,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | imageName | x | The F5 image you want to deploy. |
 | bigIpVersion | x | F5 BIG-IP version you want to use. |
 | licenseKey1 | | For BYOL only. The license token from the F5 licensing server. This license is used for the first F5 BIG-IP VE. |
-| licensedBandwidth | | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
+| licensedBandwidth | | For PAYG only. The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
 | numberOfExternalIps | x | The number of public/private IPs to deploy for the application traffic (external) NIC on the BIG-IP to be used for virtual servers. |
 | vnetAddressPrefix | x | The start of the CIDR block(/16) used by the BIG-IP VEs when creating the VNET and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168' |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or an asterisk for all sources. |
