@@ -24,7 +24,7 @@ You have three options for deploying this template:
 
 Use this button to deploy the template:
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fexperimental%2Freference%2Fstandalone%2F2nic+webserver%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.0.0.0%2Fexperimental%2Freference%2Fstandalone%2F2nic+webserver%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
@@ -232,9 +232,9 @@ Use this button to deploy the template:
 ```
 =======
 
-## Deploying Custom Configuration to an Azure Virtual Machine 
+## Deploying Custom Configuration to an Azure Virtual Machine
 
-This sample code uses the CustomScript extension resource to configure the f5.ip_forwarding iApp on BIG-IP VE in Azure Resource Manager. 
+This sample code uses the CustomScript extension resource to configure the f5.ip_forwarding iApp on BIG-IP VE in Azure Resource Manager.
 
 The CustomScript extension resource name must reference the Azure virtual machine name and must have a dependency on that virtual machine. You can use only one CustomScript extension resource per virtual machine; however, you can combine multiple semicolon-delimited commands in a single extension resource definition.
 
@@ -262,9 +262,9 @@ Warning: F5 does not support the template if you change anything other than the 
 }
 ```
 
-## Deploying Custom Configuration to an Azure Virtual Machine 
+## Deploying Custom Configuration to an Azure Virtual Machine
 
-This sample code uses the CustomScript extension resource to configure the f5.ip_forwarding iApp on BIG-IP VE in Azure Resource Manager. 
+This sample code uses the CustomScript extension resource to configure the f5.ip_forwarding iApp on BIG-IP VE in Azure Resource Manager.
 
 The CustomScript extension resource name must reference the Azure virtual machine name and must have a dependency on that virtual machine. You can use only one CustomScript extension resource per virtual machine; however, you can combine multiple semicolon-delimited commands in a single extension resource definition.
 
