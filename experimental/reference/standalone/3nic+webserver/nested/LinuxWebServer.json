@@ -1,0 +1,166 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "privateAddressWindows": {
+      "type": "string"
+    },
+    "privateAddressLinux": {
+      "type": "string"
+    },
+    "webSubnetId": {
+      "type": "string"
+    },
+    "adminUsername": {
+      "type": "string"
+    },
+    "adminPassword": {
+      "type": "securestring"
+    },
+    "dnsLabel": {
+      "type": "string"
+    },
+    "instanceType": {
+      "type": "string"
+    },
+    "gitHubLocation": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "apiVersion": "2015-06-15",
+    "storageAccountType": "Standard_LRS",
+    "publicIPAddressType": "Dynamic",
+    "WebServerNameLinux": "linuxweb01",
+    "WebServerPort": "80",
+    "Nic1NameLinux": "[concat(variables('WebServerNameLinux'), '-nic1')]",
+    "storageAccountNameLinux": "[concat(uniquestring(resourceGroup().id), variables('WebServerNameLinux'))]",
+    "publicIPAddressNameLinux": "[concat(variables('WebServerNameLinux'), '-pip')]",
+    "scriptFolderLinux": ".",
+    "scriptFileNameLinux": "init_web.sh",
+    "scriptParametersLinux": ""
+  },
+  "resources": [
+    {
+    "name": "[variables('WebServerNameLinux')]",
+    "type": "Microsoft.Compute/virtualMachines",
+    "apiVersion": "[variables('apiVersion')]",
+    "location": "[resourceGroup().location]",
+    "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('Nic1NameLinux'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountNameLinux'))]"
+    ],
+    "properties": {
+        "osProfile": {
+            "computerName": "[variables('WebServerNameLinux')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+        },
+        "hardwareProfile": {
+            "vmSize": "[parameters('instanceType')]"
+        },
+        "storageProfile": {
+            "imageReference": {
+                "publisher": "Canonical",
+                "offer": "UbuntuServer",
+                "sku": "16.04.0-LTS",
+                "version": "latest"
+            },
+            "osDisk": {
+                "name": "[concat(variables('WebServerNameLinux'), '-linuxosdisk')]",
+                "vhd": {
+                    "uri": "[concat(concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNameLinux')), '2015-06-15').primaryEndpoints['blob'], 'vhds/'), variables('storageAccountNameLinux'), '.vhd')]"
+                },
+                "caching": "ReadWrite",
+                "createOption": "fromImage"
+            },
+            "dataDisks": []
+        },
+        "networkProfile": {
+            "networkInterfaces": [
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('Nic1NameLinux'))]"
+                }
+            ]
+        }
+    }
+  },
+  {
+    "name": "[concat(variables('WebServerNameLinux'),'/webinit')]",
+    "type": "Microsoft.Compute/virtualMachines/extensions",
+    "apiVersion": "[variables('apiVersion')]",
+    "location": "[resourceGroup().location]",
+    "dependsOn": [
+    "[concat('Microsoft.Compute/virtualMachines/', variables('WebServerNameLinux'))]"
+    ],
+    "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "settings": {
+            "fileUris": [
+                "[concat(parameters('gitHubLocation'), 'scripts/', variables('scriptFileNameLinux'))]"
+            ],
+            "commandToExecute": "[concat(variables('scriptFolderLinux'), '/', variables('scriptFileNameLinux'), ' ', variables('scriptParametersLinux'))]"
+        }
+    }
+  },
+  {
+    "name": "[variables('storageAccountNameLinux')]",
+    "type": "Microsoft.Storage/storageAccounts",
+    "apiVersion": "[variables('apiVersion')]",
+    "location": "[resourceGroup().location]",
+    "properties": {
+        "accountType": "[variables('storageAccountType')]"
+    }
+  },
+  {
+    "name": "[variables('Nic1NameLinux')]",
+    "type": "Microsoft.Network/networkInterfaces",
+    "apiVersion": "[variables('apiVersion')]",
+    "location": "[resourceGroup().location]",
+    "dependsOn": [
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIPAddressNameLinux'))]"
+    ],
+    "properties": {
+        "ipConfigurations": [
+            {
+                "name": "[concat(variables('WebServerNameLinux'), '-ipconfig1')]",
+                "properties": {
+                    "subnet": {
+                        "id": "[parameters('webSubnetId')]"
+                    },
+                    "privateIPAllocationMethod": "Static",
+                    "privateIPAddress": "[parameters('privateAddressLinux')]",
+                    "publicIpAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIPAddressNameLinux'))]"
+                    }
+                }
+            }
+        ]
+    }
+  },
+  {
+    "name": "[variables('publicIPAddressNameLinux')]",
+    "type": "Microsoft.Network/publicIpAddresses",
+    "apiVersion": "[variables('apiVersion')]",
+    "location": "[resourceGroup().location]",
+    "properties": {
+        "dnsSettings": {
+          "domainNameLabel": "[concat(parameters('dnsLabel'), variables('WebServerNameLinux'))]"
+        },
+        "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
+    }
+  }
+  ],
+  "outputs": {
+    "FQDNLinux": {
+      "type": "string",
+      "value": "[concat(parameters('dnsLabel'), variables('WebServerNameLinux'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+    },
+    "FQDNWindows": {
+      "type": "string",
+      "value": "Not Deployed"
+    }
+  }
+}

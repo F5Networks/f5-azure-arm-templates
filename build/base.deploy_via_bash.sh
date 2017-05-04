@@ -33,7 +33,7 @@ while true; do
     esac
 done
 
-#If a required paramater is not passed, the script will prompt for it below
+#If a required parameter is not passed, the script will prompt for it below
 required_variables="<REQUIRED_PARAMETERS>"
 for variable in $required_variables
         do

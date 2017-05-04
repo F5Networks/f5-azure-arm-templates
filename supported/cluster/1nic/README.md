@@ -42,14 +42,14 @@ You have three options for deploying this template:
 
 ### <a name="azure"></a>Azure deploy button
 
-Use the appropriate button, depending on whether you are using BYOL or PAYG licensing.  See the Template parameters section to see the information you need to succesfully deploy the template.
+Use the appropriate button, depending on whether you are using BYOL or PAYG licensing.  See the Template parameters section to see the information you need to successfully deploy the template.
 
 **BYOL**<br>
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fsupported%2Fcluster%2F1nic%2FBYOL%2Fazuredeploy.json">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.0.0.0%2Fsupported%2Fcluster%2F1nic%2FBYOL%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
 **PAYG**<br>
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fmaster%2Fsupported%2Fcluster%2F1nic%2FPAYG%2Fazuredeploy.json">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.0.0.0%2Fsupported%2Fcluster%2F1nic%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 
 ## Template parameters
@@ -58,16 +58,16 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | --- | --- | --- |
 | deploymentName | x | A unique name for your application. |
 | numberOfInstances | x | The number of BIG-IPs that will be deployed in front of your application.  The only allowed value for this template is 2. |
-| instanceType | x | The desired Azure Virtual Machine instance size. |
-| imageName | x | The desired F5 image to deploy. |
+| instanceType | x | The Azure Virtual Machine instance size you want to use. |
+| imageName | x | The F5 image you want to deploy. |
 | adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
 | adminPassword | x | A strong password for the BIG-IPs. Do not use **#** or **'** (single quote). Remember this password, you will need it later. |
 | dnsLabel | x | Unique DNS name for the public IP address used to access the BIG-IPs for management (alphanumeric characters only). |
 | bigIpVersion | x | F5 BIG-IP Version to use. |
 | licenseKey1 | | For BYOL only: The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
 | licenseKey2 | x | For BYOL only: The license token from the F5 licensing server. This license will be used for the second F5 BIG-IP. |
-| licensedBandwidth | | PAYG only: licensed bandwidth(Mbps) image to deploy. |
-| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
+| licensedBandwidth | | PAYG only: The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| restrictedSrcAddress | x | This field restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
 
@@ -77,7 +77,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 ```powershell
     ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
     ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
-    ## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
+    ## be supplied inline when running this script but if they aren't then the default will be used as specified below.   ##
     ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -numberOfInstances 2 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_D2_v2 -imageName Good -bigIpVersion 13.0.000 -restrictedSrcAddress "*"-resourceGroupName <value>
 
     param(
@@ -245,7 +245,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
         esac
     done
 
-    #If a required paramater is not passed, the script will prompt for it below
+    #If a required parameter is not passed, the script will prompt for it below
     required_variables="numberOfInstances adminUsername adminPassword dnsLabel instanceType imageName bigIpVersion resourceGroupName licenseType "
     for variable in $required_variables
             do
@@ -291,13 +291,13 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
     azure group create -n $resourceGroupName -l $region
 
     # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
-    # such as can been done with Powershell...oh well!
+    # such as can been done with Powershell.
     if [ $licenseType == "BYOL" ]; then
         azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"numberOfInstances\":{\"value\":\"$numberOfInstances\"},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licenseKey1\":{\"value\":\"$licenseKey1\"},\"licenseKey2\":{\"value\":\"$licenseKey2\"}}"
     elif [ $licenseType == "PAYG" ]; then
         azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"numberOfInstances\":{\"value\":\"$numberOfInstances\"},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
     else
-        echo "Uh oh, shouldn't make it here! Ensure license type is either PAYG or BYOL"
+        echo "Ensure license type is either PAYG or BYOL"
         exit 1
     fi
 
@@ -355,7 +355,7 @@ Warning: F5 does not support the template if you change anything other than the 
 
 ## Configuration Example <a name="config">
 
-The following is a simple configuration diagram for this deployment. In this diagram, the IP addresses are provided as examples.
+The following is a simple configuration diagram for this deployment. In this diagram, the IP addresses are provided as examples.<br>
 ![2-NIC configuration example](images/azure-cluster-1nic.png)
 
 ### Documentation
@@ -410,4 +410,4 @@ under the License.
 Contributor License Agreement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Individuals or business entities who contribute to this project must have
-completed and submitted the `F5 Contributor License Agreement`
+completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html).
