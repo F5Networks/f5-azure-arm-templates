@@ -72,15 +72,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | licenseKey2 | | For BYOL only. The license token from the F5 licensing server. This license is used for the second F5 BIG-IP VE. |
 | licensedBandwidth | | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
 | numberOfExternalIps | x | The number of public/private IPs to deploy for the application traffic (external) NIC on the BIG-IP to be used for virtual servers. |
-| vnetName | x | The name of the existing virtual network in which you want to connect the BIG-IP VEs. |
-| vnetResourceGroupName | x | The name of the resource group that contains the Virtual Network in which the BIG-IP will be placed. |
-| mgmtSubnetName | x | Name of the existing management subnet - with external access to Internet. |
-| mgmtIpAddressRangeStart | x | The static private IP address you want to assign to the management self IP of the first BIG-IP VE. The next contiguous address is used for the second BIG-IP VE device. |
-| externalSubnetName | x | Name of the existing external subnet - with external access to Internet. |
-| externalIpPrimaryAddressRangeStart | x | The static private IP address you want to assign to the external self IP (primary) of the first BIG-IP VE. The next contiguous address is used for the second BIG-IP VE device. |
-| externalIpSecondaryAddressRangeStart | x | The static private IP address (secondary) you want to assign to the first shared Azure public IP. An additional private IP address are assigned for each public IP address you specified in numberOfExternalIps.  For example, adding 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses for external virtual servers. |
-| internalSubnetName | x | Name of the existing internal subnet. |
-| internalIpAddressRangeStart | x | The static private IP address you want to assign to the internal self IP of the first BIG-IP VE. The next contiguous address will be used for the second BIG-IP VE device. |
+| vnetAddressPrefix | x | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
 | restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or an asterisk for all sources. |
 | tenantId | x | Your Azure service principal application tenant ID. |
 | clientId | x | Your Azure service principal application client ID. |
