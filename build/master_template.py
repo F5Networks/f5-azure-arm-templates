@@ -84,14 +84,14 @@ if template_name in ('3nic'):
 
 
 ## Set BIG-IP versions to allow ##
-default_big_ip_version = '13.0.000'
-allowed_big_ip_versions = ["latest", "13.0.000"]
+default_big_ip_version = '13.0.020'
+allowed_big_ip_versions = ["latest", "13.0.020"]
 # Acount for difference in PAYG and BYOL in 12.1 release
 if license_type == 'PAYG':
     allowed_big_ip_versions += ["12.1.22"]
 elif license_type == 'BYOL':
     allowed_big_ip_versions += ["12.1.21"]
-version_port_map = { "latest": { "Port": 8443 }, "13.0.000": { "Port": 8443 }, "12.1.21": { "Port": 443 }, "12.1.22": { "Port": 443 }, "443": { "Port": 443 } }
+version_port_map = { "latest": { "Port": 8443 }, "13.0.020": { "Port": 8443 }, "12.1.21": { "Port": 443 }, "12.1.22": { "Port": 443 }, "443": { "Port": 443 } }
 
 ## Determine PAYG/BYOL variables
 sku_to_use = "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]"
