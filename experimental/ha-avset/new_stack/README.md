@@ -96,7 +96,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specified below.   ##
-## Example Command: .\Deploy_via_PS.ps1 --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.000 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --vnetAddressPrefix <value> --restrictedSrcAddress "*" --managedRoutes <value> --routeTableTag <value> --tenantId <value> --clientId <value> --secret <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: .\Deploy_via_PS.ps1 --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.020 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --vnetAddressPrefix <value> --restrictedSrcAddress "*" --managedRoutes <value> --routeTableTag <value> --tenantId <value> --clientId <value> --secret <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 param(
 
@@ -220,7 +220,7 @@ $deployment
 #!/bin/bash
 
 ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.000 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --vnetAddressPrefix <value> --restrictedSrcAddress "*" --managedRoutes <value> --routeTableTag <value> --tenantId <value> --clientId <value> --secret <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.020 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --vnetAddressPrefix <value> --restrictedSrcAddress "*" --managedRoutes <value> --routeTableTag <value> --tenantId <value> --clientId <value> --secret <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 # Assign Script Parameters and Define Variables
 # Specify static items, change these as needed or make them parameters

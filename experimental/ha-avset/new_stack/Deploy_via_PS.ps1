@@ -1,7 +1,7 @@
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specified below.   ##
-## Example Command: .\Deploy_via_PS.ps1 --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.000 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --vnetAddressPrefix <value> --restrictedSrcAddress "*" --managedRoutes <value> --routeTableTag <value> --tenantId <value> --clientId <value> --secret <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: .\Deploy_via_PS.ps1 --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.020 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --vnetAddressPrefix <value> --restrictedSrcAddress "*" --managedRoutes <value> --routeTableTag <value> --tenantId <value> --clientId <value> --secret <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 param(
 
@@ -14,7 +14,7 @@ param(
 
   [string]
   $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),
-  
+
   [string]
   $licenseKey2 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey2"}),
 
@@ -56,15 +56,15 @@ param(
 
   [string]
   $restrictedSrcAddress = "*",
-  
+
   [Parameter(Mandatory=$True)]
   [string]
   $tenantId,
-  
+
   [Parameter(Mandatory=$True)]
   [string]
   $clientId,
-  
+
   [Parameter(Mandatory=$True)]
   [string]
   $secret,
@@ -106,7 +106,7 @@ if ($licenseType -eq "BYOL") {
   if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\azuredeploy.json"; $parametersFilePath = ".\BYOL\azuredeploy.parameters.json" }
   $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -numberOfExternalIps "$numberOfExternalIps" -vnetAddressPrefix "$vnetAddressPrefix" -restrictedSrcAddress "$restrictedSrcAddress" -licenseKey1 "$licenseKey1 -licenseKey2 "$licenseKey2"
 } elseif ($licenseType -eq "PAYG") {
-  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }  
+  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }
   $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -numberOfExternalIps "$numberOfExternalIps" -vnetAddressPrefix "$vnetAddressPrefix" -restrictedSrcAddress "$restrictedSrcAddress" -licensedBandwidth "$licensedBandwidth"
   } else {
   Write-Error -Message "Please select a valid license type of PAYG or BYOL."

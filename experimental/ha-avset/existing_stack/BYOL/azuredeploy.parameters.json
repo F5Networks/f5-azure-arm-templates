@@ -1,81 +1,81 @@
 {
-     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-     "contentVersion": "2.0.0.0", 
+     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+     "contentVersion": "2.0.0.0",
      "parameters": {
           "adminUsername": {
-               "value": "azureuser", 
-          }, 
+               "value": "azureuser",
+          },
           "adminPassword": {
                "value": "GEN_UNIQUE"
-          }, 
+          },
           "dnsLabel": {
-               "value": "REQUIRED", 
-          },  
+               "value": "REQUIRED",
+          },
           "instanceName": {
-               "value": "f5vm", 
-          }, 
+               "value": "f5vm",
+          },
           "instanceType": {
-               "value": "Standard_D3_v2", 
-          }, 
+               "value": "Standard_D3_v2",
+          },
           "imageName": {
-               "value": "Good", 
-          }, 
+               "value": "Good",
+          },
           "bigIpVersion": {
-               "value": "13.0.000", 
-          }, 
+               "value": "13.0.020",
+          },
           "licenseKey1": {
-               "value": "REQUIRED", 
-          }, 
+               "value": "REQUIRED",
+          },
           "licenseKey2": {
-               "value": "REQUIRED", 
+               "value": "REQUIRED",
           },
           "numberOfExternalIps": {
-               "value": 1, 
-          }, 
+               "value": 1,
+          },
           "vnetName": {
                "value": "GEN_UNIQUE"
-          }, 
+          },
           "vnetResourceGroupName": {
                "value": "GEN_UNIQUE"
-          }, 
+          },
           "mgmtSubnetName": {
                "value": "GEN_UNIQUE"
-          }, 
+          },
           "mgmtIpAddressRangeStart": {
                "value": "GEN_UNIQUE"
-          }, 
+          },
           "externalSubnetName": {
                "value": "GEN_UNIQUE"
-          }, 
+          },
           "externalIpPrimaryAddressRangeStart": {
                "value": "GEN_UNIQUE"
-          }, 
+          },
           "externalIpSecondaryAddressRangeStart": {
                "value": "GEN_UNIQUE"
           },
           "internalSubnetName": {
                "value": "GEN_UNIQUE"
-          }, 
+          },
           "internalIpAddressRangeStart": {
                "value": "GEN_UNIQUE"
           },
           "restrictedSrcAddress": {
-               "value": "*", 
-          }, 
+               "value": "*",
+          },
           "tenantId": {
                "value": "GEN_UNIQUE"
-          }, 
+          },
           "clientId": {
                "value": "GEN_UNIQUE"
-          }, 
+          },
           "servicePrincipalSecret": {
                "value": "GEN_UNIQUE"
           "tagValues": {
                "value": {
-                    "application": "APP", 
-                    "cost": "COST", 
-                    "environment": "ENV", 
-                    "group": "GROUP", 
+                    "application": "APP",
+                    "cost": "COST",
+                    "environment": "ENV",
+                    "group": "GROUP",
                     "owner": "OWNER"
                }
           },
