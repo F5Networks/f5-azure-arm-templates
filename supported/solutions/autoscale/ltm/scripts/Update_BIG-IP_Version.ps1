@@ -1,4 +1,4 @@
-# This script can be used to update the VM Scale Set to a newer big ip version, I.E. to go from 12.1.22 to 13.0.000
+# This script can be used to update the VM Scale Set to a newer big ip version, I.E. to go from 12.1.22 to 13.0.020
 # NOTE: Another alternative would be to simply "re-deploy" the ARM template using all the same variables except the BIG-IP version
 # parameter. That will update the version used and Azure Load Balancer/NSG rules(if needed), then simply updating each instance
 # to the latest model will be all that is required to utilize the latest BIG-IP version selected.

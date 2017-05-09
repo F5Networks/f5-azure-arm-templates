@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "3.0.0.0", 
+    "contentVersion": "3.1.0.0", 
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -24,7 +24,7 @@
             "value": "Good"
         }, 
         "bigIpVersion": {
-            "value": "13.0.000"
+            "value": "13.0.020"
         }, 
         "licenseKey1": {
             "value": "REQUIRED"

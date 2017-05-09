@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json", 
-    "contentVersion": "3.0.0.0", 
+    "contentVersion": "3.1.0.0", 
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser", 
@@ -83,10 +83,10 @@
         "bigIpVersion": {
             "allowedValues": [
                 "latest", 
-                "13.0.000", 
+                "13.0.020", 
                 "12.1.22"
             ], 
-            "defaultValue": "13.0.000", 
+            "defaultValue": "13.0.020", 
             "metadata": {
                 "description": "F5 BIG-IP version you want to use."
             }, 
@@ -215,7 +215,7 @@
             "12.1.22": {
                 "Port": 443
             }, 
-            "13.0.000": {
+            "13.0.020": {
                 "Port": 8443
             }, 
             "443": {
