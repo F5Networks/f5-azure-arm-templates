@@ -539,8 +539,7 @@ if script_location:
             deploy_cmd_params = '"{'; script_dash = ' --'; license_check = ''; license2_check = ''
             meta_script = 'base.deploy_via_bash.sh'; script_loc = script_location + 'deploy_via_bash.sh'
             base_ex = '## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth ' + default_payg_bw
-            getopt_start = 'ARGS=`getopt -o '; getopt_params_long = ' --long ';  getopt_end = ' -n $0 -- "$@"`'
-            getopt_params_short = 'a:b:c:d:'; base_params = 'resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,'
+            base_params = 'resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,'
             mandatory_variables = ''; license_params = ''
             bash_shorthand_args = ['e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','aa','bb','cc','dd','ee','ff','gg','hh','ii','jj','kk','ll']
             # Need to add bash license params prior to dynamic parameters
@@ -550,12 +549,9 @@ if script_location:
                 license2_param = 'licenseKey2:,'
                 license_args.append('licenseKey2')
                 license2_check += '    if [ -z $licenseKey2 ] ; then\n            read -p "Please enter value for licenseKey2:" licenseKey2\n    fi\n'
-            getopt_license_params = base_params + 'licensedBandwidth:,licenseKey1:,' + license2_param
             for license_arg in license_args:
                 param_str += '\n        -' + bash_shorthand_args[0] + '|--' + license_arg+ ')\n            ' + license_arg + '=$2\n            shift 2;;'
-                getopt_params_short += bash_shorthand_args[0] + ':'
                 del bash_shorthand_args[0]
-            getopt_params_long += getopt_license_params
         else:
             return 'Only supporting powershell and bash for now!'
 
@@ -593,10 +589,7 @@ if script_location:
                     deploy_cmd_params += '\\"' + parameter[0] + '\\":{\\"value\\":$' + parameter[0] + '},'
                 else:
                     deploy_cmd_params += '\\"' + parameter[0] + '\\":{\\"value\\":\\"$' + parameter[0] + '\\"},'
-                # Need to build the getopt command
-                getopt_params_long += parameter[0] + ':,'
                 param_str += '\n        -' + bash_shorthand_args[0] + '|--' + parameter[0] + ')\n            ' + parameter[0] + '=$2\n            shift 2;;'
-                getopt_params_short += bash_shorthand_args[0] + ':'
                 del bash_shorthand_args[0]
             # Add param to example command
             if parameter[1]:
@@ -633,9 +626,6 @@ if script_location:
             # Right now auto scale is only PAYG
             if template_name in ('ltm_autoscale', 'waf_autoscale'):
                 license_check = '# Prompt for licensed bandwidth if not supplied and PAYG is selected\nif [ $licenseType == "PAYG" ]; then\n    if [ -z $licensedBandwidth ] ; then\n            read -p "Please enter value for licensedBandwidth:" licensedBandwidth\n    fi\n    template_file="./azuredeploy.json"\n    parameter_file="./azuredeploy.parameters.json"\nfi'
-            # Compile getopts command
-            getopt_params_long = getopt_params_long[:-1]
-            getopt_cmd = getopt_start + getopt_params_short + getopt_params_long + getopt_end
             # Add any additional example command script parameters
             for named_param in ['resourceGroupName','azureLoginUser','azureLoginPassword']:
                 base_ex += script_dash + named_param + ' <value>'
@@ -667,7 +657,6 @@ if script_location:
         script_str = script_str.replace('<LICENSE_PARAMETERS>', license_params)
         script_str = script_str.replace('<DYNAMIC_PARAMETERS>', param_str)
         if language == 'bash':
-            script_str = script_str.replace('<PARAMETERS>', getopt_cmd)
             script_str = script_str.replace('<REQUIRED_PARAMETERS>', mandatory_variables)
             script_str = script_str.replace('<LICENSE_CHECK>', license_check)
         # Write to actual script location
