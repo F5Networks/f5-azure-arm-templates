@@ -9,11 +9,8 @@ region="westus"
 restrictedSrcAddress="*"
 tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x:y:z:aa:bb:cc:dd:ee:ff: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,vmScaleSetMinCount:,vmScaleSetMaxCount:,scaleOutThroughput:,scaleInThroughput:,scaleTimeWindow:,adminUsername:,adminPassword:,dnsLabel:,instanceType:,imageName:,bigIpVersion:,solutionDeploymentName:,applicationProtocols:,applicationAddress:,applicationServiceFqdn:,applicationPort:,applicationSecurePort:,sslCert:,sslPswd:,applicationType:,blockingLevel:,customPolicy:,tenantId:,clientId:,servicePrincipalSecret:,restrictedSrcAddress: -n $0 -- "$@"`
-eval set -- "$ARGS"
-
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
-while true; do
+while [[ $# -gt 1 ]]; do
     case "$1" in
         -a|--resourceGroupName)
             resourceGroupName=$2
@@ -121,14 +118,14 @@ done
 required_variables="vmScaleSetMinCount vmScaleSetMaxCount scaleOutThroughput scaleInThroughput scaleTimeWindow adminUsername adminPassword dnsLabel instanceType imageName bigIpVersion solutionDeploymentName applicationProtocols applicationAddress applicationServiceFqdn applicationPort applicationSecurePort sslCert sslPswd applicationType blockingLevel customPolicy tenantId clientId servicePrincipalSecret resourceGroupName licenseType "
 for variable in $required_variables
         do
-        if [ -v ${!variable} ] ; then
+        if [ -z ${!variable} ] ; then
                 read -p "Please enter value for $variable:" $variable
         fi
 done
 
 # Prompt for licensed bandwidth if not supplied and PAYG is selected
 if [ $licenseType == "PAYG" ]; then
-    if [ -v $licensedBandwidth ] ; then
+    if [ -z $licensedBandwidth ] ; then
             read -p "Please enter value for licensedBandwidth:" licensedBandwidth
     fi
     template_file="./azuredeploy.json"

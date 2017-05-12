@@ -9,11 +9,8 @@ region="westus"
 restrictedSrcAddress="*"
 tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-<PARAMETERS>
-eval set -- "$ARGS"
-
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
-while true; do
+while [[ $# -gt 1 ]]; do
     case "$1" in
         -a|--resourceGroupName)
             resourceGroupName=$2
@@ -37,7 +34,7 @@ done
 required_variables="<REQUIRED_PARAMETERS>"
 for variable in $required_variables
         do
-        if [ -v ${!variable} ] ; then
+        if [ -z ${!variable} ] ; then
                 read -p "Please enter value for $variable:" $variable
         fi
 done

@@ -9,11 +9,8 @@ region="westus"
 restrictedSrcAddress="*"
 tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,adminUsername:,adminPassword:,dnsLabel:,instanceName:,instanceType:,imageName:,bigIpVersion:,restrictedSrcAddress: -n $0 -- "$@"`
-eval set -- "$ARGS"
-
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
-while true; do
+while [[ $# -gt 1 ]]; do
     case "$1" in
         -a|--resourceGroupName)
             resourceGroupName=$2
@@ -67,14 +64,14 @@ done
 required_variables="adminUsername adminPassword dnsLabel instanceName instanceType imageName bigIpVersion resourceGroupName licenseType "
 for variable in $required_variables
         do
-        if [ -v ${!variable} ] ; then
+        if [ -z ${!variable} ] ; then
                 read -p "Please enter value for $variable:" $variable
         fi
 done
 
 # Prompt for license key if not supplied and BYOL is selected
 if [ $licenseType == "BYOL" ]; then
-    if [ -v $licenseKey1 ] ; then
+    if [ -z $licenseKey1 ] ; then
             read -p "Please enter value for licenseKey1:" licenseKey1
     fi
     template_file="./BYOL/azuredeploy.json"
@@ -82,7 +79,7 @@ if [ $licenseType == "BYOL" ]; then
 fi
 # Prompt for licensed bandwidth if not supplied and PAYG is selected
 if [ $licenseType == "PAYG" ]; then
-    if [ -v $licensedBandwidth ] ; then
+    if [ -z $licensedBandwidth ] ; then
             read -p "Please enter value for licensedBandwidth:" licensedBandwidth
     fi
     template_file="./PAYG/azuredeploy.json"
