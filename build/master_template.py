@@ -33,8 +33,8 @@ nic_reference = ""
 command_to_execute = ""
 
 ## Static Variable Assignment ##
-content_version = '3.1.0.0'
-f5_networks_tag = 'v3.1.0.0'
+content_version = '3.1.1.0'
+f5_networks_tag = 'v3.1.1.0'
 f5_cloud_libs_tag = 'v3.0.2'
 f5_cloud_libs_azure_tag = 'v1.1.1'
 
@@ -85,13 +85,8 @@ if template_name in ('3nic'):
 
 ## Set BIG-IP versions to allow ##
 default_big_ip_version = '13.0.020'
-allowed_big_ip_versions = ["latest", "13.0.020"]
-# Acount for difference in PAYG and BYOL in 12.1 release
-if license_type == 'PAYG':
-    allowed_big_ip_versions += ["12.1.22"]
-elif license_type == 'BYOL':
-    allowed_big_ip_versions += ["12.1.21"]
-version_port_map = { "latest": { "Port": 8443 }, "13.0.020": { "Port": 8443 }, "12.1.21": { "Port": 443 }, "12.1.22": { "Port": 443 }, "443": { "Port": 443 } }
+allowed_big_ip_versions = ["latest", "13.0.020", "12.1.24"]
+version_port_map = { "latest": { "Port": 8443 }, "13.0.020": { "Port": 8443 }, "12.1.24": { "Port": 443 }, "443": { "Port": 443 } }
 
 ## Determine PAYG/BYOL variables
 sku_to_use = "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]"

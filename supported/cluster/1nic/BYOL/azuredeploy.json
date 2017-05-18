@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json", 
-    "contentVersion": "3.1.0.0", 
+    "contentVersion": "3.1.1.0", 
     "parameters": {
         "numberOfInstances": {
             "allowedValues": [
@@ -84,7 +84,7 @@
             "allowedValues": [
                 "latest", 
                 "13.0.020", 
-                "12.1.21"
+                "12.1.24"
             ], 
             "defaultValue": "13.0.020", 
             "metadata": {
@@ -146,10 +146,7 @@
             }
         }, 
         "bigIpVersionPortMap": {
-            "12.1.21": {
-                "Port": 443
-            }, 
-            "12.1.22": {
+            "12.1.24": {
                 "Port": 443
             }, 
             "13.0.020": {
