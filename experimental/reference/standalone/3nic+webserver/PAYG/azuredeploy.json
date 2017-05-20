@@ -83,10 +83,10 @@
         "bigIpVersion": {
             "allowedValues": [
                 "latest",
-                "13.0.020",
+                "13.0.021",
                 "12.1.24"
             ],
-            "defaultValue": "13.0.020",
+            "defaultValue": "13.0.021",
             "metadata": {
                 "description": "F5 BIG-IP Version to use"
             },
@@ -196,7 +196,7 @@
             "12.1.24": {
                 "Port": 443
             },
-            "13.0.020": {
+            "13.0.021": {
                 "Port": 8443
             },
             "443": {
