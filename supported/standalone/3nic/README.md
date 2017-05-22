@@ -60,20 +60,20 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| adminUsername | x | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
-| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IP VEs for management. |
-| dnsLabelPrefix | x | Unique DNS Name prefix for the Public IP(s) used to access the data plan for application traffic objects(Virtual Servers, etc...) |
-| instanceName | x | The hostname you want to use for the Virtual Machine. |
-| instanceType | x | The Azure Virtual Machine instance size you want to use. |
-| imageName | x | The F5 image you want to deploy. |
-| bigIpVersion | x | F5 BIG-IP version you want to use. |
-| licenseKey1 | | For BYOL only. The license token from the F5 licensing server. This license is used for the first F5 BIG-IP VE. |
-| licensedBandwidth | | For PAYG only. The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
-| numberOfExternalIps | x | The number of public/private IPs to deploy for the application traffic (external) NIC on the BIG-IP to be used for virtual servers. |
-| vnetAddressPrefix | x | The start of the CIDR block(/16) used by the BIG-IP VEs when creating the VNET and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168' |
-| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or an asterisk for all sources. |
-| tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
+| adminUsername | Yes | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
+| adminPassword | Yes | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
+| dnsLabel | Yes | Unique DNS Name for the public IP address used to access the BIG-IP VEs for management. |
+| dnsLabelPrefix | Yes | Unique DNS Name prefix for the Public IP(s) used to access the data plan for application traffic objects(Virtual Servers, etc...) |
+| instanceName | Yes | The hostname you want to use for the Virtual Machine. |
+| instanceType | Yes | The Azure Virtual Machine instance size you want to use. |
+| imageName | Yes | The F5 image you want to deploy. |
+| bigIpVersion | Yes | F5 BIG-IP version you want to use. |
+| licenseKey1 | Yes (for BYOL) | For BYOL only. The license token from the F5 licensing server. This license is used for the first F5 BIG-IP VE. |
+| licensedBandwidth | Yes (for PAYG) | For PAYG only. The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| numberOfExternalIps | Yes | The number of public/private IPs to deploy for the application traffic (external) NIC on the BIG-IP to be used for virtual servers. |
+| vnetAddressPrefix | Yes | The start of the CIDR block(/16) used by the BIG-IP VEs when creating the VNET and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168' |
+| restrictedSrcAddress | yes | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or an asterisk for all sources. |
+| tagValues | Yes | Additional key-value pair tags to be added to each Azure resource. |
 
 ### <a name="powershell"></a>PowerShell Script Example
 

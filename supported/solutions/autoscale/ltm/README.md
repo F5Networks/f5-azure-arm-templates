@@ -51,23 +51,23 @@ Use this button to deploy the template:
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| vmScaleSetMinCount | x | The minimum (and default) number of BIG-IP VEs that will be deployed into the VM Scale Set. |
-| vmScaleSetMaxCount | x | The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set. |
-| scaleOutThroughput | x | The percentage of 'Network Out' throughput that triggers a Scale Out event.  This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you choose. |
-| scaleInThroughput | x | The percentage of 'Network Out' throughput that triggers a Scale In event.  This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you choose. |
-| scaleTimeWindow | x | The time window required to trigger a scale event (in and out). This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). |
-| adminUsername | x | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
-| dnsLabel | x | Unique DNS Name for the Public IP address used to access access the BIG-IP VEs for management. |
-| instanceType | x | Azure instance size of the Virtual Machine. |
-| imageName | x | The F5 image you want to deploy. |
-| bigIpVersion | x | F5 BIG-IP version you want to use. |
-| licensedBandwidth | | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
-| tenantId | | Your Azure service principal application tenant ID. |
-| clientId | | Your Azure service principal application client (application) ID. |
-| servicePrincipalSecret | | Your Azure service principal application secret. |
-| restrictedSrcAddress | x | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources. |
-| tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
+| vmScaleSetMinCount | Yes | The minimum (and default) number of BIG-IP VEs that will be deployed into the VM Scale Set. |
+| vmScaleSetMaxCount | Yes | The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set. |
+| scaleOutThroughput | Yes | The percentage of 'Network Out' throughput that triggers a Scale Out event.  This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you choose. |
+| scaleInThroughput | Yes | The percentage of 'Network Out' throughput that triggers a Scale In event.  This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you choose. |
+| scaleTimeWindow | Yes | The time window required to trigger a scale event (in and out). This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). |
+| adminUsername | Yes | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
+| adminPassword | Yes | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
+| dnsLabel | Yes | Unique DNS Name for the Public IP address used to access access the BIG-IP VEs for management. |
+| instanceType | Yes | Azure instance size of the Virtual Machine. |
+| imageName | Yes | The F5 image you want to deploy. |
+| bigIpVersion | Yes | F5 BIG-IP version you want to use. |
+| licensedBandwidth | Yes | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| tenantId | Yes | Your Azure service principal application tenant ID. |
+| clientId | Yes | Your Azure service principal application client (application) ID. |
+| servicePrincipalSecret | Yes | Your Azure service principal application secret. |
+| restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources. |
+| tagValues | Yes | Additional key-value pair tags to be added to each Azure resource. |
 
 ### <a name="powershell"></a>PowerShell Script Example
 

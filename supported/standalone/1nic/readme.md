@@ -59,17 +59,17 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| adminUsername | x | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
-| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
-| instanceName | x | The hostname to be configured for the VM. |
-| instanceType | x | The desired Azure Virtual Machine instance size. |
-| imageName | x | The desired F5 image to deploy. |
-| bigIpVersion | x | F5 BIG-IP version you want to use. |
-| licenseKey1 | | For BYOL only. The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
-| licensedBandwidth | | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
-| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
-| tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
+| adminUsername | Yes | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
+| adminPassword | Yes | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
+| dnsLabel | Yes | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
+| instanceName | Yes | The hostname to be configured for the VM. |
+| instanceType | Yes | The desired Azure Virtual Machine instance size. |
+| imageName | Yes | The desired F5 image to deploy. |
+| bigIpVersion | Yes | F5 BIG-IP version you want to use. |
+| licenseKey1 | No | For BYOL only. The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
+| licensedBandwidth | No | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
+| restrictedSrcAddress | Yes | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
+| tagValues | Yes | Additional key-value pair tags to be added to each Azure resource. |
 
 ### <a name="powershell"></a>PowerShell Script Example
 

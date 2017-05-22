@@ -56,19 +56,19 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| deploymentName | x | A unique name for your application. |
-| numberOfInstances | x | The number of BIG-IPs that will be deployed in front of your application.  The only allowed value for this template is 2. |
-| instanceType | x | The Azure Virtual Machine instance size you want to use. |
-| imageName | x | The F5 image you want to deploy. |
-| adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IPs. Do not use **#** or **'** (single quote). Remember this password, you will need it later. |
-| dnsLabel | x | Unique DNS name for the public IP address used to access the BIG-IPs for management (alphanumeric characters only). |
-| bigIpVersion | x | F5 BIG-IP Version to use. |
-| licenseKey1 | | For BYOL only: The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
-| licenseKey2 | x | For BYOL only: The license token from the F5 licensing server. This license will be used for the second F5 BIG-IP. |
-| licensedBandwidth | | PAYG only: The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
-| restrictedSrcAddress | x | This field restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
-| tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
+| deploymentName | Yes | A unique name for your application. |
+| numberOfInstances | Yes | The number of BIG-IPs that will be deployed in front of your application.  The only allowed value for this template is 2. |
+| instanceType | Yes | The Azure Virtual Machine instance size you want to use. |
+| imageName | Yes | The F5 image you want to deploy. |
+| adminUsername | Yes | A user name to login to the BIG-IPs.  The default value is "azureuser". |
+| adminPassword | Yes | A strong password for the BIG-IPs. Do not use **#** or **'** (single quote). Remember this password, you will need it later. |
+| dnsLabel | Yes | Unique DNS name for the public IP address used to access the BIG-IPs for management (alphanumeric characters only). |
+| bigIpVersion | Yes | F5 BIG-IP Version to use. |
+| licenseKey1 | Yes (for BYOL) | For BYOL only: The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
+| licenseKey2 | Yes (for BYOL) | For BYOL only: The license token from the F5 licensing server. This license will be used for the second F5 BIG-IP. |
+| licensedBandwidth | Yes (for PAYG) | PAYG only: The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
+| tagValues | Yes | Additional key-value pair tags to be added to each Azure resource. |
 
 
 

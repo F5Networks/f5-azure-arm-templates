@@ -49,34 +49,34 @@ Use this button to deploy the template:
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| vmScaleSetMinCount | x | The minimum(and default) number of BIG-IP VEs that will be deployed into the VM Scale Set. |
-| vmScaleSetMaxCount | x | The number of maximum BIG-IP VEs that can be deployed into the VM Scale Set. |
-| scaleOutThroughput | x | The percentange of 'Network Out' Throughput to scale out on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen. |
-| scaleInThroughput | x | The percentange of 'Network Out' Throughput to scale in on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen. |
-| scaleTimeWindow | x | The time window required to trigger a scale event(up and down), this is used to determine the amount of time needed for a threshold to be breached as well as to prevent flapping. |
-| adminUsername | x | A user name to login to the BIG-IPs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IPs. Do not use **#** or **'** (single quote). Remember this password, you will need it later. |
-| dnsLabel | x | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
-| instanceType | x | The desired Azure Virtual Machine instance size. |
-| imageName | x | The desired F5 image to deploy. |
-| bigIpVersion | x | F5 BIG-IP Version to use. |
-| licensedBandwidth | | PAYG licensed bandwidth(Mbps) image to deploy. |
-| solutionDeploymentName | x | A simple name for your application. |
-| applicationProtocols | x | The protocol that will be used to configure the application virtual servers. The only allowed values for these templates are http, https, http-https or https-offload. |
-| applicationAddress | x | The public IP address or DNS FQDN of the application that this WAF will protect. |
-| applicationServiceFqdn | x | The external FQDN used by clients to access the Azure App Service. |
-| applicationPort | x | The unencrypted port that your application is listening on (for example, 80). This field is required in the http and https-offload deployment scenarios. |
-| applicationSecurePort | x | The encrypted port that your application is listening on (for example, 443). This field is required in the https deployment scenario. |
-| sslCert | x | The url to the cert that should be used, this must be publicly accessible. |
-| sslPswd | x | The password for the SSL Cert. |
-| applicationType | x | The operating system on which your application is running. (Linux OS or Windows OS). |
-| blockingLevel | x | The level of traffic you want to flag as insecure. All applications behind the WAF will use this level. The higher the level, the more traffic that is blocked. The lower the level, the more chances that unsecure traffic will make it through to your application. See the Security blocking levels topic for more information. |
-| customPolicy |  | The URL of a custom ASM security policy, in XML format, that you would like to apply to the deployment. |
-| tenantId | | Your Azure service principal application tenant ID |
-| clientId | | Your Azure service principal application client(application) ID. |
-| servicePrincipalSecret | | Your Azure service principal application secret. |
-| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
-| tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
+| vmScaleSetMinCount | Yes | The minimum(and default) number of BIG-IP VEs that will be deployed into the VM Scale Set. |
+| vmScaleSetMaxCount | Yes | The number of maximum BIG-IP VEs that can be deployed into the VM Scale Set. |
+| scaleOutThroughput | Yes | The percentange of 'Network Out' Throughput to scale out on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen. |
+| scaleInThroughput | Yes | The percentange of 'Network Out' Throughput to scale in on.  This will be factored as a percentage of the F5 PAYG image bandwidth(Mbps) size chosen. |
+| scaleTimeWindow | Yes | The time window required to trigger a scale event(up and down), this is used to determine the amount of time needed for a threshold to be breached as well as to prevent flapping. |
+| adminUsername | Yes | A user name to login to the BIG-IPs.  The default value is "azureuser". |
+| adminPassword | Yes | A strong password for the BIG-IPs. Do not use **#** or **'** (single quote). Remember this password, you will need it later. |
+| dnsLabel | Yes | Unique DNS Name for the public IP address used to access the BIG-IPs for management. |
+| instanceType | Yes | The desired Azure Virtual Machine instance size. |
+| imageName | Yes | The desired F5 image to deploy. |
+| bigIpVersion | Yes | F5 BIG-IP Version to use. |
+| licensedBandwidth | Yes | PAYG licensed bandwidth(Mbps) image to deploy. |
+| solutionDeploymentName | Yes | A simple name for your application. |
+| applicationProtocols | Yes | The protocol that will be used to configure the application virtual servers. The only allowed values for these templates are http, https, http-https or https-offload. |
+| applicationAddress | Yes | The public IP address or DNS FQDN of the application that this WAF will protect. |
+| applicationServiceFqdn | Yes | The external FQDN used by clients to access the Azure App Service. |
+| applicationPort | Yes | The unencrypted port that your application is listening on (for example, 80). This field is required in the http and https-offload deployment scenarios. |
+| applicationSecurePort | Yes | The encrypted port that your application is listening on (for example, 443). This field is required in the https deployment scenario. |
+| sslCert | Yes | The url to the cert that should be used, this must be publicly accessible. |
+| sslPswd | Yes | The password for the SSL Cert. |
+| applicationType | Yes | The operating system on which your application is running. (Linux OS or Windows OS). |
+| blockingLevel | Yes | The level of traffic you want to flag as insecure. All applications behind the WAF will use this level. The higher the level, the more traffic that is blocked. The lower the level, the more chances that unsecure traffic will make it through to your application. See the Security blocking levels topic for more information. |
+| customPolicy | No | The URL of a custom ASM security policy, in XML format, that you would like to apply to the deployment. |
+| tenantId | Yes | Your Azure service principal application tenant ID |
+| clientId | Yes | Your Azure service principal application client(application) ID. |
+| servicePrincipalSecret | Yes | Your Azure service principal application secret. |
+| restrictedSrcAddress | Yes | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
+| tagValues | Yes | Additional key-value pair tags to be added to each Azure resource. |
 
 ### <a name="powershell"></a>PowerShell Script Example
 
