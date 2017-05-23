@@ -45,6 +45,12 @@
                     "Standard_D12",
                     "Standard_D13",
                     "Standard_D14",
+                    "Standard_DS3",
+                    "Standard_DS4",
+                    "Standard_DS11",
+                    "Standard_DS12",
+                    "Standard_DS13",
+                    "Standard_DS14",
                     "Standard_D3_v2",
                     "Standard_D4_v2",
                     "Standard_D5_v2",
@@ -53,8 +59,18 @@
                     "Standard_D13_v2",
                     "Standard_D14_v2",
                     "Standard_D15_v2",
+                    "Standard_DS3_v2",
+                    "Standard_DS4_v2",
+                    "Standard_DS5_v2",
+                    "Standard_DS11_v2",
+                    "Standard_DS12_v2",
+                    "Standard_DS13_v2",
+                    "Standard_DS14_v2",
+                    "Standard_DS15_v2",
                     "Standard_F4",
-                    "Standard_F8"
+                    "Standard_F8",
+                    "Standard_F4S",
+                    "Standard_F8S"
                ],
                "defaultValue": "Standard_D3_v2",
                "metadata": {
@@ -189,8 +205,162 @@
           "installCloudLibs": "[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit\nfi\necho loaded verifyHash\nscript_loc=\"/var/lib/waagent/custom-script/download/0/\"\nconfig_loc=\"/config/cloud/\"\nhashed_file_list=\"${config_loc}f5-cloud-libs.tar.gz ${config_loc}f5-cloud-libs-azure.tar.gz\"\nfor file in $hashed_file_list; do\necho \"verifying $file\"\n/usr/bin/tmsh run cli script verifyHash $file\nif [ $? != 0 ]; then\necho \"$file is not valid\"\nexit 1\nfi\necho \"verified $file\"\ndone\necho \"expanding $hashed_file_list\"\ntar xvfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud/node_modules\ntar xvfz /config/cloud/f5-cloud-libs-azure.tar.gz -C /config/cloud/node_modules/f5-cloud-libs/node_modules\ntouch /config/cloud/cloudLibsReady', variables('singleQuote'))]",
           "numberOfInstances": 2,
           "dnsLabel": "[toLower(parameters('dnsLabel'))]",
+          "instanceTypeMap": {
+               "Standard_A3": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_A4": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_A5": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_A6": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_A7": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D11": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D11_v2": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D12": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D12_v2": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D13": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D13_v2": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D14": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D14_v2": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D2": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D2_v2": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D3": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D3_v2": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D4": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D4_v2": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_D5_v2": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_DS1": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS11": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS11_v2": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS12": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS12_v2": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS13": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS13_v2": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS14": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS14_v2": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS15_v2": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS1_v2": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS2": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS2_v2": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS3": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS3_v2": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS4": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS4_v2": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_DS5_v2": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_F2": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_F4": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_G1": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_G2": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_G3": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_G4": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_G5": {
+                    "storageAccountType": "Standard_LRS"
+               }, 
+               "Standard_GS1": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_GS2": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_GS3": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_GS4": {
+                    "storageAccountType": "Premium_LRS"
+               }, 
+               "Standard_GS5": {
+                    "storageAccountType": "Premium_LRS"
+               }
+          },           
           "newStorageAccountName": "[concat(uniquestring(resourceGroup().id), 'stor')]",
-          "storageAccountType": "Standard_LRS",
+          "storageAccountType": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]", 
+          "newDataStorageAccountName": "[concat(uniquestring(resourceGroup().id), 'data000')]", 
+          "dataStorageAccountType": "Standard_LRS", 
           "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]",
           "instanceName": "[toLower(parameters('instanceName'))]",
           "imageNameToLower": "[toLower(parameters('imageName'))]",
