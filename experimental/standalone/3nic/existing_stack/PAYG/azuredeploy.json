@@ -400,7 +400,7 @@
                 "storageAccountType": "Premium_LRS"
             }
         }, 
-        "storageAccountType": "Standard_LRS", 
+        "storageAccountType": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]", 
         "newDataStorageAccountName": "[concat(uniquestring(resourceGroup().id), 'data000')]", 
         "dataStorageAccountType": "Standard_LRS", 
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
