@@ -667,6 +667,22 @@
                "type": "Microsoft.Storage/storageAccounts"
           },
           {
+               "apiVersion": "[variables('storageApiVersion')]",
+               "location": "[variables('location')]",
+               "name": "[variables('newDataStorageAccountName')]",
+               "properties": {
+                    "accountType": "[variables('dataStorageAccountType')]"
+               },
+               "tags": {
+                    "application": "[parameters('tagValues').application]",
+                    "costCenter": "[parameters('tagValues').cost]",
+                    "environment": "[parameters('tagValues').environment]",
+                    "group": "[parameters('tagValues').group]",
+                    "owner": "[parameters('tagValues').owner]"
+               },
+               "type": "Microsoft.Storage/storageAccounts"
+          },
+          {
                "apiVersion": "[variables('networkApiVersion')]",
                "dependsOn": [
                     "[concat('Microsoft.Network/networkSecurityGroups/', variables('dnsLabel'), '-mgmt-nsg')]",
@@ -969,7 +985,8 @@
                     "[concat('Microsoft.Network/networkInterfaces/', variables('dnsLabel'), '-ext-nic0')]",
                     "[concat('Microsoft.Network/networkInterfaces/', variables('dnsLabel'), '-int-nic0')]",
                     "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]",
-                    "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]"
+                    "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]",
+                    "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
                ],
                "location": "[variables('location')]",
                "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '0')]",
@@ -985,7 +1002,7 @@
                     "diagnosticsProfile": {
                          "bootDiagnostics": {
                               "enabled": true,
-                              "storageUri": "[concat('http://',variables('newStorageAccountName'),'.blob.core.windows.net')]"
+                              "storageUri": "[concat('http://',variables('newDataStorageAccountName'),'.blob.core.windows.net')]"
                          }
                     },
                     "hardwareProfile": {
@@ -1051,7 +1068,8 @@
                     "[concat('Microsoft.Network/networkInterfaces/', variables('dnsLabel'), '-ext-nic1')]",
                     "[concat('Microsoft.Network/networkInterfaces/', variables('dnsLabel'), '-int-nic1')]",
                     "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]",
-                    "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]"
+                    "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]",
+                    "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
                ],
                "location": "[variables('location')]",
                "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '1')]",
@@ -1067,7 +1085,7 @@
                     "diagnosticsProfile": {
                          "bootDiagnostics": {
                               "enabled": true,
-                              "storageUri": "[concat('http://',variables('newStorageAccountName'),'.blob.core.windows.net')]"
+                              "storageUri": "[concat('http://',variables('newDataStorageAccountName'),'.blob.core.windows.net')]"
                          }
                     },
                     "hardwareProfile": {
