@@ -768,6 +768,7 @@
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", 
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", 
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]"
