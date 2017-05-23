@@ -18,7 +18,7 @@
             "value": "f5vm01"
         }, 
         "instanceType": {
-            "value": "Standard_D2_v2"
+            "value": "Standard_DS2_v2"
         }, 
         "imageName": {
             "value": "Good"
