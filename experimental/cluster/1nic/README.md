@@ -44,11 +44,11 @@ You have three options for deploying this template:
 Use the appropriate button, depending on whether you are using BYOL or PAYG licensing.  See the Template parameters section to see the information you need to succesfully deploy the template.
 
 **BYOL**<br>
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.1.2.0%2Fexperimental%2Fcluster%2F1nic%2FBYOL%2Fazuredeploy.json">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.1.3.0%2Fexperimental%2Fcluster%2F1nic%2FBYOL%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
 **PAYG**<br>
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.1.2.0%2Fexperimental%2Fcluster%2F1nic%2FPAYG%2Fazuredeploy.json">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.1.3.0%2Fexperimental%2Fcluster%2F1nic%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 
 ## Template parameters
