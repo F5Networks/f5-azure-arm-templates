@@ -18,6 +18,7 @@ This README file is for the ARM template in an existing stack.  If you want to d
   - If you are deploying the BYOL template, you must have two valid BIG-IP license tokens.
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - The management port for the BIG-IP Configuration utility is **8443**.  This allows you to use 443 for application traffic.
+  - Your Azure environment must be configured to use service principal authentication.  If you have not yet configured service principal authentication, see https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal.
 
 
 ## Security
@@ -61,23 +62,23 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| adminUsername | x | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
-| adminPassword | x | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
-| dnsLabel | x | Unique DNS label that is used as a part of the hostname for the public IP address used to access the BIG-IP VEs for management. You can find the DNS label by clicking the resource group, then the public IP address(es) that end with "-mgmt-pip" and looking at the DNS label of each. |
-| instanceName | x | The hostname to be configured for the VM. |
-| instanceType | x | The Azure Virtual Machine instance size you want to use. |
-| imageName | x | The F5 image you want to deploy. |
-| bigIpVersion | x | F5 BIG-IP version you want to use. |
-| licenseKey1 | | For BYOL only. The license token from the F5 licensing server. This license is used for the first F5 BIG-IP VE. |
-| licenseKey2 | | For BYOL only. The license token from the F5 licensing server. This license is used for the second F5 BIG-IP VE. |
-| licensedBandwidth | | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
-| numberOfExternalIps | x | The number of public/private IPs to deploy for the application traffic (external) NIC on the BIG-IP to be used for virtual servers. |
-| vnetAddressPrefix | x | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
-| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or an asterisk for all sources. |
-| tenantId | x | Your Azure service principal application tenant ID. |
-| clientId | x | Your Azure service principal application client ID. |
-| servicePrincipalSecret | x | Your Azure service principal application secret. |
-| tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
+| adminUsername | Yes | A user name to login to the BIG-IP VEs.  The default value is "azureuser". |
+| adminPassword | Yes | A strong password for the BIG-IP VEs. This must not include **#** or **'** (single quote). Remember this password, you will need it later. |
+| dnsLabel | Yes | Unique DNS label that is used as a part of the hostname for the public IP address used to access the BIG-IP VEs for management. You can find the DNS label by clicking the resource group, then the public IP address(es) that end with "-mgmt-pip" and looking at the DNS label of each. |
+| instanceName | Yes | The hostname to be configured for the VM. |
+| instanceType | Yes | The Azure Virtual Machine instance size you want to use. |
+| imageName | Yes | The F5 image you want to deploy. |
+| bigIpVersion | Yes | F5 BIG-IP version you want to use. |
+| licenseKey1 | Yes (BYOL only) | For BYOL only. The license token from the F5 licensing server. This license is used for the first F5 BIG-IP VE. |
+| licenseKey2 | Yes (BYOL only) | For BYOL only. The license token from the F5 licensing server. This license is used for the second F5 BIG-IP VE. |
+| licensedBandwidth | Yes (PAYG only) | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
+| numberOfExternalIps | Yes | The number of public/private IPs to deploy for the application traffic (external) NIC on the BIG-IP to be used for virtual servers. |
+| vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
+| restrictedSrcAddress | Yes | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or an asterisk for all sources. |
+| tenantId | Yes | Your Azure service principal application tenant ID. |
+| clientId | Yes | Your Azure service principal application ID, also referred to as client ID. |
+| servicePrincipalSecret | Yes | Your Azure service principal application secret. |
+| tagValues | Yes | Additional key-value pair tags to be added to each Azure resource. |
 | managedRoutes | | A comma-delimited list of UDR destinations to be managed by this cluster (for example 192.168.0.0/24,192.168.1.0/24,192.168.2.0/24). |
 | routeTableTag | | Azure tag to identify the route tables to be managed by this cluster. This can be any single word, in order for the routes to be managed by BIG-IP, you must create a tag on the route table with the key "f5_ha" and the value of the routeTable tag (for example f5_ha:myRoute). |
 

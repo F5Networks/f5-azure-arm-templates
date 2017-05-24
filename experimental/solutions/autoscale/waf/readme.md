@@ -10,6 +10,7 @@ This solution uses an ARM template to launch the deployment of F5 BIG-IP VE(s) i
   - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#** or **'** (single quote).
   - See the [Configuration Example](#config) section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
+  - Your Azure environment must be configured to use service principal authentication.  If you have not yet configured service principal authentication, see https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal.
 
 ## Security
 This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
@@ -73,7 +74,7 @@ Use this button to deploy the template:
 | blockingLevel | Yes | The level of traffic you want to flag as insecure. All applications behind the WAF will use this level. The higher the level, the more traffic that is blocked. The lower the level, the more chances that unsecure traffic will make it through to your application. See the Security blocking levels topic for more information. |
 | customPolicy | No | The URL of a custom ASM security policy, in XML format, that you would like to apply to the deployment. |
 | tenantId | Yes | Your Azure service principal application tenant ID |
-| clientId | Yes | Your Azure service principal application client(application) ID. |
+| clientId | Yes | Your Azure service principal application ID, also referred to as client ID. |
 | servicePrincipalSecret | Yes | Your Azure service principal application secret. |
 | restrictedSrcAddress | Yes | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | Yes | Additional key-value pair tags to be added to each Azure resource. |

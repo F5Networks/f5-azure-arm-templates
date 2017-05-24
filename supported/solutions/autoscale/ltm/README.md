@@ -11,6 +11,7 @@ This solution uses an ARM template to launch the deployment of F5 BIG-IP Local T
   - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#** or **'** (single quote).
   - See the [Configuration Example](#config) section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
+  - Your Azure environment must be configured to use service principal authentication.  If you have not yet configured service principal authentication, see https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal.
 
 ## Security
 This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
@@ -64,7 +65,7 @@ Use this button to deploy the template:
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
 | licensedBandwidth | Yes | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
 | tenantId | Yes | Your Azure service principal application tenant ID. |
-| clientId | Yes | Your Azure service principal application client (application) ID. |
+| clientId | Yes | Your Azure service principal application ID, also referred to as client ID. |
 | servicePrincipalSecret | Yes | Your Azure service principal application secret. |
 | restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources. |
 | tagValues | Yes | Additional key-value pair tags to be added to each Azure resource. |
