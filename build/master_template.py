@@ -142,20 +142,22 @@ if license_type == 'BYOL':
 elif license_type == 'PAYG':
     data['parameters']['licensedBandwidth'] = {"type": "string", "defaultValue": default_payg_bw, "allowedValues": [ "25m", "200m", "1g" ], "metadata": { "description": "The amount of licensed bandwidth (Mbps) you want the PAYG image to use."}}
 
-if template_name in ('2nic', '3nic'):
-    data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8], "metadata": { "description": "The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers." } }
-    if stack_type == 'new':
-        data['parameters']['vnetAddressPrefix'] = {"type": "string", "defaultValue": "10.0", "metadata": { "description": "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'." } }
-    elif stack_type == 'existing':
-        data['parameters']['vnetName'] = { "type": "string", "metadata": { "description": "The name of the existing virtual network to which you want to connect the BIG-IP VEs." } }
-        data['parameters']['vnetResourceGroupName'] = { "type": "string", "metadata": { "description": "The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed." } }
-        data['parameters']['mgmtSubnetName'] = { "type": "string", "metadata": { "description": "Name of the existing MGMT subnet - with external access to the Internet." } }
-        data['parameters']['mgmtIpAddress'] = { "type": "string", "metadata": { "description": "MGMT subnet IP Address to use for the BIG-IP management IP address." } }
-        data['parameters']['externalSubnetName'] = { "type": "string", "metadata": { "description": "Name of the existing external subnet - with external access to Internet." } }
-        data['parameters']['externalIpAddressRangeStart'] = { "type": "string", "metadata": { "description": "The starting range you want to use for the private IP address(es).  This depends on how many public/private IP addresses you selected in 'numberOfExternalIps'.  For example, if you enter 10.100.1.50 here and chose 2 for numberOfExternalIps, then 10.100.1.50 is used for the BIG-IP VE self IP address, and 10.100.1.51 and 10.100.1.52 are created as static IP addresses for use as virtual servers." } }
-        if template_name in ('3nic'):
-            data['parameters']['internalSubnetName'] = { "type": "string", "metadata": { "description": "Name of the existing internal subnet." } }
-            data['parameters']['internalIpAddress'] = { "type": "string", "metadata": { "description": "Internal subnet IP address you want to use for the BIG-IP internal self IP address." } }
+if template_name in ('1nic', '2nic', '3nic'):
+        if template_name in ('2nic', '3nic'):
+            data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8], "metadata": { "description": "The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers." } }
+        if stack_type == 'new':
+            data['parameters']['vnetAddressPrefix'] = {"type": "string", "defaultValue": "10.0", "metadata": { "description": "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'." } }
+        elif stack_type == 'existing':
+            data['parameters']['vnetName'] = { "type": "string", "metadata": { "description": "The name of the existing virtual network to which you want to connect the BIG-IP VEs." } }
+            data['parameters']['vnetResourceGroupName'] = { "type": "string", "metadata": { "description": "The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed." } }
+            data['parameters']['mgmtSubnetName'] = { "type": "string", "metadata": { "description": "Name of the existing MGMT subnet - with external access to the Internet." } }
+            data['parameters']['mgmtIpAddress'] = { "type": "string", "metadata": { "description": "MGMT subnet IP Address to use for the BIG-IP management IP address." } }
+            if template_name in ('2nic', '3nic'):
+                data['parameters']['externalSubnetName'] = { "type": "string", "metadata": { "description": "Name of the existing external subnet - with external access to Internet." } }
+                data['parameters']['externalIpAddressRangeStart'] = { "type": "string", "metadata": { "description": "The starting range you want to use for the private IP address(es).  This depends on how many public/private IP addresses you selected in 'numberOfExternalIps'.  For example, if you enter 10.100.1.50 here and chose 2 for numberOfExternalIps, then 10.100.1.50 is used for the BIG-IP VE self IP address, and 10.100.1.51 and 10.100.1.52 are created as static IP addresses for use as virtual servers." } }
+            if template_name in ('3nic'):
+                data['parameters']['internalSubnetName'] = { "type": "string", "metadata": { "description": "Name of the existing internal subnet." } }
+                data['parameters']['internalIpAddress'] = { "type": "string", "metadata": { "description": "Internal subnet IP address you want to use for the BIG-IP internal self IP address." } }
 if template_name in ('waf_autoscale'):
     data['parameters']['solutionDeploymentName'] = { "type": "string", "metadata": { "description": "A unique name for this deployment." } }
     data['parameters']['applicationProtocols'] = { "type": "string", "defaultValue": "http-https", "metadata": { "description": "The protocol(s) used by your application." }, "allowedValues" : [ "http", "https", "http-https", "https-offload" ] }
@@ -235,65 +237,66 @@ data['variables']['subnetPrefix'] = "10.0.1.0/24"
 if template_name in ('1nic', '2nic', '3nic'):
     data['variables']['subnetPrivateAddress'] = "10.0.1.4"
     data['variables']['instanceName'] = "[toLower(parameters('instanceName'))]"
-if template_name in ('2nic', '3nic'):
     if stack_type == 'new':
         data['variables']['vnetId'] = "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
         data['variables']['nicName'] = "[concat(variables('dnsLabel'), '-mgmt0')]"
         data['variables']['vnetAddressPrefix'] = "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]"
         data['variables']['subnetPrefix'] = "[concat(parameters('vnetAddressPrefix'), '.1.0/24')]"
         data['variables']['subnetPrivateAddress'] = "[concat(parameters('vnetAddressPrefix'), '.1.4')]"
-        data['variables']['dnsLabelPrefix'] = "[toLower(parameters('dnsLabelPrefix'))]"
-        data['variables']['nsg2ID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg2'))]"
         data['variables']['publicIPAddressName'] = "[concat(variables('dnsLabel'), '-mgmt-pip')]"
-        data['variables']['publicIPAddressNamePrefix'] = "[concat(variables('dnsLabel'), '-ext-pip')]"
-        data['variables']['publicIPAddressIdPrefix'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressNamePrefix'))]"
-        data['variables']['extNicName'] = "[concat(variables('dnsLabel'), '-ext0')]"
-        data['variables']['extSubnetName'] = "[concat(variables('dnsLabel'),'-subnet2')]"
-        data['variables']['extSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('extsubnetName'))]"
-        data['variables']['extSubnetPrefix'] = "[concat(parameters('vnetAddressPrefix'), '.2.0/24')]"
-        data['variables']['extSubnetPrivateAddress'] = "[concat(parameters('vnetAddressPrefix'), '.2.4')]"
-        data['variables']['extSubnetPrivateAddressPrefix'] = "[concat(parameters('vnetAddressPrefix'), '.2.')]"
-        if template_name in ('3nic'):
-            data['variables']['intNicName'] = "[concat(variables('dnsLabel'), '-int0')]"
-            data['variables']['intSubnetName'] = "[concat(variables('dnsLabel'),'-subnet3')]"
-            data['variables']['intSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]"
-            data['variables']['intSubnetPrefix'] = "[concat(parameters('vnetAddressPrefix'), '.3.0/24')]"
-            data['variables']['intSubnetPrivateAdress'] = "[concat(parameters('vnetAddressPrefix'), '.3.4')]"
-        data['variables']['numberOfExternalIps'] = "[add(parameters('numberOfExternalIps'), 1)]"
-        data['variables']['ipconfigArray'] = [{ "name": "[concat(variables('instanceName'), '-ipconfig1')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 2)]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig2')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 3)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 5)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig3')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 4)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 6)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig4')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 5)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 7)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig5')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 6)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 8)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig6')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 7)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 9)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig7')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 8)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 10)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig8')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 9)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 11)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
+        if template_name in ('2nic', '3nic'):
+            data['variables']['dnsLabelPrefix'] = "[toLower(parameters('dnsLabelPrefix'))]"
+            data['variables']['nsg2ID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg2'))]"
+            data['variables']['publicIPAddressNamePrefix'] = "[concat(variables('dnsLabel'), '-ext-pip')]"
+            data['variables']['publicIPAddressIdPrefix'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressNamePrefix'))]"
+            data['variables']['extNicName'] = "[concat(variables('dnsLabel'), '-ext0')]"
+            data['variables']['extSubnetName'] = "[concat(variables('dnsLabel'),'-subnet2')]"
+            data['variables']['extSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('extsubnetName'))]"
+            data['variables']['extSubnetPrefix'] = "[concat(parameters('vnetAddressPrefix'), '.2.0/24')]"
+            data['variables']['extSubnetPrivateAddress'] = "[concat(parameters('vnetAddressPrefix'), '.2.4')]"
+            data['variables']['extSubnetPrivateAddressPrefix'] = "[concat(parameters('vnetAddressPrefix'), '.2.')]"
+            if template_name in ('3nic'):
+                data['variables']['intNicName'] = "[concat(variables('dnsLabel'), '-int0')]"
+                data['variables']['intSubnetName'] = "[concat(variables('dnsLabel'),'-subnet3')]"
+                data['variables']['intSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]"
+                data['variables']['intSubnetPrefix'] = "[concat(parameters('vnetAddressPrefix'), '.3.0/24')]"
+                data['variables']['intSubnetPrivateAdress'] = "[concat(parameters('vnetAddressPrefix'), '.3.4')]"
+            data['variables']['numberOfExternalIps'] = "[add(parameters('numberOfExternalIps'), 1)]"
+            data['variables']['ipconfigArray'] = [{ "name": "[concat(variables('instanceName'), '-ipconfig1')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 2)]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig2')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 3)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 5)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig3')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 4)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 6)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig4')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 5)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 7)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig5')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 6)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 8)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig6')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 7)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 9)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig7')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 8)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 10)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig8')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 9)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 11)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
     if stack_type == 'existing':
         data['variables']['vnetAddressPrefix'] = "NOT_USED"
         data['variables']['vnetId'] = "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]"
         data['variables']['nicName'] = "[concat(variables('dnsLabel'), '-mgmt0')]"
         data['variables']['subnetId'] = "[concat(variables('vnetID'),'/subnets/',parameters('mgmtSubnetName'))]"
         data['variables']['subnetPrivateAddress'] = "[parameters('mgmtIpAddress')]"
-        data['variables']['dnsLabelPrefix'] = "[toLower(parameters('dnsLabelPrefix'))]"
-        data['variables']['nsg2ID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg2'))]"
         data['variables']['publicIPAddressName'] = "[concat(variables('dnsLabel'), '-mgmt-pip')]"
-        data['variables']['publicIPAddressNamePrefix'] = "[concat(variables('dnsLabel'), '-ext-pip')]"
-        data['variables']['publicIPAddressIdPrefix'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressNamePrefix'))]"
-        data['variables']['extNicName'] = "[concat(variables('dnsLabel'), '-ext0')]"
-        data['variables']['extSubnetName'] = "[parameters('externalSubnetName')]"
-        data['variables']['extSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('extsubnetName'))]"
-        data['variables']['extSubnetPrivateAddress'] = "[parameters('externalIpAddressRangeStart')]"
-        data['variables']['extSubnetPrivateAddressPrefixArray'] = "[split(parameters('externalIpAddressRangeStart'), '.')]"
-        data['variables']['extSubnetPrivateAddressPrefix'] = "[concat(variables('extSubnetPrivateAddressPrefixArray')[0], '.', variables('extSubnetPrivateAddressPrefixArray')[1], '.', variables('extSubnetPrivateAddressPrefixArray')[2], '.')]"
-        data['variables']['extSubnetPrivateAddressSuffixInt'] = "[int(variables('extSubnetPrivateAddressPrefixArray')[3])]"
-        data['variables']['extSubnetPrivateAddressSuffix0'] = "[variables('extSubnetPrivateAddressSuffixInt')]"
-        data['variables']['extSubnetPrivateAddressSuffix1'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 1)]"
-        data['variables']['extSubnetPrivateAddressSuffix2'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 2)]"
-        data['variables']['extSubnetPrivateAddressSuffix3'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 3)]"
-        data['variables']['extSubnetPrivateAddressSuffix4'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 4)]"
-        data['variables']['extSubnetPrivateAddressSuffix5'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 5)]"
-        data['variables']['extSubnetPrivateAddressSuffix6'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 6)]"
-        data['variables']['extSubnetPrivateAddressSuffix7'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 7)]"
-        if template_name in ('3nic'):
-            data['variables']['intNicName'] = "[concat(variables('dnsLabel'), '-int0')]"
-            data['variables']['intSubnetName'] = "[parameters('internalSubnetName')]"
-            data['variables']['intSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]"
-            data['variables']['intSubnetPrivateAdress'] = "[parameters('internalIpAddress')]"
-        data['variables']['numberOfExternalIps'] = "[add(parameters('numberOfExternalIps'), 1)]"
-        data['variables']['ipconfigArray'] = [{ "name": "[concat(variables('instanceName'), '-ipconfig1')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 2)]" }, "primary": True, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix0'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig2')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 3)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix1'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig3')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 4)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix2'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig4')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 5)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix3'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig5')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 6)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix4'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig6')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 7)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix5'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig7')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 8)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix6'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig8')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 9)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix7'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
+        if template_name in ('2nic', '3nic'):
+            data['variables']['dnsLabelPrefix'] = "[toLower(parameters('dnsLabelPrefix'))]"
+            data['variables']['nsg2ID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-nsg2'))]"
+            data['variables']['publicIPAddressNamePrefix'] = "[concat(variables('dnsLabel'), '-ext-pip')]"
+            data['variables']['publicIPAddressIdPrefix'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressNamePrefix'))]"
+            data['variables']['extNicName'] = "[concat(variables('dnsLabel'), '-ext0')]"
+            data['variables']['extSubnetName'] = "[parameters('externalSubnetName')]"
+            data['variables']['extSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('extsubnetName'))]"
+            data['variables']['extSubnetPrivateAddress'] = "[parameters('externalIpAddressRangeStart')]"
+            data['variables']['extSubnetPrivateAddressPrefixArray'] = "[split(parameters('externalIpAddressRangeStart'), '.')]"
+            data['variables']['extSubnetPrivateAddressPrefix'] = "[concat(variables('extSubnetPrivateAddressPrefixArray')[0], '.', variables('extSubnetPrivateAddressPrefixArray')[1], '.', variables('extSubnetPrivateAddressPrefixArray')[2], '.')]"
+            data['variables']['extSubnetPrivateAddressSuffixInt'] = "[int(variables('extSubnetPrivateAddressPrefixArray')[3])]"
+            data['variables']['extSubnetPrivateAddressSuffix0'] = "[variables('extSubnetPrivateAddressSuffixInt')]"
+            data['variables']['extSubnetPrivateAddressSuffix1'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 1)]"
+            data['variables']['extSubnetPrivateAddressSuffix2'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 2)]"
+            data['variables']['extSubnetPrivateAddressSuffix3'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 3)]"
+            data['variables']['extSubnetPrivateAddressSuffix4'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 4)]"
+            data['variables']['extSubnetPrivateAddressSuffix5'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 5)]"
+            data['variables']['extSubnetPrivateAddressSuffix6'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 6)]"
+            data['variables']['extSubnetPrivateAddressSuffix7'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 7)]"
+            if template_name in ('3nic'):
+                data['variables']['intNicName'] = "[concat(variables('dnsLabel'), '-int0')]"
+                data['variables']['intSubnetName'] = "[parameters('internalSubnetName')]"
+                data['variables']['intSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]"
+                data['variables']['intSubnetPrivateAdress'] = "[parameters('internalIpAddress')]"
+            data['variables']['numberOfExternalIps'] = "[add(parameters('numberOfExternalIps'), 1)]"
+            data['variables']['ipconfigArray'] = [{ "name": "[concat(variables('instanceName'), '-ipconfig1')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 2)]" }, "primary": True, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix0'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig2')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 3)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix1'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig3')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 4)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix2'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig4')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 5)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix3'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig5')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 6)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix4'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig6')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 7)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix5'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig7')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 8)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix6'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig8')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 9)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix7'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
 if template_name in ('cluster_base', 'ltm_autoscale', 'waf_autoscale'):
     data['variables']['ipAddress'] = "10.0.1."
     data['variables']['loadBalancerName'] = "[concat(variables('dnsLabel'),'-alb')]"

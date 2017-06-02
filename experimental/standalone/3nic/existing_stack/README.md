@@ -86,7 +86,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
     ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
     ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
     ## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
-    ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -dnsLabelPrefix <value> -instanceName f5vm01 -instanceType Standard_D3_v2 -imageName Good -bigIpVersion 13.0.021 -numberOfExternalIps 1 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddress <value> -externalSubnetName <value> -externalIpAddressRangeStart <value> -internalSubnetName <value> -internalIpAddress <value> -restrictedSrcAddress "*" -resourceGroupName <value>
+    ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -dnsLabelPrefix <value> -instanceName f5vm01 -instanceType Standard_DS3_v2 -imageName Good -bigIpVersion 13.0.021 -numberOfExternalIps 1 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddress <value> -externalSubnetName <value> -externalIpAddressRangeStart <value> -internalSubnetName <value> -internalIpAddress <value> -restrictedSrcAddress "*" -resourceGroupName <value>
 
     param(
 
@@ -227,19 +227,16 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
     #!/bin/bash
 
     ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-    ## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --dnsLabelPrefix <value> --instanceName f5vm01 --instanceType Standard_D3_v2 --imageName Good --bigIpVersion 13.0.021 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --mgmtIpAddress <value> --externalSubnetName <value> --externalIpAddressRangeStart <value> --internalSubnetName <value> --internalIpAddress <value> --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+    ## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --dnsLabelPrefix <value> --instanceName f5vm01 --instanceType Standard_DS3_v2 --imageName Good --bigIpVersion 13.0.021 --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --mgmtIpAddress <value> --externalSubnetName <value> --externalIpAddressRangeStart <value> --internalSubnetName <value> --internalIpAddress <value> --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
-    # Assign Script Paramters and Define Variables
+    # Assign Script parameters and Define Variables
     # Specify static items, change these as needed or make them parameters
     region="westus"
     restrictedSrcAddress="*"
     tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
-    ARGS=`getopt -o a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x: --long resourceGroupName:,azureLoginUser:,azureLoginPassword:,licenseType:,licensedBandwidth:,licenseKey1:,adminUsername:,adminPassword:,dnsLabel:,dnsLabelPrefix:,instanceName:,instanceType:,imageName:,bigIpVersion:,numberOfExternalIps:,vnetName:,vnetResourceGroupName:,mgmtSubnetName:,mgmtIpAddress:,externalSubnetName:,externalIpAddressRangeStart:,internalSubnetName:,internalIpAddress:,restrictedSrcAddress: -n $0 -- "$@"`
-    eval set -- "$ARGS"
-
     # Parse the command line arguments, primarily checking full params as short params are just placeholders
-    while true; do
+    while [[ $# -gt 1 ]]; do
         case "$1" in
             -a|--resourceGroupName)
                 resourceGroupName=$2
@@ -323,14 +320,14 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
     required_variables="adminUsername adminPassword dnsLabel dnsLabelPrefix instanceName instanceType imageName bigIpVersion numberOfExternalIps vnetName vnetResourceGroupName mgmtSubnetName mgmtIpAddress externalSubnetName externalIpAddressRangeStart internalSubnetName internalIpAddress resourceGroupName licenseType "
     for variable in $required_variables
             do
-            if [ -v ${!variable} ] ; then
+            if [ -z ${!variable} ] ; then
                     read -p "Please enter value for $variable:" $variable
             fi
     done
 
     # Prompt for license key if not supplied and BYOL is selected
     if [ $licenseType == "BYOL" ]; then
-        if [ -v $licenseKey1 ] ; then
+        if [ -z $licenseKey1 ] ; then
                 read -p "Please enter value for licenseKey1:" licenseKey1
         fi
         template_file="./BYOL/azuredeploy.json"
@@ -338,7 +335,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
     fi
     # Prompt for licensed bandwidth if not supplied and PAYG is selected
     if [ $licenseType == "PAYG" ]; then
-        if [ -v $licensedBandwidth ] ; then
+        if [ -z $licensedBandwidth ] ; then
                 read -p "Please enter value for licensedBandwidth:" licensedBandwidth
         fi
         template_file="./PAYG/azuredeploy.json"
