@@ -3,7 +3,7 @@
 ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
 <EXAMPLE_CMD>
 
-# Assign Script Paramters and Define Variables
+# Assign Script parameters and Define Variables
 # Specify static items, change these as needed or make them parameters
 region="westus"
 restrictedSrcAddress="*"
