@@ -367,7 +367,7 @@
           "offerToUse": "f5-big-ip",
           "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]",
           "bigIpNicPort": "443",
-          "bigIpMgmtPort": "8443",
+          "bigIpMgmtPort": "443",
           "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]",
           "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
           "vnetAddressCidr": "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]",

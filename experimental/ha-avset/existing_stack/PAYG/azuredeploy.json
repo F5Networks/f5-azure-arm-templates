@@ -412,7 +412,7 @@
           "offerToUse": "f5-big-ip-hourly",
           "skuToUse": "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]",
           "bigIpNicPort": "443",
-          "bigIpMgmtPort": "8443",
+          "bigIpMgmtPort": "443",
           "publicIPAddressType": "Static",
           "mgmtNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-mgmt-nsg'))]",
           "extNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-ext-nsg'))]",
