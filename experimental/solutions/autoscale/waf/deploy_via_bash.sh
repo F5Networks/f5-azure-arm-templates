@@ -12,106 +12,106 @@ tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWN
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
 while [[ $# -gt 1 ]]; do
     case "$1" in
-        -a|--resourceGroupName)
+        ---resourceGroupName)
             resourceGroupName=$2
             shift 2;;
-        -b|--azureLoginUser)
+        --azureLoginUser)
             azureLoginUser=$2
             shift 2;;
-        -c|--azureLoginPassword)
+        --azureLoginPassword)
             azureLoginPassword=$2
             shift 2;;
-        -d|--licenseType)
+        --licenseType)
             licenseType=$2
             shift 2;;
-        -e|--licensedBandwidth)
+        --licensedBandwidth)
             licensedBandwidth=$2
             shift 2;;
-        -f|--licenseKey1)
+        --licenseKey1)
             licenseKey1=$2
             shift 2;;
-        -g|--vmScaleSetMinCount)
+        --vmScaleSetMinCount)
             vmScaleSetMinCount=$2
             shift 2;;
-        -h|--vmScaleSetMaxCount)
+        --vmScaleSetMaxCount)
             vmScaleSetMaxCount=$2
             shift 2;;
-        -i|--scaleOutThroughput)
+        --scaleOutThroughput)
             scaleOutThroughput=$2
             shift 2;;
-        -j|--scaleInThroughput)
+        --scaleInThroughput)
             scaleInThroughput=$2
             shift 2;;
-        -k|--scaleTimeWindow)
+        --scaleTimeWindow)
             scaleTimeWindow=$2
             shift 2;;
-        -l|--adminUsername)
+        --adminUsername)
             adminUsername=$2
             shift 2;;
-        -m|--adminPassword)
+        --adminPassword)
             adminPassword=$2
             shift 2;;
-        -n|--dnsLabel)
+        --dnsLabel)
             dnsLabel=$2
             shift 2;;
-        -o|--instanceType)
+        --instanceType)
             instanceType=$2
             shift 2;;
-        -p|--imageName)
+        --imageName)
             imageName=$2
             shift 2;;
-        -q|--bigIpVersion)
+        --bigIpVersion)
             bigIpVersion=$2
             shift 2;;
-        -r|--solutionDeploymentName)
+        --solutionDeploymentName)
             solutionDeploymentName=$2
             shift 2;;
-        -s|--applicationProtocols)
+        --applicationProtocols)
             applicationProtocols=$2
             shift 2;;
-        -t|--applicationAddress)
+        --applicationAddress)
             applicationAddress=$2
             shift 2;;
-        -u|--applicationServiceFqdn)
+        --applicationServiceFqdn)
             applicationServiceFqdn=$2
             shift 2;;
-        -v|--applicationPort)
+        --applicationPort)
             applicationPort=$2
             shift 2;;
-        -w|--applicationSecurePort)
+        --applicationSecurePort)
             applicationSecurePort=$2
             shift 2;;
-        -x|--sslCert)
+        --sslCert)
             sslCert=$2
             shift 2;;
-        -y|--sslPswd)
+        --sslPswd)
             sslPswd=$2
             shift 2;;
-        -z|--applicationType)
+        --applicationType)
             applicationType=$2
             shift 2;;
-        -aa|--blockingLevel)
+        --blockingLevel)
             blockingLevel=$2
             shift 2;;
-        -bb|--customPolicy)
+        --customPolicy)
             customPolicy=$2
             shift 2;;
-        -cc|--tenantId)
+        --tenantId)
             tenantId=$2
             shift 2;;
-        -dd|--clientId)
+        --clientId)
             clientId=$2
             shift 2;;
-        -ee|--servicePrincipalSecret)
+        --servicePrincipalSecret)
             servicePrincipalSecret=$2
             shift 2;;
-        -ff|--ntpServer)
+        --ntpServer)
             ntpServer=$2
             shift 2;;
-        -gg|--timeZone)
+        --timeZone)
             timeZone=$2
             shift 2;;
-        -hh|--restrictedSrcAddress)
+        --restrictedSrcAddress)
             restrictedSrcAddress=$2
             shift 2;;
         --)

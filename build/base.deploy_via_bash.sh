@@ -12,16 +12,16 @@ tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWN
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
 while [[ $# -gt 1 ]]; do
     case "$1" in
-        -a|--resourceGroupName)
+        ---resourceGroupName)
             resourceGroupName=$2
             shift 2;;
-        -b|--azureLoginUser)
+        --azureLoginUser)
             azureLoginUser=$2
             shift 2;;
-        -c|--azureLoginPassword)
+        --azureLoginPassword)
             azureLoginPassword=$2
             shift 2;;
-        -d|--licenseType)
+        --licenseType)
             licenseType=$2
             shift 2;;<LICENSE_PARAMETERS><DYNAMIC_PARAMETERS>
         --)

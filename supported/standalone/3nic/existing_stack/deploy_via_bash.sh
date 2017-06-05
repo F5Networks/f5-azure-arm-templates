@@ -12,82 +12,82 @@ tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWN
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
 while [[ $# -gt 1 ]]; do
     case "$1" in
-        -a|--resourceGroupName)
+        ---resourceGroupName)
             resourceGroupName=$2
             shift 2;;
-        -b|--azureLoginUser)
+        --azureLoginUser)
             azureLoginUser=$2
             shift 2;;
-        -c|--azureLoginPassword)
+        --azureLoginPassword)
             azureLoginPassword=$2
             shift 2;;
-        -d|--licenseType)
+        --licenseType)
             licenseType=$2
             shift 2;;
-        -e|--licensedBandwidth)
+        --licensedBandwidth)
             licensedBandwidth=$2
             shift 2;;
-        -f|--licenseKey1)
+        --licenseKey1)
             licenseKey1=$2
             shift 2;;
-        -g|--adminUsername)
+        --adminUsername)
             adminUsername=$2
             shift 2;;
-        -h|--adminPassword)
+        --adminPassword)
             adminPassword=$2
             shift 2;;
-        -i|--dnsLabel)
+        --dnsLabel)
             dnsLabel=$2
             shift 2;;
-        -j|--dnsLabelPrefix)
+        --dnsLabelPrefix)
             dnsLabelPrefix=$2
             shift 2;;
-        -k|--instanceName)
+        --instanceName)
             instanceName=$2
             shift 2;;
-        -l|--instanceType)
+        --instanceType)
             instanceType=$2
             shift 2;;
-        -m|--imageName)
+        --imageName)
             imageName=$2
             shift 2;;
-        -n|--bigIpVersion)
+        --bigIpVersion)
             bigIpVersion=$2
             shift 2;;
-        -o|--numberOfExternalIps)
+        --numberOfExternalIps)
             numberOfExternalIps=$2
             shift 2;;
-        -p|--vnetName)
+        --vnetName)
             vnetName=$2
             shift 2;;
-        -q|--vnetResourceGroupName)
+        --vnetResourceGroupName)
             vnetResourceGroupName=$2
             shift 2;;
-        -r|--mgmtSubnetName)
+        --mgmtSubnetName)
             mgmtSubnetName=$2
             shift 2;;
-        -s|--mgmtIpAddress)
+        --mgmtIpAddress)
             mgmtIpAddress=$2
             shift 2;;
-        -t|--externalSubnetName)
+        --externalSubnetName)
             externalSubnetName=$2
             shift 2;;
-        -u|--externalIpAddressRangeStart)
+        --externalIpAddressRangeStart)
             externalIpAddressRangeStart=$2
             shift 2;;
-        -v|--internalSubnetName)
+        --internalSubnetName)
             internalSubnetName=$2
             shift 2;;
-        -w|--internalIpAddress)
+        --internalIpAddress)
             internalIpAddress=$2
             shift 2;;
-        -x|--ntpServer)
+        --ntpServer)
             ntpServer=$2
             shift 2;;
-        -y|--timeZone)
+        --timeZone)
             timeZone=$2
             shift 2;;
-        -z|--restrictedSrcAddress)
+        --restrictedSrcAddress)
             restrictedSrcAddress=$2
             shift 2;;
         --)
