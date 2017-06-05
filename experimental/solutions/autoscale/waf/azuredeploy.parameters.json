@@ -80,6 +80,12 @@
         "servicePrincipalSecret": {
             "value": "GEN_UNIQUE"
         }, 
+        "ntpServer": {
+            "value": "0.pool.ntp.org"
+        }, 
+        "timeZone": {
+            "value": "UTC"
+        }, 
         "restrictedSrcAddress": {
             "value": "*"
         }, 

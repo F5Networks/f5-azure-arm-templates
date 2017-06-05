@@ -29,6 +29,12 @@
         "licenseKey2": {
             "value": "REQUIRED"
         }, 
+        "ntpServer": {
+            "value": "0.pool.ntp.org"
+        }, 
+        "timeZone": {
+            "value": "UTC"
+        }, 
         "restrictedSrcAddress": {
             "value": "*"
         }, 

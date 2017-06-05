@@ -26,6 +26,12 @@
         "licensedBandwidth": {
             "value": "200m"
         }, 
+        "ntpServer": {
+            "value": "0.pool.ntp.org"
+        }, 
+        "timeZone": {
+            "value": "UTC"
+        }, 
         "restrictedSrcAddress": {
             "value": "*"
         }, 
