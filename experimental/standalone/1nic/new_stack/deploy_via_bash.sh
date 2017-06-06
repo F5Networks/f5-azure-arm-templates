@@ -12,7 +12,7 @@ tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWN
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
 while [[ $# -gt 1 ]]; do
     case "$1" in
-        ---resourceGroupName)
+        --resourceGroupName)
             resourceGroupName=$2
             shift 2;;
         --azureLoginUser)

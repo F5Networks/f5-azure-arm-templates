@@ -4,12 +4,14 @@ import os
 import json
 from collections import OrderedDict
 from optparse import OptionParser
+import script_generator
+import readme_generator
 
 # Process Script Parameters
 parser = OptionParser()
 parser.add_option("-n", "--template-name", action="store", type="string", dest="template_name", help="Template Name: 1nic, 2nic, cluster_base, etc." )
 parser.add_option("-l", "--license-type", action="store", type="string", dest="license_type", help="License Type: BYOL or PAYG" )
-parser.add_option("-m", "--stack-type", action="store", type="string", dest="stack_type", default="new", help="Networking Stack Type: new or existing" )
+parser.add_option("-m", "--stack-type", action="store", type="string", dest="stack_type", default="new_stack", help="Networking Stack Type: new_stack or existing_stack" )
 parser.add_option("-t", "--template-location", action="store", type="string", dest="template_location", help="Template Location: such as ../experimental/standalone/1nic/PAYG/" )
 parser.add_option("-s", "--script-location", action="store", type="string", dest="script_location", help="Script Location: such as ../experimental/standalone/1nic/" )
 parser.add_option("-v", "--solution-location", action="store", type="string", dest="solution_location", default="experimental", help="Solution location: experimental or supported" )
@@ -25,7 +27,7 @@ solution_location = options.solution_location
 ## Specify meta file and file to create(should be argument)
 metafile = 'base.azuredeploy.json'
 metafile_params = 'base.azuredeploy.parameters.json'
-createdfile = template_location + 'azuredeploy.json'
+created_file = template_location + 'azuredeploy.json'
 createdfile_params = template_location + 'azuredeploy.parameters.json'
 
 ## Static Variable Defaults
@@ -99,6 +101,10 @@ if license_type == 'PAYG':
     offer_to_use = "f5-big-ip-hourly"
     license1_command = ''
     license2_command = ''
+# Abstract license key text for readme_generator
+license_text = {'licenseKey1': 'The license token for the F5 BIG-IP VE (BYOL)', 'licensedBandwidth': 'The amount of licensed bandwidth (Mbps) you want the PAYG image to use.'}
+if template_name == 'cluster_base':
+    license_text['licenseKey2'] = 'The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices.'
 
 
 ## Load "Meta File(s)" for modification ##
@@ -135,19 +141,19 @@ if template_name in ('waf_autoscale'):
     data['parameters']['imageName'] = {"type": "string", "defaultValue": "Best", "allowedValues": [ "Best" ], "metadata": { "description": "F5 SKU (IMAGE) you want to deploy. 'Best' is the only option because ASM is required."}}
 data['parameters']['bigIpVersion'] = {"type": "string", "defaultValue": default_big_ip_version, "allowedValues": allowed_big_ip_versions, "metadata": { "description": "F5 BIG-IP version you want to use."}}
 if license_type == 'BYOL':
-    data['parameters']['licenseKey1'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "The license token for the F5 BIG-IP VE (BYOL)" } }
+    data['parameters']['licenseKey1'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": { "description": license_text['licenseKey1'] } }
     if template_name == 'cluster_base':
         for license_key in ['licenseKey2']:
-            data['parameters'][license_key] = {"type": "string", "defaultValue": "REQUIRED", "metadata": { "description": "The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices." } }
+            data['parameters'][license_key] = {"type": "string", "defaultValue": "REQUIRED", "metadata": { "description": license_text[license_key] } }
 elif license_type == 'PAYG':
-    data['parameters']['licensedBandwidth'] = {"type": "string", "defaultValue": default_payg_bw, "allowedValues": [ "25m", "200m", "1g" ], "metadata": { "description": "The amount of licensed bandwidth (Mbps) you want the PAYG image to use."}}
+    data['parameters']['licensedBandwidth'] = {"type": "string", "defaultValue": default_payg_bw, "allowedValues": [ "25m", "200m", "1g" ], "metadata": { "description": license_text['licensedBandwidth']}}
 
 if template_name in ('1nic', '2nic', '3nic'):
         if template_name in ('2nic', '3nic'):
             data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8], "metadata": { "description": "The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers." } }
-        if stack_type == 'new':
+        if stack_type == 'new_stack':
             data['parameters']['vnetAddressPrefix'] = {"type": "string", "defaultValue": "10.0", "metadata": { "description": "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'." } }
-        elif stack_type == 'existing':
+        elif stack_type == 'existing_stack':
             data['parameters']['vnetName'] = { "type": "string", "metadata": { "description": "The name of the existing virtual network to which you want to connect the BIG-IP VEs." } }
             data['parameters']['vnetResourceGroupName'] = { "type": "string", "metadata": { "description": "The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed." } }
             data['parameters']['mgmtSubnetName'] = { "type": "string", "metadata": { "description": "Name of the existing MGMT subnet - with external access to the Internet." } }
@@ -178,7 +184,7 @@ if template_name in ('ltm_autoscale', 'waf_autoscale'):
 data['parameters']['ntpServer'] = {"type": "string", "defaultValue": "0.pool.ntp.org", "metadata": { "description": "If you would like to change the NTP server the BIG-IP uses replace the default ntp server with your choice." } }
 data['parameters']['timeZone'] = {"type": "string", "defaultValue": "UTC", "metadata": { "description": "If you would like to change the time zone the BIG-IP uses then enter your chocie. This is in the format of the Olson timezone string from /usr/share/zoneinfo, such as UTC, US/Central or Europe/London." } }
 data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": "*", "metadata": { "description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources" } }
-data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values}
+data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values, "metadata": { "description": "Default key/value resource tags will be added to the resources in this deploymeny, if you would like the values to be unique adjust them as needed for each key." }}
 
 # Some modifications once parameters have been defined
 for parameter in data['parameters']:
@@ -239,7 +245,7 @@ data['variables']['subnetPrefix'] = "10.0.1.0/24"
 if template_name in ('1nic', '2nic', '3nic'):
     data['variables']['subnetPrivateAddress'] = "10.0.1.4"
     data['variables']['instanceName'] = "[toLower(parameters('instanceName'))]"
-    if stack_type == 'new':
+    if stack_type == 'new_stack':
         data['variables']['vnetId'] = "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
         data['variables']['nicName'] = "[concat(variables('dnsLabel'), '-mgmt0')]"
         data['variables']['vnetAddressPrefix'] = "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]"
@@ -265,7 +271,7 @@ if template_name in ('1nic', '2nic', '3nic'):
                 data['variables']['intSubnetPrivateAdress'] = "[concat(parameters('vnetAddressPrefix'), '.3.4')]"
             data['variables']['numberOfExternalIps'] = "[add(parameters('numberOfExternalIps'), 1)]"
             data['variables']['ipconfigArray'] = [{ "name": "[concat(variables('instanceName'), '-ipconfig1')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 2)]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig2')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 3)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 5)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig3')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 4)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 6)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig4')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 5)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 7)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig5')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 6)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 8)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig6')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 7)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 9)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig7')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 8)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 10)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ipconfig8')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('publicIPAddressIdPrefix'), 9)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 11)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
-    if stack_type == 'existing':
+    if stack_type == 'existing_stack':
         data['variables']['vnetAddressPrefix'] = "NOT_USED"
         data['variables']['vnetId'] = "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]"
         data['variables']['nicName'] = "[concat(variables('dnsLabel'), '-mgmt0')]"
@@ -350,7 +356,7 @@ if template_name in ('2nic'):
 if template_name in ('3nic'):
     subnets = [{ "name": "[variables('subnetName')]", "properties": { "addressPrefix": "[variables('subnetPrefix')]" } }, { "name": "[variables('extSubnetName')]", "properties": { "addressPrefix": "[variables('extSubnetPrefix')]" } }, { "name": "[variables('intSubnetName')]", "properties": { "addressPrefix": "[variables('intSubnetPrefix')]" } }]
 if template_name in ('1nic', '2nic', '3nic', 'cluster_base'):
-    if stack_type == 'new':
+    if stack_type == 'new_stack':
         resources_list += [{ "type": "Microsoft.Network/virtualNetworks", "apiVersion": api_version, "location": location, "name": "[variables('virtualNetworkName')]", "tags": tags, "properties": { "addressSpace": { "addressPrefixes": [ "[variables('vnetAddressPrefix')]" ] }, "subnets": subnets } }]
 
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
@@ -359,10 +365,10 @@ if template_name in ('ltm_autoscale', 'waf_autoscale'):
 
 ## Network Interface Resource(s) ##
 if template_name in ('1nic', '2nic', '3nic'):
-    if stack_type == 'new':
+    if stack_type == 'new_stack':
         depends_on = "[variables('vnetId')]", "[variables('publicIPAddressId')]", "[variables('nsgID')]"
         depends_on_multi_nic = "[variables('vnetId')]", "[concat(variables('nsg2ID'))]", "pipcopy"
-    elif stack_type == 'existing':
+    elif stack_type == 'existing_stack':
         depends_on = "[variables('publicIPAddressId')]", "[variables('nsgID')]"
         depends_on_multi_nic = "[concat(variables('nsg2ID'))]", "pipcopy"
     resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": depends_on, "location": location, "name": "[variables('nicName')]", "tags": tags, "properties": { "networkSecurityGroup": { "id": "[variables('nsgID')]" }, "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-ipconfig1')]", "properties": { "privateIPAddress": "[variables('subnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "PublicIpAddress": { "Id": "[variables('publicIPAddressId')]" }, "subnet": { "id": "[variables('subnetId')]" } } } ] } }]
@@ -494,7 +500,7 @@ if template_name in ('ltm_autoscale', 'waf_autoscale'):
 ############### End Create/Modify ARM Template Objects ###############
 
 ## Write modified template(s) to appropriate location
-with open(createdfile, 'w') as finished:
+with open(created_file, 'w') as finished:
     json.dump(data, finished, indent=4, sort_keys=False, ensure_ascii=False)
 with open(createdfile_params, 'w') as finished_params:
     json.dump(data_params, finished_params, indent=4, sort_keys=False, ensure_ascii=False)
@@ -505,164 +511,40 @@ with open(createdfile_params, 'w') as finished_params:
 
 
 ############### Create/Modify Scripts ###############
-### Update deployment scripts and write to appropriate location ###
-if script_location:
-    def script_param_array(language):
-        # Create Dynamic Parameter Array - (Parameter, default value, mandatory parameter flag, skip parameter flag)
-        param_array = []
-        for parameter in data['parameters']:
-            default_value = None; mandatory = True; skip_param = False
-            try:
-                if data['parameters'][parameter]['defaultValue'] != 'REQUIRED':
-                    default_value = data['parameters'][parameter]['defaultValue']
-            except:
-                default_value = None
-            # Specify parameters that aren't mandatory or should be skipped
-            if parameter in ('restrictedSrcAddress', 'tagValues'):
-                mandatory = False
-            if 'license' in parameter:
-                skip_param = True
-            elif parameter == 'tagValues':
-                skip_param = True
-            param_array.append([parameter, default_value, mandatory, skip_param])
-        return param_array
-
-    # Create Proc for script creation - Supporting Powershell and Bash
-    def script_creation(language):
-        param_str = ''; mandatory_cmd = ''; payg_cmd = ''; byol_cmd = ''; pwd_cmd = ''; sps_cmd = ''; ssl_pwd_cmd = ''; license2_param = ''
-        if language == 'powershell':
-            deploy_cmd_params = ''; script_dash = ' -'
-            meta_script = 'base.deploy_via_ps.ps1'; script_loc = script_location + 'Deploy_via_PS.ps1'
-            base_ex = '## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth ' + default_payg_bw
-        elif language == 'bash':
-            deploy_cmd_params = '"{'; script_dash = ' --'; license_check = ''; license2_check = ''
-            meta_script = 'base.deploy_via_bash.sh'; script_loc = script_location + 'deploy_via_bash.sh'
-            base_ex = '## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth ' + default_payg_bw
-            mandatory_variables = ''; license_params = ''
-            # Need to add bash license params prior to dynamic parameters
-            # Create license parameters, expand to be a for loop?
-            license_args = ['licensedBandwidth','licenseKey1']
-            if template_name in ('cluster_base'):
-                license2_param = 'licenseKey2:,'
-                license_args.append('licenseKey2')
-                license2_check += '    if [ -z $licenseKey2 ] ; then\n            read -p "Please enter value for licenseKey2:" licenseKey2\n    fi\n'
-            for license_arg in license_args:
-                param_str += '\n        --' + license_arg+ ')\n            ' + license_arg + '=$2\n            shift 2;;'
-        else:
-            return 'Only supporting powershell and bash for now!'
-
-        # Loop through Dynamic Parameter Array
-        for parameter in script_param_array(language):
-            mandatory_cmd = ''; param_value = ',\n'
-            # Specify any parameters that should be skipped
-            if parameter[3]:
-                continue
-            # Specify any parameters that should be mandatory
-            if parameter[2]:
-                if language == 'powershell':
-                    mandatory_cmd = '\n  [Parameter(Mandatory=$True)]'
-                elif language == 'bash':
-                    mandatory_variables += parameter[0] + ' '
-            # Specify non-mandatory parameters default value
-            if parameter[2] == False:
-                param_value = ' = "' + str(parameter[1]) + '",\n'
-            if language == 'powershell':
-                param_str += mandatory_cmd + '\n  [string]\n  $' + parameter[0] + param_value
-                if parameter[0] == 'adminPassword':
-                    deploy_cmd_params += '-' + parameter[0] + ' $pwd '
-                    pwd_cmd = '$pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force'
-                elif parameter[0] == 'servicePrincipalSecret':
-                    deploy_cmd_params += '-' + parameter[0] + ' $sps '
-                    sps_cmd = '\n$sps = ConvertTo-SecureString -String $servicePrincipalSecret -AsPlainText -Force'
-                elif parameter[0] == 'sslPswd':
-                    deploy_cmd_params += '-' + parameter[0] + ' $sslpwd '
-                    ssl_pwd_cmd = '\n$sslpwd = ConvertTo-SecureString -String $sslPswd -AsPlainText -Force'
-                else:
-                    deploy_cmd_params += '-' + parameter[0] + ' "$' + parameter[0] + '" '
-            elif language == 'bash':
-                # Handle bash quoting for int's in ARM template create command
-                if type(parameter[1]) == int:
-                    deploy_cmd_params += '\\"' + parameter[0] + '\\":{\\"value\\":$' + parameter[0] + '},'
-                else:
-                    deploy_cmd_params += '\\"' + parameter[0] + '\\":{\\"value\\":\\"$' + parameter[0] + '\\"},'
-                param_str += '\n        --' + parameter[0] + ')\n            ' + parameter[0] + '=$2\n            shift 2;;'
-            # Add param to example command
-            if parameter[1]:
-                # Add quotes around restrictedSrcAddress
-                if parameter[0] == 'restrictedSrcAddress':
-                    parameter[1] = '"' + str(parameter[1]) + '"'
-                base_ex += script_dash + parameter[0] + ' ' + str(parameter[1])
-            else:
-                base_ex += script_dash + parameter[0] + ' ' + '<value>'
-
-        if language == 'powershell':
-            # Create license parameters, expand to be a for loop?
-            if template_name in ('cluster_base'):
-                license2_param = '\n\n  [string]\n  $licenseKey2 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey2"}),'
-            license_params = '  [Parameter(Mandatory=$True)]\n  [string]\n  $licenseType,\n\n  [string]\n  $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),\n\n  [string]\n  $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),' + license2_param
-            # Add any additional example command script parameters
-            for named_param in ['resourceGroupName']:
-                base_ex += script_dash + named_param + ' ' + '<value> '
-            if template_name in ('1nic', '2nic', '3nic'):
-                byol_cmd =  deploy_cmd_params + ' -licenseKey1 "$licenseKey1"'
-                payg_cmd = deploy_cmd_params + ' -licensedBandwidth "$licensedBandwidth"'
-            elif template_name in ('cluster_base'):
-                byol_cmd = deploy_cmd_params + ' -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2"'
-                payg_cmd = deploy_cmd_params + ' -licensedBandwidth "$licensedBandwidth"'
-            base_deploy = '$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose '
-            deploy_cmd = 'if ($licenseType -eq "BYOL") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\\azuredeploy.json"; $parametersFilePath = ".\BYOL\\azuredeploy.parameters.json" }\n  ' + base_deploy + byol_cmd + '\n} elseif ($licenseType -eq "PAYG") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\\azuredeploy.json"; $parametersFilePath = ".\PAYG\\azuredeploy.parameters.json" }\n  ' + base_deploy + payg_cmd + '\n} else {\n  Write-Error -Message "Please select a valid license type of PAYG or BYOL."\n}'
-            if template_name in ('ltm_autoscale', 'waf_autoscale'):
-                deploy_cmd = base_deploy + deploy_cmd_params + ' -licensedBandwidth "$licensedBandwidth"'
-        elif language == 'bash':
-            license_check = '# Prompt for license key if not supplied and BYOL is selected\nif [ $licenseType == "BYOL" ]; then\n    if [ -z $licenseKey1 ] ; then\n            read -p "Please enter value for licenseKey1:" licenseKey1\n    fi\n' + license2_check + '    template_file="./BYOL/azuredeploy.json"\n    parameter_file="./BYOL/azuredeploy.parameters.json"\nfi\n# Prompt for licensed bandwidth if not supplied and PAYG is selected\nif [ $licenseType == "PAYG" ]; then\n    if [ -z $licensedBandwidth ] ; then\n            read -p "Please enter value for licensedBandwidth:" licensedBandwidth\n    fi\n    template_file="./PAYG/azuredeploy.json"\n    parameter_file="./PAYG/azuredeploy.parameters.json"\nfi'
-            # Right now auto scale is only PAYG
-            if template_name in ('ltm_autoscale', 'waf_autoscale'):
-                license_check = '# Prompt for licensed bandwidth if not supplied and PAYG is selected\nif [ $licenseType == "PAYG" ]; then\n    if [ -z $licensedBandwidth ] ; then\n            read -p "Please enter value for licensedBandwidth:" licensedBandwidth\n    fi\n    template_file="./azuredeploy.json"\n    parameter_file="./azuredeploy.parameters.json"\nfi'
-            # Add any additional example command script parameters
-            for named_param in ['resourceGroupName','azureLoginUser','azureLoginPassword']:
-                base_ex += script_dash + named_param + ' <value>'
-            # Add any additional mandatory parameters
-            for required_param in ['resourceGroupName', 'licenseType']:
-                mandatory_variables += required_param + ' '
-            # Add any additional parameters to the deployment command
-            for addtl_param in ['tagValues']:
-                deploy_cmd_params += '\\"' + addtl_param + '\\":{\\"value\\":$' + addtl_param + '},'
-            create_cmd = 'azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p '
-            if template_name in ('1nic', '2nic', '3nic'):
-                byol_cmd =  create_cmd + deploy_cmd_params + '\\"licenseKey1\\":{\\"value\\":\\"$licenseKey1\\"}}"'
-                payg_cmd = create_cmd + deploy_cmd_params + '\\"licensedBandwidth\\":{\\"value\\":\\"$licensedBandwidth\\"}}"'
-            elif template_name in ('cluster_base'):
-                byol_cmd = create_cmd + deploy_cmd_params + '\\"licenseKey1\\":{\\"value\\":\\"$licenseKey1\\"},\\"licenseKey2\\":{\\"value\\":\\"$licenseKey2\\"}}"'
-                payg_cmd = create_cmd + deploy_cmd_params + '\\"licensedBandwidth\\":{\\"value\\":\\"$licensedBandwidth\\"}}"'
-            deploy_cmd = 'if [ $licenseType == "BYOL" ]; then\n    ' + byol_cmd + '\nelif [ $licenseType == "PAYG" ]; then\n    ' + payg_cmd + '\nelse\n    echo "Please select a valid license type of PAYG or BYOL."\n    exit 1\nfi'
-            if template_name in ('1nic', '2nic', '3nic', 'cluster_base'):
-                deploy_cmd = 'if [ $licenseType == "BYOL" ]; then\n    ' + byol_cmd + '\nelif [ $licenseType == "PAYG" ]; then\n    ' + payg_cmd + '\nelse\n    echo "Please select a valid license type of PAYG or BYOL."\n    exit 1\nfi'
-            elif template_name in ('ltm_autoscale', 'waf_autoscale'):
-                deploy_cmd = create_cmd + deploy_cmd_params + '\\"licensedBandwidth\\":{\\"value\\":\\"$licensedBandwidth\\"}}"'
-        # Map necessary script items, handle encoding
-        ex_cmd = base_ex.encode("utf8")
-        param_str = param_str.encode("utf8")
-        # Map script as needed
-        with open(meta_script, 'r') as script:
-            script_str = script.read()
-        script_str = script_str.replace('<EXAMPLE_CMD>', ex_cmd)
-        script_str = script_str.replace('<DEPLOYMENT_CREATE>', deploy_cmd)
-        script_str = script_str.replace('<PWD_CMD>', pwd_cmd)
-        script_str = script_str.replace('<SPS_CMD>', sps_cmd)
-        script_str = script_str.replace('<SSL_PWD_CMD>', ssl_pwd_cmd)
-        script_str = script_str.replace('<LICENSE_PARAMETERS>', license_params)
-        script_str = script_str.replace('<DYNAMIC_PARAMETERS>', param_str)
-        if language == 'bash':
-            script_str = script_str.replace('<REQUIRED_PARAMETERS>', mandatory_variables)
-            script_str = script_str.replace('<LICENSE_CHECK>', license_check)
-        # Write to actual script location
-        with open(script_loc, 'w') as script_complete:
-            script_complete.write(script_str)
-        ## End Script_Creation Proc
-        return language + 'Script Created'
-
     # Need to manually add templates to create scripts for now as a 'check'...
-    if template_name in ('1nic', '2nic', '3nic', 'cluster_base', 'ltm_autoscale', 'waf_autoscale'):
-        for script_language in ('powershell', 'bash'):
-            script_creation(script_language)
+if template_name in ('1nic', '2nic', '3nic', 'cluster_base', 'ltm_autoscale', 'waf_autoscale') and script_location:
+    bash_script = script_generator.script_creation(template_name, data, script_location, default_payg_bw, 'bash')
+    ps_script = script_generator.script_creation(template_name, data, script_location, default_payg_bw, 'powershell')
 ############### END Create/Modify Scripts ###############
+
+############### Create/Modify README's ###############
+    readme_text = {'title_text': {}, 'intro_text': {}, 'help_text': {}, 'deploy_links': {}, 'version_tag': {}, 'ps_script': {}, 'bash_script': {}, 'config_example_text': {} }
+    # Title Text
+    readme_text['title_text'] = {'1nic': 'Single NIC', '2nic': '2 NIC', '3nic': '3 NIC', 'cluster_base': 'ConfigSync Cluster: Single NIC', 'ltm_autoscale': 'AutoScale BIG-IP LTM - VM Scale Set', 'waf_autoscale': 'AutoScale BIG-IP WAF(LTM+ASM) - VM Scale Set' }
+    # Intro Text
+    readme_text['intro_text']['1nic'] = 'This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard Cloud design where the compute instance of F5 is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.'
+    readme_text['intro_text']['2nic'] = 'This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3-NIC template without the NIC for connecting directly to backend webservers.'
+    readme_text['intro_text']['3nic'] = 'This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in a new networking stack in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the compute instance of F5 is running with a management, front-end application traffic(Virtual Server) and back-end application interface.'
+    readme_text['intro_text']['cluster_base'] = 'This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard Cloud design where the compute instance of F5 is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.'
+    readme_text['intro_text']['ltm_autoscale'] = 'This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE LTM instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM only.'
+    readme_text['intro_text']['waf_autoscale'] = 'This solution uses an ARM template to launch the deployment of F5 BIG-IP LTM+ASM Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE LTM instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM+ASM.'
+    # Help Text
+    readme_text['help_text']['supported'] = 'Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from F5 Technical Support.'
+    readme_text['help_text']['experimental'] = 'While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.'
+    # Deploy Buttons
+    readme_text['deploy_links']['version_tag'] = f5_networks_tag
+    readme_text['deploy_links']['lic_support'] = {'1nic': 'Both', '2nic': 'Both', '3nic': 'Both', 'cluster_base': 'Both', 'ltm_autoscale': 'PAYG', 'waf_autoscale': 'PAYG' }
+    # Example Scripts - These are set above, just adding to dict
+    readme_text['bash_script'] = bash_script
+    readme_text['ps_script'] = ps_script
+    # Configuration Example Text
+    readme_text['config_example_text']['1nic'] = 'In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.'
+    readme_text['config_example_text']['2nic'] = 'In this scneario, one NIC is for management and one NIC is for external traffic.  This is a more traditional BIG-IP deployment model where data-plane and management traffic is separate. The IP addresses in this example may be different in your implementation.'
+    readme_text['config_example_text']['3nic'] = 'In this scneario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
+    readme_text['config_example_text']['cluster_base'] = 'In this scenario, all access to the BIG-IP VE cluster is through an ALB. The IP addresses in this example may be different in your implementation.'
+    readme_text['config_example_text']['ltm_autoscale'] = 'In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.'
+    readme_text['config_example_text']['waf_autoscale'] = 'In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.'
+
+    # Call function to build create/update README
+    readme_generator.readme_creation(template_name, data, license_text, readme_text, script_location, created_file)
+############### END Create/Modify README's ###############
