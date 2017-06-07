@@ -117,7 +117,6 @@ This section has the code snippet for each the lines you should ensure are prese
 
 Note the hashed script-signature may be different in your template.<br>
 
-
 ```json
 "variables": {
     "apiVersion": "2015-06-15",
@@ -135,7 +134,6 @@ If you find an issue, we would love to hear about it.
 You have a choice when it comes to filing issues:
   - Use the **Issues** link on the GitHub menu bar in this repository for items such as enhancement or feature requests and non-urgent bug fixes. Tell us as much as you can about what you found and how you found it.
   - Contact F5 Technical support via your typical method for more time sensitive changes and other issues requiring immediate support.
-
 
 
 ## Copyright
