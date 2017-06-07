@@ -545,6 +545,6 @@ if template_name in ('1nic', '2nic', '3nic', 'cluster_base', 'ltm_autoscale', 'w
     readme_text['config_example_text']['ltm_autoscale'] = 'In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.'
     readme_text['config_example_text']['waf_autoscale'] = 'In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.'
 
-    # Call function to build create/update README
+    # Call function to create/update README
     readme_generator.readme_creation(template_name, data, license_text, readme_text, script_location, created_file)
 ############### END Create/Modify README's ###############

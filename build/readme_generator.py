@@ -52,15 +52,17 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     scale_readme = folder_loc + 'scale.README.md'
     sp_readme = folder_loc + 'sp.README.md'
     final_readme = readme_location + 'README.md'
-    readme = open(base_readme, 'r').read()
+    with open(base_readme, 'r') as readme:
+        readme = readme.read()
     scale_text = ''; sp_text = ''
 
     # Check for optional readme items
     if 'autoscale' in template_name:
-        scale_text = open(scale_readme, 'r').read()
+        with open(scale_readme, 'r') as file_str:
+            scale_text = file_str.read()
     if sp_needed(data):
-        sp_text = open(sp_readme, 'r').read()
-
+        with open(sp_readme, 'r') as file_str:
+            sp_text = file_str.read()
     ##### Text Values for README templates #####
     title_text = readme_text['title_text'][template_name]
     intro_text = readme_text['intro_text'][template_name]
