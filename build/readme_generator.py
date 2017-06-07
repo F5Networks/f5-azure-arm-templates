@@ -12,7 +12,7 @@ def sp_needed(data):
     return False
 
 def misc_readme_grep(tag, file):
-    """ Pull in any additional items that exist in the misc README file """
+    """ Pull in any additional items that exist in the misc README file, based on <TAG> """
     with open(file, 'r') as file_str:
         text = file_str.read()
     reg_ex = tag + '{{' + r"(.*?)}}"
@@ -55,7 +55,6 @@ def create_deploy_links(version_tag, lic_type, template_location):
 
 def readme_creation(template_name, data, license_params, readme_text, readme_location, template_location):
     """ Main proc to create readme """
-    # Assume running in same folder location
     folder_loc = 'readme_files/'
     base_readme = folder_loc + 'base.README.md'
     misc_readme = folder_loc + 'misc.README.txt'
@@ -63,12 +62,6 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     with open(base_readme, 'r') as readme:
         readme = readme.read()
     scale_text = ''; sp_text = ''
-
-    # Check for optional readme items
-    if 'autoscale' in template_name:
-        scale_text = misc_readme_grep('<AUTOSCALE_TXT>', misc_readme)
-    if sp_needed(data):
-        sp_text = misc_readme_grep('<SERVICE_PRINCIPAL_TXT>', misc_readme)
 
     ##### Text Values for README templates #####
     title_text = readme_text['title_text'][template_name]
@@ -81,6 +74,12 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     bash_script = readme_text['bash_script']
     ps_script = readme_text['ps_script']
     readme_text = readme_text['config_example_text'][template_name]
+
+    # Check for optional readme items
+    if 'autoscale' in template_name:
+        scale_text = misc_readme_grep('<AUTOSCALE_TXT>', misc_readme)
+    if sp_needed(data):
+        sp_text = misc_readme_grep('<SERVICE_PRINCIPAL_TXT>', misc_readme)
 
     # Map in dynamic values
     readme = readme.replace('<TITLE_TXT>', title_text)
@@ -95,7 +94,7 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     readme = readme.replace('<SERVICE_PRINCIPAL>', sp_text)
 
     # Write to solution location
-    readme_complete = open(final_readme, 'w')
-    readme_complete.write(readme)
-    ## End Script_Creation Proc
+    with open(final_readme, 'w') as readme_complete:
+        readme_complete.write(readme)
+    ## End README creation Function
     return 'README Created for ' + template_name

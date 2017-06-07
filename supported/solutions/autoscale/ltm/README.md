@@ -334,7 +334,7 @@ azure group deployment create -f $template_file -g $resourceGroupName -n $resour
 
 ## Configuration Example <a name="config">
 
-The following is an example configuration diagram for this solution deployment. In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.
+The following is an example configuration diagram for this solution deployment. In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.
 
 ![Configuration Example](images/azure-example-diagram.png)
 
