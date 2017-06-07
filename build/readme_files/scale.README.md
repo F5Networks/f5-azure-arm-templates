@@ -18,7 +18,6 @@ When this ARM template was initially deployed, a storage account was created in 
   1. Save a UCS backup file of the current BIG-IP configuration (cluster or standalone).
      - From the CLI command: ```# tmsh save /sys ucs /var/tmp/original.ucs```
      - From the Configuration utility: **System > Archives > Create**
-
   2. Upload the UCS into the **backup** container of the storage account ending in **data000** (it is a Blob container)
   3. Update the VM Scale Set Model to the new BIG-IP version.
      - From PowerShell: Use the PowerShell script in the **scripts** folder in this directory.
