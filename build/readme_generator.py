@@ -1,6 +1,7 @@
 #/usr/bin/python env
 import sys
 import os
+import re
 
 # Create Functions for README creation
 def sp_needed(data):
@@ -9,6 +10,14 @@ def sp_needed(data):
         if 'servicePrincipalSecret' in parameter:
             return True
     return False
+
+def misc_readme_grep(tag, file):
+    """ Pull in any additional items that exist in the misc README file """
+    with open(file, 'r') as file_str:
+        text = file_str.read()
+    reg_ex = tag + '{{' + r"(.*?)}}"
+    tag_text = re.findall(reg_ex, text, re.DOTALL)
+    return "".join(tag_text)
 
 def md_param_array(data, license_params):
     """ Create README example paramaters: | adminUsername | Yes | Description | """
@@ -49,8 +58,7 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     # Assume running in same folder location
     folder_loc = 'readme_files/'
     base_readme = folder_loc + 'base.README.md'
-    scale_readme = folder_loc + 'scale.README.md'
-    sp_readme = folder_loc + 'sp.README.md'
+    misc_readme = folder_loc + 'misc.README.txt'
     final_readme = readme_location + 'README.md'
     with open(base_readme, 'r') as readme:
         readme = readme.read()
@@ -58,11 +66,10 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
 
     # Check for optional readme items
     if 'autoscale' in template_name:
-        with open(scale_readme, 'r') as file_str:
-            scale_text = file_str.read()
+        scale_text = misc_readme_grep('<AUTOSCALE_TXT>', misc_readme)
     if sp_needed(data):
-        with open(sp_readme, 'r') as file_str:
-            sp_text = file_str.read()
+        sp_text = misc_readme_grep('<SERVICE_PRINCIPAL_TXT>', misc_readme)
+
     ##### Text Values for README templates #####
     title_text = readme_text['title_text'][template_name]
     intro_text = readme_text['intro_text'][template_name]
