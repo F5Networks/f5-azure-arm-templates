@@ -15,12 +15,12 @@ As new BIG-IP versions are released, existing VM scale sets can be upgraded to u
 When this ARM template was initially deployed, a storage account was created in the same Resource Group as the VM scale set. This account name ends with **data000*** (the name of storage accounts have to be globally unique, so the prefix is a unique string). In this storage account, the template created a container named **backup**.  We use this backup container to hold backup [UCS](https://support.f5.com/csp/article/K13132) configuration files. Once the UCS is present in the container, you update the scale set "model" to use the newer BIG-IP version. Once the scale set is updated, you upgrade the BIG-IP VE(s). As a part of this upgrade, the provisioning checks the backup container for a UCS file and if one exists, it uploads the configuration (if more than one exists, it uses the latest).
 
 **To upgrade the BIG-IP VE Image**
-  1. Save a UCS backup file of the current BIG-IP configuration (cluster or standalone).
+  1. Save a UCS backup file of the current BIG-IP configuration (cluster or standalone)
      - From the CLI command: ```# tmsh save /sys ucs /var/tmp/original.ucs```
      - From the Configuration utility: **System > Archives > Create**
   2. Upload the UCS into the **backup** container of the storage account ending in **data000** (it is a Blob container)
-  3. Update the VM Scale Set Model to the new BIG-IP version.
-     - From PowerShell: Use the PowerShell script in the **scripts** folder in this directory.
+  3. Update the VM Scale Set Model to the new BIG-IP version
+     - From PowerShell: Use the PowerShell script in the **scripts** folder in this directory
      - Using the Azure redeploy functionality: From the Resource Group where the ARM template was initially deployed, click the successful deployment and then select to redeploy the template. If necessary, re-select all the same variables, and **only change** the BIG-IP version to the latest.
   4. Upgrade the Instances
      1. In Azure, navigate to the VM Scale Set instances pane and verify the *Latest model* does not say **Yes** (it should have a caution sign instead of the word Yes)
