@@ -322,6 +322,7 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset'):
         data['variables']['extIpconfigArray'] = ext_ip_config_array
 
 if template_name in ('cluster_base', 'ltm_autoscale', 'waf_autoscale'):
+    data['variables']['vnetAddressPrefix'] = "10.0.0.0/16"
     data['variables']['ipAddress'] = "10.0.1."
     data['variables']['loadBalancerName'] = "[concat(variables('dnsLabel'),'-alb')]"
     data['variables']['deviceNamePrefix'] = "[concat(variables('dnsLabel'),'-device')]"

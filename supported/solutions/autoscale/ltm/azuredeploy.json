@@ -305,6 +305,7 @@
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
         "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]", 
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
+        "vnetAddressPrefix": "10.0.0.0/16", 
         "publicIPAddressType": "Static", 
         "mgmtPublicIPAddressName": "[concat(variables('dnsLabel'), '-mgmt-pip')]", 
         "mgmtPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('mgmtPublicIPAddressName'))]", 
