@@ -1,10 +1,10 @@
-# Deploying the BIG-IP VE in Azure - HA Cluster: Availability Set
+# Deploying the BIG-IP VE in Azure - HA Cluster: Active/Standby
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 
 ## Introduction
 
-This solution uses an ARM template to launch a two BIG-IP VEs in an Active/Standby configuration with network failover enabled in a new stack. Each pair of BIG-IP VEs is deployed in an Azure Availability Set, and can therefore be spread across different update and fault domains. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.
+This solution uses an ARM template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled. Each pair of BIG-IP VEs is deployed in an Azure Availability Set, and can therefore be spread across different update and fault domains. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.
 
 Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise-like" cloud design where the compute instance of F5 is running with a management interface, a front-end application traffic (Virtual Server) interface, and back-end application interface.  This template is a result of Azure now supporting multiple public IP addresses to multiple private IP addresses per NIC.  This template also has the ability to create specify additional Public/Private IP addresses for the external "application" NIC to be used for passing traffic to virtual servers in a more traditional fashion. In the event the active BIG-IP VE become unavailable, traffic seamlessly shifts to the standby BIG-IP VE using network failover.
 
@@ -371,7 +371,7 @@ fi
 
 ## Configuration Example <a name="config">
 
-The following is an example configuration diagram for this solution deployment. In this scneario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.
+The following is an example configuration diagram for this solution deployment. In this scenario, each BIG-IP has one NIC for management, one NIC for external traffic and one NIC for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.
 
 ![Configuration Example](images/azure-example-diagram.png)
 
