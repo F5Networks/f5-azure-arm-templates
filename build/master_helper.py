@@ -1,6 +1,7 @@
 #/usr/bin/python env
 import sys
 import os
+import httplib
 
 def parameter_initialize(data):
     """ Set default parameters, as well as all optional ones in a specific order """
@@ -182,3 +183,23 @@ def template_check(data, resource):
             raise Exception('Mandatory parameter was not filled in, exiting...')
             sys.exit(1)
     return data
+
+def verify_hash(url):
+    """ Download latest verifyHash to be used by the templates """
+    # Parse out url information needed
+    (protocol, host_path) = url.split('//')
+    (host, path) = host_path.split('/', 1)
+    path = '/' + path
+    if url.startswith('https'):
+        conn = httplib.HTTPSConnection(host)
+    else:
+        conn = httplib.HTTPConnection(host)
+    # Make HTTP Request
+    conn.request('GET', path)
+    response = conn.getresponse()
+    if response.status == 200:
+        pass
+    else:
+        raise Exception("Unable to download verify hash file, HTTP Error Response: %s"  % response.msg)
+    # HTTP Call includes trailing \n, remove that
+    return response.read()[:-1]
