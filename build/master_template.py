@@ -4,6 +4,7 @@ import os
 import json
 from collections import OrderedDict
 from optparse import OptionParser
+import master_helper
 import script_generator
 import readme_generator
 
@@ -202,7 +203,7 @@ data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values,
 
 # Some modifications once parameters have been defined
 for parameter in data['parameters']:
-    # Sort azuredeploy.json parameters alphabetically
+    # Sort azuredeploy.json parameter values alphabetically
     sorted_param = json.dumps(data['parameters'][parameter], sort_keys=True, ensure_ascii=False)
     data['parameters'][parameter] = json.loads(sorted_param, object_pairs_hook=OrderedDict)
     # Add parameters into parameters file as well
@@ -212,45 +213,17 @@ for parameter in data['parameters']:
         data_params['parameters'][parameter] = {"value": 'GEN_UNIQUE'}
 
 ######################################## ARM Variables ########################################
-data['variables']['bigIpNicPortMap'] = { "1": { "Port": "[parameters('bigIpVersion')]" }, "2": { "Port": "443" }, "3": { "Port": "443" }, "4": { "Port": "443" }, "5": { "Port": "443" }, "6": { "Port": "443" } }
+# Pulling in a base set of variables and setting order with below call, it is a function of master_helper.py
+master_helper.variable_initialize(data)
 data['variables']['bigIpVersionPortMap'] = version_port_map
-data['variables']['apiVersion'] = "2015-06-15"
-data['variables']['computeApiVersion'] = "2015-06-15"
-data['variables']['networkApiVersion'] = "2015-06-15"
-data['variables']['storageApiVersion'] = "2015-06-15"
-data['variables']['insightsApiVersion'] = "2015-04-01"
-if template_name in ('ltm_autoscale', 'waf_autoscale'):
-    data['variables']['computeApiVersion'] = "2016-04-30-preview"
-    data['variables']['networkApiVersion'] = "2016-06-01"
-data['variables']['location'] = "[resourceGroup().location]"
-data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
-data['variables']['resourceGroupName'] = "[resourceGroup().name]"
-data['variables']['singleQuote'] = "'"
 data['variables']['f5CloudLibsTag'] = f5_cloud_libs_tag
 data['variables']['f5CloudLibsAzureTag'] = f5_cloud_libs_azure_tag
 data['variables']['f5NetworksTag'] = f5_networks_tag
-if template_name in ('waf_autoscale'):
-    data['variables']['f5NetworksSolutionScripts'] = "[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/', variables('f5NetworksTag'), '/" + solution_location + "/solutions/autoscale/waf/deploy_scripts/')]"
 data['variables']['verifyHash'] = verify_hash
 data['variables']['installCloudLibs'] = install_cloud_libs
-data['variables']['dnsLabel'] = "[toLower(parameters('dnsLabel'))]"
-data['variables']['imageNameToLower'] = "[toLower(parameters('imageName'))]"
 data['variables']['skuToUse'] = sku_to_use
 data['variables']['offerToUse'] = offer_to_use
 data['variables']['bigIpNicPortValue'] = nic_port_map
-data['variables']['bigIpMgmtPort'] = "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]"
-data['variables']['availabilitySetName'] = "[concat(variables('dnsLabel'), '-avset')]"
-data['variables']['mgmtNicName'] = "[concat(variables('dnsLabel'), '-mgmt')]"
-data['variables']['virtualNetworkName'] = "[concat(variables('dnsLabel'), '-vnet')]"
-data['variables']['vnetId'] = "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
-data['variables']['vnetAddressPrefix'] = "10.0.0.0/16"
-data['variables']['mgmtNsgID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-mgmt-nsg'))]"
-data['variables']['mgmtPublicIPAddressName'] = "[concat(variables('dnsLabel'), '-mgmt-pip')]"
-data['variables']['mgmtPublicIPAddressId'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('mgmtPublicIPAddressName'))]"
-data['variables']['publicIPAddressType'] = "Static"
-data['variables']['mgmtSubnetName'] = "[concat(variables('dnsLabel'),'-mgmt-subnet')]"
-data['variables']['mgmtSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]"
-data['variables']['mgmtSubnetPrefix'] = "10.0.1.0/24"
 ## Handle new_stack/existing_stack variable differences
 if template_name in ('1nic', '2nic', '3nic', 'ha-avset'):
     data['variables']['instanceName'] = "[toLower(parameters('instanceName'))]"
@@ -277,26 +250,18 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset'):
                 data['variables']['intSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]"
                 data['variables']['intSubnetPrefix'] = "[concat(parameters('vnetAddressPrefix'), '.3.0/24')]"
                 data['variables']['intSubnetPrivateAddress'] = "[concat(parameters('vnetAddressPrefix'), '.3.4')]"
+            self_ip_config_array = [{ "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '0')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
             if template_name in ('ha-avset'):
                 data['variables']['mgmtSubnetPrivateAddress1'] = "[concat(parameters('vnetAddressPrefix'), '.1.5')]"
                 data['variables']['extSubnetPrivateAddress1'] = "[concat(parameters('vnetAddressPrefix'), '.2.5')]"
                 data['variables']['intSubnetPrivateAddress1'] = "[concat(parameters('vnetAddressPrefix'), '.3.5')]"
-            self_ip_config_array = [{ "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '0')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
-            if template_name in ('ha-avset'):
-                    self_ip_config_array += [{ "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '1')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress1')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
+                self_ip_config_array += [{ "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '1')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress1')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
             ext_ip_config_array = [{ "name": "[concat(variables('instanceName'), '-ext-ipconfig0')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 0)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 10)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ext-ipconfig1')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 1)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 11)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ext-ipconfig2')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 2)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 12)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ext-ipconfig3')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 3)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 13)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ext-ipconfig4')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 4)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 14)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ext-ipconfig5')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 5)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 15)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ext-ipconfig6')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 6)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 16)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ext-ipconfig7')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 7)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 17)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
     if stack_type == 'existing_stack':
-        data['variables']['vnetAddressPrefix'] = "NOT_USED"
-        data['variables']['vnetId'] = "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]"
+        data['variables']['virtualNetworkName'] = "[parameters('vnetName')]"
+        data['variables']['vnetId'] = "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]"
         data['variables']['mgmtSubnetId'] = "[concat(variables('vnetID'),'/subnets/',parameters('mgmtSubnetName'))]"
         data['variables']['mgmtSubnetPrivateAddress'] = "[parameters('mgmtIpAddress')]"
-        if template_name in ('ha-avset'):
-            data['variables']['mgmtSubnetPrivateAddress'] = "[parameters('mgmtIpAddressRangeStart')]"
-            data['variables']['mgmtSubnetPrivateAddressPrefixArray'] = "[split(parameters('mgmtIpAddressRangeStart'), '.')]"
-            data['variables']['mgmtSubnetPrivateAddressPrefix'] = "[concat(variables('mgmtSubnetPrivateAddressPrefixArray')[0], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[1], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[2], '.')]"
-            data['variables']['mgmtSubnetPrivateAddressSuffixInt'] = "[int(variables('mgmtSubnetPrivateAddressPrefixArray')[3])]"
-            data['variables']['mgmtSubnetPrivateAddressSuffix'] = "[add(variables('mgmtSubnetPrivateAddressSuffixInt'), 1)]"
-            data['variables']['mgmtSubnetPrivateAddress1'] = "[concat(variables('mgmtSubnetPrivateAddressPrefix'), variables('mgmtSubnetPrivateAddressSuffix'))]"
         if template_name in ('2nic', '3nic', 'ha-avset'):
             data['variables']['extNsgID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-ext-nsg'))]"
             data['variables']['extSelfPublicIpAddressNamePrefix'] = "[concat(variables('dnsLabel'), '-self-pip')]"
@@ -307,13 +272,6 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset'):
             data['variables']['extSubnetName'] = "[parameters('externalSubnetName')]"
             data['variables']['extSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('extsubnetName'))]"
             data['variables']['extSubnetPrivateAddress'] = "[parameters('externalIpAddressRangeStart')]"
-            if template_name in ('ha-avset'):
-                data['variables']['extSubnetPrivateAddress'] = "[parameters('externalIpSelfAddressRangeStart')]"
-                data['variables']['extSubnetSelfPrivateAddressPrefixArray'] = "[split(parameters('externalIpSelfAddressRangeStart'), '.')]"
-                data['variables']['extSubnetSelfPrivateAddressPrefix'] = "[concat(variables('extSubnetSelfPrivateAddressPrefixArray')[0], '.', variables('extSubnetSelfPrivateAddressPrefixArray')[1], '.', variables('extSubnetSelfPrivateAddressPrefixArray')[2], '.')]"
-                data['variables']['extSubnetSelfPrivateAddressSuffixInt'] = "[int(variables('extSubnetSelfPrivateAddressPrefixArray')[3])]"
-                data['variables']['extSubnetSelfPrivateAddressSuffix'] = "[add(variables('extSubnetSelfPrivateAddressSuffixInt'), 1)]"
-                data['variables']['extSubnetPrivateAddress1'] = "[concat(variables('extSubnetSelfPrivateAddressPrefix'), variables('extSubnetSelfPrivateAddressSuffix'))]"
             data['variables']['extSubnetPrivateAddressPrefixArray'] = "[split(parameters('externalIpAddressRangeStart'), '.')]"
             data['variables']['extSubnetPrivateAddressPrefix'] = "[concat(variables('extSubnetPrivateAddressPrefixArray')[0], '.', variables('extSubnetPrivateAddressPrefixArray')[1], '.', variables('extSubnetPrivateAddressPrefixArray')[2], '.')]"
             data['variables']['extSubnetPrivateAddressSuffixInt'] = "[int(variables('extSubnetPrivateAddressPrefixArray')[3])]"
@@ -330,19 +288,30 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset'):
                 data['variables']['intSubnetName'] = "[parameters('internalSubnetName')]"
                 data['variables']['intSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]"
                 data['variables']['intSubnetPrivateAddress'] = "[parameters('internalIpAddress')]"
-                if template_name in ('ha-avset'):
-                    data['variables']['intSubnetPrivateAddress'] = "[parameters('internalIpAddressRangeStart')]"
+            self_ip_config_array = [{ "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '0')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
+            if template_name in ('ha-avset'):
+                    data['variables']['mgmtSubnetPrivateAddressPrefixArray'] = "[split(parameters('mgmtIpAddressRangeStart'), '.')]"
+                    data['variables']['mgmtSubnetPrivateAddressPrefix'] = "[concat(variables('mgmtSubnetPrivateAddressPrefixArray')[0], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[1], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[2], '.')]"
+                    data['variables']['mgmtSubnetPrivateAddressSuffixInt'] = "[int(variables('mgmtSubnetPrivateAddressPrefixArray')[3])]"
+                    data['variables']['mgmtSubnetPrivateAddressSuffix'] = "[add(variables('mgmtSubnetPrivateAddressSuffixInt'), 1)]"
+                    data['variables']['mgmtSubnetPrivateAddress'] = "[parameters('mgmtIpAddressRangeStart')]"
+                    data['variables']['mgmtSubnetPrivateAddress1'] = "[concat(variables('mgmtSubnetPrivateAddressPrefix'), variables('mgmtSubnetPrivateAddressSuffix'))]"
+                    data['variables']['extSubnetSelfPrivateAddressPrefixArray'] = "[split(parameters('externalIpSelfAddressRangeStart'), '.')]"
+                    data['variables']['extSubnetSelfPrivateAddressPrefix'] = "[concat(variables('extSubnetSelfPrivateAddressPrefixArray')[0], '.', variables('extSubnetSelfPrivateAddressPrefixArray')[1], '.', variables('extSubnetSelfPrivateAddressPrefixArray')[2], '.')]"
+                    data['variables']['extSubnetSelfPrivateAddressSuffixInt'] = "[int(variables('extSubnetSelfPrivateAddressPrefixArray')[3])]"
+                    data['variables']['extSubnetSelfPrivateAddressSuffix'] = "[add(variables('extSubnetSelfPrivateAddressSuffixInt'), 1)]"
+                    data['variables']['extSubnetPrivateAddress'] = "[parameters('externalIpSelfAddressRangeStart')]"
+                    data['variables']['extSubnetPrivateAddress1'] = "[concat(variables('extSubnetSelfPrivateAddressPrefix'), variables('extSubnetSelfPrivateAddressSuffix'))]"
                     data['variables']['intSubnetPrivateAddressPrefixArray'] = "[split(parameters('internalIpAddressRangeStart'), '.')]"
                     data['variables']['intSubnetPrivateAddressPrefix'] = "[concat(variables('intSubnetPrivateAddressPrefixArray')[0], '.', variables('intSubnetPrivateAddressPrefixArray')[1], '.', variables('intSubnetPrivateAddressPrefixArray')[2], '.')]"
                     data['variables']['intSubnetPrivateAddressSuffixInt'] = "[int(variables('intSubnetPrivateAddressPrefixArray')[3])]"
                     data['variables']['intSubnetPrivateAddressSuffix'] = "[add(variables('intSubnetPrivateAddressSuffixInt'), 1)]"
+                    data['variables']['intSubnetPrivateAddress'] = "[parameters('internalIpAddressRangeStart')]"
                     data['variables']['intSubnetPrivateAddress1'] = "[concat(variables('intSubnetPrivateAddressPrefix'), variables('intSubnetPrivateAddressSuffix'))]"
-            self_ip_config_array = [{ "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '0')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
-            if template_name in ('ha-avset'):
                     self_ip_config_array += [{ "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '1')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress1')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
             ext_ip_config_array = [{ "name": "[concat(variables('instanceName'), '-ext-ipconfig0')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 0)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix0'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ext-ipconfig1')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 1)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix1'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ext-ipconfig2')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 2)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix2'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ext-ipconfig3')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 3)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix3'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ext-ipconfig4')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 4)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix4'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ext-ipconfig5')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 5)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix5'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ext-ipconfig6')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 6)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix6'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('instanceName'), '-ext-ipconfig7')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 7)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix7'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
+    # After adding variables for new_stack/existing_stack we need to add the ip config array
     if template_name in ('2nic', '3nic', 'ha-avset'):
-            # After adding variables for new_stack/existing_stack we need to add the ip config array
         data['variables']['numberOfExternalIps'] = "[parameters('numberOfExternalIps')]"
         data['variables']['selfIpconfigArray'] = self_ip_config_array
         data['variables']['extIpconfigArray'] = ext_ip_config_array
@@ -353,38 +322,36 @@ if template_name in ('cluster_base', 'ltm_autoscale', 'waf_autoscale'):
     data['variables']['deviceNamePrefix'] = "[concat(variables('dnsLabel'),'-device')]"
     data['variables']['lbID'] = "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]"
     data['variables']['frontEndIPConfigID'] = "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]"
-if template_name in ('ltm_autoscale', 'waf_autoscale'):
-    data['variables']['bigIpMgmtPort'] = 8443
-    data['variables']['vmssName'] = "[concat(parameters('dnsLabel'),'-vmss')]"
-    data['variables']['newDataStorageAccountName'] = "[concat(uniquestring(resourceGroup().id), 'data000')]"
-    data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
-    data['variables']['25m'] = 26214400
-    data['variables']['200m'] = 209715200
-    data['variables']['1g'] = 1073741824
-    data['variables']['scaleOutCalc'] = "[mul(variables(parameters('licensedBandwidth')), parameters('scaleOutThroughput'))]"
-    data['variables']['scaleInCalc'] = "[mul(variables(parameters('licensedBandwidth')), parameters('scaleInThroughput'))]"
-    data['variables']['scaleOutNetworkBits'] = "[div(variables('scaleOutCalc'), 100)]"
-    data['variables']['scaleInNetworkBits'] = "[div(variables('scaleInCalc'), 100)]"
-    data['variables']['scaleOutNetworkBytes'] = "[div(variables('scaleOutNetworkBits'), 8)]"
-    data['variables']['scaleInNetworkBytes'] = "[div(variables('scaleInNetworkBits'), 8)]"
-    data['variables']['timeWindow'] = "[concat('PT', parameters('scaleTimeWindow'), 'M')]"
-if template_name in ('waf_autoscale'):
-    data['variables']['lbTcpProbeNameHttp'] = "tcp_probe_http"
-    data['variables']['lbTcpProbeIdHttp'] = "[concat(variables('lbID'),'/probes/',variables('lbTcpProbeNameHttp'))]"
-    data['variables']['lbTcpProbeNameHttps'] = "tcp_probe_https"
-    data['variables']['lbTcpProbeIdHttps'] = "[concat(variables('lbID'),'/probes/',variables('lbTcpProbeNameHttps'))]"
-    data['variables']['httpBackendPort'] = 880
-    data['variables']['httpsBackendPort'] = 8445
-    data['variables']['commandArgs'] = "[concat('-m ', parameters('applicationProtocols'), ' -d ', parameters('solutionDeploymentName'), ' -n ', parameters('applicationAddress'), ' -j 880 -k 8445 -h ', parameters('applicationPort'), ' -s ', parameters('applicationSecurePort'), ' -t ', toLower(parameters('applicationType')), ' -l ', toLower(parameters('blockingLevel')), ' -a ', parameters('customPolicy'), ' -c ', parameters('sslCert'), ' -r ', parameters('sslPswd'), ' -o ', parameters('applicationServiceFqdn'), ' -u ', parameters('adminUsername'))]"
+    if template_name in ('ltm_autoscale', 'waf_autoscale'):
+        data['variables']['computeApiVersion'] = "2016-04-30-preview"
+        data['variables']['networkApiVersion'] = "2016-06-01"
+        data['variables']['bigIpMgmtPort'] = 8443
+        data['variables']['vmssName'] = "[concat(parameters('dnsLabel'),'-vmss')]"
+        data['variables']['newDataStorageAccountName'] = "[concat(uniquestring(resourceGroup().id), 'data000')]"
+        data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
+        data['variables']['25m'] = 26214400
+        data['variables']['200m'] = 209715200
+        data['variables']['1g'] = 1073741824
+        data['variables']['scaleOutCalc'] = "[mul(variables(parameters('licensedBandwidth')), parameters('scaleOutThroughput'))]"
+        data['variables']['scaleInCalc'] = "[mul(variables(parameters('licensedBandwidth')), parameters('scaleInThroughput'))]"
+        data['variables']['scaleOutNetworkBits'] = "[div(variables('scaleOutCalc'), 100)]"
+        data['variables']['scaleInNetworkBits'] = "[div(variables('scaleInCalc'), 100)]"
+        data['variables']['scaleOutNetworkBytes'] = "[div(variables('scaleOutNetworkBits'), 8)]"
+        data['variables']['scaleInNetworkBytes'] = "[div(variables('scaleInNetworkBits'), 8)]"
+        data['variables']['timeWindow'] = "[concat('PT', parameters('scaleTimeWindow'), 'M')]"
+    if template_name in ('waf_autoscale'):
+        data['variables']['f5NetworksSolutionScripts'] = "[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/', variables('f5NetworksTag'), '/" + solution_location + "/solutions/autoscale/waf/deploy_scripts/')]"
+        data['variables']['lbTcpProbeNameHttp'] = "tcp_probe_http"
+        data['variables']['lbTcpProbeIdHttp'] = "[concat(variables('lbID'),'/probes/',variables('lbTcpProbeNameHttp'))]"
+        data['variables']['lbTcpProbeNameHttps'] = "tcp_probe_https"
+        data['variables']['lbTcpProbeIdHttps'] = "[concat(variables('lbID'),'/probes/',variables('lbTcpProbeNameHttps'))]"
+        data['variables']['httpBackendPort'] = 880
+        data['variables']['httpsBackendPort'] = 8445
+        data['variables']['commandArgs'] = "[concat('-m ', parameters('applicationProtocols'), ' -d ', parameters('solutionDeploymentName'), ' -n ', parameters('applicationAddress'), ' -j 880 -k 8445 -h ', parameters('applicationPort'), ' -s ', parameters('applicationSecurePort'), ' -t ', toLower(parameters('applicationType')), ' -l ', toLower(parameters('blockingLevel')), ' -a ', parameters('customPolicy'), ' -c ', parameters('sslCert'), ' -r ', parameters('sslPswd'), ' -o ', parameters('applicationServiceFqdn'), ' -u ', parameters('adminUsername'))]"
 
-# Add storage array variables at the end
-data['variables']['instanceTypeMap'] = { "Standard_A3": { "storageAccountType": "Standard_LRS" }, "Standard_A4": { "storageAccountType": "Standard_LRS" }, "Standard_A5": { "storageAccountType": "Standard_LRS" }, "Standard_A6": { "storageAccountType": "Standard_LRS" }, "Standard_A7": { "storageAccountType": "Standard_LRS" }, "Standard_D2": { "storageAccountType": "Standard_LRS" }, "Standard_D3": { "storageAccountType": "Standard_LRS" }, "Standard_D4": { "storageAccountType": "Standard_LRS" }, "Standard_D11": { "storageAccountType": "Standard_LRS" }, "Standard_D12": { "storageAccountType": "Standard_LRS" }, "Standard_D13": { "storageAccountType": "Standard_LRS" }, "Standard_D14": { "storageAccountType": "Standard_LRS" }, "Standard_D2_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D3_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D4_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D5_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D11_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D12_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D13_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D14_v2": { "storageAccountType": "Standard_LRS" }, "Standard_F2": { "storageAccountType": "Standard_LRS" }, "Standard_F4": { "storageAccountType": "Standard_LRS" }, "Standard_G1": { "storageAccountType": "Standard_LRS" }, "Standard_G2": { "storageAccountType": "Standard_LRS" }, "Standard_G3": { "storageAccountType": "Standard_LRS" }, "Standard_G4": { "storageAccountType": "Standard_LRS" }, "Standard_G5": { "storageAccountType": "Standard_LRS" }, "Standard_DS1": { "storageAccountType": "Premium_LRS" }, "Standard_DS2": { "storageAccountType": "Premium_LRS" }, "Standard_DS3": { "storageAccountType": "Premium_LRS" }, "Standard_DS4": { "storageAccountType": "Premium_LRS" }, "Standard_DS11": { "storageAccountType": "Premium_LRS" }, "Standard_DS12": { "storageAccountType": "Premium_LRS" }, "Standard_DS13": { "storageAccountType": "Premium_LRS" }, "Standard_DS14": { "storageAccountType": "Premium_LRS" }, "Standard_DS1_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS2_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS3_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS4_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS5_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS11_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS12_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS13_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS14_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS15_v2": { "storageAccountType": "Premium_LRS" }, "Standard_GS1": { "storageAccountType": "Premium_LRS" }, "Standard_GS2": { "storageAccountType": "Premium_LRS" }, "Standard_GS3": { "storageAccountType": "Premium_LRS" }, "Standard_GS4": { "storageAccountType": "Premium_LRS" }, "Standard_GS5": { "storageAccountType": "Premium_LRS" } }
-data['variables']['newStorageAccountName'] = "[concat(uniquestring(resourceGroup().id), 'stor')]"
-data['variables']['storageAccountType'] = "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]"
-data['variables']['newDataStorageAccountName'] = "[concat(uniquestring(resourceGroup().id), 'data000')]"
-data['variables']['dataStorageAccountType'] = "Standard_LRS"
-
-# Sort azuredeploy.json variables alphabetically
+# Remove unecessary variables and do a check for missing mandatory variables
+master_helper.template_check(data, 'variables')
+# Sort azuredeploy.json variable value(if exists) alphabetically
 for variables in data['variables']:
     sorted_variable = json.dumps(data['variables'][variables], sort_keys=True, ensure_ascii=False)
     data['variables'][variables] = json.loads(sorted_variable, object_pairs_hook=OrderedDict)
