@@ -53,9 +53,8 @@ python -B '.\master_template.py' --template-name ltm_autoscale --license-type PA
 
 
 ############################### Misc modifications during the build process ###############################
-## Ensure bash files have the execute bit set
-# Skip on pre-commit
-if [[ $1 != "pre-commit" ]]; then
+#### Right now only do the misc modifications if this(build) script includes release-prep as first arg
+if [[ $1 == "release-prep" ]]; then
     ## Update Exec bit on bash files if not set
     for f in `find .. -name '*.sh'`; do
         ( cd `dirname $f` && git update-index --chmod=+x `basename $f` )
