@@ -11,9 +11,6 @@
         "dnsLabel": {
             "value": "REQUIRED"
         }, 
-        "dnsLabelPrefix": {
-            "value": "REQUIRED"
-        }, 
         "instanceName": {
             "value": "f5vm01"
         }, 

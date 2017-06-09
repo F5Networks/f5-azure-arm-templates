@@ -38,7 +38,7 @@ def script_creation(template_name, data, script_location, default_payg_bw, langu
         # Need to add bash license params prior to dynamic parameters
         # Create license parameters, expand to be a for loop?
         license_args = ['licensedBandwidth','licenseKey1']
-        if template_name in ('cluster_base'):
+        if template_name in ('cluster_base', 'ha-avset'):
             license2_param = 'licenseKey2:,'
             license_args.append('licenseKey2')
             license2_check += '    if [ -z $licenseKey2 ] ; then\n            read -p "Please enter value for licenseKey2:" licenseKey2\n    fi\n'
@@ -93,7 +93,7 @@ def script_creation(template_name, data, script_location, default_payg_bw, langu
 
     if language == 'powershell':
         # Create license parameters, expand to be a for loop?
-        if template_name in ('cluster_base'):
+        if template_name in ('cluster_base', 'ha-avset'):
             license2_param = '\n\n  [string]\n  $licenseKey2 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey2"}),'
         license_params = '  [Parameter(Mandatory=$True)]\n  [string]\n  $licenseType,\n\n  [string]\n  $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),\n\n  [string]\n  $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),' + license2_param
         # Add any additional example command script parameters
@@ -102,7 +102,7 @@ def script_creation(template_name, data, script_location, default_payg_bw, langu
         if template_name in ('1nic', '2nic', '3nic'):
             byol_cmd =  deploy_cmd_params + ' -licenseKey1 "$licenseKey1"'
             payg_cmd = deploy_cmd_params + ' -licensedBandwidth "$licensedBandwidth"'
-        elif template_name in ('cluster_base'):
+        elif template_name in ('cluster_base', 'ha-avset'):
             byol_cmd = deploy_cmd_params + ' -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2"'
             payg_cmd = deploy_cmd_params + ' -licensedBandwidth "$licensedBandwidth"'
         base_deploy = '$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose '
@@ -127,11 +127,11 @@ def script_creation(template_name, data, script_location, default_payg_bw, langu
         if template_name in ('1nic', '2nic', '3nic'):
             byol_cmd =  create_cmd + deploy_cmd_params + '\\"licenseKey1\\":{\\"value\\":\\"$licenseKey1\\"}}"'
             payg_cmd = create_cmd + deploy_cmd_params + '\\"licensedBandwidth\\":{\\"value\\":\\"$licensedBandwidth\\"}}"'
-        elif template_name in ('cluster_base'):
+        elif template_name in ('cluster_base', 'ha-avset'):
             byol_cmd = create_cmd + deploy_cmd_params + '\\"licenseKey1\\":{\\"value\\":\\"$licenseKey1\\"},\\"licenseKey2\\":{\\"value\\":\\"$licenseKey2\\"}}"'
             payg_cmd = create_cmd + deploy_cmd_params + '\\"licensedBandwidth\\":{\\"value\\":\\"$licensedBandwidth\\"}}"'
         deploy_cmd = 'if [ $licenseType == "BYOL" ]; then\n    ' + byol_cmd + '\nelif [ $licenseType == "PAYG" ]; then\n    ' + payg_cmd + '\nelse\n    echo "Please select a valid license type of PAYG or BYOL."\n    exit 1\nfi'
-        if template_name in ('1nic', '2nic', '3nic', 'cluster_base'):
+        if template_name in ('1nic', '2nic', '3nic', 'cluster_base', 'ha-avset'):
             deploy_cmd = 'if [ $licenseType == "BYOL" ]; then\n    ' + byol_cmd + '\nelif [ $licenseType == "PAYG" ]; then\n    ' + payg_cmd + '\nelse\n    echo "Please select a valid license type of PAYG or BYOL."\n    exit 1\nfi'
         elif template_name in ('ltm_autoscale', 'waf_autoscale'):
             deploy_cmd = create_cmd + deploy_cmd_params + '\\"licensedBandwidth\\":{\\"value\\":\\"$licensedBandwidth\\"}}"'

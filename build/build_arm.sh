@@ -1,13 +1,17 @@
 #/bin/bash
 
 ############################### Experimental ###############################
-## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic)
-template_list="1nic 2nic 3nic"
+## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), HA-AVSET
+template_list="standalone/1nic standalone/2nic standalone/3nic ha-avset"
 stack_list="new_stack existing_stack"
 for tmpl in $template_list; do
+    loc=$tmpl
+    if [[ $loc == *"/"* ]]; then
+        tmpl=`echo $loc | grep -o '[/].*$' | cut -c2-`
+    fi
     for stack_type in $stack_list; do
-        python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../experimental/standalone/$tmpl/$stack_type/PAYG/" --script-location "../experimental/standalone/$tmpl/$stack_type/"
-        python -B '.\master_template.py' --template-name $tmpl --license-type BYOL --stack-type $stack_type --template-location "../experimental/standalone/$tmpl/$stack_type/BYOL/" --script-location "../experimental/standalone/$tmpl/$stack_type/"
+        python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/PAYG/" --script-location "../experimental/$loc/$stack_type/"
+        python -B '.\master_template.py' --template-name $tmpl --license-type BYOL --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/BYOL/" --script-location "../experimental/$loc/$stack_type/"
     done
 done
 
@@ -23,15 +27,18 @@ python -B '.\master_template.py' --template-name waf_autoscale --license-type PA
 
 ############################### End Experimental ###############################
 
-
 ############################### Supported ###############################
-## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic)
-template_list="1nic 2nic 3nic"
+## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), HA-AVSET
+template_list="standalone/1nic standalone/2nic standalone/3nic ha-avset"
 stack_list="new_stack existing_stack"
 for tmpl in $template_list; do
+    loc=$tmpl
+    if [[ $loc == *"/"* ]]; then
+        tmpl=`echo $loc | grep -o '[/].*$' | cut -c2-`
+    fi
     for stack_type in $stack_list; do
-        python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../supported/standalone/$tmpl/$stack_type/PAYG/" --script-location "../supported/standalone/$tmpl/$stack_type/"
-        python -B '.\master_template.py' --template-name $tmpl --license-type BYOL --stack-type $stack_type --template-location "../supported/standalone/$tmpl/$stack_type/BYOL/" --script-location "../supported/standalone/$tmpl/$stack_type/"
+        python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../supported/$loc/$stack_type/PAYG/" --script-location "../supported/$loc/$stack_type/"
+        python -B '.\master_template.py' --template-name $tmpl --license-type BYOL --stack-type $stack_type --template-location "../supported/$loc/$stack_type/BYOL/" --script-location "../supported/$loc/$stack_type/"
     done
 done
 
