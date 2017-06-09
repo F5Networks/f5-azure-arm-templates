@@ -50,9 +50,3 @@ python -B '.\master_template.py' --template-name cluster_base --license-type BYO
 python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --template-location '../supported/solutions/autoscale/ltm/' --script-location '../supported/solutions/autoscale/ltm/' --solution-location 'supported'
 
 ############################### End Supported ###############################
-
-#### Misc Build Activities ####
-## Update Exec bit on bash files if not set
-for f in `find .. -name '*.sh'`; do
-        ( cd `dirname $f` && git update-index --chmod=+x  `basename $f` )
-done
