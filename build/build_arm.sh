@@ -7,7 +7,7 @@ stack_list="new_stack existing_stack"
 for tmpl in $template_list; do
     loc=$tmpl
     if [[ $loc == *"/"* ]]; then
-        tmpl=`echo $loc | grep -o '[/].*$' | cut -c2-`
+        tmpl=`basename $loc`
     fi
     for stack_type in $stack_list; do
         python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/PAYG/" --script-location "../experimental/$loc/$stack_type/"
@@ -34,7 +34,7 @@ stack_list="new_stack existing_stack"
 for tmpl in $template_list; do
     loc=$tmpl
     if [[ $loc == *"/"* ]]; then
-        tmpl=`echo $loc | grep -o '[/].*$' | cut -c2-`
+        tmpl=`basename $loc`
     fi
     for stack_type in $stack_list; do
         python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../supported/$loc/$stack_type/PAYG/" --script-location "../supported/$loc/$stack_type/"
@@ -50,3 +50,9 @@ python -B '.\master_template.py' --template-name cluster_base --license-type BYO
 python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --template-location '../supported/solutions/autoscale/ltm/' --script-location '../supported/solutions/autoscale/ltm/' --solution-location 'supported'
 
 ############################### End Supported ###############################
+
+#### Misc Build Activities ####
+## Update Exec bit on bash files if not set
+for f in `find .. -name '*.sh'`; do
+        ( cd `dirname $f` && git update-index --chmod=+x  `basename $f` )
+done
