@@ -201,5 +201,8 @@ def verify_hash(url):
         pass
     else:
         raise Exception("Unable to download verify hash file, HTTP Error Response: %s"  % response.msg)
-    # HTTP Call includes trailing \n, remove that
-    return response.read()[:-1]
+    # HTTP Call MIGHT include trailing \n, remove that
+    response_str = response.read()
+    if response_str[-1:] == '\n':
+        response_str = response_str[:-1]
+    return response_str
