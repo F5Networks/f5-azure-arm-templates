@@ -9,6 +9,15 @@
 
 - In a two NIC implementation, interface #1 is for management and data-plane traffic from the Internet, and interface #2 is connected into the Azure networks where traffic is processed by the pool members in a traditional two-ARM design.
 
+## Supported BIG-IP versions
+Below is a map that shows the available options for the template parameter 'bigIpVersion' as it corresponds to the BIG-IP version itself.
+
+| Azure BIG-IP Image Version | BIG-IP Version |
+| --- | --- |
+| 13.0.021 | 13.0.0 HF2 Build 2.10.1671 |
+| 12.1.24 | 12.1.2 HF1 Build 1.34.271 |
+| latest | This will select the latest BIG-IP version available |
+
 ## Documentation
 
 The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html) decribes how to create the configuration manually without using the ARM template.
@@ -24,7 +33,7 @@ You have three options for deploying this template:
 
 Use this button to deploy the template:
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.1.3.0%2Fexperimental%2Freference%2Fstandalone%2F2nic+webserver%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.1.4.0%2Fexperimental%2Freference%2Fstandalone%2F2nic+webserver%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
