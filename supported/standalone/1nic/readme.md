@@ -29,7 +29,7 @@ Additionally, F5 provides checksums for all of our supported templates. For inst
 ## Supported BIG-IP versions
 Below is a map that shows the available options for the template parameter 'bigIpVersion' as it corresponds to the BIG-IP version itself.
 
-| Azure BIG-IP Image Name | BIG-IP Version |
+| Azure BIG-IP Image Version | BIG-IP Version |
 | --- | --- |
 | 13.0.021 | 13.0.0 HF2 Build 2.10.1671 |
 | 12.1.24 | 12.1.2 HF1 Build 1.34.271 |

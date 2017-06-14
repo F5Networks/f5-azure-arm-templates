@@ -19,6 +19,14 @@ You choose the license and corresponding Azure instance based on the number of c
 | 4 | 200 Mbps | A3 Standard or D3_v2 |
 | 8 | 1 Gbps | A4 or A7 Standard or D4v2 |
 
+## Supported BIG-IP versions
+Below is a map that shows the available options for the template parameter 'bigIpVersion' as it corresponds to the BIG-IP version itself.
+
+| Azure BIG-IP Image Version | BIG-IP Version |
+| --- | --- |
+| 13.0.021 | 13.0.0 HF2 Build 2.10.1671 |
+| 12.1.24 | 12.1.2 HF1 Build 1.34.271 |
+| latest | This will select the latest BIG-IP version available |
 
 ## Template parameters
 
@@ -234,9 +242,9 @@ After the deployment successfully finishes, you can find the BIG-IP Management U
 * Click on the deployment status, and then the deployment.
 * In the "Outputs" section you will find the URL's and ports that you can use to connect to the F5 cluster.
 
-## Deploying Custom Configuration to an Azure Virtual Machine 
+## Deploying Custom Configuration to an Azure Virtual Machine
 
-This sample code uses the CustomScript extension resource to configure the f5.ip_forwarding iApp on BIG-IP VE in Azure Resource Manager. 
+This sample code uses the CustomScript extension resource to configure the f5.ip_forwarding iApp on BIG-IP VE in Azure Resource Manager.
 
 The CustomScript extension resource name must reference the Azure virtual machine name and must have a dependency on that virtual machine. You can use only one CustomScript extension resource per virtual machine; however, you can combine multiple semicolon-delimited commands in a single extension resource definition.
 
@@ -264,9 +272,9 @@ Warning: F5 does not support the template if you change anything other than the 
 }
 ```
 
-## Deploying Custom Configuration to an Azure Virtual Machine 
+## Deploying Custom Configuration to an Azure Virtual Machine
 
-This sample code uses the CustomScript extension resource to configure the f5.ip_forwarding iApp on BIG-IP VE in Azure Resource Manager. 
+This sample code uses the CustomScript extension resource to configure the f5.ip_forwarding iApp on BIG-IP VE in Azure Resource Manager.
 
 The CustomScript extension resource name must reference the Azure virtual machine name and must have a dependency on that virtual machine. You can use only one CustomScript extension resource per virtual machine; however, you can combine multiple semicolon-delimited commands in a single extension resource definition.
 
