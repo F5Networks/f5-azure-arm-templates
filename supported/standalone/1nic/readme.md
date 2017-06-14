@@ -28,7 +28,9 @@ Additionally, F5 provides checksums for all of our supported templates. For inst
 
 ## Supported BIG-IP versions
 As a result of the difference between the version number assigned to the BIG-IP image in Azure and the official BIG-IP version itself, below is a map that shows the available options for the template parameter 'bigIpVersion' as it corresponds to the BIG-IP version itself.
+
 | Azure Image Name | BIG-IP Version |
+| --- | --- |
 | 13.0.021 | 13.0.0 HF2 w/ Engineering Hotfix |
 | 12.1.24 | 12.1.2 HF1 w/ Engineering Hotfix |
 | latest | This will select the latest BIG-IP version available |
