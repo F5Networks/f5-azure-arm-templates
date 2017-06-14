@@ -26,6 +26,13 @@ In the *variables* section:
 
 Additionally, F5 provides checksums for all of our supported templates. For instructions and the checksums to compare against, see https://devcentral.f5.com/codeshare/checksums-for-f5-supported-cft-and-arm-templates-on-github-1014.
 
+## Supported BIG-IP versions
+As a result of the difference between the version number assigned to the BIG-IP image in Azure and the official BIG-IP version itself, below is a map that shows the available options for the template parameter 'bigIpVersion' as it corresponds to the BIG-IP version itself.
+| Azure Image Name | BIG-IP Version |
+| 13.0.021 | 13.0.0 HF2 w/ Engineering Hotfix |
+| 12.1.24 | 12.1.2 HF1 w/ Engineering Hotfix |
+| latest | This will select the latest BIG-IP version available |
+
 ## Supported instance types and hypervisors
   - For a list of supported Azure instance types for this solutions, see the **Azure instances for BIG-IP VE** section of https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/1.html#guid-71265d82-3a1a-43d2-bae5-892c184cc59b
 
@@ -49,10 +56,10 @@ You have three options for deploying this solution:
 ### <a name="azure"></a>Azure deploy buttons
 
 Use the appropriate button, depending on whether you are using BYOL or PAYG licensing:
-  - **BYOL** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.1.3.0%2Fsupported%2Fstandalone%2F1nic%2FBYOL%2Fazuredeploy.json">
+  - **BYOL** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.1.4.0%2Fsupported%2Fstandalone%2F1nic%2FBYOL%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
-  - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.1.3.0%2Fsupported%2Fstandalone%2F1nic%2FPAYG%2Fazuredeploy.json">
+  - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.1.4.0%2Fsupported%2Fstandalone%2F1nic%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
 ### Template parameters
