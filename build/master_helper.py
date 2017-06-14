@@ -75,6 +75,7 @@ def variable_initialize(data):
     data['variables']['f5CloudLibsTag'] = "MANDATORY"
     data['variables']['f5CloudLibsAzureTag'] = "MANDATORY"
     data['variables']['f5NetworksTag'] = "MANDATORY"
+    data['variables']['f5CloudIappsTag'] = "MANDATORY"
     data['variables']['f5NetworksSolutionScripts'] = "OPTIONAL"
     data['variables']['verifyHash'] = "MANDATORY"
     data['variables']['installCloudLibs'] = "MANDATORY"
