@@ -242,7 +242,7 @@
                 "owner": "OWNER"
             }, 
             "metadata": {
-                "description": "Default key/value resource tags will be added to the resources in this deploymeny, if you would like the values to be unique adjust them as needed for each key."
+                "description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."
             }, 
             "type": "object"
         }

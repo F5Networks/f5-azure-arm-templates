@@ -144,7 +144,7 @@ elif license_type == 'PAYG':
 data['parameters']['ntpServer'] = {"type": "string", "defaultValue": "0.pool.ntp.org", "metadata": { "description": "If you would like to change the NTP server the BIG-IP uses replace the default ntp server with your choice." } }
 data['parameters']['timeZone'] = {"type": "string", "defaultValue": "UTC", "metadata": { "description": "If you would like to change the time zone the BIG-IP uses then enter your chocie. This is in the format of the Olson timezone string from /usr/share/zoneinfo, such as UTC, US/Central or Europe/London." } }
 data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": "*", "metadata": { "description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources" } }
-data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values, "metadata": { "description": "Default key/value resource tags will be added to the resources in this deploymeny, if you would like the values to be unique adjust them as needed for each key." }}
+data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values, "metadata": { "description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key." }}
 
 # Set new_stack/existing_stack parameters for templates that support that
 if template_name in ('1nic', '2nic', '3nic', 'ha-avset'):
