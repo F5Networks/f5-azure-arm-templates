@@ -21,6 +21,16 @@ In the *variables* section:
 
 Additionally, F5 provides checksums for all of our supported templates. For instructions and the checksums to compare against, see https://devcentral.f5.com/codeshare/checksums-for-f5-supported-cft-and-arm-templates-on-github-1014.
 
+## Supported BIG-IP versions
+Below is a map that shows the available options for the template parameter 'bigIpVersion' as it corresponds to the BIG-IP version itself.
+
+| Azure BIG-IP Image Version | BIG-IP Version |
+| --- | --- |
+| 13.0.021 | 13.0.0 HF2 Build 2.10.1671 |
+| 12.1.24 | 12.1.2 HF1 Build 1.34.271 |
+| latest | This will select the latest BIG-IP version available |
+
+
 ## Supported instance types and hypervisors
   - For a list of supported Azure instance types for this solutions, see the **Azure instances for BIG-IP VE** section of https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/1.html#guid-71265d82-3a1a-43d2-bae5-892c184cc59b
 

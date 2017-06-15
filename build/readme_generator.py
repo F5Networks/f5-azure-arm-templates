@@ -36,6 +36,13 @@ def md_param_array(data, license_params):
             param_array += "| " + parameter + " | " + mandatory + " | " + data['parameters'][parameter]['metadata']['description'] + " |\n"
     return param_array
 
+def md_version_map(data, readme_text):
+    """ Create BIG-IP version map: | Azure BIG-IP Image Version | BIG-IP Version | """
+    param_array = ""
+    for version in data['parameters']['bigIpVersion']['allowedValues']:
+        param_array += "| " + version + " | " + readme_text['license_map'][version] + " |\n"
+    return param_array
+
 def create_deploy_links(version_tag, lic_type, template_location):
     """ Create deploy to Azure buttons/links """
     deploy_links = ''
@@ -70,6 +77,7 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
         help_text = readme_text['help_text']['supported']
     else:
         help_text = readme_text['help_text']['experimental']
+    version_map = md_version_map(data, readme_text)
     deploy_links = create_deploy_links(readme_text['deploy_links']['version_tag'], readme_text['deploy_links']['lic_support'][template_name], template_location)
     bash_script = readme_text['bash_script']
     ps_script = readme_text['ps_script']
@@ -84,6 +92,7 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     # Map in dynamic values
     readme = readme.replace('<TITLE_TXT>', title_text)
     readme = readme.replace('<INTRO_TXT>', intro_text)
+    readme = readme.replace('<VERSION_MAP_TXT>', version_map)
     readme = readme.replace('<HELP_TXT>', help_text)
     readme = readme.replace('<DEPLOY_LINKS>', deploy_links)
     readme = readme.replace('<EXAMPLE_PARAMS>', md_param_array(data, license_params))
