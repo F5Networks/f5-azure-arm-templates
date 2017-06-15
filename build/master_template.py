@@ -74,23 +74,21 @@ default_payg_bw = '200m'
 nic_port_map = "[variables('bigIpNicPortMap')['1'].Port]"
 default_instance = "Standard_DS2_v2"
 
-# Update port map variable if deploying multi_nic template
+## Update port map variable if deploying multi_nic template
 if template_name in ('2nic'):
     nic_port_map = "[variables('bigIpNicPortMap')['2'].Port]"
 if template_name in ('3nic', 'ha-avset'):
     nic_port_map = "[variables('bigIpNicPortMap')['3'].Port]"
 
-# Update allowed instances available based on solution
+## Update allowed instances available based on solution
+disallowed_instance_list = []
 if template_name in ('waf_autoscale'):
     disallowed_instance_list = ["Standard_A2", "Standard_F2"]
-    for instance in disallowed_instance_list:
-        instance_type_list.remove(instance)
-# This solution requires a minimum of 3 nic's, some instance types only support two
 if template_name in ('3nic', 'ha-avset'):
     default_instance = "Standard_DS3_v2"
     disallowed_instance_list = ["Standard_A2", "Standard_D2", "Standard_DS2", "Standard_D2_v2", "Standard_DS2_v2", "Standard_F2", "Standard_F2S"]
-    for instance in disallowed_instance_list:
-        instance_type_list.remove(instance)
+for instance in disallowed_instance_list:
+    instance_type_list.remove(instance)
 
 
 ## Set BIG-IP versions to allow ##
@@ -489,7 +487,7 @@ command_to_execute = ''; command_to_execute2 = ''
 if template_name == '1nic':
     command_to_execute = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none'<POST_CMD_TO_EXECUTE>)]"
 if template_name == '2nic':
-    command_to_execute = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --vlan name:external,nic:1.1 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), ',vlan:external --log-level debug'<POST_CMD_TO_EXECUTE>')]"
+    command_to_execute = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --vlan name:external,nic:1.1 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), ',vlan:external --log-level debug'<POST_CMD_TO_EXECUTE>)]"
 if template_name == '3nic':
     command_to_execute = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress'), ',vlan:internal --log-level debug'<POST_CMD_TO_EXECUTE>)]"
 if template_name == 'cluster_base':
