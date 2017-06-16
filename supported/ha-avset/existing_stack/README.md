@@ -25,7 +25,7 @@ In the *variables* section:
 Additionally, F5 provides checksums for all of our supported templates. For instructions and the checksums to compare against, see https://devcentral.f5.com/codeshare/checksums-for-f5-supported-cft-and-arm-templates-on-github-1014.
 
 ## Supported BIG-IP versions
-Below is a map that shows the available options for the template parameter 'bigIpVersion' as it corresponds to the BIG-IP version itself.
+The following is a map that shows the available options for the template parameter 'bigIpVersion' as it corresponds to the BIG-IP version itself. Only the latest version of BIG-IP VE is posted in the Azure Marketplace. For older versions, see downloads.f5.com.
 
 | Azure BIG-IP Image Version | BIG-IP Version |
 | --- | --- |
@@ -510,7 +510,10 @@ The deployment template supports creation of 1-8 external public IP addresses fo
 - Create a new IP configuration resource (ex.: myResourceGroupName-ext-ipconfig9) in the properties of the external Azure network interface(ex.: myResourceGroupName-ext0)
 - Make sure the IP configuration you create for this public IP contains "-ext-ipconfig" in the name (ex.: myResourceGroupName-ext-ipconfig9)
 - Add these Azure tags to the public IP address resource:
-- f5_privateIp=10.10.10.10 (this is the value of the new IP configurations's private IP address and also the BIG-IP virtual server)
+  - f5_privateIp=10.10.10.10 (this is the value of the new IP configurations's private IP address and also the BIG-IP virtual server)
+  - ext_SubnetId=/subscriptions/7aa18216-6c77-40de-82a4-f14bcb08c3a0/resourceGroups/underhills/providers/Microsoft.Network/virtualNetworks/underhills-vnet/subnets/mySubnet (you can get this value from resources.azure.com: Subscriptions>Resource Groups>myResourceGroupName>providers>Microsoft.Network>virtualNetworks>subnets>mySubnetName.id)
+
+When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server Destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. Additionally, these virtual servers must be created in Traffic Group **None**.  See the BIG-IP documentation for specific instructions on creating virtual servers.
 
 
 ### Changing the BIG-IP Configuration utility (GUI) port
