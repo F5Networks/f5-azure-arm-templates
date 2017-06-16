@@ -50,7 +50,7 @@ Log in to the [Azure Resource Explorer](https://resources.azure.com) and then na
 
 <SERVICE_PRINCIPAL_TXT>{{
 ### Service Principal Authentication
-This solution requires access to the Azure API to determine how the BIG-IP's should be configured.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication, for all the typical security reasons.  The following provides information/links on the options for configuring a service principal within Azure if this is the first time it is needed in a subscription.
+This solution requires access to the Azure API to determine how the BIG-IP VEs should be configured.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication, for all the typical security reasons.  The following provides information/links on the options for configuring a service principal within Azure if this is the first time it is needed in a subscription.
 
 _Ensure that however the creation of the service principal occurs to verify it only has minimum required access based on the solutions need(read vs read/write) prior to this template being deployed and used by the solution within the resource group selected(new or existing)._
 
@@ -84,7 +84,7 @@ The deployment template supports creation of 1-8 external public IP addresses fo
 - Create a new IP configuration resource (ex.: myResourceGroupName-ext-ipconfig9) in the properties of the external Azure network interface(ex.: myResourceGroupName-ext0)
 
 When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server Destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. See the BIG-IP documentation for specific instructions on creating virtual servers.
-![Configuration Example](images/azure-example-diagram.png)
+
 }}
 
 <ADDTL_PUB_IP_FAILOVER_TXT>{{

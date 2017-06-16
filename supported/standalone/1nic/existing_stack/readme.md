@@ -23,7 +23,7 @@ In the *variables* section:
 Additionally, F5 provides checksums for all of our supported templates. For instructions and the checksums to compare against, see https://devcentral.f5.com/codeshare/checksums-for-f5-supported-cft-and-arm-templates-on-github-1014.
 
 ## Supported BIG-IP versions
-The following is a map that shows the available options for the template parameter 'bigIpVersion' as it corresponds to the BIG-IP version itself. Only the latest version of BIG-IP VE is posted in the Azure Marketplace. For older versions, see downloads.f5.com.
+The following is a map that shows the available options for the template parameter **bigIpVersion** as it corresponds to the BIG-IP version itself. Only the latest version of BIG-IP VE is posted in the Azure Marketplace. For older versions, see downloads.f5.com.
 
 | Azure BIG-IP Image Version | BIG-IP Version |
 | --- | --- |
