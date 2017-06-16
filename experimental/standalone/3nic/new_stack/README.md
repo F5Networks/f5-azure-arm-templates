@@ -360,6 +360,12 @@ The following is an example configuration diagram for this solution deployment. 
 ![Configuration Example](images/azure-example-diagram.png)
 
 
+## Additional Public IP Addresses
+The deployment template supports creation of 1-8 external public IP addresses for application traffic (first one is used for external NIC Self IP).  Follow the steps below to add more public IP addresses to the deployment:
+
+- Create a new Azure public IP address resource in the deployment resource group
+- Create a new IP configuration resource (ex.: myResourceGroupName-ext-ipconfig9) in the properties of the external Azure network interface(ex.: myResourceGroupName-ext0)
+
 
 ### Changing the BIG-IP Configuration utility (GUI) port
 Depending on the deployment requirements, the default managament port for the BIG-IP may need to be changed. To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>

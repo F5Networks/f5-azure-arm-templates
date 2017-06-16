@@ -103,7 +103,7 @@ The following is an example configuration diagram for this solution deployment. 
 
 ![Configuration Example](images/azure-example-diagram.png)
 
-<AUTOSCALE_TEXT><SERVICE_PRINCIPAL>
+<AUTOSCALE_TEXT><SERVICE_PRINCIPAL><ADDTL_PUB_IP_TXT>
 
 ### Changing the BIG-IP Configuration utility (GUI) port
 Depending on the deployment requirements, the default managament port for the BIG-IP may need to be changed. To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>

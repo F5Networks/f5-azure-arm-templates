@@ -318,7 +318,6 @@
         "mgmtNicName": "[concat(variables('dnsLabel'), '-mgmt')]", 
         "mgmtSubnetName": "[concat(variables('dnsLabel'),'-mgmt-subnet')]", 
         "mgmtSubnetId": "[concat(variables('vnetID'),'/subnets/',parameters('mgmtSubnetName'))]", 
-        "mgmtSubnetPrefix": "10.0.1.0/24", 
         "mgmtSubnetPrivateAddressPrefixArray": "[split(parameters('mgmtIpAddressRangeStart'), '.')]", 
         "mgmtSubnetPrivateAddressPrefix": "[concat(variables('mgmtSubnetPrivateAddressPrefixArray')[0], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[1], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[2], '.')]", 
         "mgmtSubnetPrivateAddressSuffixInt": "[int(variables('mgmtSubnetPrivateAddressPrefixArray')[3])]", 

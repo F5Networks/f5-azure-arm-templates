@@ -73,4 +73,25 @@ _Using the Node.js cross-platform CLI - requires additional steps for setting up
 https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal-cli
 
 #### 3. Azure PowerShell
-Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.}}
+Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
+}}
+
+<ADDTL_PUB_IP_TXT>{{
+## Additional Public IP Addresses
+The deployment template supports creation of 1-8 external public IP addresses for application traffic (first one is used for external NIC Self IP).  Follow the steps below to add more public IP addresses to the deployment:
+
+- Create a new Azure public IP address resource in the deployment resource group
+- Create a new IP configuration resource (ex.: myResourceGroupName-ext-ipconfig9) in the properties of the external Azure network interface(ex.: myResourceGroupName-ext0)
+}}
+
+<ADDTL_PUB_IP_FAILOVER_TXT>{{
+## Additional Public IP Addresses - Failover
+The deployment template supports creation of 1-8 external public IP addresses for application traffic.  Follow the steps below to add more public IP addresses to the deployment:
+
+- Create a new Azure public IP address resource in the deployment resource group
+- Make sure your public IP address contains "-ext-pip" in the name (ex.: myResourceGroupName-ext-pip9)
+- Create a new IP configuration resource (ex.: myResourceGroupName-ext-ipconfig9) in the properties of the external Azure network interface(ex.: myResourceGroupName-ext0)
+- Make sure the IP configuration you create for this public IP contains "-ext-ipconfig" in the name (ex.: myResourceGroupName-ext-ipconfig9)
+- Add these Azure tags to the public IP address resource:
+- f5_privateIp=10.10.10.10 (this is the value of the new IP configurations's private IP address and also the BIG-IP virtual server)
+}}

@@ -328,6 +328,7 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset'):
 
 if template_name in ('cluster_base', 'ltm_autoscale', 'waf_autoscale'):
     data['variables']['vnetAddressPrefix'] = "10.0.0.0/16"
+    data['variables']['mgmtSubnetPrefix'] = "10.0.1.0/24"
     data['variables']['ipAddress'] = "10.0.1."
     data['variables']['loadBalancerName'] = "[concat(variables('dnsLabel'),'-alb')]"
     data['variables']['deviceNamePrefix'] = "[concat(variables('dnsLabel'),'-device')]"

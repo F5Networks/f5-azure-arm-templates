@@ -502,6 +502,17 @@ https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-aut
 #### 3. Azure PowerShell
 Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
 
+## Additional Public IP Addresses - Failover
+The deployment template supports creation of 1-8 external public IP addresses for application traffic.  Follow the steps below to add more public IP addresses to the deployment:
+
+- Create a new Azure public IP address resource in the deployment resource group
+- Make sure your public IP address contains "-ext-pip" in the name (ex.: myResourceGroupName-ext-pip9)
+- Create a new IP configuration resource (ex.: myResourceGroupName-ext-ipconfig9) in the properties of the external Azure network interface(ex.: myResourceGroupName-ext0)
+- Make sure the IP configuration you create for this public IP contains "-ext-ipconfig" in the name (ex.: myResourceGroupName-ext-ipconfig9)
+- Add these Azure tags to the public IP address resource:
+- f5_privateIp=10.10.10.10 (this is the value of the new IP configurations's private IP address and also the BIG-IP virtual server)
+
+
 ### Changing the BIG-IP Configuration utility (GUI) port
 Depending on the deployment requirements, the default managament port for the BIG-IP may need to be changed. To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>
 ***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP. BIG-IP v13.x and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.<br>

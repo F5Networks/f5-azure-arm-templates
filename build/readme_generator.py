@@ -4,10 +4,10 @@ import os
 import re
 
 # Create Functions for README creation
-def sp_needed(data):
-    """ Check if the service principal parameters exist, will add that blob in README if true """
+def param_exist(data, param):
+    """ Check if a specific parameter exists, will add that blob in README if true """
     for parameter in data['parameters']:
-        if 'servicePrincipalSecret' in parameter:
+        if param in parameter:
             return True
     return False
 
@@ -68,7 +68,7 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     final_readme = readme_location + 'README.md'
     with open(base_readme, 'r') as readme:
         readme = readme.read()
-    scale_text = ''; sp_text = ''
+    scale_text = ''; sp_text = ''; addtl_pub_ip_text = ''
 
     ##### Text Values for README templates #####
     title_text = readme_text['title_text'][template_name]
@@ -86,8 +86,13 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     # Check for optional readme items
     if 'autoscale' in template_name:
         scale_text = misc_readme_grep('<AUTOSCALE_TXT>', misc_readme)
-    if sp_needed(data):
+    if param_exist(data, 'servicePrincipalSecret'):
         sp_text = misc_readme_grep('<SERVICE_PRINCIPAL_TXT>', misc_readme)
+    if param_exist(data, 'numberOfExternalIps'):
+        if template_name in 'ha-avset':
+            addtl_pub_ip_text = misc_readme_grep('<ADDTL_PUB_IP_FAILOVER_TXT>', misc_readme)
+        else:
+            addtl_pub_ip_text = misc_readme_grep('<ADDTL_PUB_IP_TXT>', misc_readme)
 
     # Map in dynamic values
     readme = readme.replace('<TITLE_TXT>', title_text)
@@ -101,6 +106,7 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     readme = readme.replace('<EXAMPLE_TEXT>', readme_text)
     readme = readme.replace('<AUTOSCALE_TEXT>', scale_text)
     readme = readme.replace('<SERVICE_PRINCIPAL>', sp_text)
+    readme = readme.replace('<ADDTL_PUB_IP_TXT>', addtl_pub_ip_text)
 
     # Write to solution location
     with open(final_readme, 'w') as readme_complete:

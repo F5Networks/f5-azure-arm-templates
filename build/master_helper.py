@@ -97,7 +97,7 @@ def variable_initialize(data):
     data['variables']['mgmtNicName'] = "[concat(variables('dnsLabel'), '-mgmt')]"
     data['variables']['mgmtSubnetName'] = "[concat(variables('dnsLabel'),'-mgmt-subnet')]"
     data['variables']['mgmtSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]"
-    data['variables']['mgmtSubnetPrefix'] = "10.0.1.0/24"
+    data['variables']['mgmtSubnetPrefix'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddressPrefixArray'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddressPrefix'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddressSuffixInt'] = "OPTIONAL"

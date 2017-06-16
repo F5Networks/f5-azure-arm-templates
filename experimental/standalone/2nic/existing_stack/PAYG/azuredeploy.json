@@ -275,7 +275,6 @@
         "mgmtNicName": "[concat(variables('dnsLabel'), '-mgmt')]", 
         "mgmtSubnetName": "[concat(variables('dnsLabel'),'-mgmt-subnet')]", 
         "mgmtSubnetId": "[concat(variables('vnetID'),'/subnets/',parameters('mgmtSubnetName'))]", 
-        "mgmtSubnetPrefix": "10.0.1.0/24", 
         "mgmtSubnetPrivateAddress": "[parameters('mgmtIpAddress')]", 
         "extSelfPublicIpAddressNamePrefix": "[concat(variables('dnsLabel'), '-self-pip')]", 
         "extSelfPublicIpAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('extSelfPublicIpAddressNamePrefix'))]", 
