@@ -140,6 +140,8 @@ def variable_initialize(data):
     data['variables']['intSubnetPrivateAddressPrefix'] = "OPTIONAL"
     data['variables']['intSubnetPrivateAddressSuffixInt'] = "OPTIONAL"
     data['variables']['intSubnetPrivateAddressSuffix'] = "OPTIONAL"
+    data['variables']['extSubnetRef'] = "OPTIONAL"
+    data['variables']['intSubnetRef'] = "OPTIONAL"
     data['variables']['numberOfExternalIps'] = "OPTIONAL"
     data['variables']['selfIpconfigArray'] = "OPTIONAL"
     data['variables']['extIpconfigArray'] = "OPTIONAL"
