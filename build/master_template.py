@@ -39,7 +39,7 @@ command_to_execute = ""
 content_version = '3.1.3.0'
 f5_networks_tag = 'v3.1.3.0'
 f5_cloud_libs_tag = 'release-3.1.0'
-f5_cloud_libs_azure_tag = 'release-1.2.0'
+f5_cloud_libs_azure_tag = 'release-1.2.0.1'
 f5_cloud_iapps_tag = 'release-1.0.0'
 f5_cloud_workers_tag = 'release-1.0.0'
 
