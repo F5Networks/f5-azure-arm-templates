@@ -108,6 +108,13 @@
             }, 
             "type": "string"
         }, 
+        "licenseKey2": {
+            "defaultValue": "REQUIRED", 
+            "metadata": {
+                "description": "The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices."
+            }, 
+            "type": "string"
+        }, 
         "numberOfExternalIps": {
             "allowedValues": [
                 1, 
@@ -388,7 +395,7 @@
         ], 
         "extIpconfigArray": [
             {
-                "name": "[concat(variables('instanceName'), '-ext-ipconfig0')]", 
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig0')]", 
                 "properties": {
                     "PublicIpAddress": {
                         "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 0)]"
@@ -402,7 +409,7 @@
                 }
             }, 
             {
-                "name": "[concat(variables('instanceName'), '-ext-ipconfig1')]", 
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig1')]", 
                 "properties": {
                     "PublicIpAddress": {
                         "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 1)]"
@@ -416,7 +423,7 @@
                 }
             }, 
             {
-                "name": "[concat(variables('instanceName'), '-ext-ipconfig2')]", 
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig2')]", 
                 "properties": {
                     "PublicIpAddress": {
                         "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 2)]"
@@ -430,7 +437,7 @@
                 }
             }, 
             {
-                "name": "[concat(variables('instanceName'), '-ext-ipconfig3')]", 
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig3')]", 
                 "properties": {
                     "PublicIpAddress": {
                         "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 3)]"
@@ -444,7 +451,7 @@
                 }
             }, 
             {
-                "name": "[concat(variables('instanceName'), '-ext-ipconfig4')]", 
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig4')]", 
                 "properties": {
                     "PublicIpAddress": {
                         "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 4)]"
@@ -458,7 +465,7 @@
                 }
             }, 
             {
-                "name": "[concat(variables('instanceName'), '-ext-ipconfig5')]", 
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig5')]", 
                 "properties": {
                     "PublicIpAddress": {
                         "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 5)]"
@@ -472,7 +479,7 @@
                 }
             }, 
             {
-                "name": "[concat(variables('instanceName'), '-ext-ipconfig6')]", 
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig6')]", 
                 "properties": {
                     "PublicIpAddress": {
                         "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 6)]"
@@ -486,7 +493,7 @@
                 }
             }, 
             {
-                "name": "[concat(variables('instanceName'), '-ext-ipconfig7')]", 
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig7')]", 
                 "properties": {
                     "PublicIpAddress": {
                         "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 7)]"

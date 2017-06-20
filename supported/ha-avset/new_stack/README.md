@@ -75,6 +75,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | imageName | Yes | F5 SKU (IMAGE) to you want to deploy. |
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
 | licenseKey1 | No | The license token for the F5 BIG-IP VE (BYOL) |
+| licenseKey2 | No | The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices. |
 | licensedBandwidth | No | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
 | numberOfExternalIps | Yes | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |

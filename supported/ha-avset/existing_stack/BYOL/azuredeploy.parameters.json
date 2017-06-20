@@ -26,6 +26,9 @@
         "licenseKey1": {
             "value": "REQUIRED"
         }, 
+        "licenseKey2": {
+            "value": "REQUIRED"
+        }, 
         "numberOfExternalIps": {
             "value": 1
         }, 
