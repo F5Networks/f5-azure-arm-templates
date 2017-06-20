@@ -31,6 +31,7 @@ package:
         - echo "Cluster 1nic(PAYG) Template Hash - `openssl dgst -r -sha512 cluster/1nic/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
         - echo "Cluster 1nic(BYOL) Template Hash - `openssl dgst -r -sha512 cluster/1nic/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
         - echo "AutoScale LTM(PAYG) Template Hash - `openssl dgst -r -sha512 solutions/autoscale/ltm/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
+        - echo "AutoScale WAF(PAYG) Template Hash - `openssl dgst -r -sha512 solutions/autoscale/waf/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
     artifacts:
         name: f5-arm-build-$CI_BUILD_REF
         paths:

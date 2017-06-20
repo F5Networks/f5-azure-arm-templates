@@ -49,6 +49,9 @@ python -B '.\master_template.py' --template-name cluster_base --license-type BYO
 ## BIGIP ARM Template - LTM AutoScale
 python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --template-location '../supported/solutions/autoscale/ltm/' --script-location '../supported/solutions/autoscale/ltm/' --solution-location 'supported'
 
+## BIGIP ARM Template - WAF AutoScale
+python -B '.\master_template.py' --template-name waf_autoscale --license-type PAYG --template-location '../supported/solutions/autoscale/waf/' --script-location '../supported/solutions/autoscale/waf/' --solution-location 'supported'
+
 ############################### End Supported ###############################
 
 
