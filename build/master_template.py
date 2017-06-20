@@ -36,12 +36,12 @@ nic_reference = ""
 command_to_execute = ""
 
 ## Static Variable Assignment ##
-content_version = '3.1.3.0'
+content_version = '3.2.0.0'
 f5_networks_tag = 'v3.1.3.0'
-f5_cloud_libs_tag = 'release-3.1.0'
-f5_cloud_libs_azure_tag = 'release-1.2.0.1'
-f5_cloud_iapps_tag = 'release-1.0.0'
-f5_cloud_workers_tag = 'release-1.0.0'
+f5_cloud_libs_tag = 'v3.1.0'
+f5_cloud_libs_azure_tag = 'v1.2.0'
+f5_cloud_iapps_tag = 'v1.0.0'
+f5_cloud_workers_tag = 'v1.0.0'
 
 install_cloud_libs = """[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit 1\nfi\necho loaded verifyHash\nscript_loc="/var/lib/waagent/custom-script/download/0/"\nconfig_loc="/config/cloud/"\nhashed_file_list="<HASHED_FILE_LIST>"\nfor file in $hashed_file_list; do\necho "verifying $file"\n/usr/bin/tmsh run cli script verifyHash $file\nif [ $? != 0 ]; then\necho "$file is not valid"\nexit 1\nfi\necho "verified $file"\ndone\necho "expanding $hashed_file_list"\ntar xvfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud/node_modules\n<TAR_LIST>touch /config/cloud/cloudLibsReady', variables('singleQuote'))]"""
 # Automate Verify Hash - the verify_hash function will go out and pull in the latest hash file
