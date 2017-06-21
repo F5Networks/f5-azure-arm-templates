@@ -6,7 +6,11 @@
 
 This solution uses an ARM template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled. Each pair of BIG-IP VEs is deployed in an Azure Availability Set, and can therefore be spread across different update and fault domains. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.
 
-Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise-like" cloud design where the compute instance of F5 is running with a management interface, a front-end application traffic (Virtual Server) interface, and back-end application interface.  This template is a result of Azure now supporting multiple public IP addresses to multiple private IP addresses per NIC.  This template also has the ability to create specify additional Public/Private IP addresses for the external "application" NIC to be used for passing traffic to virtual servers in a more traditional fashion. In the event the active BIG-IP VE become unavailable, traffic seamlessly shifts to the standby BIG-IP VE using network failover.
+Traffic flows from the client through BIG-IP VE to the application servers. This is the standard "on-premise-like" cloud design where the compute instance of F5 is running with a management interface, a front-end application traffic (external) interface, and back-end application (internal) interface. This template is a result of Azure now supporting multiple public-to-private IP address mappings per NIC. 
+
+This template supports creating up to 8 additional public/private IP address configurations for the external "application" NIC to be used for passing traffic to BIG-IP virtual servers.  Each virtual server should be configured with a destination address matching the private IP address value of the Azure IP configuration receiving traffic for the application. In the event the active BIG-IP VE becomes unavailable, the IP configuration(s) are migrated using network failover, seamlessly shifting application traffic to the current active BIG-IP VE.
+
+The template also supports updating the next hop of Azure User-Defined Routes (UDRs) to use the active BIG-IP VEs internal self IP address . Specify a comma-delimited list of managedRoutes and a routeTableTag in the template to define the UDRs to be updated.  All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with "f5_ha:<routeTableTag>" will use the active BIG-IP VE as the next hop for those routes.
 
 ## Prerequisites and configuration notes
   - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **#** or **'** (single quote).
@@ -14,6 +18,8 @@ Traffic flows from the BIG-IP VE to the application servers. This is the standar
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
   - This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.
+  - This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.
+  - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
 
 
 ## Security
@@ -381,65 +387,14 @@ else
 fi
 ```
 
-## Service Discovery
-Once you launch your BIG-IP instance using the ARM template, you can use the Service Discovery iApp template on the BIG-IP VE to automatically update pool members based on auto-scaled cloud application hosts.  In the iApp template, you enter information about your cloud environment, including the tag key and tag value for the pool members you want to include, and then the BIG-IP VE programmatically discovers (or removes) members using those tags.
-
-### Tagging
-In Microsoft Azure, you have three options for tagging objects that the Service Discovery iApp uses. Note that you select public or private IP addresses within the iApp.
-  - *Tag a VM resource*<br>
-The BIG-IP VE will discover the primary public or private IP addresses for the primary NIC configured for the tagged VM.
-  - *Tag a NIC resource*<br>
-The BIG-IP VE will discover the primary public or private IP addresses for the tagged NIC.  Use this option if you want to use the secondary NIC of a VM in the pool.
-  - *Tag a Virtual Machine Scale Set resource*<br>
-The BIG-IP VE will discover the primary private IP address for the primary NIC configured for each Scale Set instance.  Note you must select Private IP addresses in the iApp template if you are tagging a Scale Set.
-
-The iApp first looks for NIC resources with the tags you specify.  If it finds NICs with the proper tags, it does not look for VM resources. If it does not find NIC resources, it looks for VM resources with the proper tags. In either case, it then looks for Scale Set resources with the proper tags.
-
-**Important**: Make sure the tags and IP addresses you use are unique. You should not tag multiple Azure nodes with the same key/tag combination if those nodes use the same IP address.
-
-To launch the template:
-  1.	From the BIG-IP VE web-based Configuration utility, on the Main tab, click **iApps > Application Services > Create**.
-  2.	In the **Name** field, give the template a unique name.
-  3.	From the **Template** list, select **f5.service_discovery**.  The template opens.
-  4.	Complete the template with information from your environment.  For assistance, from the Do you want to see inline help? question, select Yes, show inline help.
-  5.	When you are done, click the **Finished** button.
-
-
-
 ## Configuration Example <a name="config">
 
 The following is an example configuration diagram for this solution deployment. In this scenario, each BIG-IP has one NIC for management, one NIC for external traffic and one NIC for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.
 
 ![Configuration Example](images/azure-example-diagram.png)
 
-
-### Service Principal Authentication
-This solution requires access to the Azure API to determine how the BIG-IP VEs should be configured.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication, for all the typical security reasons.  The following provides information/links on the options for configuring a service principal within Azure if this is the first time it is needed in a subscription.
-
-_Ensure that however the creation of the service principal occurs to verify it only has minimum required access based on the solutions need(read vs read/write) prior to this template being deployed and used by the solution within the resource group selected(new or existing)._
-
-The end result should be possession of a client(application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some troubleshooting post-deployment if the service principal is in fact not fully configured.
-
-#### 1. Azure Portal
-
-Follow the steps outlined in the [Azure Portal documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-group-create-service-principal-portal/) to generate the service principal.
-
-#### 2. Azure CLI
-
-This method can be used with either the [Azure CLI v2.0 (Python)](https://github.com/Azure/azure-cli) or the [Azure Cross-Platform CLI (npm module)](https://github.com/Azure/azure-xplat-cli).
-
-_Using the Python Azure CLI v2.0 - requires just one step_
-```shell
-$ az ad sp create-for-rbac
-```
-
-_Using the Node.js cross-platform CLI - requires additional steps for setting up_
-https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal-cli
-
-#### 3. Azure PowerShell
-Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
-
-## Additional Public IP Addresses - Failover
+### Post-Deployment Configuration
+#### Additional Public IP Addresses - Failover
 The deployment template supports creation of 1-8 external public IP addresses for application traffic.  Follow the steps below to add more public IP addresses to the deployment:
 
 - Create a new Azure public IP address resource in the deployment resource group
@@ -452,11 +407,6 @@ The deployment template supports creation of 1-8 external public IP addresses fo
 
 When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server Destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. Additionally, these virtual servers must be created in Traffic Group **None**.  See the BIG-IP documentation for specific instructions on creating virtual servers.
 
-
-### Changing the BIG-IP Configuration utility (GUI) port
-Depending on the deployment requirements, the default managament port for the BIG-IP may need to be changed. To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>
-***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP. BIG-IP v13.x and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.<br>
-***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
 
 ## Documentation
 
@@ -492,6 +442,60 @@ Warning: F5 does not support the template if you change anything other than the 
 }
 ```
 
+### Service Principal Authentication
+This solution requires access to the Azure API to determine how the BIG-IP VEs should be configured.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication, for all the typical security reasons.  The following provides information/links on the options for configuring a service principal within Azure if this is the first time it is needed in a subscription.
+
+_Ensure that however the creation of the service principal occurs to verify it only has minimum required access based on the solutions need(read vs read/write) prior to this template being deployed and used by the solution within the resource group selected(new or existing)._
+
+The end result should be possession of a client(application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some troubleshooting post-deployment if the service principal is in fact not fully configured.
+
+#### 1. Azure Portal
+
+Follow the steps outlined in the [Azure Portal documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-group-create-service-principal-portal/) to generate the service principal.
+
+#### 2. Azure CLI
+
+This method can be used with either the [Azure CLI v2.0 (Python)](https://github.com/Azure/azure-cli) or the [Azure Cross-Platform CLI (npm module)](https://github.com/Azure/azure-xplat-cli).
+
+_Using the Python Azure CLI v2.0 - requires just one step_
+```shell
+$ az ad sp create-for-rbac
+```
+
+_Using the Node.js cross-platform CLI - requires additional steps for setting up_
+https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal-cli
+
+#### 3. Azure PowerShell
+Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
+
+
+## Service Discovery
+Once you launch your BIG-IP instance using the ARM template, you can use the Service Discovery iApp template on the BIG-IP VE to automatically update pool members based on auto-scaled cloud application hosts.  In the iApp template, you enter information about your cloud environment, including the tag key and tag value for the pool members you want to include, and then the BIG-IP VE programmatically discovers (or removes) members using those tags.
+
+### Tagging
+In Microsoft Azure, you have three options for tagging objects that the Service Discovery iApp uses. Note that you select public or private IP addresses within the iApp.
+  - *Tag a VM resource*<br>
+The BIG-IP VE will discover the primary public or private IP addresses for the primary NIC configured for the tagged VM.
+  - *Tag a NIC resource*<br>
+The BIG-IP VE will discover the primary public or private IP addresses for the tagged NIC.  Use this option if you want to use the secondary NIC of a VM in the pool.
+  - *Tag a Virtual Machine Scale Set resource*<br>
+The BIG-IP VE will discover the primary private IP address for the primary NIC configured for each Scale Set instance.  Note you must select Private IP addresses in the iApp template if you are tagging a Scale Set.
+
+The iApp first looks for NIC resources with the tags you specify.  If it finds NICs with the proper tags, it does not look for VM resources. If it does not find NIC resources, it looks for VM resources with the proper tags. In either case, it then looks for Scale Set resources with the proper tags.
+
+**Important**: Make sure the tags and IP addresses you use are unique. You should not tag multiple Azure nodes with the same key/tag combination if those nodes use the same IP address.
+
+To launch the template:
+  1.	From the BIG-IP VE web-based Configuration utility, on the Main tab, click **iApps > Application Services > Create**.
+  2.	In the **Name** field, give the template a unique name.
+  3.	From the **Template** list, select **f5.service_discovery**.  The template opens.
+  4.	Complete the template with information from your environment.  For assistance, from the Do you want to see inline help? question, select Yes, show inline help.
+  5.	When you are done, click the **Finished** button.
+
+### Changing the BIG-IP Configuration utility (GUI) port
+Depending on the deployment requirements, the default managament port for the BIG-IP may need to be changed. To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>
+***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP. BIG-IP v13.x and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.<br>
+***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
 
 ## Security Details <a name="securitydetail"></a>
 This section has the code snippet for each the lines you should ensure are present in your template file if you want to verify the integrity of the helper code in the template.

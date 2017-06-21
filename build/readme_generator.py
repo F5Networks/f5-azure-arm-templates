@@ -68,9 +68,9 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     final_readme = readme_location + 'README.md'
     with open(base_readme, 'r') as readme:
         readme = readme.read()
-    scale_text = ''; sp_text = ''; addtl_pub_ip_text = ''
+    post_config_text = ''; sp_text = ''; extra_prereq_text = ''
 
-    ##### Text Values for README templates #####
+    ####### Text Values for README templates #######
     title_text = readme_text['title_text'][template_name]
     intro_text = readme_text['intro_text'][template_name]
     if 'supported' in readme_location:
@@ -81,32 +81,37 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     deploy_links = create_deploy_links(readme_text['deploy_links']['version_tag'], readme_text['deploy_links']['lic_support'][template_name], template_location)
     bash_script = readme_text['bash_script']
     ps_script = readme_text['ps_script']
-    readme_text = readme_text['config_example_text'][template_name]
+    example_text = readme_text['config_example_text'][template_name]
 
-    # Check for optional readme items
-    if 'autoscale' in template_name:
-        scale_text = misc_readme_grep('<AUTOSCALE_TXT>', misc_readme)
+    ### Check for optional readme items ###
+    # Add service principal text if needed
     if param_exist(data, 'servicePrincipalSecret'):
         sp_text = misc_readme_grep('<SERVICE_PRINCIPAL_TXT>', misc_readme)
-    if param_exist(data, 'numberOfExternalIps'):
+        extra_prereq_text += '  - ' + readme_text['prereq_text']['service_principal'] + '\n'
+    # Post-Deployment Configuration Text Substitution
+    if 'autoscale' in template_name:
+        post_config_text = misc_readme_grep('<POST_CONFIG_AUTOSCALE_TXT>', misc_readme)
+        extra_prereq_text += '  - ' + readme_text['prereq_text']['post_config'] + '\n'
+    elif param_exist(data, 'numberOfExternalIps'):
+        extra_prereq_text += '  - ' + readme_text['prereq_text']['post_config'] + '\n'
         if template_name in 'ha-avset':
-            addtl_pub_ip_text = misc_readme_grep('<ADDTL_PUB_IP_FAILOVER_TXT>', misc_readme)
+            post_config_text = misc_readme_grep('<POST_CONFIG_FAILOVER_TXT>', misc_readme)
         else:
-            addtl_pub_ip_text = misc_readme_grep('<ADDTL_PUB_IP_TXT>', misc_readme)
+            post_config_text = misc_readme_grep('<POST_CONFIG_TXT>', misc_readme)
 
-    # Map in dynamic values
+    ### Map in dynamic values ###
     readme = readme.replace('<TITLE_TXT>', title_text)
     readme = readme.replace('<INTRO_TXT>', intro_text)
+    readme = readme.replace('<EXTRA_PREREQS>', extra_prereq_text)
     readme = readme.replace('<VERSION_MAP_TXT>', version_map)
     readme = readme.replace('<HELP_TXT>', help_text)
     readme = readme.replace('<DEPLOY_LINKS>', deploy_links)
     readme = readme.replace('<EXAMPLE_PARAMS>', md_param_array(data, license_params))
     readme = readme.replace('<PS_SCRIPT>', ps_script)
     readme = readme.replace('<BASH_SCRIPT>', bash_script)
-    readme = readme.replace('<EXAMPLE_TEXT>', readme_text)
-    readme = readme.replace('<AUTOSCALE_TEXT>', scale_text)
+    readme = readme.replace('<EXAMPLE_TEXT>', example_text)
+    readme = readme.replace('<POST_CONFIG_TXT>', post_config_text)
     readme = readme.replace('<SERVICE_PRINCIPAL>', sp_text)
-    readme = readme.replace('<ADDTL_PUB_IP_TXT>', addtl_pub_ip_text)
 
     # Write to solution location
     with open(final_readme, 'w') as readme_complete:
