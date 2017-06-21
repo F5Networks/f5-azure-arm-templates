@@ -624,6 +624,7 @@ if template_name in ('1nic', '2nic', '3nic', 'cluster_base', 'ha-avset', 'ltm_au
     # Add to this as additional optional pre-reqs are required
     readme_text['prereq_text']['service_principal'] = 'This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.'
     readme_text['prereq_text']['post_config'] = 'This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.'
+    readme_text['prereq_text']['rg_limit'] = 'This template requires that the resource group name the deployment uses to be no longer than **35** characters as a result of limitations to tag size within Azure.'
     ## Version Map Text ##
     # Add to this map as BIG-IP Versions change
     readme_text['license_map']['13.0.021'] = '13.0.0 HF2 Build 2.10.1671'

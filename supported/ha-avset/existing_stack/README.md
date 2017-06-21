@@ -20,6 +20,7 @@ The template also supports updating the next hop of Azure User-Defined Routes (U
   - This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.
   - This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
+  - This template requires that the resource group name the deployment uses to be no longer than **35** characters as a result of limitations to tag size within Azure.
 
 
 ## Security

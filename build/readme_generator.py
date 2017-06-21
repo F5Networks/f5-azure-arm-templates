@@ -96,6 +96,7 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
         extra_prereq_text += '  - ' + readme_text['prereq_text']['post_config'] + '\n'
         if template_name in 'ha-avset':
             post_config_text = misc_readme_grep('<POST_CONFIG_FAILOVER_TXT>', misc_readme)
+            extra_prereq_text += '  - ' + readme_text['prereq_text']['rg_limit'] + '\n'
         else:
             post_config_text = misc_readme_grep('<POST_CONFIG_TXT>', misc_readme)
 
