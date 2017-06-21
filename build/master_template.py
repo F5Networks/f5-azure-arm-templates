@@ -187,8 +187,8 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset'):
 if template_name in ('cluster_base'):
     data['parameters']['numberOfInstances'] = {"type": "int", "defaultValue": 2, "allowedValues": [ 2 ], "metadata": { "description": "The number of BIG-IP VEs that will be deployed in front of your application(s)." } }
 if template_name in ('ha-avset'):
-    data['parameters']['managedRoutes'] = { "defaultValue": "NOT_SPECIFIED", "metadata": { "description": "A comma-delimited list of UDR destinations to be managed by this cluster." }, "type": "string" }
-    data['parameters']['routeTableTag'] = { "defaultValue": "NOT_SPECIFIED", "metadata": { "description": "Azure tag to identify the route tables to be managed by this cluster." }, "type": "string" }
+    data['parameters']['managedRoutes'] = { "defaultValue": "NOT_SPECIFIED", "metadata": { "description": "A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24." }, "type": "string" }
+    data['parameters']['routeTableTag'] = { "defaultValue": "NOT_SPECIFIED", "metadata": { "description": "Azure tag value to identify the route tables to be managed by this cluster. For example tag value: myRoute.  Example Azure tag: f5_ha:myRoute." }, "type": "string" }
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
     data['parameters']['vmScaleSetMinCount'] = {"type": "int", "defaultValue": 2, "allowedValues": [1, 2, 3, 4, 5, 6], "metadata": { "description": "The minimum (and default) number of BIG-IP VEs that will be deployed into the VM Scale Set." } }
     data['parameters']['vmScaleSetMaxCount'] = {"type": "int", "defaultValue": 4, "allowedValues": [2, 3, 4, 5, 6, 7, 8], "metadata": { "description": "The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set." } }

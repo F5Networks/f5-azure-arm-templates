@@ -96,8 +96,8 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | tenantId | Yes | Your Azure service principal application tenant ID. |
 | clientId | Yes | Your Azure service principal application client ID. |
 | servicePrincipalSecret | Yes | Your Azure service principal application secret. |
-| managedRoutes | Yes | A comma-delimited list of UDR destinations to be managed by this cluster. |
-| routeTableTag | Yes | Azure tag to identify the route tables to be managed by this cluster. |
+| managedRoutes | Yes | A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24. |
+| routeTableTag | Yes | Azure tag value to identify the route tables to be managed by this cluster. For example tag value: myRoute.  Example Azure tag: f5_ha:myRoute. |
 | ntpServer | Yes | If you would like to change the NTP server the BIG-IP uses replace the default ntp server with your choice. |
 | timeZone | Yes | If you would like to change the time zone the BIG-IP uses then enter your chocie. This is in the format of the Olson timezone string from /usr/share/zoneinfo, such as UTC, US/Central or Europe/London. |
 | restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources |

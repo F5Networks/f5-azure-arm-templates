@@ -158,14 +158,14 @@
         "managedRoutes": {
             "defaultValue": "NOT_SPECIFIED", 
             "metadata": {
-                "description": "A comma-delimited list of UDR destinations to be managed by this cluster."
+                "description": "A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24."
             }, 
             "type": "string"
         }, 
         "routeTableTag": {
             "defaultValue": "NOT_SPECIFIED", 
             "metadata": {
-                "description": "Azure tag to identify the route tables to be managed by this cluster."
+                "description": "Azure tag value to identify the route tables to be managed by this cluster. For example tag value: myRoute.  Example Azure tag: f5_ha:myRoute."
             }, 
             "type": "string"
         }, 
