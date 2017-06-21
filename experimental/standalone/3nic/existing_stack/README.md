@@ -392,11 +392,29 @@ The following is an example configuration diagram for this solution deployment. 
 ![Configuration Example](images/azure-example-diagram.png)
 
 ## Post-Deployment Configuration
-#### Additional Public IP Addresses
-The deployment template supports creation of 1-8 external public IP addresses for application traffic (first one is used for external NIC Self IP).  Follow the steps below to add more public IP addresses to the deployment:
+Use this section for optional configuration changes after you have deployed the template.
+
+### Additional Public IP Addresses
+This ARM template supports using up to 8 public IP addresses.  After you initially deploy the template, if you want to include additional public IP addresses (up to the template-supported limit of 8) use the following guidance.  If you want to include more than 8 public IP addresses, see [Adding more than 8 Public IP addresses](#adding-more-than-8-public-ip-addresses-to-the-deployment).
+
+#### Adding up to 8 public IP addresses
+To add public IP addresses up to the template-supported limit of 8 after you have initially deployed the template, use the Azure Portal to redeploy the template, updating the parameters for the changes you want to make.  Use the following guidance:
+
+1.	From the Azure Portal, click the Azure Resource Group where you deployed the template.
+2.	Click **Deployments**.
+3.	Find the deployment and highlight it in the list (should be named Microsoft.Template)
+4.	Click **Redeploy**.
+5.	For the Resource Group, click **Use existing** and then select the resource group in which you initially deployed.
+6.	Enter the Admin password and Service Principal Secret parameters with the same values used in the initial deployment.
+7.	To add public IP addresses, change the value of the **Number Of External Ips** parameter to the number of IP addresses you want to use.
+8.	Agree to the terms and conditions.
+10.	Click **Purchase**.
+
+#### Adding more than 8 public IP addresses to the deployment
+The deployment template supports creation of 1-8 external public IP addresses for application traffic (first one is used for external NIC Self IP).  Follow the steps below to add **more** public IP addresses to the deployment:
 
 - Create a new Azure public IP address resource in the deployment resource group
-- Create a new IP configuration resource (ex.: myResourceGroupName-ext-ipconfig9) in the properties of the external Azure network interface(ex.: myResourceGroupName-ext0)
+- Create a new IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*)
 
 When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server Destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. See the BIG-IP documentation for specific instructions on creating virtual servers.
 
