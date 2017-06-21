@@ -48,7 +48,7 @@ Log in to the [Azure Resource Explorer](https://resources.azure.com) and then na
     ]
 ```}}
 
-<POST_CONFIG_TXT>{{### Post-Deployment Configuration
+<POST_CONFIG_TXT>{{## Post-Deployment Configuration
 #### Additional Public IP Addresses
 The deployment template supports creation of 1-8 external public IP addresses for application traffic (first one is used for external NIC Self IP).  Follow the steps below to add more public IP addresses to the deployment:
 
@@ -59,7 +59,7 @@ When you create virtual servers on the BIG-IP VE for these new additional addres
 
 }}
 
-<POST_CONFIG_FAILOVER_TXT>{{### Post-Deployment Configuration
+<POST_CONFIG_FAILOVER_TXT>{{## Post-Deployment Configuration
 #### Additional Public IP Addresses - Failover
 The deployment template supports creation of 1-8 external public IP addresses for application traffic.  Follow the steps below to add more public IP addresses to the deployment:
 
@@ -74,8 +74,7 @@ The deployment template supports creation of 1-8 external public IP addresses fo
 When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server Destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. Additionally, these virtual servers must be created in Traffic Group **None**.  See the BIG-IP documentation for specific instructions on creating virtual servers.
 }}
 
-<SERVICE_PRINCIPAL_TXT>{{
-### Service Principal Authentication
+<SERVICE_PRINCIPAL_TXT>{{### Service Principal Authentication
 This solution requires access to the Azure API to determine how the BIG-IP VEs should be configured.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication, for all the typical security reasons.  The following provides information/links on the options for configuring a service principal within Azure if this is the first time it is needed in a subscription.
 
 _Ensure that however the creation of the service principal occurs to verify it only has minimum required access based on the solutions need(read vs read/write) prior to this template being deployed and used by the solution within the resource group selected(new or existing)._
