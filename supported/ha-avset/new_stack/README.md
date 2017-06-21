@@ -416,12 +416,16 @@ To add public IP addresses up to the template-supported limit of 8 or if you wan
 11.	Click **Purchase**.
 
 #### Adding more than 8 public IP addresses to the deployment
-The deployment template supports creation of 1-8 external public IP addresses for application traffic (first one is used for external NIC Self IP).  Follow the steps below to add **more** public IP addresses to the deployment:
+The deployment template supports creation of 1-8 external public IP addresses for application traffic (first one is used for external NIC Self IP). Use the following guidance to add **more** public IP addresses to the deployment:
 
-- Create a new Azure public IP address resource in the deployment resource group
-- Create a new IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*)
+  -	Create a new Azure public IP address resource in the deployment resource group.  You ***must*** use the following syntax: ```<ResourceGroupName>-ext-pip<number>```.  For example: **SeattleResourceGroup-ext-pip9**.
+  -	Create a new IP configuration resource in the properties of the external Azure network interface (for example *myResourceGroupName-ext0*).  You ***must*** use the following syntax: ```<ResourceGroupName>-ext-ipconfig<number>```.  For example: **SeattleResourceGroup-ext-ipconfig9**.
+  -	Add these Azure tags to the public IP address resource:
+    -	For example: ```f5_privateIp=10.10.10.10``` (the tag value should correspond to the new private IP address of the IP configurations).
+    -	For example: ```ext_SubnetId=/subscriptions/<subscriptionId>/resourceGroups/<myResourceGroupName>/providers/Microsoft.Network/virtualNetworks/*< myVnetName >*/subnets/<mySubnetName>``` (you can get this value from resources.azure.com: **Subscriptions > Resource Groups > myResourceGroupName > providers > Microsoft.Network > virtualNetworks > myVnetName > subnets > mySubnetName.id**).
+  - Again, you MUST follow the resource naming conventions in the provided examples for failover to work correctly.
 
-When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server Destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. See the BIG-IP documentation for specific instructions on creating virtual servers.
+When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. See the BIG-IP documentation for specific instructions on creating virtual servers.
 
 
 ## Documentation
