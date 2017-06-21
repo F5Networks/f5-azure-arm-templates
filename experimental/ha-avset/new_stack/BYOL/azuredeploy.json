@@ -1259,21 +1259,13 @@
         }
     ], 
     "outputs": {
-        "GUI-URL0": {
+        "GUI-URL": {
             "type": "string", 
             "value": "[concat('https://',reference(concat(variables('mgmtPublicIPAddressId'), '0')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]"
         }, 
-        "SSH-URL0": {
+        "SSH-URL": {
             "type": "string", 
             "value": "[concat(reference(concat(variables('mgmtPublicIPAddressId'), '0')).dnsSettings.fqdn,' ',22)]"
-        }, 
-        "GUI-URL1": {
-            "type": "string", 
-            "value": "[concat('https://',reference(concat(variables('mgmtPublicIPAddressId'), '1')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]"
-        }, 
-        "SSH-URL1": {
-            "type": "string", 
-            "value": "[concat(reference(concat(variables('mgmtPublicIPAddressId'), '1')).dnsSettings.fqdn,' ',22)]"
         }
     }
 }
