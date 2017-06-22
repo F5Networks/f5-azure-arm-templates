@@ -49,7 +49,7 @@ verify_hash = '''[concat(variables('singleQuote'), '<CLI_SCRIPT>', variables('si
 verify_hash_url = "https://gitswarm.f5net.com/cloudsolutions/f5-cloud-libs/raw/" + f5_cloud_libs_tag + "/dist/verifyHash"
 verify_hash = verify_hash.replace('<CLI_SCRIPT>', master_helper.verify_hash(verify_hash_url))
 
-hashed_file_list = "${config_loc}f5-cloud-libs.tar.gz"
+hashed_file_list = "${config_loc}f5-cloud-libs.tar.gz ${script_loc}f5.service_discovery.tmpl"
 additional_tar_list = ""
 if template_name in ('ltm_autoscale', 'ha-avset'):
     hashed_file_list += " ${config_loc}f5-cloud-libs-azure.tar.gz"
