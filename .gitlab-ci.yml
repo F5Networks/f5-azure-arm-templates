@@ -24,10 +24,10 @@ package:
         - echo "3nic(BYOL, New Stack) Template Hash - `openssl dgst -r -sha512 standalone/3nic/new_stack/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
         - echo "3nic(PAYG, Existing Stack) Template Hash - `openssl dgst -r -sha512 standalone/3nic/existing_stack/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
         - echo "3nic(BYOL, Existing Stack) Template Hash - `openssl dgst -r -sha512 standalone/3nic/existing_stack/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
-        - echo "HA-Avset(PAYG, New Stack) Template Hash - `openssl dgst -r -sha512 standalone/ha-avset/new_stack/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
-        - echo "HA-Avset(BYOL, New Stack) Template Hash - `openssl dgst -r -sha512 standalone/ha-avset/new_stack/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
-        - echo "HA-Avset(PAYG, Existing Stack) Template Hash - `openssl dgst -r -sha512 standalone/ha-avset/existing_stack/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
-        - echo "HA-Avset(BYOL, Existing Stack) Template Hash - `openssl dgst -r -sha512 standalone/ha-avset/existing_stack/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
+        - echo "HA-Avset(PAYG, New Stack) Template Hash - `openssl dgst -r -sha512 ha-avset/new_stack/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
+        - echo "HA-Avset(BYOL, New Stack) Template Hash - `openssl dgst -r -sha512 ha-avset/new_stack/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
+        - echo "HA-Avset(PAYG, Existing Stack) Template Hash - `openssl dgst -r -sha512 ha-avset/existing_stack/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
+        - echo "HA-Avset(BYOL, Existing Stack) Template Hash - `openssl dgst -r -sha512 ha-avset/existing_stack/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
         - echo "Cluster 1nic(PAYG) Template Hash - `openssl dgst -r -sha512 cluster/1nic/PAYG/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
         - echo "Cluster 1nic(BYOL) Template Hash - `openssl dgst -r -sha512 cluster/1nic/BYOL/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
         - echo "AutoScale LTM(PAYG) Template Hash - `openssl dgst -r -sha512 solutions/autoscale/ltm/azuredeploy.json | cut -d ' ' -f 1`" >> supportedTemplateHashes
