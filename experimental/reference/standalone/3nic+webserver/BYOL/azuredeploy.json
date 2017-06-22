@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
-    "contentVersion": "3.1.0.0",
+    "contentVersion": "3.2.0.0",
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser",
@@ -265,7 +265,7 @@
 "80": "http://",
 "443": "https://",
 "httpType": "[variables(parameters('vsPort'))]",
-"gitHubLocation": "https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/v3.1.0.0/experimental/reference/standalone/3nic%2Bwebserver/",
+"gitHubLocation": "https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/v3.2.0.0/experimental/reference/standalone/3nic%2Bwebserver/",
 "webtemplatelink": "[concat(variables('gitHubLocation'),  'nested/',  parameters('webServer'),'WebServer.json')]",
 
 
