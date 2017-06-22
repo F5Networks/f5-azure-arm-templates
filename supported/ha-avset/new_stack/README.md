@@ -12,6 +12,8 @@ This template supports creating up to 8 additional public/private IP address con
 
 The template also supports updating the next hop of Azure User-Defined Routes (UDRs) to use the active BIG-IP VEs internal self IP address . Specify a comma-delimited list of managedRoutes and a routeTableTag in the template to define the UDRs to be updated.  All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with "f5_ha:<routeTableTag>" will use the active BIG-IP VE as the next hop for those routes.
 
+**Networking Stack Type:** This solution deploys into a new networking stack, which is created along with the solution.
+
 ## Prerequisites and configuration notes
   - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **#** or **'** (single quote).
   - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
@@ -65,7 +67,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
    - **BYOL** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.2.0.0%2Fsupported%2Fha-avset%2Fnew_stack%2FBYOL%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
-   - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.2.0.0%2Fsupported%2Fha-avset%2Fnew_stack%2FBYOL%2Fazuredeploy.json">
+   - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.2.0.0%2Fsupported%2Fha-avset%2Fnew_stack%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
 

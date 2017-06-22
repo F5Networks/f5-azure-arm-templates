@@ -6,6 +6,8 @@
 
 <INTRO_TXT>
 
+**Networking Stack Type:** <STACK_TYPE_TXT>
+
 ## Prerequisites and configuration notes
   - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **#** or **'** (single quote).
   - If you are deploying the BYOL template, you must have a valid BIG-IP license token.

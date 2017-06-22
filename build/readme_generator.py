@@ -36,6 +36,14 @@ def md_param_array(data, license_params):
             param_array += "| " + parameter + " | " + mandatory + " | " + data['parameters'][parameter]['metadata']['description'] + " |\n"
     return param_array
 
+def stack_type_check(template_location, readme_text):
+    """ Determine what stack type the template is, return appropriate readme text """
+    if 'existing_stack' in template_location:
+        stack_type_text = readme_text['stack_type_text']['existing_stack']
+    else:
+        stack_type_text = readme_text['stack_type_text']['new_stack']
+    return stack_type_text
+
 def md_version_map(data, readme_text):
     """ Create BIG-IP version map: | Azure BIG-IP Image Version | BIG-IP Version | """
     param_array = ""
@@ -55,6 +63,8 @@ def create_deploy_links(version_tag, lic_type, template_location):
         deploy_links += '''   - **<LIC_TYPE>** <br><a href="<DEPLOY_LINK_URL>">\n    <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>\n\n'''
         template_location = template_location.replace('/', '%2F')
         template_location = template_location.replace('..', '')
+        template_location = template_location.replace('PAYG', lic)
+        template_location = template_location.replace('BYOL', lic)
         url = base_url + template_location
         deploy_links = deploy_links.replace('<DEPLOY_LINK_URL>', url)
         deploy_links = deploy_links.replace('<LIC_TYPE>', lic)
@@ -73,6 +83,7 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     ####### Text Values for README templates #######
     title_text = readme_text['title_text'][template_name]
     intro_text = readme_text['intro_text'][template_name]
+    stack_type_text = stack_type_check(template_location, readme_text)
     if 'supported' in readme_location:
         help_text = readme_text['help_text']['supported']
     else:
@@ -103,6 +114,7 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     ### Map in dynamic values ###
     readme = readme.replace('<TITLE_TXT>', title_text)
     readme = readme.replace('<INTRO_TXT>', intro_text)
+    readme = readme.replace('<STACK_TYPE_TXT>', stack_type_text)
     readme = readme.replace('<EXTRA_PREREQS>', extra_prereq_text)
     readme = readme.replace('<VERSION_MAP_TXT>', version_map)
     readme = readme.replace('<HELP_TXT>', help_text)
