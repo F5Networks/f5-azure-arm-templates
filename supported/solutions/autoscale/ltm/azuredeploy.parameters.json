@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "3.1.4.0", 
+    "contentVersion": "3.2.0.0", 
     "parameters": {
         "vmScaleSetMinCount": {
             "value": 2
@@ -27,7 +27,7 @@
             "value": "REQUIRED"
         }, 
         "instanceType": {
-            "value": "Standard_D2_v2"
+            "value": "Standard_DS2_v2"
         }, 
         "imageName": {
             "value": "Good"
@@ -46,6 +46,12 @@
         }, 
         "servicePrincipalSecret": {
             "value": "GEN_UNIQUE"
+        }, 
+        "ntpServer": {
+            "value": "0.pool.ntp.org"
+        }, 
+        "timeZone": {
+            "value": "UTC"
         }, 
         "restrictedSrcAddress": {
             "value": "*"
