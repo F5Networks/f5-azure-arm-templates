@@ -526,6 +526,8 @@ This solution requires access to the Azure API to determine how the BIG-IP VEs s
 
 _Ensure that however the creation of the service principal occurs to verify it only has minimum required access based on the solutions need(read vs read/write) prior to this template being deployed and used by the solution within the resource group selected(new or existing)._
 
+**Minimum Required Access:** **Read/Write** access is required, it can be limited to the resource group used by this solution.
+
 The end result should be possession of a client(application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some troubleshooting post-deployment if the service principal is in fact not fully configured.
 
 #### 1. Azure Portal

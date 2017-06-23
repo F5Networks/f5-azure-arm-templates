@@ -648,7 +648,9 @@ if template_name in ('1nic', '2nic', '3nic', 'cluster_base', 'ha-avset', 'ltm_au
     readme_text['config_example_text']['ha-avset'] = 'In this scenario, each BIG-IP has one NIC for management, one NIC for external traffic and one NIC for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
     readme_text['config_example_text']['ltm_autoscale'] = 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
     readme_text['config_example_text']['waf_autoscale'] = 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
+    ## Service Principal Access Required Text ##
+    readme_text['sp_access_text'] = {'read': '**Read** access is required, it can be limited to the resource group used by this solution.', 'read_write': '**Read/Write** access is required, it can be limited to the resource group used by this solution.'}
 
-    ## Call function to create/update README
+    #### Call function to create/update README ####
     readme_generator.readme_creation(template_name, data, license_text, readme_text, script_location, created_file)
 ######################################## END Create/Modify README's ########################################
