@@ -818,7 +818,7 @@
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
                 "[variables('vnetId')]", 
-                "[concat(variables('extNsgID'))]", 
+                "[variables('extNsgID')]", 
                 "extpipcopy", 
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '0')]"
             ], 
@@ -843,7 +843,7 @@
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
                 "[variables('vnetId')]", 
-                "[concat(variables('extNsgID'))]", 
+                "[variables('extNsgID')]", 
                 "extpipcopy", 
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '1')]"
             ], 
@@ -868,7 +868,7 @@
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
                 "[variables('vnetId')]", 
-                "[concat(variables('extNsgID'))]", 
+                "[variables('extNsgID')]", 
                 "extpipcopy"
             ], 
             "location": "[variables('location')]", 
@@ -901,7 +901,7 @@
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
                 "[variables('vnetId')]", 
-                "[concat(variables('extNsgID'))]", 
+                "[variables('extNsgID')]", 
                 "extpipcopy"
             ], 
             "location": "[variables('location')]", 

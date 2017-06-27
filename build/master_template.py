@@ -419,12 +419,12 @@ if template_name in ('ltm_autoscale', 'waf_autoscale'):
 ###### Network Interface Resource(s) ######
 if stack_type == 'new_stack':
     depends_on = ["[variables('vnetId')]", "[variables('mgmtPublicIPAddressId')]", "[variables('mgmtNsgID')]"]
-    depends_on_ext = ["[variables('vnetId')]", "[concat(variables('extNsgID'))]", "extpipcopy"]
+    depends_on_ext = ["[variables('vnetId')]", "[variables('extNsgID')]", "extpipcopy"]
     if template_name in ('ha-avset'):
         depends_on = ["[variables('vnetId')]", "[variables('mgmtNsgID')]"]
 elif stack_type == 'existing_stack':
     depends_on = ["[variables('mgmtPublicIPAddressId')]", "[variables('mgmtNsgID')]"]
-    depends_on_ext = ["[concat(variables('extNsgID'))]", "extpipcopy"]
+    depends_on_ext = ["[variables('extNsgID')]", "extpipcopy"]
     if template_name in ('ha-avset'):
         depends_on = ["[variables('mgmtNsgID')]"]
 if template_name in ('1nic', '2nic', '3nic'):
