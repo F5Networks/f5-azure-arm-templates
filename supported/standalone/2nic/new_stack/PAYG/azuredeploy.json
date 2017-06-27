@@ -686,7 +686,7 @@
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
                 "[variables('vnetId')]", 
-                "[concat(variables('extNsgID'))]", 
+                "[variables('extNsgID')]", 
                 "extpipcopy"
             ], 
             "location": "[variables('location')]", 

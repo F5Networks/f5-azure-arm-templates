@@ -766,6 +766,7 @@
         {
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
+                "[variables('mgmtNsgID')]", 
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtPublicIPAddressName'), '0')]"
             ], 
             "location": "[variables('location')]", 
@@ -802,6 +803,7 @@
         {
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
+                "[variables('mgmtNsgID')]", 
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtPublicIPAddressName'), '1')]"
             ], 
             "location": "[variables('location')]", 
@@ -838,8 +840,9 @@
         {
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
-                "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '0')]", 
-                "extpipcopy"
+                "[variables('extNsgID')]", 
+                "extpipcopy", 
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '0')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[concat(variables('extNicName'), '0')]", 
@@ -861,6 +864,8 @@
         {
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
+                "[variables('extNsgID')]", 
+                "extpipcopy", 
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '1')]"
             ], 
             "location": "[variables('location')]", 
@@ -883,7 +888,7 @@
         {
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
-                "[concat(variables('extNsgID'))]", 
+                "[variables('extNsgID')]", 
                 "extpipcopy"
             ], 
             "location": "[variables('location')]", 
@@ -915,7 +920,7 @@
         {
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
-                "[concat(variables('extNsgID'))]", 
+                "[variables('extNsgID')]", 
                 "extpipcopy"
             ], 
             "location": "[variables('location')]", 
