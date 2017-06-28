@@ -26,6 +26,9 @@
         "licensedBandwidth": {
             "value": "200m"
         }, 
+        "vnetAddressPrefix": {
+            "value": "10.0"
+        }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"
         }, 

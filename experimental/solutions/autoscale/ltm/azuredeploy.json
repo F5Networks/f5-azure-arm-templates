@@ -315,7 +315,6 @@
         "mgmtSubnetName": "[concat(variables('dnsLabel'),'-mgmt-subnet')]", 
         "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]", 
         "mgmtSubnetPrefix": "10.0.1.0/24", 
-        "ipAddress": "10.0.1.", 
         "loadBalancerName": "[concat(variables('dnsLabel'),'-alb')]", 
         "deviceNamePrefix": "[concat(variables('dnsLabel'),'-device')]", 
         "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]", 

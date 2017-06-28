@@ -102,6 +102,7 @@ def variable_initialize(data):
     data['variables']['mgmtSubnetPrivateAddressPrefix'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddressSuffixInt'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddressSuffix'] = "OPTIONAL"
+    data['variables']['mgmtSubnetPrivateAddressSuffix1'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddress'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddress1'] = "OPTIONAL"
     data['variables']['extSelfPublicIpAddressNamePrefix'] = "OPTIONAL"

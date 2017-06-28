@@ -23,11 +23,23 @@
         "bigIpVersion": {
             "value": "13.0.021"
         }, 
-        "licensedBandwidth": {
-            "value": "200m"
+        "licenseKey1": {
+            "value": "REQUIRED"
         }, 
-        "vnetAddressPrefix": {
-            "value": "10.0"
+        "licenseKey2": {
+            "value": "REQUIRED"
+        }, 
+        "vnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "vnetResourceGroupName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "mgmtSubnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "mgmtIpAddressRangeStart": {
+            "value": "GEN_UNIQUE"
         }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"
