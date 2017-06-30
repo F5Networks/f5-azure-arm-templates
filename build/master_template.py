@@ -360,7 +360,7 @@ if template_name in ('cluster', 'ltm_autoscale', 'waf_autoscale'):
         data['variables']['networkApiVersion'] = "2016-06-01"
         data['variables']['bigIpMgmtPort'] = 8443
         data['variables']['vmssName'] = "[concat(parameters('dnsLabel'),'-vmss')]"
-        data['variables']['newDataStorageAccountName'] = "[concat(uniquestring(resourceGroup().id), 'data000')]"
+        data['variables']['newDataStorageAccountName'] = "[concat(uniqueString(resourceGroup().id, deployment().name), 'data000')]"
         data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
         data['variables']['25m'] = 26214400
         data['variables']['200m'] = 209715200

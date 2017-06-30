@@ -578,9 +578,9 @@
                 "storageAccountType": "Premium_LRS"
             }
         }, 
-        "newStorageAccountName": "[concat(uniquestring(resourceGroup().id), 'stor')]", 
+        "newStorageAccountName": "[concat(uniqueString(resourceGroup().id, deployment().name), 'stor')]", 
         "storageAccountType": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]", 
-        "newDataStorageAccountName": "[concat(uniquestring(resourceGroup().id), 'data000')]", 
+        "newDataStorageAccountName": "[concat(uniqueString(resourceGroup().id, deployment().name), 'data000')]", 
         "dataStorageAccountType": "Standard_LRS"
     }, 
     "resources": [
