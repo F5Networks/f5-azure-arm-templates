@@ -190,6 +190,13 @@
             }, 
             "type": "string"
         }, 
+        "vnetAddressPrefix": {
+            "defaultValue": "10.0", 
+            "metadata": {
+                "description": "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'."
+            }, 
+            "type": "string"
+        }, 
         "solutionDeploymentName": {
             "metadata": {
                 "description": "A unique name for this deployment."
@@ -395,7 +402,7 @@
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
         "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]", 
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
-        "vnetAddressPrefix": "10.0.0.0/16", 
+        "vnetAddressPrefix": "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]", 
         "publicIPAddressType": "Static", 
         "mgmtPublicIPAddressName": "[concat(variables('dnsLabel'), '-mgmt-pip')]", 
         "mgmtPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('mgmtPublicIPAddressName'))]", 
@@ -403,7 +410,7 @@
         "mgmtNicName": "[concat(variables('dnsLabel'), '-mgmt')]", 
         "mgmtSubnetName": "[concat(variables('dnsLabel'),'-mgmt-subnet')]", 
         "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]", 
-        "mgmtSubnetPrefix": "10.0.1.0/24", 
+        "mgmtSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.1.0/24')]", 
         "loadBalancerName": "[concat(variables('dnsLabel'),'-alb')]", 
         "deviceNamePrefix": "[concat(variables('dnsLabel'),'-device')]", 
         "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]", 
@@ -863,8 +870,8 @@
         {
             "apiVersion": "[variables('computeApiVersion')]", 
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", 
-                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]", 
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('vmssName')]", 
@@ -912,7 +919,7 @@
                                 "properties": {
                                     "ipConfigurations": [
                                         {
-                                            "name": "ip1", 
+                                            "name": "ipconfig1", 
                                             "properties": {
                                                 "loadBalancerBackendAddressPools": [
                                                     {
@@ -928,7 +935,7 @@
                                                     }
                                                 ], 
                                                 "subnet": {
-                                                    "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('mgmtSubnetName'))]"
+                                                    "id": "[variables('mgmtSubnetId')]"
                                                 }
                                             }
                                         }

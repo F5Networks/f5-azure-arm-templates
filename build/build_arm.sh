@@ -22,10 +22,12 @@ python -B '.\master_template.py' --template-name cluster --license-type PAYG --s
 python -B '.\master_template.py' --template-name cluster --license-type BYOL --stack-type existing_stack --template-location '../experimental/cluster/1nic/existing_stack/BYOL/' --script-location '../experimental/cluster/1nic/existing_stack/'
 
 ## BIGIP ARM Template - LTM AutoScale
-python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --template-location '../experimental/solutions/autoscale/ltm/' --script-location '../experimental/solutions/autoscale/ltm/' --solution-location 'experimental'
+python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --stack-type new_stack --template-location '../experimental/solutions/autoscale/ltm/new_stack/' --script-location '../experimental/solutions/autoscale/ltm/new_stack/' --solution-location 'experimental'
+python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --stack-type existing_stack --template-location '../experimental/solutions/autoscale/ltm/existing_stack/' --script-location '../experimental/solutions/autoscale/ltm/existing_stack/' --solution-location 'experimental'
 
 ## BIGIP ARM Template - WAF AutoScale
-python -B '.\master_template.py' --template-name waf_autoscale --license-type PAYG --template-location '../experimental/solutions/autoscale/waf/' --script-location '../experimental/solutions/autoscale/waf/' --solution-location 'experimental'
+python -B '.\master_template.py' --template-name waf_autoscale --license-type PAYG --stack-type new_stack --template-location '../experimental/solutions/autoscale/waf/new_stack/' --script-location '../experimental/solutions/autoscale/waf/new_stack/' --solution-location 'experimental'
+python -B '.\master_template.py' --template-name waf_autoscale --license-type PAYG --stack-type existing_stack --template-location '../experimental/solutions/autoscale/waf/existing_stack/' --script-location '../experimental/solutions/autoscale/waf/existing_stack/' --solution-location 'experimental'
 
 ############################### End Experimental ###############################
 

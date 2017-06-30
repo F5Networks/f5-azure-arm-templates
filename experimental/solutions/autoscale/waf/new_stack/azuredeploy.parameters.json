@@ -38,6 +38,9 @@
         "licensedBandwidth": {
             "value": "200m"
         }, 
+        "vnetAddressPrefix": {
+            "value": "10.0"
+        }, 
         "solutionDeploymentName": {
             "value": "GEN_UNIQUE"
         }, 

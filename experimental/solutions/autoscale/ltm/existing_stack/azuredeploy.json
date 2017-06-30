@@ -194,6 +194,24 @@
             }, 
             "type": "string"
         }, 
+        "vnetName": {
+            "metadata": {
+                "description": "The name of the existing virtual network to which you want to connect the BIG-IP VEs."
+            }, 
+            "type": "string"
+        }, 
+        "vnetResourceGroupName": {
+            "metadata": {
+                "description": "The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed."
+            }, 
+            "type": "string"
+        }, 
+        "mgmtSubnetName": {
+            "metadata": {
+                "description": "Name of the existing MGMT subnet - with external access to the Internet."
+            }, 
+            "type": "string"
+        }, 
         "tenantId": {
             "metadata": {
                 "description": "Your Azure service principal application tenant ID."
@@ -304,17 +322,15 @@
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['1'].Port]", 
         "bigIpMgmtPort": 8443, 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
-        "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]", 
-        "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
-        "vnetAddressPrefix": "10.0.0.0/16", 
+        "virtualNetworkName": "[parameters('vnetName')]", 
+        "vnetId": "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]", 
         "publicIPAddressType": "Static", 
         "mgmtPublicIPAddressName": "[concat(variables('dnsLabel'), '-mgmt-pip')]", 
         "mgmtPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('mgmtPublicIPAddressName'))]", 
         "mgmtNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-mgmt-nsg'))]", 
         "mgmtNicName": "[concat(variables('dnsLabel'), '-mgmt')]", 
         "mgmtSubnetName": "[concat(variables('dnsLabel'),'-mgmt-subnet')]", 
-        "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]", 
-        "mgmtSubnetPrefix": "10.0.1.0/24", 
+        "mgmtSubnetId": "[concat(variables('vnetID'),'/subnets/',parameters('mgmtSubnetName'))]", 
         "loadBalancerName": "[concat(variables('dnsLabel'),'-alb')]", 
         "deviceNamePrefix": "[concat(variables('dnsLabel'),'-device')]", 
         "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]", 
@@ -510,40 +526,6 @@
         }, 
         {
             "apiVersion": "[variables('apiVersion')]", 
-            "dependsOn": [
-                "[variables('mgmtNsgID')]"
-            ], 
-            "location": "[variables('location')]", 
-            "name": "[variables('virtualNetworkName')]", 
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[variables('vnetAddressPrefix')]"
-                    ]
-                }, 
-                "subnets": [
-                    {
-                        "name": "[variables('mgmtSubnetName')]", 
-                        "properties": {
-                            "addressPrefix": "[variables('mgmtSubnetPrefix')]", 
-                            "networkSecurityGroup": {
-                                "id": "[variables('mgmtNsgID')]"
-                            }
-                        }
-                    }
-                ]
-            }, 
-            "tags": {
-                "application": "[parameters('tagValues').application]", 
-                "costCenter": "[parameters('tagValues').cost]", 
-                "environment": "[parameters('tagValues').environment]", 
-                "group": "[parameters('tagValues').group]", 
-                "owner": "[parameters('tagValues').owner]"
-            }, 
-            "type": "Microsoft.Network/virtualNetworks"
-        }, 
-        {
-            "apiVersion": "[variables('apiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[concat(variables('dnsLabel'), '-mgmt-nsg')]", 
             "properties": {
@@ -683,8 +665,7 @@
         {
             "apiVersion": "[variables('computeApiVersion')]", 
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", 
-                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('vmssName')]", 
@@ -728,7 +709,7 @@
                                 "properties": {
                                     "ipConfigurations": [
                                         {
-                                            "name": "ip1", 
+                                            "name": "ipconfig1", 
                                             "properties": {
                                                 "loadBalancerBackendAddressPools": [
                                                     {
@@ -744,7 +725,7 @@
                                                     }
                                                 ], 
                                                 "subnet": {
-                                                    "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('mgmtSubnetName'))]"
+                                                    "id": "[variables('mgmtSubnetId')]"
                                                 }
                                             }
                                         }

@@ -1,10 +1,10 @@
-# Deploying the BIG-IP VE in Azure - AutoScale BIG-IP LTM - VM Scale Set
+# Deploying the BIG-IP VE in Azure - AutoScale BIG-IP WAF(LTM+ASM) - VM Scale Set
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 
 ## Introduction
 
-This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE LTM instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM only.
+This solution uses an ARM template to launch the deployment of F5 BIG-IP LTM+ASM Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE LTM instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM+ASM.
 
 **Networking Stack Type:** This solution deploys into a new networking stack, which is created along with the solution.
 
@@ -57,7 +57,7 @@ You have three options for deploying this solution:
 ### <a name="azure"></a>Azure deploy buttons
 
 Use the appropriate button, depending on what type of BIG-IP licensing required:
-   - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.2.1.0%2Fexperimental%2Fsolutions%2Fautoscale%2Fltm%2Fazuredeploy.json">
+   - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.2.1.0%2Fexperimental%2Fsolutions%2Fautoscale%2Fwaf%2Fnew_stack%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
 
@@ -75,10 +75,22 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | adminPassword | Yes | Password to login to the Virtual Machine. |
 | dnsLabel | Yes | Unique DNS Name for the Public IP address used to access the Virtual Machine |
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
-| imageName | Yes | F5 SKU (IMAGE) to you want to deploy. |
+| imageName | Yes | F5 SKU (IMAGE) you want to deploy. 'Best' is the only option because ASM is required. |
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
 | licenseKey1 | No | The license token for the F5 BIG-IP VE (BYOL) |
 | licensedBandwidth | No | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
+| solutionDeploymentName | Yes | A unique name for this deployment. |
+| applicationProtocols | Yes | The protocol(s) used by your application. |
+| applicationAddress | Yes | The public IP address or DNS FQDN of the application that this WAF will protect. |
+| applicationServiceFqdn | Yes | If you are deploying in front of an Azure App Service, the FQDN of the public application. |
+| applicationPort | Yes | If you are deploying an HTTP application, the port on which your service listens for unencrypted traffic. This field is not required when deploying HTTPS only. |
+| applicationSecurePort | Yes | If you are deploying an HTTPS application, the port on which your service listens for encrypted traffic. This field is not required when deploying HTTP only. |
+| sslCert | Yes | The SSL certificate .pfx file corresponding to public facing virtual server. |
+| sslPswd | Yes | The SSL certificate .pfx password corresponding to the certificate you entered. |
+| applicationType | Yes | Is your application running on a Linux OS or a Windows OS? |
+| blockingLevel | Yes | Select how aggressive you want the blocking level of this WAF.  Remember that the more aggressive the blocking level, the more potential there is for false-positives that the WAF might detect. Select Custom to specify your own security policy. |
+| customPolicy | Yes | Specify the publicly available URL of a custom ASM security policy in XML format. This policy will be applied in place of the standard High/Medium/Low policy. |
 | tenantId | Yes | Your Azure service principal application tenant ID. |
 | clientId | Yes | Your Azure service principal application client ID. |
 | servicePrincipalSecret | Yes | Your Azure service principal application secret. |
@@ -94,7 +106,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
-## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -scaleOutThroughput 90 -scaleInThroughput 10 -scaleTimeWindow 10 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_DS2_v2 -imageName Good -bigIpVersion 13.0.021 -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -ntpServer 0.pool.ntp.org -timeZone UTC -restrictedSrcAddress "*" -resourceGroupName <value> 
+## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -scaleOutThroughput 90 -scaleInThroughput 10 -scaleTimeWindow 10 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_DS2_v2 -imageName Best -bigIpVersion 13.0.021 -vnetAddressPrefix 10.0 -solutionDeploymentName <value> -applicationProtocols http-https -applicationAddress <value> -applicationServiceFqdn NOT_SPECIFIED -applicationPort 80 -applicationSecurePort 443 -sslCert NOT_SPECIFIED -sslPswd NOT_SPECIFIED -applicationType Linux -blockingLevel medium -customPolicy NOT_SPECIFIED -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -ntpServer 0.pool.ntp.org -timeZone UTC -restrictedSrcAddress "*" -resourceGroupName <value> 
 
 param(
 
@@ -154,6 +166,54 @@ param(
 
   [Parameter(Mandatory=$True)]
   [string]
+  $vnetAddressPrefix,
+
+  [Parameter(Mandatory=$True)]
+  [string]
+  $solutionDeploymentName,
+
+  [Parameter(Mandatory=$True)]
+  [string]
+  $applicationProtocols,
+
+  [Parameter(Mandatory=$True)]
+  [string]
+  $applicationAddress,
+
+  [Parameter(Mandatory=$True)]
+  [string]
+  $applicationServiceFqdn,
+
+  [Parameter(Mandatory=$True)]
+  [string]
+  $applicationPort,
+
+  [Parameter(Mandatory=$True)]
+  [string]
+  $applicationSecurePort,
+
+  [Parameter(Mandatory=$True)]
+  [string]
+  $sslCert,
+
+  [Parameter(Mandatory=$True)]
+  [string]
+  $sslPswd,
+
+  [Parameter(Mandatory=$True)]
+  [string]
+  $applicationType,
+
+  [Parameter(Mandatory=$True)]
+  [string]
+  $blockingLevel,
+
+  [Parameter(Mandatory=$True)]
+  [string]
+  $customPolicy,
+
+  [Parameter(Mandatory=$True)]
+  [string]
   $tenantId,
 
   [Parameter(Mandatory=$True)]
@@ -209,7 +269,8 @@ New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
 # Create Arm Deployment
 $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
 $sps = ConvertTo-SecureString -String $servicePrincipalSecret -AsPlainText -Force
-$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -vmScaleSetMinCount "$vmScaleSetMinCount" -vmScaleSetMaxCount "$vmScaleSetMaxCount" -scaleOutThroughput "$scaleOutThroughput" -scaleInThroughput "$scaleInThroughput" -scaleTimeWindow "$scaleTimeWindow" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -tenantId "$tenantId" -clientId "$clientId" -servicePrincipalSecret $sps -ntpServer "$ntpServer" -timeZone "$timeZone" -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
+$sslpwd = ConvertTo-SecureString -String $sslPswd -AsPlainText -Force
+$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -vmScaleSetMinCount "$vmScaleSetMinCount" -vmScaleSetMaxCount "$vmScaleSetMaxCount" -scaleOutThroughput "$scaleOutThroughput" -scaleInThroughput "$scaleInThroughput" -scaleTimeWindow "$scaleTimeWindow" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -vnetAddressPrefix "$vnetAddressPrefix" -solutionDeploymentName "$solutionDeploymentName" -applicationProtocols "$applicationProtocols" -applicationAddress "$applicationAddress" -applicationServiceFqdn "$applicationServiceFqdn" -applicationPort "$applicationPort" -applicationSecurePort "$applicationSecurePort" -sslCert "$sslCert" -sslPswd $sslpwd -applicationType "$applicationType" -blockingLevel "$blockingLevel" -customPolicy "$customPolicy" -tenantId "$tenantId" -clientId "$clientId" -servicePrincipalSecret $sps -ntpServer "$ntpServer" -timeZone "$timeZone" -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
 
 # Print Output of Deployment to Console
 $deployment
@@ -223,7 +284,7 @@ $deployment
 #!/bin/bash
 
 ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --vmScaleSetMinCount 2 --vmScaleSetMaxCount 4 --scaleOutThroughput 90 --scaleInThroughput 10 --scaleTimeWindow 10 --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceType Standard_DS2_v2 --imageName Good --bigIpVersion 13.0.021 --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --ntpServer 0.pool.ntp.org --timeZone UTC --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --vmScaleSetMinCount 2 --vmScaleSetMaxCount 4 --scaleOutThroughput 90 --scaleInThroughput 10 --scaleTimeWindow 10 --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceType Standard_DS2_v2 --imageName Best --bigIpVersion 13.0.021 --vnetAddressPrefix 10.0 --solutionDeploymentName <value> --applicationProtocols http-https --applicationAddress <value> --applicationServiceFqdn NOT_SPECIFIED --applicationPort 80 --applicationSecurePort 443 --sslCert NOT_SPECIFIED --sslPswd NOT_SPECIFIED --applicationType Linux --blockingLevel medium --customPolicy NOT_SPECIFIED --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --ntpServer 0.pool.ntp.org --timeZone UTC --restrictedSrcAddress "*" --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 # Assign Script Parameters and Define Variables
 # Specify static items below, change these as needed or make them parameters
@@ -285,6 +346,42 @@ while [[ $# -gt 1 ]]; do
         --bigIpVersion)
             bigIpVersion=$2
             shift 2;;
+        --vnetAddressPrefix)
+            vnetAddressPrefix=$2
+            shift 2;;
+        --solutionDeploymentName)
+            solutionDeploymentName=$2
+            shift 2;;
+        --applicationProtocols)
+            applicationProtocols=$2
+            shift 2;;
+        --applicationAddress)
+            applicationAddress=$2
+            shift 2;;
+        --applicationServiceFqdn)
+            applicationServiceFqdn=$2
+            shift 2;;
+        --applicationPort)
+            applicationPort=$2
+            shift 2;;
+        --applicationSecurePort)
+            applicationSecurePort=$2
+            shift 2;;
+        --sslCert)
+            sslCert=$2
+            shift 2;;
+        --sslPswd)
+            sslPswd=$2
+            shift 2;;
+        --applicationType)
+            applicationType=$2
+            shift 2;;
+        --blockingLevel)
+            blockingLevel=$2
+            shift 2;;
+        --customPolicy)
+            customPolicy=$2
+            shift 2;;
         --tenantId)
             tenantId=$2
             shift 2;;
@@ -310,7 +407,7 @@ while [[ $# -gt 1 ]]; do
 done
 
 #If a required parameter is not passed, the script will prompt for it below
-required_variables="vmScaleSetMinCount vmScaleSetMaxCount scaleOutThroughput scaleInThroughput scaleTimeWindow adminUsername adminPassword dnsLabel instanceType imageName bigIpVersion tenantId clientId servicePrincipalSecret ntpServer timeZone resourceGroupName licenseType "
+required_variables="vmScaleSetMinCount vmScaleSetMaxCount scaleOutThroughput scaleInThroughput scaleTimeWindow adminUsername adminPassword dnsLabel instanceType imageName bigIpVersion vnetAddressPrefix solutionDeploymentName applicationProtocols applicationAddress applicationServiceFqdn applicationPort applicationSecurePort sslCert sslPswd applicationType blockingLevel customPolicy tenantId clientId servicePrincipalSecret ntpServer timeZone resourceGroupName licenseType "
 for variable in $required_variables
         do
         if [ -z ${!variable} ] ; then
@@ -344,7 +441,7 @@ azure config mode arm
 azure group create -n $resourceGroupName -l $region
 
 # Deploy ARM Template, right now cannot specify parameter file AND parameters inline via Azure CLI,
-azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetMinCount\":{\"value\":$vmScaleSetMinCount},\"vmScaleSetMaxCount\":{\"value\":$vmScaleSetMaxCount},\"scaleOutThroughput\":{\"value\":$scaleOutThroughput},\"scaleInThroughput\":{\"value\":$scaleInThroughput},\"scaleTimeWindow\":{\"value\":$scaleTimeWindow},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
+azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetMinCount\":{\"value\":$vmScaleSetMinCount},\"vmScaleSetMaxCount\":{\"value\":$vmScaleSetMaxCount},\"scaleOutThroughput\":{\"value\":$scaleOutThroughput},\"scaleInThroughput\":{\"value\":$scaleInThroughput},\"scaleTimeWindow\":{\"value\":$scaleTimeWindow},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"solutionDeploymentName\":{\"value\":\"$solutionDeploymentName\"},\"applicationProtocols\":{\"value\":\"$applicationProtocols\"},\"applicationAddress\":{\"value\":\"$applicationAddress\"},\"applicationServiceFqdn\":{\"value\":\"$applicationServiceFqdn\"},\"applicationPort\":{\"value\":\"$applicationPort\"},\"applicationSecurePort\":{\"value\":\"$applicationSecurePort\"},\"sslCert\":{\"value\":\"$sslCert\"},\"sslPswd\":{\"value\":\"$sslPswd\"},\"applicationType\":{\"value\":\"$applicationType\"},\"blockingLevel\":{\"value\":\"$blockingLevel\"},\"customPolicy\":{\"value\":\"$customPolicy\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
 ```
 
 ## Configuration Example <a name="config">

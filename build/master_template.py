@@ -155,7 +155,7 @@ data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": 
 data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values, "metadata": { "description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key." }}
 
 # Set new_stack/existing_stack parameters for templates that support that
-if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster'):
+if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster', 'ltm_autoscale', 'waf_autoscale'):
     if template_name in ('1nic', '2nic', '3nic', 'ha-avset'):
         data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": { "description": "Name of the Virtual Machine."}}
     if template_name in ('2nic', '3nic', 'ha-avset'):
@@ -168,6 +168,9 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster'):
         data['parameters']['mgmtSubnetName'] = { "type": "string", "metadata": { "description": "Name of the existing MGMT subnet - with external access to the Internet." } }
         if template_name in ('ha-avset', 'cluster'):
             data['parameters']['mgmtIpAddressRangeStart'] = { "metadata": { "description": "The static private IP address you would like to assign to the management self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device." }, "type": "string" }
+        elif template_name in ('ltm_autoscale', 'waf_autoscale'):
+            # Auto Scale(VM Scale Set) solutions get the IP address dynamically
+            pass
         else:
             data['parameters']['mgmtIpAddress'] = { "type": "string", "metadata": { "description": "MGMT subnet IP Address to use for the BIG-IP management IP address." } }
         if template_name in ('2nic', '3nic', 'ha-avset'):
@@ -244,7 +247,7 @@ data['variables']['skuToUse'] = sku_to_use
 data['variables']['offerToUse'] = offer_to_use
 data['variables']['bigIpNicPortValue'] = nic_port_map
 ## Handle new_stack/existing_stack variable differences
-if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster'):
+if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster', 'ltm_autoscale', 'waf_autoscale'):
     if template_name in ('1nic', '2nic', '3nic', 'ha-avset'):
         data['variables']['instanceName'] = "[toLower(parameters('instanceName'))]"
     if stack_type == 'new_stack':
@@ -354,8 +357,7 @@ if template_name in ('cluster', 'ltm_autoscale', 'waf_autoscale'):
     data['variables']['lbID'] = "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]"
     data['variables']['frontEndIPConfigID'] = "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]"
     if template_name in ('ltm_autoscale', 'waf_autoscale'):
-        data['variables']['vnetAddressPrefix'] = "10.0.0.0/16"
-        data['variables']['mgmtSubnetPrefix'] = "10.0.1.0/24"
+        data['variables']['mgmtSubnetPrivateAddress'] = "OPTIONAL"
         data['variables']['computeApiVersion'] = "2016-04-30-preview"
         data['variables']['networkApiVersion'] = "2016-06-01"
         data['variables']['bigIpMgmtPort'] = 8443
@@ -425,7 +427,10 @@ if template_name in ('1nic', '2nic', '3nic', 'cluster', 'ha-avset'):
 
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
     subnets = [{ "name": "[variables('mgmtSubnetName')]", "properties": { "addressPrefix": "[variables('mgmtSubnetPrefix')]", "networkSecurityGroup": {"id": "[variables('mgmtNsgID')]"} } }]
-    resources_list += [{ "type": "Microsoft.Network/virtualNetworks", "apiVersion": api_version, "dependsOn": [ "[variables('mgmtNsgID')]" ], "location": location, "name": "[variables('virtualNetworkName')]", "tags": tags, "properties": { "addressSpace": { "addressPrefixes": [ "[variables('vnetAddressPrefix')]" ] }, "subnets": subnets } }]
+    scale_depends_on = []
+    if stack_type == 'new_stack':
+        scale_depends_on += ["[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"]
+        resources_list += [{ "type": "Microsoft.Network/virtualNetworks", "apiVersion": api_version, "dependsOn": [ "[variables('mgmtNsgID')]" ], "location": location, "name": "[variables('virtualNetworkName')]", "tags": tags, "properties": { "addressSpace": { "addressPrefixes": [ "[variables('vnetAddressPrefix')]" ] }, "subnets": subnets } }]
 
 ###### Network Interface Resource(s) ######
 if stack_type == 'new_stack':
@@ -576,7 +581,7 @@ if template_name in ('ltm_autoscale', 'waf_autoscale'):
     autoscale_command_to_execute = autoscale_command_to_execute.replace('<POST_CMD_TO_EXECUTE>', post_cmd_to_execute)
 
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
-    resources_list += [{ "type": "Microsoft.Compute/virtualMachineScaleSets", "apiVersion": compute_api_version, "name": "[variables('vmssName')]", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]" ], "sku": { "name": "[parameters('instanceType')]", "tier": "Standard", "capacity": "[parameters('vmScaleSetMinCount')]" }, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "[variables('offerToUse')]" }, "properties": { "upgradePolicy": { "mode": "Manual" }, "virtualMachineProfile": { "storageProfile": { "osDisk": { "vhdContainers": [ "[concat('https://', variables('newStorageAccountName'), '.blob.core.windows.net/vmss1')]" ], "name": "vmssosdisk", "caching": "ReadOnly", "createOption": "FromImage" }, "imageReference": { "publisher": "f5-networks", "offer": "[variables('offerToUse')]", "sku": "[variables('skuToUse')]", "version": image_to_use } }, "osProfile": { "computerNamePrefix": "[variables('vmssName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "networkProfile": { "networkInterfaceConfigurations": [ { "name": "nic1", "properties": { "primary": "true", "ipConfigurations": [ { "name": "ip1", "properties": { "subnet": { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('mgmtSubnetName'))]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]" } ], "loadBalancerInboundNatPools": [ { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/sshnatpool')]" }, { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/mgmtnatpool')]" } ] } } ] } } ] }, "extensionProfile": { "extensions": [ { "name":"main", "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": autoscale_file_uris }, "protectedSettings": { "commandToExecute": autoscale_command_to_execute } } } ] } }, "overprovision": "false" } }]
+    resources_list += [{ "type": "Microsoft.Compute/virtualMachineScaleSets", "apiVersion": compute_api_version, "name": "[variables('vmssName')]", "location": location, "tags": tags, "dependsOn": scale_depends_on + ["[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]"], "sku": { "name": "[parameters('instanceType')]", "tier": "Standard", "capacity": "[parameters('vmScaleSetMinCount')]" }, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "[variables('offerToUse')]" }, "properties": { "upgradePolicy": { "mode": "Manual" }, "virtualMachineProfile": { "storageProfile": { "osDisk": { "vhdContainers": [ "[concat('https://', variables('newStorageAccountName'), '.blob.core.windows.net/vmss1')]" ], "name": "vmssosdisk", "caching": "ReadOnly", "createOption": "FromImage" }, "imageReference": { "publisher": "f5-networks", "offer": "[variables('offerToUse')]", "sku": "[variables('skuToUse')]", "version": image_to_use } }, "osProfile": { "computerNamePrefix": "[variables('vmssName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "networkProfile": { "networkInterfaceConfigurations": [ { "name": "nic1", "properties": { "primary": "true", "ipConfigurations": [ { "name": "ipconfig1", "properties": { "subnet": { "id": "[variables('mgmtSubnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]" } ], "loadBalancerInboundNatPools": [ { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/sshnatpool')]" }, { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/mgmtnatpool')]" } ] } } ] } } ] }, "extensionProfile": { "extensions": [ { "name":"main", "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": autoscale_file_uris }, "protectedSettings": { "commandToExecute": autoscale_command_to_execute } } } ] } }, "overprovision": "false" } }]
 
 ###### Compute VM Scale Set(s) AutoScale Settings ######
 if template_name in ('ltm_autoscale', 'waf_autoscale'):

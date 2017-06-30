@@ -1,7 +1,7 @@
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
-## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -scaleOutThroughput 90 -scaleInThroughput 10 -scaleTimeWindow 10 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_DS2_v2 -imageName Best -bigIpVersion 13.0.021 -solutionDeploymentName <value> -applicationProtocols http-https -applicationAddress <value> -applicationServiceFqdn NOT_SPECIFIED -applicationPort 80 -applicationSecurePort 443 -sslCert NOT_SPECIFIED -sslPswd NOT_SPECIFIED -applicationType Linux -blockingLevel medium -customPolicy NOT_SPECIFIED -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -ntpServer 0.pool.ntp.org -timeZone UTC -restrictedSrcAddress "*" -resourceGroupName <value> 
+## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -scaleOutThroughput 90 -scaleInThroughput 10 -scaleTimeWindow 10 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_DS2_v2 -imageName Good -bigIpVersion 13.0.021 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -ntpServer 0.pool.ntp.org -timeZone UTC -restrictedSrcAddress "*" -resourceGroupName <value> 
 
 param(
 
@@ -61,47 +61,15 @@ param(
 
   [Parameter(Mandatory=$True)]
   [string]
-  $solutionDeploymentName,
+  $vnetName,
 
   [Parameter(Mandatory=$True)]
   [string]
-  $applicationProtocols,
+  $vnetResourceGroupName,
 
   [Parameter(Mandatory=$True)]
   [string]
-  $applicationAddress,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $applicationServiceFqdn,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $applicationPort,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $applicationSecurePort,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $sslCert,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $sslPswd,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $applicationType,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $blockingLevel,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $customPolicy,
+  $mgmtSubnetName,
 
   [Parameter(Mandatory=$True)]
   [string]
@@ -160,8 +128,7 @@ New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
 # Create Arm Deployment
 $pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force
 $sps = ConvertTo-SecureString -String $servicePrincipalSecret -AsPlainText -Force
-$sslpwd = ConvertTo-SecureString -String $sslPswd -AsPlainText -Force
-$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -vmScaleSetMinCount "$vmScaleSetMinCount" -vmScaleSetMaxCount "$vmScaleSetMaxCount" -scaleOutThroughput "$scaleOutThroughput" -scaleInThroughput "$scaleInThroughput" -scaleTimeWindow "$scaleTimeWindow" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -solutionDeploymentName "$solutionDeploymentName" -applicationProtocols "$applicationProtocols" -applicationAddress "$applicationAddress" -applicationServiceFqdn "$applicationServiceFqdn" -applicationPort "$applicationPort" -applicationSecurePort "$applicationSecurePort" -sslCert "$sslCert" -sslPswd $sslpwd -applicationType "$applicationType" -blockingLevel "$blockingLevel" -customPolicy "$customPolicy" -tenantId "$tenantId" -clientId "$clientId" -servicePrincipalSecret $sps -ntpServer "$ntpServer" -timeZone "$timeZone" -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
+$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -vmScaleSetMinCount "$vmScaleSetMinCount" -vmScaleSetMaxCount "$vmScaleSetMaxCount" -scaleOutThroughput "$scaleOutThroughput" -scaleInThroughput "$scaleInThroughput" -scaleTimeWindow "$scaleTimeWindow" -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -vnetName "$vnetName" -vnetResourceGroupName "$vnetResourceGroupName" -mgmtSubnetName "$mgmtSubnetName" -tenantId "$tenantId" -clientId "$clientId" -servicePrincipalSecret $sps -ntpServer "$ntpServer" -timeZone "$timeZone" -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
 
 # Print Output of Deployment to Console
 $deployment

@@ -38,8 +38,14 @@
         "licensedBandwidth": {
             "value": "200m"
         }, 
-        "vnetAddressPrefix": {
-            "value": "10.0"
+        "vnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "vnetResourceGroupName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "mgmtSubnetName": {
+            "value": "GEN_UNIQUE"
         }, 
         "solutionDeploymentName": {
             "value": "GEN_UNIQUE"

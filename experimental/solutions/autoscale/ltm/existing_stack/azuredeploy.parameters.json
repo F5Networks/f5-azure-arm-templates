@@ -38,6 +38,15 @@
         "licensedBandwidth": {
             "value": "200m"
         }, 
+        "vnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "vnetResourceGroupName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "mgmtSubnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
         "tenantId": {
             "value": "GEN_UNIQUE"
         }, 
