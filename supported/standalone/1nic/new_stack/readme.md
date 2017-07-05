@@ -359,16 +359,16 @@ To launch the template:
   5.	When you are done, click the **Finished** button.
 
 
-## Deploying Custom Configuration to an Azure Virtual Machine
+## Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
 
 Once the solution has been deployed there may be a need to perform some additional configuration of the BIG-IP.  This can be accomplished via traditional methods such as via the GUI, logging into the CLI or using the REST API.  However, depending on the requirments it might be preferred to perform this custom configuration as a part of the initial deployment of the solution.  This can be accomplished in the below manner.
 
-Within the Azure Resource Manager (ARM) template there is a variable called *customConfig, this contains text similar to "### START(INPUT) CUSTOM CONFIGURATION", that can be replaced with custom shell scripting to perform additional configuration of the BIG-IP.  An example of what it would look like to configure the f5.ip_forwarding iApp is included below.
+Within the Azure Resource Manager (ARM) template there is a variable called **customConfig**, this contains text similar to "### START(INPUT) CUSTOM CONFIGURATION", that can be replaced with custom shell scripting to perform additional configuration of the BIG-IP.  An example of what it would look like to configure the f5.ip_forwarding iApp is included below.
 
-Warning: F5 does not support the template if you change anything other than the *customConfig ARM template variable.
+Warning: F5 does not support the template if you change anything other than the **customConfig** ARM template variable.
 
-```
-{
+```json
+"variables": {
     "customConfig": "### START(INPUT) CUSTOM CONFIGURATION\ntmsh create sys application service my_deployment { device-group none template f5.ip_forwarding traffic-group none variables replace-all-with { basic__addr { value 0.0.0.0 } basic__forward_all { value No } basic__mask { value 0.0.0.0 } basic__port { value 0 } basic__vlan_listening { value default } options__advanced { value no }options__display_help { value hide } } }"
 }
 ```
