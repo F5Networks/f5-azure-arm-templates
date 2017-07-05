@@ -77,6 +77,8 @@ def variable_initialize(data):
     data['variables']['f5NetworksTag'] = "MANDATORY"
     data['variables']['f5CloudIappsTag'] = "MANDATORY"
     data['variables']['f5NetworksSolutionScripts'] = "OPTIONAL"
+    data['variables']['customConfig'] = "### START(INPUT) CUSTOM CONFIGURATION\n"
+    data['variables']['installCustomConfig'] = "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
     data['variables']['verifyHash'] = "MANDATORY"
     data['variables']['installCloudLibs'] = "MANDATORY"
     data['variables']['dnsLabel'] = "[toLower(parameters('dnsLabel'))]"
