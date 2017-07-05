@@ -42,6 +42,8 @@ f5_cloud_libs_tag = 'v3.1.1'
 f5_cloud_libs_azure_tag = 'v1.2.0'
 f5_cloud_iapps_tag = 'v1.0.0'
 f5_cloud_workers_tag = 'v1.0.0'
+f5_tag = '82e08e16-fc62-4bf0-8916-e1c02dc871cd'
+f5_template_tag = template_name
 
 install_cloud_libs = """[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit 1\nfi\necho loaded verifyHash\nscript_loc="/var/lib/waagent/custom-script/download/0/"\nconfig_loc="/config/cloud/"\nhashed_file_list="<HASHED_FILE_LIST>"\nfor file in $hashed_file_list; do\necho "verifying $file"\n/usr/bin/tmsh run cli script verifyHash $file\nif [ $? != 0 ]; then\necho "$file is not valid"\nexit 1\nfi\necho "verified $file"\ndone\necho "expanding $hashed_file_list"\ntar xvfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud/node_modules\n<TAR_LIST>touch /config/cloud/cloudLibsReady', variables('singleQuote'))]"""
 # Automate Verify Hash - the verify_hash function will go out and pull in the latest hash file
@@ -62,7 +64,7 @@ elif template_name in ('waf_autoscale'):
 install_cloud_libs = install_cloud_libs.replace('<HASHED_FILE_LIST>', hashed_file_list)
 install_cloud_libs = install_cloud_libs.replace('<TAR_LIST>', additional_tar_list)
 instance_type_list = ["Standard_A2", "Standard_A3", "Standard_A4", "Standard_A5", "Standard_A6", "Standard_A7", "Standard_A8", "Standard_A9", "Standard_D2", "Standard_D3", "Standard_D4", "Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14", "Standard_DS2", "Standard_DS3", "Standard_DS4", "Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2", "Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2", "Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2", "Standard_DS15_v2", "Standard_F2", "Standard_F4", "Standard_F8", "Standard_F2S", "Standard_F4S", "Standard_F8S"]
-tags = { "application": "[parameters('tagValues').application]", "environment": "[parameters('tagValues').environment]", "group": "[parameters('tagValues').group]", "owner": "[parameters('tagValues').owner]", "costCenter": "[parameters('tagValues').cost]" }
+tags = { "application": "[parameters('tagValues').application]", "environment": "[parameters('tagValues').environment]", "group": "[parameters('tagValues').group]", "owner": "[parameters('tagValues').owner]", "costCenter": "[parameters('tagValues').cost]", "f5": "[variables('f5Tag')]", "f5Template":"[variables('f5TemplateTag')]" }
 tag_values = {"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}
 api_version = "[variables('apiVersion')]"
 compute_api_version = "[variables('computeApiVersion')]"
@@ -236,6 +238,8 @@ data['variables']['bigIpVersionPortMap'] = version_port_map
 data['variables']['f5CloudLibsTag'] = f5_cloud_libs_tag
 data['variables']['f5CloudLibsAzureTag'] = f5_cloud_libs_azure_tag
 data['variables']['f5NetworksTag'] = f5_networks_tag
+data['variables']['f5Tag'] = f5_tag
+data['variables']['f5TemplateTag'] = f5_template_tag
 data['variables']['f5CloudIappsTag'] = f5_cloud_iapps_tag
 data['variables']['verifyHash'] = verify_hash
 data['variables']['installCloudLibs'] = install_cloud_libs
