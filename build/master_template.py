@@ -26,8 +26,8 @@ script_location = options.script_location
 solution_location = options.solution_location
 
 ## Specify meta file and file to create(should be argument)
-metafile = 'base.azuredeploy.json'
-metafile_params = 'base.azuredeploy.parameters.json'
+metafile = 'files/tmpl_files/base.azuredeploy.json'
+metafile_params = 'files/tmpl_files/base.azuredeploy.parameters.json'
 created_file = template_location + 'azuredeploy.json'
 createdfile_params = template_location + 'azuredeploy.parameters.json'
 
@@ -623,11 +623,16 @@ with open(createdfile_params, 'w') as finished_params:
     json.dump(data_params, finished_params, indent=4, sort_keys=False, ensure_ascii=False)
 
 
+
+###### Prepare some information prior to creating Scripts/Readme's ######
+lic_support = {'1nic': 'Both', '2nic': 'Both', '3nic': 'Both', 'cluster': 'Both', 'ha-avset': 'Both', 'ltm_autoscale': 'PAYG', 'waf_autoscale': 'PAYG' }
+lic_key_count = {'1nic': 1, '2nic': 1, '3nic': 1, 'cluster': 2, 'ha-avset': 2, 'ltm_autoscale': 0, 'waf_autoscale': 0 }
+template_info = {'template_name': template_name, 'location': script_location, 'lic_support': lic_support, 'lic_key_count': lic_key_count }
 ######################################## Create/Modify Scripts ########################################
-    # Need to manually add templates to create scripts for now as a 'check'...
+# Manually adding templates to create scripts proc for now as a 'check'...
 if template_name in ('1nic', '2nic', '3nic', 'cluster', 'ha-avset', 'ltm_autoscale', 'waf_autoscale') and script_location:
-    bash_script = script_generator.script_creation(template_name, data, script_location, default_payg_bw, 'bash')
-    ps_script = script_generator.script_creation(template_name, data, script_location, default_payg_bw, 'powershell')
+    bash_script = script_generator.script_creation(template_info, data, default_payg_bw, 'bash')
+    ps_script = script_generator.script_creation(template_info, data, default_payg_bw, 'powershell')
 ######################################## END Create/Modify Scripts ########################################
 
 ######################################## Create/Modify README's ########################################
@@ -660,7 +665,7 @@ if template_name in ('1nic', '2nic', '3nic', 'cluster', 'ha-avset', 'ltm_autosca
     readme_text['help_text']['experimental'] = 'While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.'
     ## Deploy Buttons ##
     readme_text['deploy_links']['version_tag'] = f5_networks_tag
-    readme_text['deploy_links']['lic_support'] = {'1nic': 'Both', '2nic': 'Both', '3nic': 'Both', 'cluster': 'Both', 'ha-avset': 'Both', 'ltm_autoscale': 'PAYG', 'waf_autoscale': 'PAYG' }
+    readme_text['deploy_links']['lic_support'] = template_info['lic_support']
     ## Example Scripts - These are set above, just adding to README ##
     readme_text['bash_script'] = bash_script
     readme_text['ps_script'] = ps_script
@@ -676,5 +681,5 @@ if template_name in ('1nic', '2nic', '3nic', 'cluster', 'ha-avset', 'ltm_autosca
     readme_text['sp_access_text'] = {'read': '**Read** access is required, it can be limited to the resource group used by this solution.', 'read_write': '**Read/Write** access is required, it can be limited to the resource group used by this solution.'}
 
     #### Call function to create/update README ####
-    readme_generator.readme_creation(template_name, data, license_text, readme_text, script_location, created_file)
+    readme_generator.readme_creation(template_info, data, license_text, readme_text, created_file)
 ######################################## END Create/Modify README's ########################################
