@@ -26,8 +26,8 @@ script_location = options.script_location
 solution_location = options.solution_location
 
 ## Specify meta file and file to create(should be argument)
-metafile = 'base.azuredeploy.json'
-metafile_params = 'base.azuredeploy.parameters.json'
+metafile = 'files/tmpl_files/base.azuredeploy.json'
+metafile_params = 'files/tmpl_files/base.azuredeploy.parameters.json'
 created_file = template_location + 'azuredeploy.json'
 createdfile_params = template_location + 'azuredeploy.parameters.json'
 

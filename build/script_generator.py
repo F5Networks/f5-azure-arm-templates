@@ -45,12 +45,12 @@ def script_creation(template_info, data, default_payg_bw, language):
     param_str = ''; mandatory_cmd = ''; payg_cmd = ''; byol_cmd = ''; pwd_cmd = ''; sps_cmd = ''; ssl_pwd_cmd = ''; license2_param = ''
     if language == 'powershell':
         deploy_cmd_params = ''; script_dash = ' -'
-        meta_script = 'base.deploy_via_ps.ps1'; script_loc = script_location + 'Deploy_via_PS.ps1'
+        meta_script = 'files/script_files/base.deploy_via_ps.ps1'; script_loc = script_location + 'Deploy_via_PS.ps1'
         base_ex = '## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth ' + default_payg_bw
         base_deploy = '$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose '
     elif language == 'bash':
         deploy_cmd_params = '"{'; script_dash = ' --'; license_check = ''; license2_check = ''
-        meta_script = 'base.deploy_via_bash.sh'; script_loc = script_location + 'deploy_via_bash.sh'
+        meta_script = 'files/script_files/base.deploy_via_bash.sh'; script_loc = script_location + 'deploy_via_bash.sh'
         base_ex = '## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth ' + default_payg_bw
         base_deploy = 'azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p '
         mandatory_variables = ''; license_params = ''

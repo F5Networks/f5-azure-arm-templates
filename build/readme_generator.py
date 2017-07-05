@@ -83,7 +83,7 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
     """ Main proc to create readme """
     template_name = template_info['template_name']
     readme_location = template_info['location']
-    folder_loc = 'readme_files/'
+    folder_loc = 'files/readme_files/'
     base_readme = folder_loc + 'base.README.md'
     misc_readme = folder_loc + 'misc.README.txt'
     final_readme = readme_location + 'README.md'
