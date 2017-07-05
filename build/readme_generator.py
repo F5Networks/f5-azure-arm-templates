@@ -79,8 +79,10 @@ def create_deploy_links(version_tag, lic_type, template_location):
         deploy_links = deploy_links.replace('<LIC_TYPE>', lic)
     return deploy_links
 
-def readme_creation(template_name, data, license_params, readme_text, readme_location, template_location):
+def readme_creation(template_info, data, license_params, readme_text, template_location):
     """ Main proc to create readme """
+    template_name = template_info['template_name']
+    readme_location = template_info['location']
     folder_loc = 'readme_files/'
     base_readme = folder_loc + 'base.README.md'
     misc_readme = folder_loc + 'misc.README.txt'
