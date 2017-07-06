@@ -9,7 +9,7 @@ test:
         - docker-executor
     stage: test
     script:
-        - python -B -m unittest discover -s build/test/lib -p "*test*.py"
+        - python -B -m unittest discover -s build/test/lib -p "*Tests*.py"
 
 package:
     tags:
