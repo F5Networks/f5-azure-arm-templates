@@ -79,14 +79,14 @@ default_instance = "Standard_DS2_v2"
 ## Update port map variable if deploying multi_nic template
 if template_name in ('2nic'):
     nic_port_map = "[variables('bigIpNicPortMap')['2'].Port]"
-if template_name in ('3nic', 'ha-avset'):
+if template_name in ('3nic', 'multi-nic', 'ha-avset'):
     nic_port_map = "[variables('bigIpNicPortMap')['3'].Port]"
 
 ## Update allowed instances available based on solution
 disallowed_instance_list = []
 if template_name in ('waf_autoscale'):
     disallowed_instance_list = ["Standard_A2", "Standard_F2"]
-if template_name in ('3nic', 'ha-avset'):
+if template_name in ('3nic', 'multi-nic', 'ha-avset'):
     default_instance = "Standard_DS3_v2"
     disallowed_instance_list = ["Standard_A2", "Standard_D2", "Standard_DS2", "Standard_D2_v2", "Standard_DS2_v2", "Standard_F2", "Standard_F2S"]
 for instance in disallowed_instance_list:
@@ -96,9 +96,9 @@ for instance in disallowed_instance_list:
 ext_mask_cmd = ''
 int_mask_cmd = ''
 if stack_type == 'existing_stack':
-    if template_name in ('2nic', '3nic', 'ha-avset'):
+    if template_name in ('2nic', '3nic', 'multi-nic', 'ha-avset'):
         ext_mask_cmd = "skip(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, indexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '/')),"
-    if template_name in ('3nic', 'ha-avset'):
+    if template_name in ('3nic', 'multi-nic', 'ha-avset'):
         int_mask_cmd = "skip(reference(variables('intSubnetRef'), variables('networkApiVersion')).addressPrefix, indexOf(reference(variables('intSubnetRef'), variables('networkApiVersion')).addressPrefix, '/')),"
 
 ## Set BIG-IP versions to allow ##
@@ -157,10 +157,10 @@ data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": 
 data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values, "metadata": { "description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key." }}
 
 # Set new_stack/existing_stack parameters for templates that support that
-if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster', 'ltm_autoscale', 'waf_autoscale'):
-    if template_name in ('1nic', '2nic', '3nic', 'ha-avset'):
+if template_name in ('1nic', '2nic', '3nic', 'multi-nic', 'ha-avset', 'cluster', 'ltm_autoscale', 'waf_autoscale'):
+    if template_name in ('1nic', '2nic', '3nic', 'multi-nic', 'ha-avset'):
         data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": { "description": "Name of the Virtual Machine."}}
-    if template_name in ('2nic', '3nic', 'ha-avset'):
+    if template_name in ('2nic', '3nic', 'multi-nic', 'ha-avset'):
         data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8], "metadata": { "description": "The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers." } }
     if stack_type == 'new_stack':
         data['parameters']['vnetAddressPrefix'] = {"type": "string", "defaultValue": "10.0", "metadata": { "description": "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'." } }
@@ -175,14 +175,14 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster', 'ltm_autosca
             pass
         else:
             data['parameters']['mgmtIpAddress'] = { "type": "string", "metadata": { "description": "MGMT subnet IP Address to use for the BIG-IP management IP address." } }
-        if template_name in ('2nic', '3nic', 'ha-avset'):
+        if template_name in ('2nic', '3nic', 'multi-nic', 'ha-avset'):
             data['parameters']['externalSubnetName'] = { "type": "string", "metadata": { "description": "Name of the existing external subnet - with external access to Internet." } }
             if template_name in ('ha-avset'):
                 data['parameters']['externalIpSelfAddressRangeStart'] = { "metadata": { "description": "The static private IP address you would like to assign to the external self IP (primary) of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device." }, "type": "string" }
                 data['parameters']['externalIpAddressRangeStart'] = { "metadata": { "description": "The static private IP address (secondary) you would like to assign to the first shared Azure public IP. An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses for external virtual servers." }, "type": "string" }
             else:
                 data['parameters']['externalIpAddressRangeStart'] = { "type": "string", "metadata": { "description": "The static private IP address  you would like to assign to the first external Azure public IP(for self IP). An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50(self IP), 10.100.1.51 and 10.100.1.52 being configured as static private IP addresses for external virtual servers." } }
-        if template_name in ('3nic', 'ha-avset'):
+        if template_name in ('3nic', 'multi-nic', 'ha-avset'):
             data['parameters']['internalSubnetName'] = { "type": "string", "metadata": { "description": "Name of the existing internal subnet." } }
             if template_name in ('ha-avset'):
                 data['parameters']['internalIpAddressRangeStart'] = { "type": "string", "metadata": { "description": "The static private IP address you would like to assign to the internal self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device." } }
@@ -251,8 +251,8 @@ data['variables']['skuToUse'] = sku_to_use
 data['variables']['offerToUse'] = offer_to_use
 data['variables']['bigIpNicPortValue'] = nic_port_map
 ## Handle new_stack/existing_stack variable differences
-if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster', 'ltm_autoscale', 'waf_autoscale'):
-    if template_name in ('1nic', '2nic', '3nic', 'ha-avset'):
+if template_name in ('1nic', '2nic', '3nic', 'multi-nic', 'ha-avset', 'cluster', 'ltm_autoscale', 'waf_autoscale'):
+    if template_name in ('1nic', '2nic', '3nic', 'multi-nic', 'ha-avset'):
         data['variables']['instanceName'] = "[toLower(parameters('instanceName'))]"
     if stack_type == 'new_stack':
         data['variables']['vnetId'] = "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
@@ -263,7 +263,7 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster', 'ltm_autosca
             data['variables']['mgmtSubnetPrivateAddress'] = "[concat(parameters('vnetAddressPrefix'), '.1.')]"
             data['variables']['mgmtSubnetPrivateAddressSuffix'] = 4
             data['variables']['mgmtSubnetPrivateAddressSuffix1'] = "[add(variables('mgmtSubnetPrivateAddressSuffix'), 1)]"
-        if template_name in ('2nic', '3nic', 'ha-avset'):
+        if template_name in ('2nic', '3nic', 'multi-nic', 'ha-avset'):
             data['variables']['extNsgID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-ext-nsg'))]"
             data['variables']['extSelfPublicIpAddressNamePrefix'] = "[concat(variables('dnsLabel'), '-self-pip')]"
             data['variables']['extSelfPublicIpAddressIdPrefix'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('extSelfPublicIpAddressNamePrefix'))]"
@@ -275,7 +275,7 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster', 'ltm_autosca
             data['variables']['extSubnetPrefix'] = "[concat(parameters('vnetAddressPrefix'), '.2.0/24')]"
             data['variables']['extSubnetPrivateAddress'] = "[concat(parameters('vnetAddressPrefix'), '.2.4')]"
             data['variables']['extSubnetPrivateAddressPrefix'] = "[concat(parameters('vnetAddressPrefix'), '.2.')]"
-            if template_name in ('3nic', 'ha-avset'):
+            if template_name in ('3nic', 'multi-nic', 'ha-avset'):
                 data['variables']['intNicName'] = "[concat(variables('dnsLabel'), '-int')]"
                 data['variables']['intSubnetName'] = "[concat(variables('dnsLabel'),'int-subnet')]"
                 data['variables']['intSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]"
@@ -299,7 +299,7 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster', 'ltm_autosca
                 data['variables']['mgmtSubnetPrivateAddressSuffix'] = "[int(variables('mgmtSubnetPrivateAddressPrefixArray')[3])]"
                 data['variables']['mgmtSubnetPrivateAddressSuffix1'] = "[add(variables('mgmtSubnetPrivateAddressSuffix'), 1)]"
                 data['variables']['mgmtSubnetPrivateAddress'] = "[variables('mgmtSubnetPrivateAddressPrefix')]"
-        if template_name in ('2nic', '3nic', 'ha-avset'):
+        if template_name in ('2nic', '3nic', 'multi-nic', 'ha-avset'):
             data['variables']['extNsgID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-ext-nsg'))]"
             data['variables']['extSelfPublicIpAddressNamePrefix'] = "[concat(variables('dnsLabel'), '-self-pip')]"
             data['variables']['extSelfPublicIpAddressIdPrefix'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('extSelfPublicIpAddressNamePrefix'))]"
@@ -321,7 +321,7 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster', 'ltm_autosca
             data['variables']['extSubnetPrivateAddressSuffix6'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 7)]"
             data['variables']['extSubnetPrivateAddressSuffix7'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 8)]"
             data['variables']['extSubnetRef'] = "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/', parameters('vnetResourceGroupName'), '/providers/Microsoft.Network/virtualNetworks/', parameters('vnetName'), '/subnets/', parameters('externalSubnetName'))]"
-            if template_name in ('3nic', 'ha-avset'):
+            if template_name in ('3nic', 'multi-nic', 'ha-avset'):
                 data['variables']['intNicName'] = "[concat(variables('dnsLabel'), '-int')]"
                 data['variables']['intSubnetName'] = "[parameters('internalSubnetName')]"
                 data['variables']['intSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]"
@@ -350,7 +350,7 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster', 'ltm_autosca
                     self_ip_config_array += [{ "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '1')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress1')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
             ext_ip_config_array = [{ "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig0')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 0)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix0'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig1')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 1)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix1'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig2')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 2)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix2'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig3')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 3)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix3'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig4')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 4)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix4'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig5')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 5)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix5'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig6')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 6)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix6'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig7')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 7)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix7'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
     # After adding variables for new_stack/existing_stack we need to add the ip config array
-    if template_name in ('2nic', '3nic', 'ha-avset'):
+    if template_name in ('2nic', '3nic', 'multi-nic', 'ha-avset'):
         data['variables']['numberOfExternalIps'] = "[parameters('numberOfExternalIps')]"
         data['variables']['selfIpconfigArray'] = self_ip_config_array
         data['variables']['extIpconfigArray'] = ext_ip_config_array
@@ -398,11 +398,11 @@ for variables in data['variables']:
 ######################################## ARM Resources ########################################
 resources_list = []
 ###### Public IP Resource(s) ######
-if template_name in ('1nic', '2nic', '3nic', 'cluster', 'ltm_autoscale', 'waf_autoscale'):
+if template_name in ('1nic', '2nic', '3nic', 'multi-nic', 'cluster', 'ltm_autoscale', 'waf_autoscale'):
     resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[variables('mgmtPublicIPAddressName')]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[variables('dnsLabel')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
 if template_name in ('ha-avset'):
     resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('mgmtPublicIPAddressName'), 0)]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabel'), '-0')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } },{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('mgmtPublicIPAddressName'), 1)]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabel'), '-1')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
-if template_name in ('2nic', '3nic', 'ha-avset'):
+if template_name in ('2nic', '3nic', 'multi-nic', 'ha-avset'):
     # Add Self Public IP - for external NIC
     resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('extSelfPublicIpAddressNamePrefix'), '0')]", "tags": tags, "properties": { "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
     if template_name in ('ha-avset'):
@@ -423,9 +423,9 @@ if template_name in ('1nic', 'cluster'):
     subnets = [{ "name": "[variables('mgmtSubnetName')]", "properties": { "addressPrefix": "[variables('mgmtSubnetPrefix')]" } }]
 if template_name in ('2nic'):
     subnets = [{ "name": "[variables('mgmtSubnetName')]", "properties": { "addressPrefix": "[variables('mgmtSubnetPrefix')]" } }, { "name": "[variables('extSubnetName')]", "properties": { "addressPrefix": "[variables('extSubnetPrefix')]" } }]
-if template_name in ('3nic', 'ha-avset'):
+if template_name in ('3nic', 'multi-nic', 'ha-avset'):
     subnets = [{ "name": "[variables('mgmtSubnetName')]", "properties": { "addressPrefix": "[variables('mgmtSubnetPrefix')]" } }, { "name": "[variables('extSubnetName')]", "properties": { "addressPrefix": "[variables('extSubnetPrefix')]" } }, { "name": "[variables('intSubnetName')]", "properties": { "addressPrefix": "[variables('intSubnetPrefix')]" } }]
-if template_name in ('1nic', '2nic', '3nic', 'cluster', 'ha-avset'):
+if template_name in ('1nic', '2nic', '3nic', 'multi-nic', 'cluster', 'ha-avset'):
     if stack_type == 'new_stack':
         resources_list += [{ "type": "Microsoft.Network/virtualNetworks", "apiVersion": api_version, "location": location, "name": "[variables('virtualNetworkName')]", "tags": tags, "properties": { "addressSpace": { "addressPrefixes": [ "[variables('vnetAddressPrefix')]" ] }, "subnets": subnets } }]
 
@@ -447,11 +447,11 @@ elif stack_type == 'existing_stack':
     depends_on_ext = ["[variables('extNsgID')]", "extpipcopy"]
     if template_name in ('ha-avset'):
         depends_on = ["[variables('mgmtNsgID')]"]
-if template_name in ('1nic', '2nic', '3nic'):
+if template_name in ('1nic', '2nic', '3nic', 'multi-nic',):
     resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": depends_on, "location": location, "name": "[variables('mgmtNicName')]", "tags": tags, "properties": { "networkSecurityGroup": { "id": "[variables('mgmtNsgID')]" }, "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-ipconfig1')]", "properties": { "privateIPAddress": "[variables('mgmtSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "PublicIpAddress": { "Id": "[variables('mgmtPublicIPAddressId')]" }, "subnet": { "id": "[variables('mgmtSubnetId')]" } } } ] } }]
 if template_name in ('2nic'):
     resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": depends_on_ext, "location": location, "name": "[variables('extNicName')]", "tags": tags, "properties": { "networkSecurityGroup": { "id": "[concat(variables('extNsgID'))]" }, "ipConfigurations": "[concat(take(variables('selfIpConfigArray'), 1), take(variables('extIpconfigArray'),variables('numberofExternalIps')))]" } } ]
-if template_name in ('3nic'):
+if template_name in ('3nic', 'multi-nic'):
     resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": depends_on_ext, "location": location, "name": "[variables('extNicName')]", "tags": tags, "properties": { "networkSecurityGroup": { "id": "[concat(variables('extNsgID'))]" }, "ipConfigurations": "[concat(take(variables('selfIpConfigArray'), 1), take(variables('extIpconfigArray'),variables('numberofExternalIps')))]" } }, { "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": depends_on_ext, "location": location, "name": "[variables('intNicName')]", "tags": tags, "properties": { "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-ipconfig1')]", "properties": { "privateIPAddress": "[variables('intSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('intSubnetId')]" } } } ] } } ]
 if template_name in ('cluster'):
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkInterfaces", "name": "[concat(variables('mgmtNicName'),copyindex())]", "location": location, "tags": tags, "dependsOn": depends_on + ["[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/guimgt',copyindex())]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/sshmgt',copyindex())]"], "copy": { "count": "[parameters('numberOfInstances')]", "name": "niccopy" }, "properties": { "networkSecurityGroup": { "id": "[variables('mgmtNsgID')]" }, "ipConfigurations": [ { "name": "ipconfig1", "properties": { "privateIPAllocationMethod": "Static", "privateIPAddress": "[concat(variables('mgmtSubnetPrivateAddress'),add(variables('mgmtSubnetPrivateAddressSuffix'), copyindex()))]", "subnet": { "id": "[variables('mgmtSubnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ], "loadBalancerInboundNatRules": [ { "id": "[concat(variables('lbID'), '/inboundNatRules/', 'guimgt',copyIndex())]" }, { "id": "[concat(variables('lbID'), '/inboundNatRules/', 'sshmgt',copyIndex())]" } ] } } ] } }]
@@ -469,9 +469,9 @@ nsg_security_rules = [{ "name": "mgmt_allow_https", "properties": { "description
 if template_name in ('waf_autoscale'):
     nsg_security_rules += [{ "name": "app_allow_http", "properties": { "description": "", "priority": 110, "sourceAddressPrefix": "*", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "[variables('httpBackendPort')]", "protocol": "TCP", "direction": "Inbound", "access": "Allow" } }, { "name": "app_allow_https", "properties": { "description": "", "priority": 111, "sourceAddressPrefix": "*", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "[variables('httpsBackendPort')]", "protocol": "TCP", "direction": "Inbound", "access": "Allow" } }]
 
-if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster', 'ltm_autoscale', 'waf_autoscale'):
+if template_name in ('1nic', '2nic', '3nic', 'multi-nic', 'ha-avset', 'cluster', 'ltm_autoscale', 'waf_autoscale'):
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkSecurityGroups", "location": location, "name": "[concat(variables('dnsLabel'), '-mgmt-nsg')]", "tags": tags, "properties": { "securityRules": nsg_security_rules } }]
-if template_name in ('2nic', '3nic', 'ha-avset'):
+if template_name in ('2nic', '3nic', 'multi-nic', 'ha-avset'):
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkSecurityGroups", "location": location, "name": "[concat(variables('dnsLabel'), '-ext-nsg')]", "tags": tags, "properties": { "securityRules": "" } }]
 
 ###### Load Balancer Resource(s) ######
@@ -491,7 +491,7 @@ if template_name == 'cluster':
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/loadBalancers/inboundNatRules", "name": "[concat(variables('loadBalancerName'),'/sshmgt', copyIndex())]", "location": location, "copy": { "name": "lbNatLoop", "count": "[parameters('numberOfInstances')]" }, "dependsOn": [ "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]" ], "properties": { "frontendIPConfiguration": { "id": "[variables('frontEndIPConfigID')]" }, "protocol": "tcp", "frontendPort": "[copyIndex(8022)]", "backendPort": 22, "enableFloatingIP": False } }]
 
 ######## Availability Set Resource(s) ######
-if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster'):
+if template_name in ('1nic', '2nic', '3nic', 'multi-nic', 'ha-avset', 'cluster'):
     resources_list += [{ "apiVersion": api_version, "location": location, "name": "[variables('availabilitySetName')]", "tags": tags, "type": "Microsoft.Compute/availabilitySets" }]
 
 ###### Storage Account Resource(s) ######
@@ -506,10 +506,10 @@ if template_name == '1nic':
 if template_name in ('2nic'):
     nic_reference = [{ "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('mgmtNicName'))]", "properties": { "primary": True } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('extNicName'))]", "properties": { "primary": False } }]
     depends_on.append("[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]")
-if template_name in ('3nic'):
+if template_name in ('3nic', 'multi-nic'):
     nic_reference = [{ "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('mgmtNicName'))]", "properties": { "primary": True } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('extNicName'))]", "properties": { "primary": False } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('intNicName'))]", "properties": { "primary": False } }]
     depends_on.append("[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]"); depends_on.append("[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'))]")
-if template_name in ('1nic', '2nic', '3nic'):
+if template_name in ('1nic', '2nic', '3nic', 'multi-nic'):
     resources_list += [{"apiVersion": api_version, "type": "Microsoft.Compute/virtualMachines", "dependsOn": depends_on, "location": location, "name": "[variables('instanceName')]", "tags": tags, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "[variables('offerToUse')]" }, "properties": { "diagnosticsProfile": { "bootDiagnostics": { "enabled": True, "storageUri": "[concat('http://',variables('newDataStorageAccountName'),'.blob.core.windows.net')]" } }, "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "networkProfile": { "networkInterfaces":  nic_reference }, "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]" }, "osProfile": { "computerName": "[variables('instanceName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "storageProfile": { "imageReference": { "publisher": "f5-networks", "offer": "[variables('offerToUse')]", "sku": "[variables('skuToUse')]", "version": image_to_use }, "osDisk": { "caching": "ReadWrite", "createOption": "FromImage", "name": "osdisk", "vhd": { "uri": "[concat('http://',variables('newStorageAccountName'), '.blob.core.windows.net/vhds/', variables('instanceName'), '.vhd')]" } } } } }]
 if template_name == 'cluster':
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Compute/virtualMachines", "name": "[concat(variables('deviceNamePrefix'),copyindex())]", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), copyindex())]", "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]" ], "copy": { "count": "[parameters('numberOfInstances')]", "name": "devicecopy" }, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "[variables('offerToUse')]" }, "properties": { "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]" }, "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "osProfile": { "computerName": "[concat(variables('deviceNamePrefix'),copyindex())]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "storageProfile": { "imageReference": { "publisher": "f5-networks", "offer": "[variables('offerToUse')]", "sku": "[variables('skuToUse')]", "version": image_to_use }, "osDisk": { "name": "[concat('osdisk',copyindex())]", "vhd": { "uri": "[concat('http://',variables('newStorageAccountName'),'.blob.core.windows.net/',variables('newStorageAccountName'),'/osDisk',copyindex(),'.vhd')]" }, "caching": "ReadWrite", "createOption": "FromImage" } }, "networkProfile": { "networkInterfaces": [ { "id": "[concat(resourceId('Microsoft.Network/networkInterfaces',variables('mgmtNicName')),copyindex())]" } ] }, "diagnosticsProfile": { "bootDiagnostics": { "enabled": True, "storageUri": "[concat('http://',variables('newDataStorageAccountName'),'.blob.core.windows.net')]" } } } }]
@@ -523,7 +523,7 @@ if template_name == '1nic':
     command_to_execute = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none'<POST_CMD_TO_EXECUTE>)]"
 if template_name == '2nic':
     command_to_execute = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --vlan name:external,nic:1.1 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), <EXT_MASK_CMD> ',vlan:external --log-level debug'<POST_CMD_TO_EXECUTE>)]"
-if template_name == '3nic':
+if template_name in ('3nic', 'multi-nic'):
     command_to_execute = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), <EXT_MASK_CMD> ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress'), <INT_MASK_CMD> ',vlan:internal --log-level debug'<POST_CMD_TO_EXECUTE>)]"
 if template_name == 'cluster':
     # Two Extensions for Cluster
@@ -557,7 +557,7 @@ command_to_execute2 = command_to_execute2.replace('<INT_MASK_CMD>', int_mask_cmd
 file_uris = [ "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]", "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-service-discovery/f5.service_discovery.tmpl')]" ]
 
 ## Define command to execute(s)
-if template_name in ('1nic', '2nic', '3nic'):
+if template_name in ('1nic', '2nic', '3nic', 'multi-nic'):
     resources_list += [{"apiVersion": "2016-03-30", "type": "Microsoft.Compute/virtualMachines/extensions", "name": "[concat(variables('instanceName'),'/start')]", "tags": tags, "location": location, "dependsOn": [ "[concat('Microsoft.Compute/virtualMachines/', variables('instanceName'))]" ], "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": file_uris }, "protectedSettings": { "commandToExecute": command_to_execute } } }]
 if template_name == 'cluster':
     # Two Extensions for Cluster
@@ -600,7 +600,7 @@ with open(temp_sort, 'r') as temp_sorted:
     temp_sorted.close(); os.remove(temp_sort)
 
 ######################################## ARM Outputs ########################################
-if template_name in ('1nic', '2nic', '3nic'):
+if template_name in ('1nic', '2nic', '3nic', 'multi-nic'):
     data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://', reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]" }
     data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' ',22)]" }
 if template_name == 'cluster':
@@ -625,12 +625,12 @@ with open(createdfile_params, 'w') as finished_params:
 
 
 ###### Prepare some information prior to creating Scripts/Readme's ######
-lic_support = {'1nic': 'Both', '2nic': 'Both', '3nic': 'Both', 'cluster': 'Both', 'ha-avset': 'Both', 'ltm_autoscale': 'PAYG', 'waf_autoscale': 'PAYG' }
-lic_key_count = {'1nic': 1, '2nic': 1, '3nic': 1, 'cluster': 2, 'ha-avset': 2, 'ltm_autoscale': 0, 'waf_autoscale': 0 }
+lic_support = {'1nic': 'Both', '2nic': 'Both', '3nic': 'Both', 'multi-nic': 'Both', 'cluster': 'Both', 'ha-avset': 'Both', 'ltm_autoscale': 'PAYG', 'waf_autoscale': 'PAYG' }
+lic_key_count = {'1nic': 1, '2nic': 1, '3nic': 1, 'multi-nic': 1, 'cluster': 2, 'ha-avset': 2, 'ltm_autoscale': 0, 'waf_autoscale': 0 }
 template_info = {'template_name': template_name, 'location': script_location, 'lic_support': lic_support, 'lic_key_count': lic_key_count }
 ######################################## Create/Modify Scripts ########################################
 # Manually adding templates to create scripts proc for now as a 'check'...
-if template_name in ('1nic', '2nic', '3nic', 'cluster', 'ha-avset', 'ltm_autoscale', 'waf_autoscale') and script_location:
+if template_name in ('1nic', '2nic', '3nic', 'multi-nic', 'cluster', 'ha-avset', 'ltm_autoscale', 'waf_autoscale') and script_location:
     bash_script = script_generator.script_creation(template_info, data, default_payg_bw, 'bash')
     ps_script = script_generator.script_creation(template_info, data, default_payg_bw, 'powershell')
 ######################################## END Create/Modify Scripts ########################################
@@ -638,11 +638,12 @@ if template_name in ('1nic', '2nic', '3nic', 'cluster', 'ha-avset', 'ltm_autosca
 ######################################## Create/Modify README's ########################################
     readme_text = {'title_text': {}, 'intro_text': {}, 'help_text': {}, 'deploy_links': {}, 'version_tag': {}, 'ps_script': {}, 'bash_script': {}, 'config_example_text': {}, 'license_map': {}, 'prereq_text': {}, 'stack_type_text': {} }
     ## Title Text ##
-    readme_text['title_text'] = {'1nic': 'Single NIC', '2nic': '2 NIC', '3nic': '3 NIC', 'cluster': 'ConfigSync Cluster: Single NIC', 'ha-avset': 'HA Cluster: Active/Standby', 'ltm_autoscale': 'AutoScale BIG-IP LTM - VM Scale Set', 'waf_autoscale': 'AutoScale BIG-IP WAF(LTM+ASM) - VM Scale Set' }
+    readme_text['title_text'] = {'1nic': 'Single NIC', '2nic': '2 NIC', '3nic': '3 NIC', 'multi-nic': 'Multi NIC', 'cluster': 'ConfigSync Cluster: Single NIC', 'ha-avset': 'HA Cluster: Active/Standby', 'ltm_autoscale': 'AutoScale BIG-IP LTM - VM Scale Set', 'waf_autoscale': 'AutoScale BIG-IP WAF(LTM+ASM) - VM Scale Set' }
     ## Intro Text ##
     readme_text['intro_text']['1nic'] = 'This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard Cloud design where the compute instance of F5 is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.'
     readme_text['intro_text']['2nic'] = 'This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3-NIC template without the NIC for connecting directly to backend webservers.'
     readme_text['intro_text']['3nic'] = 'This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the compute instance of F5 is running with a management, front-end application traffic(Virtual Server) and back-end application interface.'
+    readme_text['intro_text']['multi-nic'] = 'This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure, the solution can optionally also add additional NIC(s) to the BIG-IP to be used as needed. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the compute instance of F5 is running with a management, front-end application traffic(Virtual Server) and back-end application interface.'
     readme_text['intro_text']['cluster'] = 'This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard Cloud design where the compute instance of F5 is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.'
     readme_text['intro_text']['ha-avset'] = 'This solution uses an ARM template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled. Each pair of BIG-IP VEs is deployed in an Azure Availability Set, and can therefore be spread across different update and fault domains. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.\n\nTraffic flows from the client through BIG-IP VE to the application servers. This is the standard "on-premise-like" cloud design where the compute instance of F5 is running with a management interface, a front-end application traffic (external) interface, and back-end application (internal) interface. This template is a result of Azure now supporting multiple public-to-private IP address mappings per NIC. \n\nThis template supports creating up to 8 additional public/private IP address configurations for the external "application" NIC to be used for passing traffic to BIG-IP virtual servers.  Each virtual server should be configured with a destination address matching the private IP address value of the Azure IP configuration receiving traffic for the application. In the event the active BIG-IP VE becomes unavailable, the IP configuration(s) are migrated using network failover, seamlessly shifting application traffic to the current active BIG-IP VE.\n\nThe template also supports updating the next hop of Azure User-Defined Routes (UDRs) to use the active BIG-IP VEs internal self IP address. Specify a comma-delimited list of managedRoutes and a routeTableTag in the template to define the UDRs to be updated.  All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with "f5_ha:<routeTableTag>" will use the active BIG-IP VE as the next hop for those routes.'
     readme_text['intro_text']['ltm_autoscale'] = 'This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE LTM instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM only.'
@@ -673,6 +674,7 @@ if template_name in ('1nic', '2nic', '3nic', 'cluster', 'ha-avset', 'ltm_autosca
     readme_text['config_example_text']['1nic'] = 'In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.'
     readme_text['config_example_text']['2nic'] = 'In this scneario, one NIC is for management and one NIC is for external traffic.  This is a more traditional BIG-IP deployment model where data-plane and management traffic is separate. The IP addresses in this example may be different in your implementation.'
     readme_text['config_example_text']['3nic'] = 'In this scneario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
+    readme_text['config_example_text']['multi-nic'] = 'In this scneario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  Additional NICs are added to a customer provided VNET/Subnet.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
     readme_text['config_example_text']['cluster'] = 'In this scenario, all access to the BIG-IP VE cluster is through an ALB. The IP addresses in this example may be different in your implementation.'
     readme_text['config_example_text']['ha-avset'] = 'In this scenario, each BIG-IP has one NIC for management, one NIC for external traffic and one NIC for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
     readme_text['config_example_text']['ltm_autoscale'] = 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'

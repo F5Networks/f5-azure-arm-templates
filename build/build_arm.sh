@@ -2,7 +2,7 @@
 
 ############################### Experimental ###############################
 ## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), HA-AVSET
-template_list="standalone/1nic standalone/2nic standalone/3nic ha-avset"
+template_list="standalone/1nic standalone/2nic standalone/3nic standalone/multi-nic ha-avset"
 stack_list="new_stack existing_stack"
 for tmpl in $template_list; do
     loc=$tmpl
