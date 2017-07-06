@@ -1,7 +1,15 @@
 image: node:4
 
 stages:
+    - test
     - package
+
+test:
+    tags:
+        - docker-executor
+    stage: test
+    script:
+        - python -B -m unittest discover -s build/test/lib -p "*test*.py"
 
 package:
     tags:

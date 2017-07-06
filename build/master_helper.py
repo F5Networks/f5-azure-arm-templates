@@ -72,11 +72,15 @@ def variable_initialize(data):
     data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
     data['variables']['resourceGroupName'] = "[resourceGroup().name]"
     data['variables']['singleQuote'] = "'"
+    data['variables']['f5Tag'] = "MANDATORY"
+    data['variables']['f5TemplateTag'] = "MANDATORY"
     data['variables']['f5CloudLibsTag'] = "MANDATORY"
     data['variables']['f5CloudLibsAzureTag'] = "MANDATORY"
     data['variables']['f5NetworksTag'] = "MANDATORY"
     data['variables']['f5CloudIappsTag'] = "MANDATORY"
     data['variables']['f5NetworksSolutionScripts'] = "OPTIONAL"
+    data['variables']['customConfig'] = "### START(INPUT) CUSTOM CONFIGURATION\n"
+    data['variables']['installCustomConfig'] = "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
     data['variables']['verifyHash'] = "MANDATORY"
     data['variables']['installCloudLibs'] = "MANDATORY"
     data['variables']['dnsLabel'] = "[toLower(parameters('dnsLabel'))]"
@@ -102,6 +106,7 @@ def variable_initialize(data):
     data['variables']['mgmtSubnetPrivateAddressPrefix'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddressSuffixInt'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddressSuffix'] = "OPTIONAL"
+    data['variables']['mgmtSubnetPrivateAddressSuffix1'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddress'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddress1'] = "OPTIONAL"
     data['variables']['extSelfPublicIpAddressNamePrefix'] = "OPTIONAL"
@@ -170,9 +175,9 @@ def variable_initialize(data):
     data['variables']['commandArgs'] = "OPTIONAL"
     # Add storage array variables at the end
     data['variables']['instanceTypeMap'] = { "Standard_A3": { "storageAccountType": "Standard_LRS" }, "Standard_A4": { "storageAccountType": "Standard_LRS" }, "Standard_A5": { "storageAccountType": "Standard_LRS" }, "Standard_A6": { "storageAccountType": "Standard_LRS" }, "Standard_A7": { "storageAccountType": "Standard_LRS" }, "Standard_D2": { "storageAccountType": "Standard_LRS" }, "Standard_D3": { "storageAccountType": "Standard_LRS" }, "Standard_D4": { "storageAccountType": "Standard_LRS" }, "Standard_D11": { "storageAccountType": "Standard_LRS" }, "Standard_D12": { "storageAccountType": "Standard_LRS" }, "Standard_D13": { "storageAccountType": "Standard_LRS" }, "Standard_D14": { "storageAccountType": "Standard_LRS" }, "Standard_D2_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D3_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D4_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D5_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D11_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D12_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D13_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D14_v2": { "storageAccountType": "Standard_LRS" }, "Standard_F2": { "storageAccountType": "Standard_LRS" }, "Standard_F4": { "storageAccountType": "Standard_LRS" }, "Standard_G1": { "storageAccountType": "Standard_LRS" }, "Standard_G2": { "storageAccountType": "Standard_LRS" }, "Standard_G3": { "storageAccountType": "Standard_LRS" }, "Standard_G4": { "storageAccountType": "Standard_LRS" }, "Standard_G5": { "storageAccountType": "Standard_LRS" }, "Standard_DS1": { "storageAccountType": "Premium_LRS" }, "Standard_DS2": { "storageAccountType": "Premium_LRS" }, "Standard_DS3": { "storageAccountType": "Premium_LRS" }, "Standard_DS4": { "storageAccountType": "Premium_LRS" }, "Standard_DS11": { "storageAccountType": "Premium_LRS" }, "Standard_DS12": { "storageAccountType": "Premium_LRS" }, "Standard_DS13": { "storageAccountType": "Premium_LRS" }, "Standard_DS14": { "storageAccountType": "Premium_LRS" }, "Standard_DS1_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS2_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS3_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS4_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS5_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS11_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS12_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS13_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS14_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS15_v2": { "storageAccountType": "Premium_LRS" }, "Standard_GS1": { "storageAccountType": "Premium_LRS" }, "Standard_GS2": { "storageAccountType": "Premium_LRS" }, "Standard_GS3": { "storageAccountType": "Premium_LRS" }, "Standard_GS4": { "storageAccountType": "Premium_LRS" }, "Standard_GS5": { "storageAccountType": "Premium_LRS" } }
-    data['variables']['newStorageAccountName'] = "[concat(uniquestring(resourceGroup().id), 'stor')]"
+    data['variables']['newStorageAccountName'] = "[concat(uniqueString(resourceGroup().id, deployment().name), 'stor')]"
     data['variables']['storageAccountType'] = "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]"
-    data['variables']['newDataStorageAccountName'] = "[concat(uniquestring(resourceGroup().id), 'data000')]"
+    data['variables']['newDataStorageAccountName'] = "[concat(uniqueString(resourceGroup().id, deployment().name), 'data000')]"
     data['variables']['dataStorageAccountType'] = "Standard_LRS"
 
     return data

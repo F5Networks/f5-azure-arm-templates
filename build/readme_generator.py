@@ -11,9 +11,9 @@ def param_exist(data, param):
             return True
     return False
 
-def misc_readme_grep(tag, file):
+def misc_readme_grep(tag, misc_file):
     """ Pull in any additional items that exist in the misc README file, based on <TAG> """
-    with open(file, 'r') as file_str:
+    with open(misc_file, 'r') as file_str:
         text = file_str.read()
     reg_ex = tag + '{{' + r"(.*?)}}"
     tag_text = re.findall(reg_ex, text, re.DOTALL)
@@ -44,6 +44,15 @@ def stack_type_check(template_location, readme_text):
         stack_type_text = readme_text['stack_type_text']['new_stack']
     return stack_type_text
 
+def sp_access_needed(template_name, readme_text, misc_readme):
+    """ Determine what Service Principal Access is needed, return full Service Principal Text """
+    sp_text = misc_readme_grep('<SERVICE_PRINCIPAL_TXT>', misc_readme)
+    if template_name in 'ha-avset':
+        sp_text = sp_text.replace('<SP_REQUIRED_ACCESS>', readme_text['sp_access_text']['read_write'])
+    else:
+        sp_text = sp_text.replace('<SP_REQUIRED_ACCESS>', readme_text['sp_access_text']['read'])
+    return sp_text
+
 def md_version_map(data, readme_text):
     """ Create BIG-IP version map: | Azure BIG-IP Image Version | BIG-IP Version | """
     param_array = ""
@@ -70,9 +79,11 @@ def create_deploy_links(version_tag, lic_type, template_location):
         deploy_links = deploy_links.replace('<LIC_TYPE>', lic)
     return deploy_links
 
-def readme_creation(template_name, data, license_params, readme_text, readme_location, template_location):
+def readme_creation(template_info, data, license_params, readme_text, template_location):
     """ Main proc to create readme """
-    folder_loc = 'readme_files/'
+    template_name = template_info['template_name']
+    readme_location = template_info['location']
+    folder_loc = 'files/readme_files/'
     base_readme = folder_loc + 'base.README.md'
     misc_readme = folder_loc + 'misc.README.txt'
     final_readme = readme_location + 'README.md'
@@ -97,7 +108,7 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     ### Check for optional readme items ###
     # Add service principal text if needed
     if param_exist(data, 'servicePrincipalSecret'):
-        sp_text = misc_readme_grep('<SERVICE_PRINCIPAL_TXT>', misc_readme)
+        sp_text = sp_access_needed(template_name, readme_text, misc_readme)
         extra_prereq_text += '  - ' + readme_text['prereq_text']['service_principal'] + '\n'
     # Post-Deployment Configuration Text Substitution
     if 'autoscale' in template_name:
@@ -126,7 +137,7 @@ def readme_creation(template_name, data, license_params, readme_text, readme_loc
     readme = readme.replace('<POST_CONFIG_TXT>', post_config_text)
     readme = readme.replace('<SERVICE_PRINCIPAL>', sp_text)
 
-    # Write to solution location
+    ### Write to solution location ###
     with open(final_readme, 'w') as readme_complete:
         readme_complete.write(readme)
     ## End README creation Function

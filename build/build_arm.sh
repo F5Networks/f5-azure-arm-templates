@@ -16,14 +16,18 @@ for tmpl in $template_list; do
 done
 
 ## BIGIP ARM Templates - Cluster (base)
-python -B '.\master_template.py' --template-name cluster_base --license-type PAYG --template-location '../experimental/cluster/1nic/PAYG/' --script-location '../experimental/cluster/1nic/'
-python -B '.\master_template.py' --template-name cluster_base --license-type BYOL --template-location '../experimental/cluster/1nic/BYOL/' --script-location '../experimental/cluster/1nic/'
+python -B '.\master_template.py' --template-name cluster --license-type PAYG --stack-type new_stack --template-location '../experimental/cluster/1nic/new_stack/PAYG/' --script-location '../experimental/cluster/1nic/new_stack/'
+python -B '.\master_template.py' --template-name cluster --license-type BYOL --stack-type new_stack --template-location '../experimental/cluster/1nic/new_stack/BYOL/' --script-location '../experimental/cluster/1nic/new_stack/'
+python -B '.\master_template.py' --template-name cluster --license-type PAYG --stack-type existing_stack --template-location '../experimental/cluster/1nic/existing_stack/PAYG/' --script-location '../experimental/cluster/1nic/existing_stack/'
+python -B '.\master_template.py' --template-name cluster --license-type BYOL --stack-type existing_stack --template-location '../experimental/cluster/1nic/existing_stack/BYOL/' --script-location '../experimental/cluster/1nic/existing_stack/'
 
 ## BIGIP ARM Template - LTM AutoScale
-python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --template-location '../experimental/solutions/autoscale/ltm/' --script-location '../experimental/solutions/autoscale/ltm/' --solution-location 'experimental'
+python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --stack-type new_stack --template-location '../experimental/solutions/autoscale/ltm/new_stack/' --script-location '../experimental/solutions/autoscale/ltm/new_stack/' --solution-location 'experimental'
+python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --stack-type existing_stack --template-location '../experimental/solutions/autoscale/ltm/existing_stack/' --script-location '../experimental/solutions/autoscale/ltm/existing_stack/' --solution-location 'experimental'
 
 ## BIGIP ARM Template - WAF AutoScale
-python -B '.\master_template.py' --template-name waf_autoscale --license-type PAYG --template-location '../experimental/solutions/autoscale/waf/' --script-location '../experimental/solutions/autoscale/waf/' --solution-location 'experimental'
+python -B '.\master_template.py' --template-name waf_autoscale --license-type PAYG --stack-type new_stack --template-location '../experimental/solutions/autoscale/waf/new_stack/' --script-location '../experimental/solutions/autoscale/waf/new_stack/' --solution-location 'experimental'
+python -B '.\master_template.py' --template-name waf_autoscale --license-type PAYG --stack-type existing_stack --template-location '../experimental/solutions/autoscale/waf/existing_stack/' --script-location '../experimental/solutions/autoscale/waf/existing_stack/' --solution-location 'experimental'
 
 ############################### End Experimental ###############################
 
@@ -43,8 +47,8 @@ for tmpl in $template_list; do
 done
 
 ## BIGIP ARM Templates - Cluster (base)
-python -B '.\master_template.py' --template-name cluster_base --license-type PAYG --template-location '../supported/cluster/1nic/PAYG/' --script-location '../supported/cluster/1nic/'
-python -B '.\master_template.py' --template-name cluster_base --license-type BYOL --template-location '../supported/cluster/1nic/BYOL/' --script-location '../supported/cluster/1nic/'
+python -B '.\master_template.py' --template-name cluster --license-type PAYG --stack-type new_stack --template-location '../supported/cluster/1nic/PAYG/' --script-location '../supported/cluster/1nic/'
+python -B '.\master_template.py' --template-name cluster --license-type BYOL --stack-type new_stack --template-location '../supported/cluster/1nic/BYOL/' --script-location '../supported/cluster/1nic/'
 
 ## BIGIP ARM Template - LTM AutoScale
 python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --template-location '../supported/solutions/autoscale/ltm/' --script-location '../supported/solutions/autoscale/ltm/' --solution-location 'supported'

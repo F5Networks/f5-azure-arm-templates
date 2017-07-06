@@ -15,7 +15,7 @@ The template also supports updating the next hop of Azure User-Defined Routes (U
 **Networking Stack Type:** This template deploys into an existing networking stack; the networking infrastructure must be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.
 
 ## Prerequisites and configuration notes
-  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **#** or **'** (single quote).
+  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See https://support.f5.com/csp/article/K2873 for details.
   - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
@@ -26,10 +26,12 @@ The template also supports updating the next hop of Azure User-Defined Routes (U
 
 
 ## Security
-This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
+This ARM template downloads helper code to configure the BIG-IP system. If you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.  
 In the *variables* section:
-  - In the *verifyHash* variable: search for **script-signature** and then a hashed signature.
+  - In the *verifyHash* variable: **script-signature** and then a hashed signature.
+  - In the *installCloudLibs* variable: **tmsh load sys config merge file /config/verifyHash**.
   - In the *installCloudLibs* variable: ensure this includes **tmsh run cli script verifyHash /config/cloud/f5-cloud-libs.tar.gz**.
+
 
 Additionally, F5 provides checksums for all of our supported templates. For instructions and the checksums to compare against, see https://devcentral.f5.com/codeshare/checksums-for-f5-supported-cft-and-arm-templates-on-github-1014.
 
@@ -526,6 +528,8 @@ This solution requires access to the Azure API to determine how the BIG-IP VEs s
 
 _Ensure that however the creation of the service principal occurs to verify it only has minimum required access based on the solutions need(read vs read/write) prior to this template being deployed and used by the solution within the resource group selected(new or existing)._
 
+**Minimum Required Access:** **Read/Write** access is required, it can be limited to the resource group used by this solution.
+
 The end result should be possession of a client(application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some troubleshooting post-deployment if the service principal is in fact not fully configured.
 
 #### 1. Azure Portal
@@ -547,33 +551,17 @@ https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-aut
 #### 3. Azure PowerShell
 Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
 
-## Deploying Custom Configuration to an Azure Virtual Machine
+## Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
 
-This sample code uses the CustomScript extension resource to configure the f5.ip_forwarding iApp on BIG-IP VE in Azure Resource Manager.
+Once the solution has been deployed there may be a need to perform some additional configuration of the BIG-IP.  This can be accomplished via traditional methods such as via the GUI, logging into the CLI or using the REST API.  However, depending on the requirments it might be preferred to perform this custom configuration as a part of the initial deployment of the solution.  This can be accomplished in the below manner.
 
-The CustomScript extension resource name must reference the Azure virtual machine name and must have a dependency on that virtual machine. You can use only one CustomScript extension resource per virtual machine; however, you can combine multiple semicolon-delimited commands in a single extension resource definition.
+Within the Azure Resource Manager (ARM) template there is a variable called **customConfig**, this contains text similar to "### START(INPUT) CUSTOM CONFIGURATION", that can be replaced with custom shell scripting to perform additional configuration of the BIG-IP.  An example of what it would look like to configure the f5.ip_forwarding iApp is included below.
 
-Warning: F5 does not support the template if you change anything other than the CustomScript extension resource.
+Warning: F5 does not support the template if you change anything other than the **customConfig** ARM template variable.
 
-```
-{
-     "type": "Microsoft.Compute/virtualMachines/extensions",
-     "name": "[concat(variables('virtualMachineName'),'/start')]",
-     "apiVersion": "2016-03-30",
-     "location": "[resourceGroup().location] "
-     "dependsOn": [
-          "[concat('Microsoft.Compute/virtualMachines/',variables('virtualMachineName'))]"
-     ],
-     "properties": {
-          "publisher": "Microsoft.Azure.Extensions",
-          "type": "CustomScript",
-          "typeHandlerVersion": "2.0",
-          "settings": {
-          },
-          "protectedSettings": {
-               "commandToExecute": "[concat('tmsh create sys application service my_deployment { device-group none template f5.ip_forwarding traffic-group none variables replace-all-with { basic__addr { value 0.0.0.0 } basic__forward_all { value No } basic__mask { value 0.0.0.0 } basic__port { value 0 } basic__vlan_listening { value default } options__advanced { value no }options__display_help { value hide } } }')]"
-          }
-     }
+```json
+"variables": {
+    "customConfig": "### START(INPUT) CUSTOM CONFIGURATION\ntmsh create sys application service my_deployment { device-group none template f5.ip_forwarding traffic-group none variables replace-all-with { basic__addr { value 0.0.0.0 } basic__forward_all { value No } basic__mask { value 0.0.0.0 } basic__port { value 0 } basic__vlan_listening { value default } options__advanced { value no }options__display_help { value hide } } }"
 }
 ```
 ### Changing the BIG-IP Configuration utility (GUI) port
