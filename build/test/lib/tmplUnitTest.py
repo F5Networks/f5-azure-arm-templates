@@ -4,8 +4,9 @@ import json
 
 class test_template_generator(unittest.TestCase):
     """ Template Generator Unit Test Class """
-    ## Very Simple Example Test Case
-    def test_1nic_template(self):
+
+    #### Very Simple Example Test Case
+    def test_1nic_template_tag(self):
         """ Test 1nic Template """
         tmpl_loc = 'supported/standalone/1nic/new_stack/PAYG/'
         tmpl_file = tmpl_loc + 'azuredeploy.json'
