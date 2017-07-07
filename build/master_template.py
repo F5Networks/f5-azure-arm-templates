@@ -190,7 +190,7 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster', 'cluster_3ni
                 data['parameters']['internalIpAddress'] = { "type": "string", "metadata": { "description": "Internal subnet IP address you want to use for the BIG-IP internal self IP address." } }
 
 # Set unique solution parameters
-if template_name in ('cluster', 'cluster_3nic'):
+if template_name in ('cluster'):
     data['parameters']['numberOfInstances'] = {"type": "int", "defaultValue": 2, "allowedValues": [ 2 ], "metadata": { "description": "The number of BIG-IP VEs that will be deployed in front of your application(s)." } }
 if template_name in ('ha-avset'):
     data['parameters']['managedRoutes'] = { "defaultValue": "NOT_SPECIFIED", "metadata": { "description": "A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24." }, "type": "string" }
