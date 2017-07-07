@@ -1,6 +1,8 @@
 # Deploying the BIG-IP VE in Azure - 3 NIC
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
+[![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
+[![Issues](https://img.shields.io/github/issues/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/issues)
 
 ## Introduction
 
@@ -18,7 +20,7 @@ This solution uses an ARM template to launch a three NIC deployment of a cloud-f
 
 
 ## Security
-This ARM template downloads helper code to configure the BIG-IP system. If you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.  
+This ARM template downloads helper code to configure the BIG-IP system. If you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
 In the *variables* section:
   - In the *verifyHash* variable: **script-signature** and then a hashed signature.
   - In the *installCloudLibs* variable: **tmsh load sys config merge file /config/verifyHash**.

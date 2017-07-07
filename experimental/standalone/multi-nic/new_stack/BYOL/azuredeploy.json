@@ -108,6 +108,26 @@
             }, 
             "type": "string"
         }, 
+        "numberOfAdditionalNics": {
+            "allowedValues": [
+                1, 
+                2, 
+                3, 
+                4, 
+                5
+            ], 
+            "defaultValue": 1, 
+            "metadata": {
+                "description": "By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a select number of additional NICs to the BIG-IP using this parameter."
+            }, 
+            "type": "int"
+        }, 
+        "additionalNicLocation": {
+            "metadata": {
+                "description": "Please specify where the additional NIC's should go using this parameter.  This should be a semi-colon delimited string of subnets equal to the number of additional NIC's being deployed.  Example if 2 additional NIC's was selected: subnet01;subnet02  NOTE: Please ensure that there is no spaces and the NIC's subnet information is inputted as shown in this example."
+            }, 
+            "type": "string"
+        }, 
         "numberOfExternalIps": {
             "allowedValues": [
                 1, 
@@ -237,7 +257,7 @@
         "mgmtPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('mgmtPublicIPAddressName'))]", 
         "mgmtNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-mgmt-nsg'))]", 
         "mgmtNicName": "[concat(variables('dnsLabel'), '-mgmt')]", 
-        "mgmtSubnetName": "[concat(variables('dnsLabel'),'-mgmt-subnet')]", 
+        "mgmtSubnetName": "mgmt", 
         "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]", 
         "mgmtSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.1.0/24')]", 
         "mgmtSubnetPrivateAddress": "[concat(parameters('vnetAddressPrefix'), '.1.4')]", 
@@ -247,16 +267,17 @@
         "extPublicIPAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('extPublicIPAddressNamePrefix'))]", 
         "extNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-ext-nsg'))]", 
         "extNicName": "[concat(variables('dnsLabel'), '-ext')]", 
-        "extSubnetName": "[concat(variables('dnsLabel'),'-ext-subnet')]", 
+        "extSubnetName": "external", 
         "extSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.2.0/24')]", 
         "extSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('extsubnetName'))]", 
         "extSubnetPrivateAddress": "[concat(parameters('vnetAddressPrefix'), '.2.4')]", 
         "extSubnetPrivateAddressPrefix": "[concat(parameters('vnetAddressPrefix'), '.2.')]", 
         "intNicName": "[concat(variables('dnsLabel'), '-int')]", 
-        "intSubnetName": "[concat(variables('dnsLabel'),'int-subnet')]", 
+        "intSubnetName": "internal", 
         "intSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.3.0/24')]", 
         "intSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]", 
         "intSubnetPrivateAddress": "[concat(parameters('vnetAddressPrefix'), '.3.4')]", 
+        "addtlNicRefSplit": "[split(parameters('additionalNicLocation'), ';')]", 
         "numberOfExternalIps": "[parameters('numberOfExternalIps')]", 
         "selfIpconfigArray": [
             {
@@ -385,6 +406,76 @@
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
                     }
+                }
+            }
+        ], 
+        "selfNicConfigArray": [
+            {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('mgmtNicName'))]", 
+                "properties": {
+                    "primary": true
+                }
+            }, 
+            {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('extNicName'))]", 
+                "properties": {
+                    "primary": false
+                }
+            }, 
+            {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('intNicName'))]", 
+                "properties": {
+                    "primary": false
+                }
+            }
+        ], 
+        "addtlNicConfigArray": [
+            {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic1'))]", 
+                "properties": {
+                    "primary": false
+                }
+            }, 
+            {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic2'))]", 
+                "properties": {
+                    "primary": false
+                }
+            }, 
+            {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic3'))]", 
+                "properties": {
+                    "primary": false
+                }
+            }, 
+            {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic4'))]", 
+                "properties": {
+                    "primary": false
+                }
+            }, 
+            {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic5'))]", 
+                "properties": {
+                    "primary": false
+                }
+            }, 
+            {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic6'))]", 
+                "properties": {
+                    "primary": false
+                }
+            }, 
+            {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic7'))]", 
+                "properties": {
+                    "primary": false
+                }
+            }, 
+            {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic8'))]", 
+                "properties": {
+                    "primary": false
                 }
             }
         ], 
@@ -757,6 +848,47 @@
         }, 
         {
             "apiVersion": "[variables('apiVersion')]", 
+            "condition": "[greaterOrEquals(parameters('numberOfAdditionalNics'), 1)]", 
+            "copy": {
+                "count": "[parameters('numberOfAdditionalNics')]", 
+                "name": "addtlniccopy"
+            }, 
+            "dependsOn": [
+                "[variables('vnetId')]", 
+                "[variables('mgmtPublicIPAddressId')]", 
+                "[variables('mgmtNsgID')]", 
+                "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'))]", 
+                "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]", 
+                "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'))]"
+            ], 
+            "location": "[variables('location')]", 
+            "name": "[concat(variables('instanceName'), '-addtlNic', copyIndex(1))]", 
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig", 
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic", 
+                            "subnet": {
+                                "id": "[concat(variables('vnetId'), '/subnets/', variables('addtlNicRefSplit')[copyIndex()])]"
+                            }
+                        }
+                    }
+                ]
+            }, 
+            "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
+                "environment": "[parameters('tagValues').environment]", 
+                "f5": "[variables('f5Tag')]", 
+                "f5Template": "[variables('f5TemplateTag')]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
+            }, 
+            "type": "Microsoft.Network/networkInterfaces"
+        }, 
+        {
+            "apiVersion": "[variables('apiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[concat(variables('dnsLabel'), '-mgmt-nsg')]", 
             "properties": {
@@ -879,7 +1011,8 @@
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]", 
-                "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'))]"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'))]", 
+                "addtlniccopy"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('instanceName')]", 
@@ -902,26 +1035,7 @@
                     "vmSize": "[parameters('instanceType')]"
                 }, 
                 "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('mgmtNicName'))]", 
-                            "properties": {
-                                "primary": true
-                            }
-                        }, 
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('extNicName'))]", 
-                            "properties": {
-                                "primary": false
-                            }
-                        }, 
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('intNicName'))]", 
-                            "properties": {
-                                "primary": false
-                            }
-                        }
-                    ]
+                    "networkInterfaces": "[concat(take(variables('selfNicConfigArray'), 3), take(variables('addtlNicConfigArray'), parameters('numberOfAdditionalNics')))]"
                 }, 
                 "osProfile": {
                     "adminPassword": "[parameters('adminPassword')]", 
