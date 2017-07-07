@@ -150,6 +150,7 @@ def variable_initialize(data):
     data['variables']['numberOfExternalIps'] = "OPTIONAL"
     data['variables']['selfIpconfigArray'] = "OPTIONAL"
     data['variables']['extIpconfigArray'] = "OPTIONAL"
+    data['variables']['lbFrontEndArray'] = "OPTIONAL"
     data['variables']['ipAddress'] = "OPTIONAL"
     data['variables']['loadBalancerName'] = "OPTIONAL"
     data['variables']['deviceNamePrefix'] = "OPTIONAL"
