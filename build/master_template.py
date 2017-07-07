@@ -259,7 +259,7 @@ if template_name in ('1nic', '2nic', '3nic', 'ha-avset', 'cluster', 'cluster_3ni
         data['variables']['vnetAddressPrefix'] = "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]"
         data['variables']['mgmtSubnetPrefix'] = "[concat(parameters('vnetAddressPrefix'), '.1.0/24')]"
         data['variables']['mgmtSubnetPrivateAddress'] = "[concat(parameters('vnetAddressPrefix'), '.1.4')]"
-        if template_name in ('cluster', 'cluster_3nic'):
+        if template_name in ('cluster'):
             data['variables']['mgmtSubnetPrivateAddress'] = "[concat(parameters('vnetAddressPrefix'), '.1.')]"
             data['variables']['mgmtSubnetPrivateAddressSuffix'] = 4
             data['variables']['mgmtSubnetPrivateAddressSuffix1'] = "[add(variables('mgmtSubnetPrivateAddressSuffix'), 1)]"
