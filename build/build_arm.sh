@@ -15,11 +15,17 @@ for tmpl in $template_list; do
     done
 done
 
-## BIGIP ARM Templates - Cluster (base)
+## BIGIP ARM Templates - Cluster (1 NIC)
 python -B '.\master_template.py' --template-name cluster --license-type PAYG --stack-type new_stack --template-location '../experimental/cluster/1nic/new_stack/PAYG/' --script-location '../experimental/cluster/1nic/new_stack/'
 python -B '.\master_template.py' --template-name cluster --license-type BYOL --stack-type new_stack --template-location '../experimental/cluster/1nic/new_stack/BYOL/' --script-location '../experimental/cluster/1nic/new_stack/'
 python -B '.\master_template.py' --template-name cluster --license-type PAYG --stack-type existing_stack --template-location '../experimental/cluster/1nic/existing_stack/PAYG/' --script-location '../experimental/cluster/1nic/existing_stack/'
 python -B '.\master_template.py' --template-name cluster --license-type BYOL --stack-type existing_stack --template-location '../experimental/cluster/1nic/existing_stack/BYOL/' --script-location '../experimental/cluster/1nic/existing_stack/'
+
+## BIGIP ARM Templates - Cluster (3 NIC)
+python -B '.\master_template.py' --template-name cluster_3nic --license-type PAYG --stack-type new_stack --template-location '../experimental/cluster/3nic/new_stack/PAYG/' --script-location '../experimental/cluster/3nic/new_stack/'
+python -B '.\master_template.py' --template-name cluster_3nic --license-type BYOL --stack-type new_stack --template-location '../experimental/cluster/3nic/new_stack/BYOL/' --script-location '../experimental/cluster/3nic/new_stack/'
+python -B '.\master_template.py' --template-name cluster_3nic --license-type PAYG --stack-type existing_stack --template-location '../experimental/cluster/3nic/existing_stack/PAYG/' --script-location '../experimental/cluster/3nic/existing_stack/'
+python -B '.\master_template.py' --template-name cluster_3nic --license-type BYOL --stack-type existing_stack --template-location '../experimental/cluster/3nic/existing_stack/BYOL/' --script-location '../experimental/cluster/3nic/existing_stack/'
 
 ## BIGIP ARM Template - LTM AutoScale
 python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --stack-type new_stack --template-location '../experimental/solutions/autoscale/ltm/new_stack/' --script-location '../experimental/solutions/autoscale/ltm/new_stack/' --solution-location 'experimental'
