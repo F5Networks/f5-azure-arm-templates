@@ -338,7 +338,7 @@
                         }
                     ], 
                     "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 10)]", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix0'))]", 
                     "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
@@ -354,7 +354,7 @@
                         }
                     ], 
                     "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 11)]", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix1'))]", 
                     "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"

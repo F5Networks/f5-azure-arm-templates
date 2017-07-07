@@ -315,12 +315,6 @@
         "extSubnetPrivateAddressSuffixInt": "[int(variables('extSubnetPrivateAddressPrefixArray')[3])]", 
         "extSubnetPrivateAddressSuffix0": "[add(variables('extSubnetPrivateAddressSuffixInt'), 1)]", 
         "extSubnetPrivateAddressSuffix1": "[add(variables('extSubnetPrivateAddressSuffixInt'), 2)]", 
-        "extSubnetPrivateAddressSuffix2": "[add(variables('extSubnetPrivateAddressSuffixInt'), 3)]", 
-        "extSubnetPrivateAddressSuffix3": "[add(variables('extSubnetPrivateAddressSuffixInt'), 4)]", 
-        "extSubnetPrivateAddressSuffix4": "[add(variables('extSubnetPrivateAddressSuffixInt'), 5)]", 
-        "extSubnetPrivateAddressSuffix5": "[add(variables('extSubnetPrivateAddressSuffixInt'), 6)]", 
-        "extSubnetPrivateAddressSuffix6": "[add(variables('extSubnetPrivateAddressSuffixInt'), 7)]", 
-        "extSubnetPrivateAddressSuffix7": "[add(variables('extSubnetPrivateAddressSuffixInt'), 8)]", 
         "intNicName": "[concat(variables('dnsLabel'), '-int')]", 
         "intSubnetName": "[parameters('internalSubnetName')]", 
         "intSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]", 
@@ -373,7 +367,7 @@
                         }
                     ], 
                     "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 10)]", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix0'))]", 
                     "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
@@ -389,7 +383,7 @@
                         }
                     ], 
                     "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 11)]", 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix1'))]", 
                     "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"
