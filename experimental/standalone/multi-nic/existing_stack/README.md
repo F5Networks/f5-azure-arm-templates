@@ -82,7 +82,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | licenseKey1 | No | The license token for the F5 BIG-IP VE (BYOL) |
 | licensedBandwidth | No | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
 | numberOfAdditionalNics | Yes | By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a select number of additional NICs to the BIG-IP using this parameter. |
-| additionalNicLocation | Yes | Please specify where the additional NIC's should go using this parameter.  This should be a semi-colon delimited string of subnets equal to the number of additional NIC's being deployed.  Example if 2 additional NIC's was selected: subnet01;subnet02  NOTE: Please ensure that there is no spaces and the NIC's subnet information is inputted as shown in this example. |
+| additionalNicLocation | Yes | This parameter specifies where the additional NIC's should go.  This should be a semi-colon delimited string of subnets equal to the number of additional NIC's being deployed.  Example (if 2 additional NIC's was selected): 'subnet01;subnet02' NOTE: Please ensure that there is no spaces and that the correct number of subnets are provided based on the value chosen in 'numberOfAdditionalNics'. |
 | numberOfExternalIps | Yes | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
 | vnetName | Yes | The name of the existing virtual network to which you want to connect the BIG-IP VEs. |
 | vnetResourceGroupName | Yes | The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed. |
