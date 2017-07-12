@@ -19,7 +19,7 @@ def misc_readme_grep(tag, misc_file):
     tag_text = re.findall(reg_ex, text, re.DOTALL)
     return "".join(tag_text)
 
-def md_param_array(data, license_params):
+def md_param_array(data, license_params, lic_type):
     """ Create README example paramaters: | adminUsername | Yes | Description | """
     param_array = ""
     license_flag = True
@@ -31,7 +31,10 @@ def md_param_array(data, license_params):
             if license_flag:
                 license_flag = False
                 for key in license_params:
-                    param_array += "| " + key + " | " + mandatory + " | " + license_params[key] + " |\n"
+                    if lic_type == 'PAYG' and key != 'licensedBandwidth':
+                        continue
+                    else:
+                        param_array += "| " + key + " | " + mandatory + " | " + license_params[key] + " |\n"
         else:
             param_array += "| " + parameter + " | " + mandatory + " | " + data['parameters'][parameter]['metadata']['description'] + " |\n"
     return param_array
@@ -44,10 +47,10 @@ def stack_type_check(template_location, readme_text):
         stack_type_text = readme_text['stack_type_text']['new_stack']
     return stack_type_text
 
-def sp_access_needed(template_name, readme_text, misc_readme):
+def sp_access_needed(api_access_needed, readme_text, misc_readme):
     """ Determine what Service Principal Access is needed, return full Service Principal Text """
     sp_text = misc_readme_grep('<SERVICE_PRINCIPAL_TXT>', misc_readme)
-    if template_name in 'ha-avset':
+    if api_access_needed == 'read_write':
         sp_text = sp_text.replace('<SP_REQUIRED_ACCESS>', readme_text['sp_access_text']['read_write'])
     else:
         sp_text = sp_text.replace('<SP_REQUIRED_ACCESS>', readme_text['sp_access_text']['read'])
@@ -90,6 +93,8 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
     with open(base_readme, 'r') as readme:
         readme = readme.read()
     post_config_text = ''; sp_text = ''; extra_prereq_text = ''
+    api_access_needed = template_info['api_access_needed'][template_name]
+    lic_type = readme_text['deploy_links']['lic_support'][template_name]
 
     ####### Text Values for README templates #######
     title_text = readme_text['title_text'][template_name]
@@ -100,7 +105,7 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
     else:
         help_text = readme_text['help_text']['experimental']
     version_map = md_version_map(data, readme_text)
-    deploy_links = create_deploy_links(readme_text['deploy_links']['version_tag'], readme_text['deploy_links']['lic_support'][template_name], template_location)
+    deploy_links = create_deploy_links(readme_text['deploy_links']['version_tag'], lic_type, template_location)
     bash_script = readme_text['bash_script']
     ps_script = readme_text['ps_script']
     example_text = readme_text['config_example_text'][template_name]
@@ -108,19 +113,21 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
     ### Check for optional readme items ###
     # Add service principal text if needed
     if param_exist(data, 'servicePrincipalSecret'):
-        sp_text = sp_access_needed(template_name, readme_text, misc_readme)
+        sp_text = sp_access_needed(api_access_needed, readme_text, misc_readme)
         extra_prereq_text += '  - ' + readme_text['prereq_text']['service_principal'] + '\n'
     # Post-Deployment Configuration Text Substitution
     if 'autoscale' in template_name:
         post_config_text = misc_readme_grep('<POST_CONFIG_AUTOSCALE_TXT>', misc_readme)
         extra_prereq_text += '  - ' + readme_text['prereq_text']['post_config'] + '\n'
-    elif param_exist(data, 'numberOfExternalIps'):
+    if param_exist(data, 'numberOfExternalIps'):
         extra_prereq_text += '  - ' + readme_text['prereq_text']['post_config'] + '\n'
         if template_name in 'ha-avset':
             post_config_text = misc_readme_grep('<POST_CONFIG_FAILOVER_TXT>', misc_readme)
             extra_prereq_text += '  - ' + readme_text['prereq_text']['rg_limit'] + '\n'
         else:
             post_config_text = misc_readme_grep('<POST_CONFIG_TXT>', misc_readme)
+    if param_exist(data, 'numberOfAdditionalNics'):
+        extra_prereq_text += '  - ' + readme_text['prereq_text']['nic_sizing'] + '\n'
 
     ### Map in dynamic values ###
     readme = readme.replace('<TITLE_TXT>', title_text)
@@ -130,7 +137,7 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
     readme = readme.replace('<VERSION_MAP_TXT>', version_map)
     readme = readme.replace('<HELP_TXT>', help_text)
     readme = readme.replace('<DEPLOY_LINKS>', deploy_links)
-    readme = readme.replace('<EXAMPLE_PARAMS>', md_param_array(data, license_params))
+    readme = readme.replace('<EXAMPLE_PARAMS>', md_param_array(data, license_params, lic_type))
     readme = readme.replace('<PS_SCRIPT>', ps_script)
     readme = readme.replace('<BASH_SCRIPT>', bash_script)
     readme = readme.replace('<EXAMPLE_TEXT>', example_text)

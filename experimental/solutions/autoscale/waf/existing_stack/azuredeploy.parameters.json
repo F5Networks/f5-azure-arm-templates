@@ -89,6 +89,9 @@
         "servicePrincipalSecret": {
             "value": "GEN_UNIQUE"
         }, 
+        "notificationEmail": {
+            "value": "OPTIONAL"
+        }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"
         }, 

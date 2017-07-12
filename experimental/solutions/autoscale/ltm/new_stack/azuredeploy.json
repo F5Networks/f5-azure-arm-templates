@@ -226,6 +226,13 @@
             }, 
             "type": "securestring"
         }, 
+        "notificationEmail": {
+            "defaultValue": "OPTIONAL", 
+            "metadata": {
+                "description": "If you would like email notifications on scale events please specify an email address, otherwise leave the parameter as 'OPTIONAL'."
+            }, 
+            "type": "string"
+        }, 
         "ntpServer": {
             "defaultValue": "0.pool.ntp.org", 
             "metadata": {
@@ -348,6 +355,10 @@
         "scaleOutNetworkBytes": "[div(variables('scaleOutNetworkBits'), 8)]", 
         "scaleInNetworkBytes": "[div(variables('scaleInNetworkBits'), 8)]", 
         "timeWindow": "[concat('PT', parameters('scaleTimeWindow'), 'M')]", 
+        "customEmailToUse": [
+            "[parameters('notificationEmail')]"
+        ], 
+        "customEmail": "[take(variables('customEmailToUse'), length(replace(parameters('notificationEmail'), 'OPTIONAL', '')))]", 
         "instanceTypeMap": {
             "Standard_A3": {
                 "storageAccountType": "Standard_LRS"
@@ -836,6 +847,17 @@
             "properties": {
                 "enabled": true, 
                 "name": "autoscaleconfig", 
+                "notifications": [
+                    {
+                        "email": {
+                            "customEmails": "[variables('customEmail')]", 
+                            "sendToSubscriptionAdministrator": false, 
+                            "sendToSubscriptionCoAdministrators": false
+                        }, 
+                        "operation": "Scale", 
+                        "webhooks": []
+                    }
+                ], 
                 "profiles": [
                     {
                         "capacity": {
@@ -844,16 +866,6 @@
                             "minimum": "[parameters('vmScaleSetMinCount')]"
                         }, 
                         "name": "Profile1", 
-                        "notifications": [
-                            {
-                                "email": {
-                                    "customEmails": "", 
-                                    "sendToSubscriptionAdministrator": false, 
-                                    "sendToSubscriptionCoAdministrators": false
-                                }, 
-                                "operation": "Scale"
-                            }
-                        ], 
                         "rules": [
                             {
                                 "metricTrigger": {

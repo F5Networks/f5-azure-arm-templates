@@ -17,6 +17,7 @@ This solution uses an ARM template to launch a three NIC deployment of a cloud-f
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
   - This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
+  - Since this template allows you to deploy a variable number of NIC's be sure to pick an Azure Virtual Machine instance size that can support the number of NIC's chosen, otherwise the deployment will fail.  Please see the [Azure Instance Size link](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#size-tables) to determine the correct instance size to coorespond with the number of NIC's required. NOTE: This solution deploys three NIC's plus a variable number of NIC's as specified in the parameter **numberOfAdditionalNics**
 
 
 ## Security
