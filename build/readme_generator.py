@@ -77,6 +77,7 @@ def create_deploy_links(version_tag, lic_type, template_location):
         template_location = template_location.replace('..', '')
         template_location = template_location.replace('PAYG', lic)
         template_location = template_location.replace('BYOL', lic)
+        template_location = template_location.replace('BIGIQ', lic)
         url = base_url + template_location
         deploy_links = deploy_links.replace('<DEPLOY_LINK_URL>', url)
         deploy_links = deploy_links.replace('<LIC_TYPE>', lic)
