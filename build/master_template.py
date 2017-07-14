@@ -38,9 +38,9 @@ command_to_execute = ""
 ## Static Variable Assignment ##
 content_version = '3.2.1.0'
 f5_networks_tag = 'v3.2.1.0'
-f5_cloud_libs_tag = 'v3.1.1'
+f5_cloud_libs_tag = 'v3.2.1'
 f5_cloud_libs_azure_tag = 'v1.2.0'
-f5_cloud_iapps_tag = 'v1.0.0'
+f5_cloud_iapps_tag = 'v1.0.2'
 f5_cloud_workers_tag = 'v1.0.0'
 f5_tag = '82e08e16-fc62-4bf0-8916-e1c02dc871cd'
 f5_template_tag = template_name
@@ -112,6 +112,8 @@ sku_to_use = "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower')
 offer_to_use = "f5-big-ip"
 license1_command = ''
 license2_command = ''
+big_iq_pwd_cmd = ''
+bigiq_pwd_delete = ''
 if license_type == 'BYOL':
     license1_command = "' --license ', parameters('licenseKey1'),"
     license2_command = "' --license ', parameters('licenseKey2'),"
@@ -121,6 +123,7 @@ elif license_type == 'PAYG':
 elif license_type == 'BIGIQ':
     big_iq_mgmt_ip_ref = ''
     big_iq_mgmt_ip_ref2 = ''
+    big_iq_pwd_cmd = " echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/bigIqPasswd; "
     if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic'):
         big_iq_mgmt_ip_ref =  "reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,"
     if template_name == 'cluster_1nic':
@@ -130,9 +133,9 @@ elif license_type == 'BIGIQ':
     if template_name in ('ha-avset', 'cluster_3nic'):
         big_iq_mgmt_ip_ref =  "reference(concat(variables('mgmtPublicIPAddressId'), '0')).dnsSettings.fqdn,"
         big_iq_mgmt_ip_ref2 =  "reference(concat(variables('mgmtPublicIPAddressId'), '1')).dnsSettings.fqdn,"
-    # Need to use password-uri here?
-    license1_command = "' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password ', parameters('bigIqLicensePassword'), ' --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', " + big_iq_mgmt_ip_ref
-    license2_command = "' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password ', parameters('bigIqLicensePassword'), ' --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', " + big_iq_mgmt_ip_ref2
+    license1_command = "' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', " + big_iq_mgmt_ip_ref
+    license2_command = "' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', " + big_iq_mgmt_ip_ref2
+    bigiq_pwd_delete = ' rm -f /config/cloud/bigIqPasswd;'
 # Abstract license key text for readme_generator
 license_text = OrderedDict()
 license_text['licenseKey1'] = 'The license token for the F5 BIG-IP VE (BYOL)'
@@ -611,19 +614,23 @@ if template_name in 'cluster_3nic':
     command_to_execute2 = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '1.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE2_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress1'), <EXT_MASK_CMD> ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress1'), <INT_MASK_CMD> ',vlan:internal --log-level debug; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --config-sync-ip ', variables('intSubnetPrivateAddress1'), ' --join-group --device-group Sync --sync --remote-host ', variables('mgmtSubnetPrivateAddress'), ' --remote-user admin --remote-password-url file:///config/cloud/passwd'<POST_CMD_TO_EXECUTE>)]"
 
 ## Base Start/Post Command to Execute
-base_cmd_to_execute = "'mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; mkdir -p /config/cloud/node_modules; BIG_IP_CREDENTIALS_FILE=/config/cloud/passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> $BIG_IP_CREDENTIALS_FILE; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host '"
-post_cmd_to_execute = ", '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; bash /config/customConfig.sh; rm -f /config/cloud/passwd; else exit 1; fi'"
+base_cmd_to_execute = "'mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; mkdir -p /config/cloud/node_modules; BIG_IP_CREDENTIALS_FILE=/config/cloud/passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> $BIG_IP_CREDENTIALS_FILE;<BIGIQ_PWD_CMD> unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host '"
+post_cmd_to_execute = ", '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; bash /config/customConfig.sh; rm -f /config/cloud/passwd;<BIGIQ_PWD_DELETE> else exit 1; fi'"
+
 if template_name in 'ha-avset':
-    base_cmd_to_execute = "'mkdir -p /config/cloud/node_modules && cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; /usr/bin/install -b -m 400 /dev/null /config/cloud/azCredentials; /usr/bin/install -b -m 755 /dev/null /config/cloud/managedRoutes; /usr/bin/install -b -m 755 /dev/null /config/cloud/routeTableTag; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' > /config/verifyHash; echo -e ', variables('installCloudLibs'), ' > /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' > /config/cloud/passwd; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"resourceGroup\": \"', variables('resourceGroupName'), '\"}', variables('singleQuote'), ' > /config/cloud/azCredentials; echo -e ', parameters('managedRoutes'), ' > /config/cloud/managedRoutes; echo -e ', parameters('routeTableTag'), ' > /config/cloud/routeTableTag; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host '"
-    post_cmd_to_execute = ", '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; bash /config/customConfig.sh; else exit 1; fi'"
+    base_cmd_to_execute = "'mkdir -p /config/cloud/node_modules && cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null /config/cloud/passwd; /usr/bin/install -b -m 400 /dev/null /config/cloud/azCredentials; /usr/bin/install -b -m 755 /dev/null /config/cloud/managedRoutes; /usr/bin/install -b -m 755 /dev/null /config/cloud/routeTableTag;<BIGIQ_PWD_CMD> IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' > /config/verifyHash; echo -e ', variables('installCloudLibs'), ' > /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' > /config/cloud/passwd; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"resourceGroup\": \"', variables('resourceGroupName'), '\"}', variables('singleQuote'), ' > /config/cloud/azCredentials; echo -e ', parameters('managedRoutes'), ' > /config/cloud/managedRoutes; echo -e ', parameters('routeTableTag'), ' > /config/cloud/routeTableTag; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host '"
+    post_cmd_to_execute = ", '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; bash /config/customConfig.sh;<BIGIQ_PWD_DELETE> else exit 1; fi'"
 
 # Map in some commandToExecute Elements
+post_cmd_to_execute = post_cmd_to_execute.replace('<BIGIQ_PWD_DELETE>', bigiq_pwd_delete)
 command_to_execute = command_to_execute.replace('<BASE_CMD_TO_EXECUTE>', base_cmd_to_execute)
 command_to_execute2 = command_to_execute2.replace('<BASE_CMD_TO_EXECUTE>', base_cmd_to_execute)
 command_to_execute = command_to_execute.replace('<POST_CMD_TO_EXECUTE>', post_cmd_to_execute)
 command_to_execute2 = command_to_execute2.replace('<POST_CMD_TO_EXECUTE>', post_cmd_to_execute)
 command_to_execute = command_to_execute.replace('<LICENSE1_COMMAND>', license1_command)
 command_to_execute2 = command_to_execute2.replace('<LICENSE2_COMMAND>', license2_command)
+command_to_execute = command_to_execute.replace('<BIGIQ_PWD_CMD>', big_iq_pwd_cmd)
+command_to_execute2 = command_to_execute2.replace('<BIGIQ_PWD_CMD>', big_iq_pwd_cmd)
 command_to_execute = command_to_execute.replace('<EXT_MASK_CMD>', ext_mask_cmd)
 command_to_execute2 = command_to_execute2.replace('<EXT_MASK_CMD>', ext_mask_cmd)
 command_to_execute = command_to_execute.replace('<INT_MASK_CMD>', int_mask_cmd)
