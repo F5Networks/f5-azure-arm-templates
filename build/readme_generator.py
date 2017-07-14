@@ -26,7 +26,7 @@ def md_param_array(data, license_params, lic_type):
     for parameter in data['parameters']:
         mandatory = 'Yes'
         # Specify optional parameters that README, need to pull in all license options
-        if 'license' in parameter:
+        if 'license' in parameter.lower():
             mandatory = 'No'
             if license_flag:
                 license_flag = False
@@ -67,8 +67,8 @@ def create_deploy_links(version_tag, lic_type, template_location):
     """ Create deploy to Azure buttons/links """
     deploy_links = ''
     base_url = 'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2F' + version_tag
-    if 'Both' in lic_type:
-        lic_list = ['BYOL', 'PAYG']
+    if 'All' in lic_type:
+        lic_list = ['BYOL', 'PAYG', 'BIGIQ']
     else:
         lic_list = [lic_type]
     for lic in lic_list:

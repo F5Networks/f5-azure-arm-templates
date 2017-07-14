@@ -23,8 +23,17 @@
         "bigIpVersion": {
             "value": "13.0.021"
         }, 
-        "licenseKey1": {
-            "value": "REQUIRED"
+        "bigIqLicenseHost": {
+            "value": ""
+        }, 
+        "bigIqLicenseUsername": {
+            "value": ""
+        }, 
+        "bigIqLicensePassword": {
+            "value": ""
+        }, 
+        "bigIqLicensePool": {
+            "value": ""
         }, 
         "vnetName": {
             "value": "GEN_UNIQUE"

@@ -13,7 +13,7 @@ class test_template_generator(unittest.TestCase):
         with open(tmpl_file, 'r') as file_str:
             file_data = json.load(file_str)
         tmpl_tag = file_data['variables']['f5TemplateTag']
-        self.assertEqual(tmpl_tag, '1nic')
+        self.assertEqual(tmpl_tag, 'standalone_1nic')
 
 if __name__ == '__main__':
     unittest.main()

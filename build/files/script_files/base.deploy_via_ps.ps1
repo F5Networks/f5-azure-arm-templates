@@ -5,6 +5,9 @@
 
 param(
 
+  [Parameter(Mandatory=$True)]
+  [string]
+  $licenseType,
 <LICENSE_PARAMETERS>
 <DYNAMIC_PARAMETERS>
   [Parameter(Mandatory=$True)]
