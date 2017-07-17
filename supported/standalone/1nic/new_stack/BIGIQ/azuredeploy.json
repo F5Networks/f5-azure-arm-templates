@@ -2,16 +2,6 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json", 
     "contentVersion": "3.2.1.0", 
     "parameters": {
-        "numberOfInstances": {
-            "allowedValues": [
-                2
-            ], 
-            "defaultValue": 2, 
-            "metadata": {
-                "description": "The number of BIG-IP VEs that will be deployed in front of your application(s)."
-            }, 
-            "type": "int"
-        }, 
         "adminUsername": {
             "defaultValue": "azureuser", 
             "metadata": {
@@ -29,6 +19,13 @@
             "defaultValue": "REQUIRED", 
             "metadata": {
                 "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine"
+            }, 
+            "type": "string"
+        }, 
+        "instanceName": {
+            "defaultValue": "f5vm01", 
+            "metadata": {
+                "description": "Name of the Virtual Machine."
             }, 
             "type": "string"
         }, 
@@ -233,7 +230,7 @@
         "resourceGroupName": "[resourceGroup().name]", 
         "singleQuote": "'", 
         "f5Tag": "82e08e16-fc62-4bf0-8916-e1c02dc871cd", 
-        "f5TemplateTag": "cluster_1nic", 
+        "f5TemplateTag": "standalone_1nic", 
         "f5CloudLibsTag": "v3.2.1", 
         "f5CloudLibsAzureTag": "v1.2.0", 
         "f5NetworksTag": "v3.2.1.0", 
@@ -248,6 +245,7 @@
         "offerToUse": "f5-big-ip", 
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['1'].Port]", 
         "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
+        "instanceName": "[toLower(parameters('instanceName'))]", 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
         "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]", 
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
@@ -260,13 +258,7 @@
         "mgmtSubnetName": "mgmt", 
         "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]", 
         "mgmtSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.1.0/24')]", 
-        "mgmtSubnetPrivateAddressSuffix": 4, 
-        "mgmtSubnetPrivateAddressSuffix1": "[add(variables('mgmtSubnetPrivateAddressSuffix'), 1)]", 
-        "mgmtSubnetPrivateAddress": "[concat(parameters('vnetAddressPrefix'), '.1.')]", 
-        "loadBalancerName": "[concat(variables('dnsLabel'),'-alb')]", 
-        "deviceNamePrefix": "[concat(variables('dnsLabel'),'-device')]", 
-        "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]", 
-        "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]", 
+        "mgmtSubnetPrivateAddress": "[concat(parameters('vnetAddressPrefix'), '.1.4')]", 
         "instanceTypeMap": {
             "Standard_A3": {
                 "storageAccountType": "Standard_LRS"
@@ -482,39 +474,22 @@
         }, 
         {
             "apiVersion": "[variables('apiVersion')]", 
-            "copy": {
-                "count": "[parameters('numberOfInstances')]", 
-                "name": "niccopy"
-            }, 
             "dependsOn": [
                 "[variables('vnetId')]", 
                 "[variables('mgmtPublicIPAddressId')]", 
-                "[variables('mgmtNsgID')]", 
-                "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]", 
-                "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/guimgt',copyindex())]", 
-                "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/sshmgt',copyindex())]"
+                "[variables('mgmtNsgID')]"
             ], 
             "location": "[variables('location')]", 
-            "name": "[concat(variables('mgmtNicName'),copyindex())]", 
+            "name": "[variables('mgmtNicName')]", 
             "properties": {
                 "ipConfigurations": [
                     {
-                        "name": "ipconfig1", 
+                        "name": "[concat(variables('instanceName'), '-ipconfig1')]", 
                         "properties": {
-                            "loadBalancerBackendAddressPools": [
-                                {
-                                    "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
-                                }
-                            ], 
-                            "loadBalancerInboundNatRules": [
-                                {
-                                    "id": "[concat(variables('lbID'), '/inboundNatRules/', 'guimgt',copyIndex())]"
-                                }, 
-                                {
-                                    "id": "[concat(variables('lbID'), '/inboundNatRules/', 'sshmgt',copyIndex())]"
-                                }
-                            ], 
-                            "privateIPAddress": "[concat(variables('mgmtSubnetPrivateAddress'),add(variables('mgmtSubnetPrivateAddressSuffix'), copyindex()))]", 
+                            "PublicIpAddress": {
+                                "Id": "[variables('mgmtPublicIPAddressId')]"
+                            }, 
+                            "privateIPAddress": "[variables('mgmtSubnetPrivateAddress')]", 
                             "privateIPAllocationMethod": "Static", 
                             "subnet": {
                                 "id": "[variables('mgmtSubnetId')]"
@@ -585,85 +560,6 @@
             "type": "Microsoft.Network/networkSecurityGroups"
         }, 
         {
-            "apiVersion": "[variables('networkApiVersion')]", 
-            "dependsOn": [
-                "[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtPublicIPAddressName'))]"
-            ], 
-            "location": "[variables('location')]", 
-            "name": "[variables('loadBalancerName')]", 
-            "properties": {
-                "backendAddressPools": [
-                    {
-                        "name": "loadBalancerBackEnd"
-                    }
-                ], 
-                "frontendIPConfigurations": [
-                    {
-                        "name": "loadBalancerFrontEnd", 
-                        "properties": {
-                            "publicIPAddress": {
-                                "id": "[variables('mgmtPublicIPAddressId')]"
-                            }
-                        }
-                    }
-                ]
-            }, 
-            "tags": {
-                "application": "[parameters('tagValues').application]", 
-                "costCenter": "[parameters('tagValues').cost]", 
-                "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
-                "group": "[parameters('tagValues').group]", 
-                "owner": "[parameters('tagValues').owner]"
-            }, 
-            "type": "Microsoft.Network/loadBalancers"
-        }, 
-        {
-            "apiVersion": "[variables('apiVersion')]", 
-            "copy": {
-                "count": "[parameters('numberOfInstances')]", 
-                "name": "lbNatLoop"
-            }, 
-            "dependsOn": [
-                "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
-            ], 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('loadBalancerName'),'/guimgt', copyIndex())]", 
-            "properties": {
-                "backendPort": "[variables('bigIpMgmtPort')]", 
-                "enableFloatingIP": false, 
-                "frontendIPConfiguration": {
-                    "id": "[variables('frontEndIPConfigID')]"
-                }, 
-                "frontendPort": "[copyIndex(8443)]", 
-                "protocol": "tcp"
-            }, 
-            "type": "Microsoft.Network/loadBalancers/inboundNatRules"
-        }, 
-        {
-            "apiVersion": "[variables('apiVersion')]", 
-            "copy": {
-                "count": "[parameters('numberOfInstances')]", 
-                "name": "lbNatLoop"
-            }, 
-            "dependsOn": [
-                "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
-            ], 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('loadBalancerName'),'/sshmgt', copyIndex())]", 
-            "properties": {
-                "backendPort": 22, 
-                "enableFloatingIP": false, 
-                "frontendIPConfiguration": {
-                    "id": "[variables('frontEndIPConfigID')]"
-                }, 
-                "frontendPort": "[copyIndex(8022)]", 
-                "protocol": "tcp"
-            }, 
-            "type": "Microsoft.Network/loadBalancers/inboundNatRules"
-        }, 
-        {
             "apiVersion": "[variables('apiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[variables('availabilitySetName')]", 
@@ -716,17 +612,14 @@
         }, 
         {
             "apiVersion": "[variables('apiVersion')]", 
-            "copy": {
-                "count": "[parameters('numberOfInstances')]", 
-                "name": "devicecopy"
-            }, 
             "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), copyindex())]", 
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", 
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", 
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'))]"
             ], 
             "location": "[variables('location')]", 
-            "name": "[concat(variables('deviceNamePrefix'),copyindex())]", 
+            "name": "[variables('instanceName')]", 
             "plan": {
                 "name": "[variables('skuToUse')]", 
                 "product": "[variables('offerToUse')]", 
@@ -748,14 +641,17 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[concat(resourceId('Microsoft.Network/networkInterfaces',variables('mgmtNicName')),copyindex())]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('mgmtNicName'))]", 
+                            "properties": {
+                                "primary": true
+                            }
                         }
                     ]
                 }, 
                 "osProfile": {
                     "adminPassword": "[parameters('adminPassword')]", 
                     "adminUsername": "[parameters('adminUsername')]", 
-                    "computerName": "[concat(variables('deviceNamePrefix'),copyindex())]"
+                    "computerName": "[variables('instanceName')]"
                 }, 
                 "storageProfile": {
                     "imageReference": {
@@ -767,9 +663,9 @@
                     "osDisk": {
                         "caching": "ReadWrite", 
                         "createOption": "FromImage", 
-                        "name": "[concat('osdisk',copyindex())]", 
+                        "name": "osdisk", 
                         "vhd": {
-                            "uri": "[concat('http://',variables('newStorageAccountName'),'.blob.core.windows.net/',variables('newStorageAccountName'),'/osDisk',copyindex(),'.vhd')]"
+                            "uri": "[concat('http://',variables('newStorageAccountName'), '.blob.core.windows.net/vhds/', variables('instanceName'), '.vhd')]"
                         }
                     }
                 }
@@ -788,49 +684,13 @@
         {
             "apiVersion": "2016-03-30", 
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/',variables('deviceNamePrefix'),0)]"
+                "[concat('Microsoft.Compute/virtualMachines/', variables('instanceName'))]"
             ], 
             "location": "[variables('location')]", 
-            "name": "[concat(variables('deviceNamePrefix'),0,'/start')]", 
+            "name": "[concat(variables('instanceName'),'/start')]", 
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; mkdir -p /config/cloud/node_modules; BIG_IP_CREDENTIALS_FILE=/config/cloud/passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/bigIqPasswd;  unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', concat(variables('mgmtSubnetPrivateAddress'), variables('mgmtSubnetPrivateAddressSuffix')), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('deviceNamePrefix'), 0, '.azuresecurity.com'), ' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', concat(variables('mgmtSubnetPrivateAddress'), variables('mgmtSubnetPrivateAddressSuffix')), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --config-sync-ip ', concat(variables('mgmtSubnetPrivateAddress'), variables('mgmtSubnetPrivateAddressSuffix')), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(variables('deviceNamePrefix'), 0, '.azuresecurity.com'), ' --auto-sync --save-on-auto-sync', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; bash /config/customConfig.sh; rm -f /config/cloud/passwd; rm -f /config/cloud/bigIqPasswd; else exit 1; fi')]"
-                }, 
-                "publisher": "Microsoft.Azure.Extensions", 
-                "settings": {
-                    "fileUris": [
-                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]", 
-                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-service-discovery/f5.service_discovery.tmpl')]"
-                    ]
-                }, 
-                "type": "CustomScript", 
-                "typeHandlerVersion": "2.0"
-            }, 
-            "tags": {
-                "application": "[parameters('tagValues').application]", 
-                "costCenter": "[parameters('tagValues').cost]", 
-                "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
-                "group": "[parameters('tagValues').group]", 
-                "owner": "[parameters('tagValues').owner]"
-            }, 
-            "type": "Microsoft.Compute/virtualMachines/extensions"
-        }, 
-        {
-            "apiVersion": "2016-03-30", 
-            "copy": {
-                "count": "[sub(parameters('numberOfInstances'), 1)]", 
-                "name": "extensionLoop"
-            }, 
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/',variables('deviceNamePrefix'),add(copyindex(),1))]"
-            ], 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('deviceNamePrefix'),add(copyindex(),1),'/start')]", 
-            "properties": {
-                "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; mkdir -p /config/cloud/node_modules; BIG_IP_CREDENTIALS_FILE=/config/cloud/passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/bigIqPasswd;  unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', concat(variables('mgmtSubnetPrivateAddress'), variables('mgmtSubnetPrivateAddressSuffix1')), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('deviceNamePrefix'), copyindex(1), '.azuresecurity.com'), ' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', concat(variables('mgmtSubnetPrivateAddress'), variables('mgmtSubnetPrivateAddressSuffix1')), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --config-sync-ip ', concat(variables('mgmtSubnetPrivateAddress'), variables('mgmtSubnetPrivateAddressSuffix1')), ' --join-group --device-group Sync --sync --remote-host ', concat(variables('mgmtSubnetPrivateAddress'), variables('mgmtSubnetPrivateAddressSuffix')), ' --remote-user admin --remote-password-url file:///config/cloud/passwd', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; bash /config/customConfig.sh; rm -f /config/cloud/passwd; rm -f /config/cloud/bigIqPasswd; else exit 1; fi')]"
+                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; mkdir -p /config/cloud/node_modules; BIG_IP_CREDENTIALS_FILE=/config/cloud/passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/bigIqPasswd;  unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; bash /config/customConfig.sh; rm -f /config/cloud/passwd; rm -f /config/cloud/bigIqPasswd; else exit 1; fi')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {
@@ -857,11 +717,11 @@
     "outputs": {
         "GUI-URL": {
             "type": "string", 
-            "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':8443')]"
+            "value": "[concat('https://', reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]"
         }, 
         "SSH-URL": {
             "type": "string", 
-            "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',8022)]"
+            "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' ',22)]"
         }
     }
 }
