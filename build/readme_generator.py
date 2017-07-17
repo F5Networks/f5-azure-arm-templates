@@ -2,8 +2,17 @@
 import sys
 import os
 import re
+import yaml
 
 # Create Functions for README creation
+def get_custom_text(parent_key, child_key):
+    """ Pull in custom text for each solution from the YAML file """
+    yaml_doc_loc = "files/readme_files/template_text.yaml"
+    with open(yaml_doc_loc) as doc:
+        yaml_doc = doc.read()
+    yaml_dict = yaml.load(yaml_doc)
+    return yaml_dict[parent_key][child_key]
+
 def param_exist(data, param):
     """ Check if a specific parameter exists, will add that blob in README if true """
     for parameter in data['parameters']:
@@ -39,28 +48,28 @@ def md_param_array(data, license_params, lic_type):
             param_array += "| " + parameter + " | " + mandatory + " | " + data['parameters'][parameter]['metadata']['description'] + " |\n"
     return param_array
 
-def stack_type_check(template_location, readme_text):
+def stack_type_check(template_location):
     """ Determine what stack type the template is, return appropriate readme text """
     if 'existing_stack' in template_location:
-        stack_type_text = readme_text['stack_type_text']['existing_stack']
+        stack_type_text = get_custom_text('stack_type_text', 'existing_stack')
     else:
-        stack_type_text = readme_text['stack_type_text']['new_stack']
+        stack_type_text = get_custom_text('stack_type_text', 'new_stack')
     return stack_type_text
 
-def sp_access_needed(api_access_needed, readme_text, misc_readme):
+def sp_access_needed(api_access_needed, misc_readme):
     """ Determine what Service Principal Access is needed, return full Service Principal Text """
     sp_text = misc_readme_grep('<SERVICE_PRINCIPAL_TXT>', misc_readme)
     if api_access_needed == 'read_write':
-        sp_text = sp_text.replace('<SP_REQUIRED_ACCESS>', readme_text['sp_access_text']['read_write'])
+        sp_text = sp_text.replace('<SP_REQUIRED_ACCESS>', get_custom_text('sp_access_text', 'read_write'))
     else:
-        sp_text = sp_text.replace('<SP_REQUIRED_ACCESS>', readme_text['sp_access_text']['read'])
+        sp_text = sp_text.replace('<SP_REQUIRED_ACCESS>', get_custom_text('sp_access_text', 'read'))
     return sp_text
 
 def md_version_map(data, readme_text):
     """ Create BIG-IP version map: | Azure BIG-IP Image Version | BIG-IP Version | """
     param_array = ""
     for version in data['parameters']['bigIpVersion']['allowedValues']:
-        param_array += "| " + version + " | " + readme_text['license_map'][version] + " |\n"
+        param_array += "| " + version + " | " + get_custom_text('license_map', version) + " |\n"
     return param_array
 
 def create_deploy_links(version_tag, lic_type, template_location):
@@ -98,38 +107,38 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
     lic_type = readme_text['deploy_links']['lic_support'][template_name]
 
     ####### Text Values for README templates #######
-    title_text = readme_text['title_text'][template_name]
-    intro_text = readme_text['intro_text'][template_name]
-    stack_type_text = stack_type_check(template_location, readme_text)
+    title_text = get_custom_text('title_text', template_name)
+    intro_text = get_custom_text('intro_text', template_name)
+    example_text = get_custom_text('config_example_text', template_name)
+    stack_type_text = stack_type_check(template_location)
     if 'supported' in readme_location:
-        help_text = readme_text['help_text']['supported']
+        help_text = get_custom_text('help_text', 'supported')
     else:
-        help_text = readme_text['help_text']['experimental']
+        help_text = get_custom_text('help_text', 'experimental')
     version_map = md_version_map(data, readme_text)
     deploy_links = create_deploy_links(readme_text['deploy_links']['version_tag'], lic_type, template_location)
     bash_script = readme_text['bash_script']
     ps_script = readme_text['ps_script']
-    example_text = readme_text['config_example_text'][template_name]
 
     ### Check for optional readme items ###
     # Add service principal text if needed
     if param_exist(data, 'servicePrincipalSecret'):
-        sp_text = sp_access_needed(api_access_needed, readme_text, misc_readme)
-        extra_prereq_text += '  - ' + readme_text['prereq_text']['service_principal'] + '\n'
+        sp_text = sp_access_needed(api_access_needed, misc_readme)
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'service_principal') + '\n'
     # Post-Deployment Configuration Text Substitution
     if 'autoscale' in template_name:
         post_config_text = misc_readme_grep('<POST_CONFIG_AUTOSCALE_TXT>', misc_readme)
-        extra_prereq_text += '  - ' + readme_text['prereq_text']['post_config'] + '\n'
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'post_config') + '\n'
     if param_exist(data, 'numberOfExternalIps'):
-        extra_prereq_text += '  - ' + readme_text['prereq_text']['post_config'] + '\n'
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'post_config') + '\n'
         if template_name in 'ha-avset':
             post_config_text = misc_readme_grep('<POST_CONFIG_FAILOVER_TXT>', misc_readme)
-            extra_prereq_text += '  - ' + readme_text['prereq_text']['rg_limit'] + '\n'
+            extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'rg_limit') + '\n'
         else:
             post_config_text = misc_readme_grep('<POST_CONFIG_TXT>', misc_readme)
     if param_exist(data, 'numberOfAdditionalNics'):
-        extra_prereq_text += '  - ' + readme_text['prereq_text']['nic_sizing'] + '\n'
-        extra_prereq_text += '  - ' + readme_text['prereq_text']['addtl_nic_config'] + '\n'
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'nic_sizing') + '\n'
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'addtl_nic_config') + '\n'
 
     ### Map in dynamic values ###
     readme = readme.replace('<TITLE_TXT>', title_text)

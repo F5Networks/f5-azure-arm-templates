@@ -18,7 +18,7 @@ This solution uses an ARM template to launch a three NIC deployment of a cloud-f
   - This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
   - Since this template allows you to deploy a variable number of NIC's be sure to pick an Azure Virtual Machine instance size that can support the number of NIC's chosen, otherwise the deployment will fail.  Please see the [Azure Instance Size link](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#size-tables) to determine the correct instance size to coorespond with the number of NIC's required. NOTE: This solution deploys three NIC's plus a variable number of NIC's as specified in the parameter **numberOfAdditionalNics**
-  - As a result of this template deploying a variable number of NIC's using the parameter **numberOfAdditionalNics** it will pre-configure the BIG-IP VLAN's and place the interfaces into the cooresponding VLAN (based on the subnet name(s) inputted in **additionalNicLocation**).  Please be aware that after template deployment the self IP's will need to be created cooresponding to the Azure IP config object for that NIC, also setting the IP Config object to a **static** address instead of **dynamic** will be necessary to ensure it doesnt change on reboot.
+  - As a result of this template deploying a variable number of NIC's using the parameter **numberOfAdditionalNics** it will pre-configure the BIG-IP VLAN(s) and place the interfaces into the cooresponding VLAN (based on the subnet name(s) inputted in **additionalNicLocation**).  Please be aware that after template deployment the self IP(s) will need to be created cooresponding to the Azure IP config object for that NIC, also setting the IP Config object to a **static** address instead of **dynamic** will be necessary to ensure it doesnt change on reboot.
 
 
 ## Security
@@ -391,7 +391,7 @@ fi
 
 ## Configuration Example <a name="config">
 
-The following is an example configuration diagram for this solution deployment. In this scneario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  Additional NICs are added to a customer provided VNET/Subnet.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.
+The following is an example configuration diagram for this solution deployment. In this scenario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  Additional NICs are added to a customer provided VNET/Subnet.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.
 
 ![Configuration Example](images/azure-example-diagram.png)
 
