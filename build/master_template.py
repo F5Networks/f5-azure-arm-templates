@@ -136,7 +136,7 @@ elif license_type == 'BIGIQ':
     license1_command = "' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', " + big_iq_mgmt_ip_ref
     license2_command = "' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', " + big_iq_mgmt_ip_ref2
     bigiq_pwd_delete = ' rm -f /config/cloud/bigIqPasswd;'
-# Abstract license key text for readme_generator
+## Abstract license key text for readme_generator
 license_text = OrderedDict()
 license_text['licenseKey1'] = 'The license token for the F5 BIG-IP VE (BYOL)'
 license_text['licenseKey2'] = 'The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices.'
@@ -723,7 +723,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
 ######################################## Create/Modify README's ########################################
     readme_text = {'title_text': {}, 'intro_text': {}, 'help_text': {}, 'deploy_links': {}, 'version_tag': {}, 'ps_script': {}, 'bash_script': {}, 'config_example_text': {}, 'license_map': {}, 'prereq_text': {}, 'stack_type_text': {} }
     ## Title Text ##
-    readme_text['title_text'] = {'standalone_1nic': 'Single NIC', 'standalone_2nic': '2 NIC', 'standalone_3nic': '3 NIC', 'standalone_multi-nic': 'Multi NIC', 'cluster_1nic': 'ConfigSync Cluster: Single NIC', 'cluster_3nic': 'ConfigSync Cluster: 3 NIC', 'ha-avset': 'HA Cluster: Active/Standby', 'ltm_autoscale': 'AutoScale BIG-IP LTM - VM Scale Set', 'waf_autoscale': 'AutoScale BIG-IP WAF(LTM+ASM) - VM Scale Set' }
+    readme_text['title_text'] = {'standalone_1nic': 'Single NIC', 'standalone_2nic': '2 NIC', 'standalone_3nic': '3 NIC', 'standalone_multi-nic': 'Multi NIC (nNic)', 'cluster_1nic': 'ConfigSync Cluster: Single NIC', 'cluster_3nic': 'ConfigSync Cluster: 3 NIC', 'ha-avset': 'HA Cluster: Active/Standby', 'ltm_autoscale': 'AutoScale BIG-IP LTM - VM Scale Set', 'waf_autoscale': 'AutoScale BIG-IP WAF(LTM+ASM) - VM Scale Set' }
     ## Intro Text ##
     readme_text['intro_text']['standalone_1nic'] = 'This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard Cloud design where the compute instance of F5 is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.'
     readme_text['intro_text']['standalone_2nic'] = 'This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3-NIC template without the NIC for connecting directly to backend webservers.'
@@ -743,6 +743,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
     readme_text['prereq_text']['post_config'] = 'This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.'
     readme_text['prereq_text']['rg_limit'] = 'This template requires that the resource group name the deployment uses to be no longer than **35** characters as a result of limitations to tag size within Azure.'
     readme_text['prereq_text']['nic_sizing'] = "Since this template allows you to deploy a variable number of NIC's be sure to pick an Azure Virtual Machine instance size that can support the number of NIC's chosen, otherwise the deployment will fail.  Please see the [Azure Instance Size link](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#size-tables) to determine the correct instance size to coorespond with the number of NIC's required. NOTE: This solution deploys three NIC's plus a variable number of NIC's as specified in the parameter **numberOfAdditionalNics**"
+    readme_text['prereq_text']['addtl_nic_config'] = "As a result of this template deploying a variable number of NIC's using the parameter **numberOfAdditionalNics** it will pre-configure the BIG-IP VLAN's and place the interfaces into the cooresponding VLAN (based on the subnet name(s) inputted in **additionalNicLocation**).  Please be aware that after template deployment the self IP's will need to be created cooresponding to the Azure IP config object for that NIC, also setting the IP Config object to a **static** address instead of **dynamic** will be necessary to ensure it doesnt change on reboot."
     ## Version Map Text ##
     # Add to this map as BIG-IP Versions change
     readme_text['license_map']['13.0.021'] = '13.0.0 HF2 Build 2.10.1671'

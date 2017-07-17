@@ -129,6 +129,7 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
             post_config_text = misc_readme_grep('<POST_CONFIG_TXT>', misc_readme)
     if param_exist(data, 'numberOfAdditionalNics'):
         extra_prereq_text += '  - ' + readme_text['prereq_text']['nic_sizing'] + '\n'
+        extra_prereq_text += '  - ' + readme_text['prereq_text']['addtl_nic_config'] + '\n'
 
     ### Map in dynamic values ###
     readme = readme.replace('<TITLE_TXT>', title_text)
