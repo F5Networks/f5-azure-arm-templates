@@ -204,7 +204,7 @@ def variable_initialize(data):
     return data
 
 def template_check(data, resource):
-    """ Remove extra optional resources(variables, parameters, etc...), also check if mandatory parameter was not filled in """
+    """ Remove extra optional resources (variables, parameters, etc...), also check if mandatory parameter was not filled in """
     for var in data[resource]:
         if data[resource][var] == "OPTIONAL":
             data[resource].pop(var)
@@ -229,7 +229,7 @@ def verify_hash(url):
     if response.status == 200:
         pass
     else:
-        raise Exception("Unable to download verify hash file, HTTP Error Response: %s"  % response.msg)
+        raise Exception("Unable to download verify hash file, HTTP Error Response: %s" % response.msg)
     # HTTP Call MIGHT include trailing \n, remove that
     response_str = response.read()
     if response_str[-1:] == '\n':
