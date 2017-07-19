@@ -119,28 +119,24 @@
             "type": "string"
         }, 
         "bigIqLicenseHost": {
-            "defaultValue": "", 
             "metadata": {
                 "description": "The Host/IP address to use to get to the BIG-IQ to be used for BIG-IP licensing."
             }, 
             "type": "string"
         }, 
         "bigIqLicenseUsername": {
-            "defaultValue": "", 
             "metadata": {
                 "description": "The BIG-IQ username to use during licensing."
             }, 
             "type": "string"
         }, 
         "bigIqLicensePassword": {
-            "defaultValue": "", 
             "metadata": {
                 "description": "The BIG-IQ password to use during licensing."
             }, 
             "type": "securestring"
         }, 
         "bigIqLicensePool": {
-            "defaultValue": "", 
             "metadata": {
                 "description": "The BIG-IQ license pool to use during licensing."
             }, 

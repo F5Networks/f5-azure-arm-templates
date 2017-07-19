@@ -175,10 +175,10 @@ if license_type == 'BYOL':
 elif license_type == 'PAYG':
     data['parameters']['licensedBandwidth'] = {"type": "string", "defaultValue": default_payg_bw, "allowedValues": ["25m", "200m", "1g"], "metadata": {"description": license_text['licensedBandwidth']}}
 elif license_type == 'BIGIQ':
-    data['parameters']['bigIqLicenseHost'] = {"type": "string", "defaultValue": "", "metadata": {"description": license_text['bigIqLicenseHost']}}
-    data['parameters']['bigIqLicenseUsername'] = {"type": "string", "defaultValue": "", "metadata": {"description": license_text['bigIqLicenseUsername']}}
-    data['parameters']['bigIqLicensePassword'] = {"type": "securestring", "defaultValue": "", "metadata": {"description": license_text['bigIqLicensePassword']}}
-    data['parameters']['bigIqLicensePool'] = {"type": "string", "defaultValue": "", "metadata": {"description": license_text['bigIqLicensePool']}}
+    data['parameters']['bigIqLicenseHost'] = {"type": "string", "metadata": {"description": license_text['bigIqLicenseHost']}}
+    data['parameters']['bigIqLicenseUsername'] = {"type": "string", "metadata": {"description": license_text['bigIqLicenseUsername']}}
+    data['parameters']['bigIqLicensePassword'] = {"type": "securestring", "metadata": {"description": license_text['bigIqLicensePassword']}}
+    data['parameters']['bigIqLicensePool'] = {"type": "string", "metadata": {"description": license_text['bigIqLicensePool']}}
 data['parameters']['ntpServer'] = {"type": "string", "defaultValue": "0.pool.ntp.org", "metadata": {"description": "If you would like to change the NTP server the BIG-IP uses replace the default ntp server with your choice."}}
 data['parameters']['timeZone'] = {"type": "string", "defaultValue": "UTC", "metadata": {"description": "If you would like to change the time zone the BIG-IP uses then enter your chocie. This is in the format of the Olson timezone string from /usr/share/zoneinfo, such as UTC, US/Central or Europe/London."}}
 data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": "*", "metadata": {"description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources"}}
@@ -253,7 +253,7 @@ if template_name in ('ltm_autoscale', 'waf_autoscale', 'ha-avset'):
     data['parameters']['clientId'] = {"type": "string", "metadata": {"description": "Your Azure service principal application client ID."}}
     data['parameters']['servicePrincipalSecret'] = {"type": "securestring", "metadata": {"description": "Your Azure service principal application secret."}}
 
-# Remove unecessary parameters and do a check for missing mandatory variables
+## Remove unecessary parameters and do a check for missing mandatory variables
 master_helper.template_check(data, 'parameters')
 # Some modifications once parameters have been defined
 for parameter in data['parameters']:
@@ -448,7 +448,7 @@ if template_name in ('cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autos
 
 # Remove unecessary variables and do a check for missing mandatory variables
 master_helper.template_check(data, 'variables')
-# Sort azuredeploy.json variable value(if exists) alphabetically
+# Sort azuredeploy.json variable value (if exists) alphabetically
 for variables in data['variables']:
     sorted_variable = json.dumps(data['variables'][variables], sort_keys=True, ensure_ascii=False)
     data['variables'][variables] = json.loads(sorted_variable, object_pairs_hook=OrderedDict)
@@ -707,7 +707,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
 ######################################## END Create/Modify Scripts ########################################
 
 ######################################## Create/Modify README's ########################################
-    readme_text = {'deploy_links': {}, 'version_tag': {}, 'ps_script': {}, 'bash_script': {}}
+    readme_text = {'deploy_links': {}, 'ps_script': {}, 'bash_script': {}}
     ## Deploy Buttons ##
     readme_text['deploy_links']['version_tag'] = f5_networks_tag
     readme_text['deploy_links']['lic_support'] = template_info['lic_support']

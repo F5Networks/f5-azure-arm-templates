@@ -1,6 +1,4 @@
 #/usr/bin/python env
-import sys
-import os
 import re
 import yaml
 
@@ -65,7 +63,7 @@ def sp_access_needed(api_access_needed, misc_readme):
         sp_text = sp_text.replace('<SP_REQUIRED_ACCESS>', get_custom_text('sp_access_text', 'read'))
     return sp_text
 
-def md_version_map(data, readme_text):
+def md_version_map(data):
     """ Create BIG-IP version map: | Azure BIG-IP Image Version | BIG-IP Version | """
     param_array = ""
     for version in data['parameters']['bigIpVersion']['allowedValues']:
@@ -84,12 +82,9 @@ def create_deploy_links(version_tag, lic_type, template_location):
         deploy_links += '''   - **<LIC_TYPE>** <br><a href="<DEPLOY_LINK_URL>">\n    <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>\n\n'''
         template_location = template_location.replace('/', '%2F')
         template_location = template_location.replace('..', '')
-        template_location = template_location.replace('PAYG', lic)
-        template_location = template_location.replace('BYOL', lic)
-        template_location = template_location.replace('BIGIQ', lic)
+        template_location = template_location.replace('PAYG', lic).replace('BYOL', lic).replace('BIGIQ', lic)
         url = base_url + template_location
-        deploy_links = deploy_links.replace('<DEPLOY_LINK_URL>', url)
-        deploy_links = deploy_links.replace('<LIC_TYPE>', lic)
+        deploy_links = deploy_links.replace('<DEPLOY_LINK_URL>', url).replace('<LIC_TYPE>', lic)
     return deploy_links
 
 def readme_creation(template_info, data, license_params, readme_text, template_location):
@@ -115,7 +110,7 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
         help_text = get_custom_text('help_text', 'supported')
     else:
         help_text = get_custom_text('help_text', 'experimental')
-    version_map = md_version_map(data, readme_text)
+    version_map = md_version_map(data)
     deploy_links = create_deploy_links(readme_text['deploy_links']['version_tag'], lic_type, template_location)
     bash_script = readme_text['bash_script']
     ps_script = readme_text['ps_script']

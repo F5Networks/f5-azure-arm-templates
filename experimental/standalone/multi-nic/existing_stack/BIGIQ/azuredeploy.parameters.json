@@ -24,16 +24,16 @@
             "value": "13.0.021"
         }, 
         "bigIqLicenseHost": {
-            "value": ""
+            "value": "GEN_UNIQUE"
         }, 
         "bigIqLicenseUsername": {
-            "value": ""
+            "value": "GEN_UNIQUE"
         }, 
         "bigIqLicensePassword": {
-            "value": ""
+            "value": "GEN_UNIQUE"
         }, 
         "bigIqLicensePool": {
-            "value": ""
+            "value": "GEN_UNIQUE"
         }, 
         "numberOfAdditionalNics": {
             "value": 1
