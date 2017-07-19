@@ -97,6 +97,10 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 ### <a name="powershell"></a>PowerShell Script Example
 <details>
   <summary>Click to expand PowerShell Script</summary>
+  ```powershell
+  PS Script
+  ```
+</details>
 ```powershell
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
@@ -220,7 +224,7 @@ if ($licenseType -eq "BYOL") {
 # Print Output of Deployment to Console
 $deployment
 ```
-</details>
+
 =======
 
 ### <a name="cli"></a>Azure CLI(1.0) Script Example
