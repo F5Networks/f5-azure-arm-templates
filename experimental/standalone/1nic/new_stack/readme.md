@@ -95,12 +95,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 
 
 ### <a name="powershell"></a>PowerShell Script Example
-<details>
-  <summary>Click to expand PowerShell Script</summary>
-  ```powershell
-  PS Script
-  ```
-</details>
+
 ```powershell
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
