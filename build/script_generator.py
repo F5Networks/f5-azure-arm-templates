@@ -104,21 +104,21 @@ def script_creation(template_info, data, default_payg_bw, language):
 
     ######## Loop through Dynamic Parameter Array ########
     for parameter in script_param_array(data):
-        mandatory_cmd = ''; param_value = ',\n'
+        mandatory_cmd = ''; param_value = ','
         ## Specify any parameters that should be skipped ##
         if parameter[3]:
             continue
         ## Specify any parameters that should be mandatory ##
         if parameter[2]:
             if language == 'powershell':
-                mandatory_cmd = '\n  [Parameter(Mandatory=$True)]'
+                mandatory_cmd = ' [Parameter(Mandatory=$True)]'
             elif language == 'bash':
                 mandatory_variables += parameter[0] + ' '
         ## Specify non-mandatory parameters default value ##
         if parameter[2] is False:
-            param_value = ' = "' + str(parameter[1]) + '",\n'
+            param_value = ' = "' + str(parameter[1]) + '",'
         if language == 'powershell':
-            param_str += mandatory_cmd + '\n  [string]\n  $' + parameter[0] + param_value
+            param_str += '\n  [string]' + mandatory_cmd +  ' $' + parameter[0] + param_value
             if parameter[0] == 'adminPassword':
                 deploy_cmd_params += '-' + parameter[0] + ' $pwd '
                 pwd_cmd = '$pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force'
@@ -154,11 +154,11 @@ def script_creation(template_info, data, default_payg_bw, language):
         ## Create license parameters ##
         if lic_type_all is True:
             if multi_lic is True:
-                lic2_param = '\n\n  [string]\n  $licenseKey2 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey2"}),'
-            big_iq_params = '\n\n  [string]\n  $bigIqLicenseHost = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseHost"}),\n\n  [string]\n  $bigIqLicenseUsername = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseUsername"}),\n\n  [string]\n  $bigIqLicensePassword = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicensePassword"}),\n\n  [string]\n  $bigIqLicensePool = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicensePool"}),'
-            lic_params = '\n  [string]\n  $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),\n\n  [string]\n  $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),' + lic2_param + big_iq_params
+                lic2_param = '\n  [string] $licenseKey2 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey2"}),'
+            big_iq_params = '\n  [string] $bigIqLicenseHost = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseHost"}),\n  [string] $bigIqLicenseUsername = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseUsername"}),\n  [string] $bigIqLicensePassword = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicensePassword"}),\n  [string] $bigIqLicensePool = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicensePool"}),'
+            lic_params = '  [string] $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),\n  [string] $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),' + lic2_param + big_iq_params
         else:
-            lic_params = '\n  [string]\n  $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),'
+            lic_params = '  [string] $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),'
         deploy_cmd = handle_lic_cmd(language, base_deploy, deploy_cmd_params, template_info)
     elif language == 'bash':
         ## Specify any additional example command script parameters ##

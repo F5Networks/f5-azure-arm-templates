@@ -4,123 +4,39 @@
 ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceName f5vm01 -instanceType Standard_DS3_v2 -imageName Good -bigIpVersion 13.0.021 -numberOfExternalIps 1 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddressRangeStart <value> -externalSubnetName <value> -externalIpSelfAddressRangeStart <value> -externalIpAddressRangeStart <value> -internalSubnetName <value> -internalIpAddressRangeStart <value> -ntpServer 0.pool.ntp.org -timeZone UTC -restrictedSrcAddress "*" -resourceGroupName <value>
 
 param(
+  [string] [Parameter(Mandatory=$True)] $licenseType,
+  [string] $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),
+  [string] $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),
+  [string] $licenseKey2 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey2"}),
+  [string] $bigIqLicenseHost = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseHost"}),
+  [string] $bigIqLicenseUsername = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseUsername"}),
+  [string] $bigIqLicensePassword = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicensePassword"}),
+  [string] $bigIqLicensePool = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicensePool"}),
 
-  [Parameter(Mandatory=$True)]
-  [string]
-  $licenseType,
-
-  [string]
-  $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),
-
-  [string]
-  $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),
-
-  [string]
-  $licenseKey2 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey2"}),
-
-  [string]
-  $bigIqLicenseHost = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseHost"}),
-
-  [string]
-  $bigIqLicenseUsername = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseUsername"}),
-
-  [string]
-  $bigIqLicensePassword = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicensePassword"}),
-
-  [string]
-  $bigIqLicensePool = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicensePool"}),
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $adminUsername,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $adminPassword,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $dnsLabel,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $instanceName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $instanceType,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $imageName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $bigIpVersion,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $numberOfExternalIps,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $vnetName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $vnetResourceGroupName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $mgmtSubnetName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $mgmtIpAddressRangeStart,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $externalSubnetName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $externalIpSelfAddressRangeStart,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $externalIpAddressRangeStart,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $internalSubnetName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $internalIpAddressRangeStart,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $ntpServer,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $timeZone,
-
-  [string]
-  $restrictedSrcAddress = "*",
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $resourceGroupName,
-
-  [string]
-  $region = "West US",
-
-  [string]
-  $templateFilePath = "azuredeploy.json",
-
-  [string]
-  $parametersFilePath = "azuredeploy.parameters.json"
+  [string] [Parameter(Mandatory=$True)] $adminUsername,
+  [string] [Parameter(Mandatory=$True)] $adminPassword,
+  [string] [Parameter(Mandatory=$True)] $dnsLabel,
+  [string] [Parameter(Mandatory=$True)] $instanceName,
+  [string] [Parameter(Mandatory=$True)] $instanceType,
+  [string] [Parameter(Mandatory=$True)] $imageName,
+  [string] [Parameter(Mandatory=$True)] $bigIpVersion,
+  [string] [Parameter(Mandatory=$True)] $numberOfExternalIps,
+  [string] [Parameter(Mandatory=$True)] $vnetName,
+  [string] [Parameter(Mandatory=$True)] $vnetResourceGroupName,
+  [string] [Parameter(Mandatory=$True)] $mgmtSubnetName,
+  [string] [Parameter(Mandatory=$True)] $mgmtIpAddressRangeStart,
+  [string] [Parameter(Mandatory=$True)] $externalSubnetName,
+  [string] [Parameter(Mandatory=$True)] $externalIpSelfAddressRangeStart,
+  [string] [Parameter(Mandatory=$True)] $externalIpAddressRangeStart,
+  [string] [Parameter(Mandatory=$True)] $internalSubnetName,
+  [string] [Parameter(Mandatory=$True)] $internalIpAddressRangeStart,
+  [string] [Parameter(Mandatory=$True)] $ntpServer,
+  [string] [Parameter(Mandatory=$True)] $timeZone,
+  [string] $restrictedSrcAddress = "*",
+  [string] [Parameter(Mandatory=$True)] $resourceGroupName,
+  [string] $region = "West US",
+  [string] $templateFilePath = "azuredeploy.json",
+  [string] $parametersFilePath = "azuredeploy.parameters.json"
 )
 
 Write-Host "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged." -foregroundcolor green

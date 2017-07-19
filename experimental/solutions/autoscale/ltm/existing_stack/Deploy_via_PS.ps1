@@ -4,109 +4,34 @@
 ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -scaleOutThroughput 90 -scaleInThroughput 10 -scaleTimeWindow 10 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_DS2_v2 -imageName Good -bigIpVersion 13.0.021 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -notificationEmail OPTIONAL -ntpServer 0.pool.ntp.org -timeZone UTC -restrictedSrcAddress "*" -resourceGroupName <value>
 
 param(
+  [string] [Parameter(Mandatory=$True)] $licenseType,
+  [string] $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),
 
-  [Parameter(Mandatory=$True)]
-  [string]
-  $licenseType,
-
-  [string]
-  $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $vmScaleSetMinCount,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $vmScaleSetMaxCount,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $scaleOutThroughput,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $scaleInThroughput,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $scaleTimeWindow,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $adminUsername,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $adminPassword,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $dnsLabel,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $instanceType,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $imageName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $bigIpVersion,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $vnetName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $vnetResourceGroupName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $mgmtSubnetName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $tenantId,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $clientId,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $servicePrincipalSecret,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $notificationEmail,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $ntpServer,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $timeZone,
-
-  [string]
-  $restrictedSrcAddress = "*",
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $resourceGroupName,
-
-  [string]
-  $region = "West US",
-
-  [string]
-  $templateFilePath = "azuredeploy.json",
-
-  [string]
-  $parametersFilePath = "azuredeploy.parameters.json"
+  [string] [Parameter(Mandatory=$True)] $vmScaleSetMinCount,
+  [string] [Parameter(Mandatory=$True)] $vmScaleSetMaxCount,
+  [string] [Parameter(Mandatory=$True)] $scaleOutThroughput,
+  [string] [Parameter(Mandatory=$True)] $scaleInThroughput,
+  [string] [Parameter(Mandatory=$True)] $scaleTimeWindow,
+  [string] [Parameter(Mandatory=$True)] $adminUsername,
+  [string] [Parameter(Mandatory=$True)] $adminPassword,
+  [string] [Parameter(Mandatory=$True)] $dnsLabel,
+  [string] [Parameter(Mandatory=$True)] $instanceType,
+  [string] [Parameter(Mandatory=$True)] $imageName,
+  [string] [Parameter(Mandatory=$True)] $bigIpVersion,
+  [string] [Parameter(Mandatory=$True)] $vnetName,
+  [string] [Parameter(Mandatory=$True)] $vnetResourceGroupName,
+  [string] [Parameter(Mandatory=$True)] $mgmtSubnetName,
+  [string] [Parameter(Mandatory=$True)] $tenantId,
+  [string] [Parameter(Mandatory=$True)] $clientId,
+  [string] [Parameter(Mandatory=$True)] $servicePrincipalSecret,
+  [string] [Parameter(Mandatory=$True)] $notificationEmail,
+  [string] [Parameter(Mandatory=$True)] $ntpServer,
+  [string] [Parameter(Mandatory=$True)] $timeZone,
+  [string] $restrictedSrcAddress = "*",
+  [string] [Parameter(Mandatory=$True)] $resourceGroupName,
+  [string] $region = "West US",
+  [string] $templateFilePath = "azuredeploy.json",
+  [string] $parametersFilePath = "azuredeploy.parameters.json"
 )
 
 Write-Host "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged." -foregroundcolor green
