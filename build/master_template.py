@@ -38,7 +38,7 @@ command_to_execute = ""
 ## Static Variable Assignment ##
 content_version = '3.2.1.0'
 f5_networks_tag = 'v3.2.1.0'
-f5_cloud_libs_tag = 'v3.2.1'
+f5_cloud_libs_tag = 'ese-1120'
 f5_cloud_libs_azure_tag = 'v1.2.0'
 f5_cloud_iapps_tag = 'v1.0.2'
 f5_cloud_workers_tag = 'v1.0.0'
@@ -125,10 +125,9 @@ elif license_type == 'BIGIQ':
     big_iq_pwd_cmd = " echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/bigIqPasswd; "
     if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic'):
         big_iq_mgmt_ip_ref =  "reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,"
-    if template_name == 'cluster_1nic':
-        # Need to add port here once cloud libs supports
-        big_iq_mgmt_ip_ref =  "reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,"
-        big_iq_mgmt_ip_ref2 =  "reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,"
+    if template_name in ('cluster_1nic'):
+        big_iq_mgmt_ip_ref =  "reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' --big-ip-mgmt-port 8443',"
+        big_iq_mgmt_ip_ref2 =  "reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' --big-ip-mgmt-port 8444',"
     if template_name in ('ha-avset', 'cluster_3nic'):
         big_iq_mgmt_ip_ref =  "reference(concat(variables('mgmtPublicIPAddressId'), '0')).dnsSettings.fqdn,"
         big_iq_mgmt_ip_ref2 =  "reference(concat(variables('mgmtPublicIPAddressId'), '1')).dnsSettings.fqdn,"
