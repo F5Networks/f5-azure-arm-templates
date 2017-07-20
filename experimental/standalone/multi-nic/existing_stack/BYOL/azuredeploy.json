@@ -109,7 +109,7 @@
         "licenseKey1": {
             "defaultValue": "REQUIRED", 
             "metadata": {
-                "description": "The license token for the F5 BIG-IP VE (BYOL)"
+                "description": "The license token for the F5 BIG-IP VE (BYOL)."
             }, 
             "type": "string"
         }, 
@@ -201,14 +201,14 @@
         "ntpServer": {
             "defaultValue": "0.pool.ntp.org", 
             "metadata": {
-                "description": "If you would like to change the NTP server the BIG-IP uses replace the default ntp server with your choice."
+                "description": "If you would like to change the NTP server the BIG-IP uses then replace the default ntp server with your choice."
             }, 
             "type": "string"
         }, 
         "timeZone": {
             "defaultValue": "UTC", 
             "metadata": {
-                "description": "If you would like to change the time zone the BIG-IP uses then enter your chocie. This is in the format of the Olson timezone string from /usr/share/zoneinfo, such as UTC, US/Central or Europe/London."
+                "description": "If you would like to change the time zone the BIG-IP uses then enter your choice. This is in the format of the Olson timezone string from /usr/share/zoneinfo, such as UTC, US/Central or Europe/London."
             }, 
             "type": "string"
         }, 

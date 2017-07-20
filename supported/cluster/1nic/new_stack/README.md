@@ -81,16 +81,16 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (IMAGE) to you want to deploy. |
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
-| licenseKey1 | No | The license token for the F5 BIG-IP VE (BYOL) |
+| licenseKey1 | No | The license token for the F5 BIG-IP VE (BYOL). |
 | licenseKey2 | No | The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices. |
 | licensedBandwidth | No | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
-| bigIqLicenseHost | No | The Host/IP address to use to get to the BIG-IQ to be used for BIG-IP licensing. |
+| bigIqLicenseHost | No | The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP. |
 | bigIqLicenseUsername | No | The BIG-IQ username to use during licensing. |
 | bigIqLicensePassword | No | The BIG-IQ password to use during licensing. |
 | bigIqLicensePool | No | The BIG-IQ license pool to use during licensing. |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
-| ntpServer | Yes | If you would like to change the NTP server the BIG-IP uses replace the default ntp server with your choice. |
-| timeZone | Yes | If you would like to change the time zone the BIG-IP uses then enter your chocie. This is in the format of the Olson timezone string from /usr/share/zoneinfo, such as UTC, US/Central or Europe/London. |
+| ntpServer | Yes | If you would like to change the NTP server the BIG-IP uses then replace the default ntp server with your choice. |
+| timeZone | Yes | If you would like to change the time zone the BIG-IP uses then enter your choice. This is in the format of the Olson timezone string from /usr/share/zoneinfo, such as UTC, US/Central or Europe/London. |
 | restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources |
 | tagValues | Yes | Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key. |
 

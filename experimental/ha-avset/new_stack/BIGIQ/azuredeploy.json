@@ -108,7 +108,7 @@
         }, 
         "bigIqLicenseHost": {
             "metadata": {
-                "description": "The Host/IP address to use to get to the BIG-IQ to be used for BIG-IP licensing."
+                "description": "The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP."
             }, 
             "type": "string"
         }, 
@@ -189,14 +189,14 @@
         "ntpServer": {
             "defaultValue": "0.pool.ntp.org", 
             "metadata": {
-                "description": "If you would like to change the NTP server the BIG-IP uses replace the default ntp server with your choice."
+                "description": "If you would like to change the NTP server the BIG-IP uses then replace the default ntp server with your choice."
             }, 
             "type": "string"
         }, 
         "timeZone": {
             "defaultValue": "UTC", 
             "metadata": {
-                "description": "If you would like to change the time zone the BIG-IP uses then enter your chocie. This is in the format of the Olson timezone string from /usr/share/zoneinfo, such as UTC, US/Central or Europe/London."
+                "description": "If you would like to change the time zone the BIG-IP uses then enter your choice. This is in the format of the Olson timezone string from /usr/share/zoneinfo, such as UTC, US/Central or Europe/London."
             }, 
             "type": "string"
         }, 

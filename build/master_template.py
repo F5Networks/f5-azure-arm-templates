@@ -136,10 +136,10 @@ elif license_type == 'BIGIQ':
     bigiq_pwd_delete = ' rm -f /config/cloud/bigIqPasswd;'
 ## Abstract license key text for readme_generator
 license_text = OrderedDict()
-license_text['licenseKey1'] = 'The license token for the F5 BIG-IP VE (BYOL)'
+license_text['licenseKey1'] = 'The license token for the F5 BIG-IP VE (BYOL).'
 license_text['licenseKey2'] = 'The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices.'
 license_text['licensedBandwidth'] = 'The amount of licensed bandwidth (Mbps) you want the PAYG image to use.'
-license_text['bigIqLicenseHost'] = 'The Host/IP address to use to get to the BIG-IQ to be used for BIG-IP licensing.'
+license_text['bigIqLicenseHost'] = 'The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP.'
 license_text['bigIqLicenseUsername'] = 'The BIG-IQ username to use during licensing.'
 license_text['bigIqLicensePassword'] = 'The BIG-IQ password to use during licensing.'
 license_text['bigIqLicensePool'] = 'The BIG-IQ license pool to use during licensing.'
@@ -178,8 +178,8 @@ elif license_type == 'BIGIQ':
     data['parameters']['bigIqLicenseUsername'] = {"type": "string", "metadata": {"description": license_text['bigIqLicenseUsername']}}
     data['parameters']['bigIqLicensePassword'] = {"type": "securestring", "metadata": {"description": license_text['bigIqLicensePassword']}}
     data['parameters']['bigIqLicensePool'] = {"type": "string", "metadata": {"description": license_text['bigIqLicensePool']}}
-data['parameters']['ntpServer'] = {"type": "string", "defaultValue": "0.pool.ntp.org", "metadata": {"description": "If you would like to change the NTP server the BIG-IP uses replace the default ntp server with your choice."}}
-data['parameters']['timeZone'] = {"type": "string", "defaultValue": "UTC", "metadata": {"description": "If you would like to change the time zone the BIG-IP uses then enter your chocie. This is in the format of the Olson timezone string from /usr/share/zoneinfo, such as UTC, US/Central or Europe/London."}}
+data['parameters']['ntpServer'] = {"type": "string", "defaultValue": "0.pool.ntp.org", "metadata": {"description": "If you would like to change the NTP server the BIG-IP uses then replace the default ntp server with your choice."}}
+data['parameters']['timeZone'] = {"type": "string", "defaultValue": "UTC", "metadata": {"description": "If you would like to change the time zone the BIG-IP uses then enter your choice. This is in the format of the Olson timezone string from /usr/share/zoneinfo, such as UTC, US/Central or Europe/London."}}
 data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": "*", "metadata": {"description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources"}}
 data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values, "metadata": {"description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."}}
 
