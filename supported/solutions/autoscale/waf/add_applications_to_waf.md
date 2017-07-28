@@ -4,7 +4,7 @@ You can use the [**deploy_waf_application.sh**](https://gitswarm.f5net.com/cloud
 
 You need to provide a list of parameters when deploying the script (you will be prompted for the WAF password).
 
-Example usage:  ```bash -x .\deploy_waf_application.sh -m http-https -d mydeployment -p 1.2.3.4 -v 881 -s 8446 -o 80 -l 443 -t linux -e custom -i https://example.com/my_security_policy.xml -c https://example.com/my_ssl_archive.pfx -a Ih3@rtF5! -r myapp.example.com -u azureuser -h 1.1.1.1 -g 8443```
+Example usage:  ```bash -x .\deploy_waf_application.sh -m http-https -d mydeployment -p 1.2.3.4 -v 881 -s 8446 -o 80 -l 443 -t linux -e custom -i https://example.com/my_security_policy.xml -c https://example.com/my_ssl_archive.pfx -a Ih3@rtF5! -r myapp.example.com -u azureuser -h 1.1.1.1 -g 50101```
 
 | Flag | Name | Description | Example values | Notes |
 | --- | --- | --- | --- | --- |
@@ -23,4 +23,4 @@ Example usage:  ```bash -x .\deploy_waf_application.sh -m http-https -d mydeploy
 | -r | Application Service FQDN |  The FQDN of your application, if not the same as pool_member. | myapp.example.com, NOT_SPECIFIED | When the application is an Azure App Service or App Service Environment, enter the FQDN that clients use to access the application; otherwise, use **NOT_SPECIFIED**. |
 | -u | WAF Username | The user name for the account create at provisioning time. | azureuser | |  
 | -h | WAF Host IP | The management IP address of the WAF device | 1.1.1.1 | The host IP address can be accessed in the outputs of the Azure template deployment, or from Azure Security Center. |
-| -g | WAF Management Port | The management port of the WAF device. | 443, 8443 | The management port can be accessed in the outputs of the Azure template deployment, or from Azure Security Center. |
+| -g | WAF Management Port | The management port of the WAF device. | 50101 | The management port can be accessed in the outputs of the Azure template deployment, or from Azure Security Center. |
