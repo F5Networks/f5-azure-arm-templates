@@ -4,7 +4,8 @@ You can use the [**deploy_waf_application_autoscale.sh**](https://gitswarm.f5net
 
 You need to provide a list of parameters when deploying the script (you will be prompted for the WAF password).
 
-Example usage:  ```bash
+Example usage:  
+```bash
 bash -x .\deploy_waf_application.sh -m http-https -d mydeployment -p 1.2.3.4 -v 881 -s 8446 -o 80 -l 443 -t linux -e custom -i https://example.com/my_security_policy.xml -c https://example.com/my_ssl_archive.pfx -a Ih3@rtF5! -r myapp.example.com -u azureuser -h 1.1.1.1 -g 50101
 ```
 
