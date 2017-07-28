@@ -6,9 +6,6 @@ You need to provide a list of parameters when deploying the script (you will be 
 
 Example usage:  ```bash -x .\deploy_waf_application.sh -m http-https -d mydeployment -p 1.2.3.4 -v 881 -s 8446 -o 80 -l 443 -t linux -e custom -i https://example.com/my_security_policy.xml -c https://example.com/my_ssl_archive.pfx -a Ih3@rtF5! -r myapp.example.com -u azureuser -h 1.1.1.1 -g 8443```
 
-| Parameter | Required | Description |
-| --- | --- | --- |
-
 | Flag | Name | Description | Example values | Notes |
 | --- | --- | --- | --- | --- |
 | -m | Application Protocols | The protocol(s) used by clients to access your application. | http, http-https, https, https-offload | 
