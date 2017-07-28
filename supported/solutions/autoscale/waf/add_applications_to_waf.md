@@ -1,6 +1,6 @@
 # Deploying Additional Applications to the F5 WAF
 
-You can use the [**deploy_waf_application.sh**](https://gitswarm.f5net.com/cloudsolutions/f5-azure-arm-templates/blob/develop/supported/solutions/autoscale/waf/deploy_waf_application.sh) script in this repo to deploy additional applications to your F5 WAF devices.  The script configures the required security policy, profiles, and virtual server objects to receive application traffic. After you run the script, you must manually configure the Azure Load Balancer and Network Security Group to pass traffic for the application to the WAF device. The script does not configure Azure resources. For more information on configuring Azure objects, see the Azure documentation.
+You can use the [**deploy_waf_application_autoscale.sh**](https://gitswarm.f5net.com/cloudsolutions/f5-azure-arm-templates/blob/develop/supported/solutions/autoscale/waf/deploy_waf_application_autoscale.sh) script in this repo to deploy additional applications to your F5 WAF devices.  The script configures the required security policy, profiles, and virtual server objects to receive application traffic. After you run the script, you must manually configure the Azure Load Balancer and Network Security Group to pass traffic for the application to the WAF device. The script does not configure Azure resources. For more information on configuring Azure objects, see the Azure documentation.
 
 You need to provide a list of parameters when deploying the script (you will be prompted for the WAF password).
 
