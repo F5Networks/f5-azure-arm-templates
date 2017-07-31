@@ -180,6 +180,13 @@
             }, 
             "type": "string"
         }, 
+        "avSetChoice": {
+            "defaultValue": "CREATE_NEW", 
+            "metadata": {
+                "description": "If you would like the VM placed in a new availabilty set then leave the default value of 'CREATE_NEW', otherwise specify the name of the existing availability set you would like to use. Note: If using an existing AV Set then this deployment must be in the same resource group as the AV Set."
+            }, 
+            "type": "string"
+        }, 
         "ntpServer": {
             "defaultValue": "0.pool.ntp.org", 
             "metadata": {
@@ -274,7 +281,8 @@
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['2'].Port]", 
         "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
         "instanceName": "[toLower(parameters('instanceName'))]", 
-        "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
+        "newAvailabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
+        "availabilitySetName": "[replace(parameters('avSetChoice'), 'CREATE_NEW', variables('newAvailabilitySetName'))]", 
         "virtualNetworkName": "[parameters('vnetName')]", 
         "vnetId": "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]", 
         "publicIPAddressType": "Static", 
@@ -799,6 +807,7 @@
         }, 
         {
             "apiVersion": "[variables('apiVersion')]", 
+            "condition": "[equals(toUpper(parameters('avSetChoice')), 'CREATE_NEW')]", 
             "location": "[variables('location')]", 
             "name": "[variables('availabilitySetName')]", 
             "tags": {

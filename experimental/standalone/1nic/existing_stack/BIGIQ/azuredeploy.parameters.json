@@ -47,6 +47,9 @@
         "mgmtIpAddress": {
             "value": "GEN_UNIQUE"
         }, 
+        "avSetChoice": {
+            "value": "CREATE_NEW"
+        }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"
         }, 
