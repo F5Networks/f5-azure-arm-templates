@@ -106,27 +106,15 @@
             }, 
             "type": "string"
         }, 
-        "bigIqLicenseHost": {
+        "licensedBandwidth": {
+            "allowedValues": [
+                "25m", 
+                "200m", 
+                "1g"
+            ], 
+            "defaultValue": "200m", 
             "metadata": {
-                "description": "The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP."
-            }, 
-            "type": "string"
-        }, 
-        "bigIqLicenseUsername": {
-            "metadata": {
-                "description": "The BIG-IQ username to use during licensing."
-            }, 
-            "type": "string"
-        }, 
-        "bigIqLicensePassword": {
-            "metadata": {
-                "description": "The BIG-IQ password to use during licensing."
-            }, 
-            "type": "securestring"
-        }, 
-        "bigIqLicensePool": {
-            "metadata": {
-                "description": "The BIG-IQ license pool to use during licensing."
+                "description": "The amount of licensed bandwidth (Mbps) you want the PAYG image to use."
             }, 
             "type": "string"
         }, 
@@ -254,7 +242,7 @@
         "resourceGroupName": "[resourceGroup().name]", 
         "singleQuote": "'", 
         "f5Tag": "82e08e16-fc62-4bf0-8916-e1c02dc871cd", 
-        "f5TemplateTag": "standalone_multi-nic", 
+        "f5TemplateTag": "standalone_multi_nic", 
         "f5CloudLibsTag": "ese-1120", 
         "f5CloudLibsAzureTag": "v1.2.0", 
         "f5NetworksTag": "v3.2.1.0", 
@@ -263,8 +251,8 @@
         "installCloudLibs": "[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit 1\nfi\necho loaded verifyHash\nscript_loc=\"/var/lib/waagent/custom-script/download/0/\"\nconfig_loc=\"/config/cloud/\"\nhashed_file_list=\"\"\nfor file in $hashed_file_list; do\necho \"verifying $file\"\n/usr/bin/tmsh run cli script verifyHash $file\nif [ $? != 0 ]; then\necho \"$file is not valid\"\nexit 1\nfi\necho \"verified $file\"\ndone\necho \"expanding $hashed_file_list\"\ntar xvfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud/node_modules\ntouch /config/cloud/cloudLibsReady', variables('singleQuote'))]", 
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
-        "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]", 
-        "offerToUse": "f5-big-ip", 
+        "skuToUse": "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]", 
+        "offerToUse": "f5-big-ip-hourly", 
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['3'].Port]", 
         "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
         "instanceName": "[toLower(parameters('instanceName'))]", 
@@ -305,12 +293,7 @@
             "filler05"
         ], 
         "addtlNicRefSplit": "[concat(split(parameters('additionalNicLocation'), ';'), variables('addtlNicFillerArray'))]", 
-        "netCmd01": "[concat(' --vlan name:', variables('addtlNicRefSplit')[0], ',nic:1.3')]", 
-        "netCmd02": "[concat(variables('netCmd01'), ' --vlan name:', variables('addtlNicRefSplit')[1], ',nic:1.4')]", 
-        "netCmd03": "[concat(variables('netCmd02'), ' --vlan name:', variables('addtlNicRefSplit')[2], ',nic:1.5')]", 
-        "netCmd04": "[concat(variables('netCmd03'), ' --vlan name:', variables('addtlNicRefSplit')[3], ',nic:1.6')]", 
-        "netCmd05": "[concat(variables('netCmd04'), ' --vlan name:', variables('addtlNicRefSplit')[4], ',nic:1.7')]", 
-        "netCmd": "[variables(concat('netCmd0', parameters ('numberOfAdditionalNics')))]", 
+        "netCmd": "", 
         "numberOfExternalIps": "[parameters('numberOfExternalIps')]", 
         "mgmtRouteGw": "[concat(parameters('vnetAddressPrefix'), '.1.1')]", 
         "tmmRouteGw": "[concat(parameters('vnetAddressPrefix'), '.2.1')]", 
@@ -1125,7 +1108,7 @@
             "name": "[concat(variables('instanceName'),'/start')]", 
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; mkdir -p /config/cloud/node_modules; BIG_IP_CREDENTIALS_FILE=/config/cloud/passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/bigIqPasswd;  unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --default-gw ', variables('tmmRouteGw'), ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'),  ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress'),  ',vlan:internal ', variables('netCmd'), ' --log-level debug', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; ', variables('routeCmdArray')[parameters('bigIpVersion')], '; rm -f /config/cloud/passwd; rm -f /config/cloud/bigIqPasswd; bash /config/customConfig.sh; else exit 1; fi')]"
+                    "commandToExecute": "[concat('mkdir /config/cloud && cp f5-cloud-libs.tar.gz* /config/cloud; mkdir -p /config/cloud/node_modules; BIG_IP_CREDENTIALS_FILE=/config/cloud/passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> $BIG_IP_CREDENTIALS_FILE; unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'),  ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --default-gw ', variables('tmmRouteGw'), ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'),  ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress'),  ',vlan:internal ', variables('netCmd'), ' --log-level debug', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; ', variables('routeCmdArray')[parameters('bigIpVersion')], '; rm -f /config/cloud/passwd; bash /config/customConfig.sh; else exit 1; fi')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {

@@ -84,14 +84,14 @@ default_instance = "Standard_DS2_v2"
 ## Update port map variable if deploying multi_nic template
 if template_name in 'standalone_2nic':
     nic_port_map = "[variables('bigIpNicPortMap')['2'].Port]"
-if template_name in ('standalone_3nic', 'standalone_multi-nic', 'ha-avset', 'cluster_3nic'):
+if template_name in ('standalone_3nic', 'standalone_multi_nic', 'ha-avset', 'cluster_3nic'):
     nic_port_map = "[variables('bigIpNicPortMap')['3'].Port]"
 
 ## Update allowed instances available based on solution
 disallowed_instance_list = []
 if template_name in 'waf_autoscale':
     disallowed_instance_list = ["Standard_A2", "Standard_F2"]
-if template_name in ('standalone_3nic', 'standalone_multi-nic', 'ha-avset', 'cluster_3nic'):
+if template_name in ('standalone_3nic', 'standalone_multi_nic', 'ha-avset', 'cluster_3nic'):
     default_instance = "Standard_DS3_v2"
     disallowed_instance_list = ["Standard_A2", "Standard_D2", "Standard_DS2", "Standard_D2_v2", "Standard_DS2_v2", "Standard_F2", "Standard_F2S", "Standard_G2", "Standard_GS2"]
 for instance in disallowed_instance_list:
@@ -101,9 +101,9 @@ for instance in disallowed_instance_list:
 ext_mask_cmd = ''
 int_mask_cmd = ''
 if stack_type == 'existing_stack':
-    if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'ha-avset', 'cluster_3nic'):
+    if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'ha-avset', 'cluster_3nic'):
         ext_mask_cmd = "skip(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, indexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '/')),"
-    if template_name in ('standalone_3nic', 'standalone_multi-nic', 'ha-avset', 'cluster_3nic'):
+    if template_name in ('standalone_3nic', 'standalone_multi_nic', 'ha-avset', 'cluster_3nic'):
         int_mask_cmd = "skip(reference(variables('intSubnetRef'), variables('networkApiVersion')).addressPrefix, indexOf(reference(variables('intSubnetRef'), variables('networkApiVersion')).addressPrefix, '/')),"
 
 ## Determine PAYG/BYOL/BIGIQ variables
@@ -124,7 +124,7 @@ elif license_type == 'BIGIQ':
     big_iq_mgmt_ip_ref = ''
     big_iq_mgmt_ip_ref2 = ''
     big_iq_pwd_cmd = " echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/bigIqPasswd; "
-    if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic'):
+    if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic'):
         big_iq_mgmt_ip_ref =  "reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,"
     if template_name in ('cluster_1nic'):
         big_iq_mgmt_ip_ref =  "reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' --big-ip-mgmt-port 8443',"
@@ -185,10 +185,10 @@ data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": 
 data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values, "metadata": {"description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."}}
 
 # Set new_stack/existing_stack parameters for templates that support that
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'cluster_3nic', 'ha-avset', 'cluster_1nic', 'ltm_autoscale', 'waf_autoscale'):
-    if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'cluster_3nic', 'ha-avset'):
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset', 'cluster_1nic', 'ltm_autoscale', 'waf_autoscale'):
+    if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
         data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": {"description": "Name of the Virtual Machine."}}
-    if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'cluster_3nic', 'ha-avset'):
+    if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
         data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8], "metadata": {"description": "The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers."}}
     if stack_type == 'new_stack':
         data['parameters']['vnetAddressPrefix'] = {"type": "string", "defaultValue": "10.0", "metadata": {"description": "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'."}}
@@ -203,24 +203,24 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
             pass
         else:
             data['parameters']['mgmtIpAddress'] = {"type": "string", "metadata": {"description": "MGMT subnet IP Address to use for the BIG-IP management IP address."}}
-        if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'cluster_3nic', 'ha-avset'):
+        if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
             data['parameters']['externalSubnetName'] = {"type": "string", "metadata": {"description": "Name of the existing external subnet - with external access to Internet."}}
             if template_name in ('ha-avset', 'cluster_3nic'):
                 data['parameters']['externalIpSelfAddressRangeStart'] = {"metadata": {"description": "The static private IP address you would like to assign to the external self IP (primary) of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."}, "type": "string"}
                 data['parameters']['externalIpAddressRangeStart'] = {"metadata": {"description": "The static private IP address (secondary) you would like to assign to the first shared Azure public IP. An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses for external virtual servers."}, "type": "string"}
             else:
                 data['parameters']['externalIpAddressRangeStart'] = {"type": "string", "metadata": {"description": "The static private IP address  you would like to assign to the first external Azure public IP(for self IP). An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50(self IP), 10.100.1.51 and 10.100.1.52 being configured as static private IP addresses for external virtual servers."}}
-        if template_name in ('standalone_3nic', 'standalone_multi-nic', 'ha-avset', 'cluster_3nic'):
+        if template_name in ('standalone_3nic', 'standalone_multi_nic', 'ha-avset', 'cluster_3nic'):
             data['parameters']['internalSubnetName'] = {"type": "string", "metadata": {"description": "Name of the existing internal subnet."}}
             if template_name in ('ha-avset', 'cluster_3nic'):
                 data['parameters']['internalIpAddressRangeStart'] = {"type": "string", "metadata": {"description": "The static private IP address you would like to assign to the internal self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."}}
             else:
                 data['parameters']['internalIpAddress'] = {"type": "string", "metadata": {"description": "Internal subnet IP address you want to use for the BIG-IP internal self IP address."}}
-        if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic'):
+        if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic'):
             data['parameters']['avSetChoice'] = {"defaultValue": "CREATE_NEW", "metadata": {"description": "If you would like the VM placed in a new availabilty set then leave the default value of 'CREATE_NEW', otherwise specify the name of the existing availability set you would like to use. Note: If using an existing AV Set then this deployment must be in the same resource group as the AV Set."}, "type": "string"}
 
 # Set unique solution parameters
-if template_name in ('standalone_multi-nic'):
+if template_name in ('standalone_multi_nic'):
     data['parameters']['numberOfAdditionalNics'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5], "metadata": {"description": "By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a select number of additional NICs to the BIG-IP using this parameter."}}
     data['parameters']['additionalNicLocation'] = {"type": "string", "metadata": {"description": "This parameter specifies where the additional NIC's should go.  This should be a semi-colon delimited string of subnets equal to the number of additional NIC's being deployed.  Example (if 2 additional NIC's was selected): 'subnet01;subnet02' NOTE: Please ensure that there is no spaces and that the correct number of subnets are provided based on the value chosen in 'numberOfAdditionalNics'."}}
 if template_name in ('cluster_1nic'):
@@ -285,8 +285,8 @@ data['variables']['skuToUse'] = sku_to_use
 data['variables']['offerToUse'] = offer_to_use
 data['variables']['bigIpNicPortValue'] = nic_port_map
 ## Handle new_stack/existing_stack variable differences
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'ha-avset', 'cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autoscale'):
-    if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'cluster_3nic', 'ha-avset'):
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'ha-avset', 'cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autoscale'):
+    if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
         data['variables']['instanceName'] = "[toLower(parameters('instanceName'))]"
     if stack_type == 'new_stack':
         data['variables']['vnetId'] = "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
@@ -297,7 +297,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
             data['variables']['mgmtSubnetPrivateAddress'] = "[concat(parameters('vnetAddressPrefix'), '.1.')]"
             data['variables']['mgmtSubnetPrivateAddressSuffix'] = 4
             data['variables']['mgmtSubnetPrivateAddressSuffix1'] = "[add(variables('mgmtSubnetPrivateAddressSuffix'), 1)]"
-        if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'cluster_3nic', 'ha-avset'):
+        if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
             data['variables']['extNsgID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-ext-nsg'))]"
             data['variables']['extSelfPublicIpAddressNamePrefix'] = "[concat(variables('dnsLabel'), '-self-pip')]"
             data['variables']['extSelfPublicIpAddressIdPrefix'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('extSelfPublicIpAddressNamePrefix'))]"
@@ -312,7 +312,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
             data['variables']['tmmRouteGw'] = "[concat(parameters('vnetAddressPrefix'), '.2.1')]"
             data['variables']['mgmtRouteGw'] = "[concat(parameters('vnetAddressPrefix'), '.1.1')]"
             data['variables']['routeCmdArray'] = route_cmd_array
-            if template_name in ('standalone_3nic', 'standalone_multi-nic', 'cluster_3nic', 'ha-avset'):
+            if template_name in ('standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
                 data['variables']['intNicName'] = "[concat(variables('dnsLabel'), '-int')]"
                 data['variables']['intSubnetName'] = "internal"
                 data['variables']['intSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]"
@@ -324,17 +324,19 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
                 data['variables']['extSubnetPrivateAddress1'] = "[concat(parameters('vnetAddressPrefix'), '.2.5')]"
                 data['variables']['intSubnetPrivateAddress1'] = "[concat(parameters('vnetAddressPrefix'), '.3.5')]"
                 self_ip_config_array += [{"name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": {"PublicIpAddress": {"Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '1')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress1')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]"}}}]
-            if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'ha-avset'):
+            if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'ha-avset'):
                 ext_ip_config_array = [{"name": "[concat(variables('resourceGroupName'), '-ext-ipconfig0')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 0)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 10)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig1')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 1)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 11)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig2')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 2)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 12)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig3')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 3)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 13)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig4')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 4)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 14)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig5')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 5)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 15)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig6')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 6)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 16)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig7')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 7)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 17)]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]"}}}]
             if template_name in ('cluster_3nic'):
                 ext_ip_config_array = [ { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig0')]", "properties": { "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 10)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ] } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig1')]", "properties": { "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 11)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ] } } ]
                 lb_front_end_array = [ { "name": "loadBalancerFrontEnd0", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 0)]" } } }, { "name": "loadBalancerFrontEnd1", "properties": { "publicIPAddress": { "id":"[concat(variables('extPublicIPAddressIdPrefix'), 1)]" } } }, { "name": "loadBalancerFrontEnd2", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 2)]" } } }, { "name": "loadBalancerFrontEnd3", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 3)]" } } }, { "name": "loadBalancerFrontEnd4", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 4)]" } } } ]
+            if template_name in ('standalone_multi_nic'):
+                data['variables']['netCmd'] = ""
     if stack_type == 'existing_stack':
         data['variables']['virtualNetworkName'] = "[parameters('vnetName')]"
         data['variables']['vnetId'] = "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]"
         data['variables']['mgmtSubnetName'] = "[parameters('mgmtSubnetName')]"
         data['variables']['mgmtSubnetPrivateAddress'] = "[parameters('mgmtIpAddress')]"
-        if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic'):
+        if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic'):
             data['variables']['newAvailabilitySetName'] = "[concat(variables('dnsLabel'), '-avset')]"
             data['variables']['availabilitySetName'] = "[replace(parameters('avSetChoice'), 'CREATE_NEW', variables('newAvailabilitySetName'))]"
         if template_name in ('cluster_1nic'):
@@ -343,7 +345,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
                 data['variables']['mgmtSubnetPrivateAddressSuffix'] = "[int(variables('mgmtSubnetPrivateAddressPrefixArray')[3])]"
                 data['variables']['mgmtSubnetPrivateAddressSuffix1'] = "[add(variables('mgmtSubnetPrivateAddressSuffix'), 1)]"
                 data['variables']['mgmtSubnetPrivateAddress'] = "[variables('mgmtSubnetPrivateAddressPrefix')]"
-        if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'cluster_3nic', 'ha-avset'):
+        if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
             data['variables']['extNsgID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-ext-nsg'))]"
             data['variables']['extSelfPublicIpAddressNamePrefix'] = "[concat(variables('dnsLabel'), '-self-pip')]"
             data['variables']['extSelfPublicIpAddressIdPrefix'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('extSelfPublicIpAddressNamePrefix'))]"
@@ -361,7 +363,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
             data['variables']['extSubnetPrivateAddressSuffixInt'] = "[int(variables('extSubnetPrivateAddressPrefixArray')[3])]"
             data['variables']['extSubnetPrivateAddressSuffix0'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 1)]"
             data['variables']['extSubnetPrivateAddressSuffix1'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 2)]"
-            if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'ha-avset'):
+            if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'ha-avset'):
                 data['variables']['extSubnetPrivateAddressSuffix2'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 3)]"
                 data['variables']['extSubnetPrivateAddressSuffix3'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 4)]"
                 data['variables']['extSubnetPrivateAddressSuffix4'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 5)]"
@@ -369,7 +371,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
                 data['variables']['extSubnetPrivateAddressSuffix6'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 7)]"
                 data['variables']['extSubnetPrivateAddressSuffix7'] = "[add(variables('extSubnetPrivateAddressSuffixInt'), 8)]"
             data['variables']['extSubnetRef'] = "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/', parameters('vnetResourceGroupName'), '/providers/Microsoft.Network/virtualNetworks/', parameters('vnetName'), '/subnets/', parameters('externalSubnetName'))]"
-            if template_name in ('standalone_3nic', 'standalone_multi-nic', 'cluster_3nic', 'ha-avset'):
+            if template_name in ('standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
                 data['variables']['intNicName'] = "[concat(variables('dnsLabel'), '-int')]"
                 data['variables']['intSubnetName'] = "[parameters('internalSubnetName')]"
                 data['variables']['intSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]"
@@ -397,29 +399,30 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
                 data['variables']['intSubnetPrivateAddress'] = "[parameters('internalIpAddressRangeStart')]"
                 data['variables']['intSubnetPrivateAddress1'] = "[concat(variables('intSubnetPrivateAddressPrefix'), variables('intSubnetPrivateAddressSuffix'))]"
                 self_ip_config_array += [{ "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '1')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress1')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
-            if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'ha-avset'):
+            if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'ha-avset'):
                 ext_ip_config_array = [{ "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig0')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 0)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix0'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig1')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 1)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix1'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig2')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 2)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix2'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig3')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 3)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix3'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig4')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 4)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix4'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig5')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 5)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix5'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig6')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 6)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix6'))]",  "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig7')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 7)]" }, "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix7'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
             if template_name in ('cluster_3nic'):
                 ext_ip_config_array = [ { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig0')]", "properties": { "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix0'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ] } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig1')]", "properties": { "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix1'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ] } } ]
                 lb_front_end_array = [ { "name": "loadBalancerFrontEnd0", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 0)]" } } }, { "name": "loadBalancerFrontEnd1", "properties": { "publicIPAddress": { "id":"[concat(variables('extPublicIPAddressIdPrefix'), 1)]" } } }, { "name": "loadBalancerFrontEnd2", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 2)]" } } }, { "name": "loadBalancerFrontEnd3", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 3)]" } } }, { "name": "loadBalancerFrontEnd4", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 4)]" } } } ]
+            if template_name in ('standalone_multi_nic'):
+                data['variables']['netCmd01'] = "[concat(' --vlan name:', variables('addtlNicRefSplit')[0], ',nic:1.3')]"
+                data['variables']['netCmd02'] = "[concat(variables('netCmd01'), ' --vlan name:', variables('addtlNicRefSplit')[1], ',nic:1.4')]"
+                data['variables']['netCmd03'] = "[concat(variables('netCmd02'), ' --vlan name:', variables('addtlNicRefSplit')[2], ',nic:1.5')]"
+                data['variables']['netCmd04'] = "[concat(variables('netCmd03'), ' --vlan name:', variables('addtlNicRefSplit')[3], ',nic:1.6')]"
+                data['variables']['netCmd05'] = "[concat(variables('netCmd04'), ' --vlan name:', variables('addtlNicRefSplit')[4], ',nic:1.7')]"
+                data['variables']['netCmd'] = "[variables(concat('netCmd0', parameters ('numberOfAdditionalNics')))]"
 
     # After adding variables for new_stack/existing_stack we need to add the ip config array
-    if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'cluster_3nic', 'ha-avset'):
+    if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
         data['variables']['numberOfExternalIps'] = "[parameters('numberOfExternalIps')]"
         data['variables']['selfIpconfigArray'] = self_ip_config_array
         data['variables']['extIpconfigArray'] = ext_ip_config_array
         if template_name in ('cluster_3nic'):
             data['variables']['lbFrontEndArray'] = lb_front_end_array
 
-if template_name in ('standalone_multi-nic'):
+if template_name in ('standalone_multi_nic'):
     data['variables']['addtlNicFillerArray'] = ["filler01", "filler02", "filler03", "filler04", "filler05"]
     data['variables']['addtlNicRefSplit'] = "[concat(split(parameters('additionalNicLocation'), ';'), variables('addtlNicFillerArray'))]"
-    data['variables']['netCmd01'] = "[concat(' --vlan name:', variables('addtlNicRefSplit')[0], ',nic:1.3')]"
-    data['variables']['netCmd02'] = "[concat(variables('netCmd01'), ' --vlan name:', variables('addtlNicRefSplit')[1], ',nic:1.4')]"
-    data['variables']['netCmd03'] = "[concat(variables('netCmd02'), ' --vlan name:', variables('addtlNicRefSplit')[2], ',nic:1.5')]"
-    data['variables']['netCmd04'] = "[concat(variables('netCmd03'), ' --vlan name:', variables('addtlNicRefSplit')[3], ',nic:1.6')]"
-    data['variables']['netCmd05'] = "[concat(variables('netCmd04'), ' --vlan name:', variables('addtlNicRefSplit')[4], ',nic:1.7')]"
-    data['variables']['netCmd'] = "[variables(concat('netCmd0', parameters ('numberOfAdditionalNics')))]"
     data['variables']['selfNicConfigArray'] = [{ "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('mgmtNicName'))]", "properties": { "primary": True } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('extNicName'))]", "properties": { "primary": False } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('intNicName'))]", "properties": { "primary": False } }]
     data['variables']['addtlNicConfigArray'] = [{ "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic1'))]", "properties": { "primary": False } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic2'))]", "properties": { "primary": False } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic3'))]", "properties": { "primary": False } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic4'))]", "properties": { "primary": False } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic5'))]", "properties": { "primary": False } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic6'))]", "properties": { "primary": False } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic7'))]", "properties": { "primary": False } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('instanceName'), '-addtlNic8'))]", "properties": { "primary": False } }]
 if template_name in ('cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autoscale'):
@@ -468,11 +471,11 @@ for variables in data['variables']:
 ######################################## ARM Resources ########################################
 resources_list = []
 ###### Public IP Resource(s) ######
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'cluster_1nic', 'ltm_autoscale', 'waf_autoscale'):
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_1nic', 'ltm_autoscale', 'waf_autoscale'):
     resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[variables('mgmtPublicIPAddressName')]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[variables('dnsLabel')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
 if template_name in ('ha-avset', 'cluster_3nic'):
     resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('mgmtPublicIPAddressName'), 0)]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabel'), '-0')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } },{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('mgmtPublicIPAddressName'), 1)]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabel'), '-1')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
-if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'cluster_3nic', 'ha-avset'):
+if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
     # Add Self Public IP - for external NIC
     resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('extSelfPublicIpAddressNamePrefix'), '0')]", "tags": tags, "properties": { "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
     if template_name in ('ha-avset', 'cluster_3nic'):
@@ -493,9 +496,9 @@ if template_name in ('standalone_1nic', 'cluster_1nic'):
     subnets = [{ "name": "[variables('mgmtSubnetName')]", "properties": { "addressPrefix": "[variables('mgmtSubnetPrefix')]" } }]
 if template_name in ('standalone_2nic'):
     subnets = [{ "name": "[variables('mgmtSubnetName')]", "properties": { "addressPrefix": "[variables('mgmtSubnetPrefix')]" } }, { "name": "[variables('extSubnetName')]", "properties": { "addressPrefix": "[variables('extSubnetPrefix')]" } }]
-if template_name in ('standalone_3nic', 'standalone_multi-nic', 'cluster_3nic', 'ha-avset'):
+if template_name in ('standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
     subnets = [{ "name": "[variables('mgmtSubnetName')]", "properties": { "addressPrefix": "[variables('mgmtSubnetPrefix')]" } }, { "name": "[variables('extSubnetName')]", "properties": { "addressPrefix": "[variables('extSubnetPrefix')]" } }, { "name": "[variables('intSubnetName')]", "properties": { "addressPrefix": "[variables('intSubnetPrefix')]" } }]
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'cluster_1nic', 'cluster_3nic', 'ha-avset'):
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_1nic', 'cluster_3nic', 'ha-avset'):
     if stack_type == 'new_stack':
         resources_list += [{ "type": "Microsoft.Network/virtualNetworks", "apiVersion": api_version, "location": location, "name": "[variables('virtualNetworkName')]", "tags": tags, "properties": { "addressSpace": { "addressPrefixes": [ "[variables('vnetAddressPrefix')]" ] }, "subnets": subnets } }]
 
@@ -517,13 +520,13 @@ elif stack_type == 'existing_stack':
     depends_on_ext = ["[variables('extNsgID')]", "extpipcopy"]
     if template_name in ('ha-avset', 'cluster_3nic'):
         depends_on = ["[variables('mgmtNsgID')]"]
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic',):
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic',):
     resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": depends_on, "location": location, "name": "[variables('mgmtNicName')]", "tags": tags, "properties": { "networkSecurityGroup": { "id": "[variables('mgmtNsgID')]" }, "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-ipconfig1')]", "properties": { "privateIPAddress": "[variables('mgmtSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "PublicIpAddress": { "Id": "[variables('mgmtPublicIPAddressId')]" }, "subnet": { "id": "[variables('mgmtSubnetId')]" } } } ] } }]
 if template_name in ('standalone_2nic'):
     resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": depends_on_ext + ["[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '0')]"], "location": location, "name": "[variables('extNicName')]", "tags": tags, "properties": { "networkSecurityGroup": { "id": "[concat(variables('extNsgID'))]" }, "ipConfigurations": "[concat(take(variables('selfIpConfigArray'), 1), take(variables('extIpconfigArray'),variables('numberofExternalIps')))]" } } ]
-if template_name in ('standalone_3nic', 'standalone_multi-nic'):
+if template_name in ('standalone_3nic', 'standalone_multi_nic'):
     resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": depends_on_ext + ["[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '0')]"], "location": location, "name": "[variables('extNicName')]", "tags": tags, "properties": { "networkSecurityGroup": { "id": "[concat(variables('extNsgID'))]" }, "ipConfigurations": "[concat(take(variables('selfIpConfigArray'), 1), take(variables('extIpconfigArray'),variables('numberofExternalIps')))]" } }, { "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "dependsOn": depends_on_ext, "location": location, "name": "[variables('intNicName')]", "tags": tags, "properties": { "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-ipconfig1')]", "properties": { "privateIPAddress": "[variables('intSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('intSubnetId')]" } } } ] } } ]
-if template_name in ('standalone_multi-nic'):
+if template_name in ('standalone_multi_nic'):
     resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": api_version, "condition": "[greaterOrEquals(parameters('numberOfAdditionalNics'), 1)]", "copy": { "count": "[parameters('numberOfAdditionalNics')]", "name": "addtlniccopy" }, "dependsOn": depends_on + ["[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'))]", "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]", "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'))]"], "location": location, "name": "[concat(variables('instanceName'), '-addtlNic', copyIndex(1))]", "properties": { "ipConfigurations": [ { "name": "ipconfig", "properties": { "privateIPAllocationMethod": "Dynamic", "subnet": { "id": "[concat(variables('vnetId'), '/subnets/', variables('addtlNicRefSplit')[copyIndex()])]" } } } ] }, "tags": tags }]
 if template_name in ('cluster_1nic'):
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkInterfaces", "name": "[concat(variables('mgmtNicName'),copyindex())]", "location": location, "tags": tags, "dependsOn": depends_on + ["[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/guimgt',copyindex())]", "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/sshmgt',copyindex())]"], "copy": { "count": "[parameters('numberOfInstances')]", "name": "niccopy" }, "properties": { "networkSecurityGroup": { "id": "[variables('mgmtNsgID')]" }, "ipConfigurations": [ { "name": "ipconfig1", "properties": { "privateIPAllocationMethod": "Static", "privateIPAddress": "[concat(variables('mgmtSubnetPrivateAddress'),add(variables('mgmtSubnetPrivateAddressSuffix'), copyindex()))]", "subnet": { "id": "[variables('mgmtSubnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ], "loadBalancerInboundNatRules": [ { "id": "[concat(variables('lbID'), '/inboundNatRules/', 'guimgt',copyIndex())]" }, { "id": "[concat(variables('lbID'), '/inboundNatRules/', 'sshmgt',copyIndex())]" } ] } } ] } }]
@@ -545,9 +548,9 @@ nsg_security_rules = [{ "name": "mgmt_allow_https", "properties": { "description
 if template_name in ('waf_autoscale'):
     nsg_security_rules += [{ "name": "app_allow_http", "properties": { "description": "", "priority": 110, "sourceAddressPrefix": "*", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "[variables('httpBackendPort')]", "protocol": "TCP", "direction": "Inbound", "access": "Allow" } }, { "name": "app_allow_https", "properties": { "description": "", "priority": 111, "sourceAddressPrefix": "*", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "[variables('httpsBackendPort')]", "protocol": "TCP", "direction": "Inbound", "access": "Allow" } }]
 
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'ha-avset', 'cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autoscale'):
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'ha-avset', 'cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autoscale'):
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkSecurityGroups", "location": location, "name": "[concat(variables('dnsLabel'), '-mgmt-nsg')]", "tags": tags, "properties": { "securityRules": nsg_security_rules } }]
-if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'cluster_3nic', 'ha-avset'):
+if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkSecurityGroups", "location": location, "name": "[concat(variables('dnsLabel'), '-ext-nsg')]", "tags": tags, "properties": { "securityRules": "" } }]
 
 ###### Load Balancer Resource(s) ######
@@ -570,9 +573,9 @@ if template_name == 'cluster_1nic':
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/loadBalancers/inboundNatRules", "name": "[concat(variables('loadBalancerName'),'/sshmgt', copyIndex())]", "location": location, "copy": { "name": "lbNatLoop", "count": "[parameters('numberOfInstances')]" }, "dependsOn": [ "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]" ], "properties": { "frontendIPConfiguration": { "id": "[variables('frontEndIPConfigID')]" }, "protocol": "tcp", "frontendPort": "[copyIndex(8022)]", "backendPort": 22, "enableFloatingIP": False } }]
 
 ######## Availability Set Resource(s) ######
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'ha-avset', 'cluster_1nic', 'cluster_3nic'):
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'ha-avset', 'cluster_1nic', 'cluster_3nic'):
     avset = { "apiVersion": api_version, "location": location, "name": "[variables('availabilitySetName')]", "tags": tags, "type": "Microsoft.Compute/availabilitySets" }
-    if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic') and stack_type == 'existing_stack':
+    if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic') and stack_type == 'existing_stack':
         avset['condition'] = "[equals(toUpper(parameters('avSetChoice')), 'CREATE_NEW')]"
     resources_list += [avset]
 
@@ -591,10 +594,10 @@ if template_name in ('standalone_2nic'):
 if template_name in ('standalone_3nic'):
     nic_reference = [{ "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('mgmtNicName'))]", "properties": { "primary": True } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('extNicName'))]", "properties": { "primary": False } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('intNicName'))]", "properties": { "primary": False } }]
     depends_on.append("[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]"); depends_on.append("[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'))]")
-if template_name in ('standalone_multi-nic'):
+if template_name in ('standalone_multi_nic'):
     nic_reference = "[concat(take(variables('selfNicConfigArray'), 3), take(variables('addtlNicConfigArray'), parameters('numberOfAdditionalNics')))]"
     depends_on.append("[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]"); depends_on.append("[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'))]"); depends_on.append("addtlniccopy")
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic'):
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic'):
     resources_list += [{"apiVersion": api_version, "type": "Microsoft.Compute/virtualMachines", "dependsOn": depends_on, "location": location, "name": "[variables('instanceName')]", "tags": tags, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "[variables('offerToUse')]" }, "properties": { "diagnosticsProfile": { "bootDiagnostics": { "enabled": True, "storageUri": "[concat('http://',variables('newDataStorageAccountName'),'.blob.core.windows.net')]" } }, "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "networkProfile": { "networkInterfaces":  nic_reference }, "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]" }, "osProfile": { "computerName": "[variables('instanceName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "storageProfile": { "imageReference": { "publisher": "f5-networks", "offer": "[variables('offerToUse')]", "sku": "[variables('skuToUse')]", "version": image_to_use }, "osDisk": { "caching": "ReadWrite", "createOption": "FromImage", "name": "osdisk", "vhd": { "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vhds/', variables('instanceName'),'.vhd')]" } } } } }]
 if template_name == 'cluster_1nic':
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Compute/virtualMachines", "name": "[concat(variables('deviceNamePrefix'),copyindex())]", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), copyindex())]", "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]" ], "copy": { "count": "[parameters('numberOfInstances')]", "name": "devicecopy" }, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "[variables('offerToUse')]" }, "properties": { "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]" }, "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "osProfile": { "computerName": "[concat(variables('deviceNamePrefix'),copyindex())]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "storageProfile": { "imageReference": { "publisher": "f5-networks", "offer": "[variables('offerToUse')]", "sku": "[variables('skuToUse')]", "version": image_to_use }, "osDisk": { "name": "[concat('osdisk',copyindex())]", "vhd": { "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vhds/', copyindex(),'.vhd')]" }, "caching": "ReadWrite", "createOption": "FromImage" } }, "networkProfile": { "networkInterfaces": [ { "id": "[concat(resourceId('Microsoft.Network/networkInterfaces',variables('mgmtNicName')),copyindex())]" } ] }, "diagnosticsProfile": { "bootDiagnostics": { "enabled": True, "storageUri": "[concat('http://',variables('newDataStorageAccountName'),'.blob.core.windows.net')]" } } } }]
@@ -611,7 +614,7 @@ if template_name in ('standalone_2nic'):
     command_to_execute = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --default-gw ', variables('tmmRouteGw'), ' --vlan name:external,nic:1.1 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), <EXT_MASK_CMD> ',vlan:external --log-level debug'<POST_CMD_TO_EXECUTE>)]"
 if template_name in ('standalone_3nic'):
     command_to_execute = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --default-gw ', variables('tmmRouteGw'), ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), <EXT_MASK_CMD> ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress'), <INT_MASK_CMD> ',vlan:internal --log-level debug'<POST_CMD_TO_EXECUTE>)]"
-if template_name in ('standalone_multi-nic'):
+if template_name in ('standalone_multi_nic'):
     command_to_execute = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/passwd --default-gw ', variables('tmmRouteGw'), ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), <EXT_MASK_CMD> ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress'), <INT_MASK_CMD> ',vlan:internal ', variables('netCmd'), ' --log-level debug'<POST_CMD_TO_EXECUTE>)]"
 if template_name in ('cluster_1nic'):
     # Two Extensions for cluster_1nic
@@ -636,7 +639,7 @@ if template_name in 'ha-avset':
 
 # Link-local route command, for 2+ nic templates
 route_add_cmd = ''
-if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'cluster_3nic', 'ha-avset'):
+if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
     route_add_cmd = " ', variables('routeCmdArray')[parameters('bigIpVersion')], ';"
 
 ## Map in some commandToExecute Elements
@@ -655,7 +658,7 @@ command_to_execute2 = command_to_execute2.replace('<BIGIQ_PWD_CMD>', big_iq_pwd_
 file_uris = [ "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]", "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-service-discovery/f5.service_discovery.tmpl')]" ]
 
 ## Define command to execute(s)
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic'):
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic'):
     resources_list += [{"apiVersion": "2016-03-30", "type": "Microsoft.Compute/virtualMachines/extensions", "name": "[concat(variables('instanceName'),'/start')]", "tags": tags, "location": location, "dependsOn": [ "[concat('Microsoft.Compute/virtualMachines/', variables('instanceName'))]" ], "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": file_uris }, "protectedSettings": { "commandToExecute": command_to_execute } } }]
 if template_name == 'cluster_1nic':
     # Two Extensions for cluster_1nic
@@ -697,7 +700,7 @@ resources_sorted = json.dumps(resources_list, sort_keys=True, indent=4, ensure_a
 data['resources'] = json.loads(resources_sorted, object_pairs_hook=OrderedDict)
 
 ######################################## ARM Outputs ########################################
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic'):
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic'):
     data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://', reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]" }
     data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' ',22)]" }
 if template_name == 'cluster_1nic':
@@ -720,13 +723,13 @@ with open(createdfile_params, 'w') as finished_params:
 
 
 ###### Prepare some information prior to creating Scripts/Readme's ######
-lic_support = {'standalone_1nic': 'All', 'standalone_2nic': 'All', 'standalone_3nic': 'All', 'standalone_multi-nic': 'All', 'cluster_1nic': 'All', 'cluster_3nic': 'All', 'ha-avset': 'All', 'ltm_autoscale': 'PAYG', 'waf_autoscale': 'PAYG'}
-lic_key_count = {'standalone_1nic': 1, 'standalone_2nic': 1, 'standalone_3nic': 1, 'standalone_multi-nic': 1, 'cluster_1nic': 2, 'cluster_3nic': 2, 'ha-avset': 2, 'ltm_autoscale': 0, 'waf_autoscale': 0}
-api_access_needed = {'standalone_1nic': None, 'standalone_2nic': None, 'standalone_3nic': None, 'standalone_multi-nic': None, 'cluster_1nic': None, 'cluster_3nic': None, 'ha-avset': 'read_write', 'ltm_autoscale': 'read', 'waf_autoscale': 'read'}
+lic_support = {'standalone_1nic': 'All', 'standalone_2nic': 'All', 'standalone_3nic': 'All', 'standalone_multi_nic': 'All', 'cluster_1nic': 'All', 'cluster_3nic': 'All', 'ha-avset': 'All', 'ltm_autoscale': 'PAYG', 'waf_autoscale': 'PAYG'}
+lic_key_count = {'standalone_1nic': 1, 'standalone_2nic': 1, 'standalone_3nic': 1, 'standalone_multi_nic': 1, 'cluster_1nic': 2, 'cluster_3nic': 2, 'ha-avset': 2, 'ltm_autoscale': 0, 'waf_autoscale': 0}
+api_access_needed = {'standalone_1nic': None, 'standalone_2nic': None, 'standalone_3nic': None, 'standalone_multi_nic': None, 'cluster_1nic': None, 'cluster_3nic': None, 'ha-avset': 'read_write', 'ltm_autoscale': 'read', 'waf_autoscale': 'read'}
 template_info = {'template_name': template_name, 'location': script_location, 'lic_support': lic_support, 'lic_key_count': lic_key_count, 'api_access_needed': api_access_needed}
 ######################################## Create/Modify Scripts ########################################
 # Manually adding templates to create scripts proc for now as a 'check'...
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi-nic', 'cluster_1nic', 'cluster_3nic', 'ha-avset', 'ltm_autoscale', 'waf_autoscale') and script_location:
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_1nic', 'cluster_3nic', 'ha-avset', 'ltm_autoscale', 'waf_autoscale') and script_location:
     bash_script = script_generator.script_creation(template_info, data, default_payg_bw, 'bash')
     ps_script = script_generator.script_creation(template_info, data, default_payg_bw, 'powershell')
 ######################################## END Create/Modify Scripts ########################################
