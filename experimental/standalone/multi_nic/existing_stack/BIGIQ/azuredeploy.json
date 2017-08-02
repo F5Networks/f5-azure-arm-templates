@@ -146,7 +146,7 @@
         }, 
         "additionalNicLocation": {
             "metadata": {
-                "description": "This parameter specifies where the additional NIC's should go.  This should be a semi-colon delimited string of subnets equal to the number of additional NIC's being deployed.  Example (if 2 additional NIC's was selected): 'subnet01;subnet02' NOTE: Please ensure that there is no spaces and that the correct number of subnets are provided based on the value chosen in 'numberOfAdditionalNics'."
+                "description": "This parameter specifies where the additional NIC's should go.  This should be a semi-colon delimited string of subnets equal to the number of additional NIC's being deployed.  Example (for 2 additional NIC's): 'subnet01;subnet02'. NOTE: Please ensure that there is no spaces and that the correct number of subnets are provided based on the value chosen in 'numberOfAdditionalNics'. Additional NOTE: It MUST be a unique subnet provided for each additional NIC requested."
             }, 
             "type": "string"
         }, 
