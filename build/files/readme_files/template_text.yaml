@@ -54,7 +54,7 @@ sp_access_text:
   read_write: '**Read/Write** access is required, it can be limited to the resource group used by this solution.'
 
 license_text:
-  BYOL: ' (Bring your own license): This allows you to use an existing BIG-IP license.'
+  BYOL: ' (bring your own license): This allows you to use an existing BIG-IP license.'
   PAYG: ': This allows you to use pay-as-you-go hourly billing.'
   BIG-IQ: ': This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP(s).'
 
