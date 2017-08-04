@@ -75,7 +75,7 @@ def create_deploy_links(version_tag, lic_type, template_location):
     deploy_links = ''
     base_url = 'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2F' + version_tag
     if 'All' in lic_type:
-        lic_list = ['BYOL', 'PAYG', 'BIGIQ']
+        lic_list = ['BYOL', 'PAYG', 'BIG-IQ']
     else:
         lic_list = [lic_type]
     for lic in lic_list:
@@ -84,6 +84,7 @@ def create_deploy_links(version_tag, lic_type, template_location):
         template_location = template_location.replace('..', '')
         template_location = template_location.replace('PAYG', lic).replace('BYOL', lic).replace('BIGIQ', lic)
         url = base_url + template_location
+        lic = lic + get_custom_text('license_text', lic)
         deploy_links = deploy_links.replace('<DEPLOY_LINK_URL>', url).replace('<LIC_TYPE>', lic)
     return deploy_links
 
