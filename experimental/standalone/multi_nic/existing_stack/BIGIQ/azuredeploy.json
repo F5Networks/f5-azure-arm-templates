@@ -367,7 +367,7 @@
         "netCmd03": "[concat(variables('netCmd02'), ' --vlan name:', variables('addtlNicRefSplit')[2], ',nic:1.5')]", 
         "netCmd04": "[concat(variables('netCmd03'), ' --vlan name:', variables('addtlNicRefSplit')[3], ',nic:1.6')]", 
         "netCmd05": "[concat(variables('netCmd04'), ' --vlan name:', variables('addtlNicRefSplit')[4], ',nic:1.7')]", 
-        "netCmd": "[variables(concat('netCmd0', parameters ('numberOfAdditionalNics')))]", 
+        "netCmd": "[variables(concat('netCmd0', parameters('numberOfAdditionalNics')))]", 
         "numberOfExternalIps": "[parameters('numberOfExternalIps')]", 
         "mgmtRouteGw": "[concat(take(parameters('mgmtIpAddress'), lastIndexOf(parameters('mgmtIpAddress'), '.')), '.1')]", 
         "tmmRouteGw": "[concat(take(parameters('externalIpAddressRangeStart'), lastIndexOf(parameters('externalIpAddressRangeStart'), '.')), '.1')]", 
