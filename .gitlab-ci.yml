@@ -22,9 +22,8 @@ package:
         - /^build_hash*/
         - triggers
     script:
-        - for f in `find supported -name 'azuredeploy.json'`; do
-        -   echo "Template File $f Hash - `openssl dgst -r -sha512 $f | cut -d ' ' -f 1`" >> supportedTemplateHashes
-        - done
+        - cd supported
+        - for f in `find supported -name 'azuredeploy.json'`; do echo "Template File $f Hash - `openssl dgst -r -sha512 $f | cut -d ' ' -f 1`" >> supportedTemplateHashes; done
     artifacts:
         name: f5-arm-build-$CI_BUILD_REF
         paths:
