@@ -227,7 +227,7 @@
         "singleQuote": "'", 
         "f5Tag": "82e08e16-fc62-4bf0-8916-e1c02dc871cd", 
         "f5TemplateTag": "standalone_2nic", 
-        "f5CloudLibsTag": "release-3.3.0", 
+        "f5CloudLibsTag": "v3.3.0", 
         "f5CloudLibsAzureTag": "v1.2.0", 
         "f5NetworksTag": "release-3.3.0.0", 
         "f5CloudIappsTag": "v1.0.2", 
