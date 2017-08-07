@@ -8,6 +8,9 @@ test:
     tags:
         - docker-executor
     stage: test
+    only:
+        - /^build_hash*/
+        - triggers
     script:
         - python -B -m unittest discover -s build/test/lib -p "*Tests*.py"
 

@@ -1,6 +1,8 @@
 # Deploying the BIG-IP VE in Azure - <TITLE_TXT>
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
+[![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
+[![Issues](https://img.shields.io/github/issues/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/issues)
 
 ## Introduction
 
@@ -17,7 +19,7 @@
 <EXTRA_PREREQS>
 
 ## Security
-This ARM template downloads helper code to configure the BIG-IP system. If you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.  
+This ARM template downloads helper code to configure the BIG-IP system. If you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
 In the *variables* section:
   - In the *verifyHash* variable: **script-signature** and then a hashed signature.
   - In the *installCloudLibs* variable: **tmsh load sys config merge file /config/verifyHash**.
@@ -122,7 +124,7 @@ Warning: F5 does not support the template if you change anything other than the 
 
 ```json
 "variables": {
-    "customConfig": "### START(INPUT) CUSTOM CONFIGURATION\ntmsh create sys application service my_deployment { device-group none template f5.ip_forwarding traffic-group none variables replace-all-with { basic__addr { value 0.0.0.0 } basic__forward_all { value No } basic__mask { value 0.0.0.0 } basic__port { value 0 } basic__vlan_listening { value default } options__advanced { value no }options__display_help { value hide } } }"
+    "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\ntmsh create sys application service my_deployment { device-group none template f5.ip_forwarding traffic-group none variables replace-all-with { basic__addr { value 0.0.0.0 } basic__forward_all { value No } basic__mask { value 0.0.0.0 } basic__port { value 0 } basic__vlan_listening { value default } options__advanced { value no }options__display_help { value hide } } }"
 }
 ```
 ### Changing the BIG-IP Configuration utility (GUI) port

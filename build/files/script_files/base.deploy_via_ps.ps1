@@ -4,21 +4,13 @@
 <EXAMPLE_CMD>
 
 param(
-
+  [string] [Parameter(Mandatory=$True)] $licenseType,
 <LICENSE_PARAMETERS>
 <DYNAMIC_PARAMETERS>
-  [Parameter(Mandatory=$True)]
-  [string]
-  $resourceGroupName,
-
-  [string]
-  $region = "West US",
-
-  [string]
-  $templateFilePath = "azuredeploy.json",
-
-  [string]
-  $parametersFilePath = "azuredeploy.parameters.json"
+  [string] [Parameter(Mandatory=$True)] $resourceGroupName,
+  [string] $region = "West US",
+  [string] $templateFilePath = "azuredeploy.json",
+  [string] $parametersFilePath = "azuredeploy.parameters.json"
 )
 
 Write-Host "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged." -foregroundcolor green
