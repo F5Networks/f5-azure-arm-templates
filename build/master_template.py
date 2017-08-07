@@ -34,11 +34,12 @@ createdfile_params = template_location + 'azuredeploy.parameters.json'
 ## Static Variable Defaults
 nic_reference = ""
 command_to_execute = ""
+route_add_cmd = ""
 
 ## Static Variable Assignment ##
 content_version = '3.2.1.0'
 f5_networks_tag = 'v3.2.1.0'
-f5_cloud_libs_tag = 'ese-1120'
+f5_cloud_libs_tag = 'release-3.3.0'
 f5_cloud_libs_azure_tag = 'v1.2.0'
 f5_cloud_iapps_tag = 'v1.0.2'
 f5_cloud_workers_tag = 'v1.0.0'
@@ -65,7 +66,7 @@ elif template_name in 'waf_autoscale':
     hashed_file_list += " ${config_loc}f5-cloud-libs-azure.tar.gz ${script_loc}deploy_waf.sh ${script_loc}f5.http.v1.2.0rc7.tmpl ${script_loc}f5.policy_creator.tmpl ${script_loc}asm-policy.tar.gz"
     additional_tar_list = "tar xvfz /config/cloud/f5-cloud-libs-azure.tar.gz -C /config/cloud/node_modules/f5-cloud-libs/node_modules\n"
 #### Temp empty hashed file list when testing new cloud libs....
-hashed_file_list = ""
+#hashed_file_list = ""
 install_cloud_libs = install_cloud_libs.replace('<HASHED_FILE_LIST>', hashed_file_list)
 install_cloud_libs = install_cloud_libs.replace('<TAR_LIST>', additional_tar_list)
 instance_type_list = ["Standard_A2", "Standard_A3", "Standard_A4", "Standard_A5", "Standard_A6", "Standard_A7", "Standard_D2", "Standard_D3", "Standard_D4", "Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14", "Standard_DS2", "Standard_DS3", "Standard_DS4", "Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2", "Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2", "Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2", "Standard_DS15_v2", "Standard_F2", "Standard_F4", "Standard_F8", "Standard_F2S", "Standard_F4S", "Standard_F8S", "Standard_F16S", "Standard_G2", "Standard_G3", "Standard_G4", "Standard_G5", "Standard_GS2", "Standard_GS3", "Standard_GS4", "Standard_GS5"]
@@ -638,7 +639,6 @@ if template_name in 'ha-avset':
     post_cmd_to_execute = ", '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl;<BIGIQ_PWD_DELETE> bash /config/customConfig.sh; else exit 1; fi'"
 
 # Link-local route command, for 2+ nic templates
-route_add_cmd = ''
 if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
     route_add_cmd = " ', variables('routeCmdArray')[parameters('bigIpVersion')], ';"
 
