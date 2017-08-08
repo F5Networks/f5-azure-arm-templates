@@ -126,13 +126,13 @@ elif license_type == 'BIGIQ':
     big_iq_mgmt_ip_ref2 = ''
     big_iq_pwd_cmd = " echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/bigIqPasswd; "
     if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic'):
-        big_iq_mgmt_ip_ref =  "reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,"
+        big_iq_mgmt_ip_ref =  "reference(variables('mgmtPublicIPAddressId')).ipAddress,"
     if template_name in ('cluster_1nic'):
-        big_iq_mgmt_ip_ref =  "reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' --big-ip-mgmt-port 8443',"
-        big_iq_mgmt_ip_ref2 =  "reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' --big-ip-mgmt-port 8444',"
+        big_iq_mgmt_ip_ref =  "reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --big-ip-mgmt-port 8443',"
+        big_iq_mgmt_ip_ref2 =  "reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --big-ip-mgmt-port 8444',"
     if template_name in ('ha-avset', 'cluster_3nic'):
-        big_iq_mgmt_ip_ref =  "reference(concat(variables('mgmtPublicIPAddressId'), '0')).dnsSettings.fqdn,"
-        big_iq_mgmt_ip_ref2 =  "reference(concat(variables('mgmtPublicIPAddressId'), '1')).dnsSettings.fqdn,"
+        big_iq_mgmt_ip_ref =  "reference(concat(variables('mgmtPublicIPAddressId'), '0')).ipAddress,"
+        big_iq_mgmt_ip_ref2 =  "reference(concat(variables('mgmtPublicIPAddressId'), '1')).ipAddress,"
     license1_command = "' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', " + big_iq_mgmt_ip_ref
     license2_command = "' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', " + big_iq_mgmt_ip_ref2
     bigiq_pwd_delete = ' rm -f /config/cloud/bigIqPasswd;'
