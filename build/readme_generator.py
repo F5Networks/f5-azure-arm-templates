@@ -34,10 +34,15 @@ def md_param_array(data, license_params, lic_type):
         mandatory = 'Yes'
         # Specify optional parameters that README, need to pull in all license options
         if 'license' in parameter.lower():
-            mandatory = 'No'
             if license_flag:
                 license_flag = False
                 for key in license_params:
+                    if key == 'licensedBandwidth':
+                        mandatory = 'PAYG only:'
+                    elif 'licenseKey' in key:
+                        mandatory = 'BYOL only:'
+                    else:
+                        mandatory = 'BIG-IQ licensing only:'
                     if lic_type == 'PAYG' and key != 'licensedBandwidth':
                         continue
                     else:

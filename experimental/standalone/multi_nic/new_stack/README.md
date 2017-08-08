@@ -84,12 +84,12 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (IMAGE) to you want to deploy. |
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
-| licenseKey1 | No | The license token for the F5 BIG-IP VE (BYOL). |
-| licensedBandwidth | No | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
-| bigIqLicenseHost | No | The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP. |
-| bigIqLicenseUsername | No | The BIG-IQ username to use during licensing. |
-| bigIqLicensePassword | No | The BIG-IQ password to use during licensing. |
-| bigIqLicensePool | No | The BIG-IQ license pool to use during licensing. |
+| licenseKey1 | BYOL only: | The license token for the F5 BIG-IP VE (BYOL). |
+| licensedBandwidth | PAYG only: | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| bigIqLicenseHost | BIG-IQ licensing only: | The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP. |
+| bigIqLicenseUsername | BIG-IQ licensing only: | The BIG-IQ username to use during licensing. |
+| bigIqLicensePassword | BIG-IQ licensing only: | The BIG-IQ password to use during licensing. |
+| bigIqLicensePool | BIG-IQ licensing only: | The BIG-IQ license pool to use during licensing. |
 | numberOfAdditionalNics | Yes | By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a select number of additional NICs to the BIG-IP using this parameter. |
 | additionalNicLocation | Yes | This parameter specifies where the additional NIC's should go.  This should be a semi-colon delimited string of subnets equal to the number of additional NIC's being deployed.  Example (for 2 additional NIC's): 'subnet01;subnet02'. NOTE: Please ensure that there is no spaces and that the correct number of subnets are provided based on the value chosen in 'numberOfAdditionalNics'. Additional NOTE: It MUST be a unique subnet provided for each additional NIC requested. |
 | numberOfExternalIps | Yes | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |

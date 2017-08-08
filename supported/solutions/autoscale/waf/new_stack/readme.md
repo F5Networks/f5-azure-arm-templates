@@ -81,7 +81,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (IMAGE) you want to deploy. 'Best' is the only option because ASM is required. |
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
-| licensedBandwidth | No | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| licensedBandwidth | PAYG only: | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
 | solutionDeploymentName | Yes | A unique name for this deployment. |
 | applicationProtocols | Yes | The protocol(s) used by your application. |

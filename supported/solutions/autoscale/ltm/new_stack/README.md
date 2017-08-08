@@ -81,7 +81,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (IMAGE) to you want to deploy. |
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
-| licensedBandwidth | No | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| licensedBandwidth | PAYG only: | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
 | tenantId | Yes | Your Azure service principal application tenant ID. |
 | clientId | Yes | Your Azure service principal application client ID. |

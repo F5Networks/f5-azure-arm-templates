@@ -81,7 +81,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (IMAGE) you want to deploy. 'Best' is the only option because ASM is required. |
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
-| licensedBandwidth | No | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| licensedBandwidth | PAYG only: | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
 | vnetName | Yes | The name of the existing virtual network to which you want to connect the BIG-IP VEs. |
 | vnetResourceGroupName | Yes | The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed. |
 | mgmtSubnetName | Yes | Name of the existing MGMT subnet - with external access to the Internet. |

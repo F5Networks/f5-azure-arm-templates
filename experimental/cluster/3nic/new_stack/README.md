@@ -82,13 +82,13 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (IMAGE) to you want to deploy. |
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
-| licenseKey1 | No | The license token for the F5 BIG-IP VE (BYOL). |
-| licenseKey2 | No | The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices. |
-| licensedBandwidth | No | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
-| bigIqLicenseHost | No | The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP. |
-| bigIqLicenseUsername | No | The BIG-IQ username to use during licensing. |
-| bigIqLicensePassword | No | The BIG-IQ password to use during licensing. |
-| bigIqLicensePool | No | The BIG-IQ license pool to use during licensing. |
+| licenseKey1 | BYOL only: | The license token for the F5 BIG-IP VE (BYOL). |
+| licenseKey2 | BYOL only: | The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices. |
+| licensedBandwidth | PAYG only: | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| bigIqLicenseHost | BIG-IQ licensing only: | The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP. |
+| bigIqLicenseUsername | BIG-IQ licensing only: | The BIG-IQ username to use during licensing. |
+| bigIqLicensePassword | BIG-IQ licensing only: | The BIG-IQ password to use during licensing. |
+| bigIqLicensePool | BIG-IQ licensing only: | The BIG-IQ license pool to use during licensing. |
 | numberOfExternalIps | Yes | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
 | ntpServer | Yes | If you would like to change the NTP server the BIG-IP uses then replace the default ntp server with your choice. |
