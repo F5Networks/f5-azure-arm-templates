@@ -89,35 +89,35 @@ The following is a list of the current **supported** F5 ARM templates. See the *
 
 
 - **Deploying the BIG-IP VE in Azure - Cluster**
-  - *Single NIC*
-    - [New Neworking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/cluster/1nic/new_stack)
-      - *BYOL* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.0.0%2Fsupported%2Fcluster%2F1nic%2FBYOL%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
+    - *Single NIC*
+      - [New Neworking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/cluster/1nic/new_stack)
+          - *BYOL* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.0.0%2Fsupported%2Fcluster%2F1nic%2FBYOL%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-      - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.0.0%2Fsupported%2Fcluster%2F1nic%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
+          - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.0.0%2Fsupported%2Fcluster%2F1nic%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-      - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F1nic%2Fnew_stack%2FBIG-IQ%2Fazuredeploy.json"> <img src="http://azuredeploy.net/deploybutton.png"/></a>
+          - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F1nic%2Fnew_stack%2FBIG-IQ%2Fazuredeploy.json"> <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-    - [Existing Neworking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/cluster/1nic/existing_stack)
-      - *BYOL* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F1nic%2Fexisting_stack%2FBYOL%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
+      - [Existing Neworking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/cluster/1nic/existing_stack)
+          - *BYOL* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F1nic%2Fexisting_stack%2FBYOL%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-      - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F1nic%2Fexisting_stack%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
+          - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F1nic%2Fexisting_stack%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-      - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F1nic%2Fexisting_stack%2FBIG-IQ%2Fazuredeploy.json"> <img src="http://azuredeploy.net/deploybutton.png"/></a>
+          - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F1nic%2Fexisting_stack%2FBIG-IQ%2Fazuredeploy.json"> <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-  - *3 NICs*
-    - [New Neworking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/cluster/1nic/new_stack)
-      - *BYOL* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fnew_stack%2FBYOL%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
+    - *3 NICs*
+      - [New Neworking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/cluster/1nic/new_stack)
+          - *BYOL* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fnew_stack%2FBYOL%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-      - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fnew_stack%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
+          - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fnew_stack%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-      - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fnew_stack%2FBIG-IQ%2Fazuredeploy.json"> <img src="http://azuredeploy.net/deploybutton.png"/></a>
+          - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fnew_stack%2FBIG-IQ%2Fazuredeploy.json"> <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-    - [Existing Neworking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/cluster/1nic/existing_stack)
-      - *BYOL* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fexisting_stack%2FBYOL%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
+      - [Existing Neworking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/cluster/1nic/existing_stack)
+          - *BYOL* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fexisting_stack%2FBYOL%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-      - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fexisting_stack%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
+          - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fexisting_stack%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-      - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fexisting_stack%2FBIG-IQ%2Fazuredeploy.json"> <img src="http://azuredeploy.net/deploybutton.png"/></a>  
+          - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fexisting_stack%2FBIG-IQ%2Fazuredeploy.json"> <img src="http://azuredeploy.net/deploybutton.png"/></a>  
 
 
 - **[Deploying the BIG-IP VE in Azure - AutoScale BIG-IP LTM - VM Scale Set](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/solutions/autoscale/ltm)**
