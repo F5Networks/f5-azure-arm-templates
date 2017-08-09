@@ -1,6 +1,6 @@
 # Deploying Additional Applications to the F5 WAF
 
-You can use the [**deploy_waf_application_autoscale.sh**](https://gitswarm.f5net.com/cloudsolutions/f5-azure-arm-templates/blob/develop/supported/solutions/autoscale/waf/deploy_waf_application_autoscale.sh) script in this repo to deploy additional applications to your F5 WAF devices.  The script configures the required security policy, profiles, and virtual server objects to receive application traffic. After you run the script, you must manually configure the Azure Load Balancer and Network Security Group to pass traffic for the application to the WAF device. The script does not configure Azure resources. For more information on configuring Azure objects, see the Azure documentation.
+You can use the [**deploy_waf_application_autoscale.sh**](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental/reference/scripts/deploy_waf_application_autoscale.sh) script in this repo to deploy additional applications to your F5 WAF devices.  The script configures the required security policy, profiles, and virtual server objects to receive application traffic. After you run the script, you must manually configure the Azure Load Balancer and Network Security Group to pass traffic for the application to the WAF device. The script does not configure Azure resources. For more information on configuring Azure objects, see the Azure documentation.
 
 You need to provide a list of parameters when deploying the script (you will be prompted for the WAF password).
 
@@ -27,3 +27,7 @@ bash -x .\deploy_waf_application.sh -m http-https -d mydeployment -p 1.2.3.4 -v 
 | -u | WAF Username | The user name for the account create at provisioning time. | azureuser | |  
 | -h | WAF Host IP | The management IP address of the WAF device | 1.1.1.1 | The host IP address can be accessed in the outputs of the Azure template deployment, or from Azure Security Center. |
 | -g | WAF Management Port | The management port of the WAF device. | 50101 | The management port can be accessed in the outputs of the Azure template deployment, or from Azure Security Center. |
+
+
+## Adding Applications to an Azure Security Center WAF Deployment
+Additionally, F5 has created an iApp template for adding applications to an Azure Security Center WAF deployment: https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental/reference/scripts/add_asc_app.tmpl.  To add applications to an Autoscale WAF deployment, you must use the script.
