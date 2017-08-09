@@ -806,14 +806,11 @@ sys application template f5.add_asc_app {
      actions {
           definition {
             html-help {
-            <p><b>SMTP Application Template</b></p>
+            <p><b>Azure Security Center WAF Application Template</b></p>
 
-<p>This template creates a complete configuration for SMTP traffic. <br> Before you start </p>
+<p>This template creates a complete configuration for protecting application traffic with an F5 WAF in Azure. <br> Before you start </p>
 <ul>
-    <li>For help configuring this iApp template, enable the template's inline help, or see the associated deployment guide at http://www.f5.com/pdf/deployment-guides/f5-smtp-dg.pdf.</li>
-    <li>Check System :: Resource Provisioning to ensure that LTM (Local Traffic Manager) is provisioned.</li>
-    <li>Set up VLANs and Self-IP addresses on the networks you will use for client-side and server-side traffic.</li>
-    <li>Import the proper SSL certificates. </li>
+    <li>For help configuring this iApp template, enable the template's inline help, or see the associated deployment guide at http://www.f5.com/.</li>
 </ul>
                }
 implementation {
@@ -1109,6 +1106,8 @@ presentation {
     section intro {
         message intro "Deploy an ASM-protected application for use with Azure Security Center."
         message check_for_updates "Check for new versions of this template on DevCentral (https://devcentral.f5.com/wiki/iApp.Microsoft-Applications.ashx)."
+        message post_deployment "After deploying applications with this template, you must configure additional Azure resources to forward application traffic to this WAF device. New Azure TCP probes, load balancing rules, and inbound security rules must be configured on the Azure Load Balancer for the WAF TCP ports specified in this deployment."
+        message reconfigure "If you need to change the deployment, do not reconfigure this template; instead, create a new deployment with the desired settings using a unique set of encrypted/unencrypted WAF TCP ports. Reconfigure Azure resources to reflect the new WAF ports, verify functionality, then delete the previous deployment."
         optional ( intro == "HIDE_THIS" ) {
             choice ltm_provisioned tcl {
                 return [expr {[tmsh::run_proc f5.iapp.1.4.0.cli:iapp_get_provisioned ltm] ? "yes" : "no"}]
@@ -1141,14 +1140,20 @@ presentation {
         message mode_help "Selecting HTTP will create an unencrypted BIG-IP virtual server; HTTPS creates an encrypted virtual server with redirect; HTTP and HTTP creates both unencrypted and encrypted virtual servers; SSL Offload creates an encrypted virtual server forwarding unencrypted traffic to the application server(s)"
         string pool_member display "xxlarge" required validator "IpOrFqdn"
         message pool_member_help "A single IP address or FQDN of an Azure Load Balancer or subdomain name of the Azure App Service."
-        string pool_http_port display "xxlarge" required default "80" validator "PortNumber"
-        message pool_http_port_help "The port on which the server(s) listen for unencrypted traffic."
+        optional ( mode != "https" ) {
+            string pool_http_port display "xxlarge" required default "80" validator "PortNumber"
+            message pool_http_port_help "The TCP port on which the server(s) listen for unencrypted traffic."
+        }
         string vs_http_port display "xxlarge" required default "880" validator "PortNumber"
-        message vs_http_port_help "The port on which the BIG-IP listens for unencrypted traffic. This port MUST be unique for each deployment. You must create Azure load balancing rules and inbound security rules for this port before successfully passing unencrypted traffic for this application."
-        string pool_https_port display "xxlarge" required default "443" validator "PortNumber"
-        message pool_https_port_help "The port on which the server(s) listen for encrypted traffic."
-        string vs_https_port display "xxlarge" required default "8445" validator "PortNumber"
-        message vs_https_port_help "The port on which the BIG-IP listens for encrypted traffic. This port MUST be unique for each deployment. You must create Azure load balancing rules and inbound security rules for this port before successfully passing encrypted traffic for this application."
+        message vs_http_port_help "The TCP port on which the BIG-IP listens for unencrypted traffic. This port MUST be unique for each deployment. When deploying HTTPS or SSL Offload, this port is used to create a redirect virtual server."
+        optional ( mode == "https" || mode == "http-https" ) {
+            string pool_https_port display "xxlarge" required default "443" validator "PortNumber"
+            message pool_https_port_help "The TCP port on which the server(s) listen for encrypted traffic."
+        }
+        optional ( mode != "http" ) {
+            string vs_https_port display "xxlarge" required default "8445" validator "PortNumber"
+            message vs_https_port_help "The TCP port on which the BIG-IP listens for encrypted traffic. This port MUST be unique for each deployment."
+        }
         choice type display "xxlarge" default "linux" {
             "Linux" => "linux",
             "Windows" => "windows"
@@ -1183,8 +1188,10 @@ presentation {
     text {
              intro "Welcome to the F5 Azure Security Center Deployment iApp Template"
              intro.intro "Introduction"
-             intro.check_for_updates "Check for Updates"
+             intro.check_for_updates "Check for updates"
              intro.sorry "We're sorry"
+             intro.post_deployment "Post-deployment steps"
+             intro.reconfigure "Reconfiguration note"
 
              application "Application Information"
              application.nic "Does this BIG-IP have one or more network interfaces?"

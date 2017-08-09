@@ -1,13 +1,19 @@
 # Deploying Additional Applications to the F5 WAF
 
-You can use the [**deploy_waf_application_autoscale.sh**](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental/reference/scripts/deploy_waf_application_autoscale.sh) script in this repo to deploy additional applications to your F5 WAF devices.  The script configures the required security policy, profiles, and virtual server objects to receive application traffic. After you run the script, you must manually configure the Azure Load Balancer and Network Security Group to pass traffic for the application to the WAF device. The script does not configure Azure resources. For more information on configuring Azure objects, see the Azure documentation.
+You can use the *deploy_waf_application_autoscale.sh* or *deploy_waf_application.sh* script in this repo to deploy additional applications to your F5 WAF devices.  The script configures the required security policy, profiles, and virtual server objects to receive application traffic. After you run the script, you must manually configure the Azure Load Balancer and Network Security Group to pass traffic for the application to the WAF device. The script does not configure Azure resources. For more information on configuring Azure objects, see the Azure documentation.
+
+Example usage for auto scale deployments:  
+```bash
+bash -x .\deploy_waf_application_autoscale.sh -m http-https -d mydeployment -p 1.2.3.4 -v 881 -s 8446 -o 80 -l 443 -t linux -e custom -i https://example.com/my_security_policy.xml -c https://example.com/my_ssl_archive.pfx -a Ih3@rtF5! -r myapp.example.com -u azureuser -h 1.1.1.1 -g 50101
+```
+
+Example usage for Azure Security Center deployments:  
+```bash
+bash -x .\deploy_waf_application.sh -m http-https -d mydeployment -p 1.2.3.4 -v 881 -s 8446 -o 80 -l 443 -t linux -e custom -i https://example.com/my_security_policy.xml -c https://example.com/my_ssl_archive.pfx -a Ih3@rtF5! -r myapp.example.com -u azureuser -h 1.1.1.1 -g 50101 
+```
 
 You need to provide a list of parameters when deploying the script (you will be prompted for the WAF password).
 
-Example usage:  
-```bash
-bash -x .\deploy_waf_application.sh -m http-https -d mydeployment -p 1.2.3.4 -v 881 -s 8446 -o 80 -l 443 -t linux -e custom -i https://example.com/my_security_policy.xml -c https://example.com/my_ssl_archive.pfx -a Ih3@rtF5! -r myapp.example.com -u azureuser -h 1.1.1.1 -g 50101
-```
 
 | Flag | Name | Description | Example values | Notes |
 | --- | --- | --- | --- | --- |
