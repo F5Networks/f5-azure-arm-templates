@@ -87,7 +87,7 @@ def create_deploy_links(version_tag, lic_type, template_location):
         deploy_links += '''   - **<LIC_TYPE>**<LIC_TEXT> <br><a href="<DEPLOY_LINK_URL>">\n    <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>\n\n'''
         template_location = template_location.replace('/', '%2F')
         template_location = template_location.replace('..', '')
-        template_location = template_location.replace('PAYG', lic).replace('BYOL', lic).replace('BIGIQ', lic)
+        template_location = template_location.replace('PAYG', lic).replace('BYOL', lic).replace('BIGIQ', lic).replace('BIG-IQ', 'BIGIQ')
         url = base_url + template_location
         deploy_links = deploy_links.replace('<DEPLOY_LINK_URL>', url).replace('<LIC_TYPE>', lic)
         deploy_links = deploy_links.replace('<LIC_TEXT>', get_custom_text('license_text', lic))
@@ -140,6 +140,8 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
     if param_exist(data, 'numberOfAdditionalNics'):
         extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'nic_sizing') + '\n'
         extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'addtl_nic_config') + '\n'
+    if template_name in ('ha-avset'):
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'traffic_group_msg') + '\n'
 
     ### Map in dynamic values ###
     readme = readme.replace('<TITLE_TXT>', title_text)

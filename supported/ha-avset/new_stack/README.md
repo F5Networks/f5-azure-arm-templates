@@ -25,6 +25,7 @@ The template also supports updating the next hop of Azure User-Defined Routes (U
   - This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
   - This template requires that the resource group name the deployment uses to be no longer than **35** characters as a result of limitations to tag size within Azure.
+  - Persistence and connection mirroring are now supported in this template.  It also supports mirroring of APM sessions, if the Access Profile is deployed in traffic-group-1.  F5 recommends using a single traffic group, since a traditional Active/Active model is not supported at this time.
 
 
 ## Security
@@ -68,13 +69,13 @@ You have three options for deploying this solution:
 ### <a name="azure"></a>Azure deploy buttons
 
 Use the appropriate button, depending on what type of BIG-IP licensing required:
-   - **BYOL** (bring your own license): This allows you to use an existing BIG-IP license. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fha-avset%2Fnew_stack%2FBYOL%2Fazuredeploy.json">
+   - **BYOL** (bring your own license): This allows you to use an existing BIG-IP license. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.0.0%2Fsupported%2Fha-avset%2Fnew_stack%2FBYOL%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
-   - **PAYG**: This allows you to use pay-as-you-go hourly billing. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fha-avset%2Fnew_stack%2FPAYG%2Fazuredeploy.json">
+   - **PAYG**: This allows you to use pay-as-you-go hourly billing. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.0.0%2Fsupported%2Fha-avset%2Fnew_stack%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
-   - **BIG-IQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP(s). <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-3.3.0.0%2Fsupported%2Fha-avset%2Fnew_stack%2FBIG-IQ%2Fazuredeploy.json">
+   - **BIG-IQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP(s). <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.0.0%2Fsupported%2Fha-avset%2Fnew_stack%2FBIGIQ%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
 
