@@ -142,6 +142,8 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
         extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'addtl_nic_config') + '\n'
     if template_name in ('ha-avset'):
         extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'traffic_group_msg') + '\n'
+    if template_name in ('waf_autoscale'):
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'asm_sync') + '\n'
 
     ### Map in dynamic values ###
     readme = readme.replace('<TITLE_TXT>', title_text)
