@@ -355,7 +355,7 @@ fi
 
 ## Configuration Example <a name="config">
 
-The following is an example configuration diagram for this solution deployment. In this scneario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.
+The following is an example configuration diagram for this solution deployment. In this scenario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.
 
 ![Configuration Example](images/azure-example-diagram.png)
 

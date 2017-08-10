@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure, the solution can optionally also add additional NIC(s) to the BIG-IP to be used as needed. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the compute instance of F5 is running with a management, front-end application traffic(Virtual Server) and back-end application interface.
+This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. The solution can optionally also add additional NIC(s) to the BIG-IP to be used as needed. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the compute instance of F5 is running with a management, front-end application traffic(Virtual Server) and back-end application interface.
 
 **Networking Stack Type:** This solution deploys into a new networking stack, which is created along with the solution.
 
@@ -17,8 +17,8 @@ This solution uses an ARM template to launch a three NIC deployment of a cloud-f
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
   - This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
-  - Since this template allows you to deploy a variable number of NIC's be sure to pick an Azure Virtual Machine instance size that can support the number of NIC's chosen, otherwise the deployment will fail.  Please see the [Azure Instance Size link](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#size-tables) to determine the correct instance size to coorespond with the number of NIC's required. NOTE: This solution deploys three NIC's plus a variable number of NIC's as specified in the parameter **numberOfAdditionalNics**
-  - As a result of this template deploying a variable number of NIC's using the parameter **numberOfAdditionalNics** it will pre-configure the BIG-IP VLAN(s) and place the interfaces into the cooresponding VLAN (based on the subnet name(s) inputted in **additionalNicLocation**).  Please be aware that after template deployment the self IP(s) will need to be created cooresponding to the Azure IP config object for that NIC, also setting the IP Config object to a **static** address instead of **dynamic** will be necessary to ensure it doesnt change on reboot.
+  - Because this template allows you to deploy a variable number of NICs, be sure to pick an Azure Virtual Machine instance size that can support the number of NICs you choose, otherwise the deployment will fail.  Please see the [Azure Instance Size link](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#size-tables) to determine the correct instance size to correspond with the number of NICs required. NOTE: This solution deploys three NICs plus a variable number of NICs as specified in the parameter **numberOfAdditionalNics**
+  - As a result of this template deploying a variable number of NICs using the parameter **numberOfAdditionalNics** it will pre-configure the BIG-IP VLAN(s) and place the interfaces into the corresponding VLAN (based on the subnet name(s) in **additionalNicLocation**).  Be aware that after template deployment, the self IP(s) will need to be created corresponding to the Azure IP config object for that NIC, and you must set the IP Config object to a **static** address instead of **dynamic** to ensure it does not change on reboot.
 
 
 ## Security
