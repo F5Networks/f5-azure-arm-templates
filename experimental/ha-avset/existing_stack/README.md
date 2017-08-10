@@ -1,21 +1,23 @@
-# Deploying the BIG-IP VE in Azure - HA Cluster: Active/Standby
+# Deploying the BIG-IP VE in Azure - HA Cluster (Active/Standby)
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
+[![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
+[![Issues](https://img.shields.io/github/issues/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/issues)
 
 ## Introduction
 
 This solution uses an ARM template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled. Each pair of BIG-IP VEs is deployed in an Azure Availability Set, and can therefore be spread across different update and fault domains. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.
 
-Traffic flows from the client through BIG-IP VE to the application servers. This is the standard "on-premise-like" cloud design where the compute instance of F5 is running with a management interface, a front-end application traffic (external) interface, and back-end application (internal) interface. This template is a result of Azure now supporting multiple public-to-private IP address mappings per NIC. 
+Traffic flows from the client through BIG-IP VE to the application servers. This is the standard 'on-premise-like' cloud design where the compute instance of F5 is running with a management interface, a front-end application traffic (external) interface, and back-end application (internal) interface. This template is a result of Azure now supporting multiple public-to-private IP address mappings per NIC. 
 
-This template supports creating up to 8 additional public/private IP address configurations for the external "application" NIC to be used for passing traffic to BIG-IP virtual servers.  Each virtual server should be configured with a destination address matching the private IP address value of the Azure IP configuration receiving traffic for the application. In the event the active BIG-IP VE becomes unavailable, the IP configuration(s) are migrated using network failover, seamlessly shifting application traffic to the current active BIG-IP VE.
+This template supports creating up to 8 additional public/private IP address configurations for the external 'application' NIC to be used for passing traffic to BIG-IP virtual servers.  Each virtual server should be configured with a destination address matching the private IP address value of the Azure IP configuration receiving traffic for the application. In the event the active BIG-IP VE becomes unavailable, the IP configuration(s) are migrated using network failover, seamlessly shifting application traffic to the current active BIG-IP VE.
 
-The template also supports updating the next hop of Azure User-Defined Routes (UDRs) to use the active BIG-IP VEs internal self IP address. Specify a comma-delimited list of managedRoutes and a routeTableTag in the template to define the UDRs to be updated.  All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with "f5_ha:<routeTableTag>" will use the active BIG-IP VE as the next hop for those routes.
+The template also supports updating the next hop of Azure User-Defined Routes (UDRs) to use the active BIG-IP VEs internal self IP address. Specify a comma-delimited list of managedRoutes and a routeTableTag in the template to define the UDRs to be updated.  All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with 'f5_ha:<routeTableTag>' will use the active BIG-IP VE as the next hop for those routes.
 
 **Networking Stack Type:** This template deploys into an existing networking stack; the networking infrastructure must be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.
 
 ## Prerequisites and configuration notes
-  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the characters **#** or **'** (single quote).
+  - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See https://support.f5.com/csp/article/K2873 for details.
   - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
@@ -23,13 +25,16 @@ The template also supports updating the next hop of Azure User-Defined Routes (U
   - This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
   - This template requires that the resource group name the deployment uses to be no longer than **35** characters as a result of limitations to tag size within Azure.
+  - Persistence and connection mirroring are now supported in this template.  It also supports mirroring of APM sessions, if the Access Profile is deployed in traffic-group-1.  F5 recommends using a single traffic group, since a traditional Active/Active model is not supported at this time.
 
 
 ## Security
-This ARM template downloads helper code to configure the BIG-IP system. If your organization is security conscious and you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
+This ARM template downloads helper code to configure the BIG-IP system. If you want to verify the integrity of the template, you can open the template and ensure the following lines are present. See [Security Detail](#securitydetail) for the exact code.
 In the *variables* section:
-  - In the *verifyHash* variable: search for **script-signature** and then a hashed signature.
+  - In the *verifyHash* variable: **script-signature** and then a hashed signature.
+  - In the *installCloudLibs* variable: **tmsh load sys config merge file /config/verifyHash**.
   - In the *installCloudLibs* variable: ensure this includes **tmsh run cli script verifyHash /config/cloud/f5-cloud-libs.tar.gz**.
+
 
 Additionally, F5 provides checksums for all of our supported templates. For instructions and the checksums to compare against, see https://devcentral.f5.com/codeshare/checksums-for-f5-supported-cft-and-arm-templates-on-github-1014.
 
@@ -64,10 +69,13 @@ You have three options for deploying this solution:
 ### <a name="azure"></a>Azure deploy buttons
 
 Use the appropriate button, depending on what type of BIG-IP licensing required:
-   - **BYOL** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.2.1.0%2Fexperimental%2Fha-avset%2Fexisting_stack%2FBYOL%2Fazuredeploy.json">
+   - **BYOL** (bring your own license): This allows you to use an existing BIG-IP license. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.0.0%2Fexperimental%2Fha-avset%2Fexisting_stack%2FBYOL%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
-   - **PAYG** <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.2.1.0%2Fexperimental%2Fha-avset%2Fexisting_stack%2FPAYG%2Fazuredeploy.json">
+   - **PAYG**: This allows you to use pay-as-you-go hourly billing. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.0.0%2Fexperimental%2Fha-avset%2Fexisting_stack%2FPAYG%2Fazuredeploy.json">
+    <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
+
+   - **BIG-IQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP(s). <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.0.0%2Fexperimental%2Fha-avset%2Fexisting_stack%2FBIGIQ%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
 
@@ -83,9 +91,13 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (IMAGE) to you want to deploy. |
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
-| licenseKey1 | No | The license token for the F5 BIG-IP VE (BYOL) |
-| licenseKey2 | No | The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices. |
-| licensedBandwidth | No | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| licenseKey1 | BYOL only: | The license token for the F5 BIG-IP VE (BYOL). |
+| licenseKey2 | BYOL only: | The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices. |
+| licensedBandwidth | PAYG only: | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
+| bigIqLicenseHost | BIG-IQ licensing only: | The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP. |
+| bigIqLicenseUsername | BIG-IQ licensing only: | The BIG-IQ username to use during licensing. |
+| bigIqLicensePassword | BIG-IQ licensing only: | The BIG-IQ password to use during licensing. |
+| bigIqLicensePool | BIG-IQ licensing only: | The BIG-IQ license pool to use during licensing. |
 | numberOfExternalIps | Yes | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
 | vnetName | Yes | The name of the existing virtual network to which you want to connect the BIG-IP VEs. |
 | vnetResourceGroupName | Yes | The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed. |
@@ -101,8 +113,8 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | servicePrincipalSecret | Yes | Your Azure service principal application secret. |
 | managedRoutes | Yes | A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24. |
 | routeTableTag | Yes | Azure tag value to identify the route tables to be managed by this cluster. For example tag value: myRoute.  Example Azure tag: f5_ha:myRoute. |
-| ntpServer | Yes | If you would like to change the NTP server the BIG-IP uses replace the default ntp server with your choice. |
-| timeZone | Yes | If you would like to change the time zone the BIG-IP uses then enter your chocie. This is in the format of the Olson timezone string from /usr/share/zoneinfo, such as UTC, US/Central or Europe/London. |
+| ntpServer | Yes | If you would like to change the NTP server the BIG-IP uses then replace the default ntp server with your choice. |
+| timeZone | Yes | If you would like to change the time zone the BIG-IP uses then enter your choice. This is in the format of the Olson timezone string from /usr/share/zoneinfo, such as UTC, US/Central or Europe/London. |
 | restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources |
 | tagValues | Yes | Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key. |
 
@@ -113,134 +125,47 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
-## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceName f5vm01 -instanceType Standard_DS3_v2 -imageName Good -bigIpVersion 13.0.021 -numberOfExternalIps 1 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddressRangeStart <value> -externalSubnetName <value> -externalIpSelfAddressRangeStart <value> -externalIpAddressRangeStart <value> -internalSubnetName <value> -internalIpAddressRangeStart <value> -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -managedRoutes NOT_SPECIFIED -routeTableTag NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -restrictedSrcAddress "*" -resourceGroupName <value> 
+## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceName f5vm01 -instanceType Standard_DS3_v2 -imageName Good -bigIpVersion 13.0.021 -numberOfExternalIps 1 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddressRangeStart <value> -externalSubnetName <value> -externalIpSelfAddressRangeStart <value> -externalIpAddressRangeStart <value> -internalSubnetName <value> -internalIpAddressRangeStart <value> -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -managedRoutes NOT_SPECIFIED -routeTableTag NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -restrictedSrcAddress "*" -resourceGroupName <value>
 
 param(
+  [string] [Parameter(Mandatory=$True)] $licenseType,
+  [string] $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),
+  [string] $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),
+  [string] $licenseKey2 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey2"}),
+  [string] $bigIqLicenseHost = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseHost"}),
+  [string] $bigIqLicenseUsername = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseUsername"}),
+  [string] $bigIqLicensePassword = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicensePassword"}),
+  [string] $bigIqLicensePool = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicensePool"}),
 
-  [Parameter(Mandatory=$True)]
-  [string]
-  $licenseType,
-
-  [string]
-  $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),
-
-  [string]
-  $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),
-
-  [string]
-  $licenseKey2 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey2"}),
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $adminUsername,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $adminPassword,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $dnsLabel,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $instanceName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $instanceType,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $imageName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $bigIpVersion,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $numberOfExternalIps,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $vnetName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $vnetResourceGroupName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $mgmtSubnetName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $mgmtIpAddressRangeStart,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $externalSubnetName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $externalIpSelfAddressRangeStart,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $externalIpAddressRangeStart,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $internalSubnetName,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $internalIpAddressRangeStart,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $tenantId,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $clientId,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $servicePrincipalSecret,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $managedRoutes,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $routeTableTag,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $ntpServer,
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $timeZone,
-
-  [string]
-  $restrictedSrcAddress = "*",
-
-  [Parameter(Mandatory=$True)]
-  [string]
-  $resourceGroupName,
-
-  [string]
-  $region = "West US",
-
-  [string]
-  $templateFilePath = "azuredeploy.json",
-
-  [string]
-  $parametersFilePath = "azuredeploy.parameters.json"
+  [string] [Parameter(Mandatory=$True)] $adminUsername,
+  [string] [Parameter(Mandatory=$True)] $adminPassword,
+  [string] [Parameter(Mandatory=$True)] $dnsLabel,
+  [string] [Parameter(Mandatory=$True)] $instanceName,
+  [string] [Parameter(Mandatory=$True)] $instanceType,
+  [string] [Parameter(Mandatory=$True)] $imageName,
+  [string] [Parameter(Mandatory=$True)] $bigIpVersion,
+  [string] [Parameter(Mandatory=$True)] $numberOfExternalIps,
+  [string] [Parameter(Mandatory=$True)] $vnetName,
+  [string] [Parameter(Mandatory=$True)] $vnetResourceGroupName,
+  [string] [Parameter(Mandatory=$True)] $mgmtSubnetName,
+  [string] [Parameter(Mandatory=$True)] $mgmtIpAddressRangeStart,
+  [string] [Parameter(Mandatory=$True)] $externalSubnetName,
+  [string] [Parameter(Mandatory=$True)] $externalIpSelfAddressRangeStart,
+  [string] [Parameter(Mandatory=$True)] $externalIpAddressRangeStart,
+  [string] [Parameter(Mandatory=$True)] $internalSubnetName,
+  [string] [Parameter(Mandatory=$True)] $internalIpAddressRangeStart,
+  [string] [Parameter(Mandatory=$True)] $tenantId,
+  [string] [Parameter(Mandatory=$True)] $clientId,
+  [string] [Parameter(Mandatory=$True)] $servicePrincipalSecret,
+  [string] [Parameter(Mandatory=$True)] $managedRoutes,
+  [string] [Parameter(Mandatory=$True)] $routeTableTag,
+  [string] [Parameter(Mandatory=$True)] $ntpServer,
+  [string] [Parameter(Mandatory=$True)] $timeZone,
+  [string] $restrictedSrcAddress = "*",
+  [string] [Parameter(Mandatory=$True)] $resourceGroupName,
+  [string] $region = "West US",
+  [string] $templateFilePath = "azuredeploy.json",
+  [string] $parametersFilePath = "azuredeploy.parameters.json"
 )
 
 Write-Host "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged." -foregroundcolor green
@@ -269,8 +194,12 @@ if ($licenseType -eq "BYOL") {
 } elseif ($licenseType -eq "PAYG") {
   if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }
   $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -numberOfExternalIps "$numberOfExternalIps" -vnetName "$vnetName" -vnetResourceGroupName "$vnetResourceGroupName" -mgmtSubnetName "$mgmtSubnetName" -mgmtIpAddressRangeStart "$mgmtIpAddressRangeStart" -externalSubnetName "$externalSubnetName" -externalIpSelfAddressRangeStart "$externalIpSelfAddressRangeStart" -externalIpAddressRangeStart "$externalIpAddressRangeStart" -internalSubnetName "$internalSubnetName" -internalIpAddressRangeStart "$internalIpAddressRangeStart" -tenantId "$tenantId" -clientId "$clientId" -servicePrincipalSecret $sps -managedRoutes "$managedRoutes" -routeTableTag "$routeTableTag" -ntpServer "$ntpServer" -timeZone "$timeZone" -restrictedSrcAddress "$restrictedSrcAddress"  -licensedBandwidth "$licensedBandwidth"
+} elseif ($licenseType -eq "BIGIQ") {
+  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BIGIQ\azuredeploy.json"; $parametersFilePath = ".\BIGIQ\azuredeploy.parameters.json" }
+  $bigiq_pwd = ConvertTo-SecureString -String $bigIqLicensePassword -AsPlainText -Force
+  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername "$adminUsername" -adminPassword $pwd -dnsLabel "$dnsLabel" -instanceName "$instanceName" -instanceType "$instanceType" -imageName "$imageName" -bigIpVersion "$bigIpVersion" -numberOfExternalIps "$numberOfExternalIps" -vnetName "$vnetName" -vnetResourceGroupName "$vnetResourceGroupName" -mgmtSubnetName "$mgmtSubnetName" -mgmtIpAddressRangeStart "$mgmtIpAddressRangeStart" -externalSubnetName "$externalSubnetName" -externalIpSelfAddressRangeStart "$externalIpSelfAddressRangeStart" -externalIpAddressRangeStart "$externalIpAddressRangeStart" -internalSubnetName "$internalSubnetName" -internalIpAddressRangeStart "$internalIpAddressRangeStart" -tenantId "$tenantId" -clientId "$clientId" -servicePrincipalSecret $sps -managedRoutes "$managedRoutes" -routeTableTag "$routeTableTag" -ntpServer "$ntpServer" -timeZone "$timeZone" -restrictedSrcAddress "$restrictedSrcAddress"  -bigIqLicenseHost "$bigIqLicenseHost" -bigIqLicenseUsername "$bigIqLicenseUsername" -bigIqLicensePassword $bigiq_pwd -bigIqLicensePool "$bigIqLicensePool"
 } else {
-  Write-Error -Message "Please select a valid license type of PAYG or BYOL."
+  Write-Error -Message "Please select a valid license type of PAYG, BYOL or BIGIQ."
 }
 
 # Print Output of Deployment to Console
@@ -426,6 +355,17 @@ if [ $licenseType == "PAYG" ]; then
     template_file="./PAYG/azuredeploy.json"
     parameter_file="./PAYG/azuredeploy.parameters.json"
 fi
+# Prompt for BIGIQ parameters if not supplied and BIGIQ is selected
+if [ $licenseType == "BIGIQ" ]; then
+	big_iq_vars="bigIqLicenseHost bigIqLicenseUsername bigIqLicensePassword bigIqLicensePool"
+	for variable in $big_iq_vars
+			do
+			if [ -z ${!variable} ] ; then
+					read -p "Please enter value for $variable:" $variable
+			fi
+	done
+fi
+
 
 echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
 sleep 3
@@ -448,8 +388,10 @@ if [ $licenseType == "BYOL" ]; then
     azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddressRangeStart\":{\"value\":\"$mgmtIpAddressRangeStart\"},\"externalSubnetName\":{\"value\":\"$externalSubnetName\"},\"externalIpSelfAddressRangeStart\":{\"value\":\"$externalIpSelfAddressRangeStart\"},\"externalIpAddressRangeStart\":{\"value\":\"$externalIpAddressRangeStart\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddressRangeStart\":{\"value\":\"$internalIpAddressRangeStart\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"managedRoutes\":{\"value\":\"$managedRoutes\"},\"routeTableTag\":{\"value\":\"$routeTableTag\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licenseKey1\":{\"value\":\"$licenseKey1\"},\"licenseKey2\":{\"value\":\"$licenseKey2\"}}"
 elif [ $licenseType == "PAYG" ]; then
     azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddressRangeStart\":{\"value\":\"$mgmtIpAddressRangeStart\"},\"externalSubnetName\":{\"value\":\"$externalSubnetName\"},\"externalIpSelfAddressRangeStart\":{\"value\":\"$externalIpSelfAddressRangeStart\"},\"externalIpAddressRangeStart\":{\"value\":\"$externalIpAddressRangeStart\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddressRangeStart\":{\"value\":\"$internalIpAddressRangeStart\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"managedRoutes\":{\"value\":\"$managedRoutes\"},\"routeTableTag\":{\"value\":\"$routeTableTag\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
+elif [ $licenseType == "BIGIQ" ]; then
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddressRangeStart\":{\"value\":\"$mgmtIpAddressRangeStart\"},\"externalSubnetName\":{\"value\":\"$externalSubnetName\"},\"externalIpSelfAddressRangeStart\":{\"value\":\"$externalIpSelfAddressRangeStart\"},\"externalIpAddressRangeStart\":{\"value\":\"$externalIpAddressRangeStart\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddressRangeStart\":{\"value\":\"$internalIpAddressRangeStart\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"managedRoutes\":{\"value\":\"$managedRoutes\"},\"routeTableTag\":{\"value\":\"$routeTableTag\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"bigIqLicenseHost\":{\"value\":\"$bigIqLicenseHost\"},\"bigIqLicenseUsername\":{\"value\":\"$bigIqLicenseUsername\"}},\"bigIqLicensePassword\":{\"value\":\"$bigIqLicensePassword\"}},\"bigIqLicensePool\":{\"value\":\"$bigIqLicensePool\"}}"
 else
-    echo "Please select a valid license type of PAYG or BYOL."
+    echo "Please select a valid license type of PAYG, BYOL or BIGIQ."
     exit 1
 fi
 ```
@@ -526,6 +468,8 @@ This solution requires access to the Azure API to determine how the BIG-IP VEs s
 
 _Ensure that however the creation of the service principal occurs to verify it only has minimum required access based on the solutions need(read vs read/write) prior to this template being deployed and used by the solution within the resource group selected(new or existing)._
 
+**Minimum Required Access:** **Read/Write** access is required, it can be limited to the resource group used by this solution.
+
 The end result should be possession of a client(application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some troubleshooting post-deployment if the service principal is in fact not fully configured.
 
 #### 1. Azure Portal
@@ -547,33 +491,17 @@ https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-aut
 #### 3. Azure PowerShell
 Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
 
-## Deploying Custom Configuration to an Azure Virtual Machine
+## Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
 
-This sample code uses the CustomScript extension resource to configure the f5.ip_forwarding iApp on BIG-IP VE in Azure Resource Manager.
+Once the solution has been deployed there may be a need to perform some additional configuration of the BIG-IP.  This can be accomplished via traditional methods such as via the GUI, logging into the CLI or using the REST API.  However, depending on the requirments it might be preferred to perform this custom configuration as a part of the initial deployment of the solution.  This can be accomplished in the below manner.
 
-The CustomScript extension resource name must reference the Azure virtual machine name and must have a dependency on that virtual machine. You can use only one CustomScript extension resource per virtual machine; however, you can combine multiple semicolon-delimited commands in a single extension resource definition.
+Within the Azure Resource Manager (ARM) template there is a variable called **customConfig**, this contains text similar to "### START(INPUT) CUSTOM CONFIGURATION", that can be replaced with custom shell scripting to perform additional configuration of the BIG-IP.  An example of what it would look like to configure the f5.ip_forwarding iApp is included below.
 
-Warning: F5 does not support the template if you change anything other than the CustomScript extension resource.
+Warning: F5 does not support the template if you change anything other than the **customConfig** ARM template variable.
 
-```
-{
-     "type": "Microsoft.Compute/virtualMachines/extensions",
-     "name": "[concat(variables('virtualMachineName'),'/start')]",
-     "apiVersion": "2016-03-30",
-     "location": "[resourceGroup().location] "
-     "dependsOn": [
-          "[concat('Microsoft.Compute/virtualMachines/',variables('virtualMachineName'))]"
-     ],
-     "properties": {
-          "publisher": "Microsoft.Azure.Extensions",
-          "type": "CustomScript",
-          "typeHandlerVersion": "2.0",
-          "settings": {
-          },
-          "protectedSettings": {
-               "commandToExecute": "[concat('tmsh create sys application service my_deployment { device-group none template f5.ip_forwarding traffic-group none variables replace-all-with { basic__addr { value 0.0.0.0 } basic__forward_all { value No } basic__mask { value 0.0.0.0 } basic__port { value 0 } basic__vlan_listening { value default } options__advanced { value no }options__display_help { value hide } } }')]"
-          }
-     }
+```json
+"variables": {
+    "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\ntmsh create sys application service my_deployment { device-group none template f5.ip_forwarding traffic-group none variables replace-all-with { basic__addr { value 0.0.0.0 } basic__forward_all { value No } basic__mask { value 0.0.0.0 } basic__port { value 0 } basic__vlan_listening { value default } options__advanced { value no }options__display_help { value hide } } }"
 }
 ```
 ### Changing the BIG-IP Configuration utility (GUI) port

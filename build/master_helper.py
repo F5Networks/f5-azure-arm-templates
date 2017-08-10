@@ -22,6 +22,13 @@ def parameter_initialize(data):
     data['parameters']['licenseKey1'] = "OPTIONAL"
     data['parameters']['licenseKey2'] = "OPTIONAL"
     data['parameters']['licensedBandwidth'] = "OPTIONAL"
+    data['parameters']['bigIqLicenseHost'] = "OPTIONAL"
+    data['parameters']['bigIqLicenseUsername'] = "OPTIONAL"
+    data['parameters']['bigIqLicensePassword'] = "OPTIONAL"
+    data['parameters']['bigIqLicensePool'] = "OPTIONAL"
+    data['parameters']['numberOfAdditionalNics'] = "OPTIONAL"
+    data['parameters']['additionalNicLocation'] = "OPTIONAL"
+    data['parameters']['additionalNicIpRangeStart'] = "OPTIONAL"
     data['parameters']['numberOfExternalIps'] = "OPTIONAL"
     data['parameters']['vnetAddressPrefix'] = "OPTIONAL"
     data['parameters']['vnetName'] = "OPTIONAL"
@@ -36,6 +43,7 @@ def parameter_initialize(data):
     data['parameters']['internalSubnetName'] = "OPTIONAL"
     data['parameters']['internalIpAddressRangeStart'] = "OPTIONAL"
     data['parameters']['internalIpAddress'] = "OPTIONAL"
+    data['parameters']['avSetChoice'] = "OPTIONAL"
     data['parameters']['solutionDeploymentName'] = "OPTIONAL"
     data['parameters']['applicationProtocols'] = "OPTIONAL"
     data['parameters']['applicationAddress'] = "OPTIONAL"
@@ -50,6 +58,7 @@ def parameter_initialize(data):
     data['parameters']['tenantId'] = "OPTIONAL"
     data['parameters']['clientId'] = "OPTIONAL"
     data['parameters']['servicePrincipalSecret'] = "OPTIONAL"
+    data['parameters']['notificationEmail'] = "OPTIONAL"
     data['parameters']['managedRoutes'] = "OPTIONAL"
     data['parameters']['routeTableTag'] = "OPTIONAL"
     data['parameters']['ntpServer'] = "MANDATORY"
@@ -72,6 +81,8 @@ def variable_initialize(data):
     data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
     data['variables']['resourceGroupName'] = "[resourceGroup().name]"
     data['variables']['singleQuote'] = "'"
+    data['variables']['f5Tag'] = "MANDATORY"
+    data['variables']['f5TemplateTag'] = "MANDATORY"
     data['variables']['f5CloudLibsTag'] = "MANDATORY"
     data['variables']['f5CloudLibsAzureTag'] = "MANDATORY"
     data['variables']['f5NetworksTag'] = "MANDATORY"
@@ -86,6 +97,7 @@ def variable_initialize(data):
     data['variables']['bigIpNicPortValue'] = "MANDATORY"
     data['variables']['bigIpMgmtPort'] = "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]"
     data['variables']['instanceName'] = "OPTIONAL"
+    data['variables']['newAvailabilitySetName'] = "OPTIONAL"
     data['variables']['availabilitySetName'] = "[concat(variables('dnsLabel'), '-avset')]"
     data['variables']['virtualNetworkName'] = "[concat(variables('dnsLabel'), '-vnet')]"
     data['variables']['vnetId'] = "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
@@ -95,13 +107,14 @@ def variable_initialize(data):
     data['variables']['mgmtPublicIPAddressId'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('mgmtPublicIPAddressName'))]"
     data['variables']['mgmtNsgID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-mgmt-nsg'))]"
     data['variables']['mgmtNicName'] = "[concat(variables('dnsLabel'), '-mgmt')]"
-    data['variables']['mgmtSubnetName'] = "[concat(variables('dnsLabel'),'-mgmt-subnet')]"
+    data['variables']['mgmtSubnetName'] = "mgmt"
     data['variables']['mgmtSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]"
     data['variables']['mgmtSubnetPrefix'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddressPrefixArray'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddressPrefix'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddressSuffixInt'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddressSuffix'] = "OPTIONAL"
+    data['variables']['mgmtSubnetPrivateAddressSuffix1'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddress'] = "OPTIONAL"
     data['variables']['mgmtSubnetPrivateAddress1'] = "OPTIONAL"
     data['variables']['extSelfPublicIpAddressNamePrefix'] = "OPTIONAL"
@@ -142,9 +155,25 @@ def variable_initialize(data):
     data['variables']['intSubnetPrivateAddressSuffix'] = "OPTIONAL"
     data['variables']['extSubnetRef'] = "OPTIONAL"
     data['variables']['intSubnetRef'] = "OPTIONAL"
+    data['variables']['addtlNicFillerArray'] = "OPTIONAL"
+    data['variables']['addtlNicRefSplit'] = "OPTIONAL"
+    data['variables']['netCmd01'] = "OPTIONAL"
+    data['variables']['netCmd02'] = "OPTIONAL"
+    data['variables']['netCmd03'] = "OPTIONAL"
+    data['variables']['netCmd04'] = "OPTIONAL"
+    data['variables']['netCmd05'] = "OPTIONAL"
+    data['variables']['netCmd'] = "OPTIONAL"
     data['variables']['numberOfExternalIps'] = "OPTIONAL"
+    data['variables']['mgmtRouteGw'] = "OPTIONAL"
+    data['variables']['tmmRouteGw'] = "OPTIONAL"
+    data['variables']['routeCmdArray'] = "OPTIONAL"
+    data['variables']['subnetArray'] = "OPTIONAL"
+    data['variables']['addtlSubnetArray'] = "OPTIONAL"
     data['variables']['selfIpconfigArray'] = "OPTIONAL"
     data['variables']['extIpconfigArray'] = "OPTIONAL"
+    data['variables']['selfNicConfigArray'] = "OPTIONAL"
+    data['variables']['addtlNicConfigArray'] = "OPTIONAL"
+    data['variables']['lbFrontEndArray'] = "OPTIONAL"
     data['variables']['ipAddress'] = "OPTIONAL"
     data['variables']['loadBalancerName'] = "OPTIONAL"
     data['variables']['deviceNamePrefix'] = "OPTIONAL"
@@ -161,6 +190,8 @@ def variable_initialize(data):
     data['variables']['scaleOutNetworkBytes'] = "OPTIONAL"
     data['variables']['scaleInNetworkBytes'] = "OPTIONAL"
     data['variables']['timeWindow'] = "OPTIONAL"
+    data['variables']['customEmailToUse'] = "OPTIONAL"
+    data['variables']['customEmail'] = "OPTIONAL"
     data['variables']['lbTcpProbeNameHttp'] = "OPTIONAL"
     data['variables']['lbTcpProbeIdHttp'] = "OPTIONAL"
     data['variables']['lbTcpProbeNameHttps'] = "OPTIONAL"
@@ -169,16 +200,18 @@ def variable_initialize(data):
     data['variables']['httpsBackendPort'] = "OPTIONAL"
     data['variables']['commandArgs'] = "OPTIONAL"
     # Add storage array variables at the end
-    data['variables']['instanceTypeMap'] = { "Standard_A3": { "storageAccountType": "Standard_LRS" }, "Standard_A4": { "storageAccountType": "Standard_LRS" }, "Standard_A5": { "storageAccountType": "Standard_LRS" }, "Standard_A6": { "storageAccountType": "Standard_LRS" }, "Standard_A7": { "storageAccountType": "Standard_LRS" }, "Standard_D2": { "storageAccountType": "Standard_LRS" }, "Standard_D3": { "storageAccountType": "Standard_LRS" }, "Standard_D4": { "storageAccountType": "Standard_LRS" }, "Standard_D11": { "storageAccountType": "Standard_LRS" }, "Standard_D12": { "storageAccountType": "Standard_LRS" }, "Standard_D13": { "storageAccountType": "Standard_LRS" }, "Standard_D14": { "storageAccountType": "Standard_LRS" }, "Standard_D2_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D3_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D4_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D5_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D11_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D12_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D13_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D14_v2": { "storageAccountType": "Standard_LRS" }, "Standard_F2": { "storageAccountType": "Standard_LRS" }, "Standard_F4": { "storageAccountType": "Standard_LRS" }, "Standard_G1": { "storageAccountType": "Standard_LRS" }, "Standard_G2": { "storageAccountType": "Standard_LRS" }, "Standard_G3": { "storageAccountType": "Standard_LRS" }, "Standard_G4": { "storageAccountType": "Standard_LRS" }, "Standard_G5": { "storageAccountType": "Standard_LRS" }, "Standard_DS1": { "storageAccountType": "Premium_LRS" }, "Standard_DS2": { "storageAccountType": "Premium_LRS" }, "Standard_DS3": { "storageAccountType": "Premium_LRS" }, "Standard_DS4": { "storageAccountType": "Premium_LRS" }, "Standard_DS11": { "storageAccountType": "Premium_LRS" }, "Standard_DS12": { "storageAccountType": "Premium_LRS" }, "Standard_DS13": { "storageAccountType": "Premium_LRS" }, "Standard_DS14": { "storageAccountType": "Premium_LRS" }, "Standard_DS1_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS2_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS3_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS4_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS5_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS11_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS12_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS13_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS14_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS15_v2": { "storageAccountType": "Premium_LRS" }, "Standard_GS1": { "storageAccountType": "Premium_LRS" }, "Standard_GS2": { "storageAccountType": "Premium_LRS" }, "Standard_GS3": { "storageAccountType": "Premium_LRS" }, "Standard_GS4": { "storageAccountType": "Premium_LRS" }, "Standard_GS5": { "storageAccountType": "Premium_LRS" } }
-    data['variables']['newStorageAccountName'] = "[concat(uniquestring(resourceGroup().id), 'stor')]"
+    data['variables']['instanceTypeMap'] = { "Standard_A3": { "storageAccountType": "Standard_LRS" }, "Standard_A4": { "storageAccountType": "Standard_LRS" }, "Standard_A5": { "storageAccountType": "Standard_LRS" }, "Standard_A6": { "storageAccountType": "Standard_LRS" }, "Standard_A7": { "storageAccountType": "Standard_LRS" }, "Standard_D2": { "storageAccountType": "Standard_LRS" }, "Standard_D3": { "storageAccountType": "Standard_LRS" }, "Standard_D4": { "storageAccountType": "Standard_LRS" }, "Standard_D11": { "storageAccountType": "Standard_LRS" }, "Standard_D12": { "storageAccountType": "Standard_LRS" }, "Standard_D13": { "storageAccountType": "Standard_LRS" }, "Standard_D14": { "storageAccountType": "Standard_LRS" }, "Standard_D2_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D3_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D4_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D5_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D11_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D12_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D13_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D14_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D15_v2": { "storageAccountType": "Standard_LRS" }, "Standard_F2": { "storageAccountType": "Standard_LRS" }, "Standard_F4": { "storageAccountType": "Standard_LRS" }, "Standard_G1": { "storageAccountType": "Standard_LRS" }, "Standard_G2": { "storageAccountType": "Standard_LRS" }, "Standard_G3": { "storageAccountType": "Standard_LRS" }, "Standard_G4": { "storageAccountType": "Standard_LRS" }, "Standard_G5": { "storageAccountType": "Standard_LRS" }, "Standard_DS1": { "storageAccountType": "Premium_LRS" }, "Standard_DS2": { "storageAccountType": "Premium_LRS" }, "Standard_DS3": { "storageAccountType": "Premium_LRS" }, "Standard_DS4": { "storageAccountType": "Premium_LRS" }, "Standard_DS11": { "storageAccountType": "Premium_LRS" }, "Standard_DS12": { "storageAccountType": "Premium_LRS" }, "Standard_DS13": { "storageAccountType": "Premium_LRS" }, "Standard_DS14": { "storageAccountType": "Premium_LRS" }, "Standard_DS1_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS2_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS3_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS4_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS5_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS11_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS12_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS13_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS14_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS15_v2": { "storageAccountType": "Premium_LRS" }, "Standard_GS1": { "storageAccountType": "Premium_LRS" }, "Standard_GS2": { "storageAccountType": "Premium_LRS" }, "Standard_GS3": { "storageAccountType": "Premium_LRS" }, "Standard_GS4": { "storageAccountType": "Premium_LRS" }, "Standard_GS5": { "storageAccountType": "Premium_LRS" } }
+    data['variables']['newStorageAccountName'] = "[concat(uniqueString(resourceGroup().id, deployment().name), 'stor')]"
     data['variables']['storageAccountType'] = "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]"
-    data['variables']['newDataStorageAccountName'] = "[concat(uniquestring(resourceGroup().id), 'data000')]"
+    data['variables']['newDataStorageAccountName'] = "[concat(uniqueString(resourceGroup().id, deployment().name), 'data000')]"
     data['variables']['dataStorageAccountType'] = "Standard_LRS"
+    data['variables']['customConfig'] = "### START (INPUT) CUSTOM CONFIGURATION HERE\n"
+    data['variables']['installCustomConfig'] = "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
 
     return data
 
 def template_check(data, resource):
-    """ Remove extra optional resources(variables, parameters, etc...), also check if mandatory parameter was not filled in """
+    """ Remove extra optional resources (variables, parameters, etc...), also check if mandatory parameter was not filled in """
     for var in data[resource]:
         if data[resource][var] == "OPTIONAL":
             data[resource].pop(var)
@@ -203,7 +236,7 @@ def verify_hash(url):
     if response.status == 200:
         pass
     else:
-        raise Exception("Unable to download verify hash file, HTTP Error Response: %s"  % response.msg)
+        raise Exception("Unable to download verify hash file, HTTP Error Response: %s" % response.msg)
     # HTTP Call MIGHT include trailing \n, remove that
     response_str = response.read()
     if response_str[-1:] == '\n':
