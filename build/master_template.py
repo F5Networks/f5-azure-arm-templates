@@ -359,7 +359,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
             data['variables']['extSubnetPrivateAddress'] = "[parameters('externalIpAddressRangeStart')]"
             data['variables']['extSubnetPrivateAddressPrefixArray'] = "[split(parameters('externalIpAddressRangeStart'), '.')]"
             data['variables']['extSubnetPrivateAddressPrefix'] = "[concat(variables('extSubnetPrivateAddressPrefixArray')[0], '.', variables('extSubnetPrivateAddressPrefixArray')[1], '.', variables('extSubnetPrivateAddressPrefixArray')[2], '.')]"
-            data['variables']['tmmRouteGw'] = "[concat(take(parameters('externalIpAddressRangeStart'), lastIndexOf(parameters('externalIpAddressRangeStart'), '.')), '.')]"
+            data['variables']['tmmRouteGw'] = "OPTIONAL"
             data['variables']['mgmtRouteGw'] = "`tmsh list sys management-route default gateway | grep gateway | sed 's/gateway //;s/ //g'`"
             data['variables']['routeCmdArray'] = route_cmd_array
             data['variables']['extSubnetPrivateAddressSuffixInt'] = "[int(variables('extSubnetPrivateAddressPrefixArray')[3])]"
@@ -646,7 +646,7 @@ if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic
     route_add_cmd = " ', variables('routeCmdArray')[parameters('bigIpVersion')], ';"
 # Default GW command is different for existing_stack
 if stack_type == 'existing_stack':
-    default_gw_cmd = "concat(variables('tmmRouteGw'), add(int(take(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], indexOf(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], '/'))), 1))"
+    default_gw_cmd = "concat(take(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, add(lastIndexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.'), 1)), add(int(take(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], indexOf(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], '/'))), 1))"
 
 ## Map in some commandToExecute Elements
 post_cmd_to_execute = post_cmd_to_execute.replace('<BIGIQ_PWD_DELETE>', bigiq_pwd_delete)
