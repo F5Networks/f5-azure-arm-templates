@@ -190,7 +190,7 @@ def variable_initialize(data):
     data['variables']['scaleOutNetworkBytes'] = "OPTIONAL"
     data['variables']['scaleInNetworkBytes'] = "OPTIONAL"
     data['variables']['timeWindow'] = "OPTIONAL"
-    data['variables']['customEmailToUse'] = "OPTIONAL"
+    data['variables']['customEmailBaseArray'] = "OPTIONAL"
     data['variables']['customEmail'] = "OPTIONAL"
     data['variables']['lbTcpProbeNameHttp'] = "OPTIONAL"
     data['variables']['lbTcpProbeIdHttp'] = "OPTIONAL"
