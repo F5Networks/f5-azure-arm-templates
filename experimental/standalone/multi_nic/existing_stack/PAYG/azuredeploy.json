@@ -147,7 +147,19 @@
                 5, 
                 6, 
                 7, 
-                8
+                8, 
+                9, 
+                10, 
+                11, 
+                12, 
+                13, 
+                14, 
+                15, 
+                16, 
+                17, 
+                18, 
+                19, 
+                20
             ], 
             "defaultValue": 1, 
             "metadata": {
@@ -486,6 +498,174 @@
                     }, 
                     "primary": false, 
                     "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix7'))]", 
+                    "privateIPAllocationMethod": "Static", 
+                    "subnet": {
+                        "id": "[variables('extSubnetId')]"
+                    }
+                }
+            }, 
+            {
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig8')]", 
+                "properties": {
+                    "PublicIpAddress": {
+                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 8)]"
+                    }, 
+                    "primary": false, 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix8'))]", 
+                    "privateIPAllocationMethod": "Static", 
+                    "subnet": {
+                        "id": "[variables('extSubnetId')]"
+                    }
+                }
+            }, 
+            {
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig9')]", 
+                "properties": {
+                    "PublicIpAddress": {
+                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 9)]"
+                    }, 
+                    "primary": false, 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix9'))]", 
+                    "privateIPAllocationMethod": "Static", 
+                    "subnet": {
+                        "id": "[variables('extSubnetId')]"
+                    }
+                }
+            }, 
+            {
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig10')]", 
+                "properties": {
+                    "PublicIpAddress": {
+                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 10)]"
+                    }, 
+                    "primary": false, 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix10'))]", 
+                    "privateIPAllocationMethod": "Static", 
+                    "subnet": {
+                        "id": "[variables('extSubnetId')]"
+                    }
+                }
+            }, 
+            {
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig11')]", 
+                "properties": {
+                    "PublicIpAddress": {
+                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 11)]"
+                    }, 
+                    "primary": false, 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix11'))]", 
+                    "privateIPAllocationMethod": "Static", 
+                    "subnet": {
+                        "id": "[variables('extSubnetId')]"
+                    }
+                }
+            }, 
+            {
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig12')]", 
+                "properties": {
+                    "PublicIpAddress": {
+                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 12)]"
+                    }, 
+                    "primary": false, 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix12'))]", 
+                    "privateIPAllocationMethod": "Static", 
+                    "subnet": {
+                        "id": "[variables('extSubnetId')]"
+                    }
+                }
+            }, 
+            {
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig13')]", 
+                "properties": {
+                    "PublicIpAddress": {
+                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 13)]"
+                    }, 
+                    "primary": false, 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix13'))]", 
+                    "privateIPAllocationMethod": "Static", 
+                    "subnet": {
+                        "id": "[variables('extSubnetId')]"
+                    }
+                }
+            }, 
+            {
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig14')]", 
+                "properties": {
+                    "PublicIpAddress": {
+                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 14)]"
+                    }, 
+                    "primary": false, 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix14'))]", 
+                    "privateIPAllocationMethod": "Static", 
+                    "subnet": {
+                        "id": "[variables('extSubnetId')]"
+                    }
+                }
+            }, 
+            {
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig15')]", 
+                "properties": {
+                    "PublicIpAddress": {
+                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 15)]"
+                    }, 
+                    "primary": false, 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix15'))]", 
+                    "privateIPAllocationMethod": "Static", 
+                    "subnet": {
+                        "id": "[variables('extSubnetId')]"
+                    }
+                }
+            }, 
+            {
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig16')]", 
+                "properties": {
+                    "PublicIpAddress": {
+                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 16)]"
+                    }, 
+                    "primary": false, 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix16'))]", 
+                    "privateIPAllocationMethod": "Static", 
+                    "subnet": {
+                        "id": "[variables('extSubnetId')]"
+                    }
+                }
+            }, 
+            {
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig17')]", 
+                "properties": {
+                    "PublicIpAddress": {
+                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 17)]"
+                    }, 
+                    "primary": false, 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix17'))]", 
+                    "privateIPAllocationMethod": "Static", 
+                    "subnet": {
+                        "id": "[variables('extSubnetId')]"
+                    }
+                }
+            }, 
+            {
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig18')]", 
+                "properties": {
+                    "PublicIpAddress": {
+                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 18)]"
+                    }, 
+                    "primary": false, 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix18'))]", 
+                    "privateIPAllocationMethod": "Static", 
+                    "subnet": {
+                        "id": "[variables('extSubnetId')]"
+                    }
+                }
+            }, 
+            {
+                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig19')]", 
+                "properties": {
+                    "PublicIpAddress": {
+                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 19)]"
+                    }, 
+                    "primary": false, 
+                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix19'))]", 
                     "privateIPAllocationMethod": "Static", 
                     "subnet": {
                         "id": "[variables('extSubnetId')]"

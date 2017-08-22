@@ -139,7 +139,19 @@
                 5, 
                 6, 
                 7, 
-                8
+                8, 
+                9, 
+                10, 
+                11, 
+                12, 
+                13, 
+                14, 
+                15, 
+                16, 
+                17, 
+                18, 
+                19, 
+                20
             ], 
             "defaultValue": 1, 
             "metadata": {
@@ -390,6 +402,126 @@
                 "properties": {
                     "publicIPAddress": {
                         "id": "[concat(variables('extPublicIPAddressIdPrefix'), 4)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd5", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 5)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd6", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 6)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd7", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 7)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd8", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 8)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd9", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 9)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd10", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 10)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd11", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 11)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd12", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 12)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd13", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 13)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd14", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 14)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd15", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 15)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd16", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 16)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd17", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 17)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd18", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 18)]"
+                    }
+                }
+            }, 
+            {
+                "name": "loadBalancerFrontEnd19", 
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 19)]"
                     }
                 }
             }
