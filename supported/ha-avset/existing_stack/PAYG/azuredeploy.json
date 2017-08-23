@@ -977,9 +977,7 @@
                 "f5": "[variables('f5Tag')]", 
                 "f5Template": "[variables('f5TemplateTag')]", 
                 "f5_extSubnetId": "[variables('extSubnetId')]", 
-                "f5_privateIp": [
-                    "[concat(variables('extSubnetPrivateAddressPrefix'), add(variables('extSubnetPrivateAddressSuffixInt'), copyIndex(1)))]"
-                ], 
+                "f5_privateIp": "[concat(variables('extSubnetPrivateAddressPrefix'), add(variables('extSubnetPrivateAddressSuffixInt'), copyIndex(1)))]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 

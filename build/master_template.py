@@ -498,9 +498,9 @@ if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic
     pip_tags = tags.copy()
     if template_name in ('ha-avset'):
         if stack_type == 'new_stack':
-            private_ip_value = "[concat(variables('extSubnetPrivateAddressPrefix'), copyIndex(10))]",
+            private_ip_value = "[concat(variables('extSubnetPrivateAddressPrefix'), copyIndex(10))]"
         elif stack_type == 'existing_stack':
-            private_ip_value = "[concat(variables('extSubnetPrivateAddressPrefix'), add(variables('extSubnetPrivateAddressSuffixInt'), copyIndex(1)))]",
+            private_ip_value = "[concat(variables('extSubnetPrivateAddressPrefix'), add(variables('extSubnetPrivateAddressSuffixInt'), copyIndex(1)))]"
         pip_tags['f5_privateIp'] = private_ip_value
         pip_tags['f5_extSubnetId'] = "[variables('extSubnetId')]"
     resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('extPublicIPAddressNamePrefix'), copyIndex())]", "copy": { "count": "[variables('numberOfExternalIps')]", "name": "extpipcopy"}, "tags": pip_tags, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabel'), copyIndex(0))]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
