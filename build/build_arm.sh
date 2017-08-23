@@ -31,8 +31,12 @@ for tmpl in $template_list; do
 done
 
 ## BIGIP ARM Template - LTM AutoScale
-python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --stack-type new_stack --template-location '../experimental/solutions/autoscale/ltm/new_stack/' --script-location '../experimental/solutions/autoscale/ltm/new_stack/' --solution-location 'experimental'
-python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --stack-type existing_stack --template-location '../experimental/solutions/autoscale/ltm/existing_stack/' --script-location '../experimental/solutions/autoscale/ltm/existing_stack/' --solution-location 'experimental'
+# PAYG
+python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --stack-type new_stack --template-location '../experimental/solutions/autoscale/ltm/new_stack/PAYG/' --script-location '../experimental/solutions/autoscale/ltm/new_stack/' --solution-location 'experimental'
+python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --stack-type existing_stack --template-location '../experimental/solutions/autoscale/ltm/existing_stack/PAYG/' --script-location '../experimental/solutions/autoscale/ltm/existing_stack/' --solution-location 'experimental'
+# Via BIG-IQ
+python -B '.\master_template.py' --template-name ltm_autoscale --license-type BIGIQ --stack-type new_stack --template-location '../experimental/solutions/autoscale/ltm/new_stack/BIGIQ/' --script-location '../experimental/solutions/autoscale/ltm/new_stack/' --solution-location 'experimental'
+python -B '.\master_template.py' --template-name ltm_autoscale --license-type BIGIQ --stack-type existing_stack --template-location '../experimental/solutions/autoscale/ltm/existing_stack/BIGIQ/' --script-location '../experimental/solutions/autoscale/ltm/existing_stack/' --solution-location 'experimental'
 ## BIGIP ARM Template - WAF AutoScale
 python -B '.\master_template.py' --template-name waf_autoscale --license-type PAYG --stack-type new_stack --template-location '../experimental/solutions/autoscale/waf/new_stack/' --script-location '../experimental/solutions/autoscale/waf/new_stack/' --solution-location 'experimental'
 python -B '.\master_template.py' --template-name waf_autoscale --license-type PAYG --stack-type existing_stack --template-location '../experimental/solutions/autoscale/waf/existing_stack/' --script-location '../experimental/solutions/autoscale/waf/existing_stack/' --solution-location 'experimental'

@@ -45,6 +45,8 @@ def md_param_array(data, license_params, lic_type):
                         mandatory = 'BIG-IQ licensing only:'
                     if lic_type == 'PAYG' and key != 'licensedBandwidth':
                         continue
+                    elif all(x in ['PAYG', 'BIG-IQ'] for x in lic_type) and 'licenseKey' in key:
+                        continue                       
                     else:
                         param_array += "| " + key + " | " + mandatory + " | " + license_params[key] + " |\n"
         else:
@@ -81,6 +83,8 @@ def create_deploy_links(version_tag, lic_type, template_location):
     base_url = 'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2F' + version_tag
     if 'All' in lic_type:
         lic_list = ['BYOL', 'PAYG', 'BIG-IQ']
+    elif isinstance(lic_type, list):
+        lic_list = lic_type
     else:
         lic_list = [lic_type]
     for lic in lic_list:
