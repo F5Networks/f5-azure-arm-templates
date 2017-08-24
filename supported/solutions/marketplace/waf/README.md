@@ -47,7 +47,7 @@ The following table lists the information gathered by the solution template.  No
 
 |Section | Field | Description |
 | --- | --- | --- |
-| Basics | Subscription | Ensure the proper subscription is selected. |
+| **Basics** | Subscription | Ensure the proper subscription is selected. |
 | | Resource Group | You can select an existing Azure Resource Group, or have the solution create a new one. If you select a new group, type a name in the field. |
 | | Location | Select the Azure location in which you want to deploy this solution. |
 | Infrastructure Settings | Deployment Name | A unique name for this implementation. |
@@ -66,7 +66,7 @@ The following table lists the information gathered by the solution template.  No
 | | Subnets | Select existing subnets, or the solution can create new subnets for you. |
 | | Restricted source network or address | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources. |
 | | NTP Server | You can use the default NTP server the BIG-IP uses, or replace the default NTP server as applicable. |
-| Application Settings | Application Protocols | Choose the protocol(s) you want to use to connect to your applications (HTTP and HTTPS, HTTP, HTTPS, or SSL Offload). |
+| **Application Settings** | Application Protocols | Choose the protocol(s) you want to use to connect to your applications (HTTP and HTTPS, HTTP, HTTPS, or SSL Offload). |
 | | Application Address | The public IP address or FQDN of the application you are protecting with the WAF. For example, 1.2.3.4 or myapp.example.com. |
 | | Application Port | The port on which your application listens for unencrypted traffic. |
 | | Application Secure Port | The port on which your application listens for encrypted traffic. This field is not required when deploying HTTP only. |
@@ -75,7 +75,7 @@ The following table lists the information gathered by the solution template.  No
 | | SSL Certificate Upload | The SSL certificate .pfx file corresponding to public facing virtual server. This field does not appear when deploying HTTP only.|
 | | Certificate Passphrase | The SSL certificate .pfx password corresponding to the certificate you entered. This field does not appear when deploying HTTP only. |
 | | Application Platform | The platform on which you have deployed your application (IaaS or PaaS). Select IaaS if your application is deployed on an Azure Virtual Machine.  Select PaaS if your application is deployed on an Azure Application Service or Application Service Environment. |
-| Autoscale Settings | VM Scale Set Maximum Count | The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set (2-8). |
+| **Autoscale Settings** | VM Scale Set Maximum Count | The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set (2-8). |
 | | VM Scale Set Scale Out Throughput | The percentage of *Network Out* throughput that triggers a Scale Out event. This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you chose). |
 | | VM Scale Set Scale In Throughput | The percentage of *Network Out* throughput that triggers a Scale In event. This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you chose). |
 | | VM Scale Set Time Window | The time window required to trigger a scale event (in and out). This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). |
