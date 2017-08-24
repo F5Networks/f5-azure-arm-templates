@@ -50,7 +50,7 @@ The following table lists the information gathered by the solution template.  No
 | **Basics** | Subscription | Ensure the proper subscription is selected. |
 | | Resource Group | You can select an existing Azure Resource Group, or have the solution create a new one. If you select a new group, type a name in the field. |
 | | Location | Select the Azure location in which you want to deploy this solution. |
-| Infrastructure Settings | Deployment Name | A unique name for this implementation. |
+| **Infrastructure Settings** | Deployment Name | A unique name for this implementation. |
 | | BIG-IP Version | Choose whether you want to use BIG-IP v13 or v12.1.2 |
 | | BIG-IP Image Name | No | Because this solution uses ASM, Best is the only option. |
 | | Minimum Number of WAFs | The minimum (and default) number of BIG-IP VEs that are deployed into the VM Scale Set. We recommend at least 2. |
