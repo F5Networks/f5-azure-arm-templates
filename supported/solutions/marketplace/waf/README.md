@@ -1,4 +1,4 @@
-# Deploying the BIG-IP VE from the Azure Marketplace - Auto Scale BIG-IP WAF (LTM + ASM) - VM Scale Set
+# Deploying the BIG-IP VE from the Azure Marketplace - Autoscale BIG-IP WAF (LTM + ASM) - VM Scale Set
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
@@ -16,14 +16,12 @@
 
 ## Introduction
 
-This Azure Marketplace solution uses a solution template to launch the deployment of F5 BIG-IP LTM and ASM (Application Security Manager) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto-scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM + ASM, and can be deployed into a new or existing networking stack.
+This Azure Marketplace solution uses a solution template to launch the deployment of F5 BIG-IP LTM (Local Traffic Manager) and ASM (Application Security Manager) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for autoscaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM + ASM, and can be deployed into a new or existing networking stack.
 
 
 ## Prerequisites and configuration notes
   - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See https://support.f5.com/csp/article/K2873 for details.
-  - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
-  - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
-  - This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.
+  - This template supports [Service Discovery](#service-discovery).
   - This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
   - For this solution, only Azure instances that include premium storage are supported.
@@ -101,7 +99,7 @@ The following table lists the information gathered by the solution template.  No
 
 The following is an example configuration diagram for this solution deployment. In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.
 
-![Configuration Example](images/azure-example-diagram.png)
+![Configuration Example](images/azure-example-diagram-waf.png)
 
 ## Post-Deployment Configuration
 If you need to add more applications to this deployment, see https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental/reference/scripts.
