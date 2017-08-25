@@ -4,6 +4,16 @@
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
 [![Issues](https://img.shields.io/github/issues/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/issues)
 
+**Contents**
+ - [Introduction](#introduction)
+ - [Prerequisites](#prerequisites-and-configuration-notes)
+ - [Getting Help](#help)
+ - [Launching the Solution Template](#launching-the-solution-template)
+ - [Configuration Example](#configuration-example)
+ - [Post Deployment Configuration](#post-deployment-configuration)
+   - [Service Discovery](#service-discovery)
+   - [Service Principal Authentication](#service-principal-authentication)
+
 ## Introduction
 
 This Azure Marketplace solution uses a solution template to launch the deployment of F5 BIG-IP LTM and ASM (Application Security Manager) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto-scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM + ASM, and can be deployed into a new or existing networking stack.
@@ -40,19 +50,21 @@ We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.c
 
 
 
+## Launching the Solution Template
+This Readme file describes launching the auto scale BIG-IP WAF solution template from the Azure Marketplace. From the Azure Marketplace, click the Add (+) button and then search for **F5 autoscale**.  From the search results, click **F5 WAF AutoScale Solution** and then click the **Create** button.
 
 
 ### Solution Template Fields
 The following table lists the information gathered by the solution template.  Note that fields in the template with an asterisk are required.  Some fields are validated as you type; if you see a red exclamation point, click it to get information on how to correct your entry.
 
-|Section | Field | Description |
+| Section | Field | Description |
 | --- | --- | --- |
 | **Basics** | Subscription | Ensure the proper subscription is selected. |
 | | Resource Group | You can select an existing Azure Resource Group, or have the solution create a new one. If you select a new group, type a name in the field. |
 | | Location | Select the Azure location in which you want to deploy this solution. |
 | **Infrastructure Settings** | Deployment Name | A unique name for this implementation. |
 | | BIG-IP Version | Choose whether you want to use BIG-IP v13 or v12.1.2 |
-| | BIG-IP Image Name | No | Because this solution uses ASM, Best is the only option. |
+| | BIG-IP Image Name | Because this solution uses ASM, Best is the only option. |
 | | Minimum Number of WAFs | The minimum (and default) number of BIG-IP VEs that are deployed into the VM Scale Set. We recommend at least 2. |
 | | Licensed Bandwidth | The amount of licensed bandwidth (Mbps) you want to allocate for each WAF. |
 | | F5 WAF Username | Administrative username for the Azure virtual machine(s). |
@@ -60,10 +72,10 @@ The following table lists the information gathered by the solution template.  No
 | | Confirm Password | Retype the password. |
 | | Virtual Machine Size | The size of the Azure virtual machine you want to provision for each cluster node. |
 | | Use Managed disks | You can enable managed disks to have Azure automatically manage the availability of disks to provide data redundancy and fault tolerance, without creating and managing storage accounts on your own. |
-| | Public IP Address | The public IP address to communicate with the virtual machine from outside the virtual network. |
-| | Domain Name Label | The label for the domain. |
-| | Virtual Network | Select an existing (new) virtual network, or the solution can create one for you. |
-| | Subnets | Select existing subnets, or the solution can create new subnets for you. |
+| | Public IP Address | The public IP address to communicate with the Azure Virtual Machine Scale Set from outside the virtual network. |
+| | Domain Name Label | The label used to construct the DNS record of the Azure Public IP. This record must be unique within the Azure region. |
+| | Virtual Network | Create a new virtual network, or select an existing network from the same Azure region as the deployment resource group. |
+| | Subnets | If you are creating a new virtual network, configure the name and address space for the new subnet.  If you select an existing virtual network, specify an existing subnet in that network. Only subnets meeting the minimum requirements for this solution are displayed. |
 | | Restricted source network or address | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources. |
 | | NTP Server | You can use the default NTP server the BIG-IP uses, or replace the default NTP server as applicable. |
 | **Application Settings** | Application Protocols | Choose the protocol(s) you want to use to connect to your applications (HTTP and HTTPS, HTTP, HTTPS, or SSL Offload). |
@@ -74,7 +86,7 @@ The following table lists the information gathered by the solution template.  No
 | | Security Blocking Level | This selection determines how aggressive the blocking level of this WAF is initially.  The more aggressive the blocking level, the more potential there is for false-positives that the WAF might detect. Select Custom to specify your own security policy. |
 | | SSL Certificate Upload | The SSL certificate .pfx file corresponding to public facing virtual server. This field does not appear when deploying HTTP only.|
 | | Certificate Passphrase | The SSL certificate .pfx password corresponding to the certificate you entered. This field does not appear when deploying HTTP only. |
-| | Application Platform | The platform on which you have deployed your application (IaaS or PaaS). Select IaaS if your application is deployed on an Azure Virtual Machine.  Select PaaS if your application is deployed on an Azure Application Service or Application Service Environment. |
+| | Application Platform | The platform on which you have deployed your application (IaaS or PaaS). Select IaaS if your application is deployed on an Azure Virtual Machine. Select PaaS if your application is deployed on an Azure Application Service, Application Service Environment, or Service Fabric. |
 | **Autoscale Settings** | VM Scale Set Maximum Count | The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set (2-8). |
 | | VM Scale Set Scale Out Throughput | The percentage of *Network Out* throughput that triggers a Scale Out event. This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you chose). |
 | | VM Scale Set Scale In Throughput | The percentage of *Network Out* throughput that triggers a Scale In event. This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you chose). |
@@ -85,8 +97,6 @@ The following table lists the information gathered by the solution template.  No
 | |  Email for Scale Event Notifications | If you would like email notifications on scale events you can specify an email address. Note: You can specify multiple emails by separating them with a semi-colon such as 'email@domain.com;email2@domain.com'. |
 
 
-
-
 ## Configuration Example 
 
 The following is an example configuration diagram for this solution deployment. In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.
@@ -95,7 +105,6 @@ The following is an example configuration diagram for this solution deployment. 
 
 ## Post-Deployment Configuration
 If you need to add more applications to this deployment, see https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental/reference/scripts.
-
 
 ### Additional Optional Configuration Items
 Here are some post-deployment options that are entirely optional but could be useful based on your needs.
