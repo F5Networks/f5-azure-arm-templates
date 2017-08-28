@@ -42,7 +42,7 @@ else
 fi
 
 # install iApp templates
-template_location="/var/lib/waagent/custom-script/download/0"
+template_location="/config/cloud"
 
 for template in f5.http.v1.2.0rc7.tmpl f5.policy_creator.tmpl
 do
