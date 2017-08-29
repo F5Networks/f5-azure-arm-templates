@@ -467,7 +467,7 @@ if template_name in ('cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autos
         data['variables']['timeWindow'] = "[concat('PT', parameters('scaleTimeWindow'), 'M')]"
         data['variables']['customEmailBaseArray'] = [""]
         data['variables']['customEmail'] = "[skip(union(variables('customEmailBaseArray'), split(replace(parameters('notificationEmail'), 'OPTIONAL', ''), ';')), 1)]"
-    if template_name in ('ltm_autoscale') and 'experimental' in created_file:
+    if template_name in ('ltm_autoscale', 'waf_autoscale') and 'experimental' in created_file:
         if license_type == 'BIGIQ':
             data['variables']['scaleOutCalc'] = "[mul(variables('200m'), parameters('scaleOutThroughput'))]"
             data['variables']['scaleInCalc'] = "[mul(variables('200m'), parameters('scaleInThroughput'))]"
