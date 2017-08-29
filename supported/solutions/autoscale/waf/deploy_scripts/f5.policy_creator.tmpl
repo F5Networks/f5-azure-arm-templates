@@ -9,7 +9,7 @@ sys application template /Common/f5.policy_creator {
             implementation {
 ##################################################################################################################################################################################################
 ## Example call to REST API to instantiate this iApp, there is no presentation so passing in specific									   														##
-## variables which are called at the start of the template																				   														##	
+## variables which are called at the start of the template																				   														##
 ##													  																					   														##
 ##	curl -sku admin:admin-X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/application/service/ -d \																	##
 ## '{"name":"'"$appname"'","partition":"Common","strictUpdates":"disabled","template":"/Common/f5.deploy_helper","trafficGroup":"none","lists":[],\												##
@@ -18,7 +18,7 @@ sys application template /Common/f5.policy_creator {
 ## {"name":"variables__custom_asm_policy","encrypted":"no","value":"'"$custom_asm_policy"'"},{"name":"variables__l7dos_level","encrypted":"no","value":"'"$l7dos_level"'"}]}' | jq .			##
 ##	{"name":"variables__do_asm","encrypted":"no","value":"'"$do_asm"'"},{"name":"variables__do_l7dos","encrypted":"no","value":"'"$do_l7dos"'"},\												##
 ##	{"name":"variables__do_uri_rewrite","encrypted":"no","value":"'"$do_uri_rewrite"'"}																											##
-## 																																		   														##	
+## 																																		   														##
 ##################################################################################################################################################################################################
 
 	package require iapp 1.1.3
@@ -33,7 +33,7 @@ sys application template /Common/f5.policy_creator {
 		if { $custom_asm_policy != "none" && [regexp -- {^(https?://[a-z0-9\-]+\.[a-z0-9\-\.]+(?:/|(?:/[a-zA-Z0-9!#\$%&'\*\+,\-\.:;=\?@\[\]_~]+)*))$} $custom_asm_policy match url] } {
 			puts "Deploying... Custom URL Acceptable: $custom_asm_policy"
                set custom 1
-			set asm_level "$custom_asm_policy" 
+			set asm_level "$custom_asm_policy"
           } else {
                puts "Deploying... Standard ASM policy from ${asm_policy_location}/asm-policy.tar.gz"
                exec /bin/tar xf ${asm_policy_location}/asm-policy.tar.gz -C $asm_policy_location
@@ -46,29 +46,29 @@ sys application template /Common/f5.policy_creator {
 				medium { set blocking_mode "enabled" ; set asm_name $deployment-$type-$unique_level ; set asm_url "${asm_policy_location}/asm-policy-${type}-${unique_level}.xml" }
 				high { set blocking_mode "enabled" ; set asm_name $deployment-$type-$unique_level ; set asm_url "${asm_policy_location}/asm-policy-${type}-${unique_level}.xml" }
                     off { set blocking_mode "disabled" ; set asm_name $deployment-$type-$unique_level ; set asm_url "${asm_policy_location}/asm-policy-${type}-${unique_level}.xml" }
-				default { set blocking_mode "enabled" ; set asm_name "$deployment-custom-asm-policy" ; set asm_url $custom_asm_policy } 
+				default { set blocking_mode "enabled" ; set asm_name "$deployment-custom-asm-policy" ; set asm_url $custom_asm_policy }
 			}
-               
+
 			if { $unique_level == "none" } { continue }
-			
-			#Download ASM asm_policy and load it               
+
+			#Download ASM asm_policy and load it
                puts "Deploying... Downloading ASM Policy: $asm_url"
-               
+
                if { $custom } {
-                    if { [catch { exec /usr/bin/curl -s -k $asm_url --retry 3 -o /tmp/${asm_name}.xml } err] } { 
-                         error "Unable to download ASM policy - URL: $asm_url Error: $err" 
+                    if { [catch { exec /usr/bin/curl -s -k $asm_url --retry 3 -o /tmp/${asm_name}.xml } err] } {
+                         error "Unable to download ASM policy - URL: $asm_url Error: $err"
                     }
-               } else {                   
-                    if { [catch { exec cp $asm_url /tmp/${asm_name}.xml } err] } { 
-                         error "Unable to copy ASM policy - location: $asm_url Error: $err" 
+               } else {
+                    if { [catch { exec cp $asm_url /tmp/${asm_name}.xml } err] } {
+                         error "Unable to copy ASM policy - location: $asm_url Error: $err"
                     }
                }
 
 			puts "Deploying... Creating ASM Policy: /Common/${asm_name}-security_policy Level: $unique_level"
-               
+
 			tmsh_exe "load asm policy /Common/${asm_name}-security_policy overwrite file /tmp/${asm_name}.xml"
 
-			#Set asm asm_policy to active and blocking              
+			#Set asm asm_policy to active and blocking
 			tmsh_exe "modify asm policy /Common/${asm_name}-security_policy active blocking-mode $blocking_mode"
 		}
 	}
@@ -88,38 +88,38 @@ sys application template /Common/f5.policy_creator {
 	set type [expr { [info exists ::variables__type] ? "$::variables__type" : "linux" }]
 	set level [expr { [info exists ::variables__level] ? "$::variables__level" : "high" }]
 	set l7dos_level [expr { [info exists ::variables__l7dos_level] ? "$::variables__l7dos_level" : "$level" }]
-	set asm_policy_location [expr { [info exists ::variables__asm_policy_location] ? "$::variables__asm_policy_location" : "/var/lib/waagent/custom-script/download/0" }]
+	set asm_policy_location [expr { [info exists ::variables__asm_policy_location] ? "$::variables__asm_policy_location" : "/config/cloud" }]
 	set custom_asm_policy [expr { [info exists ::variables__custom_asm_policy] ? "$::variables__custom_asm_policy" : "none" }]
-	
+
 	#Set Explicit Flags for what to deploy, must be true or false is passing, if not passed will default to false
 	set do_asm [expr { [info exists ::variables__do_asm] ? "$::variables__do_asm" : "false" }]
 	set do_l7dos [expr { [info exists ::variables__do_l7dos] ? "$::variables__do_l7dos" : "false" }]
 	set do_uri_rewrite [expr { [info exists ::variables__do_uri_rewrite] ? "$::variables__do_uri_rewrite" : "false" }]
      set server_host [expr { [info exists ::variables__server_host] ? "$::variables__server_host" : "none" }]
      set rewrite_scheme [expr { [info exists ::variables__rewrite_scheme] ? "$::variables__rewrite_scheme" : "none" }]
-	
+
 	#Signal that we are starting...
 	puts "Starting cloud policy helper iApp for $deployment Deploying... ASM: $do_asm L7DOS: $do_l7dos URI Rewrite: $do_uri_rewrite"
 
 	#Run proc to download and deploy ASM
     if {$do_asm} { deploy_asm $deployment $type $level $asm_policy_location $custom_asm_policy }
-	
+
 	#Bot categories for l7 dos, perhaps later we can customize actions based on user input
 	set bot_categories "
-	\"Crawler\" \{ action report $app_service \} 
-	\"DOS Tool\" \{ action block $app_service \} 
-	\"E-Mail Collector\" \{ action block $app_service \} 
-	\"Exploit Tool\" \{ action block $app_service \} 
-	\"HTTP Library\" \{ action report $app_service \} 
+	\"Crawler\" \{ action report $app_service \}
+	\"DOS Tool\" \{ action block $app_service \}
+	\"E-Mail Collector\" \{ action block $app_service \}
+	\"Exploit Tool\" \{ action block $app_service \}
+	\"HTTP Library\" \{ action report $app_service \}
 	\"Network Scanner\" \{ action block $app_service \}
 	\"Search Bot\" \{ action report $app_service \}
-	\"Search Engine\" \{ action report $app_service \} 
-	\"Service Agent\" \{ action report $app_service \} 
-	\"Site Monitor \" \{ action report $app_service \} 
-	\"Social Media Agent\" \{ action report $app_service \} 
-	\"Spam Bot\" \{ action block $app_service \} 
-	\"Vulnerability Scanner\" \{ action block $app_service \} 
-	\"Web Downloader\" \{ action report $app_service \} 
+	\"Search Engine\" \{ action report $app_service \}
+	\"Service Agent\" \{ action report $app_service \}
+	\"Site Monitor \" \{ action report $app_service \}
+	\"Social Media Agent\" \{ action report $app_service \}
+	\"Spam Bot\" \{ action block $app_service \}
+	\"Vulnerability Scanner\" \{ action block $app_service \}
+	\"Web Downloader\" \{ action report $app_service \}
 	\"Web Spider\" \{ action block $app_service \}"
 
    set tps_low "ip-maximum-tps 100 ip-minimum-tps 100 url-maximum-tps 800 url-minimum-tps 800"
@@ -177,17 +177,17 @@ sys application template /Common/f5.policy_creator {
 			 tps-based \{ mode blocking $tps_high geo-rate-limiting enabled site-rate-limiting enabled \} $app_service \} \} \}]}
 		*    {}
    }
-								  
+
 	# Need to append this L7 DOS profile to ltm policy created as a rule, for now will just create
 	if {$do_l7dos} {
 		puts "Deploying... Creating L7 DOS Profile: $l7dos_name Level: $l7dos_level"
 		iapp::substa l7dos_arr($l7dos_level)
 	}
-	
+
 	#Create ltm policy, check if custom policy was requested
 	if {$do_asm} {
 		if {$is_v12_1} { set legacy "legacy" }
-		if {$custom_asm_policy == "none"} { 
+		if {$custom_asm_policy == "none"} {
 			puts "Deploying... Creating LTM Policy: $deployment-ltm_policy"
 			iapp::conf create ltm policy /Common/$deployment-ltm_policy $legacy controls replace-all-with \{ asm \} requires replace-all-with \{ http \} \
 			rules replace-all-with \{ default \{ actions replace-all-with \{ 0 \{ asm enable policy /Common/$deployment-$type-$level-security_policy $app_service \} \} ordinal 1 $app_service \} \} strategy first-match $app_service
@@ -197,8 +197,8 @@ sys application template /Common/f5.policy_creator {
 			rules replace-all-with \{ default \{ actions replace-all-with \{ 0 \{ asm enable policy /Common/$deployment-custom-asm-policy-security_policy $app_service \} \} ordinal 1 $app_service \} \} strategy first-match $app_service
 		}
 	}
-	
-     # create uri-rewrite profile 
+
+     # create uri-rewrite profile
      if {$do_uri_rewrite != "false" && $server_host != "none" && $rewrite_scheme != "none"} {
           if { $rewrite_scheme == "http" || $rewrite_scheme == "https" }  {
                iapp::conf create ltm profile rewrite /Common/$deployment-uri_rewrite \{ $app_service defaults-from rewrite-uri-translation uri-rules replace-all-with \{ $deployment-rule \{ client \{ host $do_uri_rewrite path / scheme $rewrite_scheme \} server \{ host $server_host path / scheme $rewrite_scheme \} \} \} \}
@@ -208,7 +208,7 @@ sys application template /Common/f5.policy_creator {
                iapp::conf create ltm profile rewrite /Common/$deployment-uri_rewrite \{ $app_service defaults-from rewrite-uri-translation uri-rules replace-all-with \{ $deployment-rule-https \{ client \{ host $do_uri_rewrite path / scheme https \} server \{ host $server_host path / scheme https \} \} $deployment-rule-http \{ client \{ host $do_uri_rewrite path / scheme http \} server \{ host $server_host path / scheme http \} \} \} \}
           }
      }
-     
+
 	puts "Deploying... Finished."
 	iapp::template stop
             }
@@ -257,7 +257,7 @@ sys application template /Common/f5.policy_creator {
             }
         }
      }
-     
+
 	text {
 
 		intro "Policy Creator iApp(Cloud)"
