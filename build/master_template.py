@@ -38,7 +38,7 @@ route_add_cmd = ""
 
 ## Static Variable Assignment ##
 content_version = '3.3.1.0'
-f5_networks_tag = 'v3.3.1.0'
+f5_networks_tag = 'ese-1276'
 f5_cloud_libs_tag = 'develop'
 f5_cloud_libs_azure_tag = 'ese-1276'
 f5_cloud_iapps_tag = 'develop'
