@@ -52,6 +52,7 @@ version_port_map = {"latest": {"Port": 8443}, "13.0.021": {"Port": 8443}, "12.1.
 route_cmd_array = {"latest": "route", "13.0.021": "route", "12.1.24": "[concat('route add 168.63.129.16 gw ', variables('mgmtRouteGw'), ' eth0')]"}
 
 install_cloud_libs = """[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit 1\nfi\necho loaded verifyHash\n\nconfig_loc="/config/cloud/"\nhashed_file_list="<HASHED_FILE_LIST>"\nfor file in $hashed_file_list; do\necho "verifying $file"\n/usr/bin/tmsh run cli script verifyHash $file\nif [ $? != 0 ]; then\necho "$file is not valid"\nexit 1\nfi\necho "verified $file"\ndone\necho "expanding $hashed_file_list"\ntar xvfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud/azure/node_modules\n<TAR_LIST>touch /config/cloud/cloudLibsReady', variables('singleQuote'))]"""
+
 # Automate Verify Hash - the verify_hash function will go out and pull in the latest hash file
 verify_hash = '''[concat(variables('singleQuote'), '<CLI_SCRIPT>', variables('singleQuote'))]'''
 verify_hash_url = "https://gitswarm.f5net.com/cloudsolutions/f5-cloud-libs/raw/" + f5_cloud_libs_tag + "/dist/verifyHash"
@@ -65,6 +66,7 @@ if template_name in ('ltm_autoscale', 'ha-avset'):
 elif template_name in 'waf_autoscale':
     hashed_file_list += " ${config_loc}f5-cloud-libs-azure.tar.gz deploy_waf.sh f5.http.v1.2.0rc7.tmpl f5.policy_creator.tmpl asm-policy.tar.gz"
     additional_tar_list = "tar xvfz /config/cloud/f5-cloud-libs-azure.tar.gz -C /config/cloud/azure/node_modules/f5-cloud-libs/node_modules\n"
+
 #### Temp empty hashed file list when testing new cloud libs....
 hashed_file_list = ""
 install_cloud_libs = install_cloud_libs.replace('<HASHED_FILE_LIST>', hashed_file_list)
