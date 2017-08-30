@@ -236,8 +236,9 @@ if template_name in ('ha-avset'):
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
     data['parameters']['vmScaleSetMinCount'] = {"type": "int", "defaultValue": 2, "allowedValues": [1, 2, 3, 4, 5, 6], "metadata": {"description": "The minimum (and default) number of BIG-IP VEs that will be deployed into the VM Scale Set."}}
     data['parameters']['vmScaleSetMaxCount'] = {"type": "int", "defaultValue": 4, "allowedValues": [2, 3, 4, 5, 6, 7, 8], "metadata": {"description": "The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set."}}
-    data['parameters']['scaleOutThroughput'] = {"type": "int", "defaultValue": 90, "allowedValues": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95], "metadata": {"description": "The percentage of 'Network Out' throughput that triggers a Scale Out event.  This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you choose."}}
-    data['parameters']['scaleInThroughput'] = {"type": "int", "defaultValue": 10, "allowedValues": [5, 10, 15, 20, 25, 30, 35, 40, 45], "metadata": {"description": "The percentage of 'Network Out' throughput that triggers a Scale In event.  This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you choose."}}
+    data['parameters']['calculatedBandwidth'] = {"type": "string", "defaultValue": "200m", "allowedValues": ["10m", "25m", "100m", "200m", "1g"], "metadata": {"description": "Specify the amount of bandwidth (in mbps) that should be used to base the throughput percentage calculation on for scale events. (For PAYG it is recommended that this match the parameter licensedBandwidth, or at minimum is a lower value)"}}
+    data['parameters']['scaleOutThroughput'] = {"type": "int", "defaultValue": 90, "allowedValues": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95], "metadata": {"description": "The percentage of 'Network Out' throughput that triggers a Scale Out event.  This is factored as a percentage of the parameter 'calculatedBandwidth'."}}
+    data['parameters']['scaleInThroughput'] = {"type": "int", "defaultValue": 10, "allowedValues": [5, 10, 15, 20, 25, 30, 35, 40, 45], "metadata": {"description": "The percentage of 'Network Out' throughput that triggers a Scale In event.  This is factored as a percentage of the parameter 'calculatedBandwidth'."}}
     data['parameters']['scaleTimeWindow'] = {"type": "int", "defaultValue": 10, "allowedValues": [5, 10, 15, 30], "metadata": {"description": "The time window required to trigger a scale event (in and out). This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping)."}}
     data['parameters']['notificationEmail'] = {"defaultValue": "OPTIONAL", "metadata": {"description": "If you would like email notifications on scale events please specify an email address, otherwise leave the parameter as 'OPTIONAL'. Note: You can specify multiple emails by seperating them with a semi-colon such as 'email@domain.com;email2@domain.com'."}, "type": "string"}
 if template_name in ('waf_autoscale'):
@@ -457,11 +458,13 @@ if template_name in ('cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autos
         data['variables']['vmssName'] = "[concat(parameters('dnsLabel'),'-vmss')]"
         data['variables']['newDataStorageAccountName'] = "[concat(uniqueString(resourceGroup().id, deployment().name), 'data000')]"
         data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
+        data['variables']['10m'] = 10485760
         data['variables']['25m'] = 26214400
+        data['variables']['100m'] = 104857600
         data['variables']['200m'] = 209715200
         data['variables']['1g'] = 1073741824
-        data['variables']['scaleOutCalc'] = "[mul(variables(parameters('licensedBandwidth')), parameters('scaleOutThroughput'))]"
-        data['variables']['scaleInCalc'] = "[mul(variables(parameters('licensedBandwidth')), parameters('scaleInThroughput'))]"
+        data['variables']['scaleOutCalc'] = "[mul(variables(parameters('calculatedBandwidth')), parameters('scaleOutThroughput'))]"
+        data['variables']['scaleInCalc'] = "[mul(variables(parameters('calculatedBandwidth')), parameters('scaleInThroughput'))]"
         data['variables']['scaleOutNetworkBits'] = "[div(variables('scaleOutCalc'), 100)]"
         data['variables']['scaleInNetworkBits'] = "[div(variables('scaleInCalc'), 100)]"
         data['variables']['scaleOutNetworkBytes'] = "[div(variables('scaleOutNetworkBits'), 8)]"
@@ -469,10 +472,6 @@ if template_name in ('cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autos
         data['variables']['timeWindow'] = "[concat('PT', parameters('scaleTimeWindow'), 'M')]"
         data['variables']['customEmailBaseArray'] = [""]
         data['variables']['customEmail'] = "[skip(union(variables('customEmailBaseArray'), split(replace(parameters('notificationEmail'), 'OPTIONAL', ''), ';')), 1)]"
-    if template_name in ('ltm_autoscale', 'waf_autoscale') and 'experimental' in created_file:
-        if license_type == 'BIGIQ':
-            data['variables']['scaleOutCalc'] = "[mul(variables('200m'), parameters('scaleOutThroughput'))]"
-            data['variables']['scaleInCalc'] = "[mul(variables('200m'), parameters('scaleInThroughput'))]"
     if template_name in ('waf_autoscale'):
         data['variables']['f5NetworksSolutionScripts'] = "[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/', variables('f5NetworksTag'), '/" + solution_location + "/solutions/autoscale/waf/deploy_scripts/')]"
         data['variables']['lbTcpProbeNameHttp'] = "tcp_probe_http"

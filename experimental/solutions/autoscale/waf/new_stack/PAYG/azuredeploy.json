@@ -33,6 +33,20 @@
             }, 
             "type": "int"
         }, 
+        "calculatedBandwidth": {
+            "allowedValues": [
+                "10m", 
+                "25m", 
+                "100m", 
+                "200m", 
+                "1g"
+            ], 
+            "defaultValue": "200m", 
+            "metadata": {
+                "description": "Specify the amount of bandwidth (in mbps) that should be used to base the throughput percentage calculation on for scale events. (For PAYG it is recommended that this match the parameter licensedBandwidth, or at minimum is a lower value)"
+            }, 
+            "type": "string"
+        }, 
         "scaleOutThroughput": {
             "allowedValues": [
                 50, 
@@ -48,7 +62,7 @@
             ], 
             "defaultValue": 90, 
             "metadata": {
-                "description": "The percentage of 'Network Out' throughput that triggers a Scale Out event.  This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you choose."
+                "description": "The percentage of 'Network Out' throughput that triggers a Scale Out event.  This is factored as a percentage of the parameter 'calculatedBandwidth'."
             }, 
             "type": "int"
         }, 
@@ -66,7 +80,7 @@
             ], 
             "defaultValue": 10, 
             "metadata": {
-                "description": "The percentage of 'Network Out' throughput that triggers a Scale In event.  This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you choose."
+                "description": "The percentage of 'Network Out' throughput that triggers a Scale In event.  This is factored as a percentage of the parameter 'calculatedBandwidth'."
             }, 
             "type": "int"
         }, 
@@ -432,11 +446,13 @@
         "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]", 
         "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]", 
         "vmssName": "[concat(parameters('dnsLabel'),'-vmss')]", 
+        "10m": 10485760, 
         "25m": 26214400, 
+        "100m": 104857600, 
         "200m": 209715200, 
         "1g": 1073741824, 
-        "scaleOutCalc": "[mul(variables(parameters('licensedBandwidth')), parameters('scaleOutThroughput'))]", 
-        "scaleInCalc": "[mul(variables(parameters('licensedBandwidth')), parameters('scaleInThroughput'))]", 
+        "scaleOutCalc": "[mul(variables(parameters('calculatedBandwidth')), parameters('scaleOutThroughput'))]", 
+        "scaleInCalc": "[mul(variables(parameters('calculatedBandwidth')), parameters('scaleInThroughput'))]", 
         "scaleOutNetworkBits": "[div(variables('scaleOutCalc'), 100)]", 
         "scaleInNetworkBits": "[div(variables('scaleInCalc'), 100)]", 
         "scaleOutNetworkBytes": "[div(variables('scaleOutNetworkBits'), 8)]", 

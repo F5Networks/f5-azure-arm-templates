@@ -8,6 +8,9 @@
         "vmScaleSetMaxCount": {
             "value": 4
         }, 
+        "calculatedBandwidth": {
+            "value": "200m"
+        }, 
         "scaleOutThroughput": {
             "value": 90
         }, 
