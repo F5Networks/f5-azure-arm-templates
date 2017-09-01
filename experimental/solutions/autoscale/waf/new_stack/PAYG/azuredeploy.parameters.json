@@ -8,6 +8,9 @@
         "vmScaleSetMaxCount": {
             "value": 4
         }, 
+        "appInsights": {
+            "value": "CREATE_NEW"
+        }, 
         "calculatedBandwidth": {
             "value": "200m"
         }, 

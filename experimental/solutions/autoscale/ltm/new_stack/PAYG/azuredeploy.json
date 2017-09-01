@@ -33,6 +33,13 @@
             }, 
             "type": "int"
         }, 
+        "appInsights": {
+            "defaultValue": "CREATE_NEW", 
+            "metadata": {
+                "description": "Input the name of your existing Application Insights workspace that you would like to receive custom BIG-IP metrics that can be used for VM Scale set rules and device visbility (If in a different resource group than this deployment specify it as <app insights name>;<app insights resource group>).  If you do not have an Application Insights workspace then leave the default of CREATE_NEW and one will be created for you."
+            }, 
+            "type": "string"
+        }, 
         "calculatedBandwidth": {
             "allowedValues": [
                 "10m", 
@@ -322,7 +329,9 @@
         "networkApiVersion": "2016-06-01", 
         "storageApiVersion": "2015-06-15", 
         "insightsApiVersion": "2015-04-01", 
+        "appInsightsApiVersion": "2015-05-01", 
         "location": "[resourceGroup().location]", 
+        "appInsightsLocation": "eastus", 
         "subscriptionID": "[subscription().subscriptionId]", 
         "resourceGroupName": "[resourceGroup().name]", 
         "singleQuote": "'", 
@@ -357,6 +366,8 @@
         "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]", 
         "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]", 
         "vmssName": "[concat(parameters('dnsLabel'),'-vmss')]", 
+        "appInsightsName": "[replace(parameters('appInsights'), 'CREATE_NEW', concat(deployment().name, '-appinsights'))]", 
+        "appInsightsNameArray": "[split(concat(variables('appInsightsName'), ';', variables('resourceGroupName')) , ';')]", 
         "10m": 10485760, 
         "25m": 26214400, 
         "100m": 104857600, 
@@ -762,7 +773,7 @@
                                 "name": "main", 
                                 "properties": {
                                     "protectedSettings": {
-                                        "commandToExecute": "[concat('mkdir -p /config/cloud/azure/node_modules; AZURE_CREDENTIALS_FILE=/config/cloud/azCredentials; BIG_IP_CREDENTIALS_FILE=/config/cloud/passwd; /usr/bin/install -m 400 /dev/null $AZURE_CREDENTIALS_FILE; /usr/bin/install -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' > $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).key1, '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"loadBalancerName\": \"', variables('loadBalancerName'), '\"}', variables('singleQuote'), ' > $AZURE_CREDENTIALS_FILE; cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; bash /config/installCloudLibs.sh; bash /config/cloud/azure/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/autoscale.sh --resourceGroup ', resourceGroup().name, ' --vmssName ', variables('vmssName'), ' --userName ', parameters('adminUsername'), ' --password $BIG_IP_CREDENTIALS_FILE --azureSecretFile $AZURE_CREDENTIALS_FILE --managementPort ', variables('bigIpMgmtPort'), ' --ntpServer ', parameters('ntpServer'), ' --timeZone ', parameters('timeZone'), '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; bash /config/customConfig.sh; else exit 1; fi')]"
+                                        "commandToExecute": "[concat('mkdir -p /config/cloud/azure/node_modules; AZURE_CREDENTIALS_FILE=/config/cloud/azCredentials; BIG_IP_CREDENTIALS_FILE=/config/cloud/passwd; /usr/bin/install -m 400 /dev/null $AZURE_CREDENTIALS_FILE; /usr/bin/install -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' > $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).key1, '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"loadBalancerName\": \"', variables('loadBalancerName'), '\"}', variables('singleQuote'), ' > $AZURE_CREDENTIALS_FILE; cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; bash /config/installCloudLibs.sh; bash /config/cloud/azure/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/autoscale.sh --resourceGroup ', resourceGroup().name, ' --vmssName ', variables('vmssName'), ' --userName ', parameters('adminUsername'), ' --password $BIG_IP_CREDENTIALS_FILE --azureSecretFile $AZURE_CREDENTIALS_FILE --managementPort ', variables('bigIpMgmtPort'), ' --ntpServer ', parameters('ntpServer'), ' --timeZone ', parameters('timeZone'), ' --appInsightsKey ', variables('singleQuote'), reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsApiVersion')).InstrumentationKey, variables('singleQuote'), '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; bash /config/customConfig.sh; else exit 1; fi')]"
                                     }, 
                                     "publisher": "Microsoft.Azure.Extensions", 
                                     "settings": {
@@ -927,6 +938,28 @@
                 "targetResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]"
             }, 
             "type": "Microsoft.Insights/autoscaleSettings"
+        }, 
+        {
+            "apiVersion": "[variables('appInsightsApiVersion')]", 
+            "condition": "[equals(parameters('appInsights'), 'CREATE_NEW')]", 
+            "dependsOn": [], 
+            "kind": "other", 
+            "location": "[variables('appInsightsLocation')]", 
+            "name": "[variables('appInsightsName')]", 
+            "properties": {
+                "ApplicationId": "[variables('appInsightsName')]", 
+                "Application_Type": "other"
+            }, 
+            "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
+                "environment": "[parameters('tagValues').environment]", 
+                "f5": "[variables('f5Tag')]", 
+                "f5Template": "[variables('f5TemplateTag')]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
+            }, 
+            "type": "microsoft.insights/components"
         }
     ], 
     "outputs": {
