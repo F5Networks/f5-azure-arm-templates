@@ -47,7 +47,7 @@
             }, 
             "type": "string"
         }, 
-        "scaleOutThroughput": {
+        "scaleOutThreshold": {
             "allowedValues": [
                 50, 
                 55, 
@@ -62,11 +62,11 @@
             ], 
             "defaultValue": 90, 
             "metadata": {
-                "description": "The percentage of 'Network Out' throughput that triggers a Scale Out event.  This is factored as a percentage of the parameter 'calculatedBandwidth'."
+                "description": "The percentage the metric should be above to trigger a Scale Out event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'."
             }, 
             "type": "int"
         }, 
-        "scaleInThroughput": {
+        "scaleInThreshold": {
             "allowedValues": [
                 5, 
                 10, 
@@ -80,7 +80,7 @@
             ], 
             "defaultValue": 10, 
             "metadata": {
-                "description": "The percentage of 'Network Out' throughput that triggers a Scale In event.  This is factored as a percentage of the parameter 'calculatedBandwidth'."
+                "description": "The percentage the metric should be below to trigger a Scale In event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'."
             }, 
             "type": "int"
         }, 
@@ -371,13 +371,22 @@
         "100m": 104857600, 
         "200m": 209715200, 
         "1g": 1073741824, 
-        "scaleOutCalc": "[mul(variables(parameters('calculatedBandwidth')), parameters('scaleOutThroughput'))]", 
-        "scaleInCalc": "[mul(variables(parameters('calculatedBandwidth')), parameters('scaleInThroughput'))]", 
+        "scaleOutCalc": "[mul(variables(parameters('calculatedBandwidth')), parameters('scaleOutThreshold'))]", 
+        "scaleInCalc": "[mul(variables(parameters('calculatedBandwidth')), parameters('scaleInThreshold'))]", 
         "scaleOutNetworkBits": "[div(variables('scaleOutCalc'), 100)]", 
         "scaleInNetworkBits": "[div(variables('scaleInCalc'), 100)]", 
         "scaleOutNetworkBytes": "[div(variables('scaleOutNetworkBits'), 8)]", 
         "scaleInNetworkBytes": "[div(variables('scaleInNetworkBits'), 8)]", 
         "timeWindow": "[concat('PT', parameters('scaleTimeWindow'), 'M')]", 
+        "autoScaleMetric": "Host_Throughput", 
+        "scaleMetricMap": {
+            "Host_Throughput": {
+                "metricName": "Network Out", 
+                "metricResourceUri": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', variables('vmssName'))]", 
+                "thresholdIn": "[variables('scaleInNetworkBytes')]", 
+                "thresholdOut": "[variables('scaleOutNetworkBytes')]"
+            }
+        }, 
         "customEmailBaseArray": [
             ""
         ], 
@@ -860,12 +869,12 @@
                         "rules": [
                             {
                                 "metricTrigger": {
-                                    "metricName": "Network Out", 
+                                    "metricName": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricName]", 
                                     "metricNamespace": "", 
-                                    "metricResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", 
+                                    "metricResourceUri": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricResourceUri]", 
                                     "operator": "GreaterThan", 
                                     "statistic": "Average", 
-                                    "threshold": "[variables('scaleOutNetworkBytes')]", 
+                                    "threshold": "[variables('scaleMetricMap')[variables('autoScaleMetric')].thresholdOut]", 
                                     "timeAggregation": "Average", 
                                     "timeGrain": "PT1M", 
                                     "timeWindow": "[variables('timeWindow')]"
@@ -879,12 +888,12 @@
                             }, 
                             {
                                 "metricTrigger": {
-                                    "metricName": "Network Out", 
+                                    "metricName": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricName]", 
                                     "metricNamespace": "", 
-                                    "metricResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]", 
+                                    "metricResourceUri": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricResourceUri]", 
                                     "operator": "LessThan", 
                                     "statistic": "Average", 
-                                    "threshold": "[variables('scaleInNetworkBytes')]", 
+                                    "threshold": "[variables('scaleMetricMap')[variables('autoScaleMetric')].thresholdIn]", 
                                     "timeAggregation": "Average", 
                                     "timeGrain": "PT1M", 
                                     "timeWindow": "[variables('timeWindow')]"

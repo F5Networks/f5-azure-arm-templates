@@ -8,16 +8,19 @@
         "vmScaleSetMaxCount": {
             "value": 4
         }, 
+        "autoScaleMetric": {
+            "value": "Host_Throughput"
+        }, 
         "appInsights": {
             "value": "CREATE_NEW"
         }, 
         "calculatedBandwidth": {
             "value": "200m"
         }, 
-        "scaleOutThroughput": {
+        "scaleOutThreshold": {
             "value": 90
         }, 
-        "scaleInThroughput": {
+        "scaleInThreshold": {
             "value": 10
         }, 
         "scaleTimeWindow": {
