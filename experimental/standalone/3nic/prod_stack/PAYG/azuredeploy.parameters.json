@@ -1,0 +1,78 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
+    "contentVersion": "3.3.1.0", 
+    "parameters": {
+        "adminUsername": {
+            "value": "azureuser"
+        }, 
+        "adminPassword": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "dnsLabel": {
+            "value": "REQUIRED"
+        }, 
+        "instanceName": {
+            "value": "f5vm01"
+        }, 
+        "instanceType": {
+            "value": "Standard_DS3_v2"
+        }, 
+        "imageName": {
+            "value": "Good"
+        }, 
+        "bigIpVersion": {
+            "value": "13.0.021"
+        }, 
+        "licensedBandwidth": {
+            "value": "200m"
+        }, 
+        "numberOfExternalIps": {
+            "value": 1
+        }, 
+        "vnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "vnetResourceGroupName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "mgmtSubnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "mgmtIpAddress": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "externalSubnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "externalIpAddressRangeStart": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "internalSubnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "internalIpAddress": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "avSetChoice": {
+            "value": "CREATE_NEW"
+        }, 
+        "ntpServer": {
+            "value": "0.pool.ntp.org"
+        }, 
+        "timeZone": {
+            "value": "UTC"
+        }, 
+        "restrictedSrcAddress": {
+            "value": "*"
+        }, 
+        "tagValues": {
+            "value": {
+                "application": "APP", 
+                "cost": "COST", 
+                "environment": "ENV", 
+                "group": "GROUP", 
+                "owner": "OWNER"
+            }
+        }
+    }
+}

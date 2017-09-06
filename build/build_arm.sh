@@ -15,6 +15,21 @@ for tmpl in $template_list; do
         python -B '.\master_template.py' --template-name $tmpl --license-type BIGIQ --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/BIGIQ/" --script-location "../experimental/$loc/$stack_type/"
     done
 done
+
+## BIGIP ARM Templates - prod_stack templates (experimental)
+template_list="standalone/1nic standalone/2nic standalone/3nic standalone/multi_nic"
+stack_list="prod_stack"
+for tmpl in $template_list; do
+    loc=$tmpl
+    if [[ $loc == *"standalone"* ]]; then
+        tmpl="standalone_"`basename $loc`
+    fi
+    for stack_type in $stack_list; do
+        python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/PAYG/" --script-location "../experimental/$loc/$stack_type/"
+        python -B '.\master_template.py' --template-name $tmpl --license-type BYOL --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/BYOL/" --script-location "../experimental/$loc/$stack_type/"
+    done
+done
+
 ## BIGIP ARM Templates - Cluster (1nic, 3nic)
 template_list="cluster/1nic cluster/3nic"
 stack_list="new_stack existing_stack"

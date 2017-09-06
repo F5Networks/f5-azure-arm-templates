@@ -12,7 +12,7 @@ import readme_generator
 parser = OptionParser()
 parser.add_option("-n", "--template-name", action="store", type="string", dest="template_name", help="Template Name: standalone_1nic, standalone_2nic, cluster_1nic, etc.")
 parser.add_option("-l", "--license-type", action="store", type="string", dest="license_type", help="License Type: BYOL or PAYG")
-parser.add_option("-m", "--stack-type", action="store", type="string", dest="stack_type", default="new_stack", help="Networking Stack Type: new_stack or existing_stack")
+parser.add_option("-m", "--stack-type", action="store", type="string", dest="stack_type", default="new_stack", help="Networking Stack Type: new_stack, existing_stack or prod_stack.")
 parser.add_option("-t", "--template-location", action="store", type="string", dest="template_location", help="Template Location: such as ../experimental/standalone/1nic/PAYG/")
 parser.add_option("-s", "--script-location", action="store", type="string", dest="script_location", help="Script Location: such as ../experimental/standalone/1nic/")
 parser.add_option("-v", "--solution-location", action="store", type="string", dest="solution_location", default="experimental", help="Solution location: experimental or supported")
@@ -103,7 +103,7 @@ for instance in disallowed_instance_list:
 ## Set stack mask commands ##
 ext_mask_cmd = ''
 int_mask_cmd = ''
-if stack_type == 'existing_stack':
+if stack_type in ('existing_stack', 'prod_stack'):
     if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'ha-avset', 'cluster_3nic'):
         ext_mask_cmd = "skip(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, indexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '/')),"
     if template_name in ('standalone_3nic', 'standalone_multi_nic', 'ha-avset', 'cluster_3nic'):
@@ -189,7 +189,7 @@ data['parameters']['timeZone'] = {"type": "string", "defaultValue": "UTC", "meta
 data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": "*", "metadata": {"description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources"}}
 data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values, "metadata": {"description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."}}
 
-# Set new_stack/existing_stack parameters for templates that support that
+# Set new_stack/existing_stack/prod_stack parameters for templates
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset', 'cluster_1nic', 'ltm_autoscale', 'waf_autoscale'):
     if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
         data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": {"description": "Name of the Virtual Machine."}}
@@ -197,7 +197,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
         data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "metadata": {"description": "The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers."}}
     if stack_type == 'new_stack':
         data['parameters']['vnetAddressPrefix'] = {"type": "string", "defaultValue": "10.0", "metadata": {"description": "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'."}}
-    elif stack_type == 'existing_stack':
+    elif stack_type in ('existing_stack', 'prod_stack'):
         data['parameters']['vnetName'] = {"type": "string", "metadata": {"description": "The name of the existing virtual network to which you want to connect the BIG-IP VEs."}}
         data['parameters']['vnetResourceGroupName'] = {"type": "string", "metadata": {"description": "The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed."}}
         data['parameters']['mgmtSubnetName'] = {"type": "string", "metadata": {"description": "Name of the existing MGMT subnet - with external access to the Internet."}}
@@ -342,7 +342,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
             if template_name in ('standalone_multi_nic'):
                 data['variables']['subnetArray'] = [{ "name": "[variables('mgmtSubnetName')]", "properties": { "addressPrefix": "[variables('mgmtSubnetPrefix')]" } }, { "name": "[variables('extSubnetName')]", "properties": { "addressPrefix": "[variables('extSubnetPrefix')]" } }, { "name": "[variables('intSubnetName')]", "properties": { "addressPrefix": "[variables('intSubnetPrefix')]" } }]
                 data['variables']['addtlSubnetArray'] = [{ "name": "[variables('addtlNicRefSplit')[0]]", "properties": { "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.4.0/24')]" } }, { "name": "[variables('addtlNicRefSplit')[1]]", "properties": { "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.5.0/24')]" } }, { "name": "[variables('addtlNicRefSplit')[2]]", "properties": { "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.6.0/24')]" } }, { "name": "[variables('addtlNicRefSplit')[3]]", "properties": { "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.7.0/24')]" } }, { "name": "[variables('addtlNicRefSplit')[4]]", "properties": { "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.8.0/24')]" } }]
-    if stack_type == 'existing_stack':
+    if stack_type in ('existing_stack', 'prod_stack'):
         data['variables']['virtualNetworkName'] = "[parameters('vnetName')]"
         data['variables']['vnetId'] = "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]"
         data['variables']['mgmtSubnetName'] = "[parameters('mgmtSubnetName')]"
@@ -520,7 +520,7 @@ if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic
     if template_name in ('ha-avset'):
         if stack_type == 'new_stack':
             private_ip_value = "[concat(variables('extSubnetPrivateAddressPrefix'), copyIndex(10))]"
-        elif stack_type == 'existing_stack':
+        elif stack_type in ('existing_stack', 'prod_stack'):
             private_ip_value = "[concat(variables('extSubnetPrivateAddressPrefix'), add(variables('extSubnetPrivateAddressSuffixInt'), copyIndex(1)))]"
         pip_tags['f5_privateIp'] = private_ip_value
         pip_tags['f5_extSubnetId'] = "[variables('extSubnetId')]"
@@ -552,7 +552,7 @@ if stack_type == 'new_stack':
     depends_on_ext = ["[variables('vnetId')]", "[variables('extNsgID')]", "extpipcopy"]
     if template_name in ('ha-avset', 'cluster_3nic'):
         depends_on = ["[variables('vnetId')]", "[variables('mgmtNsgID')]"]
-elif stack_type == 'existing_stack':
+elif stack_type in ('existing_stack', 'prod_stack'):
     depends_on = ["[variables('mgmtPublicIPAddressId')]", "[variables('mgmtNsgID')]"]
     depends_on_ext = ["[variables('extNsgID')]", "extpipcopy"]
     if template_name in ('ha-avset', 'cluster_3nic'):
@@ -612,8 +612,9 @@ if template_name == 'cluster_1nic':
 ######## Availability Set Resource(s) ######
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'ha-avset', 'cluster_1nic', 'cluster_3nic'):
     avset = { "apiVersion": api_version, "location": location, "name": "[variables('availabilitySetName')]", "tags": tags, "type": "Microsoft.Compute/availabilitySets" }
-    if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic') and stack_type == 'existing_stack':
-        avset['condition'] = "[equals(toUpper(parameters('avSetChoice')), 'CREATE_NEW')]"
+    if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic'):
+        if stack_type in ('existing_stack', 'prod_stack'):
+            avset['condition'] = "[equals(toUpper(parameters('avSetChoice')), 'CREATE_NEW')]"
     resources_list += [avset]
 
 ###### Storage Account Resource(s) ######
@@ -678,7 +679,7 @@ if template_name in 'ha-avset':
 if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
     route_add_cmd = " ', variables('routeCmdArray')[parameters('bigIpVersion')], ';"
 # Default GW command is different for existing_stack
-if stack_type == 'existing_stack':
+if stack_type in ('existing_stack', 'prod_stack'):
     default_gw_cmd = "concat(take(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, add(lastIndexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.'), 1)), add(int(take(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], indexOf(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], '/'))), 1))"
 
 ## Map in some commandToExecute Elements
@@ -758,10 +759,20 @@ if template_name in ('ltm_autoscale', 'waf_autoscale'):
 resources_sorted = json.dumps(resources_list, sort_keys=True, indent=4, ensure_ascii=False)
 data['resources'] = json.loads(resources_sorted, object_pairs_hook=OrderedDict)
 
+# Prod Stack Strip Public IP Address Function
+if stack_type == 'prod_stack':
+    master_helper.pub_ip_strip(data['variables'], 'PublicIpAddress', 'variables')
+    master_helper.pub_ip_strip(data['resources'], 'PublicIpAddress', 'resources')
+
 ######################################## ARM Outputs ########################################
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic'):
-    data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://', reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]" }
-    data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' ',22)]" }
+    # Change outputs if prod_stack as public IP's are not attached to the BIG-IP's
+    if stack_type == 'prod_stack':
+        data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://', reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress, ':', variables('bigIpMgmtPort'))]" }
+        data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress, ' ',22)]" }
+    else:
+        data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://', reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]" }
+        data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' ',22)]" }              
 if template_name == 'cluster_1nic':
     data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':8443')]" }
     data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',8022)]" }

@@ -57,6 +57,8 @@ def stack_type_check(template_location):
     """ Determine what stack type the template is, return appropriate readme text """
     if 'existing_stack' in template_location:
         stack_type_text = get_custom_text('stack_type_text', 'existing_stack')
+    elif 'prod_stack' in template_location:
+        stack_type_text = get_custom_text('stack_type_text', 'prod_stack')
     else:
         stack_type_text = get_custom_text('stack_type_text', 'new_stack')
     return stack_type_text

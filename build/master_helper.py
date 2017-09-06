@@ -112,6 +112,7 @@ def variable_initialize(data):
     data['variables']['mgmtPublicIPAddressId'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('mgmtPublicIPAddressName'))]"
     data['variables']['mgmtNsgID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-mgmt-nsg'))]"
     data['variables']['mgmtNicName'] = "[concat(variables('dnsLabel'), '-mgmt')]"
+    data['variables']['mgmtNicID'] = "[resourceId('Microsoft.Network/NetworkInterfaces', variables('mgmtNicName'))]"
     data['variables']['mgmtSubnetName'] = "mgmt"
     data['variables']['mgmtSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]"
     data['variables']['mgmtSubnetPrefix'] = "OPTIONAL"
@@ -240,7 +241,32 @@ def template_check(data, resource):
             data[resource].pop(var)
         elif data[resource][var] == "MANDATORY":
             raise Exception('Mandatory parameter was not filled in, exiting...')
-            sys.exit(1)
+    return data
+
+def pub_ip_strip(data, resource, tmpl_type):
+    """ Set Public IP address value to null within the IP Configuration Objects if exists - For use by prod_stack """
+    if resource == 'PublicIpAddress':
+        for item in data:
+            if tmpl_type == 'resources':
+                try:
+                    if isinstance(item['properties']['ipConfigurations'], list):
+                        for ipconfig in range(0, len(item['properties']['ipConfigurations'])):
+                            if resource in item['properties']['ipConfigurations'][ipconfig]['properties']:
+                                item['properties']['ipConfigurations'][ipconfig]['properties'][resource] = None
+                except:
+                    continue
+            elif tmpl_type == 'variables':
+                try:
+                    if isinstance(data[item], list):
+                        for ipconfig in range(0, len(data[item])):
+                            if resource in data[item][ipconfig]['properties']:
+                                data[item][ipconfig]['properties'][resource] = None
+                except:
+                    continue
+            else:
+                raise Exception('Unknown template type specified in the function.')
+    else:
+        raise Exception('Unknown resource type specified in function.')
     return data
 
 def verify_hash(url):
