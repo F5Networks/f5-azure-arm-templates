@@ -268,7 +268,7 @@ Note: If you deployed the WAF from the Azure Marketplace, violations and status 
 ## Configuration example
 The following is a simple configuration diagram for this deployment. In this diagram, the IP addresses are provided as examples. 
 
-![Configuration example](/images/azure-autoscale-waf-semi-auto.png)
+![Configuration example](images/azure-autoscale-waf-semi-auto.png)
 
 As traffic passes through the WAF, alerts are sent to Azure about possible violations. The amount of traffic that is flagged depends on the security blocking level you choose when you create the WAF.
 
