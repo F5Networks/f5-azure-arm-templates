@@ -265,6 +265,9 @@ Note: If you deployed the WAF from the Azure Marketplace, violations and status 
 
 9. To stop blocking the traffic that's displayed, in the Accept Status area, click the Accept this Request button.
 
+## Deploying Additional Applications to the WAF
+If you want to deploy additional applications to the F5 WAF after launching this solutions, see https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental/reference/scripts.
+
 ## Configuration example
 The following is a simple configuration diagram for this deployment. In this diagram, the IP addresses are provided as examples. 
 
