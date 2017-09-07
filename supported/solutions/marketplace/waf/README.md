@@ -1,4 +1,4 @@
-# Deploying the BIG-IP VE from the Azure Marketplace - Autoscale BIG-IP WAF (LTM + ASM) - VM Scale Set
+# Deploying Web application firewalls (WAFs) in Azure
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
@@ -8,38 +8,45 @@
  - [Introduction](#introduction)
  - [Prerequisites](#prerequisites-and-configuration-notes)
  - [Getting Help](#help)
- - [Launching the Solution Template](#launching-the-solution-template)
- - [Configuration Example](#configuration-example)
- - [Post Deployment Configuration](#post-deployment-configuration)
-   - [Service Discovery](#service-discovery)
-   - [Service Principal Authentication](#service-principal-authentication)
+ - [Launching the Solution Template](#launching-the-waf-solution)
+ - [Finalize the WAF ](#finalize-the-waf)
+ - [Automatically update signatures](#automatically-update-signatures)
+ - [Troubleshooting the F5 WAF](#troubleshooting-the-f5-waf)
+   
+
 
 ## Introduction
+You can secure your web applications by creating a web application firewall (WAF) that uses the Local Traffic Manager (LTM) and Application Security Manager (ASM) modules. In Azure, the BIG-IP VE instances are configured as a WAF for you, complete with traffic monitoring in Azure. The F5 WAF solution has more than 2600 signatures at its disposal to identify and block unwanted traffic.
 
-This Azure Marketplace solution uses a solution template to launch the deployment of F5 BIG-IP LTM (Local Traffic Manager) and ASM (Application Security Manager) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for autoscaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM + ASM, and can be deployed into a new or existing networking stack.
+When you secure your applications by using an F5 WAF, the BIG-IP VE instances are all in Active status (not Active-Standby), and are used as a single WAF, for redundancy and scalability, rather than failover. If one WAF goes down, Azure will keep load balancing to the other.
 
+This WAF deployment is *semi-automatic*. In an *automatic* deployment, the solution template discovers your application and configures ports, IP addresses, and protocols automatically. A *semi-automatic* deployment is more flexible: you can configure the networking for your application, and because of this, Platform as a Service (PaaS) is supported.
+
+When you secure your applications by using an F5 WAF, the BIG-IP VE instances are all in Active status (not Active-Standby), and are used as a single WAF, for redundancy and scalability, rather than failover. If one WAF goes down, Azure will keep load balancing to the other.
+
+See the [configuration example](#configuration-example) for a visual representation of this solution.
 
 ## Prerequisites and configuration notes
   - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See https://support.f5.com/csp/article/K2873 for details.
-  - This template supports [Service Discovery](#service-discovery).
-  - This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.
-  - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
-  - For this solution, only Azure instances that include premium storage are supported.
+  - For this solution, if you choose to use Managed Disks, only Azure instances that include premium storage are available.
+  - See [Security Blocking Levels](#security-blocking-levels) for a description of your options when configuring the WAF. 
 
 
-## Supported BIG-IP versions
-The following is a map that shows the available options for the template parameter **bigIpVersion** as it corresponds to the BIG-IP version itself. Only the latest version of BIG-IP VE is posted in the Azure Marketplace. For older versions, see downloads.f5.com.
+### F5 WAF instance types and pricing tiers
 
-| Azure BIG-IP Image Version | BIG-IP Version |
-| --- | --- |
-| 13.0.021 | 13.0.0 HF2 Build 2.10.1671 |
-| 12.1.24 | 12.1.2 HF1 Build 1.34.271 |
+When you secure web applications with an F5 WAF, you must choose an Azure instance type.
+
+The following instances are recommended minimums; you can choose bigger instances if you want.
 
 
-## Supported instance types and hypervisors
-  - This solution supports the following Azure instance types: Standard_DS2, Standard_DS3, Standard_DS4, Standard_DS11, Standard_DS12, Standard_DS13, Standard_DS14, Standard_DS2_v2, Standard_DS3_v2, Standard_DS4_v2, Standard_DS5_v2, Standard_DS11_v2, Standard_DS12_v2, Standard_DS13_v2, Standard_DS14_v2, Standard_DS15_v2, Standard_F2S, Standard_F4S, Standard_F8S.
+| Cores | BIG-IP VE Throughput (hourly only) |  Minimum Azure instance |
+| ---  | --- | --- |
+| 2 |  25 Mbps |  Standard_A5, Standard_D11 |
+| 4 |  200 Mbps | Standard_D3, Standard_DS3_v2 |
+| 8 |  1 Gbps  |  Standard_DS4, Standard_DS4_v2 |
 
-  - For a list versions of the BIG-IP Virtual Edition (VE) and F5 licenses that are supported on specific hypervisors and Microsoft Azure, see https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/ve-supported-hypervisor-matrix.html.
+
+For all the available Azure instance types allowed by the solution template, see the [complete list of azure instance sizes](#complete-list-of-azure-instance-sizes).
 
 ### Help
 Because this solution has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K40701984).
@@ -47,142 +54,305 @@ Because this solution has been created and fully tested by F5 Networks, it is fu
 We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates.  This channel is typically monitored Monday-Friday 9-5 PST by F5 employees who will offer best-effort support.
 
 
+## Launching the F5 WAF solution
+You have two options for deploying the F5 WAF solution template: from the [Azure Security Center](#launching-the-waf-from-the-azure-security-center) or the [Azure Marketplace](#launching-the-waf-from-the-azure-marketplace).  In either scenario, Web applications can be hosted on Azure virtual machines (IaaS) or the Azure App Service (PaaS).
+Refer to the following table for guidance. 
 
-## Launching the Solution Template
-This Readme file describes launching the auto scale BIG-IP WAF solution template from the Azure Marketplace. From the Azure Marketplace, click the Add (+) button and then search for **F5 autoscale**.  From the search results, click **F5 WAF AutoScale Solution** and then click the **Create** button.
-
-
-### Solution Template Fields
-The following table lists the information gathered by the solution template.  Note that fields in the template with an asterisk are required.  Some fields are validated as you type; if you see a red exclamation point, click it to get information on how to correct your entry.
-
-| Section | Field | Description |
-| --- | --- | --- |
-| **Basics** | Subscription | Ensure the proper subscription is selected. |
-| | Resource Group | You can select an existing Azure Resource Group, or have the solution create a new one. If you select a new group, type a name in the field. |
-| | Location | Select the Azure location in which you want to deploy this solution. |
-| **Infrastructure Settings** | Deployment Name | A unique name for this implementation. |
-| | BIG-IP Version | Choose whether you want to use BIG-IP v13 or v12.1.2 |
-| | BIG-IP Image Name | Because this solution uses ASM, Best is the only option. |
-| | Minimum Number of WAFs | The minimum (and default) number of BIG-IP VEs that are deployed into the VM Scale Set. We recommend at least 2. |
-| | Licensed Bandwidth | The amount of licensed bandwidth (Mbps) you want to allocate for each WAF. |
-| | F5 WAF Username | Administrative username for the Azure virtual machine(s). |
-| | F5 WAF Password | Administrative password for the Azure virtual machine(s). |
-| | Confirm Password | Retype the password. |
-| | Virtual Machine Size | The size of the Azure virtual machine you want to provision for each cluster node. |
-| | Use Managed disks | You can enable managed disks to have Azure automatically manage the availability of disks to provide data redundancy and fault tolerance, without creating and managing storage accounts on your own. |
-| | Public IP Address | The public IP address to communicate with the Azure Virtual Machine Scale Set from outside the virtual network. |
-| | Domain Name Label | The label used to construct the DNS record of the Azure Public IP. This record must be unique within the Azure region. |
-| | Virtual Network | Create a new virtual network, or select an existing network from the same Azure region as the deployment resource group. |
-| | Subnets | If you are creating a new virtual network, configure the name and address space for the new subnet.  If you select an existing virtual network, specify an existing subnet in that network. Only subnets meeting the minimum requirements for this solution are displayed. |
-| | Restricted source network or address | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources. |
-| | NTP Server | You can use the default NTP server the BIG-IP uses, or replace the default NTP server as applicable. |
-| **Application Settings** | Application Protocols | Choose the protocol(s) you want to use to connect to your applications (HTTP and HTTPS, HTTP, HTTPS, or SSL Offload). |
-| | Application Address | The public IP address or FQDN of the application you are protecting with the WAF. For example, 1.2.3.4 or myapp.example.com. |
-| | Application Port | The port on which your application listens for unencrypted traffic. |
-| | Application Secure Port | The port on which your application listens for encrypted traffic. This field is not required when deploying HTTP only. |
-| | Application Type | The application type that most closely matches your application (such as IIS or Apache). The template uses this selection to establish a base security policy for the initial deployment.  An exact match is not required. | 
-| | Security Blocking Level | This selection determines how aggressive the blocking level of this WAF is initially.  The more aggressive the blocking level, the more potential there is for false-positives that the WAF might detect. Select Custom to specify your own security policy. |
-| | SSL Certificate Upload | The SSL certificate .pfx file corresponding to public facing virtual server. This field does not appear when deploying HTTP only.|
-| | Certificate Passphrase | The SSL certificate .pfx password corresponding to the certificate you entered. This field does not appear when deploying HTTP only. |
-| | Application Platform | The platform on which you have deployed your application (IaaS or PaaS). Select IaaS if your application is deployed on an Azure Virtual Machine. Select PaaS if your application is deployed on an Azure Application Service, Application Service Environment, or Service Fabric. |
-| **Autoscale Settings** | VM Scale Set Maximum Count | The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set (2-8). |
-| | VM Scale Set Scale Out Throughput | The percentage of *Network Out* throughput that triggers a Scale Out event. This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you chose). |
-| | VM Scale Set Scale In Throughput | The percentage of *Network Out* throughput that triggers a Scale In event. This is factored as a percentage of the F5 PAYG image bandwidth (Mbps) size you chose). |
-| | VM Scale Set Time Window | The time window required to trigger a scale event (in and out). This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). |
-| | Tenant ID | Your Azure service principal application tenant ID. |
-| | Client ID | Your Azure service principal application client ID. |
-| | Secret | Your Azure service principal application secret. |
-| |  Email for Scale Event Notifications | If you would like email notifications on scale events you can specify an email address. Note: You can specify multiple emails by separating them with a semi-colon such as 'email@domain.com;email2@domain.com'. |
+| Azure Environment | F5 License | Deploy From | Notes |
+| --- | --- | --- | --- |
+| App Service Environment | BYOL | Azure Security Center (ASC)| |
+| App Service Plan | BYOL | Azure Marketplace | No logging will show in ASC |
+| IaaS (virtual machine) | BYOL |  Azure Security Center (ASC) | |
+| App Service Environment | Hourly |  Azure Marketplace | No logging will show in ASC |
+| App Service Plan | Hourly | Azure Marketplace | No logging will show in ASC |
+| IaaS (virtual machine)   | Hourly  | Azure Marketplace | No logging will show in ASC | 
 
 
-## Configuration Example 
+### Launching the WAF from the Azure Security Center 
 
-The following is an example configuration diagram for this solution deployment. In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.
-
-![Configuration Example](images/azure-example-diagram-waf.png)
-
-## Post-Deployment Configuration
-If you need to add more applications to this deployment, see https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental/reference/scripts.
-
-### Additional Optional Configuration Items
-Here are some post-deployment options that are entirely optional but could be useful based on your needs.
-
-#### BIG-IP Lifecycle Management
-As new BIG-IP versions are released, existing VM scale sets can be upgraded to use those new images. In an existing implementation, we assume you have created different types of BIG-IP configuration objects (such as virtual servers, pools, and monitors), and you want to retain this BIG-IP configuration after an upgrade. This section describes the process of upgrading and retaining the configuration.
-
-When this ARM template was initially deployed, a storage account was created in the same Resource Group as the VM scale set. This account name ends with **data000*** (the name of storage accounts have to be globally unique, so the prefix is a unique string). In this storage account, the template created a container named **backup**.  We use this backup container to hold backup [UCS](https://support.f5.com/csp/article/K13132) configuration files. Once the UCS is present in the container, you update the scale set "model" to use the newer BIG-IP version. Once the scale set is updated, you upgrade the BIG-IP VE(s). As a part of this upgrade, the provisioning checks the backup container for a UCS file and if one exists, it uploads the configuration (if more than one exists, it uses the latest).
-
-**To upgrade the BIG-IP VE Image**
-  1. Save a UCS backup file of the current BIG-IP configuration (cluster or standalone)
-     - From the CLI command: ```# tmsh save /sys ucs /var/tmp/original.ucs```
-     - From the Configuration utility: **System > Archives > Create**
-  2. Upload the UCS into the **backup** container of the storage account ending in **data000** (it is a Blob container)
-  3. Update the VM Scale Set Model to the new BIG-IP version
-     - From PowerShell: Use the PowerShell script in the **scripts** folder in this directory
-     - Using the Azure redeploy functionality: From the Resource Group where the ARM template was initially deployed, click the successful deployment and then select to redeploy the template. If necessary, re-select all the same variables, and **only change** the BIG-IP version to the latest.
-  4. Upgrade the Instances
-     1. In Azure, navigate to the VM Scale Set instances pane and verify the *Latest model* does not say **Yes** (it should have a caution sign instead of the word Yes)
-     2. Select either all instances at once or each instance one at a time (starting with instance ID 0 and working up).
-     3. Click the **Upgrade** action button.
+Before you create a WAF, you need a web application hosted in Azure, with a public IP address and ports 80 and/or 443 open. When the application is hosted in Azure, messages sent from the BIG-IP VE firewall will be displayed in Azure Security Center.
 
 
-### Service Discovery
-Once you launch your BIG-IP instance using the solution template, you can use the Service Discovery iApp template on the BIG-IP VE to automatically update pool members based on auto-scaled cloud application hosts.  In the iApp template, you enter information about your cloud environment, including the tag key and tag value for the pool members you want to include, and then the BIG-IP VE programmatically discovers (or removes) members using those tags.
+**To create the F5 WAF from the Azure Security Center**
 
-#### Tagging
-In Microsoft Azure, you have three options for tagging objects that the Service Discovery iApp uses. Note that you select public or private IP addresses within the iApp.
-  - *Tag a VM resource*<br>
-The BIG-IP VE will discover the primary public or private IP addresses for the primary NIC configured for the tagged VM.
-  - *Tag a NIC resource*<br>
-The BIG-IP VE will discover the primary public or private IP addresses for the tagged NIC.  Use this option if you want to use the secondary NIC of a VM in the pool.
-  - *Tag a Virtual Machine Scale Set resource*<br>
-The BIG-IP VE will discover the primary private IP address for the primary NIC configured for each Scale Set instance.  Note you must select Private IP addresses in the iApp template if you are tagging a Scale Set.
-
-The iApp first looks for NIC resources with the tags you specify.  If it finds NICs with the proper tags, it does not look for VM resources. If it does not find NIC resources, it looks for VM resources with the proper tags. In either case, it then looks for Scale Set resources with the proper tags.
-
-**Important**: Make sure the tags and IP addresses you use are unique. You should not tag multiple Azure nodes with the same key/tag combination if those nodes use the same IP address.
-
-To launch the template:
-  1.	From the BIG-IP VE web-based Configuration utility, on the Main tab, click **iApps > Application Services > Create**.
-  2.	In the **Name** field, give the template a unique name.
-  3.	From the **Template** list, select **f5.service_discovery**.  The template opens.
-  4.	Complete the template with information from your environment.  For assistance, from the Do you want to see inline help? question, select Yes, show inline help.
-  5.	When you are done, click the **Finished** button.
-
-### Service Principal Authentication
-This solution requires access to the Azure API to determine how the BIG-IP VEs should be configured.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication, for all the typical security reasons.  The following provides information/links on the options for configuring a service principal within Azure if this is the first time it is needed in a subscription.
-
-_Ensure that however the creation of the service principal occurs to verify it only has minimum required access based on the solutions need(read vs read/write) prior to this template being deployed and used by the solution within the resource group selected(new or existing)._
-
-**Minimum Required Access:** **Read** access is required, it can be limited to the resource group used by this solution.
-
-The end result should be possession of a client(application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some troubleshooting post-deployment if the service principal is in fact not fully configured.
-
-#### 1. Azure Portal
-
-Follow the steps outlined in the [Azure Portal documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-group-create-service-principal-portal/) to generate the service principal.
-
-#### 2. Azure CLI
-
-This method can be used with either the [Azure CLI v2.0 (Python)](https://github.com/Azure/azure-cli) or the [Azure Cross-Platform CLI (npm module)](https://github.com/Azure/azure-xplat-cli).
-
-_Using the Python Azure CLI v2.0 - requires just one step_
-```shell
-$ az ad sp create-for-rbac
-```
-
-_Using the Node.js cross-platform CLI - requires additional steps for setting up_
-https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal-cli
-
-#### 3. Azure PowerShell
-Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
+1. Log in to the Azure portal, portal.azure.com.
+2. In the left pane, click **Browse > Security Center**.
+3. Click the **Recommendations** widget.
+4. From the list of recommendations, select **Add a web application firewall**.
+5. From the list of applications, click the web application you want to secure.
+6. On the Add a Web Application Firewall blade, click **Create New** and then click **F5 Networks**.
+7. On the Choose package blade, click **F5 Networks Semi-automatically provisioned**.
+8. At the bottom of the F5 WAF Solution blade, click **Create**.
+9. Continue with [Configure the F5 WAF solution template](#configure-the-f5-waf-solution-template).
 
 
-## Filing Issues
-If you find an issue, we would love to hear about it.
+### Launching the WAF from the Azure Marketplace
+
+Before you create a WAF, you need a web application hosted in Azure, with a public IP address and ports 80 and/or 443 open.
+
+**To create the F5 WAF from the Azure Marketplace** 
+
+1. Log in to the Microsoft Azure Portal at https://portal.azure.com.
+2. On the Dashboard, select **Marketplace**.
+3. In the **Filter** field, type **F5 WAF Solution** and press Enter.
+4. Click the name of the solution.
+5. At the bottom of the F5 WAF Solution blade, click **Create**.
+6. Continue with [Configure the F5 WAF solution template](#configure-the-f5-waf-solution-template). 
+
+
+## Configure the F5 WAF solution template
+Use the following guidance to configure the F5 WAF from either the Marketplace or the Security Center.
+
+1. Complete the fields on the ***Basics*** blade.
+
+| Option | Description |
+| --- | --- |
+| Subscription | Ensure the proper subscription is selected. |
+| Resource Group | You can select an existing Azure Resource Group, or have the solution create a new one. If you select a new group, type a name in the field. |
+| Location | Select the Azure location in which you want to deploy this solution. |
+
+2. Click **OK**.
+
+3. Complete the fields on the ***Infrastructure Settings*** blade.
+
+
+| Option | Description | 
+| --- | ---|
+| Deployment Name | A unique name that you haven't used for previous deployments. |
+| BIG-IP Version | The version of BIG-IP VE you want to use (13.0.021 or 12.1.24). |
+| F5 WAF Username | The username you will use to access BIG-IP VE. |
+| F5 WAF Password | Use a strong password. You will need this if you want to connect to BIG-IP VE. |
+| Confirm Password | Retype the password. | 
+| Virtual machine size | The size of the Azure virtual machine you want to provision for each node in the cluster. Only sizes that use premium storage are available. |  
+| Number of WAFs | Choose the number of WAFs you want to deploy (1-4). |
+| License Token | BYOL ONLY: The license key from F5. There are as many license fields as number of WAFs you selected. |
+| Licensed Bandwidth| PAYG ONLY: Throughput is limited to the threshold you choose. |
+| Use managed disks | You can enable managed disks to have Azure automatically manage the availability of disks to provide data redundancy and fault tolerance, without creating and managing storage accounts on your own. | 
+| Storage Account | If you are **not** using managed disks, you must select an existing storage account, or use the template to create a new one. | 
+| Public IP address | Select a new or existing public IP address to communicate with the Azure Virtual Machine from outside the virtual network. |
+| Domain name label | The BIG-IP will be accessible by a name like F5WAF.westus.cloudapp.azure.com. The label you enter will be the first part of the name. Must be unique within the Azure Region.|
+| Virtual network |  Select a new or existing virtual network. |
+| Subnets | If you are creating a new virtual network, configure the name and address space for the internal, internal, and management subnets. If you select an existing virtual network, specify existing subnets in that network. Only subnets meeting the minimum requirements for this solution are displayed.  In either case, ensure that there are available IP addresses to be used for the BIG-IP VE instances. |
+| Restricted source network or address | The IP address or range of addresses that can access the BIG-IP Configuration utility. |
+  
+4. Click **OK**.
+
+5. Complete the ***Application Settings*** blade. The fields you must complete are based on the application protocol you select.
+
+| Option | Description |
+| --- | --- |  
+| Application Protocol | The protocol used to connect to your application (HTTP and HTTPS, HTTP, HTTPS, SSL Offload). |
+| Application Address | The public IP address or fully qualified domain name for the application this WAF will protect. |
+| Application Port | The port your application listens on for unencrypted traffic. This field is not required when deploying HTTP only. |
+| Application Secure Port | The port your application listens on for encrypted traffic. |
+| Application Type | The type of application (such as IIS or Apache) that most closely matches the one you want to secure. The template uses this selection to establish a base security policy for the initial deployment, all applications behind the WAF will use signatures specific to this application type. If the exact application type you are using is not listed, choose something similar, or choose Generic. |
+| Security Blocking Level | The level of traffic you want to flag as insecure. All applications behind the WAF will use this level. The higher the level, the more traffic that is blocked. The lower the level, the more chances that insecure traffic will make it through to your application. See the [Security blocking levels](#security-blocking-levels) for more information. |
+| SSL Certificate Upload | The SSL certificate and key (in .pfx format) corresponding to the application's public virtual server. |
+| Certificate Passphrase | The passphrase for the SSL certificate. |
+| Application Platform | If the application is on an Azure virtual machine, choose IaaS. If your application is on an Azure App Service Environment or App Service Plan, choose PaaS. |
+| Application Service FQDN | For PaaS, the fully qualified domain name that clients will use to access the Azure App Service. |
+
+6. Click **OK**.
+7. On the ***Summary*** blade, click **OK**.
+8. On the ***Buy*** blade, click **Purchase**.
+
+The WAF is created behind an Azure load balancer. This deployment may take up to 45 minutes to complete.
+
+However, traffic is not yet going to the application servers. You must first finalize the setup.
+
+
+
+
+## Finalize the WAF
+
+Update your DNS records to point to the WAF public IP address.
+
+Then, you can finalize the WAF by allowing traffic from the WAF to access your application servers and the Azure Load Balancer in front of your applications. You must also deny traffic from the internet.  If you launched the WAF from the Security Center, you receive a recommendation to finalize the WAF.  If you launch from the Marketplace, you do not see the recommendation, but still must finalize the WAF using the following guidance.
+
+1. In the Azure portal, open the Network Security Group associated with your application.
+2. Click the Inbound security rules label.
+3. Note the priority number for each existing rule. You are going to create at least three new rules for each application, and they must be higher priority (lower numbers) than the existing rules.
+
+Note: The lowest number you can use is 100. If 100, 101, and 102 are already in use, you must re-create existing rules and assign a higher number to each, so that these numbers are available.
+
+4. On the Inbound security rules blade, click Add.
+5. Allow the WAF to access the application server.
+
+| Option | Description |
+| --- | --- |
+| Name | A unique, descriptive name for the rule, for example allow_http_waf_appsrv0. |
+| Priority | A unique priority that is lower than any other security rule. |
+| Source | Choose CIDR block. |
+| Source IP address range	 | The public IP address of the Azure Load Balancer in front of the WAF devices, in CIDR notation. For example, if the IP address is 52.160.108.42, you would enter 52.160.108.42/32. You can find the public IP address in the resource group for the WAF; it is usually named waf-pip. |
+| Service	| The service on the application server, for example HTTP or HTTPS. |
+| Protocol | Choose TCP. |
+| Port range | The TCP port on which your application server listens for traffic, for example, 80. |
+| Action | Choose Allow. |
+
+8. Click OK.
+
+9. Allow the WAF to access the Azure Load Balancer in front of your application servers.
+
+| Option | Description | 
+| --- | --- |
+| Name | A unique, descriptive name for the rule, for example allow_http_alb_appsrv0. |
+| Priority | A unique priority that is just above the previous rule. |
+| Source | Choose Tag. |
+| Source tag | Choose AzureLoadBalancer. |
+| Service | The service on the application server, for example HTTP or HTTPS. |
+| Protocol | Choose TCP. |
+| Port range | The TCP port on which your application server listens for traffic, for example, 80. |
+| Action | Choose Allow. |
+  
+10. Click OK.
+11. Deny internet traffic from getting to the application server.
+
+| Option | Description |
+| --- | --- |
+| Name | A unique, descriptive name for the rule, for example deny_http. |
+| Priority | A unique priority that is just above the previous rule.|
+| Source  |  Choose Tag.|
+| Source tag | Choose Internet.|
+| Service | Choose Custom.|
+| Protocol | Choose Any. |
+| Port range | The TCP port on which your application server listens for traffic, for example, 80. |
+| Action | Choose Deny. |
+
+12. Click OK.
+
+Repeat these steps for each application server in the deployment.
+
+You should no longer be able to access the application from the internet. Instead, you should be able to access the application by using the public IP address of the Azure Load Balancer for the WAF.
+
+## Automatically update signatures
+
+You must update settings in BIG-IP VE to ensure that the latest signatures are used for the WAF.
+
+1. In the Azure portal, in the left pane, click **Browse > Resource groups**.
+2. Click the name of your resource group and then in the SETTINGS area, click **Deployments**.
+3. Click the original deployment.
+4. In the Outputs section, copy the GUI-URL.
+5. Open a web browser window and paste the text.
+   The BIG-IP Configuration utility opens.
+
+6. Log in to the BIG-IP Configuration utility with the username **azureuser** and the password you specified when you created the WAF.
+7. On the Main tab, click Security > Security Updates > Application Security.
+8. For the Update Mode setting, click **Scheduled**.
+9. Select the update interval and click **Save Settings**.
+
+Signatures are now updated at the interval you specified.
+
+## View violations and status messages from the WAF
+You can view more detailed information about traffic being monitored by the WAF, and if necessary, block or unblock it.
+
+Note: If you deployed the WAF from the Azure Marketplace, violations and status messages do not appear in Azure Security Center.
+
+1. In the Azure portal, in the left pane, click Browse > Security Center.
+2. In the Detection area, click the Security alerts chart.
+   The chart displays flagged traffic from all vendors.
+
+3. Filter the list by clicking the Filter icon at the top of the page.
+4. To see details, click the traffic you're interested in.
+5. On the blade that opens, click the row to show more details.
+6. On the blade that opens, copy the Remediation Steps- Extra Information text.
+7. Click the Management URL link and log in with the username azureuser and the password you specified when you created the WAF.
+
+8. In the browser address bar, remove /xui from the address and paste the remediation steps information, for example:
+
+   https://10.10.10.10:8443/dms/policy/win_open_proxy_request.php?id=&support_id=4854296639235424357
+
+   The BIG-IP Configuration utility displays the details of the message.
+
+9. To stop blocking the traffic that's displayed, in the Accept Status area, click the Accept this Request button.
+
+## Configuration example
+The following is a simple configuration diagram for this deployment. In this diagram, the IP addresses are provided as examples. 
+
+![Configuration example](/images/azure-autoscale-waf-semi-auto.png)
+
+As traffic passes through the WAF, alerts are sent to Azure about possible violations. The amount of traffic that is flagged depends on the security blocking level you choose when you create the WAF.
+
+
+## Security blocking levels
+The security blocking level determines how much traffic is blocked and alerted by the F5 WAF.
+
+*Attack signatures* are rules that identify attacks on a web application and its components. The WAF has at least 2600 attack signatures available. The higher the security level you choose, the more traffic that is blocked by these signatures.
+
+| Level | Details |
+| --- | --- |
+| **High** | The most attack signatures enabled. A large number of false positives may be recorded; you must correct these alerts for your application to function correctly. |
+| **Medium** | A balance between logging too many violations and too many false positives. |
+| **Low** | The fewest attack signatures enabled. There is a greater chance of possible security violations making it through to the web applications, but a lesser chance of false positives. |
+| **Off** |  Violations are logged but no traffic is blocked. |
+| **Custom** | If you have an existing ASM Security policy, you can upload it.  For more information, see https://support.f5.com/kb/en-us/products/big-ip_asm/manuals/product/asm-implementations-12-1-0/33.html#unique_697805654. | 
+
+For all levels except Custom, the WAF learns from traffic that is not blocked. Over time, if the WAF determines that traffic is safe, it allows it through to the application. Alternately, the WAF can determine that traffic is unsafe and block it from the application.
+
+
+## More granular control of WAF settings
+
+The Application Security Manager (ASM) module on the F5 WAF has policy settings that determine how the WAF behaves.
+
+Although these policy settings are automatically configured when you create the WAF, you can log in to BIG-IP Configuration utility and change them. You should not change settings unless you are familiar with ASM™. For more information about ASM, see the Changing Security Policy Settings chapter in the BIG-IP Application Security Manager: Implementations guide on http://support.f5.com/kb/en-us.html.
+
+Important: Wait approximately five minutes after the WAF is created before making changes to the associated ASM security policy.
+
+## Troubleshooting the F5 WAF
+
+If you log in to the BIG-IP Configuration utility, you might notice the following messages or warnings.
+
+**Warning: Source Template Has Changed**
+
+You can ignore this message. It might be displayed when you add an application to a WAF or reconfigure an application in Azure Security Center.
+
+**Changes Pending**
+
+You can ignore this message. If you made changes to ASM security policy, the changes are automatically synchronized to the WAF devices in your deployment through a device group called Sync. A separate device group called datasync-global-dg is synchronized manually and is the cause of the message.
+
+**Virtual servers may be in Unchecked status**
+
+You can ignore this message. Traffic will still be forwarded correctly through the virtual servers.
+
+
+
+## Find the BIG-IP VE registration key
+
+
+If you are using a BYOL version of the F5 WAF, and you need to call F5 Support, you will need the registration key associated with BIG-IP VE.
+
+1. In the Azure portal, in the left pane, click Browse > Resource groups .
+2. Click the name of your resource group and then in the SETTINGS area, click Deployments.
+3. Click the original deployment.
+4. In the Outputs section, copy the GUI-URL.
+5. Open a web browser window and paste the text.
+   The BIG-IP Configuration utility opens.
+6. Log in to the BIG-IP Configuration utility with the username azureuser and the password you specified when you created the WAF.
+7. On the Main tab, click System > License and click Re-activate.
+
+The key is displayed in the Base Registration Key field.
+
+## Delete a WAF
+If you no longer need a WAF, you can delete it. The associated resource group and all related objects remain, and should be manually deleted.
+
+1. In the Azure portal, in the left pane, click Browse > Security Center .
+2. In the Prevention area, click the Partner solutions widget.
+3. On the Partner solutions blade, select the WAF you want to delete.
+4. On the blade for your WAF, in the Associated resources section, ensure that only one application is linked to the WAF.
+5. Click Delete solution.
+6. On the confirmation message, click Yes.
+
+This deletes the WAF. If you would like, you can now associate the application with another WAF.
+
+## Complete list of Azure instance sizes
+The following are the Azure virtual hardware instances you can use:  
+ Standard_DS4, Standard_DS11, Standard_DS12, Standard_DS13, Standard_DS14, Standard_DS3_v2, Standard_DS4_v2, Standard_DS5_v2, Standard_DS11_v2, Standard_DS12_v2, Standard_DS13_v2, Standard_DS14_v2, Standard_DS15_v2, Standard_F4S, Standard_F8S, Standard_A4, Standard_A5, Standard_A6, Standard_A7, Standard_A8, Standard_A9, Standard_D3, Standard_D4, Standard_D11, Standard_D12, Standard_D13, Standard_D14, Standard_D3_v2, Standard_D4_v2, Standard_D5_v2, Standard_D11_v2, Standard_D12_v2, Standard_D13_v2, Standard_D14_v2, Standard_D15_v2, Standard_F4, Standard_F8
+
+ ## Filing Issues
+If you find an issue, we would love to hear about it. 
 You have a choice when it comes to filing issues:
   - Use the **Issues** link on the GitHub menu bar in this repository for items such as enhancement or feature requests and non-urgent bug fixes. Tell us as much as you can about what you found and how you found it.
   - Contact F5 Technical support via your typical method for more time sensitive changes and other issues requiring immediate support.
+
 
 
 ## Copyright
@@ -211,5 +381,3 @@ Contributor License Agreement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Individuals or business entities who contribute to this project must have
 completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html).
-
-
