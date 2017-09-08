@@ -1,4 +1,4 @@
-# Deploying Web application firewalls (WAFs) in Azure
+# Deploying the BIG-IP VE from the Azure Marketplace or Azure Security Center - BIG-IP WAF (LTM + ASM)
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
@@ -101,66 +101,44 @@ Before you create a WAF, you need a web application hosted in Azure, with a publ
 
 
 ## Configure the F5 WAF solution template
-Use the following guidance to configure the F5 WAF from either the Marketplace or the Security Center.
-
-1. Complete the fields on the ***Basics*** blade.
-
-| Option | Description |
-| --- | --- |
-| Subscription | Ensure the proper subscription is selected. |
-| Resource Group | You can select an existing Azure Resource Group, or have the solution create a new one. If you select a new group, type a name in the field. |
-| Location | Select the Azure location in which you want to deploy this solution. |
-
-2. Click **OK**.
-
-3. Complete the fields on the ***Infrastructure Settings*** blade.
+Use the following table for guidance on configuring the F5 WAF from either the Azure Marketplace or the Azure Security Center.
 
 
-| Option | Description | 
-| --- | ---|
-| Deployment Name | A unique name that you haven't used for previous deployments. |
-| BIG-IP Version | The version of BIG-IP VE you want to use (13.0.021 or 12.1.24). |
-| F5 WAF Username | The username you will use to access BIG-IP VE. |
-| F5 WAF Password | Use a strong password. You will need this if you want to connect to BIG-IP VE. |
-| Confirm Password | Retype the password. | 
-| Virtual machine size | The size of the Azure virtual machine you want to provision for each node in the cluster. Only sizes that use premium storage are available. |  
-| Number of WAFs | Choose the number of WAFs you want to deploy (1-4). |
-| License Token | BYOL ONLY: The license key from F5. There are as many license fields as number of WAFs you selected. |
-| Licensed Bandwidth| PAYG ONLY: Throughput is limited to the threshold you choose. |
-| Use managed disks | You can enable managed disks to have Azure automatically manage the availability of disks to provide data redundancy and fault tolerance, without creating and managing storage accounts on your own. | 
-| Storage Account | If you are **not** using managed disks, you must select an existing storage account, or use the template to create a new one. | 
-| Public IP address | Select a new or existing public IP address to communicate with the Azure Virtual Machine from outside the virtual network. |
-| Domain name label | The BIG-IP will be accessible by a name like F5WAF.westus.cloudapp.azure.com. The label you enter will be the first part of the name. Must be unique within the Azure Region.|
-| Virtual network |  Select a new or existing virtual network. |
-| Subnets | If you are creating a new virtual network, configure the name and address space for the internal, internal, and management subnets. If you select an existing virtual network, specify existing subnets in that network. Only subnets meeting the minimum requirements for this solution are displayed.  In either case, ensure that there are available IP addresses to be used for the BIG-IP VE instances. |
-| Restricted source network or address | The IP address or range of addresses that can access the BIG-IP Configuration utility. |
-  
-4. Click **OK**.
+| Blade | Option | Description | 
+| --- | --- | ---|
+| ***Basic*** | Subscription | Ensure the proper subscription is selected. |
+| | Resource Group | You can select an existing Azure Resource Group, or have the solution create a new one. If you select a new group, type a name in the field. |
+| | Location | Select the Azure location in which you want to deploy this solution. |
+| ***Infrastructure Settings*** | Deployment Name | A unique name that you have not used for previous deployments. |
+| | BIG-IP Version | The version of BIG-IP VE you want to use (13.0.021 or 12.1.24). |
+| | F5 WAF Username | The username you will use to access BIG-IP VE. |
+| | F5 WAF Password | Use a strong password. You will need this if you want to connect to BIG-IP VE. |
+| | Confirm Password | Retype the password. | 
+| | Virtual machine size | The size of the Azure virtual machine you want to provision for each node in the cluster. Only sizes that use premium storage are available. 
+| | Number of WAFs | Choose the number of WAFs you want to deploy (1-4). |
+| | License Token | BYOL ONLY: The license key from F5. There are as many license fields as number of WAFs you selected. |
+| | Licensed Bandwidth| PAYG ONLY: Throughput is limited to the threshold you choose. |
+| | Use managed disks | You can enable managed disks to have Azure automatically manage the availability of disks to provide data redundancy and fault tolerance, without creating and managing storage accounts on your own. | 
+| | Storage Account | If you are **not** using managed disks, you must select an existing storage account, or use the template to create a new one. | 
+| | Public IP address | Select a new or existing public IP address to communicate with the Azure Virtual Machine from outside the virtual network. |
+| | Domain name label | The BIG-IP will be accessible by a name like F5WAF.westus.cloudapp.azure.com. The label you enter will be the first part of the name. Must be unique within the Azure Region.|
+| | Virtual network |  Select a new or existing virtual network. |
+| | Subnets | If you are creating a new virtual network, configure the name and address space for the internal, internal, and management subnets. If you select an existing virtual network, specify existing subnets in that network. Only subnets meeting the minimum requirements for this solution are displayed.  In either case, ensure that there are available IP addresses to be used for the BIG-IP VE instances. |
+| | Restricted source network or address | The IP address or range of addresses that can access the BIG-IP Configuration utility. |
+| ***Application Settings*** | Application Protocol | The protocol used to connect to your application (HTTP and HTTPS, HTTP, HTTPS, SSL Offload). |
+| | Application Address | The public IP address or fully qualified domain name for the application this WAF will protect. |
+| | Application Port | The port your application listens on for unencrypted traffic. This field is not required when deploying HTTP only. |
+| | Application Secure Port | The port your application listens on for encrypted traffic. |
+| | Application Type | The type of application (such as IIS or Apache) that most closely matches the one you want to secure. The template uses this selection to establish a base security policy for the initial deployment, all applications behind the WAF will use signatures specific to this application type. If the exact application type you are using is not listed, choose something similar, or choose Generic. |
+| | Security Blocking Level | The level of traffic you want to flag as insecure. All applications behind the WAF will use this level. The higher the level, the more traffic that is blocked. The lower the level, the more chances that insecure traffic will make it through to your application. See the [Security blocking levels](#security-blocking-levels) for more information. |
+| | SSL Certificate Upload | The SSL certificate and key (in .pfx format) corresponding to the application's public virtual server. |
+| | Certificate Passphrase | The passphrase for the SSL certificate. |
+| | Application Platform | If the application is on an Azure virtual machine, choose IaaS. If your application is on an Azure App Service Environment or App Service Plan, choose PaaS. |
+| | Application Service FQDN | For PaaS, the fully qualified domain name that clients will use to access the Azure App Service. |
 
-5. Complete the ***Application Settings*** blade. The fields you must complete are based on the application protocol you select.
+When you have completed the template, review the ***Summary*** blade, and then on the ***Buy*** blade, click **Purchase**.
 
-| Option | Description |
-| --- | --- |  
-| Application Protocol | The protocol used to connect to your application (HTTP and HTTPS, HTTP, HTTPS, SSL Offload). |
-| Application Address | The public IP address or fully qualified domain name for the application this WAF will protect. |
-| Application Port | The port your application listens on for unencrypted traffic. This field is not required when deploying HTTP only. |
-| Application Secure Port | The port your application listens on for encrypted traffic. |
-| Application Type | The type of application (such as IIS or Apache) that most closely matches the one you want to secure. The template uses this selection to establish a base security policy for the initial deployment, all applications behind the WAF will use signatures specific to this application type. If the exact application type you are using is not listed, choose something similar, or choose Generic. |
-| Security Blocking Level | The level of traffic you want to flag as insecure. All applications behind the WAF will use this level. The higher the level, the more traffic that is blocked. The lower the level, the more chances that insecure traffic will make it through to your application. See the [Security blocking levels](#security-blocking-levels) for more information. |
-| SSL Certificate Upload | The SSL certificate and key (in .pfx format) corresponding to the application's public virtual server. |
-| Certificate Passphrase | The passphrase for the SSL certificate. |
-| Application Platform | If the application is on an Azure virtual machine, choose IaaS. If your application is on an Azure App Service Environment or App Service Plan, choose PaaS. |
-| Application Service FQDN | For PaaS, the fully qualified domain name that clients will use to access the Azure App Service. |
-
-6. Click **OK**.
-7. On the ***Summary*** blade, click **OK**.
-8. On the ***Buy*** blade, click **Purchase**.
-
-The WAF is created behind an Azure load balancer. This deployment may take up to 45 minutes to complete.
-
-However, traffic is not yet going to the application servers. You must first finalize the setup.
-
-
+***Important:*** The WAF is created behind an Azure load balancer. This deployment may take up to 45 minutes to complete. However, traffic is not yet going to the application servers. You must first finalize the setup.
 
 
 ## Finalize the WAF
