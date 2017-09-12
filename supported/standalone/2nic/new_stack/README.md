@@ -4,6 +4,17 @@
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
 [![Issues](https://img.shields.io/github/issues/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/issues)
 
+
+**Contents**
+- [Introduction](#introduction)
+- [Prerequisites](#prerequisites-and-configuration-notes)
+- [Security](#security)
+- [Getting Help](#help)
+- [Installation](#installation)
+- [Configuration Example](#configuration-example)
+- [Service Discovery](#service-discovery)
+
+
 ## Introduction
 
 This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3-NIC template without the NIC for connecting directly to backend webservers.

@@ -4,6 +4,17 @@
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
 [![Issues](https://img.shields.io/github/issues/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/issues)
 
+
+**Contents**
+- [Introduction](#introduction)
+- [Prerequisites](#prerequisites-and-configuration-notes)
+- [Security](#security)
+- [Getting Help](#help)
+- [Installation](#installation)
+- [Configuration Example](#configuration-example)
+- [Service Discovery](#service-discovery)
+
+
 ## Introduction
 
 This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard Cloud design where the compute instance of F5 is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.
