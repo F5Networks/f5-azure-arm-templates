@@ -36,11 +36,12 @@
         "autoScaleMetric": {
             "allowedValues": [
                 "TMM_CPU", 
+                "TMM_Traffic", 
                 "Host_Throughput"
             ], 
             "defaultValue": "Host_Throughput", 
             "metadata": {
-                "description": "Select the metric you would like the auto scale events to be triggered on, the following parameters determine individual settings for the scaling rules based on the metric chosen."
+                "description": "Select the metric you would like the auto scale events to be triggered on, the following parameters determine individual settings for the scaling rules based on the metric chosen. Note: Custom BIG-IP metrics will be sent to Application Insights regardless of metric selected, for use by additional autoscale rules or for device visbility."
             }, 
             "type": "string"
         }, 
@@ -495,6 +496,12 @@
                 "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", 
                 "thresholdIn": "[parameters('scaleInThreshold')]", 
                 "thresholdOut": "[parameters('scaleOutThreshold')]"
+            }, 
+            "TMM_Traffic": {
+                "metricName": "customMetrics/F5_TRAFFIC_TOTAL_BYTES", 
+                "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", 
+                "thresholdIn": "[variables('scaleInNetworkBytes')]", 
+                "thresholdOut": "[variables('scaleOutNetworkBytes')]"
             }
         }, 
         "customEmailBaseArray": [
