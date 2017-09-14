@@ -109,7 +109,7 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
     final_readme = readme_location + 'README.md'
     with open(base_readme, 'r') as readme:
         readme = readme.read()
-    post_config_text = ''; sp_text = ''; extra_prereq_text = ''
+    post_config_text = ''; sp_text = ''; extra_prereq_text = ''; tg_config_text = ''
     api_access_needed = template_info['api_access_needed'][template_name]
     lic_type = readme_text['deploy_links']['lic_support'][template_name]
 
@@ -150,6 +150,9 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
         extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'traffic_group_msg') + '\n'
     if template_name in ('waf_autoscale'):
         extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'asm_sync') + '\n'
+    if template_name in ('ha-avset'):
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'tg_config') + '\n'
+        tg_config_text = misc_readme_grep('<TG_CONFIG_TEXT>', misc_readme)
 
     ### Map in dynamic values ###
     readme = readme.replace('<TITLE_TXT>', title_text)
@@ -165,6 +168,7 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
     readme = readme.replace('<EXAMPLE_TEXT>', example_text)
     readme = readme.replace('<POST_CONFIG_TXT>', post_config_text)
     readme = readme.replace('<SERVICE_PRINCIPAL>', sp_text)
+    readme = readme.replace('<TG_CONFIG_TEXT>', tg_config_text)
 
     ### Write to solution location ###
     with open(final_readme, 'w') as readme_complete:
