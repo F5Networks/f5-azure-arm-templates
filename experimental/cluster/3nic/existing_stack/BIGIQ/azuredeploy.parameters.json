@@ -68,6 +68,9 @@
         "enableNetworkFailover": {
             "value": "No"
         }, 
+        "internalLoadBalancerProbePort": {
+            "value": "3456"
+        }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"
         }, 
