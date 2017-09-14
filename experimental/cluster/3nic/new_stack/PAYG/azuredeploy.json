@@ -997,7 +997,9 @@
             "dependsOn": [
                 "[variables('vnetId')]", 
                 "[variables('extNsgID')]", 
-                "extpipcopy"
+                "extpipcopy", 
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '0')]", 
+                "[variables('intLbId')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[concat(variables('intNicName'), '0')]", 
@@ -1049,7 +1051,9 @@
             "dependsOn": [
                 "[variables('vnetId')]", 
                 "[variables('extNsgID')]", 
-                "extpipcopy"
+                "extpipcopy", 
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '0')]", 
+                "[variables('intLbId')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[concat(variables('intNicName'), '1')]", 
