@@ -83,6 +83,7 @@ def variable_initialize(data):
     data['variables']['insightsApiVersion'] = "2015-04-01"
     data['variables']['appInsightsApiVersion'] = "OPTIONAL"
     data['variables']['location'] = "[resourceGroup().location]"
+    data['variables']['defaultAppInsightsLocation'] = "OPTIONAL"
     data['variables']['appInsightsLocation'] = "OPTIONAL"
     data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
     data['variables']['resourceGroupName'] = "[resourceGroup().name]"

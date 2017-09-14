@@ -240,8 +240,8 @@ if template_name in ('ltm_autoscale', 'waf_autoscale'):
     data['parameters']['vmScaleSetMaxCount'] = {"type": "int", "defaultValue": 4, "allowedValues": [2, 3, 4, 5, 6, 7, 8], "metadata": {"description": "The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set."}}
     # Add TMM CPU metric option into autoscale experimental templates
     if 'experimental' in created_file:
-        data['parameters']['autoScaleMetric'] = {"type": "string", "defaultValue": "Host_Throughput", "allowedValues": ["TMM_CPU", "Host_Throughput"],  "metadata": {"description": "Select the metric you would like the auto scale events to be triggered on, the following parameters determine individual settings for the scaling rules based on the metric chosen."}}
-        data['parameters']['appInsights'] = {"type": "string", "defaultValue": "CREATE_NEW", "metadata": {"description": "Input the name of your existing Application Insights workspace that you would like to receive custom BIG-IP metrics that can be used for VM Scale set rules and device visbility (If in a different resource group than this deployment specify it as <app insights name>;<app insights resource group>).  If you do not have an Application Insights workspace then leave the default of CREATE_NEW and one will be created for you."}}
+        data['parameters']['autoScaleMetric'] = {"type": "string", "defaultValue": "Host_Throughput", "allowedValues": ["TMM_CPU", "TMM_Traffic", "Host_Throughput"],  "metadata": {"description": "Select the metric you would like the auto scale events to be triggered on, the following parameters determine individual settings for the scaling rules based on the metric chosen. Note: Custom BIG-IP metrics will be sent to Application Insights regardless of metric selected, for use by additional autoscale rules or for device visbility."}}
+        data['parameters']['appInsights'] = {"type": "string", "defaultValue": "CREATE_NEW", "metadata": {"description": "Input the name of your existing Application Insights environment that will be used to receive custom BIG-IP metrics that can be used for Scale Set rules and device visbility (If in a different resource group than this deployment specify it as 'app_insights_name;app_insights_rg').  If you do not have an Application Insights environment then leave the default of CREATE_NEW and one will be created for you (Note: By default it will be created in East US, specify a different region as 'CREATE_NEW:app_insights_region')."}}
     data['parameters']['calculatedBandwidth'] = {"type": "string", "defaultValue": "200m", "allowedValues": ["10m", "25m", "100m", "200m", "1g"], "metadata": {"description": "Specify the amount of bandwidth (in mbps) that should be used to base the throughput percentage calculation on for scale events. (For PAYG it is recommended that this match the parameter licensedBandwidth, or at minimum is a lower value)"}}
     data['parameters']['scaleOutThreshold'] = {"type": "int", "defaultValue": 90, "allowedValues": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95], "metadata": {"description": "The percentage the metric should be above to trigger a Scale Out event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'."}}
     data['parameters']['scaleInThreshold'] = {"type": "int", "defaultValue": 10, "allowedValues": [5, 10, 15, 20, 25, 30, 35, 40, 45], "metadata": {"description": "The percentage the metric should be below to trigger a Scale In event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'."}}
@@ -485,9 +485,10 @@ if template_name in ('cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autos
         if 'experimental' in created_file:
             data['variables']['appInsightsApiVersion'] = "2015-05-01"
             data['variables']['autoScaleMetric'] = "[parameters('autoScaleMetric')]"
-            data['variables']['scaleMetricMap'] = { "Host_Throughput": { "metricName": "Network Out", "metricResourceUri": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', variables('vmssName'))]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]"  }, "TMM_CPU": { "metricName": "customMetrics/F5_TMM_CPU", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[parameters('scaleOutThreshold')]", "thresholdIn": "[parameters('scaleInThreshold')]" } }
-            data['variables']['appInsightsLocation'] = "eastus"
-            data['variables']['appInsightsName'] = "[replace(parameters('appInsights'), 'CREATE_NEW', concat(deployment().name, '-appinsights'))]"
+            data['variables']['scaleMetricMap'] = { "Host_Throughput": { "metricName": "Network Out", "metricResourceUri": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', variables('vmssName'))]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]"  }, "TMM_CPU": { "metricName": "customMetrics/F5_TMM_CPU", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[parameters('scaleOutThreshold')]", "thresholdIn": "[parameters('scaleInThreshold')]" }, "TMM_Traffic": { "metricName": "customMetrics/F5_TRAFFIC_TOTAL_BYTES", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]" } }
+            data['variables']['defaultAppInsightsLocation'] = "eastus"
+            data['variables']['appInsightsLocation'] = "[split(concat(parameters('appInsights'), ':', variables('defaultAppInsightsLocation')), ':')[1]]"
+            data['variables']['appInsightsName'] = "[replace(split(parameters('appInsights'), ':')[0], 'CREATE_NEW', concat(deployment().name, '-appinsights'))]"
             data['variables']['appInsightsNameArray'] = "[split(concat(variables('appInsightsName'), ';', variables('resourceGroupName')) , ';')]"
         data['variables']['10m'] = 10485760
         data['variables']['25m'] = 26214400
@@ -783,7 +784,7 @@ if template_name in ('ltm_autoscale', 'waf_autoscale'):
 # Add TMM CPU metric option into autoscale experimental templates
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
     if 'experimental' in created_file:
-        resources_list += [{ "type": "microsoft.insights/components", "condition": "[equals(parameters('appInsights'), 'CREATE_NEW')]", "kind": "other", "name": "[variables('appInsightsName')]", "apiVersion": "[variables('appInsightsApiVersion')]", "location": "[variables('appInsightsLocation')]", "tags": tags, "properties": { "ApplicationId": "[variables('appInsightsName')]", "Application_Type": "other" }, "dependsOn": [] }]
+        resources_list += [{ "type": "microsoft.insights/components", "condition": "[contains(toUpper(parameters('appInsights')), 'CREATE_NEW')]", "kind": "other", "name": "[variables('appInsightsName')]", "apiVersion": "[variables('appInsightsApiVersion')]", "location": "[variables('appInsightsLocation')]", "tags": tags, "properties": { "ApplicationId": "[variables('appInsightsName')]", "Application_Type": "other" }, "dependsOn": [] }]
 
 ## Sort resources section - Expand to choose order of resources instead of just alphabetical?
 resources_sorted = json.dumps(resources_list, sort_keys=True, indent=4, ensure_ascii=False)
@@ -795,8 +796,8 @@ if stack_type == 'prod_stack':
     master_helper.pub_ip_strip(data['resources'], 'PublicIpAddress', 'resources')
 
 ######################################## ARM Outputs ########################################
+## Note: Change outputs if prod_stack as public IP's are not attached to the BIG-IP's
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic'):
-    # Change outputs if prod_stack as public IP's are not attached to the BIG-IP's
     if stack_type == 'prod_stack':
         data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://', reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress, ':', variables('bigIpMgmtPort'))]" }
         data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress, ' ',22)]" }
@@ -804,11 +805,19 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
         data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://', reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]" }
         data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' ',22)]" }
 if template_name == 'cluster_1nic':
-    data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':8443')]" }
-    data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',8022)]" }
+    if stack_type == 'prod_stack':
+        data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress,':8443')]" }
+        data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress,' ',8022)]" }
+    else:
+        data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':8443')]" }
+        data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',8022)]" }
 if template_name in ('ha-avset', 'cluster_3nic'):
-    data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(concat(variables('mgmtPublicIPAddressId'), '0')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]" }
-    data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(concat(variables('mgmtPublicIPAddressId'), '0')).dnsSettings.fqdn,' ',22)]" }
+    if stack_type == 'prod_stack':
+        data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(concat(variables('mgmtNicId'), '0')).ipConfigurations[0].properties.privateIPAddress, ':', variables('bigIpMgmtPort'))]" }
+        data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(concat(variables('mgmtNicId'), '0')).ipConfigurations[0].properties.privateIPAddress,' ',22)]" }
+    else:
+        data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(concat(variables('mgmtPublicIPAddressId'), '0')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]" }
+        data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(concat(variables('mgmtPublicIPAddressId'), '0')).dnsSettings.fqdn,' ',22)]" }
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
     data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50101', ' - 50200')]" }
     data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50001, ' - 50100')]" }

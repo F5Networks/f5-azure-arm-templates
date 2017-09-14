@@ -4,6 +4,17 @@
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
 [![Issues](https://img.shields.io/github/issues/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/issues)
 
+
+**Contents**
+- [Introduction](#introduction)
+- [Prerequisites](#prerequisites-and-configuration-notes)
+- [Security](#security)
+- [Getting Help](#help)
+- [Installation](#installation)
+- [Configuration Example](#configuration-example)
+- [Service Discovery](#service-discovery)
+
+
 ## Introduction
 
 This solution uses an ARM template to launch the deployment of F5 BIG-IP LTM and ASM Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE LTM instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM+ASM.
@@ -76,8 +87,8 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | --- | --- | --- |
 | vmScaleSetMinCount | Yes | The minimum (and default) number of BIG-IP VEs that will be deployed into the VM Scale Set. |
 | vmScaleSetMaxCount | Yes | The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set. |
-| autoScaleMetric | Yes | Select the metric you would like the auto scale events to be triggered on, the following parameters determine individual settings for the scaling rules based on the metric chosen. |
-| appInsights | Yes | Input the name of your existing Application Insights workspace that you would like to receive custom BIG-IP metrics that can be used for VM Scale set rules and device visbility (If in a different resource group than this deployment specify it as <app insights name>;<app insights resource group>).  If you do not have an Application Insights workspace then leave the default of CREATE_NEW and one will be created for you. |
+| autoScaleMetric | Yes | Select the metric you would like the auto scale events to be triggered on, the following parameters determine individual settings for the scaling rules based on the metric chosen. Note: Custom BIG-IP metrics will be sent to Application Insights regardless of metric selected, for use by additional autoscale rules or for device visbility. |
+| appInsights | Yes | Input the name of your existing Application Insights environment that will be used to receive custom BIG-IP metrics that can be used for Scale Set rules and device visbility (If in a different resource group than this deployment specify it as 'app_insights_name;app_insights_rg').  If you do not have an Application Insights environment then leave the default of CREATE_NEW and one will be created for you (Note: By default it will be created in East US, specify a different region as 'CREATE_NEW:app_insights_region'). |
 | calculatedBandwidth | Yes | Specify the amount of bandwidth (in mbps) that should be used to base the throughput percentage calculation on for scale events. (For PAYG it is recommended that this match the parameter licensedBandwidth, or at minimum is a lower value) |
 | scaleOutThreshold | Yes | The percentage the metric should be above to trigger a Scale Out event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'. |
 | scaleInThreshold | Yes | The percentage the metric should be below to trigger a Scale In event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'. |

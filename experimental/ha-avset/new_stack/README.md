@@ -4,6 +4,17 @@
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
 [![Issues](https://img.shields.io/github/issues/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/issues)
 
+
+**Contents**
+- [Introduction](#introduction)
+- [Prerequisites](#prerequisites-and-configuration-notes)
+- [Security](#security)
+- [Getting Help](#help)
+- [Installation](#installation)
+- [Configuration Example](#configuration-example)
+- [Service Discovery](#service-discovery)
+
+
 ## Introduction
 
 This solution uses an ARM template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled. Each pair of BIG-IP VEs is deployed in an Azure Availability Set, and can therefore be spread across different update and fault domains. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.
