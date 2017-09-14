@@ -962,7 +962,8 @@
             "dependsOn": [
                 "[variables('extNsgID')]", 
                 "extpipcopy", 
-                "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '0')]"
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '0')]", 
+                "[variables('extLbId')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[concat(variables('extNicName'), '0')]", 
@@ -988,7 +989,8 @@
             "dependsOn": [
                 "[variables('extNsgID')]", 
                 "extpipcopy", 
-                "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '1')]"
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '1')]", 
+                "[variables('extLbId')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[concat(variables('extNicName'), '1')]", 
