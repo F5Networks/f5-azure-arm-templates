@@ -65,6 +65,9 @@
         "internalIpAddressRangeStart": {
             "value": "GEN_UNIQUE"
         }, 
+        "enableNetworkFailover": {
+            "value": "No"
+        }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"
         }, 

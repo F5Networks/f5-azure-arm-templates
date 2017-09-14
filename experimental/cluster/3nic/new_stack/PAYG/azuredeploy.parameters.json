@@ -32,6 +32,9 @@
         "vnetAddressPrefix": {
             "value": "10.0"
         }, 
+        "enableNetworkFailover": {
+            "value": "No"
+        }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"
         }, 
