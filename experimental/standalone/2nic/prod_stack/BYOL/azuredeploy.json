@@ -761,76 +761,8 @@
     }, 
     "resources": [
         {
-            "apiVersion": "[variables('networkApiVersion')]", 
-            "location": "[variables('location')]", 
-            "name": "[variables('mgmtPublicIPAddressName')]", 
-            "properties": {
-                "dnsSettings": {
-                    "domainNameLabel": "[variables('dnsLabel')]"
-                }, 
-                "idleTimeoutInMinutes": 30, 
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
-            }, 
-            "tags": {
-                "application": "[parameters('tagValues').application]", 
-                "costCenter": "[parameters('tagValues').cost]", 
-                "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
-                "group": "[parameters('tagValues').group]", 
-                "owner": "[parameters('tagValues').owner]"
-            }, 
-            "type": "Microsoft.Network/publicIPAddresses"
-        }, 
-        {
-            "apiVersion": "[variables('networkApiVersion')]", 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('extSelfPublicIpAddressNamePrefix'), '0')]", 
-            "properties": {
-                "idleTimeoutInMinutes": 30, 
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
-            }, 
-            "tags": {
-                "application": "[parameters('tagValues').application]", 
-                "costCenter": "[parameters('tagValues').cost]", 
-                "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
-                "group": "[parameters('tagValues').group]", 
-                "owner": "[parameters('tagValues').owner]"
-            }, 
-            "type": "Microsoft.Network/publicIPAddresses"
-        }, 
-        {
-            "apiVersion": "[variables('networkApiVersion')]", 
-            "copy": {
-                "count": "[variables('numberOfExternalIps')]", 
-                "name": "extpipcopy"
-            }, 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('extPublicIPAddressNamePrefix'), copyIndex())]", 
-            "properties": {
-                "dnsSettings": {
-                    "domainNameLabel": "[concat(variables('dnsLabel'), copyIndex(0))]"
-                }, 
-                "idleTimeoutInMinutes": 30, 
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
-            }, 
-            "tags": {
-                "application": "[parameters('tagValues').application]", 
-                "costCenter": "[parameters('tagValues').cost]", 
-                "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
-                "group": "[parameters('tagValues').group]", 
-                "owner": "[parameters('tagValues').owner]"
-            }, 
-            "type": "Microsoft.Network/publicIPAddresses"
-        }, 
-        {
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
-                "[variables('mgmtPublicIPAddressId')]", 
                 "[variables('mgmtNsgID')]"
             ], 
             "location": "[variables('location')]", 
@@ -867,9 +799,7 @@
         {
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
-                "[variables('extNsgID')]", 
-                "extpipcopy", 
-                "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '0')]"
+                "[variables('extNsgID')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('extNicName')]", 

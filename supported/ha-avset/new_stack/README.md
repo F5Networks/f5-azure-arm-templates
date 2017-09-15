@@ -37,6 +37,7 @@ The template also supports updating the next hop of Azure User-Defined Routes (U
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
   - This template requires that the resource group name the deployment uses to be no longer than **35** characters as a result of limitations to tag size within Azure.
   - Persistence and connection mirroring are now supported in this template.  It also supports mirroring of APM sessions, if the Access Profile is deployed in traffic-group-1.  F5 recommends using a single traffic group, since a traditional Active/Active model is not supported at this time.
+  - This template now supports associating Azure Public IP Address resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.
 
 
 ## Security
@@ -461,6 +462,22 @@ https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-aut
 
 #### 3. Azure PowerShell
 Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
+
+### Traffic Group Configuration
+
+This template supports associating Azure Public IP Address resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  
+At deployment time, an Azure tag with key **f5_tg** and value **traffic-group-1** is created on each public IP address resource. Use the following guidance to configure multiple traffic groups.
+
+  1. Select the Azure public IP address you want to associate with the second traffic group (in our example, the second traffic group name is **traffic-group-2**).
+  2. From the public IP address Tags blade, select the **f5_tg** tag.
+  3. Modify the tag value to **traffic-group-2** and then save the tag.
+  4. From the BIG-IP VE management Configuration utility, click **Device Management > Traffic Groups > Create**, and then complete the following.
+     - Name: traffic-group-2
+     - Failover Order: Select the preferred order of the devices for this traffic group; F5 recommends setting the current standby device as the preferred device for this second traffic group, so that each traffic group has a different preferred device (device will become active after creating the traffic group)
+     - Click Create Traffic Group. 
+  5. The public IP address resources tagged with **traffic-group-2** will be associated with the preferred device for that traffic group.
+  
+**Note**: The next hop for Azure user defined routes (UDRs) will follow the active device for traffic-group-1.
 
 ## Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
 

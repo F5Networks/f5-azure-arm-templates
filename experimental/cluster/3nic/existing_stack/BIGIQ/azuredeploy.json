@@ -1086,7 +1086,7 @@
             "dependsOn": [
                 "[variables('extNsgID')]", 
                 "extpipcopy", 
-                "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '0')]", 
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '1')]", 
                 "[variables('intLbId')]"
             ], 
             "location": "[variables('location')]", 
