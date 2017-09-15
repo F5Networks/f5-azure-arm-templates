@@ -17,7 +17,9 @@
 
 ## Introduction
 
-This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE cluster (Active/Active) in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the compute instance of F5 is running with a management, front-end application traffic(Virtual Server) and back-end application interface.
+This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE cluster (Active/Active) in Microsoft Azure. It also allows you to choose to deploy the HA cluster with or without network failover enabled. With network failover disabled, the cluster is created in a limited *Active/Active* configuration and traffic groups are not available; consequently, you cannot use connection, persistence, or session mirroring.  
+
+When network failover is enabled, the cluster is configured in a traditional *Active/Standby* mode. Alternately, you can configure multiple traffic groups in the traditional *Active/Active* mode to allow each device to process traffic for the traffic group to which it is associated. In both of these network failover modes, Azure load balancer probes determine which BIG-IP VE device will receive application traffic. Mirroring and failover are available in both scenarios.
 
 **Networking Stack Type:** This solution deploys into a new networking stack, which is created along with the solution.
 
