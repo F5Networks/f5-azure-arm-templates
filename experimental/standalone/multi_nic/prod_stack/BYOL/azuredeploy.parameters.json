@@ -8,7 +8,7 @@
         "adminPassword": {
             "value": "GEN_UNIQUE"
         }, 
-        "dnsLabel": {
+        "uniqueLabel": {
             "value": "REQUIRED"
         }, 
         "instanceName": {
