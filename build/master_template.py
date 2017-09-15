@@ -168,7 +168,8 @@ master_helper.parameter_initialize(data)
 ## Set default parameters for all templates
 data['parameters']['adminUsername'] = {"type": "string", "defaultValue": "azureuser", "metadata": {"description": "User name for the Virtual Machine."}}
 data['parameters']['adminPassword'] = {"type": "securestring", "metadata": {"description": "Password to login to the Virtual Machine."}}
-data['parameters']['dnsLabel'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": "Unique DNS Name for the Public IP address used to access the Virtual Machine"}}
+if stack_type not in ('prod_stack'):
+    data['parameters']['dnsLabel'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": "Unique DNS Name for the Public IP address used to access the Virtual Machine"}}
 data['parameters']['instanceType'] = {"type": "string", "defaultValue": default_instance, "allowedValues": instance_type_list, "metadata": {"description": "Azure instance size of the Virtual Machine."}}
 data['parameters']['imageName'] = {"type": "string", "defaultValue": "Good", "allowedValues": ["Good", "Better", "Best"], "metadata": {"description": "F5 SKU (IMAGE) to you want to deploy."}}
 data['parameters']['bigIpVersion'] = {"type": "string", "defaultValue": default_big_ip_version, "allowedValues": allowed_big_ip_versions, "metadata": {"description": "F5 BIG-IP version you want to use."}}
@@ -190,42 +191,43 @@ data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": 
 data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values, "metadata": {"description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."}}
 
 # Set new_stack/existing_stack/prod_stack parameters for templates
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset', 'cluster_1nic', 'ltm_autoscale', 'waf_autoscale'):
-    if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
-        data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": {"description": "Name of the Virtual Machine."}}
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
+    data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": {"description": "Name of the Virtual Machine."}}
+if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
+    data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "metadata": {"description": "The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers."}}
+if template_name in ('cluster_3nic') and 'experimental' in created_file:
+    data['parameters']['enableNetworkFailover'] = {"allowedValues": [ "No", "Yes" ], "defaultValue": "No", "metadata": { "description": "Enabling failover creates a traditional active/active deployment with traffic groups and mirroring. When failover is disabled, all devices are active; use traffic group none." }, "type": "string"}
+    data['parameters']['internalLoadBalancerProbePort'] = {"defaultValue": "3456", "metadata": { "description": "Specify a TCP port for the internal load balancer to monitor." }, "type": "string"}
+if stack_type == 'new_stack':
+    data['parameters']['vnetAddressPrefix'] = {"type": "string", "defaultValue": "10.0", "metadata": {"description": "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'."}}
+elif stack_type in ('existing_stack', 'prod_stack'):
+    data['parameters']['vnetName'] = {"type": "string", "metadata": {"description": "The name of the existing virtual network to which you want to connect the BIG-IP VEs."}}
+    data['parameters']['vnetResourceGroupName'] = {"type": "string", "metadata": {"description": "The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed."}}
+    data['parameters']['mgmtSubnetName'] = {"type": "string", "metadata": {"description": "Name of the existing MGMT subnet - with external access to the Internet."}}
+    if template_name in ('ha-avset', 'cluster_1nic', 'cluster_3nic'):
+        data['parameters']['mgmtIpAddressRangeStart'] = {"metadata": {"description": "The static private IP address you would like to assign to the management self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."}, "type": "string"}
+    elif template_name in ('ltm_autoscale', 'waf_autoscale'):
+        # Auto Scale(VM Scale Set) solutions get the IP address dynamically
+        pass
+    else:
+        data['parameters']['mgmtIpAddress'] = {"type": "string", "metadata": {"description": "MGMT subnet IP Address to use for the BIG-IP management IP address."}}
     if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
-        data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "metadata": {"description": "The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers."}}
-    if template_name in ('cluster_3nic') and 'experimental' in created_file:
-        data['parameters']['enableNetworkFailover'] = {"allowedValues": [ "No", "Yes" ], "defaultValue": "No", "metadata": { "description": "Enabling failover creates a traditional active/active deployment with traffic groups and mirroring. When failover is disabled, all devices are active; use traffic group none." }, "type": "string"}
-        data['parameters']['internalLoadBalancerProbePort'] = {"defaultValue": "3456", "metadata": { "description": "Specify a TCP port for the internal load balancer to monitor." }, "type": "string"}
-    if stack_type == 'new_stack':
-        data['parameters']['vnetAddressPrefix'] = {"type": "string", "defaultValue": "10.0", "metadata": {"description": "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'."}}
-    elif stack_type in ('existing_stack', 'prod_stack'):
-        data['parameters']['vnetName'] = {"type": "string", "metadata": {"description": "The name of the existing virtual network to which you want to connect the BIG-IP VEs."}}
-        data['parameters']['vnetResourceGroupName'] = {"type": "string", "metadata": {"description": "The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed."}}
-        data['parameters']['mgmtSubnetName'] = {"type": "string", "metadata": {"description": "Name of the existing MGMT subnet - with external access to the Internet."}}
-        if template_name in ('ha-avset', 'cluster_1nic', 'cluster_3nic'):
-            data['parameters']['mgmtIpAddressRangeStart'] = {"metadata": {"description": "The static private IP address you would like to assign to the management self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."}, "type": "string"}
-        elif template_name in ('ltm_autoscale', 'waf_autoscale'):
-            # Auto Scale(VM Scale Set) solutions get the IP address dynamically
-            pass
+        data['parameters']['externalSubnetName'] = {"type": "string", "metadata": {"description": "Name of the existing external subnet - with external access to Internet."}}
+        if template_name in ('ha-avset', 'cluster_3nic'):
+            data['parameters']['externalIpSelfAddressRangeStart'] = {"metadata": {"description": "The static private IP address you would like to assign to the external self IP (primary) of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."}, "type": "string"}
+            data['parameters']['externalIpAddressRangeStart'] = {"metadata": {"description": "The static private IP address (secondary) you would like to assign to the first shared Azure public IP. An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses for external virtual servers."}, "type": "string"}
         else:
-            data['parameters']['mgmtIpAddress'] = {"type": "string", "metadata": {"description": "MGMT subnet IP Address to use for the BIG-IP management IP address."}}
-        if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
-            data['parameters']['externalSubnetName'] = {"type": "string", "metadata": {"description": "Name of the existing external subnet - with external access to Internet."}}
-            if template_name in ('ha-avset', 'cluster_3nic'):
-                data['parameters']['externalIpSelfAddressRangeStart'] = {"metadata": {"description": "The static private IP address you would like to assign to the external self IP (primary) of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."}, "type": "string"}
-                data['parameters']['externalIpAddressRangeStart'] = {"metadata": {"description": "The static private IP address (secondary) you would like to assign to the first shared Azure public IP. An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses for external virtual servers."}, "type": "string"}
-            else:
-                data['parameters']['externalIpAddressRangeStart'] = {"type": "string", "metadata": {"description": "The static private IP address  you would like to assign to the first external Azure public IP(for self IP). An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50(self IP), 10.100.1.51 and 10.100.1.52 being configured as static private IP addresses for external virtual servers."}}
-        if template_name in ('standalone_3nic', 'standalone_multi_nic', 'ha-avset', 'cluster_3nic'):
-            data['parameters']['internalSubnetName'] = {"type": "string", "metadata": {"description": "Name of the existing internal subnet."}}
-            if template_name in ('ha-avset', 'cluster_3nic'):
-                data['parameters']['internalIpAddressRangeStart'] = {"type": "string", "metadata": {"description": "The static private IP address you would like to assign to the internal self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."}}
-            else:
-                data['parameters']['internalIpAddress'] = {"type": "string", "metadata": {"description": "Internal subnet IP address you want to use for the BIG-IP internal self IP address."}}
-        if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic'):
-            data['parameters']['avSetChoice'] = {"defaultValue": "CREATE_NEW", "metadata": {"description": "If you would like the VM placed in a new availabilty set then leave the default value of 'CREATE_NEW', otherwise specify the name of the existing availability set you would like to use. Note: If using an existing AV Set then this deployment must be in the same resource group as the AV Set."}, "type": "string"}
+            data['parameters']['externalIpAddressRangeStart'] = {"type": "string", "metadata": {"description": "The static private IP address  you would like to assign to the first external Azure public IP(for self IP). An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50(self IP), 10.100.1.51 and 10.100.1.52 being configured as static private IP addresses for external virtual servers."}}
+    if template_name in ('standalone_3nic', 'standalone_multi_nic', 'ha-avset', 'cluster_3nic'):
+        data['parameters']['internalSubnetName'] = {"type": "string", "metadata": {"description": "Name of the existing internal subnet."}}
+        if template_name in ('ha-avset', 'cluster_3nic'):
+            data['parameters']['internalIpAddressRangeStart'] = {"type": "string", "metadata": {"description": "The static private IP address you would like to assign to the internal self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."}}
+        else:
+            data['parameters']['internalIpAddress'] = {"type": "string", "metadata": {"description": "Internal subnet IP address you want to use for the BIG-IP internal self IP address."}}
+    if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic'):
+        data['parameters']['avSetChoice'] = {"defaultValue": "CREATE_NEW", "metadata": {"description": "If you would like the VM placed in a new availabilty set then leave the default value of 'CREATE_NEW', otherwise specify the name of the existing availability set you would like to use. Note: If using an existing AV Set then this deployment must be in the same resource group as the AV Set."}, "type": "string"}
+if stack_type in ('prod_stack'):
+    data['parameters']['uniqueLabel'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": "Unique Name for the deployment to be used when creating resources."}}
 
 # Set unique solution parameters
 if template_name in ('standalone_multi_nic'):
@@ -445,7 +447,8 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
             if template_name in ('cluster_3nic'):
                 ext_ip_config_array = [ { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig0')]", "properties": { "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix0'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat(variables('extLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ] } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig1')]", "properties": { "primary": False, "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix1'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat(variables('extLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ] } } ]
                 lb_front_end_array = [{ "name": "loadBalancerFrontEnd0", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 0)]" } } }, { "name": "loadBalancerFrontEnd1", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 1)]" } } }, { "name": "loadBalancerFrontEnd2", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 2)]" } } }, { "name": "loadBalancerFrontEnd3", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 3)]" } } }, { "name": "loadBalancerFrontEnd4", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 4)]" } } }, { "name": "loadBalancerFrontEnd5", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 5)]" } } }, { "name": "loadBalancerFrontEnd6", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 6)]" } } }, { "name": "loadBalancerFrontEnd7", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 7)]" } } }, { "name": "loadBalancerFrontEnd8", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 8)]" } } }, { "name": "loadBalancerFrontEnd9", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 9)]" } } }, { "name": "loadBalancerFrontEnd10", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 10)]" } } }, { "name": "loadBalancerFrontEnd11", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 11)]" } } }, { "name": "loadBalancerFrontEnd12", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 12)]" } } }, { "name": "loadBalancerFrontEnd13", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 13)]" } } }, { "name": "loadBalancerFrontEnd14", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 14)]" } } }, { "name": "loadBalancerFrontEnd15", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 15)]" } } }, { "name": "loadBalancerFrontEnd16", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 16)]" } } }, { "name": "loadBalancerFrontEnd17", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 17)]" } } }, { "name": "loadBalancerFrontEnd18", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 18)]" } } }, { "name": "loadBalancerFrontEnd19", "properties": { "publicIPAddress": { "id": "[concat(variables('extPublicIPAddressIdPrefix'), 19)]" } } }]
-
+    if stack_type in ('prod_stack'):
+        data['variables']['dnsLabel'] = "[toLower(parameters('uniqueLabel'))]"
 
     # After adding variables for new_stack/existing_stack we need to add the ip config array
     if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
