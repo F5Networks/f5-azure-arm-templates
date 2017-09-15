@@ -51,11 +51,11 @@ Log in to the [Azure Resource Explorer](https://resources.azure.com) and then na
 <POST_CONFIG_TXT>{{## Post-Deployment Configuration
 Use this section for optional configuration changes after you have deployed the template.
 
-### Additional Public IP Addresses
-This ARM template supports using up to 8 public IP addresses.  After you initially deploy the template, if you want to include additional public IP addresses (up to the template-supported limit of 8) use the following guidance.  If you want to include more than 8 public IP addresses, see [Adding more than 8 Public IP addresses](#adding-more-than-8-public-ip-addresses-to-the-deployment).
+### Additional public IP addresses
+This ARM template supports using up to 20 public IP addresses.  When you initially deployed the template, if you chose fewer than 20 public IP addresses and now want to include additional public IP addresses (up to the template-supported limit of 20) use the following guidance.  If you want to include more than 20 public IP addresses available from the template, see [Adding more than 20 Public IP addresses](#adding-more-than-20-public-ip-addresses-to-the-deployment).
 
-#### Adding up to 8 public IP addresses
-To add public IP addresses up to the template-supported limit of 8 after you have initially deployed the template, use the Azure Portal to redeploy the template, updating the parameters for the changes you want to make.  Use the following guidance:
+#### Adding up to 20 public IP addresses after initially deploying the template
+To add public IP addresses up to the template-supported limit of 20 after you have initially deployed the template, use the Azure Portal to redeploy the template, updating the parameters for the changes you want to make.  Use the following guidance:
 
 1.	From the Azure Portal, click the Azure Resource Group where you deployed the template.
 2.	Click **Deployments**.
@@ -67,8 +67,8 @@ To add public IP addresses up to the template-supported limit of 8 after you hav
 8.	Agree to the terms and conditions.
 10.	Click **Purchase**.
 
-#### Adding more than 8 public IP addresses to the deployment
-The deployment template supports creation of 1-8 external public IP addresses for application traffic (first one is used for external NIC Self IP).  Follow the steps below to add **more** public IP addresses to the deployment:
+#### Adding more than 20 public IP addresses to the deployment
+The deployment template supports creation of 1-20 external public IP addresses for application traffic (first one is used for external NIC Self IP).  Follow the steps below to add **more** than 20 public IP addresses to the deployment:
 
 - Create a new Azure public IP address resource in the deployment resource group
 - Create a new IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*)
@@ -81,10 +81,10 @@ When you create virtual servers on the BIG-IP VE for these new additional addres
 Use this section for optional configuration changes after you have deployed the template.
 
 ### Additional Public IP Addresses - Failover
-This ARM template supports using up to 8 public IP addresses.  After you initially deploy the template, if you want to include additional public IP addresses (up to the template-supported limit of 8) and/or if you want to add or remove the user-defined routes (UDRs) to be managed by the BIG-IP, use the following guidance.  If you want to include more than 8 public IP addresses, see [Adding more than 8 Public IP addresses](#adding-more-than-8-public-ip-addresses-to-the-deployment)
+This ARM template supports using up to 20 public IP addresses.   When you initially deployed the template, if you chose fewer than 20 public IP addresses and now want to include additional public IP addresses (up to the template-supported limit of 20) and/or if you want to add or remove the user-defined routes (UDRs) to be managed by the BIG-IP, use the following guidance.  If you want to include more than 8 public IP addresses, see [Adding more than 8 Public IP addresses](#adding-more-than-8-public-ip-addresses-to-the-deployment)
 
-#### Adding up to 8 public IP addresses
-To add public IP addresses up to the template-supported limit of 8 or if you want to add or remove the user-defined routes managed by the BIG-IP system after you have initially deployed the template, use the Azure Portal to redeploy the template, updating the parameters for the changes you want to make.  Use the following guidance:
+#### Adding up to 20 public IP addresses after initially deploying the template
+To add public IP addresses up to the template-supported limit of 20 after you have initially deployed the template, use the Azure Portal to redeploy the template, updating the parameters for the changes you want to make.  Use the following guidance:
 
 1.	Ensure that the first BIG-IP (VM 0) in the cluster is in an active state (from the BIG-IP Configuration utility, click **Device Management>Devices**, the device with the lowest IP address should be active).
 2.	From the Azure Portal, click the Azure Resource Group where you deployed the template.
@@ -98,8 +98,8 @@ To add public IP addresses up to the template-supported limit of 8 or if you wan
 10.	Agree to the terms and conditions.
 11.	Click **Purchase**.
 
-#### Adding more than 8 public IP addresses to the deployment
-The deployment template supports creation of 1-8 external public IP addresses for application traffic (first one is used for external NIC Self IP). Use the following guidance to add **more** public IP addresses to the deployment:
+#### Adding more than 20 public IP addresses to the deployment
+The deployment template supports creation of 1-20 external public IP addresses for application traffic (first one is used for external NIC Self IP). Use the following guidance to add **more** than 20 public IP addresses to the deployment:
 
   -	Create a new Azure public IP address resource in the deployment resource group.  You ***must*** use the following syntax: ```<ResourceGroupName>-ext-pip<number>```.  For example: **SeattleResourceGroup-ext-pip9**.
   -	Create a new IP configuration resource in the properties of the external Azure network interface (for example *myResourceGroupName-ext0*).  You ***must*** use the following syntax: ```<ResourceGroupName>-ext-ipconfig<number>```.  For example: **SeattleResourceGroup-ext-ipconfig9**.
@@ -150,10 +150,11 @@ At deployment time, an Azure tag with key **f5_tg** and value **traffic-group-1*
   2. From the public IP address Tags blade, select the **f5_tg** tag.
   3. Modify the tag value to **traffic-group-2** and then save the tag.
   4. From the BIG-IP VE management Configuration utility, click **Device Management > Traffic Groups > Create**, and then complete the following.
-     - Name: traffic-group-2
-     - Failover Order: Select the preferred order of the devices for this traffic group; F5 recommends setting the current standby device as the preferred device for this second traffic group, so that each traffic group has a different preferred device (device will become active after creating the traffic group)
-     - Click Create Traffic Group. 
-  5. The public IP address resources tagged with **traffic-group-2** will be associated with the preferred device for that traffic group.
+     - *Name*: **traffic-group-2**
+     - *Failover Order*: Select the preferred order of the devices for this traffic group; F5 recommends setting the current standby device as the preferred device for this second traffic group, so that each traffic group has a different preferred device (device will become active after creating the traffic group).
+     - Click **Create Traffic Group**. 
+
+The public IP address resources tagged with **traffic-group-2** will be associated with the preferred device for that traffic group.
   
 **Note**: The next hop for Azure user defined routes (UDRs) will follow the active device for traffic-group-1.
 }}
