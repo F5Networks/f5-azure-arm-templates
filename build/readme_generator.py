@@ -3,13 +3,20 @@ import re
 import yaml
 
 # Create Functions for README creation
-def get_custom_text(parent_key, child_key):
+def get_custom_text(parent_key, child_key, support_type=None):
     """ Pull in custom text for each solution from the YAML file """
     yaml_doc_loc = "files/readme_files/template_text.yaml"
     with open(yaml_doc_loc) as doc:
         yaml_doc = doc.read()
     yaml_dict = yaml.load(yaml_doc)
-    return yaml_dict[parent_key][child_key]
+    yaml_value = yaml_dict[parent_key][child_key]
+    # Check if supported/experimental keys exist, defaults to 'default'
+    if isinstance(yaml_value, dict):
+        if support_type in yaml_value: 
+            yaml_value = yaml_value[support_type]
+        else:
+            yaml_value = yaml_value['default']
+    return yaml_value
 
 def param_exist(data, param):
     """ Check if a specific parameter exists, will add that blob in README if true """
@@ -114,14 +121,16 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
     lic_type = readme_text['deploy_links']['lic_support'][template_name]
 
     ####### Text Values for README templates #######
-    title_text = get_custom_text('title_text', template_name)
-    intro_text = get_custom_text('intro_text', template_name)
-    example_text = get_custom_text('config_example_text', template_name)
-    stack_type_text = stack_type_check(template_location)
     if 'supported' in readme_location:
         help_text = get_custom_text('help_text', 'supported')
+        support_type = 'supported'
     else:
         help_text = get_custom_text('help_text', 'experimental')
+        support_type = 'experimental'
+    title_text = get_custom_text('title_text', template_name, support_type)
+    intro_text = get_custom_text('intro_text', template_name, support_type)
+    example_text = get_custom_text('config_example_text', template_name, support_type)
+    stack_type_text = stack_type_check(template_location)
     version_map = md_version_map(data)
     deploy_links = create_deploy_links(readme_text['deploy_links']['version_tag'], lic_type, template_location)
     bash_script = readme_text['bash_script']
@@ -131,27 +140,27 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
     # Add service principal text if needed
     if param_exist(data, 'servicePrincipalSecret'):
         sp_text = sp_access_needed(api_access_needed, misc_readme)
-        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'service_principal') + '\n'
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'service_principal', support_type) + '\n'
     # Post-Deployment Configuration Text Substitution
     if 'autoscale' in template_name:
         post_config_text = misc_readme_grep('<POST_CONFIG_AUTOSCALE_TXT>', misc_readme)
-        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'post_config') + '\n'
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'post_config', support_type) + '\n'
     if param_exist(data, 'numberOfExternalIps'):
-        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'post_config') + '\n'
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'post_config', support_type) + '\n'
         if template_name in 'ha-avset':
             post_config_text = misc_readme_grep('<POST_CONFIG_FAILOVER_TXT>', misc_readme)
-            extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'rg_limit') + '\n'
+            extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'rg_limit', support_type) + '\n'
         else:
             post_config_text = misc_readme_grep('<POST_CONFIG_TXT>', misc_readme)
     if param_exist(data, 'numberOfAdditionalNics'):
-        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'nic_sizing') + '\n'
-        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'addtl_nic_config') + '\n'
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'nic_sizing', support_type) + '\n'
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'addtl_nic_config', support_type) + '\n'
     if template_name in ('ha-avset'):
-        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'traffic_group_msg') + '\n'
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'traffic_group_msg', support_type) + '\n'
     if template_name in ('waf_autoscale'):
-        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'asm_sync') + '\n'
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'asm_sync', support_type) + '\n'
     if template_name in ('ha-avset'):
-        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'tg_config') + '\n'
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'tg_config', support_type) + '\n'
         tg_config_text = misc_readme_grep('<TG_CONFIG_TEXT>', misc_readme)
 
     ### Map in dynamic values ###
