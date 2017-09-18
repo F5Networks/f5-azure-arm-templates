@@ -88,11 +88,11 @@ for tmpl in $template_list; do
 done
 
 ## BIGIP ARM Template - LTM AutoScale
-python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --stack-type new_stack --template-location '../supported/solutions/autoscale/ltm/new_stack/' --script-location '../supported/solutions/autoscale/ltm/new_stack/' --solution-location 'supported'
-python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --stack-type existing_stack --template-location '../supported/solutions/autoscale/ltm/existing_stack/' --script-location '../supported/solutions/autoscale/ltm/existing_stack/' --solution-location 'supported'
+python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --stack-type new_stack --template-location '../supported/solutions/autoscale/ltm/new_stack/PAYG/' --script-location '../supported/solutions/autoscale/ltm/new_stack/' --solution-location 'supported'
+python -B '.\master_template.py' --template-name ltm_autoscale --license-type PAYG --stack-type existing_stack --template-location '../supported/solutions/autoscale/ltm/existing_stack/PAYG/' --script-location '../supported/solutions/autoscale/ltm/existing_stack/' --solution-location 'supported'
 ## BIGIP ARM Template - WAF AutoScale
-python -B '.\master_template.py' --template-name waf_autoscale --license-type PAYG --stack-type new_stack --template-location '../supported/solutions/autoscale/waf/new_stack/' --script-location '../supported/solutions/autoscale/waf/new_stack/' --solution-location 'supported'
-python -B '.\master_template.py' --template-name waf_autoscale --license-type PAYG --stack-type existing_stack --template-location '../supported/solutions/autoscale/waf/existing_stack/' --script-location '../supported/solutions/autoscale/waf/existing_stack/' --solution-location 'supported'
+python -B '.\master_template.py' --template-name waf_autoscale --license-type PAYG --stack-type new_stack --template-location '../supported/solutions/autoscale/waf/new_stack/PAYG/' --script-location '../supported/solutions/autoscale/waf/new_stack/' --solution-location 'supported'
+python -B '.\master_template.py' --template-name waf_autoscale --license-type PAYG --stack-type existing_stack --template-location '../supported/solutions/autoscale/waf/existing_stack/PAYG/' --script-location '../supported/solutions/autoscale/waf/existing_stack/' --solution-location 'supported'
 ############################### End Supported ###############################
 
 
