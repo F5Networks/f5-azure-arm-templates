@@ -140,17 +140,10 @@ elif license_type == 'BIGIQ':
     bigiq_pwd_delete = ' rm -f /config/cloud/bigIqPasswd;'
     if template_name in ('ltm_autoscale', 'waf_autoscale'):
         license1_command =  ", ' --bigIqLicenseHost ', parameters('bigIqLicenseHost'), ' --bigIqLicenseUsername ', parameters('bigIqLicenseUsername'), ' --bigIqLicensePassword /config/cloud/bigIqPasswd --bigIqLicensePool ', parameters('bigIqLicensePool'), ' --bigIpExtMgmtAddress ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --bigIpExtMgmtPort via-api'"
-## Abstract license key text for readme_generator
-license_text = OrderedDict()
-license_text['licenseKey1'] = 'The license token for the F5 BIG-IP VE (BYOL).'
-license_text['licenseKey2'] = 'The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices.'
-license_text['licensedBandwidth'] = 'The amount of licensed bandwidth (Mbps) you want the PAYG image to use.'
-license_text['bigIqLicenseHost'] = 'The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP.'
-license_text['bigIqLicenseUsername'] = 'The BIG-IQ username to use during licensing.'
-license_text['bigIqLicensePassword'] = 'The BIG-IQ password to use during licensing.'
-license_text['bigIqLicensePool'] = 'The BIG-IQ license pool to use during licensing.'
+## Abstract license key parameters for readme_generator
+license_params = ['licenseKey1', 'licenseKey2', 'licensedBandwidth', 'bigIqLicenseHost', 'bigIqLicenseUsername', 'bigIqLicensePassword', 'bigIqLicensePool']
 if template_name not in ('cluster_1nic', 'cluster_3nic', 'ha-avset'):
-    license_text.pop('licenseKey2')
+    license_params.remove('licenseKey2')
 
 ## Load "Meta File(s)" for modification ##
 with open(metafile, 'r') as base:
@@ -166,112 +159,114 @@ data_params['contentVersion'] = content_version
 ## Pulling in a base set of variables and setting order with below call, it is a function of master_helper.py
 master_helper.parameter_initialize(data)
 ## Set default parameters for all templates
-data['parameters']['adminUsername'] = {"type": "string", "defaultValue": "azureuser", "metadata": {"description": "User name for the Virtual Machine."}}
-data['parameters']['adminPassword'] = {"type": "securestring", "metadata": {"description": "Password to login to the Virtual Machine."}}
+data['parameters']['adminUsername'] = {"type": "string", "defaultValue": "azureuser", "metadata": {"description": ""}}
+data['parameters']['adminPassword'] = {"type": "securestring", "metadata": {"description": ""}}
 if stack_type not in ('prod_stack'):
-    data['parameters']['dnsLabel'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": "Unique DNS Name for the Public IP address used to access the Virtual Machine"}}
-data['parameters']['instanceType'] = {"type": "string", "defaultValue": default_instance, "allowedValues": instance_type_list, "metadata": {"description": "Azure instance size of the Virtual Machine."}}
-data['parameters']['imageName'] = {"type": "string", "defaultValue": "Good", "allowedValues": ["Good", "Better", "Best"], "metadata": {"description": "F5 SKU (IMAGE) to you want to deploy."}}
-data['parameters']['bigIpVersion'] = {"type": "string", "defaultValue": default_big_ip_version, "allowedValues": allowed_big_ip_versions, "metadata": {"description": "F5 BIG-IP version you want to use."}}
+    data['parameters']['dnsLabel'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": ""}}
+data['parameters']['instanceType'] = {"type": "string", "defaultValue": default_instance, "allowedValues": instance_type_list, "metadata": {"description": ""}}
+data['parameters']['imageName'] = {"type": "string", "defaultValue": "Good", "allowedValues": ["Good", "Better", "Best"], "metadata": {"description": ""}}
+data['parameters']['bigIpVersion'] = {"type": "string", "defaultValue": default_big_ip_version, "allowedValues": allowed_big_ip_versions, "metadata": {"description": ""}}
 if license_type == 'BYOL':
-    data['parameters']['licenseKey1'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": license_text['licenseKey1']}}
+    data['parameters']['licenseKey1'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": ""}}
     if template_name in ('cluster_1nic', 'cluster_3nic', 'ha-avset'):
         for license_key in ['licenseKey2']:
-            data['parameters'][license_key] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": license_text[license_key]}}
+            data['parameters'][license_key] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": ""}}
 elif license_type == 'PAYG':
-    data['parameters']['licensedBandwidth'] = {"type": "string", "defaultValue": default_payg_bw, "allowedValues": ["25m", "200m", "1g"], "metadata": {"description": license_text['licensedBandwidth']}}
+    data['parameters']['licensedBandwidth'] = {"type": "string", "defaultValue": default_payg_bw, "allowedValues": ["25m", "200m", "1g"], "metadata": {"description": ""}}
 elif license_type == 'BIGIQ':
-    data['parameters']['bigIqLicenseHost'] = {"type": "string", "metadata": {"description": license_text['bigIqLicenseHost']}}
-    data['parameters']['bigIqLicenseUsername'] = {"type": "string", "metadata": {"description": license_text['bigIqLicenseUsername']}}
-    data['parameters']['bigIqLicensePassword'] = {"type": "securestring", "metadata": {"description": license_text['bigIqLicensePassword']}}
-    data['parameters']['bigIqLicensePool'] = {"type": "string", "metadata": {"description": license_text['bigIqLicensePool']}}
-data['parameters']['ntpServer'] = {"type": "string", "defaultValue": "0.pool.ntp.org", "metadata": {"description": "If you would like to change the NTP server the BIG-IP uses then replace the default ntp server with your choice."}}
-data['parameters']['timeZone'] = {"type": "string", "defaultValue": "UTC", "metadata": {"description": "If you would like to change the time zone the BIG-IP uses then enter your choice. This is based on the tzdatabase found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."}}
-data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": "*", "metadata": {"description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources"}}
-data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values, "metadata": {"description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."}}
+    data['parameters']['bigIqLicenseHost'] = {"type": "string", "metadata": {"description": ""}}
+    data['parameters']['bigIqLicenseUsername'] = {"type": "string", "metadata": {"description": ""}}
+    data['parameters']['bigIqLicensePassword'] = {"type": "securestring", "metadata": {"description": ""}}
+    data['parameters']['bigIqLicensePool'] = {"type": "string", "metadata": {"description": ""}}
+data['parameters']['ntpServer'] = {"type": "string", "defaultValue": "0.pool.ntp.org", "metadata": {"description": ""}}
+data['parameters']['timeZone'] = {"type": "string", "defaultValue": "UTC", "metadata": {"description": ""}}
+data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": "*", "metadata": {"description": ""}}
+data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values, "metadata": {"description": ""}}
 
 # Set new_stack/existing_stack/prod_stack parameters for templates
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
-    data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": {"description": "Name of the Virtual Machine."}}
+    data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": {"description": ""}}
 if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
-    data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "metadata": {"description": "The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers."}}
+    data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "metadata": {"description": ""}}
 if template_name in ('cluster_3nic') and 'experimental' in created_file:
-    data['parameters']['enableNetworkFailover'] = {"allowedValues": [ "No", "Yes" ], "defaultValue": "No", "metadata": { "description": "Enabling failover creates a traditional active/active deployment with traffic groups and mirroring. When failover is disabled, all devices are active; use traffic group none." }, "type": "string"}
-    data['parameters']['internalLoadBalancerProbePort'] = {"defaultValue": "3456", "metadata": { "description": "Specify a TCP port for the internal load balancer to monitor." }, "type": "string"}
+    data['parameters']['enableNetworkFailover'] = {"allowedValues": [ "No", "Yes" ], "defaultValue": "No", "metadata": { "description": "" }, "type": "string"}
+    data['parameters']['internalLoadBalancerProbePort'] = {"defaultValue": "3456", "metadata": { "description": "" }, "type": "string"}
 if stack_type == 'new_stack':
-    data['parameters']['vnetAddressPrefix'] = {"type": "string", "defaultValue": "10.0", "metadata": {"description": "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'."}}
+    data['parameters']['vnetAddressPrefix'] = {"type": "string", "defaultValue": "10.0", "metadata": {"description": ""}}
 elif stack_type in ('existing_stack', 'prod_stack'):
-    data['parameters']['vnetName'] = {"type": "string", "metadata": {"description": "The name of the existing virtual network to which you want to connect the BIG-IP VEs."}}
-    data['parameters']['vnetResourceGroupName'] = {"type": "string", "metadata": {"description": "The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed."}}
-    data['parameters']['mgmtSubnetName'] = {"type": "string", "metadata": {"description": "Name of the existing MGMT subnet - with external access to the Internet."}}
+    data['parameters']['vnetName'] = {"type": "string", "metadata": {"description": ""}}
+    data['parameters']['vnetResourceGroupName'] = {"type": "string", "metadata": {"description": ""}}
+    data['parameters']['mgmtSubnetName'] = {"type": "string", "metadata": {"description": ""}}
     if template_name in ('ha-avset', 'cluster_1nic', 'cluster_3nic'):
-        data['parameters']['mgmtIpAddressRangeStart'] = {"metadata": {"description": "The static private IP address you would like to assign to the management self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."}, "type": "string"}
+        data['parameters']['mgmtIpAddressRangeStart'] = {"metadata": {"description": ""}, "type": "string"}
     elif template_name in ('ltm_autoscale', 'waf_autoscale'):
         # Auto Scale(VM Scale Set) solutions get the IP address dynamically
         pass
     else:
-        data['parameters']['mgmtIpAddress'] = {"type": "string", "metadata": {"description": "MGMT subnet IP Address to use for the BIG-IP management IP address."}}
+        data['parameters']['mgmtIpAddress'] = {"type": "string", "metadata": {"description": ""}}
     if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
-        data['parameters']['externalSubnetName'] = {"type": "string", "metadata": {"description": "Name of the existing external subnet - with external access to Internet."}}
+        data['parameters']['externalSubnetName'] = {"type": "string", "metadata": {"description": ""}}
         if template_name in ('ha-avset', 'cluster_3nic'):
-            data['parameters']['externalIpSelfAddressRangeStart'] = {"metadata": {"description": "The static private IP address you would like to assign to the external self IP (primary) of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."}, "type": "string"}
+            data['parameters']['externalIpSelfAddressRangeStart'] = {"metadata": {"description": ""}, "type": "string"}
             data['parameters']['externalIpAddressRangeStart'] = {"metadata": {"description": "The static private IP address (secondary) you would like to assign to the first shared Azure public IP. An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses for external virtual servers."}, "type": "string"}
         else:
-            data['parameters']['externalIpAddressRangeStart'] = {"type": "string", "metadata": {"description": "The static private IP address  you would like to assign to the first external Azure public IP(for self IP). An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50(self IP), 10.100.1.51 and 10.100.1.52 being configured as static private IP addresses for external virtual servers."}}
+            data['parameters']['externalIpAddressRangeStart'] = {"type": "string", "metadata": {"description": ""}}
     if template_name in ('standalone_3nic', 'standalone_multi_nic', 'ha-avset', 'cluster_3nic'):
-        data['parameters']['internalSubnetName'] = {"type": "string", "metadata": {"description": "Name of the existing internal subnet."}}
+        data['parameters']['internalSubnetName'] = {"type": "string", "metadata": {"description": ""}}
         if template_name in ('ha-avset', 'cluster_3nic'):
-            data['parameters']['internalIpAddressRangeStart'] = {"type": "string", "metadata": {"description": "The static private IP address you would like to assign to the internal self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."}}
+            data['parameters']['internalIpAddressRangeStart'] = {"type": "string", "metadata": {"description": ""}}
         else:
-            data['parameters']['internalIpAddress'] = {"type": "string", "metadata": {"description": "Internal subnet IP address you want to use for the BIG-IP internal self IP address."}}
+            data['parameters']['internalIpAddress'] = {"type": "string", "metadata": {"description": ""}}
     if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_multi_nic'):
-        data['parameters']['avSetChoice'] = {"defaultValue": "CREATE_NEW", "metadata": {"description": "If you would like the VM placed in a new availabilty set then leave the default value of 'CREATE_NEW', otherwise specify the name of the existing availability set you would like to use. Note: If using an existing AV Set then this deployment must be in the same resource group as the AV Set."}, "type": "string"}
+        data['parameters']['avSetChoice'] = {"defaultValue": "CREATE_NEW", "metadata": {"description": ""}, "type": "string"}
 if stack_type in ('prod_stack'):
-    data['parameters']['uniqueLabel'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": "Unique Name for the deployment to be used when creating resources."}}
+    data['parameters']['uniqueLabel'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": ""}}
 
 # Set unique solution parameters
 if template_name in ('standalone_multi_nic'):
-    data['parameters']['numberOfAdditionalNics'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5], "metadata": {"description": "By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a select number of additional NICs to the BIG-IP using this parameter."}}
-    data['parameters']['additionalNicLocation'] = {"type": "string", "metadata": {"description": "This parameter specifies where the additional NIC's should go.  This should be a semi-colon delimited string of subnets equal to the number of additional NIC's being deployed.  Example (for 2 additional NIC's): 'subnet01;subnet02'. NOTE: Please ensure that there is no spaces and that the correct number of subnets are provided based on the value chosen in 'numberOfAdditionalNics'. Additional NOTE: It MUST be a unique subnet provided for each additional NIC requested."}}
+    data['parameters']['numberOfAdditionalNics'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5], "metadata": {"description": ""}}
+    data['parameters']['additionalNicLocation'] = {"type": "string", "metadata": {"description": ""}}
 if template_name in ('cluster_1nic'):
-    data['parameters']['numberOfInstances'] = {"type": "int", "defaultValue": 2, "allowedValues": [2], "metadata": {"description": "The number of BIG-IP VEs that will be deployed in front of your application(s)."}}
+    data['parameters']['numberOfInstances'] = {"type": "int", "defaultValue": 2, "allowedValues": [2], "metadata": {"description": ""}}
 if template_name in ('ha-avset'):
-    data['parameters']['managedRoutes'] = {"defaultValue": "NOT_SPECIFIED", "metadata": {"description": "A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24."}, "type": "string"}
-    data['parameters']['routeTableTag'] = {"defaultValue": "NOT_SPECIFIED", "metadata": {"description": "Azure tag value to identify the route tables to be managed by this cluster. For example tag value: myRoute.  Example Azure tag: f5_ha:myRoute."}, "type": "string"}
+    data['parameters']['managedRoutes'] = {"defaultValue": "NOT_SPECIFIED", "metadata": {"description": ""}, "type": "string"}
+    data['parameters']['routeTableTag'] = {"defaultValue": "NOT_SPECIFIED", "metadata": {"description": ""}, "type": "string"}
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
-    data['parameters']['vmScaleSetMinCount'] = {"type": "int", "defaultValue": 2, "allowedValues": [1, 2, 3, 4, 5, 6], "metadata": {"description": "The minimum (and default) number of BIG-IP VEs that will be deployed into the VM Scale Set."}}
-    data['parameters']['vmScaleSetMaxCount'] = {"type": "int", "defaultValue": 4, "allowedValues": [2, 3, 4, 5, 6, 7, 8], "metadata": {"description": "The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set."}}
+    data['parameters']['vmScaleSetMinCount'] = {"type": "int", "defaultValue": 2, "allowedValues": [1, 2, 3, 4, 5, 6], "metadata": {"description": ""}}
+    data['parameters']['vmScaleSetMaxCount'] = {"type": "int", "defaultValue": 4, "allowedValues": [2, 3, 4, 5, 6, 7, 8], "metadata": {"description": ""}}
     # Add TMM CPU metric option into autoscale experimental templates
     if 'experimental' in created_file:
-        data['parameters']['autoScaleMetric'] = {"type": "string", "defaultValue": "Host_Throughput", "allowedValues": ["TMM_CPU", "TMM_Traffic", "Host_Throughput"],  "metadata": {"description": "Select the metric you would like the auto scale events to be triggered on, the following parameters determine individual settings for the scaling rules based on the metric chosen. Note: Custom BIG-IP metrics will be sent to Application Insights regardless of metric selected, for use by additional autoscale rules or for device visbility."}}
-        data['parameters']['appInsights'] = {"type": "string", "defaultValue": "CREATE_NEW", "metadata": {"description": "Input the name of your existing Application Insights environment that will be used to receive custom BIG-IP metrics that can be used for Scale Set rules and device visbility (If in a different resource group than this deployment specify it as 'app_insights_name;app_insights_rg').  If you do not have an Application Insights environment then leave the default of CREATE_NEW and one will be created for you (Note: By default it will be created in East US, specify a different region as 'CREATE_NEW:app_insights_region')."}}
-    data['parameters']['calculatedBandwidth'] = {"type": "string", "defaultValue": "200m", "allowedValues": ["10m", "25m", "100m", "200m", "1g"], "metadata": {"description": "Specify the amount of bandwidth (in mbps) that should be used to base the throughput percentage calculation on for scale events. (For PAYG it is recommended that this match the parameter licensedBandwidth, or at minimum is a lower value)"}}
-    data['parameters']['scaleOutThreshold'] = {"type": "int", "defaultValue": 90, "allowedValues": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95], "metadata": {"description": "The percentage the metric should be above to trigger a Scale Out event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'."}}
-    data['parameters']['scaleInThreshold'] = {"type": "int", "defaultValue": 10, "allowedValues": [5, 10, 15, 20, 25, 30, 35, 40, 45], "metadata": {"description": "The percentage the metric should be below to trigger a Scale In event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'."}}
-    data['parameters']['scaleTimeWindow'] = {"type": "int", "defaultValue": 10, "allowedValues": [5, 10, 15, 30], "metadata": {"description": "The time window required to trigger a scale event (in and out). This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping)."}}
-    data['parameters']['notificationEmail'] = {"defaultValue": "OPTIONAL", "metadata": {"description": "If you would like email notifications on scale events please specify an email address, otherwise leave the parameter as 'OPTIONAL'. Note: You can specify multiple emails by seperating them with a semi-colon such as 'email@domain.com;email2@domain.com'."}, "type": "string"}
+        data['parameters']['autoScaleMetric'] = {"type": "string", "defaultValue": "Host_Throughput", "allowedValues": ["TMM_CPU", "TMM_Traffic", "Host_Throughput"],  "metadata": {"description": ""}}
+        data['parameters']['appInsights'] = {"type": "string", "defaultValue": "CREATE_NEW", "metadata": {"description": ""}}
+    data['parameters']['calculatedBandwidth'] = {"type": "string", "defaultValue": "200m", "allowedValues": ["10m", "25m", "100m", "200m", "1g"], "metadata": {"description": ""}}
+    data['parameters']['scaleOutThreshold'] = {"type": "int", "defaultValue": 90, "allowedValues": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95], "metadata": {"description": ""}}
+    data['parameters']['scaleInThreshold'] = {"type": "int", "defaultValue": 10, "allowedValues": [5, 10, 15, 20, 25, 30, 35, 40, 45], "metadata": {"description": ""}}
+    data['parameters']['scaleTimeWindow'] = {"type": "int", "defaultValue": 10, "allowedValues": [5, 10, 15, 30], "metadata": {"description": ""}}
+    data['parameters']['notificationEmail'] = {"defaultValue": "OPTIONAL", "metadata": {"description": ""}, "type": "string"}
 if template_name in ('waf_autoscale'):
     # WAF-like templates need the 'Best' Image, still prompt as a parameter so they are aware of what they are paying for with PAYG
-    data['parameters']['imageName'] = {"type": "string", "defaultValue": "Best", "allowedValues": ["Best"], "metadata": {"description": "F5 SKU (IMAGE) you want to deploy. 'Best' is the only option because ASM is required."}}
-    data['parameters']['solutionDeploymentName'] = {"type": "string", "metadata": {"description": "A unique name for this deployment."}}
-    data['parameters']['applicationProtocols'] = {"type": "string", "defaultValue": "http-https", "metadata": {"description": "The protocol(s) used by your application."}, "allowedValues" : ["http", "https", "http-https", "https-offload"]}
-    data['parameters']['applicationAddress'] = {"type": "string", "metadata": { "description": "The public IP address or DNS FQDN of the application that this WAF will protect."}}
-    data['parameters']['applicationServiceFqdn'] = {"type": "string", "defaultValue": "NOT_SPECIFIED", "metadata": {"description": "If you are deploying in front of an Azure App Service, the FQDN of the public application."}}
-    data['parameters']['applicationPort'] = {"type": "string", "defaultValue": "80", "metadata": {"description": "If you are deploying an HTTP application, the port on which your service listens for unencrypted traffic. This field is not required when deploying HTTPS only."}}
-    data['parameters']['applicationSecurePort'] = {"type": "string", "defaultValue": "443", "metadata": {"description": "If you are deploying an HTTPS application, the port on which your service listens for encrypted traffic. This field is not required when deploying HTTP only."}}
-    data['parameters']['sslCert'] = {"type": "string", "defaultValue": "NOT_SPECIFIED", "metadata": {"description": "The SSL certificate .pfx file corresponding to public facing virtual server."}}
-    data['parameters']['sslPswd'] = {"type": "securestring", "defaultValue": "NOT_SPECIFIED", "metadata": {"description": "The SSL certificate .pfx password corresponding to the certificate you entered."}}
-    data['parameters']['applicationType'] = {"type": "string", "defaultValue": "Linux", "metadata": {"description": "Is your application running on a Linux OS or a Windows OS?"}, "allowedValues": ["Windows", "Linux"]}
-    data['parameters']['blockingLevel'] = {"type": "string", "defaultValue": "medium", "metadata": {"description": "Select how aggressive you want the blocking level of this WAF.  Remember that the more aggressive the blocking level, the more potential there is for false-positives that the WAF might detect. Select Custom to specify your own security policy."}, "allowedValues": ["low", "medium", "high", "off", "custom"]}
-    data['parameters']['customPolicy'] = {"type": "string", "defaultValue": "NOT_SPECIFIED", "metadata": {"description": "Specify the publicly available URL of a custom ASM security policy in XML format. This policy will be applied in place of the standard High/Medium/Low policy."}}
+    data['parameters']['imageName'] = {"type": "string", "defaultValue": "Best", "allowedValues": ["Best"], "metadata": {"description": ""}}
+    data['parameters']['solutionDeploymentName'] = {"type": "string", "metadata": {"description": ""}}
+    data['parameters']['applicationProtocols'] = {"type": "string", "defaultValue": "http-https", "metadata": {"description": ""}, "allowedValues" : ["http", "https", "http-https", "https-offload"]}
+    data['parameters']['applicationAddress'] = {"type": "string", "metadata": { "description": ""}}
+    data['parameters']['applicationServiceFqdn'] = {"type": "string", "defaultValue": "NOT_SPECIFIED", "metadata": {"description": ""}}
+    data['parameters']['applicationPort'] = {"type": "string", "defaultValue": "80", "metadata": {"description": ""}}
+    data['parameters']['applicationSecurePort'] = {"type": "string", "defaultValue": "443", "metadata": {"description": ""}}
+    data['parameters']['sslCert'] = {"type": "string", "defaultValue": "NOT_SPECIFIED", "metadata": {"description": ""}}
+    data['parameters']['sslPswd'] = {"type": "securestring", "defaultValue": "NOT_SPECIFIED", "metadata": {"description": ""}}
+    data['parameters']['applicationType'] = {"type": "string", "defaultValue": "Linux", "metadata": {"description": ""}, "allowedValues": ["Windows", "Linux"]}
+    data['parameters']['blockingLevel'] = {"type": "string", "defaultValue": "medium", "metadata": {"description": ""}, "allowedValues": ["low", "medium", "high", "off", "custom"]}
+    data['parameters']['customPolicy'] = {"type": "string", "defaultValue": "NOT_SPECIFIED", "metadata": {"description": ""}}
 # Add service principal parameters to necessary solutions
 if template_name in ('ltm_autoscale', 'waf_autoscale', 'ha-avset'):
-    data['parameters']['tenantId'] = {"type": "string", "metadata": {"description": "Your Azure service principal application tenant ID."}}
-    data['parameters']['clientId'] = {"type": "string", "metadata": {"description": "Your Azure service principal application client ID."}}
-    data['parameters']['servicePrincipalSecret'] = {"type": "securestring", "metadata": {"description": "Your Azure service principal application secret."}}
+    data['parameters']['tenantId'] = {"type": "string", "metadata": {"description": ""}}
+    data['parameters']['clientId'] = {"type": "string", "metadata": {"description": ""}}
+    data['parameters']['servicePrincipalSecret'] = {"type": "securestring", "metadata": {"description": ""}}
 
 ## Remove unecessary parameters and do a check for missing mandatory variables
 master_helper.template_check(data, 'parameters')
+## Fill in descriptions from YAML doc file in files/readme_files
+master_helper.param_descr_update(data['parameters'], template_name)
 # Some modifications once parameters have been defined
 for parameter in data['parameters']:
     # Sort azuredeploy.json parameter values alphabetically
@@ -872,5 +867,5 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
     readme_text['ps_script'] = ps_script
 
     #### Call function to create/update README ####
-    readme_generator.readme_creation(template_info, data, license_text, readme_text, created_file)
+    readme_generator.readme_creation(template_info, data, license_params, readme_text, created_file)
 ######################################## END Create/Modify README's ########################################

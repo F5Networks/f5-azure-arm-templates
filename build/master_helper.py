@@ -2,6 +2,7 @@
 import sys
 import os
 import httplib
+import readme_generator
 
 def parameter_initialize(data):
     """ Set default parameters, as well as all optional ones in a specific order """
@@ -254,6 +255,16 @@ def template_check(data, resource):
             data[resource].pop(var)
         elif data[resource][var] == "MANDATORY":
             raise Exception('Mandatory parameter was not filled in, exiting...')
+    return data
+
+def param_descr_update(data, template_name):
+    """ Fill in parameter descriptions from the YAML doc file """
+    for param in data:
+        if data[param]['metadata']['description'] != "":
+            # If parameter description is filled in then don't replace
+            continue
+        else:
+            data[param]['metadata']['description'] = readme_generator.get_custom_text('parameter_list', param, None, template_name)
     return data
 
 def pub_ip_strip(data, resource, tmpl_type):
