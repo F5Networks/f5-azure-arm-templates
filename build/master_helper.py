@@ -212,6 +212,7 @@ def variable_initialize(data):
     data['variables']['intLbId'] = "OPTIONAL"
     data['variables']['frontEndIPConfigID'] = "OPTIONAL"
     data['variables']['vmssName'] = "OPTIONAL"
+    data['variables']['vmssId'] = "OPTIONAL"
     data['variables']['appInsightsName'] = "OPTIONAL"
     data['variables']['appInsightsNameArray'] = "OPTIONAL"
     data['variables']['10m'] = "OPTIONAL"

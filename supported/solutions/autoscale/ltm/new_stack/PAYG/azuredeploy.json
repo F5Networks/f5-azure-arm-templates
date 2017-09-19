@@ -358,6 +358,7 @@
         "extLbId": "[resourceId('Microsoft.Network/loadBalancers',variables('externalLoadBalancerName'))]", 
         "frontEndIPConfigID": "[concat(variables('extLbId'),'/frontendIPConfigurations/loadBalancerFrontEnd')]", 
         "vmssName": "[concat(parameters('dnsLabel'),'-vmss')]", 
+        "vmssId": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', variables('vmssName'))]", 
         "10m": 10485760, 
         "25m": 26214400, 
         "100m": 104857600, 
@@ -374,7 +375,7 @@
         "scaleMetricMap": {
             "Host_Throughput": {
                 "metricName": "Network Out", 
-                "metricResourceUri": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', variables('vmssName'))]", 
+                "metricResourceUri": "[variables('vmssId')]", 
                 "thresholdIn": "[variables('scaleInNetworkBytes')]", 
                 "thresholdOut": "[variables('scaleOutNetworkBytes')]"
             }
@@ -866,7 +867,7 @@
         {
             "apiVersion": "[variables('insightsApiVersion')]", 
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]"
+                "[variables('vmssId')]"
             ], 
             "location": "[variables('location')]", 
             "name": "autoscaleconfig", 
@@ -934,7 +935,7 @@
                         ]
                     }
                 ], 
-                "targetResourceUri": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssName'))]"
+                "targetResourceUri": "[variables('vmssId')]"
             }, 
             "type": "Microsoft.Insights/autoscaleSettings"
         }
