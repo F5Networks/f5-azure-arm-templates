@@ -122,15 +122,15 @@ The following is a list of the current **supported** F5 ARM templates. See the *
 
 - **[Deploying the BIG-IP VE in Azure - AutoScale BIG-IP LTM - VM Scale Set](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/solutions/autoscale/ltm)**
     - [New Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/solutions/autoscale/ltm/new_stack)
-        - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.2.0%2Fsupported%2Fsolutions%2Fautoscale%2Fltm%2Fnew_stack%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
+        - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.2.0%2Fsupported%2Fsolutions%2Fautoscale%2Fltm%2Fnew_stack%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
     - [Existing Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/solutions/autoscale/ltm/existing_stack)
-        - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.2.0%2Fsupported%2Fsolutions%2Fautoscale%2Fltm%2Fexisting_stack%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
+        - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.2.0%2Fsupported%2Fsolutions%2Fautoscale%2Fltm%2Fexisting_stack%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
 - **[Deploying the BIG-IP VE in Azure - Auto Scale BIG-IP WAF (LTM + ASM) - VM Scale Set](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/solutions/autoscale/waf)**
     - [New Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/solutions/autoscale/waf/new_stack)
-        - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.2.0%2Fsupported%2Fsolutions%2Fautoscale%2Fwaf%2Fnew_stack%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
+        - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.2.0%2Fsupported%2Fsolutions%2Fautoscale%2Fwaf%2Fnew_stack%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
     - [Existing Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/solutions/autoscale/waf/existing_stack)
-        - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.2.0%2Fsupported%2Fsolutions%2Fautoscale%2Fwaf%2Fexisting_stack%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
+        - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv3.3.2.0%2Fsupported%2Fsolutions%2Fautoscale%2Fwaf%2Fexisting_stack%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
 
 - **Deploying the BIG-IP VE in Azure - HA Cluster: Active/Standby**
