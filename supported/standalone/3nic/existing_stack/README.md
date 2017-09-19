@@ -77,7 +77,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
    - **PAYG**: This allows you to use pay-as-you-go hourly billing. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fsupported%2Fstandalone%2F3nic%2Fexisting_stack%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
-   - **BIG-IQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP(s). <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fsupported%2Fstandalone%2F3nic%2Fexisting_stack%2FBIGIQ%2Fazuredeploy.json">
+   - **BIG-IQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s). <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fsupported%2Fstandalone%2F3nic%2Fexisting_stack%2FBIGIQ%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
 
@@ -88,7 +88,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | --- | --- | --- |
 | adminUsername | Yes | User name for the Virtual Machine. |
 | adminPassword | Yes | Password to login to the Virtual Machine. |
-| dnsLabel | Yes | Unique DNS Name for the Public IP address used to access the Virtual Machine |
+| dnsLabel | Yes | Unique DNS Name for the Public IP address used to access the Virtual Machine. |
 | instanceName | Yes | Name of the Virtual Machine. |
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (IMAGE) to you want to deploy. |
@@ -105,12 +105,12 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | mgmtSubnetName | Yes | Name of the existing MGMT subnet - with external access to the Internet. |
 | mgmtIpAddress | Yes | MGMT subnet IP Address to use for the BIG-IP management IP address. |
 | externalSubnetName | Yes | Name of the existing external subnet - with external access to Internet. |
-| externalIpAddressRangeStart | Yes | The static private IP address  you would like to assign to the first external Azure public IP(for self IP). An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50(self IP), 10.100.1.51 and 10.100.1.52 being configured as static private IP addresses for external virtual servers. |
+| externalIpAddressRangeStart | Yes | The static private IP address want to assign to the first external Azure public IP (for self IP). An additional private IP address will be assigned for each public IP address you specified in **numberOfExternalIps**.  For example, entering 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 (self IP), 10.100.1.51 and 10.100.1.52 being configured as static private IP addresses for external virtual servers. |
 | internalSubnetName | Yes | Name of the existing internal subnet. |
 | internalIpAddress | Yes | Internal subnet IP address you want to use for the BIG-IP internal self IP address. |
-| avSetChoice | Yes | If you would like the VM placed in a new availabilty set then leave the default value of 'CREATE_NEW', otherwise specify the name of the existing availability set you would like to use. Note: If using an existing AV Set then this deployment must be in the same resource group as the AV Set. |
-| ntpServer | Yes | If you would like to change the NTP server the BIG-IP uses then replace the default ntp server with your choice. |
-| timeZone | Yes | If you would like to change the time zone the BIG-IP uses then enter your choice. This is based on the tzdatabase found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |
+| avSetChoice | Yes | If you would like the VM placed in a new availability set then leave the default value of 'CREATE_NEW', otherwise specify the name of the existing availability set you would like to use. Note: If using an existing AV Set then this deployment must be in the same resource group as the AV Set. |
+| ntpServer | Yes | If you want to change the NTP server the BIG-IP uses then replace the default NTP server with your choice. |
+| timeZone | Yes | If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |
 | restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources |
 | tagValues | Yes | Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key. |
 
@@ -381,7 +381,7 @@ To add public IP addresses up to the template-supported limit of 20 after you ha
 
 1.	From the Azure Portal, click the Azure Resource Group where you deployed the template.
 2.	Click **Deployments**.
-3.	Find the deployment and highlight it in the list (should be named Microsoft.Template)
+3.	Find the deployment and highlight it in the list.
 4.	Click **Redeploy**.
 5.	For the Resource Group, click **Use existing** and then select the resource group in which you initially deployed.
 6.	Enter the Admin password and Service Principal Secret parameters with the same values used in the initial deployment.

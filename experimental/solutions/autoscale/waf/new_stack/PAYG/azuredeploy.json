@@ -41,14 +41,14 @@
             ], 
             "defaultValue": "Host_Throughput", 
             "metadata": {
-                "description": "Select the metric you would like the auto scale events to be triggered on, the following parameters determine individual settings for the scaling rules based on the metric chosen. Note: Custom BIG-IP metrics will be sent to Application Insights regardless of metric selected, for use by additional autoscale rules or for device visbility."
+                "description": "Select the metric you would like the auto scale events to be triggered on, the following parameters determine individual settings for the scaling rules based on the metric chosen. Note: Custom BIG-IP metrics will be sent to Application Insights regardless of metric selected, for use by additional autoscale rules or for device visibility."
             }, 
             "type": "string"
         }, 
         "appInsights": {
             "defaultValue": "CREATE_NEW", 
             "metadata": {
-                "description": "Input the name of your existing Application Insights environment that will be used to receive custom BIG-IP metrics that can be used for Scale Set rules and device visbility (If in a different resource group than this deployment specify it as 'app_insights_name;app_insights_rg').  If you do not have an Application Insights environment then leave the default of CREATE_NEW and one will be created for you (Note: By default it will be created in East US, specify a different region as 'CREATE_NEW:app_insights_region')."
+                "description": "Enter the name of your existing Application Insights environment that will be used to receive custom BIG-IP metrics that can be used for Scale Set rules and device visibility. If it is in a different Resource Group than this deployment, specify it as **app_insights_name;app_insights_rg**).  If you do not have an Application Insights environment, leave the default (CREATE_NEW) and the template will create one. Note: By default, the new Application Insights environment will be created in **East US**, if necessary you can specify a different region as **CREATE_NEW:app_insights_region**)."
             }, 
             "type": "string"
         }, 
@@ -62,7 +62,7 @@
             ], 
             "defaultValue": "200m", 
             "metadata": {
-                "description": "Specify the amount of bandwidth (in mbps) that should be used to base the throughput percentage calculation on for scale events. (For PAYG it is recommended that this match the parameter licensedBandwidth, or at minimum is a lower value)"
+                "description": "Specify the amount of bandwidth (in Mbps) that should be used to base the throughput percentage calculation on for scale events. For PAYG, we recommend that this match the parameter **licensedBandwidth**, or at minimum is a lower value."
             }, 
             "type": "string"
         }, 
@@ -132,7 +132,7 @@
         "dnsLabel": {
             "defaultValue": "REQUIRED", 
             "metadata": {
-                "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine"
+                "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine."
             }, 
             "type": "string"
         }, 
@@ -202,7 +202,7 @@
             ], 
             "defaultValue": "Best", 
             "metadata": {
-                "description": "F5 SKU (IMAGE) you want to deploy. 'Best' is the only option because ASM is required."
+                "description": "F5 SKU (IMAGE) you want to deploy. **Best** is the only option because BIG-IP ASM is required."
             }, 
             "type": "string"
         }, 
@@ -318,7 +318,7 @@
             ], 
             "defaultValue": "medium", 
             "metadata": {
-                "description": "Select how aggressive you want the blocking level of this WAF.  Remember that the more aggressive the blocking level, the more potential there is for false-positives that the WAF might detect. Select Custom to specify your own security policy."
+                "description": "Select how aggressive you want the blocking level of this WAF.  Remember that the more aggressive the blocking level, the more potential there is for false-positives the WAF might detect. Select **Custom** to specify your own security policy."
             }, 
             "type": "string"
         }, 
@@ -350,21 +350,21 @@
         "notificationEmail": {
             "defaultValue": "OPTIONAL", 
             "metadata": {
-                "description": "If you would like email notifications on scale events please specify an email address, otherwise leave the parameter as 'OPTIONAL'. Note: You can specify multiple emails by seperating them with a semi-colon such as 'email@domain.com;email2@domain.com'."
+                "description": "If you want email notifications on scale events, specify an email address, otherwise leave the parameter as **OPTIONAL**. Note: You can specify multiple emails by separating them with a semi-colon, such as *email@domain.com;email2@domain.com*."
             }, 
             "type": "string"
         }, 
         "ntpServer": {
             "defaultValue": "0.pool.ntp.org", 
             "metadata": {
-                "description": "If you would like to change the NTP server the BIG-IP uses then replace the default ntp server with your choice."
+                "description": "If you want to change the NTP server the BIG-IP uses then replace the default NTP server with your choice."
             }, 
             "type": "string"
         }, 
         "timeZone": {
             "defaultValue": "UTC", 
             "metadata": {
-                "description": "If you would like to change the time zone the BIG-IP uses then enter your choice. This is based on the tzdatabase found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."
+                "description": "If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."
             }, 
             "type": "string"
         }, 

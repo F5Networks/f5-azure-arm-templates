@@ -87,7 +87,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
    - **PAYG**: This allows you to use pay-as-you-go hourly billing. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fsupported%2Fha-avset%2Fnew_stack%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
-   - **BIG-IQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP(s). <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fsupported%2Fha-avset%2Fnew_stack%2FBIGIQ%2Fazuredeploy.json">
+   - **BIG-IQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s). <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fsupported%2Fha-avset%2Fnew_stack%2FBIGIQ%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
 
@@ -98,7 +98,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | --- | --- | --- |
 | adminUsername | Yes | User name for the Virtual Machine. |
 | adminPassword | Yes | Password to login to the Virtual Machine. |
-| dnsLabel | Yes | Unique DNS Name for the Public IP address used to access the Virtual Machine |
+| dnsLabel | Yes | Unique DNS Name for the Public IP address used to access the Virtual Machine. |
 | instanceName | Yes | Name of the Virtual Machine. |
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (IMAGE) to you want to deploy. |
@@ -117,8 +117,8 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | servicePrincipalSecret | Yes | Your Azure service principal application secret. |
 | managedRoutes | Yes | A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24. |
 | routeTableTag | Yes | Azure tag value to identify the route tables to be managed by this cluster. For example tag value: myRoute.  Example Azure tag: f5_ha:myRoute. |
-| ntpServer | Yes | If you would like to change the NTP server the BIG-IP uses then replace the default ntp server with your choice. |
-| timeZone | Yes | If you would like to change the time zone the BIG-IP uses then enter your choice. This is based on the tzdatabase found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |
+| ntpServer | Yes | If you want to change the NTP server the BIG-IP uses then replace the default NTP server with your choice. |
+| timeZone | Yes | If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |
 | restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources |
 | tagValues | Yes | Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key. |
 
@@ -378,7 +378,7 @@ The following is an example configuration diagram for this solution deployment. 
 Use this section for optional configuration changes after you have deployed the template.
 
 ### Additional Public IP Addresses - Failover
-This ARM template supports using up to 20 public IP addresses.   When you initially deployed the template, if you chose fewer than 20 public IP addresses and now want to include additional public IP addresses (up to the template-supported limit of 20) and/or if you want to add or remove the user-defined routes (UDRs) to be managed by the BIG-IP, use the following guidance.  If you want to include more than 8 public IP addresses, see [Adding more than 8 Public IP addresses](#adding-more-than-8-public-ip-addresses-to-the-deployment)
+This ARM template supports using up to 20 public IP addresses.   When you initially deployed the template, if you chose fewer than 20 public IP addresses and now want to include additional public IP addresses (up to the template-supported limit of 20) and/or if you want to add or remove the user-defined routes (UDRs) to be managed by the BIG-IP, use the following guidance.  If you want to include more than 20 public IP addresses, see [Adding more than 20 Public IP addresses](#adding-more-than-20-public-ip-addresses-to-the-deployment)
 
 #### Adding up to 20 public IP addresses after initially deploying the template
 To add public IP addresses up to the template-supported limit of 20 after you have initially deployed the template, use the Azure Portal to redeploy the template, updating the parameters for the changes you want to make.  Use the following guidance:
@@ -386,7 +386,7 @@ To add public IP addresses up to the template-supported limit of 20 after you ha
 1.	Ensure that the first BIG-IP (VM 0) in the cluster is in an active state (from the BIG-IP Configuration utility, click **Device Management>Devices**, the device with the lowest IP address should be active).
 2.	From the Azure Portal, click the Azure Resource Group where you deployed the template.
 3.	Click **Deployments**.
-4.	Find the deployment and highlight it in the list (should be named Microsoft.Template)
+4.	Find the deployment and highlight it in the list.
 5.	Click **Redeploy**.
 6.	For the Resource Group, click Use existing and select the resource group in which you initially deployed.
 7.	Enter the Admin password and Service Principal Secret parameters with the same values used in the initial deployment.
@@ -401,8 +401,9 @@ The deployment template supports creation of 1-20 external public IP addresses f
   -	Create a new Azure public IP address resource in the deployment resource group.  You ***must*** use the following syntax: ```<ResourceGroupName>-ext-pip<number>```.  For example: **SeattleResourceGroup-ext-pip9**.
   -	Create a new IP configuration resource in the properties of the external Azure network interface (for example *myResourceGroupName-ext0*).  You ***must*** use the following syntax: ```<ResourceGroupName>-ext-ipconfig<number>```.  For example: **SeattleResourceGroup-ext-ipconfig9**.
   -	Add these Azure tags to the public IP address resource:
-    -	For example: ```f5_privateIp=10.10.10.10``` (the tag value should correspond to the new private IP address of the IP configurations).
-    -	For example: ```ext_SubnetId=/subscriptions/<subscriptionId>/resourceGroups/<myResourceGroupName>/providers/Microsoft.Network/virtualNetworks/*< myVnetName >*/subnets/<mySubnetName>``` (you can get this value from resources.azure.com: **Subscriptions > Resource Groups > myResourceGroupName > providers > Microsoft.Network > virtualNetworks > myVnetName > subnets > mySubnetName.id**).
+    -	For example: ```f5_privateIp=10.10.10.10``` (the tag value should correspond to the new private IP address of the IP configuration that references this public IP address).
+    -	For example: ```f5_extSubnetId=/subscriptions/<subscriptionId>/resourceGroups/<myResourceGroupName>/providers/Microsoft.Network/virtualNetworks/*< myVnetName >*/subnets/<mySubnetName>``` (you can get this value from resources.azure.com: **Subscriptions > Resource Groups > myResourceGroupName > providers > Microsoft.Network > virtualNetworks > myVnetName > subnets > mySubnetName.id**).
+    - An Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group you have configured on the BIG-IP VE.
   - Again, you MUST follow the resource naming conventions in the provided examples for failover to work correctly.
 
 When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. See the BIG-IP documentation for specific instructions on creating virtual servers.

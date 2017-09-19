@@ -18,7 +18,7 @@
         "dnsLabel": {
             "defaultValue": "REQUIRED", 
             "metadata": {
-                "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine"
+                "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine."
             }, 
             "type": "string"
         }, 
@@ -167,7 +167,7 @@
         }, 
         "mgmtIpAddressRangeStart": {
             "metadata": {
-                "description": "The static private IP address you would like to assign to the management self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."
+                "description": "The static private IP address you want to assign to the management self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."
             }, 
             "type": "string"
         }, 
@@ -179,7 +179,7 @@
         }, 
         "externalIpSelfAddressRangeStart": {
             "metadata": {
-                "description": "The static private IP address you would like to assign to the external self IP (primary) of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."
+                "description": "The static private IP address you want to assign to the external self IP (primary) of the first BIG-IP VE. The next contiguous address will be used for the second BIG-IP device."
             }, 
             "type": "string"
         }, 
@@ -197,7 +197,7 @@
         }, 
         "internalIpAddressRangeStart": {
             "metadata": {
-                "description": "The static private IP address you would like to assign to the internal self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."
+                "description": "The static private IP address you would like to assign to the internal self IP of the first BIG-IP VE. The next contiguous address will be used for the second BIG-IP device."
             }, 
             "type": "string"
         }, 
@@ -222,14 +222,14 @@
         "ntpServer": {
             "defaultValue": "0.pool.ntp.org", 
             "metadata": {
-                "description": "If you would like to change the NTP server the BIG-IP uses then replace the default ntp server with your choice."
+                "description": "If you want to change the NTP server the BIG-IP uses then replace the default NTP server with your choice."
             }, 
             "type": "string"
         }, 
         "timeZone": {
             "defaultValue": "UTC", 
             "metadata": {
-                "description": "If you would like to change the time zone the BIG-IP uses then enter your choice. This is based on the tzdatabase found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."
+                "description": "If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."
             }, 
             "type": "string"
         }, 
