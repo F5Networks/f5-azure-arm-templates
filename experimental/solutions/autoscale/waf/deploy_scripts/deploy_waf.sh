@@ -2,7 +2,7 @@
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin/"
 
 function passwd() {
-  echo | awk '{print $1}' /config/cloud/passwd
+  echo | awk '{print $1}' /config/cloud/.passwd
 }
 
 while getopts m:d:n:j:k:h:s:t:l:a:c:r:o:u: option
