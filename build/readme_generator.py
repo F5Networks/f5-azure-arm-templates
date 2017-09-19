@@ -3,17 +3,22 @@ import re
 import yaml
 
 # Create Functions for README creation
-def get_custom_text(parent_key, child_key, support_type=None):
+def get_custom_text(parent_key, child_key, support_type=None, template_name=None):
     """ Pull in custom text for each solution from the YAML file """
     yaml_doc_loc = "files/readme_files/template_text.yaml"
     with open(yaml_doc_loc) as doc:
         yaml_doc = doc.read()
     yaml_dict = yaml.load(yaml_doc)
-    yaml_value = yaml_dict[parent_key][child_key]
+    try:
+        yaml_value = yaml_dict[parent_key][child_key]
+    except KeyError:
+        yaml_value = "Please input a value."
     # Check if supported/experimental keys exist, defaults to 'default'
     if isinstance(yaml_value, dict):
         if support_type in yaml_value: 
             yaml_value = yaml_value[support_type]
+        elif template_name in yaml_value:
+            yaml_value = yaml_value[template_name]
         else:
             yaml_value = yaml_value['default']
     return yaml_value
@@ -55,7 +60,7 @@ def md_param_array(data, license_params, lic_type):
                     elif all(x in ['PAYG', 'BIG-IQ'] for x in lic_type) and 'licenseKey' in key:
                         continue                       
                     else:
-                        param_array += "| " + key + " | " + mandatory + " | " + license_params[key] + " |\n"
+                        param_array += "| " + key + " | " + mandatory + " | " + get_custom_text('parameter_list', key) + " |\n"
         else:
             param_array += "| " + parameter + " | " + mandatory + " | " + data['parameters'][parameter]['metadata']['description'] + " |\n"
     return param_array
