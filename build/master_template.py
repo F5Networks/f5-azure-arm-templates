@@ -16,6 +16,7 @@ parser.add_option("-m", "--stack-type", action="store", type="string", dest="sta
 parser.add_option("-t", "--template-location", action="store", type="string", dest="template_location", help="Template Location: such as ../experimental/standalone/1nic/PAYG/")
 parser.add_option("-s", "--script-location", action="store", type="string", dest="script_location", help="Script Location: such as ../experimental/standalone/1nic/")
 parser.add_option("-v", "--solution-location", action="store", type="string", dest="solution_location", default="experimental", help="Solution location: experimental or supported")
+parser.add_option("-r", "--release-prep", action="store_true", dest="release_prep", default=False, help="Release Prep Flag: If passed will equal True.")
 
 (options, args) = parser.parse_args()
 template_name = options.template_name
@@ -24,6 +25,7 @@ stack_type = options.stack_type
 template_location = options.template_location
 script_location = options.script_location
 solution_location = options.solution_location
+release_prep = options.release_prep
 
 ## Specify meta file and file to create(should be argument)
 metafile = 'files/tmpl_files/base.azuredeploy.json'
@@ -54,9 +56,10 @@ route_cmd_array = {"latest": "route", "13.0.021": "route", "12.1.24": "[concat('
 install_cloud_libs = """[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit 1\nfi\necho loaded verifyHash\n\nconfig_loc="/config/cloud/"\nhashed_file_list="<HASHED_FILE_LIST>"\nfor file in $hashed_file_list; do\necho "verifying $file"\n/usr/bin/tmsh run cli script verifyHash $file\nif [ $? != 0 ]; then\necho "$file is not valid"\nexit 1\nfi\necho "verified $file"\ndone\necho "expanding $hashed_file_list"\ntar xvfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud/azure/node_modules\n<TAR_LIST>touch /config/cloud/cloudLibsReady', variables('singleQuote'))]"""
 
 # Automate Verify Hash - the verify_hash function will go out and pull in the latest hash file
+# if release-prep flag is included.  Otherwise it will pull from local verifyHash file
 verify_hash = '''[concat(variables('singleQuote'), '<CLI_SCRIPT>', variables('singleQuote'))]'''
 verify_hash_url = "https://gitswarm.f5net.com/cloudsolutions/f5-cloud-libs/raw/" + f5_cloud_libs_tag + "/dist/verifyHash"
-verify_hash = verify_hash.replace('<CLI_SCRIPT>', master_helper.verify_hash(verify_hash_url))
+verify_hash = verify_hash.replace('<CLI_SCRIPT>', master_helper.verify_hash(verify_hash_url, release_prep))
 
 hashed_file_list = "${config_loc}f5-cloud-libs.tar.gz f5.service_discovery.tmpl"
 additional_tar_list = ""
@@ -359,11 +362,13 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
             data['variables']['newAvailabilitySetName'] = "[concat(variables('dnsLabel'), '-avset')]"
             data['variables']['availabilitySetName'] = "[replace(parameters('avSetChoice'), 'CREATE_NEW', variables('newAvailabilitySetName'))]"
         if template_name in ('cluster_1nic'):
-                data['variables']['mgmtSubnetPrivateAddressPrefixArray'] = "[split(parameters('mgmtIpAddressRangeStart'), '.')]"
-                data['variables']['mgmtSubnetPrivateAddressPrefix'] = "[concat(variables('mgmtSubnetPrivateAddressPrefixArray')[0], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[1], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[2], '.')]"
-                data['variables']['mgmtSubnetPrivateAddressSuffix'] = "[int(variables('mgmtSubnetPrivateAddressPrefixArray')[3])]"
-                data['variables']['mgmtSubnetPrivateAddressSuffix1'] = "[add(variables('mgmtSubnetPrivateAddressSuffix'), 1)]"
-                data['variables']['mgmtSubnetPrivateAddress'] = "[variables('mgmtSubnetPrivateAddressPrefix')]"
+            data['variables']['mgmtSubnetPrivateAddressPrefixArray'] = "[split(parameters('mgmtIpAddressRangeStart'), '.')]"
+            data['variables']['mgmtSubnetPrivateAddressPrefix'] = "[concat(variables('mgmtSubnetPrivateAddressPrefixArray')[0], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[1], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[2], '.')]"
+            data['variables']['mgmtSubnetPrivateAddressSuffix'] = "[int(variables('mgmtSubnetPrivateAddressPrefixArray')[3])]"
+            data['variables']['mgmtSubnetPrivateAddressSuffix1'] = "[add(variables('mgmtSubnetPrivateAddressSuffix'), 1)]"
+            data['variables']['mgmtSubnetPrivateAddress'] = "[variables('mgmtSubnetPrivateAddressPrefix')]"
+            if stack_type in ('prod_stack'):
+                data['variables']['externalLoadBalancerAddress'] = "[concat(variables('mgmtSubnetPrivateAddress'), add(variables('mgmtSubnetPrivateAddressSuffix1'), 1))]"
         if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_multi_nic', 'cluster_3nic', 'ha-avset'):
             data['variables']['extNsgID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-ext-nsg'))]"
             data['variables']['extSelfPublicIpAddressNamePrefix'] = "[concat(variables('dnsLabel'), '-self-pip')]"
@@ -631,7 +636,12 @@ if template_name in ('waf_autoscale'):
     lb_rules_to_use = [{ "Name": "app-http", "properties": { "frontendIPConfiguration": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]" }, "backendAddressPool": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]" }, "probe": { "id": "[variables('lbTcpProbeIdHttp')]" }, "protocol": "Tcp", "frontendPort": "[parameters('applicationPort')]", "backendPort": "[variables('httpBackendPort')]", "idleTimeoutInMinutes": 15 } }, { "Name": "app-https", "properties": { "frontendIPConfiguration": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]" }, "backendAddressPool": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]" }, "probe": { "id": "[variables('lbTcpProbeIdHttps')]" }, "protocol": "Tcp", "frontendPort": "[parameters('applicationSecurePort')]", "backendPort": "[variables('httpsBackendPort')]", "idleTimeoutInMinutes": 15 } }]
 
 if template_name == 'cluster_1nic':
-    resources_list += [{ "apiVersion": network_api_version, "dependsOn": [ "[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtPublicIPAddressName'))]" ], "location": location, "tags": tags, "name": "[variables('externalLoadBalancerName')]", "properties": { "frontendIPConfigurations": [ { "name": "loadBalancerFrontEnd", "properties": { "publicIPAddress": { "id": "[variables('mgmtPublicIPAddressId')]" } } } ], "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ] }, "type": "Microsoft.Network/loadBalancers" }]
+    lb_fe_properties = { "publicIPAddress": { "id": "[variables('mgmtPublicIPAddressId')]" } }
+    depends_on_pip = ["[variables('mgmtPublicIPAddressId')]"]
+    if stack_type in ('prod_stack'):
+        lb_fe_properties = { "privateIPAddress":  "[variables('externalLoadBalancerAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('mgmtSubnetId')]" } }
+        depends_on_pip.remove("[variables('mgmtPublicIPAddressId')]")
+    resources_list += [{ "apiVersion": network_api_version, "dependsOn": [] + depends_on_pip, "location": location, "tags": tags, "name": "[variables('externalLoadBalancerName')]", "properties": { "frontendIPConfigurations": [ { "name": "loadBalancerFrontEnd", "properties": lb_fe_properties } ], "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ] }, "type": "Microsoft.Network/loadBalancers" }]
 if template_name == 'cluster_3nic':
     resources_list += [{ "apiVersion": network_api_version, "dependsOn": [ "extpipcopy" ], "location": location, "tags": tags, "name": "[variables('externalLoadBalancerName')]", "properties": { "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ],
     "frontendIPConfigurations": "[take(variables('lbFrontEndArray'), variables('numberOfExternalIps'))]" }, "type": "Microsoft.Network/loadBalancers" }]
@@ -817,8 +827,8 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
         data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' ',22)]" }
 if template_name == 'cluster_1nic':
     if stack_type == 'prod_stack':
-        data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress,':8443')]" }
-        data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress,' ',8022)]" }
+        data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(concat(variables('mgmtNicId'), 0)).ipConfigurations[0].properties.privateIPAddress,':8443')]" }
+        data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(concat(variables('mgmtNicId'), 0)).ipConfigurations[0].properties.privateIPAddress,' ',8022)]" }
     else:
         data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':8443')]" }
         data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',8022)]" }

@@ -574,7 +574,7 @@
         {
             "apiVersion": "[variables('networkApiVersion')]", 
             "dependsOn": [
-                "[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtPublicIPAddressName'))]"
+                "[variables('mgmtPublicIPAddressId')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('externalLoadBalancerName')]", 
