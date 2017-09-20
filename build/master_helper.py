@@ -207,6 +207,7 @@ def variable_initialize(data):
     data['variables']['ipAddress'] = "OPTIONAL"
     data['variables']['deviceNamePrefix'] = "OPTIONAL"
     data['variables']['externalLoadBalancerName'] = "OPTIONAL"
+    data['variables']['externalLoadBalancerAddress'] = "OPTIONAL"
     data['variables']['extLbId'] = "OPTIONAL"
     data['variables']['internalLoadBalancerName'] = "OPTIONAL"
     data['variables']['intLbId'] = "OPTIONAL"
@@ -294,25 +295,36 @@ def pub_ip_strip(data, resource, tmpl_type):
         raise Exception('Unknown resource type specified in function.')
     return data
 
-def verify_hash(url):
-    """ Download latest verifyHash to be used by the templates """
-    # Parse out url information needed
-    (protocol, host_path) = url.split('//')
-    (host, path) = host_path.split('/', 1)
-    path = '/' + path
-    if url.startswith('https'):
-        conn = httplib.HTTPSConnection(host)
+def verify_hash(url, via_url):
+    """ Download latest verifyHash to be used by the templates, or pull from local file """
+    verify_hash_file = "files/misc_files/verifyHash"
+    if via_url:
+        # Parse out url information needed
+        (protocol, host_path) = url.split('//')
+        (host, path) = host_path.split('/', 1)
+        path = '/' + path
+        if url.startswith('https'):
+            conn = httplib.HTTPSConnection(host)
+        else:
+            conn = httplib.HTTPConnection(host)
+        # Make HTTP Request
+        conn.request('GET', path)
+        response = conn.getresponse()
+        if response.status == 200:
+            pass
+        else:
+            raise Exception("Unable to download verify hash file, HTTP Error Response: %s" % response.msg)
+        # HTTP Call MIGHT include trailing \n, remove that
+        verify_hash = response.read()
+        if verify_hash[-1:] == '\n':
+            verify_hash = verify_hash[:-1]
+        # Update verifyHash file if not in sync
+        with open(verify_hash_file, "r+") as f:
+            if verify_hash != f.read():
+                f.seek(0)
+                f.write(verify_hash)
+                f.truncate()
     else:
-        conn = httplib.HTTPConnection(host)
-    # Make HTTP Request
-    conn.request('GET', path)
-    response = conn.getresponse()
-    if response.status == 200:
-        pass
-    else:
-        raise Exception("Unable to download verify hash file, HTTP Error Response: %s" % response.msg)
-    # HTTP Call MIGHT include trailing \n, remove that
-    response_str = response.read()
-    if response_str[-1:] == '\n':
-        response_str = response_str[:-1]
-    return response_str
+        with open(verify_hash_file, "r") as f:
+            verify_hash = f.read()
+    return verify_hash
