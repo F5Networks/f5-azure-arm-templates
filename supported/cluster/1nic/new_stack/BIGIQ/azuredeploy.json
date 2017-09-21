@@ -120,25 +120,25 @@
         }, 
         "bigIqLicenseHost": {
             "metadata": {
-                "description": "The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP."
+                "description": "The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP.  Note: The BIG-IP will make a REST call to the BIG-IQ (already existing) to let it know a BIG-IP needs to be licensed, it will then license the BIG-IP using the provided BIG-IQ credentials and license pool."
             }, 
             "type": "string"
         }, 
         "bigIqLicenseUsername": {
             "metadata": {
-                "description": "The BIG-IQ username to use during licensing."
+                "description": "The BIG-IQ username to use during BIG-IP licensing via BIG-IQ."
             }, 
             "type": "string"
         }, 
         "bigIqLicensePassword": {
             "metadata": {
-                "description": "The BIG-IQ password to use during licensing."
+                "description": "The BIG-IQ password to use during BIG-IP licensing via BIG-IQ."
             }, 
             "type": "securestring"
         }, 
         "bigIqLicensePool": {
             "metadata": {
-                "description": "The BIG-IQ license pool to use during licensing."
+                "description": "The BIG-IQ license pool to use during BIG-IP licensing via BIG-IQ."
             }, 
             "type": "string"
         }, 
