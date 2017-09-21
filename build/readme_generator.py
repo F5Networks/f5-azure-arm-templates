@@ -150,6 +150,7 @@ def readme_creation(template_info, data, license_params, readme_text, template_l
     if 'autoscale' in template_name:
         post_config_text = misc_readme_grep('<POST_CONFIG_AUTOSCALE_TXT>', misc_readme)
         extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'post_config', support_type) + '\n'
+        extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'master_election', support_type) + '\n'
     if param_exist(data, 'numberOfExternalIps'):
         extra_prereq_text += '  - ' + get_custom_text('prereq_text', 'post_config', support_type) + '\n'
         if template_name in 'ha-avset':

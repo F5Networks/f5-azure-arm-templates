@@ -29,6 +29,7 @@ This solution uses an ARM template to launch the deployment of F5 BIG-IP Local T
   - This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.
   - This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
+  - This template includes a new master election feature, which ensures that if the existing master BIG-IP VE is unavailable, a new master is selected from the BIG-IP VEs in the cluster.
 
 
 ## Security
