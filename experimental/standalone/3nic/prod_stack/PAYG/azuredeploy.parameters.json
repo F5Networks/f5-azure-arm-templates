@@ -73,6 +73,9 @@
                 "group": "GROUP", 
                 "owner": "OWNER"
             }
+        }, 
+        "allowUsageAnalytics": {
+            "value": "Yes"
         }
     }
 }

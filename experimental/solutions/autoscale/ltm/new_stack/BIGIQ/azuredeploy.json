@@ -311,6 +311,17 @@
                 "description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."
             }, 
             "type": "object"
+        }, 
+        "allowUsageAnalytics": {
+            "allowedValues": [
+                "Yes", 
+                "No"
+            ], 
+            "defaultValue": "Yes", 
+            "metadata": {
+                "description": "Staying with the default selection of **Yes** results in this deployment sending anonymous statistics to F5 to help F5 determine how to improve the solutions available. If **No** is selected then statistics will not be sent."
+            }, 
+            "type": "string"
         }
     }, 
     "variables": {
@@ -591,6 +602,17 @@
         "storageAccountType": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]", 
         "newDataStorageAccountName": "[concat(uniqueString(resourceGroup().id, deployment().name), 'data000')]", 
         "dataStorageAccountType": "Standard_LRS", 
+        "deploymentId": "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('dnsLabel'))]", 
+        "allowUsageAnalytics": {
+            "No": {
+                "hashCmd": "echo AllowUsageAnalytics:No", 
+                "metricsCmd": ""
+            }, 
+            "Yes": {
+                "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deploymentId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]", 
+                "metricsCmd": "[concat(' --usageAnalytics \" --metrics customerId:${custId},deploymentId:${deployId},templateName:ltm_autoscale,templateVersion:3.3.1.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BIGIQ,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:Azure\"')]"
+            }
+        }, 
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n", 
         "installCustomConfig": "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
     }, 
@@ -821,7 +843,7 @@
                                 "name": "main", 
                                 "properties": {
                                     "protectedSettings": {
-                                        "commandToExecute": "[concat('mkdir -p /config/cloud/azure/node_modules; AZURE_CREDENTIALS_FILE=/config/cloud/.azCredentials; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -m 400 /dev/null $AZURE_CREDENTIALS_FILE; /usr/bin/install -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' > $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).key1, '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"loadBalancerName\": \"', variables('externalLoadBalancerName'), '\"}', variables('singleQuote'), ' > $AZURE_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; bash /config/installCloudLibs.sh; bash /config/cloud/azure/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/autoscale.sh --resourceGroup ', resourceGroup().name, ' --vmssName ', variables('vmssName'), ' --userName ', parameters('adminUsername'), ' --password $BIG_IP_CREDENTIALS_FILE --azureSecretFile $AZURE_CREDENTIALS_FILE --managementPort ', variables('bigIpMgmtPort'), ' --ntpServer ', parameters('ntpServer'), ' --timeZone ', parameters('timeZone'), ' --appInsightsKey ', variables('singleQuote'), reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsApiVersion')).InstrumentationKey, variables('singleQuote'), ' --bigIqLicenseHost ', parameters('bigIqLicenseHost'), ' --bigIqLicenseUsername ', parameters('bigIqLicenseUsername'), ' --bigIqLicensePassword /config/cloud/.bigIqPasswd --bigIqLicensePool ', parameters('bigIqLicensePool'), ' --bigIpExtMgmtAddress ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --bigIpExtMgmtPort via-api', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; rm -f /config/cloud/.bigIqPasswd; bash /config/customConfig.sh; else exit 1; fi')]"
+                                        "commandToExecute": "[concat('mkdir -p /config/cloud/azure/node_modules; AZURE_CREDENTIALS_FILE=/config/cloud/.azCredentials; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -m 400 /dev/null $AZURE_CREDENTIALS_FILE; /usr/bin/install -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' > $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).key1, '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"loadBalancerName\": \"', variables('externalLoadBalancerName'), '\"}', variables('singleQuote'), ' > $AZURE_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; bash /config/installCloudLibs.sh;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, ';  bash /config/cloud/azure/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/autoscale.sh --resourceGroup ', resourceGroup().name, ' --vmssName ', variables('vmssName'), ' --userName ', parameters('adminUsername'), ' --password $BIG_IP_CREDENTIALS_FILE --azureSecretFile $AZURE_CREDENTIALS_FILE --managementPort ', variables('bigIpMgmtPort'), ' --ntpServer ', parameters('ntpServer'), ' --timeZone ', parameters('timeZone'), variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, ' --appInsightsKey ', variables('singleQuote'), reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsApiVersion')).InstrumentationKey, variables('singleQuote'), ' --bigIqLicenseHost ', parameters('bigIqLicenseHost'), ' --bigIqLicenseUsername ', parameters('bigIqLicenseUsername'), ' --bigIqLicensePassword /config/cloud/.bigIqPasswd --bigIqLicensePool ', parameters('bigIqLicensePool'), ' --bigIpExtMgmtAddress ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --bigIpExtMgmtPort via-api', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; rm -f /config/cloud/.bigIqPasswd; bash /config/customConfig.sh; else exit 1; fi')]"
                                     }, 
                                     "publisher": "Microsoft.Azure.Extensions", 
                                     "settings": {
