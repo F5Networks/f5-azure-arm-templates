@@ -95,10 +95,10 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
 | licenseKey1 | BYOL only: | The license token for the F5 BIG-IP VE (BYOL). |
 | licensedBandwidth | PAYG only: | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
-| bigIqLicenseHost | BIG-IQ licensing only: | The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP. |
-| bigIqLicenseUsername | BIG-IQ licensing only: | The BIG-IQ username to use during licensing. |
-| bigIqLicensePassword | BIG-IQ licensing only: | The BIG-IQ password to use during licensing. |
-| bigIqLicensePool | BIG-IQ licensing only: | The BIG-IQ license pool to use during licensing. |
+| bigIqLicenseHost | BIG-IQ licensing only: | The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP.  Note: The BIG-IP will make a REST call to the BIG-IQ (already existing) to let it know a BIG-IP needs to be licensed, it will then license the BIG-IP using the provided BIG-IQ credentials and license pool. |
+| bigIqLicenseUsername | BIG-IQ licensing only: | The BIG-IQ username to use during BIG-IP licensing via BIG-IQ. |
+| bigIqLicensePassword | BIG-IQ licensing only: | The BIG-IQ password to use during BIG-IP licensing via BIG-IQ. |
+| bigIqLicensePool | BIG-IQ licensing only: | The BIG-IQ license pool to use during BIG-IP licensing via BIG-IQ. |
 | numberOfExternalIps | Yes | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
 | ntpServer | Yes | If you want to change the NTP server the BIG-IP uses then replace the default NTP server with your choice. |
