@@ -17,7 +17,7 @@
 
 ## Introduction
 
-This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3-NIC template without the NIC for connecting directly to backend webservers.
+This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3-NIC template, just without the internal NIC for connecting directly to the backend webservers.
 
 **Networking Stack Type:** This template deploys into an existing, production networking stack; the networking infrastructure must be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects. **NOTE:** This template is designed to deploy into a production stack, with the assumption that there should be no public access. As such this deployment does not attach public IP addresses of any kind to the BIG-IP(s) deployed, outbound Internet access is still **required.**
 
