@@ -3,12 +3,14 @@ import re
 import yaml
 
 # Create Functions for README creation
-def get_custom_text(parent_key, child_key, support_type=None, template_name=None):
+def get_custom_text(parent_key, child_key, support_type=None, template_name=None, yaml_dict=None):
     """ Pull in custom text for each solution from the YAML file """
     yaml_doc_loc = "files/readme_files/template_text.yaml"
-    with open(yaml_doc_loc) as doc:
-        yaml_doc = doc.read()
-    yaml_dict = yaml.load(yaml_doc)
+    # Check if opening file or using passed in dict
+    if not yaml_dict:
+        with open(yaml_doc_loc) as doc:
+            yaml_doc = doc.read()
+        yaml_dict = yaml.load(yaml_doc)
     try:
         yaml_value = yaml_dict[parent_key][child_key]
     except KeyError:

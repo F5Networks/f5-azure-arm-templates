@@ -2,6 +2,7 @@
 import sys
 import os
 import httplib
+import yaml
 import readme_generator
 
 def parameter_initialize(data):
@@ -261,12 +262,16 @@ def template_check(data, resource):
 
 def param_descr_update(data, template_name):
     """ Fill in parameter descriptions from the YAML doc file """
+    yaml_doc_loc = "files/readme_files/template_text.yaml"
+    with open(yaml_doc_loc) as doc:
+        yaml_doc = doc.read()
+    yaml_dict = yaml.load(yaml_doc)
     for param in data:
         if data[param]['metadata']['description'] != "":
             # If parameter description is filled in then don't replace
             continue
         else:
-            data[param]['metadata']['description'] = readme_generator.get_custom_text('parameter_list', param, None, template_name)
+            data[param]['metadata']['description'] = readme_generator.get_custom_text('parameter_list', param, None, template_name, yaml_dict)
     return data
 
 def pub_ip_strip(data, resource, tmpl_type):
