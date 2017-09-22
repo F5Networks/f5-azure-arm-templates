@@ -262,16 +262,15 @@ def template_check(data, resource):
 
 def param_descr_update(data, template_name):
     """ Fill in parameter descriptions from the YAML doc file """
-    yaml_doc_loc = "files/readme_files/template_text.yaml"
-    with open(yaml_doc_loc) as doc:
-        yaml_doc = doc.read()
-    yaml_dict = yaml.load(yaml_doc)
+    yaml_doc_loc = {'doc_text_file': 'files/readme_files/template_text.yaml'}
+    rG = readme_generator.ReadmeGen()
+    files = rG.open_files(yaml_doc_loc)
     for param in data:
         if data[param]['metadata']['description'] != "":
             # If parameter description is filled in then don't replace
             continue
         else:
-            data[param]['metadata']['description'] = readme_generator.get_custom_text('parameter_list', param, None, template_name, yaml_dict)
+            data[param]['metadata']['description'] = rG.get_custom_text('parameter_list', param, template_name)
     return data
 
 def pub_ip_strip(data, resource, tmpl_type):
