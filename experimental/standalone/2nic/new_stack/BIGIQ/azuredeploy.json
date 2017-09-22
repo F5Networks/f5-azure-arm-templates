@@ -208,6 +208,17 @@
                 "description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."
             }, 
             "type": "object"
+        }, 
+        "allowUsageAnalytics": {
+            "allowedValues": [
+                "Yes", 
+                "No"
+            ], 
+            "defaultValue": "Yes", 
+            "metadata": {
+                "description": "Staying with the default selection of **Yes** results in this deployment sending anonymous statistics to F5 to help F5 determine how to improve the solutions available. If **No** is selected then statistics will not be sent."
+            }, 
+            "type": "string"
         }
     }, 
     "variables": {
@@ -759,6 +770,17 @@
         "storageAccountType": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]", 
         "newDataStorageAccountName": "[concat(uniqueString(resourceGroup().id, deployment().name), 'data000')]", 
         "dataStorageAccountType": "Standard_LRS", 
+        "deploymentId": "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('dnsLabel'))]", 
+        "allowUsageAnalytics": {
+            "No": {
+                "hashCmd": "echo AllowUsageAnalytics:No", 
+                "metricsCmd": ""
+            }, 
+            "Yes": {
+                "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deploymentId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]", 
+                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:standalone_2nic,templateVersion:3.3.1.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BIGIQ,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:Azure')]"
+            }
+        }, 
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n", 
         "installCustomConfig": "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
     }, 
@@ -1136,7 +1158,7 @@
             "name": "[concat(variables('instanceName'),'/start')]", 
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir -p /config/cloud/azure/node_modules && cp f5-cloud-libs.tar.gz* /config/cloud; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  unset IFS; bash /config/installCloudLibs.sh; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --default-gw ', variables('tmmRouteGw'), ' --vlan name:external,nic:1.1 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'),  ',vlan:external --log-level debug', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; ', variables('routeCmdArray')[parameters('bigIpVersion')], '; rm -f /config/cloud/.passwd; rm -f /config/cloud/.bigIqPasswd; bash /config/customConfig.sh; else exit 1; fi')]"
+                    "commandToExecute": "[concat('mkdir -p /config/cloud/azure/node_modules && cp f5-cloud-libs.tar.gz* /config/cloud; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  unset IFS; bash /config/installCloudLibs.sh;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, '; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, ' --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --default-gw ', variables('tmmRouteGw'), ' --vlan name:external,nic:1.1 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'),  ',vlan:external --log-level debug', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; ', variables('routeCmdArray')[parameters('bigIpVersion')], '; rm -f /config/cloud/.passwd; rm -f /config/cloud/.bigIqPasswd; bash /config/customConfig.sh; else exit 1; fi')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {

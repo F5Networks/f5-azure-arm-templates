@@ -73,6 +73,7 @@ def parameter_initialize(data):
     data['parameters']['timeZone'] = "MANDATORY"
     data['parameters']['restrictedSrcAddress'] = "MANDATORY"
     data['parameters']['tagValues'] = "MANDATORY"
+    data['parameters']['allowUsageAnalytics'] = "MANDATORY"
 
     return data
 
@@ -246,6 +247,8 @@ def variable_initialize(data):
     data['variables']['storageAccountType'] = "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]"
     data['variables']['newDataStorageAccountName'] = "[concat(uniqueString(resourceGroup().id, deployment().name), 'data000')]"
     data['variables']['dataStorageAccountType'] = "Standard_LRS"
+    data['variables']['deploymentId'] = "MANDATORY"
+    data['variables']['allowUsageAnalytics'] = "MANDATORY"
     data['variables']['customConfig'] = "### START (INPUT) CUSTOM CONFIGURATION HERE\n"
     data['variables']['installCustomConfig'] = "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
 
