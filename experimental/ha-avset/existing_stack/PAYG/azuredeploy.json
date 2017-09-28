@@ -222,7 +222,7 @@
         "managedRoutes": {
             "defaultValue": "NOT_SPECIFIED", 
             "metadata": {
-                "description": "A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24."
+                "description": "A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24. Specifying a comma-delimited list of managedRoutes and a routeTableTag in the template defines the UDRs to be updated. All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with 'f5_ha:' will use the active BIG-IP VE as the next hop for those routes. "
             }, 
             "type": "string"
         }, 
@@ -274,7 +274,7 @@
             ], 
             "defaultValue": "Yes", 
             "metadata": {
-                "description": "Staying with the default selection of **Yes** results in this deployment sending anonymous statistics to F5 to help F5 determine how to improve the solutions available. If **No** is selected then statistics will not be sent."
+                "description": "This deployment can send anonymous statistics to F5 to help us determine how to improve our solutions. If you select **No** statistics are not sent."
             }, 
             "type": "string"
         }

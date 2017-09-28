@@ -17,13 +17,13 @@
 
 ## Introduction
 
-This solution uses an ARM template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled. Each pair of BIG-IP VEs is deployed in an Azure Availability Set, and can therefore be spread across different update and fault domains. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.
+This solution uses an ARM template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled (the template now supports [multiple traffic groups](#traffic-group-configuration) which enables active/active deployments). Each pair of BIG-IP VEs is deployed in an Azure Availability Set, and can therefore be spread across different update and fault domains. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.
 
 Traffic flows from the client through BIG-IP VE to the application servers. This is the standard 'on-premise-like' cloud design where the  BIG-IP VE instance is running with a management interface, a front-end application traffic (external) interface, and back-end application (internal) interface. This template is a result of Azure now supporting multiple public-to-private IP address mappings per NIC. 
 
-This template supports creating up to 20 additional public/private IP address configurations for the external 'application' NIC to be used for passing traffic to BIG-IP virtual servers.  Each virtual server should be configured with a destination address matching the private IP address value of the Azure IP configuration receiving traffic for the application. In the event the active BIG-IP VE becomes unavailable, the IP configuration(s) are migrated using network failover, seamlessly shifting application traffic to the current active BIG-IP VE.
+This template supports creating up to 20 additional public/private IP address configurations for the external 'application' NIC to be used for passing traffic to BIG-IP virtual servers. 
 
-The template also supports updating the next hop of Azure User-Defined Routes (UDRs) to use the active BIG-IP VEs internal self IP address. Specify a comma-delimited list of managedRoutes and a routeTableTag in the template to define the UDRs to be updated.  All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with 'f5_ha:<routeTableTag>' will use the active BIG-IP VE as the next hop for those routes.  See [Post-Deployment Configuration](#post-deployment-configuration) for details.
+The template also supports updating the next hop of Azure User-Defined Routes (UDRs) to use the active BIG-IP VEs internal self IP address.
 
 **Networking Stack Type:** This solution deploys into a new networking stack, which is created along with the solution.
 
@@ -115,13 +115,13 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | tenantId | Yes | Your Azure service principal application tenant ID. |
 | clientId | Yes | Your Azure service principal application client ID. |
 | servicePrincipalSecret | Yes | Your Azure service principal application secret. |
-| managedRoutes | Yes | A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24. |
+| managedRoutes | Yes | A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24. Specifying a comma-delimited list of managedRoutes and a routeTableTag in the template defines the UDRs to be updated. All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with 'f5_ha:' will use the active BIG-IP VE as the next hop for those routes.  |
 | routeTableTag | Yes | Azure tag value to identify the route tables to be managed by this cluster. For example tag value: myRoute.  Example Azure tag: f5_ha:myRoute. |
 | ntpServer | Yes | If you want to change the NTP server the BIG-IP uses then replace the default NTP server with your choice. |
 | timeZone | Yes | If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |
 | restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources |
 | tagValues | Yes | Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key. |
-| allowUsageAnalytics | Yes | Staying with the default selection of **Yes** results in this deployment sending anonymous statistics to F5 to help F5 determine how to improve the solutions available. If **No** is selected then statistics will not be sent. |
+| allowUsageAnalytics | Yes | This deployment can send anonymous statistics to F5 to help us determine how to improve our solutions. If you select **No** statistics are not sent. |
 
 
 ### <a name="powershell"></a>PowerShell Script Example
@@ -383,7 +383,7 @@ The following is an example configuration diagram for this solution deployment. 
 Use this section for optional configuration changes after you have deployed the template.
 
 ### Additional Public IP Addresses - Failover
-This ARM template supports using up to 20 public IP addresses.   When you initially deployed the template, if you chose fewer than 20 public IP addresses and now want to include additional public IP addresses (up to the template-supported limit of 20) and/or if you want to add or remove the user-defined routes (UDRs) to be managed by the BIG-IP, use the following guidance.  If you want to include more than 20 public IP addresses, see [Adding more than 20 Public IP addresses](#adding-more-than-20-public-ip-addresses-to-the-deployment)
+This ARM template supports using up to 20 public IP addresses for the external 'application' NIC to be used for passing traffic to BIG-IP virtual servers. Each virtual server should be configured with a destination address matching the private IP address value of the Azure IP configuration receiving traffic for the application. In the event the active BIG-IP VE becomes unavailable, the IP configuration(s) are migrated using network failover, seamlessly shifting application traffic to the current active BIG-IP VE (the template now supports [multiple traffic groups](#traffic-group-configuration) which enables active/active deployments).   When you initially deployed the template, if you chose fewer than 20 public IP addresses and now want to include additional public IP addresses (up to the template-supported limit of 20) and/or if you want to add or remove the user-defined routes (UDRs) to be managed by the BIG-IP, use the following guidance.  If you want to include more than 20 public IP addresses, see [Adding more than 20 Public IP addresses](#adding-more-than-20-public-ip-addresses-to-the-deployment).
 
 #### Adding up to 20 public IP addresses after initially deploying the template
 To add public IP addresses up to the template-supported limit of 20 after you have initially deployed the template, use the Azure Portal to redeploy the template, updating the parameters for the changes you want to make.  Use the following guidance:
@@ -488,7 +488,7 @@ The public IP address resources tagged with **traffic-group-2** will be associat
 
 ## Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
 
-Once the solution has been deployed there may be a need to perform some additional configuration of the BIG-IP.  This can be accomplished via traditional methods such as via the GUI, logging into the CLI or using the REST API.  However, depending on the requirments it might be preferred to perform this custom configuration as a part of the initial deployment of the solution.  This can be accomplished in the below manner.
+Once the solution has been deployed there may be a need to perform some additional configuration of the BIG-IP.  This can be accomplished via traditional methods such as via the GUI, logging into the CLI or using the REST API.  However, depending on the requirements it might be preferred to perform this custom configuration as a part of the initial deployment of the solution.  This can be accomplished in the below manner.
 
 Within the Azure Resource Manager (ARM) template there is a variable called **customConfig**, this contains text similar to "### START(INPUT) CUSTOM CONFIGURATION", that can be replaced with custom shell scripting to perform additional configuration of the BIG-IP.  An example of what it would look like to configure the f5.ip_forwarding iApp is included below.
 
@@ -500,7 +500,7 @@ Warning: F5 does not support the template if you change anything other than the 
 }
 ```
 ### Changing the BIG-IP Configuration utility (GUI) port
-Depending on the deployment requirements, the default managament port for the BIG-IP may need to be changed. To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>
+Depending on the deployment requirements, the default management port for the BIG-IP may need to be changed. To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>
 ***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP. BIG-IP v13.x and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.<br>
 ***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
 

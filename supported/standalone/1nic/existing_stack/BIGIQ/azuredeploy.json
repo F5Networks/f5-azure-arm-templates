@@ -166,7 +166,7 @@
         "avSetChoice": {
             "defaultValue": "CREATE_NEW", 
             "metadata": {
-                "description": "If you would like the VM placed in a new availability set then leave the default value of 'CREATE_NEW', otherwise specify the name of the existing availability set you would like to use. Note: If using an existing AV Set then this deployment must be in the same resource group as the AV Set."
+                "description": "If you would like the VM placed in a new Azure Availability Set, leave the default value of **CREATE_NEW**, otherwise specify the name of the existing Availability Set you want to use. Note: If you are using an existing AV Set then this deployment must be in the same Azure Resource Group as the AV Set."
             }, 
             "type": "string"
         }, 
@@ -211,7 +211,7 @@
             ], 
             "defaultValue": "Yes", 
             "metadata": {
-                "description": "Staying with the default selection of **Yes** results in this deployment sending anonymous statistics to F5 to help F5 determine how to improve the solutions available. If **No** is selected then statistics will not be sent."
+                "description": "This deployment can send anonymous statistics to F5 to help us determine how to improve our solutions. If you select **No** statistics are not sent."
             }, 
             "type": "string"
         }

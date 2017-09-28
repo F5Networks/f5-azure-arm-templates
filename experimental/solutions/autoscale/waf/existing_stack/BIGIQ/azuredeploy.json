@@ -418,7 +418,7 @@
             ], 
             "defaultValue": "Yes", 
             "metadata": {
-                "description": "Staying with the default selection of **Yes** results in this deployment sending anonymous statistics to F5 to help F5 determine how to improve the solutions available. If **No** is selected then statistics will not be sent."
+                "description": "This deployment can send anonymous statistics to F5 to help us determine how to improve our solutions. If you select **No** statistics are not sent."
             }, 
             "type": "string"
         }
