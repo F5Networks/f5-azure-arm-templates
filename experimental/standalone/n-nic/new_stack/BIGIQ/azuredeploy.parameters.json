@@ -1,0 +1,72 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
+    "contentVersion": "3.3.1.0", 
+    "parameters": {
+        "adminUsername": {
+            "value": "azureuser"
+        }, 
+        "adminPassword": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "dnsLabel": {
+            "value": "REQUIRED"
+        }, 
+        "instanceName": {
+            "value": "f5vm01"
+        }, 
+        "instanceType": {
+            "value": "Standard_DS3_v2"
+        }, 
+        "imageName": {
+            "value": "Good"
+        }, 
+        "bigIpVersion": {
+            "value": "13.0.021"
+        }, 
+        "bigIqLicenseHost": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "bigIqLicenseUsername": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "bigIqLicensePassword": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "bigIqLicensePool": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "numberOfAdditionalNics": {
+            "value": 1
+        }, 
+        "additionalNicLocation": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "numberOfExternalIps": {
+            "value": 1
+        }, 
+        "vnetAddressPrefix": {
+            "value": "10.0"
+        }, 
+        "ntpServer": {
+            "value": "0.pool.ntp.org"
+        }, 
+        "timeZone": {
+            "value": "UTC"
+        }, 
+        "restrictedSrcAddress": {
+            "value": "*"
+        }, 
+        "tagValues": {
+            "value": {
+                "application": "APP", 
+                "cost": "COST", 
+                "environment": "ENV", 
+                "group": "GROUP", 
+                "owner": "OWNER"
+            }
+        }, 
+        "allowUsageAnalytics": {
+            "value": "Yes"
+        }
+    }
+}
