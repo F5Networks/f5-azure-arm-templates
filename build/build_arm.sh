@@ -14,7 +14,7 @@ fi
 
 ############################### Supported ###############################
 ## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), Cluster (1nic, 3nic), HA-AVSET
-template_list="standalone/1nic standalone/2nic standalone/3nic standalone/multi_nic cluster/1nic cluster/3nic ha-avset"
+template_list="standalone/1nic standalone/2nic standalone/3nic standalone/n-nic cluster/1nic cluster/3nic ha-avset"
 stack_list="new_stack existing_stack"
 for tmpl in $template_list; do
     loc=$tmpl
@@ -40,7 +40,7 @@ python -B '.\master_template.py' --template-name waf_autoscale --license-type PA
 
 ############################### Experimental ###############################
 ## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), Cluster (1nic, 3nic), HA-AVSET
-template_list="standalone/1nic standalone/2nic standalone/3nic standalone/multi_nic cluster/1nic cluster/3nic ha-avset"
+template_list="standalone/1nic standalone/2nic standalone/3nic standalone/n-nic cluster/1nic cluster/3nic ha-avset"
 for tmpl in $template_list; do
     loc=$tmpl
     if [[ $loc == *"standalone"* ]]; then
