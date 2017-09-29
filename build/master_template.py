@@ -39,12 +39,12 @@ command_to_execute = ""
 route_add_cmd = ""
 
 ## Static Variable Assignment ##
-content_version = '3.3.1.0'
-f5_networks_tag = 'develop'
-f5_cloud_libs_tag = 'develop'
-f5_cloud_libs_azure_tag = 'develop'
-f5_cloud_iapps_tag = 'develop'
-f5_cloud_workers_tag = 'develop'
+content_version = '4.0.0.0'
+f5_networks_tag = '4.0.0.0'
+f5_cloud_libs_tag = 'release-3.4.0'
+f5_cloud_libs_azure_tag = 'release-1.3.0'
+f5_cloud_iapps_tag = 'release-1.1.0'
+f5_cloud_workers_tag = 'v1.0.0'
 f5_tag = '82e08e16-fc62-4bf0-8916-e1c02dc871cd'
 f5_template_tag = template_name
 # Set BIG-IP versions to allow

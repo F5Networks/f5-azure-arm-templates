@@ -73,10 +73,10 @@ You have three options for deploying this solution:
 ### <a name="azure"></a>Azure deploy buttons
 
 Use the appropriate button, depending on what type of BIG-IP licensing required:
-   - **PAYG**: This allows you to use pay-as-you-go hourly billing. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fexperimental%2Fsolutions%2Fautoscale%2Fltm%2Fexisting_stack%2FPAYG%2Fazuredeploy.json">
+   - **PAYG**: This allows you to use pay-as-you-go hourly billing. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2F4.0.0.0%2Fexperimental%2Fsolutions%2Fautoscale%2Fltm%2Fexisting_stack%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
-   - **BIG-IQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s). <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fexperimental%2Fsolutions%2Fautoscale%2Fltm%2Fexisting_stack%2FBIGIQ%2Fazuredeploy.json">
+   - **BIG-IQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s). <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2F4.0.0.0%2Fexperimental%2Fsolutions%2Fautoscale%2Fltm%2Fexisting_stack%2FBIGIQ%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
 
