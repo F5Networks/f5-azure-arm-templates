@@ -705,7 +705,7 @@ if template_name in ('ha-avset', 'cluster_3nic'):
 command_to_execute = ''; command_to_execute2 = ''; route_add_cmd = ''; default_gw_cmd = "variables('tmmRouteGw')"
 
 if template_name in ('standalone_1nic'):
-    command_to_execute = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048<ANALYTICS_CMD> --module ltm:nominal --module afm:none'<POST_CMD_TO_EXECUTE>)]"
+    command_to_execute = "[concat(<MTU_CMD><BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048<ANALYTICS_CMD> --module ltm:nominal --module afm:none'<POST_CMD_TO_EXECUTE>)]"
 if template_name in ('standalone_2nic'):
     command_to_execute = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048<ANALYTICS_CMD> --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --default-gw ', <DFL_GW_CMD>, ' --vlan name:external,nic:1.1 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), <EXT_MASK_CMD> ',vlan:external --log-level debug'<POST_CMD_TO_EXECUTE>)]"
 if template_name in ('standalone_3nic'):
@@ -755,6 +755,11 @@ command_to_execute = command_to_execute.replace('<LICENSE1_COMMAND>', license1_c
 command_to_execute2 = command_to_execute2.replace('<LICENSE2_COMMAND>', license2_command)
 command_to_execute = command_to_execute.replace('<BIGIQ_PWD_CMD>', big_iq_pwd_cmd)
 command_to_execute2 = command_to_execute2.replace('<BIGIQ_PWD_CMD>', big_iq_pwd_cmd)
+
+# Change MTU to 1400 for 1 NIC
+mtu_cmd = "'tmsh modify sys global-settings mgmt-dhcp disabled; tmsh modify net vlan internal mtu 1400; ', "
+command_to_execute = command_to_execute.replace('<MTU_CMD>', mtu_cmd)
+command_to_execute2 = command_to_execute2.replace('<MTU_CMD>', mtu_cmd)
 
 # Add Usage Analytics Hash and Metrics Command
 metrics_hash_to_exec = "', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, ';"
