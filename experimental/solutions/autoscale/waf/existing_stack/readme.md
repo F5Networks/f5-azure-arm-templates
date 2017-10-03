@@ -27,6 +27,7 @@ This solution uses an ARM template to launch the deployment of F5 BIG-IP Local T
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
   - This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.
+  - This template can send non-identifiable statistical information to F5 Networks to help us improve our templates.  See [Sending statistical information to F5](#sending-statistical-information-to-f5).
   - This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
   - This template includes a master election feature, which ensures that if the existing master BIG-IP VE is unavailable, a new master is selected from the BIG-IP VEs in the cluster.
@@ -440,7 +441,7 @@ The following is an example configuration diagram for this solution deployment. 
 ## Post-Deployment Configuration
 This solution deploys an ARM template that fully configures BIG-IP VE(s) and handles clustering (DSC) and Azure creation of objects needed for management of those BIG-IP VEs.  However, once deployed the assumption is configuration will be performed on the BIG-IP VE(s) to create virtual servers, pools, and other objects used for processing application traffic.  Because that information is unknown at deployment time, ensure the following tasks are done for each unique service to allow traffic to reach the BIG-IP(s) in the VM Scale Set.
 
-### Post-deployment tasks(example application on port 443)
+### Post-deployment tasks (example application on port 443)
   1. Add a "Health Probe" to the ALB (Azure Load Balancer) for port 443, you can choose TCP or HTTP depending on your needs.  This queries each BIG-IP at that port to determine if it is available for traffic.
   2. Add a "Load Balancing Rule" to the ALB where the port is 443 and the backend port is also 443 (assuming you are using same port on the BIG-IP), make sure the backend pool is selected (there should only be one backend pool which was created and is managed by the VM Scale set)
   3. Add an "Inbound Security Rule" to the Network Security Group (NSG) for port 443 as the NSG is added to the subnet where the BIG-IP VE(s) are deployed - You could optionally just remove the NSG from the subnet as the VM Scale Set is fronted by the ALB.
@@ -559,6 +560,23 @@ Warning: F5 does not support the template if you change anything other than the 
 Depending on the deployment requirements, the default management port for the BIG-IP may need to be changed. To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>
 ***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP. BIG-IP v13.x and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.<br>
 ***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
+
+### Sending statistical information to F5
+All of the F5 templates now have an option to send anonymous statistical data to F5 Networks to help us improve future templates.  
+None of the information we collect is personally identifiable, and only includes:  
+
+- Customer ID: this is a hash of the customer ID, not the actual ID
+- Deployment ID: hash of stack ID
+- F5 template name
+- F5 template version
+- Cloud Name
+- Azure region 
+- BIG-IP version 
+- F5 license type
+- F5 Cloud libs version
+- F5 script name
+
+This information is critical to the future improvements of templates, but should you decide to select **No**, information will not be sent to F5.
 
 ## Security Details <a name="securitydetail"></a>
 This section has the code snippet for each the lines you should ensure are present in your template file if you want to verify the integrity of the helper code in the template.

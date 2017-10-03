@@ -27,6 +27,7 @@ This solution uses an ARM template to launch a three NIC deployment of a cloud-f
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
   - This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.
+  - This template can send non-identifiable statistical information to F5 Networks to help us improve our templates.  See [Sending statistical information to F5](#sending-statistical-information-to-f5).
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
   - Because this template allows you to deploy a variable number of NICs, be sure to pick an Azure Virtual Machine instance size that can support the number of NICs you choose, otherwise the deployment will fail.  See the [Azure Instance Size link](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#size-tables) to determine the correct instance size to correspond with the number of NICs required. NOTE: This solution deploys three NICs plus a variable number of NICs as specified in the parameter **numberOfAdditionalNics**
   - As a result of this template deploying a variable number of NICs using the parameter **numberOfAdditionalNics** it will pre-configure the BIG-IP VLAN(s) and place the interfaces into the corresponding VLAN (based on the subnet name(s) in **additionalNicLocation**).  Be aware that after template deployment, the self IP(s) will need to be created corresponding to the Azure IP config object for that NIC, and you must set the IP Config object to a **static** address instead of **dynamic** to ensure it does not change on reboot.
@@ -421,6 +422,23 @@ Warning: F5 does not support the template if you change anything other than the 
 Depending on the deployment requirements, the default management port for the BIG-IP may need to be changed. To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>
 ***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP. BIG-IP v13.x and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.<br>
 ***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
+
+### Sending statistical information to F5
+All of the F5 templates now have an option to send anonymous statistical data to F5 Networks to help us improve future templates.  
+None of the information we collect is personally identifiable, and only includes:  
+
+- Customer ID: this is a hash of the customer ID, not the actual ID
+- Deployment ID: hash of stack ID
+- F5 template name
+- F5 template version
+- Cloud Name
+- Azure region 
+- BIG-IP version 
+- F5 license type
+- F5 Cloud libs version
+- F5 script name
+
+This information is critical to the future improvements of templates, but should you decide to select **No**, information will not be sent to F5.
 
 ## Security Details <a name="securitydetail"></a>
 This section has the code snippet for each the lines you should ensure are present in your template file if you want to verify the integrity of the helper code in the template.
