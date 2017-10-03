@@ -143,6 +143,8 @@ elif license_type == 'BIGIQ':
     bigiq_pwd_delete = ' rm -f /config/cloud/.bigIqPasswd;'
     if template_name in ('ltm_autoscale', 'waf_autoscale'):
         license1_command =  ", ' --bigIqLicenseHost ', parameters('bigIqLicenseHost'), ' --bigIqLicenseUsername ', parameters('bigIqLicenseUsername'), ' --bigIqLicensePassword /config/cloud/.bigIqPasswd --bigIqLicensePool ', parameters('bigIqLicensePool'), ' --bigIpExtMgmtAddress ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --bigIpExtMgmtPort via-api'"
+        # Need to keep BIG-IQ password around in autoscale case for license revocation
+        bigiq_pwd_delete = ''
 ## Abstract license key parameters for readme_generator
 license_params = ['licenseKey1', 'licenseKey2', 'licensedBandwidth', 'bigIqLicenseHost', 'bigIqLicenseUsername', 'bigIqLicensePassword', 'bigIqLicensePool']
 if template_name not in ('cluster_1nic', 'cluster_3nic', 'ha-avset'):
