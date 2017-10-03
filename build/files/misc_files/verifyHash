@@ -13,7 +13,7 @@ proc script::run {} {
             set hashes(f5.aws_advanced_ha.v1.4.0rc1.tmpl) de068455257412a949f1eadccaee8506347e04fd69bfb645001b76f200127668e4a06be2bbb94e10fefc215cfc3665b07945e6d733cbe1a4fa1b88e881590396
             set hashes(asm-policy.tar.gz) 2d39ec60d006d05d8a1567a1d8aae722419e8b062ad77d6d9a31652971e5e67bc4043d81671ba2a8b12dd229ea46d205144f75374ed4cae58cefa8f9ab6533e6
             set hashes(deploy_waf.sh) 7ac8caac0f4e6f3907cd541a2d905931e97cd0220b443403dfbaaa30f3cad615fcd9420a3123327c2609441bd4a87d86a1a35b7567dbe78e3f97bd954a3cc5df
-            set hashes(f5.policy_creator.tmpl) 54d265e0a573d3ae99864adf4e054b293644e48a54de1e19e8a6826aa32ab03bd04c7255fd9c980c3673e9cd326b0ced513665a91367add1866875e5ef3c4e3a
+            set hashes(f5.policy_creator.tmpl) 06539e08d115efafe55aa507ecb4e443e83bdb1f5825a9514954ef6ca56d240ed00c7b5d67bd8f67b815ee9dd46451984701d058c89dae2434c89715d375a620
             set hashes(f5.service_discovery.tmpl) d4008a2c5a7f26cc42eb5cbe2171e15e6e95afb1b34fb03d04f6c1b80f154d896e6faaa2e04fbb85fd8e0e51b479dbfcd286357ce0967b162233cc57e0138b96
 
             set file_path [lindex $tmsh::argv 1]
@@ -36,6 +36,6 @@ proc script::run {} {
             exit 1
         }
     }
-    script-signature pwtV0Cr0C/ECdOJYfrKasgJRwQnGakav+VTuaSBFbzGfUpSUEz3WQr2BG7D5d1qL4ofEkB84hf+4aHNg1KKnKksNjZyFOcxKEm5UtfedjOuySgx0sGxH1TB9i9ek0Q0UH6YmrVvYB2frZF+0BCkksualfJCJVelqSFvxrr5/1ya1apflKocZT5ImN4Uv5Ia37m6vRkr51X1Dlsr5/xhBhy+2zgjcUG0I7HyKyWQ5btwtUyQWAbAndS2DOmAG9yqwrhXF/QlC5ZmI//38kkDbwT8rkto55G8dLFvXa4+AunjPo6spXjkhFIDSYS85HMxPhXAgwQhTzU0QGHsNqhe0+w==
+    script-signature Ta4Gw6Snzfn7VC9D1S4f5CZiYfFyxDJWJTUEAbQ17i5ZQ2CPuQ8TBiNQy2Z/s3mmiJ2ZYdPTTST8FfTq5DsWobvZt1eQrsLjV9TR+FVyPzL2ePOBPmofUq/TKV2RhF1Vhm7mIEk+YbkxTmwaNnba1dLWj9KY7lN5ue6t1PfqqZmHQuMaOtywn0bX+Jhp0VdrS70PkH4NkRmFHVzuoC+NmMXLagr198yXW3IAHu7aViWFj8F4Y+asI8HO2+dAJ3srd/y00RjfNBANvXpEZHoi2hU4uLHuqBiJRa+4L2ADmj+x3a4Q1hVTxCCVWoItrUbPheQqgVOXpr4h7vdAL/eI/w==
     signing-key /Common/f5-irule
 }
