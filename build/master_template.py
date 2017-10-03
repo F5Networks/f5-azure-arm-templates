@@ -149,6 +149,11 @@ elif license_type == 'BIGIQ':
 license_params = ['licenseKey1', 'licenseKey2', 'licensedBandwidth', 'bigIqLicenseHost', 'bigIqLicenseUsername', 'bigIqLicensePassword', 'bigIqLicensePool']
 if template_name not in ('cluster_1nic', 'cluster_3nic', 'ha-avset'):
     license_params.remove('licenseKey2')
+## Check if supported or experimental
+if 'supported' in created_file:
+    support_type = 'supported'
+else:
+    support_type = 'experimental'
 
 ## Load "Meta File(s)" for modification ##
 with open(metafile, 'r') as base:
@@ -194,7 +199,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
     data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": {"description": ""}}
 if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'cluster_3nic', 'ha-avset'):
     data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "metadata": {"description": ""}}
-if template_name in ('cluster_3nic') and 'experimental' in created_file:
+if template_name in ('cluster_3nic') and 'experimental' in support_type:
     data['parameters']['enableNetworkFailover'] = {"allowedValues": [ "No", "Yes" ], "defaultValue": "No", "metadata": { "description": "" }, "type": "string"}
     data['parameters']['internalLoadBalancerProbePort'] = {"defaultValue": "3456", "metadata": { "description": "" }, "type": "string"}
 if stack_type == 'new_stack':
@@ -241,7 +246,7 @@ if template_name in ('ltm_autoscale', 'waf_autoscale'):
     data['parameters']['vmScaleSetMinCount'] = {"type": "int", "defaultValue": 2, "allowedValues": [1, 2, 3, 4, 5, 6], "metadata": {"description": ""}}
     data['parameters']['vmScaleSetMaxCount'] = {"type": "int", "defaultValue": 4, "allowedValues": [2, 3, 4, 5, 6, 7, 8], "metadata": {"description": ""}}
     # Add TMM CPU metric option into autoscale experimental templates
-    if 'experimental' in created_file:
+    if 'experimental' in support_type:
         data['parameters']['autoScaleMetric'] = {"type": "string", "defaultValue": "Host_Throughput", "allowedValues": ["TMM_CPU", "TMM_Traffic", "Host_Throughput"],  "metadata": {"description": ""}}
         data['parameters']['appInsights'] = {"type": "string", "defaultValue": "CREATE_NEW", "metadata": {"description": ""}}
     data['parameters']['calculatedBandwidth'] = {"type": "string", "defaultValue": "200m", "allowedValues": ["10m", "25m", "100m", "200m", "1g"], "metadata": {"description": ""}}
@@ -306,14 +311,14 @@ metrics_cmd = "[concat(' --metrics customerId:${custId},deploymentId:${deployId}
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
     # Pass down to autoscale.sh for autoscale templates
     metrics_cmd = "[concat(' --usageAnalytics \" --metrics customerId:${custId},deploymentId:${deployId},templateName:<TMPL_NAME>,templateVersion:<TMPL_VER>,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:<LIC_TYPE>,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure\"')]"
-metrics_cmd = metrics_cmd.replace('<TMPL_NAME>', template_name).replace('<TMPL_VER>', content_version).replace('<LIC_TYPE>', license_type)
+metrics_cmd = metrics_cmd.replace('<TMPL_NAME>', template_name + '-' + stack_type + '-' + support_type).replace('<TMPL_VER>', content_version).replace('<LIC_TYPE>', license_type)
 hash_cmd = "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]"
 data['variables']['allowUsageAnalytics'] = { "Yes": { "hashCmd": hash_cmd, "metricsCmd": metrics_cmd}, "No": { "hashCmd": "echo AllowUsageAnalytics:No", "metricsCmd": ""} }
 ## Handle new_stack/existing_stack variable differences
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'ha-avset', 'cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autoscale'):
     if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'cluster_3nic', 'ha-avset'):
         data['variables']['instanceName'] = "[toLower(parameters('instanceName'))]"
-    if template_name in ('cluster_3nic') and 'experimental' in created_file:
+    if template_name in ('cluster_3nic') and 'experimental' in support_type:
         data['variables']['failoverCmdArray'] = {"No": {"first": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '0.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address none')]", "second": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '1.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address none')]" }, "Yes": {"first": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '0.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress'))]", "second": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '1.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress1'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress1'))]"}}
         data['variables']['internalLoadBalancerName'] =  "[concat(variables('dnsLabel'),'-int-ilb')]"
         data['variables']["intLbId"] = "[resourceId('Microsoft.Network/loadBalancers',variables('internalLoadBalancerName'))]"
@@ -353,7 +358,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
                 data['variables']['extSubnetPrivateAddress1'] = "[concat(parameters('vnetAddressPrefix'), '.2.5')]"
                 data['variables']['intSubnetPrivateAddress1'] = "[concat(parameters('vnetAddressPrefix'), '.3.5')]"
                 self_ip_config_array += [{"name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": {"PublicIpAddress": {"Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '1')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress1')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]"}}}]
-                if template_name in ('cluster_3nic') and 'experimental' in created_file:
+                if template_name in ('cluster_3nic') and 'experimental' in support_type:
                     data['variables']['intSubnetPrivateAddress2'] = "[concat(parameters('vnetAddressPrefix'), '.3.10')]"
                     data['variables']['intSubnetPrivateAddress3'] = "[concat(parameters('vnetAddressPrefix'), '.3.11')]"
                     data['variables']['internalLoadBalancerAddress'] = "[concat(parameters('vnetAddressPrefix'), '.3.50')]"
@@ -447,7 +452,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
                 data['variables']['intSubnetPrivateAddress'] = "[parameters('internalIpAddressRangeStart')]"
                 data['variables']['intSubnetPrivateAddress1'] = "[concat(variables('intSubnetPrivateAddressPrefix'), variables('intSubnetPrivateAddressSuffix'))]"
                 self_ip_config_array += [{ "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": {"PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '1')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress1')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }]
-                if template_name in ('cluster_3nic') and 'experimental' in created_file:
+                if template_name in ('cluster_3nic') and 'experimental' in support_type:
                     data['variables']['intSubnetPrivateAddressSuffix1'] = "[add(variables('intSubnetPrivateAddressSuffixInt'), 2)]"
                     data['variables']['intSubnetPrivateAddressSuffix2'] = "[add(variables('intSubnetPrivateAddressSuffixInt'), 3)]"
                     data['variables']['intSubnetPrivateAddressSuffix3'] = "[add(variables('intSubnetPrivateAddressSuffixInt'), 4)]"
@@ -499,7 +504,7 @@ if template_name in ('cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autos
         data['variables']['autoScaleMetric'] = "Host_Throughput"
         data['variables']['scaleMetricMap'] = { "Host_Throughput": { "metricName": "Network Out", "metricResourceUri": "[variables('vmssId')]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]"  } }
         # Accout for addition of TMM CPU in autoscale experimental
-        if 'experimental' in created_file:
+        if 'experimental' in support_type:
             data['variables']['appInsightsApiVersion'] = "2015-05-01"
             data['variables']['autoScaleMetric'] = "[parameters('autoScaleMetric')]"
             data['variables']['scaleMetricMap'] = { "Host_Throughput": { "metricName": "Network Out", "metricResourceUri": "[variables('vmssId')]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]"  }, "TMM_CPU": { "metricName": "customMetrics/F5_TMM_CPU", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[parameters('scaleOutThreshold')]", "thresholdIn": "[parameters('scaleInThreshold')]" }, "TMM_Traffic": { "metricName": "customMetrics/F5_TRAFFIC_TOTAL_BYTES", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]" } }
@@ -624,7 +629,7 @@ if template_name in ('ha-avset', 'cluster_3nic'):
     if template_name in ('cluster_3nic'):
         resources_list += [{ "apiVersion": api_version, "dependsOn": depends_on_ext + depends_on_ext_pub0 + ["[variables('extLbId')]"], "location": location, "name": "[concat(variables('extNicName'), '0')]", "properties": { "ipConfigurations": "[concat(take(variables('selfIpConfigArray'), 1), take(variables('extIpconfigArray'), 1))]", "networkSecurityGroup": { "id": "[concat(variables('extNsgId'))]" } }, "tags": tags, "type": "Microsoft.Network/networkInterfaces" }]
         resources_list += [{ "apiVersion": api_version, "dependsOn": depends_on_ext + depends_on_ext_pub1 + ["[variables('extLbId')]"], "location": location, "name": "[concat(variables('extNicName'), '1')]", "properties": { "ipConfigurations": "[concat(skip(variables('selfIpConfigArray'), 1), skip(variables('extIpconfigArray'), 1))]", "networkSecurityGroup": { "id": "[concat(variables('extNsgId'))]" } }, "tags": tags, "type": "Microsoft.Network/networkInterfaces" }]
-    if template_name in ('cluster_3nic') and 'experimental' in created_file:
+    if template_name in ('cluster_3nic') and 'experimental' in support_type:
         resources_list += [{"apiVersion": api_version, "dependsOn": depends_on_ext + depends_on_ext_pub0 + ["[variables('intLbId')]"], "location": location, "name": "[concat(variables('intNicName'), '0')]", "properties": { "primary": True, "enableIPForwarding": True, "ipConfigurations": [ { "name": "[concat(variables('dnsLabel'), '-int-ipconfig')]", "properties": { "primary": True, "privateIPAddress": "[variables('intSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('intSubnetId')]" } } }, { "name": "[concat(variables('dnsLabel'), '-int-ipconfig-secondary')]", "properties": { "privateIPAddress": "[variables('intSubnetPrivateAddress2')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('intSubnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat(variables('intLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ] } } ] }, "tags": tags, "type": "Microsoft.Network/networkInterfaces"}]
         resources_list += [{"apiVersion": api_version, "dependsOn": depends_on_ext + depends_on_ext_pub1 + ["[variables('intLbId')]"], "location": location, "name": "[concat(variables('intNicName'), '1')]", "properties": { "primary": True, "enableIPForwarding": True, "ipConfigurations": [ { "name": "[concat(variables('dnsLabel'), '-int-ipconfig')]", "properties": { "primary": True, "privateIPAddress": "[variables('intSubnetPrivateAddress1')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('intSubnetId')]" } } }, { "name": "[concat(variables('dnsLabel'), '-int-ipconfig-secondary')]", "properties": { "privateIPAddress": "[variables('intSubnetPrivateAddress3')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('intSubnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat(variables('intLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ] } } ] }, "tags": tags, "type": "Microsoft.Network/networkInterfaces"}]
     else:
@@ -657,7 +662,7 @@ if template_name == 'cluster_1nic':
 if template_name == 'cluster_3nic':
     resources_list += [{ "apiVersion": network_api_version, "dependsOn": [ "extpipcopy" ], "location": location, "tags": tags, "name": "[variables('externalLoadBalancerName')]", "properties": { "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ],
     "frontendIPConfigurations": "[take(variables('lbFrontEndArray'), variables('numberOfExternalIps'))]" }, "type": "Microsoft.Network/loadBalancers" }]
-    if 'experimental' in created_file:
+    if 'experimental' in support_type:
         probes_to_use = [{"name": "tcp-probe", "properties": { "protocol": "Tcp", "port": "[parameters('internalLoadBalancerProbePort')]", "intervalInSeconds": 5, "numberOfProbes": 2 }}]
         lb_rules_to_use = [{"name": "allProtocolLbRule", "properties": { "frontendIPConfiguration": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]" }, "backendAddressPool": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]" }, "probe": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancerName')), '/probes/tcp-probe')]" }, "frontendPort": 0, "backendPort": 0, "enableFloatingIP": False, "idleTimeoutInMinutes": 15, "protocol": "All", "loadDistribution": "Default" }}]
         resources_list += [{ "apiVersion": network_api_version, "name": "[variables('internalLoadBalancerName')]", "type": "Microsoft.Network/loadBalancers", "location": location, "tags": tags, "dependsOn": depends_on_ext, "properties": { "frontendIPConfigurations": [ { "name": "LoadBalancerFrontEnd", "properties": { "privateIPAddress":  "[variables('internalLoadBalancerAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('intSubnetId')]" } } } ], "backendAddressPools": [ { "name": "LoadBalancerBackEnd" } ], "loadBalancingRules": lb_rules_to_use, "probes": probes_to_use } }]
@@ -724,7 +729,7 @@ if template_name in ('ha-avset'):
     command_to_execute2 = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --hostname ', concat(variables('instanceName'), '1.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE2_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048<ANALYTICS_CMD> --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --default-gw ', <DFL_GW_CMD>, ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress1'), <EXT_MASK_CMD> ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress1'), <INT_MASK_CMD> ',vlan:internal --log-level debug; echo ', variables('singleQuote'), '/usr/bin/f5-rest-node --use-strict /config/cloud/azure/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/failoverProvider.js', variables('singleQuote'), ' >> /config/failover/tgactive; echo ', variables('singleQuote'), '/usr/bin/f5-rest-node --use-strict /config/cloud/azure/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-azure/scripts/failoverProvider.js', variables('singleQuote'), ' >> /config/failover/tgrefresh; tmsh modify cm device ', concat(variables('instanceName'), '1.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress1'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress1'), '; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --config-sync-ip ', variables('intSubnetPrivateAddress1'), ' --join-group --device-group Sync --sync --remote-host ', variables('mgmtSubnetPrivateAddress'), ' --remote-user admin --remote-password-url file:///config/cloud/.passwd'<POST_CMD_TO_EXECUTE>)]"
 if template_name in ('cluster_3nic'):
     # Two Extensions for cluster_3nic
-    if 'experimental' in created_file:
+    if 'experimental' in support_type:
         command_to_execute = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --hostname ', concat(variables('instanceName'), '0.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE1_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048<ANALYTICS_CMD> --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --default-gw ', <DFL_GW_CMD>, ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), <EXT_MASK_CMD> ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress'), <INT_MASK_CMD> ',vlan:internal --log-level debug; ', variables('failoverCmdArray')[parameters('enableNetworkFailover')].first, '; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --config-sync-ip ', variables('intSubnetPrivateAddress'), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(variables('instanceName'), '0.', resourceGroup().location, '.cloudapp.azure.com'), ' --network-failover --auto-sync --save-on-auto-sync'<POST_CMD_TO_EXECUTE>)]"
         command_to_execute2 = "[concat(<BASE_CMD_TO_EXECUTE>, variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --hostname ', concat(variables('instanceName'), '1.', resourceGroup().location, '.cloudapp.azure.com'), <LICENSE2_COMMAND> ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048<ANALYTICS_CMD> --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --default-gw ', <DFL_GW_CMD>, ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress1'), <EXT_MASK_CMD> ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress1'), <INT_MASK_CMD> ',vlan:internal --log-level debug; ', variables('failoverCmdArray')[parameters('enableNetworkFailover')].second, '; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --config-sync-ip ', variables('intSubnetPrivateAddress1'), ' --join-group --device-group Sync --sync --remote-host ', variables('mgmtSubnetPrivateAddress'), ' --remote-user admin --remote-password-url file:///config/cloud/.passwd'<POST_CMD_TO_EXECUTE>)]"
     else:
@@ -800,7 +805,7 @@ if template_name in ('waf_autoscale'):
 
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
     # Add TMM CPU metric option into autoscale experimental templates - pass key into autoscale.sh
-    if 'experimental' in created_file:
+    if 'experimental' in support_type:
         addtl_script_args += ", ' --appInsightsKey ', variables('singleQuote'), reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsApiVersion')).InstrumentationKey, variables('singleQuote')"
     if template_name in ('waf_autoscale'):
         post_cmd_to_execute = ", '; if [[ $? == 0 ]]; then tmsh modify cm device-group Sync asm-sync enabled; tmsh load sys application template f5.service_discovery.tmpl;<BIGIQ_PWD_DELETE> bash /config/customConfig.sh; else exit 1; fi'"
@@ -833,7 +838,7 @@ if template_name in ('ltm_autoscale', 'waf_autoscale'):
 ###### Appliction Insight Workspace(s) ######
 # Add TMM CPU metric option into autoscale experimental templates
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
-    if 'experimental' in created_file:
+    if 'experimental' in support_type:
         resources_list += [{ "type": "microsoft.insights/components", "condition": "[contains(toUpper(parameters('appInsights')), 'CREATE_NEW')]", "kind": "other", "name": "[variables('appInsightsName')]", "apiVersion": "[variables('appInsightsApiVersion')]", "location": "[variables('appInsightsLocation')]", "tags": tags, "properties": { "ApplicationId": "[variables('appInsightsName')]", "Application_Type": "other" }, "dependsOn": [] }]
 
 ## Sort resources section - Expand to choose order of resources instead of just alphabetical?
@@ -887,7 +892,7 @@ lic_key_count = {'standalone_1nic': 1, 'standalone_2nic': 1, 'standalone_3nic': 
 api_access_needed = {'standalone_1nic': None, 'standalone_2nic': None, 'standalone_3nic': None, 'standalone_n-nic': None, 'cluster_1nic': None, 'cluster_3nic': None, 'ha-avset': 'read_write', 'ltm_autoscale': 'read', 'waf_autoscale': 'read'}
 template_info = {'template_name': template_name, 'location': script_location, 'lic_support': lic_support, 'lic_key_count': lic_key_count, 'api_access_needed': api_access_needed}
 
-if template_name in ('ltm_autoscale', 'waf_autoscale') and 'experimental' in created_file:
+if template_name in ('ltm_autoscale', 'waf_autoscale') and 'experimental' in support_type:
         lic_support['ltm_autoscale'] = ['PAYG', 'BIG-IQ']
         lic_support['waf_autoscale'] = ['PAYG', 'BIG-IQ']
 ######################################## Create/Modify Scripts ########################################

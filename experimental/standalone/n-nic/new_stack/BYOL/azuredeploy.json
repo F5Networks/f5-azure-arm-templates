@@ -913,7 +913,7 @@
             }, 
             "Yes": {
                 "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]", 
-                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:standalone_n-nic,templateVersion:4.0.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BYOL,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
+                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:standalone_n-nic-new_stack-experimental,templateVersion:4.0.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BYOL,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
             }
         }, 
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n", 
