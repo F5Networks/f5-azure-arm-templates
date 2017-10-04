@@ -199,6 +199,7 @@ class ReadmeGen(object):
             extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'asm_sync') + '\n'
         if template_name in ('ha-avset'):
             extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'tg_config') + '\n'
+            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'failover_log') + '\n'
             tg_config_text = self.misc_readme_grep('<TG_CONFIG_TEXT>')
 
         ### Map in dynamic values ###

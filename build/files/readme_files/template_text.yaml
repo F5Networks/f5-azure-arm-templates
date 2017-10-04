@@ -44,10 +44,12 @@ config_example_text:
   waf_autoscale: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
 
 prereq_text:
-  service_principal: 'This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.'
+  service_principal:
+    default: 'This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.'
+    ha-avset: 'This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details. Note: The service principal must have at least Contributor role access to the external network interfaces of both BIG-IP VEs, as well as to all route tables to be modified.'
   post_config: 'This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.'
   master_election: 'This template includes a master election feature, which ensures that if the existing master BIG-IP VE is unavailable, a new master is selected from the BIG-IP VEs in the cluster.'
-  config_backup: 
+  config_backup:
     default: 'After deploying the template, if you make manual changes to the BIG-IP configuration, you must see [this section](#backup-big-ip-configuration-for-cluster-recovery).'
     waf_autoscale: 'After deploying the template, you must see [this section](#backup-big-ip-configuration-for-cluster-recovery) to create and store a backup of your BIG-IP configuration.'
   rg_limit: 'This template requires that the resource group name the deployment uses to be no longer than **35** characters as a result of limitations to tag size within Azure.'
@@ -57,6 +59,7 @@ prereq_text:
   udr_tags: 'To have the UDRs managed by BIG-IP, you must configure it with an Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group you have configured on the BIG-IP VE.'
   asm_sync: '**Important**: After the template successfully deploys, you must log into one of the BIG-IP VEs to modify the Application Security Synchronization settings.  Log in to the BIG-IP VE, and then click **Security > Options > Synchronization > Application Security Synchronization**.  From the **Device Group** list, select **Sync**, and then click **Save**. This ensures any changes to the ASM security policy are synchronized to other devices in the cluster.'
   tg_config: 'This template now supports associating Azure Public IP Address resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.'
+  failover_log: 'The BIG-IP VE failover log can be found at **/var/tmp/azureFailover.log**.'
 
 help_text:
   supported: 'Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K40701984).'

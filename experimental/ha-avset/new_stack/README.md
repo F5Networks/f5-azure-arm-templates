@@ -35,12 +35,13 @@ The template also supports updating the next hop of Azure User-Defined Routes (U
   - This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.
   - This template can send non-identifiable statistical information to F5 Networks to help us improve our templates.  See [Sending statistical information to F5](#sending-statistical-information-to-f5).
   - F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughputs available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/azure-bigip-version-matrix.md.
-  - This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.
+  - This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details. Note: The service principal must have at least Contributor role access to the external network interfaces of both BIG-IP VEs, as well as to all route tables to be modified.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
   - This template requires that the resource group name the deployment uses to be no longer than **35** characters as a result of limitations to tag size within Azure.
   - Persistence and connection mirroring are now supported in this template.  It also supports mirroring of APM sessions, if the Access Profile is deployed in traffic-group-1.  F5 recommends using a single traffic group, since a traditional Active/Active model is not supported at this time.
   - To have the UDRs managed by BIG-IP, you must configure it with an Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group you have configured on the BIG-IP VE.
   - This template now supports associating Azure Public IP Address resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.
+  - The BIG-IP VE failover log can be found at **/var/tmp/azureFailover.log**.
 
 
 ## Security
