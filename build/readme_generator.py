@@ -30,7 +30,6 @@ class ReadmeGen(object):
             yaml_value = "Please input a value."
         try:
             support_type = self.i_data['support_type']
-            template_name = self.i_data['template_info']['template_name']
         except:
             support_type = None
         if not template_name:
@@ -40,7 +39,10 @@ class ReadmeGen(object):
             if support_type in yaml_value: 
                 yaml_value = yaml_value[support_type]
             elif template_name in yaml_value:
-                yaml_value = yaml_value[template_name]
+                if isinstance(yaml_value[template_name], dict) and support_type in yaml_value[template_name]: 
+                    yaml_value = yaml_value[template_name][support_type]
+                else:
+                    yaml_value = yaml_value[template_name]
             else:
                 yaml_value = yaml_value['default']
         return yaml_value
@@ -179,6 +181,7 @@ class ReadmeGen(object):
             post_config_text = self.misc_readme_grep('<POST_CONFIG_AUTOSCALE_TXT>')
             extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'post_config') + '\n'
             extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'master_election') + '\n'
+            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'config_backup') + '\n'
         if self.param_exist('numberOfExternalIps'):
             extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'post_config') + '\n'
             if template_name in 'ha-avset':
@@ -191,6 +194,7 @@ class ReadmeGen(object):
             extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'addtl_nic_config') + '\n'
         if template_name in ('ha-avset'):
             extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'traffic_group_msg') + '\n'
+            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'udr_tags') + '\n'
         if template_name in ('waf_autoscale'):
             extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'asm_sync') + '\n'
         if template_name in ('ha-avset'):
