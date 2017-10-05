@@ -155,7 +155,7 @@ class ReadmeGen(object):
         template_name = i_data['template_info']['template_name']
         readme_location = i_data['template_info']['location']
         final_readme = readme_location + 'README.md'
-        post_config_text = ''; sp_text = ''; extra_prereq_text = ''; tg_config_text = ''
+        post_config_text = ''; sp_text = ''; extra_prereq_text = ''; tg_config_text = ''; vs_creation = ''
         if 'supported' in readme_location:
             self.i_data['support_type'] = 'supported'
             help_text = self.get_custom_text('help_text', 'supported')
@@ -195,12 +195,19 @@ class ReadmeGen(object):
         if template_name in ('ha-avset'):
             extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'traffic_group_msg') + '\n'
             extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'udr_tags') + '\n'
-        if template_name in ('waf_autoscale'):
-            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'asm_sync') + '\n'
-        if template_name in ('ha-avset'):
             extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'tg_config') + '\n'
             extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'failover_log') + '\n'
             tg_config_text = self.misc_readme_grep('<TG_CONFIG_TEXT>')
+        if template_name in ('waf_autoscale'):
+            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'asm_sync') + '\n'
+        if template_name in ('ha-avset'):
+            vs_creation = self.misc_readme_grep('<VS_CREATION_CLUSTER_AVSET>')
+        elif template_name in ('cluster_1nic'):
+            vs_creation = self.misc_readme_grep('<VS_CREATION_CLUSTER_1NIC>')
+        elif template_name in ('cluster_3nic'):
+            vs_creation = self.misc_readme_grep('<VS_CREATION_CLUSTER_3NIC>')
+        else:
+            vs_creation = self.misc_readme_grep('<VS_CREATION>')
 
         ### Map in dynamic values ###
         readme = self.loaded_files['base_readme']
@@ -218,6 +225,7 @@ class ReadmeGen(object):
         readme = readme.replace('<POST_CONFIG_TXT>', post_config_text)
         readme = readme.replace('<SERVICE_PRINCIPAL>', sp_text)
         readme = readme.replace('<TG_CONFIG_TEXT>', tg_config_text)
+        readme = readme.replace('<VS_CREATION>', vs_creation)
 
         ### Write to solution location ###
         with open(final_readme, 'w') as readme_complete:

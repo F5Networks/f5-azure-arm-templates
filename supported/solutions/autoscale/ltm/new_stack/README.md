@@ -76,7 +76,7 @@ You have three options for deploying this solution:
 ### <a name="azure"></a>Azure deploy buttons
 
 Use the appropriate button, depending on what type of BIG-IP licensing required:
-   - **PAYG**: This allows you to use pay-as-you-go hourly billing. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-4.0.0.0%2Fsupported%2Fsolutions%2Fautoscale%2Fltm%2Fnew_stack%2FPAYG%2Fazuredeploy.json">
+   - **PAYG**: This allows you to use pay-as-you-go hourly billing. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.0.0.0%2Fsupported%2Fsolutions%2Fautoscale%2Fltm%2Fnew_stack%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
 
@@ -444,6 +444,23 @@ https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-aut
 
 #### 3. Azure PowerShell
 Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
+
+## Creating virtual servers on the BIG-IP VE
+
+In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the Azure BIG-IP VM's secondary private IP addresses (on the external vlan/NIC). If you need additional virtual servers for your applications/servers, you can add more secondary private IP addresses in Azure, and corresponding virtual servers on the BIG-IP system. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-multiple-ip-addresses-portal for information on multiple IP addresses.
+Note: For 1nic BIG-IP's the virtual server configuration uses the single private IP address available and should utilize different ports (if behind an ALB) or hostnames to differentiate services.
+
+**To create virtual servers on the BIG-IP system**
+
+1. Once your BIG-IP VE has launched, open the BIG-IP VE Configuration utility.
+2. On the Main tab, click **Local Traffic > Virtual Servers** and then click the **Create** button.
+3. In the **Name** field, give the Virtual Server a unique name.
+4. In the **Destination/Mask** field, type the Azure secondary private IP address.
+5. In the **Service Port** field, type the appropriate port. 
+6. Configure the rest of the virtual server as appropriate.
+7. If you used the Service Discovery iApp template: <br>In the Resources section, from the **Default Pool** list, select the name of the pool created by the iApp.
+8. Click the **Finished** button.
+9. Repeat as necessary.
 
 ## Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
 
