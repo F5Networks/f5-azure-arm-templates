@@ -87,6 +87,26 @@ The following is a list of the current **supported** F5 ARM templates. See the *
       - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.0.0.0%2Fsupported%2Fstandalone%2F3nic%2Fexisting_stack%2FBIGIQ%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
+- **Deploying the BIG-IP VE in Azure - N NICs**
+    - [New Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/standalone/n-nic/new_stack)
+      - *BYOL* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.0.0.0%2Fsupported%2Fstandalone%2Fn-nic%2Fnew_stack%2FBYOL%2Fazuredeploy.json">
+    <img src="http://azuredeploy.net/deploybutton.png"/></a><br>
+
+      - *PAYG* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.0.0.0%2Fsupported%2Fstandalone%2Fn-nic%2Fnew_stack%2FPAYG%2Fazuredeploy.json">
+    <img src="http://azuredeploy.net/deploybutton.png"/></a>
+
+      - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.0.0.0%2Fsupported%2Fstandalone%2Fn-nic%2Fnew_stack%2FBIGIQ%2Fazuredeploy.json">
+    <img src="http://azuredeploy.net/deploybutton.png"/></a>
+
+    - [Existing Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/standalone/n-nic/existing_stack)
+      - *BYOL* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.0.0.0%2Fsupported%2Fstandalone%2Fn-nic%2Fexisting_stack%2FBYOL%2Fazuredeploy.json">
+    <img src="http://azuredeploy.net/deploybutton.png"/></a><br>
+
+      - *PAYG* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.0.0.0%2Fsupported%2Fstandalone%2Fn-nic%2Fexisting_stack%2FPAYG%2Fazuredeploy.json">
+    <img src="http://azuredeploy.net/deploybutton.png"/></a>
+
+      - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.0.0.0%2Fsupported%2Fstandalone%2Fn-nic%2Fexisting_stack%2FBIGIQ%2Fazuredeploy.json">
+    <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
 - **Deploying the BIG-IP VE in Azure - Cluster**
     - *Single NIC*
