@@ -448,8 +448,8 @@ To launch the template:
 
 ## Creating virtual servers on the BIG-IP VE
 
-In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the Azure BIG-IP VM's secondary private IP addresses (on the external vlan/NIC). If you need additional virtual servers for your applications/servers, you can add more secondary private IP addresses in Azure, and corresponding virtual servers on the BIG-IP system. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-multiple-ip-addresses-portal for information on multiple IP addresses.
-Note: For 1nic BIG-IP's the virtual server configuration uses the single private IP address available and should utilize different ports (if behind an ALB) or hostnames to differentiate services.
+In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the private IP address of the IP configuration(s) for each BIG-IP VE network interface created by the template. If you need additional virtual servers for your applications/servers, you can add more secondary IP configurations on the Azure network interface, and corresponding virtual servers on the BIG-IP system. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-multiple-ip-addresses-portal for information on multiple IP addresses.
+**Important**: For 1 NIC BIG-IP VEs, the virtual server configuration uses a wildcard destination address (example: 0.0.0.0/0) and should use different ports (if behind an ALB) or hostnames to differentiate services.
 
 **To create virtual servers on the BIG-IP system**
 

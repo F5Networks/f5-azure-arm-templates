@@ -371,14 +371,14 @@ To launch the template:
 
 ## Creating virtual servers on the BIG-IP VE Cluster
 
-In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the Azure BIG-IP VM's secondary private IP addresses (on the external vlan/NIC). If you need additional virtual servers for your applications/servers, you can add more secondary private IP addresses in Azure, and corresponding virtual servers on the BIG-IP system. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-multiple-ip-addresses-portal for information on multiple IP addresses.
+In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. 
 
-In this template, the Azure public IP address is associated with an Azure Load Balancer that forwards traffic to a backend pool that includes primary (self) IP configurations for *each* BIG-IP network interface.  You must create a single virtual server with a wildcard destination in Traffic Group None.
+In this template, the Azure public IP address is associated with an Azure Load Balancer that forwards traffic to a backend pool that includes the primary (self) IP configurations for *each* BIG-IP network interface.  Because traffic is destined for the self IP addresses of the BIG-IP VEs, you must create a single virtual server with a wildcard destination in Traffic Group **None**.
 
 1. Once your BIG-IP VE has launched, open the BIG-IP VE Configuration utility.
 2. On the Main tab, click **Local Traffic > Virtual Servers** and then click the **Create** button.
 3. In the **Name** field, give the Virtual Server a unique name.
-4. In the **Destination/Mask** field, type the destination address (example: 0.0.0.0/0).
+4. In the **Destination/Mask** field, type the destination address ( for example: 0.0.0.0/0).
 5. In the **Service Port** field, type the appropriate port. 
 6. Configure the rest of the virtual server as appropriate.
 7. If you used the Service Discovery iApp template: <br>In the Resources section, from the **Default Pool** list, select the name of the pool created by the iApp.

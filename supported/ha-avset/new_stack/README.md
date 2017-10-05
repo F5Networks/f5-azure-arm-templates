@@ -475,14 +475,14 @@ Follow the steps outlined in the [Azure Powershell documentation](https://docs.m
 
 ## Creating virtual servers on the BIG-IP VE Cluster
 
-In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the Azure BIG-IP VM's secondary private IP addresses (on the external vlan/NIC). If you need additional virtual servers for your applications/servers, you can add more secondary private IP addresses in Azure, and corresponding virtual servers on the BIG-IP system. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-multiple-ip-addresses-portal for information on multiple IP addresses.
+In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the private IP address of the secondary IP configuration(s) for each BIG-IP VE network interface created by the template. If you need additional virtual servers for your applications/servers, you can add more secondary IP configurations on the Azure network interface, and corresponding virtual servers on the BIG-IP system. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-multiple-ip-addresses-portal for information on multiple IP addresses.
 
-In this template, each Azure public IP address is associated with a secondary IP configuration attached to the external network interface of the BIG-IP VE. Since the IP configuration will be moved to the active BIG-IP device, you need to create a single virtual server in traffic-group-1 that corresponds to the private IP address of that IP configuration.
+In this template, each Azure public IP address is associated with a secondary IP configuration attached to the external network interface of the BIG-IP VE. Because this IP configuration will be moved to the active BIG-IP device, you need to create a single virtual server in **traffic-group-1** that corresponds to the private IP address of that IP configuration.
 
 1. Once your BIG-IP VE has launched, open the BIG-IP VE Configuration utility.
 2. On the Main tab, click **Local Traffic > Virtual Servers** and then click the **Create** button.
 3. In the **Name** field, give the Virtual Server a unique name.
-4. In the **Destination/Mask** field, type the private IP address of the secondary IP configuration associated with the Azure public IP address for your application.
+4. In the **Destination/Mask** field, type the private IP address of the secondary IP configuration associated with the Azure public IP address for your application (for example: 10.0.1.10/32).
 5. In the **Service Port** field, type the appropriate port. 
 6. Configure the rest of the virtual server as appropriate.
 7. If you used the Service Discovery iApp template: <br>In the Resources section, from the **Default Pool** list, select the name of the pool created by the iApp.
