@@ -17,6 +17,9 @@ Welcome to the GitHub repository for F5's ARM templates for Azure deployments.  
 Descriptions for each template are contained at the top of each template in the *Description* key.
 For additional information, including how the templates are generated, and assistance in deploying a template, see the individual README.md file in the individual template directory.
 
+### Matrix for tagged releases
+F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughputs available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md
+
 
 ## List of F5 ARM templates for Azure deployments
 The following is a list of the current **supported** F5 ARM templates. See the **experimental** directory for experimental templates.
