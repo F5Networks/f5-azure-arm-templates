@@ -183,7 +183,7 @@ In order to pass traffic from your clients to the servers through the BIG-IP sys
 }}
 
 <VS_CREATION_CLUSTER_AVSET>{{
-## Creating virtual servers on the BIG-IP VE Cluster
+## Creating virtual servers on the BIG-IP VE
 
 In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the private IP address of the secondary IP configuration(s) for each BIG-IP VE network interface created by the template. If you need additional virtual servers for your applications/servers, you can add more secondary IP configurations on the Azure network interface, and corresponding virtual servers on the BIG-IP system. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-multiple-ip-addresses-portal for information on multiple IP addresses.
 
@@ -209,7 +209,7 @@ When you have completed the virtual server configuration, you may modify the vir
 }}
 
 <VS_CREATION_CLUSTER_3NIC>{{
-## Creating virtual servers on the BIG-IP VE Cluster
+## Creating virtual servers on the BIG-IP VE
 
 In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the private IP address of the secondary IP configuration(s) for each BIG-IP VE network interface created by the template. If you need additional virtual servers for your applications/servers, you can add more secondary IP configurations on the Azure network interface, and corresponding virtual servers on the BIG-IP system. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-multiple-ip-addresses-portal for information on multiple IP addresses.
 
@@ -243,7 +243,7 @@ If network failover is enabled (if, for example, you have deployed the experimen
 }}
 
 <VS_CREATION_CLUSTER_1NIC>{{
-## Creating virtual servers on the BIG-IP VE Cluster
+## Creating virtual servers on the BIG-IP VE
 
 In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. 
 
