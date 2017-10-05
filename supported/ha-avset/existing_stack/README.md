@@ -38,7 +38,7 @@ The template also supports updating the next hop of Azure User-Defined Routes (U
   - This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details. Note: The service principal must have at least Contributor role access to the external network interfaces of both BIG-IP VEs, as well as to all route tables to be modified.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
   - This template requires that the resource group name the deployment uses to be no longer than **35** characters as a result of limitations to tag size within Azure.
-  - Persistence and connection mirroring are now supported in this template.  It also supports mirroring of APM sessions, if the Access Profile is deployed in traffic-group-1.  F5 recommends using a single traffic group, since a traditional Active/Active model is not supported at this time.
+  - Persistence and connection mirroring are now supported in this template.  It also supports mirroring of APM sessions.
   - To have the UDRs managed by BIG-IP, you must configure it with an Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group you have configured on the BIG-IP VE.
   - This template now supports associating Azure Public IP Address resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.
   - The BIG-IP VE failover log can be found at **/var/tmp/azureFailover.log**.
@@ -451,7 +451,7 @@ The deployment template supports creation of 1-20 external public IP addresses f
   -	Create a new IP configuration resource in the properties of the external Azure network interface (for example *myResourceGroupName-ext0*).  You ***must*** use the following syntax: ```<ResourceGroupName>-ext-ipconfig<number>```.  For example: **SeattleResourceGroup-ext-ipconfig9**.
   -	Add these Azure tags to the public IP address resource:
     -	For example: ```f5_privateIp=10.10.10.10``` (the tag value should correspond to the new private IP address of the IP configuration that references this public IP address).
-    -	For example: ```f5_extSubnetId=/subscriptions/<subscriptionId>/resourceGroups/<myResourceGroupName>/providers/Microsoft.Network/virtualNetworks/*< myVnetName >*/subnets/<mySubnetName>``` (you can get this value from resources.azure.com: **Subscriptions > Resource Groups > myResourceGroupName > providers > Microsoft.Network > virtualNetworks > myVnetName > subnets > mySubnetName.id**).
+    -	For example: ```f5_extSubnetId=/subscriptions/<subscriptionId>/resourceGroups/<myResourceGroupName>/providers/Microsoft.Network/virtualNetworks/*< myVnetName >*/subnets/<mySubnetName>``` (you can get this value from a public IP address resource previously configured by the ARM template, or from resources.azure.com: **Subscriptions > Resource Groups > myResourceGroupName > providers > Microsoft.Network > virtualNetworks > myVnetName > subnets > mySubnetName.id**).
     - An Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group you have configured on the BIG-IP VE.
   - Again, you MUST follow the resource naming conventions in the provided examples for failover to work correctly.
 
@@ -492,7 +492,7 @@ _Ensure that however the creation of the service principal occurs to verify it o
 
 **Minimum Required Access:** **Read/Write** access is required, it can be limited to the resource group used by this solution.
 
-The end result should be possession of a client(application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some troubleshooting post-deployment if the service principal is in fact not fully configured.
+The end result should be possession of a client (application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some troubleshooting post-deployment if the service principal is in fact not fully configured.
 
 #### 1. Azure Portal
 
@@ -539,11 +539,11 @@ When you have completed the virtual server configuration, you may modify the vir
 
 ### Traffic Group Configuration
 
-This template supports associating Azure Public IP Address resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  
-At deployment time, an Azure tag with key **f5_tg** and value **traffic-group-1** is created on each public IP address resource. Use the following guidance to configure multiple traffic groups.
+This template supports associating Azure Public IP Address and Route Table resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  
+At deployment time, an Azure tag with key **f5_tg** and value **traffic-group-1** is created on each public IP address resource. Use the following guidance to configure multiple traffic groups.  Note you must create the **f5_tg** on any route tables with routes that will be managed by BIG-IP VE. At a minimum, these route tables must be tagged with a default value of **traffic-group-1**.
 
-  1. Select the Azure public IP address you want to associate with the second traffic group (in our example, the second traffic group name is **traffic-group-2**).
-  2. From the public IP address Tags blade, select the **f5_tg** tag.
+  1. Select the Azure public IP address or route table you want to associate with the second traffic group (in our example, the second traffic group name is **traffic-group-2**).
+  2. From the public IP address or route table Tags blade, select the **f5_tg** tag.
   3. Modify the tag value to **traffic-group-2** and then save the tag.
   4. From the BIG-IP VE management Configuration utility, click **Device Management > Traffic Groups > Create**, and then complete the following.
      - *Name*: **traffic-group-2**
@@ -551,8 +551,6 @@ At deployment time, an Azure tag with key **f5_tg** and value **traffic-group-1*
      - Click **Create Traffic Group**. 
 
 The public IP address resources tagged with **traffic-group-2** will be associated with the preferred device for that traffic group.
-  
-**Note**: The next hop for Azure user defined routes (UDRs) will follow the active device for traffic-group-1.
 
 ## Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
 
