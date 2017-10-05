@@ -1,0 +1,81 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
+    "contentVersion": "4.0.0.0", 
+    "parameters": {
+        "vmScaleSetMinCount": {
+            "value": 2
+        }, 
+        "vmScaleSetMaxCount": {
+            "value": 4
+        }, 
+        "calculatedBandwidth": {
+            "value": "200m"
+        }, 
+        "scaleOutThreshold": {
+            "value": 90
+        }, 
+        "scaleInThreshold": {
+            "value": 10
+        }, 
+        "scaleTimeWindow": {
+            "value": 10
+        }, 
+        "adminUsername": {
+            "value": "azureuser"
+        }, 
+        "adminPassword": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "dnsLabel": {
+            "value": "REQUIRED"
+        }, 
+        "instanceType": {
+            "value": "Standard_DS2_v2"
+        }, 
+        "imageName": {
+            "value": "Good"
+        }, 
+        "bigIpVersion": {
+            "value": "13.0.021"
+        }, 
+        "licensedBandwidth": {
+            "value": "200m"
+        }, 
+        "vnetAddressPrefix": {
+            "value": "10.0"
+        }, 
+        "tenantId": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "clientId": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "servicePrincipalSecret": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "notificationEmail": {
+            "value": "OPTIONAL"
+        }, 
+        "ntpServer": {
+            "value": "0.pool.ntp.org"
+        }, 
+        "timeZone": {
+            "value": "UTC"
+        }, 
+        "restrictedSrcAddress": {
+            "value": "*"
+        }, 
+        "tagValues": {
+            "value": {
+                "application": "APP", 
+                "cost": "COST", 
+                "environment": "ENV", 
+                "group": "GROUP", 
+                "owner": "OWNER"
+            }
+        }, 
+        "allowUsageAnalytics": {
+            "value": "Yes"
+        }
+    }
+}

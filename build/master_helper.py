@@ -2,18 +2,24 @@
 import sys
 import os
 import httplib
+import yaml
+import readme_generator
 
 def parameter_initialize(data):
     """ Set default parameters, as well as all optional ones in a specific order """
     data['parameters']['numberOfInstances'] = "OPTIONAL"
     data['parameters']['vmScaleSetMinCount'] = "OPTIONAL"
     data['parameters']['vmScaleSetMaxCount'] = "OPTIONAL"
-    data['parameters']['scaleOutThroughput'] = "OPTIONAL"
-    data['parameters']['scaleInThroughput'] = "OPTIONAL"
+    data['parameters']['autoScaleMetric'] = "OPTIONAL"
+    data['parameters']['appInsights'] = "OPTIONAL"
+    data['parameters']['calculatedBandwidth'] = "OPTIONAL"
+    data['parameters']['scaleOutThreshold'] = "OPTIONAL"
+    data['parameters']['scaleInThreshold'] = "OPTIONAL"
     data['parameters']['scaleTimeWindow'] = "OPTIONAL"
     data['parameters']['adminUsername'] = "MANDATORY"
     data['parameters']['adminPassword'] = "MANDATORY"
-    data['parameters']['dnsLabel'] = "MANDATORY"
+    data['parameters']['uniqueLabel'] = "OPTIONAL"
+    data['parameters']['dnsLabel'] = "OPTIONAL"
     data['parameters']['instanceName'] = "OPTIONAL"
     data['parameters']['instanceType'] = "MANDATORY"
     data['parameters']['imageName'] = "MANDATORY"
@@ -43,6 +49,8 @@ def parameter_initialize(data):
     data['parameters']['internalSubnetName'] = "OPTIONAL"
     data['parameters']['internalIpAddressRangeStart'] = "OPTIONAL"
     data['parameters']['internalIpAddress'] = "OPTIONAL"
+    data['parameters']['enableNetworkFailover'] = "OPTIONAL"
+    data['parameters']['internalLoadBalancerProbePort'] = "OPTIONAL"
     data['parameters']['avSetChoice'] = "OPTIONAL"
     data['parameters']['solutionDeploymentName'] = "OPTIONAL"
     data['parameters']['applicationProtocols'] = "OPTIONAL"
@@ -65,6 +73,7 @@ def parameter_initialize(data):
     data['parameters']['timeZone'] = "MANDATORY"
     data['parameters']['restrictedSrcAddress'] = "MANDATORY"
     data['parameters']['tagValues'] = "MANDATORY"
+    data['parameters']['allowUsageAnalytics'] = "MANDATORY"
 
     return data
 
@@ -77,7 +86,10 @@ def variable_initialize(data):
     data['variables']['networkApiVersion'] = "2015-06-15"
     data['variables']['storageApiVersion'] = "2015-06-15"
     data['variables']['insightsApiVersion'] = "2015-04-01"
+    data['variables']['appInsightsApiVersion'] = "OPTIONAL"
     data['variables']['location'] = "[resourceGroup().location]"
+    data['variables']['defaultAppInsightsLocation'] = "OPTIONAL"
+    data['variables']['appInsightsLocation'] = "OPTIONAL"
     data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
     data['variables']['resourceGroupName'] = "[resourceGroup().name]"
     data['variables']['singleQuote'] = "'"
@@ -107,6 +119,7 @@ def variable_initialize(data):
     data['variables']['mgmtPublicIPAddressId'] = "[resourceId('Microsoft.Network/publicIPAddresses', variables('mgmtPublicIPAddressName'))]"
     data['variables']['mgmtNsgID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-mgmt-nsg'))]"
     data['variables']['mgmtNicName'] = "[concat(variables('dnsLabel'), '-mgmt')]"
+    data['variables']['mgmtNicID'] = "[resourceId('Microsoft.Network/NetworkInterfaces', variables('mgmtNicName'))]"
     data['variables']['mgmtSubnetName'] = "mgmt"
     data['variables']['mgmtSubnetId'] = "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]"
     data['variables']['mgmtSubnetPrefix'] = "OPTIONAL"
@@ -143,16 +156,34 @@ def variable_initialize(data):
     data['variables']['extSubnetPrivateAddressSuffix5'] = "OPTIONAL"
     data['variables']['extSubnetPrivateAddressSuffix6'] = "OPTIONAL"
     data['variables']['extSubnetPrivateAddressSuffix7'] = "OPTIONAL"
+    data['variables']['extSubnetPrivateAddressSuffix8'] = "OPTIONAL"
+    data['variables']['extSubnetPrivateAddressSuffix9'] = "OPTIONAL"
+    data['variables']['extSubnetPrivateAddressSuffix10'] = "OPTIONAL"
+    data['variables']['extSubnetPrivateAddressSuffix11'] = "OPTIONAL"
+    data['variables']['extSubnetPrivateAddressSuffix12'] = "OPTIONAL"
+    data['variables']['extSubnetPrivateAddressSuffix13'] = "OPTIONAL"
+    data['variables']['extSubnetPrivateAddressSuffix14'] = "OPTIONAL"
+    data['variables']['extSubnetPrivateAddressSuffix15'] = "OPTIONAL"
+    data['variables']['extSubnetPrivateAddressSuffix16'] = "OPTIONAL"
+    data['variables']['extSubnetPrivateAddressSuffix17'] = "OPTIONAL"
+    data['variables']['extSubnetPrivateAddressSuffix18'] = "OPTIONAL"
+    data['variables']['extSubnetPrivateAddressSuffix19'] = "OPTIONAL"
     data['variables']['intNicName'] = "OPTIONAL"
     data['variables']['intSubnetName'] = "OPTIONAL"
     data['variables']['intSubnetPrefix'] = "OPTIONAL"
     data['variables']['intSubnetId'] = "OPTIONAL"
     data['variables']['intSubnetPrivateAddress'] = "OPTIONAL"
     data['variables']['intSubnetPrivateAddress1'] = "OPTIONAL"
+    data['variables']['intSubnetPrivateAddress2'] = "OPTIONAL"
+    data['variables']['intSubnetPrivateAddress3'] = "OPTIONAL"
     data['variables']['intSubnetPrivateAddressPrefixArray'] = "OPTIONAL"
     data['variables']['intSubnetPrivateAddressPrefix'] = "OPTIONAL"
     data['variables']['intSubnetPrivateAddressSuffixInt'] = "OPTIONAL"
     data['variables']['intSubnetPrivateAddressSuffix'] = "OPTIONAL"
+    data['variables']['intSubnetPrivateAddressSuffix1'] = "OPTIONAL"
+    data['variables']['intSubnetPrivateAddressSuffix2'] = "OPTIONAL"
+    data['variables']['intSubnetPrivateAddressSuffix3'] = "OPTIONAL"
+    data['variables']['internalLoadBalancerAddress'] = "OPTIONAL"
     data['variables']['extSubnetRef'] = "OPTIONAL"
     data['variables']['intSubnetRef'] = "OPTIONAL"
     data['variables']['addtlNicFillerArray'] = "OPTIONAL"
@@ -174,13 +205,22 @@ def variable_initialize(data):
     data['variables']['selfNicConfigArray'] = "OPTIONAL"
     data['variables']['addtlNicConfigArray'] = "OPTIONAL"
     data['variables']['lbFrontEndArray'] = "OPTIONAL"
+    data['variables']['failoverCmdArray'] = "OPTIONAL"
     data['variables']['ipAddress'] = "OPTIONAL"
-    data['variables']['loadBalancerName'] = "OPTIONAL"
     data['variables']['deviceNamePrefix'] = "OPTIONAL"
-    data['variables']['lbID'] = "OPTIONAL"
+    data['variables']['externalLoadBalancerName'] = "OPTIONAL"
+    data['variables']['externalLoadBalancerAddress'] = "OPTIONAL"
+    data['variables']['extLbId'] = "OPTIONAL"
+    data['variables']['internalLoadBalancerName'] = "OPTIONAL"
+    data['variables']['intLbId'] = "OPTIONAL"
     data['variables']['frontEndIPConfigID'] = "OPTIONAL"
     data['variables']['vmssName'] = "OPTIONAL"
+    data['variables']['vmssId'] = "OPTIONAL"
+    data['variables']['appInsightsName'] = "OPTIONAL"
+    data['variables']['appInsightsNameArray'] = "OPTIONAL"
+    data['variables']['10m'] = "OPTIONAL"
     data['variables']['25m'] = "OPTIONAL"
+    data['variables']['100m'] = "OPTIONAL"
     data['variables']['200m'] = "OPTIONAL"
     data['variables']['1g'] = "OPTIONAL"
     data['variables']['scaleOutCalc'] = "OPTIONAL"
@@ -190,7 +230,9 @@ def variable_initialize(data):
     data['variables']['scaleOutNetworkBytes'] = "OPTIONAL"
     data['variables']['scaleInNetworkBytes'] = "OPTIONAL"
     data['variables']['timeWindow'] = "OPTIONAL"
-    data['variables']['customEmailToUse'] = "OPTIONAL"
+    data['variables']['autoScaleMetric'] = "OPTIONAL"
+    data['variables']['scaleMetricMap'] = "OPTIONAL"
+    data['variables']['customEmailBaseArray'] = "OPTIONAL"
     data['variables']['customEmail'] = "OPTIONAL"
     data['variables']['lbTcpProbeNameHttp'] = "OPTIONAL"
     data['variables']['lbTcpProbeIdHttp'] = "OPTIONAL"
@@ -205,6 +247,8 @@ def variable_initialize(data):
     data['variables']['storageAccountType'] = "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]"
     data['variables']['newDataStorageAccountName'] = "[concat(uniqueString(resourceGroup().id, deployment().name), 'data000')]"
     data['variables']['dataStorageAccountType'] = "Standard_LRS"
+    data['variables']['deploymentId'] = "MANDATORY"
+    data['variables']['allowUsageAnalytics'] = "MANDATORY"
     data['variables']['customConfig'] = "### START (INPUT) CUSTOM CONFIGURATION HERE\n"
     data['variables']['installCustomConfig'] = "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
 
@@ -217,28 +261,77 @@ def template_check(data, resource):
             data[resource].pop(var)
         elif data[resource][var] == "MANDATORY":
             raise Exception('Mandatory parameter was not filled in, exiting...')
-            sys.exit(1)
     return data
 
-def verify_hash(url):
-    """ Download latest verifyHash to be used by the templates """
-    # Parse out url information needed
-    (protocol, host_path) = url.split('//')
-    (host, path) = host_path.split('/', 1)
-    path = '/' + path
-    if url.startswith('https'):
-        conn = httplib.HTTPSConnection(host)
+def param_descr_update(data, template_name):
+    """ Fill in parameter descriptions from the YAML doc file """
+    yaml_doc_loc = {'doc_text_file': 'files/readme_files/template_text.yaml'}
+    rG = readme_generator.ReadmeGen()
+    files = rG.open_files(yaml_doc_loc)
+    for param in data:
+        if data[param]['metadata']['description'] != "":
+            # If parameter description is filled in then don't replace
+            continue
+        else:
+            data[param]['metadata']['description'] = rG.get_custom_text('parameter_list', param, template_name)
+    return data
+
+def pub_ip_strip(data, resource, tmpl_type):
+    """ Set Public IP address value to null within the IP Configuration Objects if exists - For use by prod_stack """
+    if resource == 'PublicIpAddress':
+        for item in data:
+            if tmpl_type == 'resources':
+                try:
+                    if isinstance(item['properties']['ipConfigurations'], list):
+                        for ipconfig in range(0, len(item['properties']['ipConfigurations'])):
+                            if resource in item['properties']['ipConfigurations'][ipconfig]['properties']:
+                                item['properties']['ipConfigurations'][ipconfig]['properties'][resource] = None
+                except:
+                    continue
+            elif tmpl_type == 'variables':
+                try:
+                    if isinstance(data[item], list):
+                        for ipconfig in range(0, len(data[item])):
+                            if resource in data[item][ipconfig]['properties']:
+                                data[item][ipconfig]['properties'][resource] = None
+                except:
+                    continue
+            else:
+                raise Exception('Unknown template type specified in the function.')
     else:
-        conn = httplib.HTTPConnection(host)
-    # Make HTTP Request
-    conn.request('GET', path)
-    response = conn.getresponse()
-    if response.status == 200:
-        pass
+        raise Exception('Unknown resource type specified in function.')
+    return data
+
+def verify_hash(url, via_url):
+    """ Download latest verifyHash to be used by the templates, or pull from local file """
+    verify_hash_file = "files/misc_files/verifyHash"
+    if via_url:
+        # Parse out url information needed
+        (protocol, host_path) = url.split('//')
+        (host, path) = host_path.split('/', 1)
+        path = '/' + path
+        if url.startswith('https'):
+            conn = httplib.HTTPSConnection(host)
+        else:
+            conn = httplib.HTTPConnection(host)
+        # Make HTTP Request
+        conn.request('GET', path)
+        response = conn.getresponse()
+        if response.status == 200:
+            pass
+        else:
+            raise Exception("Unable to download verify hash file, HTTP Error Response: %s" % response.msg)
+        # HTTP Call MIGHT include trailing \n, remove that
+        verify_hash = response.read()
+        if verify_hash[-1:] == '\n':
+            verify_hash = verify_hash[:-1]
+        # Update verifyHash file if not in sync
+        with open(verify_hash_file, "r+") as f:
+            if verify_hash != f.read():
+                f.seek(0)
+                f.write(verify_hash)
+                f.truncate()
     else:
-        raise Exception("Unable to download verify hash file, HTTP Error Response: %s" % response.msg)
-    # HTTP Call MIGHT include trailing \n, remove that
-    response_str = response.read()
-    if response_str[-1:] == '\n':
-        response_str = response_str[:-1]
-    return response_str
+        with open(verify_hash_file, "r") as f:
+            verify_hash = f.read()
+    return verify_hash

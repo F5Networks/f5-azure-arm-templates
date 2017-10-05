@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "3.3.2.0", 
+    "contentVersion": "4.0.0.0", 
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -59,6 +59,12 @@
         "internalIpAddressRangeStart": {
             "value": "GEN_UNIQUE"
         }, 
+        "enableNetworkFailover": {
+            "value": "No"
+        }, 
+        "internalLoadBalancerProbePort": {
+            "value": "3456"
+        }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"
         }, 
@@ -76,6 +82,9 @@
                 "group": "GROUP", 
                 "owner": "OWNER"
             }
+        }, 
+        "allowUsageAnalytics": {
+            "value": "Yes"
         }
     }
 }

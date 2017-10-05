@@ -2,7 +2,7 @@
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin/"
 
 function passwd() {
-  echo | awk '{print $1}' /config/cloud/passwd
+  echo | awk '{print $1}' /config/cloud/.passwd
 }
 
 while getopts m:d:n:j:k:h:s:t:l:a:c:r:o:u: option
@@ -42,7 +42,7 @@ else
 fi
 
 # install iApp templates
-template_location="/var/lib/waagent/custom-script/download/0"
+template_location="/config/cloud"
 
 for template in f5.http.v1.2.0rc7.tmpl f5.policy_creator.tmpl
 do
