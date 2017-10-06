@@ -82,7 +82,7 @@ class ReadmeGen(object):
         return result
 
     def delete_tags(self, readme):
-        """ Pull in custom template text for each solution from the YAML file """
+        """ Delete left over tags from the README file """
         reg_ex = r"<([A-Z-_]{0,50})>"
         tag_text = re.findall(reg_ex, readme)
         for match in tag_text:
@@ -189,7 +189,6 @@ class ReadmeGen(object):
         template_name = i_data['template_info']['template_name']
         readme_location = i_data['template_info']['location']
         final_readme = readme_location + 'README.md'
-        post_config_text = ''; sp_text = ''; tg_config_text = ''; vs_creation = ''
         if 'supported' in readme_location:
             self.i_data['support_type'] = 'supported'
             help_text = self.get_custom_text('help_text', 'supported')
