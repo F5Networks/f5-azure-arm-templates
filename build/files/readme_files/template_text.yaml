@@ -1,57 +1,120 @@
 # YAML Document that includes the custom text for each solution readme
 ## NOTE 1: YAML single quotes in single quoted strings are escaped by including an extra quote, so NIC's becomes NIC''s
-## NOTE 2: If separation is needed between supported and experimental templates then use a new sub-key of name 'default'
-## for the default text and a sub-key for either supported or experimental, depending on what should be unique.
-## title_text:
+## NOTE 2: If separation is needed between supported and experimental templates then add a child key for 'supported' and 'experimental'
 ##   standalone_1nic:
-##     default: 'Single NIC'
+##     supported: 'Single NIC'
 ##     experimental: 'Experimental Single NIC'
-## NOTE 3: parameter_list supports same style as note 2, using  'default' and template name as keys when parameter is unique for a solution
+## NOTE 3: If separation is needed between templates then add a child key of 'default' as the catch all and a child key for each unique template
+##   parameter_list:
+##     adminUsername: 'Single NIC'
+##      default: 'adminUsername Help Text'
+##      standalon_1nic: 'adminUsername Experimental Help Text'
 
-title_text:
-  standalone_1nic: 'Single NIC'
-  standalone_2nic: '2 NIC'
-  standalone_3nic: '3 NIC'
-  standalone_n-nic: 'Multi NIC (nNic)'
-  cluster_1nic: 'ConfigSync Cluster (Active/Active): Single NIC'
-  cluster_3nic: 'ConfigSync Cluster (Active/Active): 3 NIC'
-  ha-avset: 'HA Cluster (Active/Standby)'
-  ltm_autoscale: 'AutoScale BIG-IP LTM - VM Scale Set'
-  waf_autoscale: 'Auto Scale BIG-IP WAF (LTM + ASM) - VM Scale Set'
-
-intro_text:
-  standalone_1nic: 'This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard Cloud design where the  BIG-IP VE instance is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.'
-  standalone_2nic: 'This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3-NIC template, just without the internal NIC for connecting directly to the backend webservers.'
-  standalone_3nic: 'This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the  BIG-IP VE instance is running with a management, front-end application traffic(Virtual Server) and back-end application interface.'
-  standalone_n-nic: 'This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. The solution can optionally also add additional NIC(s) to the BIG-IP to be used as needed. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the  BIG-IP VE instance is running with a management, front-end application traffic (Virtual Server) and back-end application interface.'
-  cluster_1nic: 'This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE cluster (Active/Active) in Microsoft Azure. Traffic flows from an ALB to the BIG-IP VE which then processes the traffic to application servers. This is the standard cloud design where the  BIG-IP VE instance is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.'
+######################### Define each template here #########################
+templates:
+  standalone_1nic:
+    title: 'Single NIC'
+    intro: 'This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard Cloud design where the  BIG-IP VE instance is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.'
+    config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.'
+    extra_text:
+      - <VS_CREATION>
+  standalone_2nic:
+    title: '2 NIC'
+    intro: 'This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3-NIC template, just without the internal NIC for connecting directly to the backend webservers.'
+    config_ex_text: 'In this scenario, one NIC is for management and one NIC is for external traffic.  This is a more traditional BIG-IP deployment model where data-plane and management traffic is separate. The IP addresses in this example may be different in your implementation.'
+    prereq_list:
+      - post_config
+    extra_text:
+      - <POST_CONFIG_TXT>
+      - <VS_CREATION>
+  standalone_3nic:
+    title: '3 NIC'
+    intro: 'This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the  BIG-IP VE instance is running with a management, front-end application traffic(Virtual Server) and back-end application interface.'
+    config_ex_text: 'In this scenario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
+    prereq_list:
+      - post_config
+    extra_text:
+      - <POST_CONFIG_TXT>
+      - <VS_CREATION>
+  standalone_n-nic:
+    title: 'Multi NIC (nNic)'
+    intro: 'This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. The solution can optionally also add additional NIC(s) to the BIG-IP to be used as needed. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the  BIG-IP VE instance is running with a management, front-end application traffic (Virtual Server) and back-end application interface.'
+    config_ex_text: 'In this scenario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  Additional NICs are added to a customer provided VNET/Subnet.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
+    prereq_list:
+      - post_config
+      - nic_sizing
+      - addtl_nic_config
+    extra_text:
+      - <POST_CONFIG_TXT>
+      - <VS_CREATION>
+  cluster_1nic:
+    title: 'ConfigSync Cluster (Active/Active): Single NIC'
+    intro: 'This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE cluster (Active/Active) in Microsoft Azure. Traffic flows from an ALB to the BIG-IP VE which then processes the traffic to application servers. This is the standard cloud design where the  BIG-IP VE instance is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.'
+    config_ex_text: 'In this scenario, all access to the BIG-IP VE cluster (Active/Active) is through an ALB. The IP addresses in this example may be different in your implementation.'
+    extra_text:
+      - <VS_CREATION>: <VS_CREATION_CLUSTER_1NIC>
   cluster_3nic:
-    default: 'This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE cluster (Active/Active) in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the  BIG-IP VE instance is running with a management, front-end application traffic (Virtual Server) and back-end application interface.'
-    experimental: "This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE cluster (Active/Active) in Microsoft Azure. It also allows you to choose to deploy the HA cluster with or without network failover enabled. With network failover disabled, the cluster is created in a limited *Active/Active* configuration and traffic groups are not available; consequently, you cannot use connection, persistence, or session mirroring.  \n\nWhen network failover is enabled, the cluster is configured in a traditional *Active/Standby* mode. Alternately, you can configure multiple traffic groups in the traditional *Active/Active* mode to allow each device to process traffic for the traffic group to which it is associated. In both of these network failover modes, Azure load balancer probes determine which BIG-IP VE device will receive application traffic. Mirroring and failover are available in both scenarios."
-  ha-avset: "This solution uses an ARM template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled (the template now supports [multiple traffic groups](#traffic-group-configuration) which enables active/active deployments). Each pair of BIG-IP VEs is deployed in an Azure Availability Set, and can therefore be spread across different update and fault domains. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.\n\nTraffic flows from the client through BIG-IP VE to the application servers. This is the standard 'on-premise-like' cloud design where the  BIG-IP VE instance is running with a management interface, a front-end application traffic (external) interface, and back-end application (internal) interface. This template is a result of Azure now supporting multiple public-to-private IP address mappings per NIC. \n\nThis template supports creating up to 20 additional public/private IP address configurations for the external 'application' NIC to be used for passing traffic to BIG-IP virtual servers. \n\nThe template also supports updating the next hop of Azure User-Defined Routes (UDRs) to use the active BIG-IP VEs internal self IP address."
-  ltm_autoscale: 'This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE LTM instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM only.'
-  waf_autoscale: 'This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE LTM instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM + ASM.'
+    title: 'ConfigSync Cluster (Active/Active): 3 NIC'
+    intro:
+      supported: 'This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE cluster (Active/Active) in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the  BIG-IP VE instance is running with a management, front-end application traffic (Virtual Server) and back-end application interface.'
+      experimental: "This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE cluster (Active/Active) in Microsoft Azure. It also allows you to choose to deploy the HA cluster with or without network failover enabled. With network failover disabled, the cluster is created in a limited *Active/Active* configuration and traffic groups are not available; consequently, you cannot use connection, persistence, or session mirroring.  \n\nWhen network failover is enabled, the cluster is configured in a traditional *Active/Standby* mode. Alternately, you can configure multiple traffic groups in the traditional *Active/Active* mode to allow each device to process traffic for the traffic group to which it is associated. In both of these network failover modes, Azure load balancer probes determine which BIG-IP VE device will receive application traffic. Mirroring and failover are available in both scenarios."
+    config_ex_text: 'In this scenario, all access to the BIG-IP VE cluster (Active/Active) is through an ALB. The IP addresses in this example may be different in your implementation.'
+    prereq_list:
+      - post_config
+    extra_text:
+      - <POST_CONFIG_TXT>
+      - <VS_CREATION>: <VS_CREATION_CLUSTER_3NIC>
+  ha-avset:
+    title: 'HA Cluster (Active/Standby)'
+    intro: "This solution uses an ARM template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled (the template now supports [multiple traffic groups](#traffic-group-configuration) which enables active/active deployments). Each pair of BIG-IP VEs is deployed in an Azure Availability Set, and can therefore be spread across different update and fault domains. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.\n\nTraffic flows from the client through BIG-IP VE to the application servers. This is the standard 'on-premise-like' cloud design where the  BIG-IP VE instance is running with a management interface, a front-end application traffic (external) interface, and back-end application (internal) interface. This template is a result of Azure now supporting multiple public-to-private IP address mappings per NIC. \n\nThis template supports creating up to 20 additional public/private IP address configurations for the external 'application' NIC to be used for passing traffic to BIG-IP virtual servers. \n\nThe template also supports updating the next hop of Azure User-Defined Routes (UDRs) to use the active BIG-IP VEs internal self IP address."
+    config_ex_text: 'In this scenario, each BIG-IP has one NIC for management, one NIC for external traffic and one NIC for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
+    prereq_list:
+      - service_principal: 'This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details. Note: The service principal must have at least Contributor role access to the external network interfaces of both BIG-IP VEs, as well as to all route tables to be modified.'
+      - post_config
+      - rg_limit
+      - traffic_group_msg
+      - udr_tags
+      - tg_config
+      - failover_log
+    extra_text:
+      - <POST_CONFIG_TXT>: <POST_CONFIG_FAILOVER_TXT>
+      - <VS_CREATION>: <VS_CREATION_CLUSTER_AVSET>
+      - <SERVICE_PRINCIPAL>
+      - <TG_CONFIG_TEXT>
+  ltm_autoscale:
+    title: 'AutoScale BIG-IP LTM - VM Scale Set'
+    intro: 'This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE LTM instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM only.'
+    config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
+    prereq_list:
+      - service_principal
+      - post_config
+      - master_election
+      - config_backup
+    extra_text:
+      - <POST_CONFIG_TXT>: <POST_CONFIG_AUTOSCALE_TXT>
+      - <VS_CREATION>
+      - <SERVICE_PRINCIPAL>
+  waf_autoscale:
+    title: 'Auto Scale BIG-IP WAF (LTM + ASM) - VM Scale Set'
+    intro: 'This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE LTM instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. This solution is for BIG-IP LTM + ASM.'
+    config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
+    prereq_list:
+      - service_principal
+      - post_config
+      - master_election
+      - config_backup: 'After deploying the template, you must see [this section](#backup-big-ip-configuration-for-cluster-recovery) to create and store a backup of your BIG-IP configuration.'
+      - asm_sync
+    extra_text:
+      - <POST_CONFIG_TXT>: <POST_CONFIG_AUTOSCALE_TXT>
+      - <VS_CREATION>
+      - <SERVICE_PRINCIPAL>
 
-config_example_text:
-  standalone_1nic: 'In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.'
-  standalone_2nic: 'In this scenario, one NIC is for management and one NIC is for external traffic.  This is a more traditional BIG-IP deployment model where data-plane and management traffic is separate. The IP addresses in this example may be different in your implementation.'
-  standalone_3nic: 'In this scenario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
-  standalone_n-nic: 'In this scenario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  Additional NICs are added to a customer provided VNET/Subnet.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
-  cluster_1nic: 'In this scenario, all access to the BIG-IP VE cluster (Active/Active) is through an ALB. The IP addresses in this example may be different in your implementation.'
-  cluster_3nic: 'In this scenario, all access to the BIG-IP VE cluster (Active/Active) is through an ALB. The IP addresses in this example may be different in your implementation.'
-  ha-avset: 'In this scenario, each BIG-IP has one NIC for management, one NIC for external traffic and one NIC for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
-  ltm_autoscale: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
-  waf_autoscale: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
-
+######################### Additional documentation items #########################
 prereq_text:
-  service_principal:
-    default: 'This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.'
-    ha-avset: 'This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details. Note: The service principal must have at least Contributor role access to the external network interfaces of both BIG-IP VEs, as well as to all route tables to be modified.'
+  service_principal: 'This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.'
   post_config: 'This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.'
   master_election: 'This template includes a master election feature, which ensures that if the existing master BIG-IP VE is unavailable, a new master is selected from the BIG-IP VEs in the cluster.'
-  config_backup:
-    default: 'After deploying the template, if you make manual changes to the BIG-IP configuration, you must see [this section](#backup-big-ip-configuration-for-cluster-recovery).'
-    waf_autoscale: 'After deploying the template, you must see [this section](#backup-big-ip-configuration-for-cluster-recovery) to create and store a backup of your BIG-IP configuration.'
+  config_backup: 'After deploying the template, if you make manual changes to the BIG-IP configuration, you must see [this section](#backup-big-ip-configuration-for-cluster-recovery).'
   rg_limit: 'This template requires that the resource group name the deployment uses to be no longer than **35** characters as a result of limitations to tag size within Azure.'
   nic_sizing: 'Because this template allows you to deploy a variable number of NICs, be sure to pick an Azure Virtual Machine instance size that can support the number of NICs you choose, otherwise the deployment will fail.  See the [Azure Instance Size link](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#size-tables) to determine the correct instance size to correspond with the number of NICs required. NOTE: This solution deploys three NICs plus a variable number of NICs as specified in the parameter **numberOfAdditionalNics**'
   addtl_nic_config: 'As a result of this template deploying a variable number of NICs using the parameter **numberOfAdditionalNics** it will pre-configure the BIG-IP VLAN(s) and place the interfaces into the corresponding VLAN (based on the subnet name(s) in **additionalNicLocation**).  Be aware that after template deployment, the self IP(s) will need to be created corresponding to the Azure IP config object for that NIC, and you must set the IP Config object to a **static** address instead of **dynamic** to ensure it does not change on reboot.'
@@ -60,30 +123,25 @@ prereq_text:
   asm_sync: '**Important**: After the template successfully deploys, you must log into one of the BIG-IP VEs to modify the Application Security Synchronization settings.  Log in to the BIG-IP VE, and then click **Security > Options > Synchronization > Application Security Synchronization**.  From the **Device Group** list, select **Sync**, and then click **Save**. This ensures any changes to the ASM security policy are synchronized to other devices in the cluster.'
   tg_config: 'This template now supports associating Azure Public IP Address resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.'
   failover_log: 'The BIG-IP VE failover log can be found at **/var/tmp/azureFailover.log**.'
-
 help_text:
   supported: 'Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K40701984).'
   experimental: 'While this template has been created by F5 Networks, it is in the **experimental** directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.'
-
 stack_type_text:
   new_stack: 'This solution deploys into a new networking stack, which is created along with the solution.'
   existing_stack: 'This template deploys into an existing networking stack; the networking infrastructure must be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.'
   prod_stack: 'This template deploys into an existing, production networking stack; the networking infrastructure must be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects. **NOTE:** This template is designed to deploy into a production stack, with the assumption that there should be no public access. As such this deployment does not attach public IP addresses of any kind to the BIG-IP(s) deployed, outbound Internet access is still **required.**'
-
 sp_access_text:
   read: '**Read** access is required, it can be limited to the resource group used by this solution.'
   read_write: '**Read/Write** access is required, it can be limited to the resource group used by this solution.'
-
 license_text:
   BYOL: ' (bring your own license): This allows you to use an existing BIG-IP license.'
   PAYG: ': This allows you to use pay-as-you-go hourly billing.'
   BIG-IQ: ': This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s).'
-
 license_map:
   13.0.021: '13.0.0 HF2 Build 2.10.1671'
   12.1.24: '12.1.2 HF1 Build 1.34.271'
   latest: 'This will select the latest BIG-IP version available'
-
+# Parameter text used in the template parameters and then subsequently the README's
 parameter_list:
   adminUsername: "User name for the Virtual Machine."
   adminPassword: "Password to login to the Virtual Machine."
