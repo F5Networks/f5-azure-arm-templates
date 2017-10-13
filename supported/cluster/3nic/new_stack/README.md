@@ -7,7 +7,8 @@
 
 **Contents**
 - [Introduction](#introduction)
-- [Prerequisites](#prerequisites-and-configuration-notes)
+- [Prerequisites](#prerequisites)
+- [Important Configuration Notes](#important-configuration-notes)
 - [Security](#security)
 - [Getting Help](#help)
 - [Installation](#installation)
@@ -21,9 +22,11 @@ This solution uses an ARM template to launch a three NIC deployment of a cloud-f
 
 **Networking Stack Type:** This solution deploys into a new networking stack, which is created along with the solution.
 
-## Prerequisites and configuration notes
+## Prerequisites
   - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See https://support.f5.com/csp/article/K2873 for details.
   - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
+
+## Important configuration notes
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
   - This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.

@@ -57,12 +57,13 @@ class ReadmeGen(object):
         yvalue = ydict[p_key][s_key]
         sp_type = self.i_data['support_type']
         result = ''
-        if t_key == 'prereq_list' and t_key in yvalue:
-            for item in yvalue['prereq_list']:
+        if t_key in ('prereq_list', 'config_note_list') and t_key in yvalue:
+            t_list = yvalue[t_key]
+            for item in t_list:
                 if isinstance(item, dict):
                     result += '  - ' + item[next(iter(item))] + '\n'
                 else:
-                    result += '  - ' + ydict['prereq_text'][item] + '\n'
+                    result += '  - ' + ydict['note_text'][item] + '\n'
         elif t_key == 'extra_text':
             result = self.loaded_files['base_readme']
             if t_key in yvalue:
@@ -198,7 +199,8 @@ class ReadmeGen(object):
         title_text = self.get_tmpl_text('templates', template_name, 'title')
         intro_text = self.get_tmpl_text('templates', template_name, 'intro')
         example_text = self.get_tmpl_text('templates', template_name, 'config_ex_text')
-        extra_prereq_text = self.get_tmpl_text('templates', template_name, 'prereq_list')
+        extra_prereq = self.get_tmpl_text('templates', template_name, 'prereq_list')
+        extra_config_note = self.get_tmpl_text('templates', template_name, 'config_note_list')
         stack_type_text = self.stack_type_check()
         version_map = self.md_version_map()
         deploy_links = self.create_deploy_links()
@@ -207,7 +209,8 @@ class ReadmeGen(object):
         ### Map in dynamic values ###
         readme = self.loaded_files['base_readme']
         readme = readme.replace('<TITLE_TXT>', title_text).replace('<INTRO_TXT>', intro_text)
-        readme = readme.replace('<STACK_TYPE_TXT>', stack_type_text).replace('<EXTRA_PREREQS>', extra_prereq_text)
+        readme = readme.replace('<STACK_TYPE_TXT>', stack_type_text).replace('<EXTRA_PREREQS>', extra_prereq)
+        readme = readme.replace('<STACK_TYPE_TXT>', stack_type_text).replace('<EXTRA_CONFIG_NOTES>', extra_config_note)
         readme = readme.replace('<VERSION_MAP_TXT>', version_map).replace('<HELP_TXT>', help_text)
         readme = readme.replace('<DEPLOY_LINKS>', deploy_links).replace('<EXAMPLE_PARAMS>', self.md_param_array())
         readme = readme.replace('<PS_SCRIPT>', ps_script).replace('<BASH_SCRIPT>', bash_script)

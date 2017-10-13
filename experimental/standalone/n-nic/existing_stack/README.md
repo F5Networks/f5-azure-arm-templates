@@ -1,4 +1,4 @@
-# Deploying the BIG-IP VE in Azure - Multi NIC (nNic)
+# Deploying the BIG-IP VE in Azure - N NIC (variable # of extra nics)
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
@@ -7,7 +7,8 @@
 
 **Contents**
 - [Introduction](#introduction)
-- [Prerequisites](#prerequisites-and-configuration-notes)
+- [Prerequisites](#prerequisites)
+- [Important Configuration Notes](#important-configuration-notes)
 - [Security](#security)
 - [Getting Help](#help)
 - [Installation](#installation)
@@ -21,9 +22,11 @@ This solution uses an ARM template to launch a three NIC deployment of a cloud-f
 
 **Networking Stack Type:** This template deploys into an existing networking stack; the networking infrastructure must be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.
 
-## Prerequisites and configuration notes
+## Prerequisites
   - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See https://support.f5.com/csp/article/K2873 for details.
   - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
+
+## Important configuration notes
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
   - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
   - This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.
@@ -31,7 +34,6 @@ This solution uses an ARM template to launch a three NIC deployment of a cloud-f
   - In order to pass traffic from your clients to the servers, after launching the template, you must create virtual server(s) on the BIG-IP VE.  See [Creating a virtual server](#creating-virtual-servers-on-the-big-ip-ve).
   - F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughputs available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
-  - Because this template allows you to deploy a variable number of NICs, be sure to pick an Azure Virtual Machine instance size that can support the number of NICs you choose, otherwise the deployment will fail.  See the [Azure Instance Size link](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#size-tables) to determine the correct instance size to correspond with the number of NICs required. NOTE: This solution deploys three NICs plus a variable number of NICs as specified in the parameter **numberOfAdditionalNics**
   - As a result of this template deploying a variable number of NICs using the parameter **numberOfAdditionalNics** it will pre-configure the BIG-IP VLAN(s) and place the interfaces into the corresponding VLAN (based on the subnet name(s) in **additionalNicLocation**).  Be aware that after template deployment, the self IP(s) will need to be created corresponding to the Azure IP config object for that NIC, and you must set the IP Config object to a **static** address instead of **dynamic** to ensure it does not change on reboot.
 
 
