@@ -204,8 +204,8 @@ class ReadmeGen(object):
         stack_type_text = self.stack_type_check()
         version_map = self.md_version_map()
         deploy_links = self.create_deploy_links()
-        bash_script = i_data['readme_text']['bash_script']
-        ps_script = i_data['readme_text']['ps_script']
+        bash_script = [l for l in i_data['readme_text']['bash_script'].split('\n') if "Example Command" in l][0]
+        ps_script = [l for l in i_data['readme_text']['ps_script'].split('\n') if "Example Command" in l][0]
         ### Map in dynamic values ###
         readme = self.loaded_files['base_readme']
         readme = readme.replace('<TITLE_TXT>', title_text).replace('<INTRO_TXT>', intro_text)

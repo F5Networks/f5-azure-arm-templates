@@ -80,8 +80,10 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | Parameter | Required | Description |
 | --- | --- | --- |
 <EXAMPLE_PARAMS>
+### Programmatic deployments
+As an alternative to deploying through the Azure Portal (GUI) each solution provides example scripts to deploy the ARM template.  The example commands can be found below along with the name of the script file, which exists in the current directory.
 
-### <a name="powershell"></a>PowerShell Script Example
+#### <a name="powershell"></a>PowerShell Script Example
 
 ```powershell
 <PS_SCRIPT>
@@ -89,7 +91,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 
 =======
 
-### <a name="cli"></a>Azure CLI(1.0) Script Example
+#### <a name="cli"></a>Azure CLI(1.0) Script Example
 
 ```bash
 <BASH_SCRIPT>
