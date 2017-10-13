@@ -209,8 +209,8 @@ class ReadmeGen(object):
         ### Map in dynamic values ###
         readme = self.loaded_files['base_readme']
         readme = readme.replace('<TITLE_TXT>', title_text).replace('<INTRO_TXT>', intro_text)
-        readme = readme.replace('<STACK_TYPE_TXT>', stack_type_text).replace('<EXTRA_PREREQS>', extra_prereq)
-        readme = readme.replace('<STACK_TYPE_TXT>', stack_type_text).replace('<EXTRA_CONFIG_NOTES>', extra_config_note)
+        readme = readme.replace('<STACK_TYPE_TXT>', stack_type_text)
+        readme = readme.replace('<EXTRA_PREREQS>', extra_prereq).replace('<EXTRA_CONFIG_NOTES>', extra_config_note)
         readme = readme.replace('<VERSION_MAP_TXT>', version_map).replace('<HELP_TXT>', help_text)
         readme = readme.replace('<DEPLOY_LINKS>', deploy_links).replace('<EXAMPLE_PARAMS>', self.md_param_array())
         readme = readme.replace('<PS_SCRIPT>', ps_script).replace('<BASH_SCRIPT>', bash_script)
