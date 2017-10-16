@@ -246,8 +246,6 @@
         "subscriptionID": "[subscription().subscriptionId]", 
         "resourceGroupName": "[resourceGroup().name]", 
         "singleQuote": "'", 
-        "f5Tag": "82e08e16-fc62-4bf0-8916-e1c02dc871cd", 
-        "f5TemplateTag": "cluster_1nic", 
         "f5CloudLibsTag": "v3.4.2", 
         "f5CloudLibsAzureTag": "develop", 
         "f5NetworksTag": "v4.0.0.0", 
@@ -469,8 +467,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -525,8 +521,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -572,8 +566,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -607,8 +599,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -666,8 +656,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -684,8 +672,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -702,8 +688,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -774,8 +758,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -806,8 +788,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -842,8 +822,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 

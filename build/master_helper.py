@@ -93,8 +93,6 @@ def variable_initialize(data):
     data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
     data['variables']['resourceGroupName'] = "[resourceGroup().name]"
     data['variables']['singleQuote'] = "'"
-    data['variables']['f5Tag'] = "MANDATORY"
-    data['variables']['f5TemplateTag'] = "MANDATORY"
     data['variables']['f5CloudLibsTag'] = "MANDATORY"
     data['variables']['f5CloudLibsAzureTag'] = "MANDATORY"
     data['variables']['f5NetworksTag'] = "MANDATORY"
