@@ -148,12 +148,12 @@ Update your DNS records to point to the WAF public IP address.
 Then, you can finalize the WAF by allowing traffic from the WAF to access your application servers and the Azure Load Balancer in front of your applications. You must also deny traffic from the internet.  If you launched the WAF from the Security Center, you receive a recommendation to finalize the WAF.  If you launch from the Marketplace, you do not see the recommendation, but still must finalize the WAF using the following guidance.
 
 1. In the Azure portal, open the Network Security Group associated with your application.
-2. Click the Inbound security rules label.
+2. Click the **Inbound security rules** label.
 3. Note the priority number for each existing rule. You are going to create at least three new rules for each application, and they must be higher priority (lower numbers) than the existing rules.
 
 Note: The lowest number you can use is 100. If 100, 101, and 102 are already in use, you must re-create existing rules and assign a higher number to each, so that these numbers are available.
 
-4. On the Inbound security rules blade, click Add.
+4. On the **Inbound security rules** blade, click Add.
 5. Allow the WAF to access the application server.
 
 | Option | Description |
@@ -161,13 +161,13 @@ Note: The lowest number you can use is 100. If 100, 101, and 102 are already in 
 | Name | A unique, descriptive name for the rule, for example allow_http_waf_appsrv0. |
 | Priority | A unique priority that is lower than any other security rule. |
 | Source | Choose CIDR block. |
-| Source IP address range	 | The public IP address of the Azure Load Balancer in front of the WAF devices, in CIDR notation. For example, if the IP address is 52.160.108.42, you would enter 52.160.108.42/32. You can find the public IP address in the resource group for the WAF; it is usually named waf-pip. |
+| Source IP address range	 | Add at least two source IP addresses separated by commas:  1) The public IP address of the Azure Load Balancer in front of the WAF devices, in CIDR notation. For example, if the IP address is 52.160.108.42, you would enter 52.160.108.42/32. You can find the public IP address in the resource group for the WAF; it is usually named **waf-pip**.  2) The public IP address(es) of the BIG-IP VE management interface(s).  The public IPs of the management interfaces end with **-mgmt-pip0** through **-mgmt-pip3**. |
 | Service	| The service on the application server, for example HTTP or HTTPS. |
 | Protocol | Choose TCP. |
 | Port range | The TCP port on which your application server listens for traffic, for example, 80. |
 | Action | Choose Allow. |
 
-8. Click OK.
+8. Click **OK**.
 
 9. Allow the WAF to access the Azure Load Balancer in front of your application servers.
 
@@ -182,7 +182,7 @@ Note: The lowest number you can use is 100. If 100, 101, and 102 are already in 
 | Port range | The TCP port on which your application server listens for traffic, for example, 80. |
 | Action | Choose Allow. |
   
-10. Click OK.
+10. Click **OK**.
 11. Deny internet traffic from getting to the application server.
 
 | Option | Description |
@@ -196,7 +196,7 @@ Note: The lowest number you can use is 100. If 100, 101, and 102 are already in 
 | Port range | The TCP port on which your application server listens for traffic, for example, 80. |
 | Action | Choose Deny. |
 
-12. Click OK.
+12. Click **OK**.
 
 Repeat these steps for each application server in the deployment.
 
@@ -344,8 +344,8 @@ Copyright 2014-2017 F5 Networks Inc.
 ## License
 
 
-Apache V2.0
-~~~~~~~~~~~
+### Apache V2.0
+
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License. You may obtain a copy of the
 License at
@@ -358,7 +358,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations
 under the License.
 
-Contributor License Agreement
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Contributor License Agreement
+
 Individuals or business entities who contribute to this project must have
 completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html).
