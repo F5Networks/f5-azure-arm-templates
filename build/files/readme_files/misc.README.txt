@@ -115,6 +115,15 @@ The deployment template supports creation of 1-20 external public IP addresses f
   - Again, you MUST follow the resource naming conventions in the provided examples for failover to work correctly.
 
 When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. See the BIG-IP documentation for specific instructions on creating virtual servers.
+
+### Configuring additional routes
+If you want to configure additional routes to use the active BIG-IP VE as the next hop virtual appliance, you must edit the **/config/cloud/managedRoutes** file on each BIG-IP VE device.
+
+The managedRoutes file is a comma-separated list of route destinations. For example, if you entered **192.168.0.0/24,192.168.1.0/24** in the **managedRoutes** parameter of the ARM template deployment, and want to set the active BIG-IP VE device as the next hop for the routes 192.168.2.0/24 and 0.0.0.0/0, log in via SSH to each device and manually edit the **/config/cloud/managedRoutes** file to:
+
+**192.168.0.0/24,192.168.1.0/24, 192.168.2.0/24,0.0.0.0/0**
+
+Ensure the Azure Route Table(s) containing the routes with these destinations are tagged with key **f5_ha** and the value you provided for the **routeTableTag** parameter of the ARM template deployment.
 }}
 
 <SERVICE_PRINCIPAL>{{### Service Principal Authentication
