@@ -161,7 +161,7 @@ Note: The lowest number you can use is 100. If 100, 101, and 102 are already in 
 | Name | A unique, descriptive name for the rule, for example allow_http_waf_appsrv0. |
 | Priority | A unique priority that is lower than any other security rule. |
 | Source | Choose CIDR block. |
-| Source IP address range	 | Add at least two source IP addresses separated by commas:  1) The public IP address of the Azure Load Balancer in front of the WAF devices, in CIDR notation. For example, if the IP address is 52.160.108.42, you would enter 52.160.108.42/32. You can find the public IP address in the resource group for the WAF; it is usually named **waf-pip**.  2) The public IP address(es) of the BIG-IP VE management interface(s).  The public IPs of the management interfaces end with **-mgmt-pip0** through **-mgmt-pip3**. |
+| Source IP address range	 | The public IPs of the management interfaces end with **-mgmt-pip0** through **-mgmt-pip3**. |
 | Service	| The service on the application server, for example HTTP or HTTPS. |
 | Protocol | Choose TCP. |
 | Port range | The TCP port on which your application server listens for traffic, for example, 80. |
@@ -175,8 +175,8 @@ Note: The lowest number you can use is 100. If 100, 101, and 102 are already in 
 | --- | --- |
 | Name | A unique, descriptive name for the rule, for example allow_http_alb_appsrv0. |
 | Priority | A unique priority that is just above the previous rule. |
-| Source | Choose Tag. |
-| Source tag | Choose AzureLoadBalancer. |
+| Source | Choose Service Tag. |
+| Source service tag | Choose AzureLoadBalancer. |
 | Service | The service on the application server, for example HTTP or HTTPS. |
 | Protocol | Choose TCP. |
 | Port range | The TCP port on which your application server listens for traffic, for example, 80. |
