@@ -140,6 +140,7 @@
         }, 
         "numberOfExternalIps": {
             "allowedValues": [
+                0, 
                 1, 
                 2, 
                 3, 
@@ -962,8 +963,9 @@
         }, 
         {
             "apiVersion": "[variables('networkApiVersion')]", 
+            "condition": "[not(equals(variables('numberOfExternalIps'),0))]", 
             "copy": {
-                "count": "[variables('numberOfExternalIps')]", 
+                "count": "[if(not(equals(variables('numberOfExternalIps'), 0)), variables('numberOfExternalIps'), 1)]", 
                 "name": "extpipcopy"
             }, 
             "location": "[variables('location')]", 

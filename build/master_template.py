@@ -196,7 +196,7 @@ data['parameters']['allowUsageAnalytics'] = {"type": "string", "defaultValue": "
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'cluster_3nic', 'ha-avset'):
     data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": {"description": ""}}
 if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'cluster_3nic', 'ha-avset'):
-    data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "metadata": {"description": ""}}
+    data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [0,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "metadata": {"description": ""}}
 if template_name in ('cluster_3nic') and 'experimental' in support_type:
     data['parameters']['enableNetworkFailover'] = {"allowedValues": [ "No", "Yes" ], "defaultValue": "No", "metadata": { "description": "" }, "type": "string"}
     data['parameters']['internalLoadBalancerProbePort'] = {"defaultValue": "3456", "metadata": { "description": "" }, "type": "string"}
@@ -563,7 +563,7 @@ if stack_type in ('new_stack', 'existing_stack'):
             pip_tags['f5_privateIp'] = private_ip_value
             pip_tags['f5_extSubnetId'] = "[variables('extSubnetId')]"
             pip_tags['f5_tg'] = "traffic-group-1"
-        resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('extPublicIPAddressNamePrefix'), copyIndex())]", "copy": { "count": "[variables('numberOfExternalIps')]", "name": "extpipcopy"}, "tags": pip_tags, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabel'), copyIndex(0))]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
+        resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "condition": "[not(equals(variables('numberOfExternalIps'),0))]", "location": location, "name": "[concat(variables('extPublicIPAddressNamePrefix'), copyIndex())]", "copy": { "count": "[if(not(equals(variables('numberOfExternalIps'), 0)), variables('numberOfExternalIps'), 1)]", "name": "extpipcopy"}, "tags": pip_tags, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabel'), copyIndex(0))]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
 
 ###### Virtual Network Resources(s) ######
 if template_name in ('standalone_1nic', 'cluster_1nic'):
