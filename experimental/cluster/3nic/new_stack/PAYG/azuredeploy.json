@@ -1168,6 +1168,7 @@
         }, 
         {
             "apiVersion": "[variables('networkApiVersion')]", 
+            "condition": "[not(equals(variables('numberOfExternalIps'),0))]", 
             "dependsOn": [
                 "extpipcopy"
             ], 
