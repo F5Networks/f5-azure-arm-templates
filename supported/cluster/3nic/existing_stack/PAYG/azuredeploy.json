@@ -359,230 +359,9 @@
             "13.0.021": "route", 
             "latest": "route"
         }, 
-        "selfIpconfigArray": [
+        "backEndAddressPoolArray": [
             {
-                "name": "[concat(variables('instanceName'), '-self-ipconfig')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '0')]"
-                    }, 
-                    "primary": true, 
-                    "privateIPAddress": "[variables('extSubnetPrivateAddress')]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('instanceName'), '-self-ipconfig')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '1')]"
-                    }, 
-                    "primary": true, 
-                    "privateIPAddress": "[variables('extSubnetPrivateAddress1')]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }
-        ], 
-        "extIpconfigArray": [
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig0')]", 
-                "properties": {
-                    "loadBalancerBackendAddressPools": [
-                        {
-                            "id": "[concat(variables('extLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
-                        }
-                    ], 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix0'))]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig1')]", 
-                "properties": {
-                    "loadBalancerBackendAddressPools": [
-                        {
-                            "id": "[concat(variables('extLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
-                        }
-                    ], 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix1'))]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }
-        ], 
-        "lbFrontEndArray": [
-            {
-                "name": "loadBalancerFrontEnd0", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 0)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd1", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 1)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd2", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 2)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd3", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 3)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd4", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 4)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd5", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 5)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd6", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 6)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd7", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 7)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd8", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 8)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd9", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 9)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd10", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 10)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd11", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 11)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd12", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 12)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd13", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 13)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd14", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 14)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd15", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 15)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd16", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 16)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd17", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 17)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd18", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 18)]"
-                    }
-                }
-            }, 
-            {
-                "name": "loadBalancerFrontEnd19", 
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[concat(variables('extPublicIPAddressIdPrefix'), 19)]"
-                    }
-                }
+                "id": "[concat(variables('extLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
             }
         ], 
         "externalLoadBalancerName": "[concat(variables('dnsLabel'),'-ext-alb')]", 
@@ -945,7 +724,34 @@
             "location": "[variables('location')]", 
             "name": "[concat(variables('extNicName'), '0')]", 
             "properties": {
-                "ipConfigurations": "[concat(take(variables('selfIpConfigArray'), 1), take(variables('extIpconfigArray'), 1))]", 
+                "ipConfigurations": [
+                    {
+                        "name": "[concat(variables('instanceName'), '-self-ipconfig')]", 
+                        "properties": {
+                            "PublicIpAddress": {
+                                "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '0')]"
+                            }, 
+                            "primary": true, 
+                            "privateIPAddress": "[variables('extSubnetPrivateAddress')]", 
+                            "privateIPAllocationMethod": "Static", 
+                            "subnet": {
+                                "id": "[variables('extSubnetId')]"
+                            }
+                        }
+                    }, 
+                    {
+                        "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig0')]", 
+                        "properties": {
+                            "loadBalancerBackendAddressPools": "[take(variables('backEndAddressPoolArray'), variables('numberOfExternalIps'))]", 
+                            "primary": false, 
+                            "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix0'))]", 
+                            "privateIPAllocationMethod": "Static", 
+                            "subnet": {
+                                "id": "[variables('extSubnetId')]"
+                            }
+                        }
+                    }
+                ], 
                 "networkSecurityGroup": {
                     "id": "[concat(variables('extNsgId'))]"
                 }
@@ -970,7 +776,34 @@
             "location": "[variables('location')]", 
             "name": "[concat(variables('extNicName'), '1')]", 
             "properties": {
-                "ipConfigurations": "[concat(skip(variables('selfIpConfigArray'), 1), skip(variables('extIpconfigArray'), 1))]", 
+                "ipConfigurations": [
+                    {
+                        "name": "[concat(variables('instanceName'), '-self-ipconfig')]", 
+                        "properties": {
+                            "PublicIpAddress": {
+                                "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '1')]"
+                            }, 
+                            "primary": true, 
+                            "privateIPAddress": "[variables('extSubnetPrivateAddress1')]", 
+                            "privateIPAllocationMethod": "Static", 
+                            "subnet": {
+                                "id": "[variables('extSubnetId')]"
+                            }
+                        }
+                    }, 
+                    {
+                        "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig1')]", 
+                        "properties": {
+                            "loadBalancerBackendAddressPools": "[take(variables('backEndAddressPoolArray'), variables('numberOfExternalIps'))]", 
+                            "primary": false, 
+                            "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix1'))]", 
+                            "privateIPAllocationMethod": "Static", 
+                            "subnet": {
+                                "id": "[variables('extSubnetId')]"
+                            }
+                        }
+                    }
+                ], 
                 "networkSecurityGroup": {
                     "id": "[concat(variables('extNsgId'))]"
                 }
@@ -1125,7 +958,20 @@
                         "name": "loadBalancerBackEnd"
                     }
                 ], 
-                "frontendIPConfigurations": "[take(variables('lbFrontEndArray'), variables('numberOfExternalIps'))]"
+                "copy": [
+                    {
+                        "count": "[if(not(equals(variables('numberOfExternalIps'), 0)), variables('numberOfExternalIps'), 1)]", 
+                        "input": {
+                            "name": "[concat('loadBalancerFrontEnd', copyIndex('frontendIPConfigurations', 1))]", 
+                            "properties": {
+                                "publicIPAddress": {
+                                    "id": "[concat(variables('extPublicIPAddressIdPrefix'), sub(copyIndex('frontendIPConfigurations', 1), 1))]"
+                                }
+                            }
+                        }, 
+                        "name": "frontendIPConfigurations"
+                    }
+                ]
             }, 
             "tags": {
                 "application": "[parameters('tagValues').application]", 
