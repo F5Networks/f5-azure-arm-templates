@@ -434,7 +434,8 @@
                 "storageAccountType": "Premium_LRS"
             }
         }, 
-        "newStorageAccountName": "[concat(uniqueString(resourceGroup().id, deployment().name), 'stor')]", 
+        "newStorageAccountName0": "[concat(uniqueString(resourceGroup().id, deployment().name), 'stor0')]", 
+        "newStorageAccountName1": "[concat(uniqueString(resourceGroup().id, deployment().name), 'stor1')]", 
         "storageAccountType": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]", 
         "newDataStorageAccountName": "[concat(uniqueString(resourceGroup().id, deployment().name), 'data000')]", 
         "dataStorageAccountType": "Standard_LRS", 
@@ -644,7 +645,7 @@
         {
             "apiVersion": "[variables('storageApiVersion')]", 
             "location": "[variables('location')]", 
-            "name": "[variables('newStorageAccountName')]", 
+            "name": "[variables('newStorageAccountName0')]", 
             "properties": {
                 "accountType": "[variables('storageAccountType')]"
             }, 
@@ -674,6 +675,22 @@
             "type": "Microsoft.Storage/storageAccounts"
         }, 
         {
+            "apiVersion": "[variables('storageApiVersion')]", 
+            "location": "[variables('location')]", 
+            "name": "[variables('newStorageAccountName1')]", 
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }, 
+            "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
+            }, 
+            "type": "Microsoft.Storage/storageAccounts"
+        }, 
+        {
             "apiVersion": "[variables('apiVersion')]", 
             "copy": {
                 "count": "[parameters('numberOfInstances')]", 
@@ -682,7 +699,7 @@
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), copyindex())]", 
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", 
+                "[concat('Microsoft.Storage/storageAccounts/', variables(concat('newStorageAccountName', copyIndex()))]", 
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
             ], 
             "location": "[variables('location')]", 
@@ -729,7 +746,7 @@
                         "createOption": "FromImage", 
                         "name": "[concat('osdisk',copyindex())]", 
                         "vhd": {
-                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vhds/', copyindex(),'.vhd')]"
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables(concat('newStorageAccountName', copyIndex()))), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vhds/', copyindex(),'.vhd')]"
                         }
                     }
                 }

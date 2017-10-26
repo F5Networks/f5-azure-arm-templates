@@ -557,7 +557,7 @@
                 "storageAccountType": "Premium_LRS"
             }
         }, 
-        "newStorageAccountName": "[concat(uniqueString(resourceGroup().id, deployment().name), 'stor')]", 
+        "newStorageAccountName0": "[concat(uniqueString(resourceGroup().id, deployment().name), 'stor0')]", 
         "storageAccountType": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]", 
         "newDataStorageAccountName": "[concat(uniqueString(resourceGroup().id, deployment().name), 'data000')]", 
         "dataStorageAccountType": "Standard_LRS", 
@@ -705,7 +705,7 @@
         {
             "apiVersion": "[variables('storageApiVersion')]", 
             "location": "[variables('location')]", 
-            "name": "[variables('newStorageAccountName')]", 
+            "name": "[variables('newStorageAccountName0')]", 
             "properties": {
                 "accountType": "[variables('storageAccountType')]"
             }, 
@@ -737,7 +737,7 @@
         {
             "apiVersion": "[variables('computeApiVersion')]", 
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]"
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0'))]"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('vmssName')]", 
@@ -827,7 +827,7 @@
                             "createOption": "FromImage", 
                             "name": "vmssosdisk", 
                             "vhdContainers": [
-                                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vmss1/')]"
+                                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vmss1/')]"
                             ]
                         }
                     }
