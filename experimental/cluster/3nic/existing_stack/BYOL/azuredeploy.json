@@ -1167,6 +1167,22 @@
             "type": "Microsoft.Storage/storageAccounts"
         }, 
         {
+            "apiVersion": "[variables('storageApiVersion')]", 
+            "location": "[variables('location')]", 
+            "name": "[variables('newStorageAccountName2')]", 
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }, 
+            "tags": {
+                "application": "[parameters('tagValues').application]", 
+                "costCenter": "[parameters('tagValues').cost]", 
+                "environment": "[parameters('tagValues').environment]", 
+                "group": "[parameters('tagValues').group]", 
+                "owner": "[parameters('tagValues').owner]"
+            }, 
+            "type": "Microsoft.Storage/storageAccounts"
+        }, 
+        {
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), '0')]", 
@@ -1256,7 +1272,7 @@
                 "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'), '1')]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '1')]", 
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", 
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName2'))]", 
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
             ], 
             "location": "[variables('location')]", 
@@ -1318,7 +1334,7 @@
                         "createOption": "FromImage", 
                         "name": "osdisk", 
                         "vhd": {
-                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vhds/', variables('instanceName'),'1.vhd')]"
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName2')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vhds/', variables('instanceName'),'1.vhd')]"
                         }
                     }
                 }
