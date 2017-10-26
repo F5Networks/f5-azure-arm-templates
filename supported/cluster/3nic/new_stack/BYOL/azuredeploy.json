@@ -308,6 +308,8 @@
         ], 
         "externalLoadBalancerName": "[concat(variables('dnsLabel'),'-ext-alb')]", 
         "extLbId": "[resourceId('Microsoft.Network/loadBalancers',variables('externalLoadBalancerName'))]", 
+        "internalLoadBalancerName": "[concat(variables('dnsLabel'),'-int-ilb')]", 
+        "intLbId": "[resourceId('Microsoft.Network/loadBalancers',variables('internalLoadBalancerName'))]", 
         "instanceTypeMap": {
             "Standard_A3": {
                 "storageAccountType": "Standard_LRS"
@@ -727,7 +729,7 @@
                     {
                         "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig0')]", 
                         "properties": {
-                            "loadBalancerBackendAddressPools": "[take(variables('backEndAddressPoolArray'), variables('numberOfExternalIps'))]", 
+                            "loadBalancerBackendAddressPools": "[if(equals(variables('numberOfExternalIps'), 0), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 1))]", 
                             "primary": false, 
                             "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 10)]", 
                             "privateIPAllocationMethod": "Static", 
@@ -780,7 +782,7 @@
                     {
                         "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig1')]", 
                         "properties": {
-                            "loadBalancerBackendAddressPools": "[take(variables('backEndAddressPoolArray'), variables('numberOfExternalIps'))]", 
+                            "loadBalancerBackendAddressPools": "[if(equals(variables('numberOfExternalIps'), 0), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 1))]", 
                             "primary": false, 
                             "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 11)]", 
                             "privateIPAllocationMethod": "Static", 

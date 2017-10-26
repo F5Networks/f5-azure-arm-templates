@@ -36,7 +36,7 @@
             "value": "No"
         }, 
         "internalLoadBalancerProbePort": {
-            "value": "3456"
+            "value": "DO_NOT_USE"
         }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"

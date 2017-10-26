@@ -179,7 +179,7 @@
             "type": "string"
         }, 
         "internalLoadBalancerProbePort": {
-            "defaultValue": "3456", 
+            "defaultValue": "DO_NOT_USE", 
             "metadata": {
                 "description": "Specify a TCP port for the internal load balancer to monitor."
             }, 
@@ -770,7 +770,7 @@
                     {
                         "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig0')]", 
                         "properties": {
-                            "loadBalancerBackendAddressPools": "[take(variables('backEndAddressPoolArray'), variables('numberOfExternalIps'))]", 
+                            "loadBalancerBackendAddressPools": "[if(equals(variables('numberOfExternalIps'), 0), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 1))]", 
                             "primary": false, 
                             "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 10)]", 
                             "privateIPAllocationMethod": "Static", 
@@ -823,7 +823,7 @@
                     {
                         "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig1')]", 
                         "properties": {
-                            "loadBalancerBackendAddressPools": "[take(variables('backEndAddressPoolArray'), variables('numberOfExternalIps'))]", 
+                            "loadBalancerBackendAddressPools": "[if(equals(variables('numberOfExternalIps'), 0), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 1))]", 
                             "primary": false, 
                             "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 11)]", 
                             "privateIPAllocationMethod": "Static", 
@@ -874,11 +874,7 @@
                     {
                         "name": "[concat(variables('dnsLabel'), '-int-ipconfig-secondary')]", 
                         "properties": {
-                            "loadBalancerBackendAddressPools": [
-                                {
-                                    "id": "[concat(variables('intLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
-                                }
-                            ], 
+                            "loadBalancerBackendAddressPools": "[if(equals(parameters('internalLoadBalancerProbePort'), 'DO_NOT_USE'), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 2))]", 
                             "privateIPAddress": "[variables('intSubnetPrivateAddress2')]", 
                             "privateIPAllocationMethod": "Static", 
                             "subnet": {
@@ -926,11 +922,7 @@
                     {
                         "name": "[concat(variables('dnsLabel'), '-int-ipconfig-secondary')]", 
                         "properties": {
-                            "loadBalancerBackendAddressPools": [
-                                {
-                                    "id": "[concat(variables('intLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
-                                }
-                            ], 
+                            "loadBalancerBackendAddressPools": "[if(equals(parameters('internalLoadBalancerProbePort'), 'DO_NOT_USE'), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 2))]", 
                             "privateIPAddress": "[variables('intSubnetPrivateAddress3')]", 
                             "privateIPAllocationMethod": "Static", 
                             "subnet": {
@@ -1051,6 +1043,7 @@
         }, 
         {
             "apiVersion": "[variables('networkApiVersion')]", 
+            "condition": "[not(equals(parameters('internalLoadBalancerProbePort'),'DO_NOT_USE'))]", 
             "dependsOn": [
                 "[variables('vnetId')]", 
                 "[variables('extNsgID')]", 
