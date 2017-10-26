@@ -304,6 +304,9 @@
         "backEndAddressPoolArray": [
             {
                 "id": "[concat(variables('extLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
+            }, 
+            {
+                "id": "[concat(variables('intLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
             }
         ], 
         "externalLoadBalancerName": "[concat(variables('dnsLabel'),'-ext-alb')]", 
