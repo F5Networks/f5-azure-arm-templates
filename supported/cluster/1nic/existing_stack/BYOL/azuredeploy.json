@@ -719,7 +719,8 @@
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), copyindex())]", 
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
-                "[concat('Microsoft.Storage/storageAccounts/', variables(concat('newStorageAccountName', copyIndex()))]", 
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0'))]", 
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName1'))]", 
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
             ], 
             "location": "[variables('location')]", 
