@@ -181,8 +181,8 @@ parameter_list:
   instanceName: "Name of the Virtual Machine."
   instanceType: "Azure instance size of the Virtual Machine."
   imageName:
-    default: "F5 SKU (IMAGE) to you want to deploy."
-    waf_autoscale: "F5 SKU (IMAGE) you want to deploy. **Best** is the only option because BIG-IP ASM is required."
+    default: "F5 SKU (IMAGE) to you want to deploy. Note: The disk size of the VM will be determined based on the option chosen."
+    waf_autoscale: "F5 SKU (IMAGE) you want to deploy. **Best** is the only option because BIG-IP ASM is required. Note: The disk size of the VM will be determined based on the option chosen."
   licenseKey1: "The license token for the F5 BIG-IP VE (BYOL)."
   licenseKey2: "The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices."
   licensedBandwidth: "The amount of licensed bandwidth (Mbps) you want the PAYG image to use."

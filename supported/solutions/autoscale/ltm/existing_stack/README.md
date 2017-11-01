@@ -99,7 +99,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | adminPassword | Yes | Password to login to the Virtual Machine. |
 | dnsLabel | Yes | Unique DNS Name for the Public IP address used to access the Virtual Machine. |
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
-| imageName | Yes | F5 SKU (IMAGE) to you want to deploy. |
+| imageName | Yes | F5 SKU (IMAGE) to you want to deploy. Note: The disk size of the VM will be determined based on the option chosen. |
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
 | licensedBandwidth | PAYG only: | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
 | vnetName | Yes | The name of the existing virtual network to which you want to connect the BIG-IP VEs. |
