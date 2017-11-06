@@ -1201,7 +1201,7 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true, 
-                        "storageUri": "[concat('http://',variables('newDataStorageAccountName'),'.blob.core.windows.net')]"
+                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
                     }
                 }, 
                 "hardwareProfile": {
@@ -1284,7 +1284,7 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true, 
-                        "storageUri": "[concat('http://',variables('newDataStorageAccountName'),'.blob.core.windows.net')]"
+                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
                     }
                 }, 
                 "hardwareProfile": {
