@@ -568,9 +568,7 @@
                         "input": {
                             "name": "[if(equals(copyIndex('ipConfigurations', 1), 1), concat(variables('instanceName'), '-self-ipconfig'), concat(variables('resourceGroupName'), '-ext-ipconfig', sub(copyIndex('ipConfigurations', 1), 2)))]", 
                             "properties": {
-                                "PublicIpAddress": {
-                                    "Id": "[if(equals(copyIndex('ipConfigurations', 1), 1), concat(variables('extSelfPublicIpAddressIdPrefix'), '0'), concat(variables('extPublicIPAddressIdPrefix'), sub(copyIndex('ipConfigurations', 1), 2)))]"
-                                }, 
+                                "PublicIpAddress": null, 
                                 "primary": "[if(equals(copyIndex('ipConfigurations', 1), 1), 'True', 'False')]", 
                                 "privateIPAddress": "[if(equals(copyIndex('ipConfigurations', 1), 1), variables('extSubnetPrivateAddress'), concat(variables('extSubnetPrivateAddressPrefix'), add(variables('extSubnetPrivateAddressSuffixInt'), sub(copyIndex('ipConfigurations', 1), 1))))]", 
                                 "privateIPAllocationMethod": "Static", 
