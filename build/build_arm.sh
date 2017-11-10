@@ -15,7 +15,6 @@ fi
 ############################### Supported ###############################
 ## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), Cluster (1nic, 3nic), HA-AVSET
 template_list="standalone/1nic standalone/2nic standalone/3nic standalone/n-nic cluster/1nic cluster/3nic ha-avset"
-stack_list="new_stack existing_stack"
 for tmpl in $template_list; do
     loc=$tmpl
     if [[ $loc == *"standalone"* ]]; then
@@ -23,10 +22,18 @@ for tmpl in $template_list; do
     elif [[ $loc == *"cluster"* ]]; then
         tmpl="cluster_"`basename $loc`
     fi
+    # Do not build prod_stack for certain templates
+    stack_list="new_stack existing_stack prod_stack"
+    if [[ $tmpl == *"ha-avset"* ]] || [[ $tmpl == *"cluster_"* ]]; then
+        stack_list="new_stack existing_stack"
+    fi
     for stack_type in $stack_list; do
         python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../supported/$loc/$stack_type/PAYG/" --script-location "../supported/$loc/$stack_type/" $release_prep
         python -B '.\master_template.py' --template-name $tmpl --license-type BYOL --stack-type $stack_type --template-location "../supported/$loc/$stack_type/BYOL/" --script-location "../supported/$loc/$stack_type/" $release_prep
-        python -B '.\master_template.py' --template-name $tmpl --license-type BIGIQ --stack-type $stack_type --template-location "../supported/$loc/$stack_type/BIGIQ/" --script-location "../supported/$loc/$stack_type/" $release_prep
+        # Don't build BIG-IQ template if stack type is prod_stack
+        if [[ $stack_type != *"prod_stack"* ]]; then
+            python -B '.\master_template.py' --template-name $tmpl --license-type BIGIQ --stack-type $stack_type --template-location "../supported/$loc/$stack_type/BIGIQ/" --script-location "../supported/$loc/$stack_type/" $release_prep
+        fi
     done
 done
 

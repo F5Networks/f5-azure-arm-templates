@@ -260,13 +260,19 @@ def pub_ip_strip(data, resource, tmpl_type):
     if resource == 'PublicIpAddress':
         for item in data:
             if tmpl_type == 'resources':
-                try:
-                    if isinstance(item['properties']['ipConfigurations'], list):
-                        for ipconfig in range(0, len(item['properties']['ipConfigurations'])):
-                            if resource in item['properties']['ipConfigurations'][ipconfig]['properties']:
-                                item['properties']['ipConfigurations'][ipconfig]['properties'][resource] = None
-                except:
-                    continue
+                if 'properties' in item:
+                    obj = 'ipConfigurations'
+                    if obj in item['properties']:
+                        # declared as a list
+                        for ipconfig in range(0, len(item['properties'][obj])):
+                            if resource in item['properties'][obj][ipconfig]['properties']:
+                                item['properties'][obj][ipconfig]['properties'][resource] = None
+                    # Check if ipConfigurations is a copy and strip there as well if so
+                    obj = 'copy'
+                    if obj in item['properties']:
+                        for copy in range(0, len(item['properties'][obj])):
+                            if resource in item['properties'][obj][copy]['input']['properties']:
+                                item['properties'][obj][copy]['input']['properties'][resource] = None
             elif tmpl_type == 'variables':
                 try:
                     if isinstance(data[item], list):
