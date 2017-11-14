@@ -198,7 +198,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
 if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'cluster_3nic', 'ha-avset'):
     data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [0,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "metadata": {"description": ""}}
 if template_name in ('cluster_3nic') and 'experimental' in support_type:
-    data['parameters']['enableNetworkFailover'] = {"allowedValues": [ "No", "Yes" ], "defaultValue": "No", "metadata": { "description": "" }, "type": "string"}
+    data['parameters']['enableNetworkFailover'] = {"allowedValues": [ "No", "Yes" ], "defaultValue": "Yes", "metadata": { "description": "" }, "type": "string"}
     data['parameters']['internalLoadBalancerType'] = {"defaultValue": "Per-protocol", "allowedValues": ["Per-protocol", "All-protocol", "DO_NOT_USE"], "metadata": { "description": "" }, "type": "string"}
     data['parameters']['internalLoadBalancerProbePort'] = {"defaultValue": "3456", "metadata": { "description": "" }, "type": "string"}
 if stack_type == 'new_stack':
