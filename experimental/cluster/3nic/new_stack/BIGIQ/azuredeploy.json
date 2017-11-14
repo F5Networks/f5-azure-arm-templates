@@ -178,10 +178,22 @@
             }, 
             "type": "string"
         }, 
-        "internalLoadBalancerProbePort": {
-            "defaultValue": "DO_NOT_USE", 
+        "internalLoadBalancerType": {
+            "allowedValues": [
+                "Per-protocol", 
+                "All-protocol", 
+                "DO_NOT_USE"
+            ], 
+            "defaultValue": "Per-protocol", 
             "metadata": {
-                "description": "Specify a TCP port for the internal load balancer to monitor."
+                "description": "Specify a the type of internal Azure load balancer to deploy."
+            }, 
+            "type": "string"
+        }, 
+        "internalLoadBalancerProbePort": {
+            "defaultValue": "3456", 
+            "metadata": {
+                "description": "Specify a TCP port for the internal load balancer to monitor. If you specified DO_NOT_USE for internal load balancer type, this setting has no effect."
             }, 
             "type": "string"
         }, 
@@ -878,7 +890,7 @@
                     {
                         "name": "[concat(variables('dnsLabel'), '-int-ipconfig-secondary')]", 
                         "properties": {
-                            "loadBalancerBackendAddressPools": "[if(equals(parameters('internalLoadBalancerProbePort'), 'DO_NOT_USE'), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 2))]", 
+                            "loadBalancerBackendAddressPools": "[if(equals(parameters('internalLoadBalancerType'), 'DO_NOT_USE'), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 2))]", 
                             "privateIPAddress": "[variables('intSubnetPrivateAddress2')]", 
                             "privateIPAllocationMethod": "Static", 
                             "subnet": {
@@ -926,7 +938,7 @@
                     {
                         "name": "[concat(variables('dnsLabel'), '-int-ipconfig-secondary')]", 
                         "properties": {
-                            "loadBalancerBackendAddressPools": "[if(equals(parameters('internalLoadBalancerProbePort'), 'DO_NOT_USE'), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 2))]", 
+                            "loadBalancerBackendAddressPools": "[if(equals(parameters('internalLoadBalancerType'), 'DO_NOT_USE'), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 2))]", 
                             "privateIPAddress": "[variables('intSubnetPrivateAddress3')]", 
                             "privateIPAllocationMethod": "Static", 
                             "subnet": {
@@ -1047,7 +1059,7 @@
         }, 
         {
             "apiVersion": "[variables('networkApiVersion')]", 
-            "condition": "[not(equals(parameters('internalLoadBalancerProbePort'),'DO_NOT_USE'))]", 
+            "condition": "[not(equals(parameters('internalLoadBalancerType'),'DO_NOT_USE'))]", 
             "dependsOn": [
                 "[variables('vnetId')]", 
                 "[variables('extNsgID')]", 
@@ -1075,29 +1087,29 @@
                 ], 
                 "loadBalancingRules": [
                     {
-                        "name": "allProtocolLbRule", 
+                        "name": "[if(equals(parameters('internalLoadBalancerType'),'Per-protocol'), concat('lbRule-', parameters('internalLoadBalancerProbePort')), 'allProtocolLbRule')]", 
                         "properties": {
                             "backendAddressPool": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
                             }, 
-                            "backendPort": 0, 
+                            "backendPort": "[if(equals(parameters('internalLoadBalancerType'),'Per-protocol'), parameters('internalLoadBalancerProbePort'), 0)]", 
                             "enableFloatingIP": false, 
                             "frontendIPConfiguration": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
                             }, 
-                            "frontendPort": 0, 
+                            "frontendPort": "[if(equals(parameters('internalLoadBalancerType'),'Per-protocol'), parameters('internalLoadBalancerProbePort'), 0)]", 
                             "idleTimeoutInMinutes": 15, 
                             "loadDistribution": "Default", 
                             "probe": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancerName')), '/probes/tcp-probe')]"
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancerName')), '/probes/tcp-probe-', parameters('internalLoadBalancerProbePort'))]"
                             }, 
-                            "protocol": "All"
+                            "protocol": "[if(equals(parameters('internalLoadBalancerType'),'Per-protocol'), 'tcp', 'All')]"
                         }
                     }
                 ], 
                 "probes": [
                     {
-                        "name": "tcp-probe", 
+                        "name": "[concat('tcp-probe-', parameters('internalLoadBalancerProbePort'))]", 
                         "properties": {
                             "intervalInSeconds": 5, 
                             "numberOfProbes": 2, 
