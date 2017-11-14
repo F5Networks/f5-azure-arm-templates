@@ -42,7 +42,7 @@
             "value": "10.0"
         }, 
         "enableNetworkFailover": {
-            "value": "No"
+            "value": "Yes"
         }, 
         "internalLoadBalancerType": {
             "value": "Per-protocol"

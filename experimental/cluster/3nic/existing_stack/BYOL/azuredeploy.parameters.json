@@ -60,7 +60,7 @@
             "value": "GEN_UNIQUE"
         }, 
         "enableNetworkFailover": {
-            "value": "No"
+            "value": "Yes"
         }, 
         "internalLoadBalancerType": {
             "value": "Per-protocol"
