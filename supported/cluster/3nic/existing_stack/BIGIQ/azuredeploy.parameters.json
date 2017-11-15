@@ -65,6 +65,15 @@
         "internalIpAddressRangeStart": {
             "value": "GEN_UNIQUE"
         }, 
+        "enableNetworkFailover": {
+            "value": "Yes"
+        }, 
+        "internalLoadBalancerType": {
+            "value": "Per-protocol"
+        }, 
+        "internalLoadBalancerProbePort": {
+            "value": "3456"
+        }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"
         }, 
