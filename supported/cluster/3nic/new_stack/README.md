@@ -109,7 +109,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | numberOfExternalIps | Yes | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
 | enableNetworkFailover | Yes | Enabling failover creates a traditional active/active deployment with traffic groups and mirroring. When failover is disabled, all devices are active; use traffic group none. |
-| internalLoadBalancerType | Yes | Specify a the type of internal Azure load balancer to deploy. |
+| internalLoadBalancerType | Yes | Specify a the type of internal Azure load balancer to deploy. Note: As of the initial release of this template, the all-protocol Azure load balancer is in public preview. Please ensure that this feature is enabled before selecting **All-protocol**. |
 | internalLoadBalancerProbePort | Yes | Specify a TCP port for the internal load balancer to monitor. If you specified DO_NOT_USE for internal load balancer type, this setting has no effect. |
 | ntpServer | Yes | If you want to change the NTP server the BIG-IP uses then replace the default NTP server with your choice. |
 | timeZone | Yes | If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |

@@ -221,7 +221,7 @@
             ], 
             "defaultValue": "Per-protocol", 
             "metadata": {
-                "description": "Specify a the type of internal Azure load balancer to deploy."
+                "description": "Specify a the type of internal Azure load balancer to deploy. Note: As of the initial release of this template, the all-protocol Azure load balancer is in public preview. Please ensure that this feature is enabled before selecting **All-protocol**."
             }, 
             "type": "string"
         }, 
