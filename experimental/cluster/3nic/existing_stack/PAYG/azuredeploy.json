@@ -896,7 +896,7 @@
                     {
                         "name": "[concat(variables('dnsLabel'), '-int-ipconfig-secondary')]", 
                         "properties": {
-                            "loadBalancerBackendAddressPools": "[if(equals(parameters('internalLoadBalancerType'), 'DO_NOT_USE'), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 2))]", 
+                            "loadBalancerBackendAddressPools": "[if(equals(parameters('internalLoadBalancerType'), 'DO_NOT_USE'), take(variables('backEndAddressPoolArray'), 0), skip(variables('backEndAddressPoolArray'), 1))]", 
                             "privateIPAddress": "[variables('intSubnetPrivateAddress2')]", 
                             "privateIPAllocationMethod": "Static", 
                             "subnet": {
@@ -943,7 +943,7 @@
                     {
                         "name": "[concat(variables('dnsLabel'), '-int-ipconfig-secondary')]", 
                         "properties": {
-                            "loadBalancerBackendAddressPools": "[if(equals(parameters('internalLoadBalancerType'), 'DO_NOT_USE'), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 2))]", 
+                            "loadBalancerBackendAddressPools": "[if(equals(parameters('internalLoadBalancerType'), 'DO_NOT_USE'), take(variables('backEndAddressPoolArray'), 0), skip(variables('backEndAddressPoolArray'), 1))]", 
                             "privateIPAddress": "[variables('intSubnetPrivateAddress3')]", 
                             "privateIPAllocationMethod": "Static", 
                             "subnet": {
