@@ -5,14 +5,14 @@
 
 <table>
  <tr>
-  <td align=center>:warning: <strong>CRITICAL :warning: <strong> </td>
+  <td align=center>:warning: <strong>CRITICAL<strong> :warning:  </td>
  </tr>
  <tr>
   <td>BIG-IP virtual servers configured with a Client SSL profile may be vulnerable to an Adaptive Chosen Ciphertext attack (AKA Bleichenbacher attack). For complete information on this vulnerability, see https://support.f5.com/csp/article/K21905460. <br>F5 has released hotfixes for all vulnerable releases. <br>  
    <ul>
     <li><em>If you have an existing BIG-IP VE deployment in Azure</em>  <br>See the <a href="https://support.f5.com/csp/article/K21905460">Security Advisory</a>, which contains information about upgrading your BIG-IP VE to a non-vulnerable version.</li>
-    <li><em>For <strong>new</strong> BIG-IP VE deployments in Azure</em><br> F5 has uploaded new BIG-IP versions into Azure, but they are not yet available.  We will update this page as soon as the images are available.</li>
-    <li><em>For <strong>new</strong> BIG-IP VE deployments using a template in an older tagged release on GitHub</em><br>  F5 has uploaded new BIG-IP versions into Azure, but they are not yet available.  We will update this page as soon as the images are available.</li>
+    <li><em>For <strong>new</strong> BIG-IP VE deployments in Azure</em><br> F5 has uploaded new BIG-IP versions into Azure, but they are not yet available.  We will update this page as soon as the images are available. Until the new images are available, we recommend new deployments of BIG-IP immediately apply the hotfix as described in the Security Advisory.</li>
+    <li><em>For <strong>new</strong> BIG-IP VE deployments using a template in an older F5 tagged release on GitHub</em><br>  F5 has uploaded new BIG-IP versions into Azure, but they are not yet available.  We will update this page as soon as the images are available. Until the new images are available, we recommend new deployments of BIG-IP immediately apply the hotfix as described in the Security Advisory.</li>
    </ul></td>
  </tr>
  </table>
