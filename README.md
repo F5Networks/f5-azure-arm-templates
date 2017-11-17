@@ -11,8 +11,8 @@
   <td>BIG-IP virtual servers configured with a Client SSL profile may be vulnerable to an Adaptive Chosen Ciphertext attack (AKA Bleichenbacher attack). For complete information on this vulnerability, see https://support.f5.com/csp/article/K21905460. <br>F5 has released hotfixes for all vulnerable releases. <br>  
    <ul>
     <li><em>If you have an existing BIG-IP VE deployment in Azure</em>  <br>See the <a href="https://support.f5.com/csp/article/K21905460">Security Advisory</a>, which contains information about upgrading your BIG-IP VE to a non-vulnerable version.</li>
-    <li><em>For new BIG-IP VE deployments in Azure</em><br> The F5 ARM templates in the latest release (4.1.0.0) use non-vulnerable images. We recommending using the templates in this release for new deployments.</li>
-    <li><em>For new BIG-IP VE deployments using a template in an older tagged release on GitHub</em><br>  If you have a specific need an older template, see <a href="azure-update-bigip-image.md">Changing the BIG-IP VE image in an F5 ARM template</a> for instructions on updating the BIG-IP images referenced in the template.</li>
+    <li><em>For ***new*** BIG-IP VE deployments in Azure</em><br> F5 has uploaded new BIG-IP versions into Azure, but they are not yet available.  We will update this page as soon as the images are available.</li>
+    <li><em>For new BIG-IP VE deployments using a template in an older tagged release on GitHub</em><br>  F5 has uploaded new BIG-IP versions into Azure, but they are not yet available.  We will update this page as soon as the images are available.</li>
    </ul></td>
  </tr>
  </table>
