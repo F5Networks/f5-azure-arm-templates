@@ -50,6 +50,7 @@ def parameter_initialize(data):
     data['parameters']['internalIpAddressRangeStart'] = "OPTIONAL"
     data['parameters']['internalIpAddress'] = "OPTIONAL"
     data['parameters']['enableNetworkFailover'] = "OPTIONAL"
+    data['parameters']['internalLoadBalancerType'] = "OPTIONAL"
     data['parameters']['internalLoadBalancerProbePort'] = "OPTIONAL"
     data['parameters']['avSetChoice'] = "OPTIONAL"
     data['parameters']['solutionDeploymentName'] = "OPTIONAL"

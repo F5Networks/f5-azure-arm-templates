@@ -177,7 +177,8 @@ parameter_list:
   internalSubnetName: "Name of the existing internal subnet."
   internalIpAddressRangeStart: "The static private IP address you would like to assign to the internal self IP of the first BIG-IP VE. The next contiguous address will be used for the second BIG-IP device."
   internalIpAddress: "Internal subnet IP address you want to use for the BIG-IP internal self IP address."
-  internalLoadBalancerProbePort: "Specify a TCP port for the internal load balancer to monitor."
+  internalLoadBalancerType: "Specify a the type of internal Azure load balancer to deploy. Note: As of the initial release of this template, the all-protocol Azure load balancer is in public preview. Please ensure that this feature is enabled before selecting **All-protocol**."
+  internalLoadBalancerProbePort: "Specify a TCP port for the internal load balancer to monitor. If you specified DO_NOT_USE for internal load balancer type, this setting has no effect."
   instanceName: "Name of the Virtual Machine."
   instanceType: "Azure instance size of the Virtual Machine."
   imageName:

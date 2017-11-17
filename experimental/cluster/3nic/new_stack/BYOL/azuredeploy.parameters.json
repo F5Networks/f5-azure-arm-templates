@@ -36,10 +36,13 @@
             "value": "10.0"
         }, 
         "enableNetworkFailover": {
-            "value": "No"
+            "value": "Yes"
+        }, 
+        "internalLoadBalancerType": {
+            "value": "Per-protocol"
         }, 
         "internalLoadBalancerProbePort": {
-            "value": "DO_NOT_USE"
+            "value": "3456"
         }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"
