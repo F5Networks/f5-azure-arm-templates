@@ -19,7 +19,9 @@
 
 This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE cluster (Active/Active) in Microsoft Azure. It also allows you to choose to deploy the HA cluster with or without network failover enabled. With network failover disabled, the cluster is created in a limited *Active/Active* configuration and traffic groups are not available; consequently, you cannot use connection, persistence, or session mirroring.  
 
-When network failover is enabled, the cluster is configured in a traditional *Active/Standby* mode. Alternately, you can configure multiple traffic groups in the traditional *Active/Active* mode to allow each device to process traffic for the traffic group to which it is associated. In both of these network failover modes, Azure load balancer probes determine which BIG-IP VE device will receive application traffic. Mirroring and failover are available in both scenarios.
+When network failover is enabled, the cluster is configured in a traditional *Active/Standby* mode. Alternately, you can configure multiple traffic groups in the traditional *Active/Active* mode to allow each device to process traffic for the traffic group to which it is associated. In both of these network failover modes, Azure load balancer probes determine which BIG-IP VE device will receive application traffic. Mirroring and failover are available in both scenarios. 
+
+This template also configures an all-protocol internal Azure Load Balancer (ILB) for forwarding traffic to the internal interfaces of the BIG-IP VE devices.  You can configure the next hop on Azure User Defined Routes (UDRs) to point to the private IP address of the ILB.  Deploy an IP forwarding virtual server on BIG-IP VE to accept this traffic and forward it to the destination.  Note: The all-protocol ILB is currently only available in preview; you must sign up through Microsoft to enable this functionality before deploying the template.
 
 **Networking Stack Type:** This solution deploys into a new networking stack, which is created along with the solution.
 
@@ -31,7 +33,7 @@ When network failover is enabled, the cluster is configured in a traditional *Ac
   - This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.
   - This template can send non-identifiable statistical information to F5 Networks to help us improve our templates.  See [Sending statistical information to F5](#sending-statistical-information-to-f5).
   - In order to pass traffic from your clients to the servers, after launching the template, you must create virtual server(s) on the BIG-IP VE.  See [Creating a virtual server](#creating-virtual-servers-on-the-big-ip-ve).
-  - F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughputs available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/azure-bigip-version-matrix.md.
+  - F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughputs available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
 
 
@@ -76,13 +78,13 @@ You have three options for deploying this solution:
 ### <a name="azure"></a>Azure deploy buttons
 
 Use the appropriate button, depending on what type of BIG-IP licensing required:
-   - **BYOL** (bring your own license): This allows you to use an existing BIG-IP license. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.0.0.0%2Fexperimental%2Fcluster%2F3nic%2Fnew_stack%2FBYOL%2Fazuredeploy.json">
+   - **BYOL** (bring your own license): This allows you to use an existing BIG-IP license. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.1.0.0%2Fexperimental%2Fcluster%2F3nic%2Fnew_stack%2FBYOL%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
-   - **PAYG**: This allows you to use pay-as-you-go hourly billing. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.0.0.0%2Fexperimental%2Fcluster%2F3nic%2Fnew_stack%2FPAYG%2Fazuredeploy.json">
+   - **PAYG**: This allows you to use pay-as-you-go hourly billing. <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.1.0.0%2Fexperimental%2Fcluster%2F3nic%2Fnew_stack%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
-   - **BIG-IQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s). <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.0.0.0%2Fexperimental%2Fcluster%2F3nic%2Fnew_stack%2FBIGIQ%2Fazuredeploy.json">
+   - **BIG-IQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s). <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.1.0.0%2Fexperimental%2Fcluster%2F3nic%2Fnew_stack%2FBIGIQ%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>
 
 
