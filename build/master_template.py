@@ -315,7 +315,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
     if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'cluster_3nic', 'ha-avset'):
         data['variables']['instanceName'] = "[toLower(parameters('instanceName'))]"
     if template_name in ('ha-avset', 'cluster_1nic', 'cluster_3nic'):
-        data['variables']['newStorageAccountName1'] = "[concat(uniqueString(resourceGroup().id, deployment().name), 'stor1')]"
+        data['variables']['newStorageAccountName1'] = "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'stor1')]"
     if template_name in ('cluster_3nic'):
         data['variables']['internalLoadBalancerName'] =  "[concat(variables('dnsLabel'),'-int-ilb')]"
         data['variables']["intLbId"] = "[resourceId('Microsoft.Network/loadBalancers',variables('internalLoadBalancerName'))]"
@@ -466,7 +466,7 @@ if template_name in ('cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autos
         data['variables']['bigIpMgmtPort'] = 8443
         data['variables']['vmssName'] = "[concat(parameters('dnsLabel'),'-vmss')]"
         data['variables']['vmssId'] = "[resourceId('Microsoft.Compute/virtualMachineScaleSets', variables('vmssName'))]"
-        data['variables']['newDataStorageAccountName'] = "[concat(uniqueString(resourceGroup().id, deployment().name), 'data000')]"
+        data['variables']['newDataStorageAccountName'] = "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data000')]"
         data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
         data['variables']['autoScaleMetric'] = "Host_Throughput"
         data['variables']['scaleMetricMap'] = { "Host_Throughput": { "metricName": "Network Out", "metricResourceUri": "[variables('vmssId')]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]"  } }
