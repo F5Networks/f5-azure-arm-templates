@@ -61,6 +61,7 @@ prereq_text:
   asm_sync: '**Important**: After the template successfully deploys, you must log into one of the BIG-IP VEs to modify the Application Security Synchronization settings.  Log in to the BIG-IP VE, and then click **Security > Options > Synchronization > Application Security Synchronization**.  From the **Device Group** list, select **Sync**, and then click **Save**. This ensures any changes to the ASM security policy are synchronized to other devices in the cluster.'
   tg_config: 'This template now supports associating Azure Public IP Address resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.'
   failover_log: 'The BIG-IP VE failover log can be found at **/var/tmp/azureFailover.log**.'
+  ha_avset: 'F5 recommends you deploy this template into a unique Azure resource group.  Deploying into a resource group with other BIG-IP virtual machines can cause unexpected results.'
 
 help_text:
   supported: 'Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K40701984).'
@@ -81,8 +82,8 @@ license_text:
   BIG-IQ: ': This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s).'
 
 license_map:
-  13.0.021: '13.0.0 HF2 Build 2.10.1671'
-  12.1.24: '12.1.2 HF1 Build 1.34.271'
+  13.0.0300: '13.0.0 HF3 Build 3.0.1679'
+  12.1.2200: '12.1.2 HF2 Build 2.0.276'
   latest: 'This will select the latest BIG-IP version available'
 
 parameter_list:
