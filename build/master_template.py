@@ -244,10 +244,9 @@ if template_name in ('ha-avset'):
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
     data['parameters']['vmScaleSetMinCount'] = {"type": "int", "defaultValue": 2, "allowedValues": [1, 2, 3, 4, 5, 6], "metadata": {"description": ""}}
     data['parameters']['vmScaleSetMaxCount'] = {"type": "int", "defaultValue": 4, "allowedValues": [2, 3, 4, 5, 6, 7, 8], "metadata": {"description": ""}}
-    # Add TMM CPU metric option into autoscale experimental templates
-    if 'experimental' in support_type:
-        data['parameters']['autoScaleMetric'] = {"type": "string", "defaultValue": "Host_Throughput", "allowedValues": ["TMM_CPU", "TMM_Traffic", "Host_Throughput"],  "metadata": {"description": ""}}
-        data['parameters']['appInsights'] = {"type": "string", "defaultValue": "CREATE_NEW", "metadata": {"description": ""}}
+    # Add TMM CPU metric option into autoscale templates
+    data['parameters']['autoScaleMetric'] = {"type": "string", "defaultValue": "Host_Throughput", "allowedValues": ["TMM_CPU", "TMM_Traffic", "Host_Throughput"],  "metadata": {"description": ""}}
+    data['parameters']['appInsights'] = {"type": "string", "defaultValue": "CREATE_NEW", "metadata": {"description": ""}}
     data['parameters']['calculatedBandwidth'] = {"type": "string", "defaultValue": "200m", "allowedValues": ["10m", "25m", "100m", "200m", "1g"], "metadata": {"description": ""}}
     data['parameters']['scaleOutThreshold'] = {"type": "int", "defaultValue": 90, "allowedValues": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95], "metadata": {"description": ""}}
     data['parameters']['scaleInThreshold'] = {"type": "int", "defaultValue": 10, "allowedValues": [5, 10, 15, 20, 25, 30, 35, 40, 45], "metadata": {"description": ""}}
@@ -471,15 +470,13 @@ if template_name in ('cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autos
         data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
         data['variables']['autoScaleMetric'] = "Host_Throughput"
         data['variables']['scaleMetricMap'] = { "Host_Throughput": { "metricName": "Network Out", "metricResourceUri": "[variables('vmssId')]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]"  } }
-        # Accout for addition of TMM CPU in autoscale experimental
-        if 'experimental' in support_type:
-            data['variables']['appInsightsApiVersion'] = "2015-05-01"
-            data['variables']['autoScaleMetric'] = "[parameters('autoScaleMetric')]"
-            data['variables']['scaleMetricMap'] = { "Host_Throughput": { "metricName": "Network Out", "metricResourceUri": "[variables('vmssId')]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]"  }, "TMM_CPU": { "metricName": "customMetrics/F5_TMM_CPU", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[parameters('scaleOutThreshold')]", "thresholdIn": "[parameters('scaleInThreshold')]" }, "TMM_Traffic": { "metricName": "customMetrics/F5_TRAFFIC_TOTAL_BYTES", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]" } }
-            data['variables']['defaultAppInsightsLocation'] = "eastus"
-            data['variables']['appInsightsLocation'] = "[split(concat(parameters('appInsights'), ':', variables('defaultAppInsightsLocation')), ':')[1]]"
-            data['variables']['appInsightsName'] = "[replace(split(parameters('appInsights'), ':')[0], 'CREATE_NEW', concat(deployment().name, '-appinsights'))]"
-            data['variables']['appInsightsNameArray'] = "[split(concat(variables('appInsightsName'), ';', variables('resourceGroupName')) , ';')]"
+        data['variables']['appInsightsApiVersion'] = "2015-05-01"
+        data['variables']['autoScaleMetric'] = "[parameters('autoScaleMetric')]"
+        data['variables']['scaleMetricMap'] = { "Host_Throughput": { "metricName": "Network Out", "metricResourceUri": "[variables('vmssId')]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]"  }, "TMM_CPU": { "metricName": "customMetrics/F5_TMM_CPU", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[parameters('scaleOutThreshold')]", "thresholdIn": "[parameters('scaleInThreshold')]" }, "TMM_Traffic": { "metricName": "customMetrics/F5_TRAFFIC_TOTAL_BYTES", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]" } }
+        data['variables']['defaultAppInsightsLocation'] = "eastus"
+        data['variables']['appInsightsLocation'] = "[split(concat(parameters('appInsights'), ':', variables('defaultAppInsightsLocation')), ':')[1]]"
+        data['variables']['appInsightsName'] = "[replace(split(parameters('appInsights'), ':')[0], 'CREATE_NEW', concat(deployment().name, '-appinsights'))]"
+        data['variables']['appInsightsNameArray'] = "[split(concat(variables('appInsightsName'), ';', variables('resourceGroupName')) , ';')]"
         data['variables']['10m'] = 10485760
         data['variables']['25m'] = 26214400
         data['variables']['100m'] = 104857600
@@ -781,9 +778,8 @@ if template_name in ('waf_autoscale'):
     autoscale_file_uris += ["[concat(variables('f5NetworksSolutionScripts'), 'deploy_waf.sh')]", "[concat(variables('f5NetworksSolutionScripts'), 'f5.http.v1.2.0rc7.tmpl')]", "[concat(variables('f5NetworksSolutionScripts'), 'f5.policy_creator.tmpl')]", "[concat(variables('f5NetworksSolutionScripts'), 'asm-policy.tar.gz')]"]
 
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
-    # Add TMM CPU metric option into autoscale experimental templates - pass key into autoscale.sh
-    if 'experimental' in support_type:
-        addtl_script_args += ", ' --appInsightsKey ', variables('singleQuote'), reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsApiVersion')).InstrumentationKey, variables('singleQuote')"
+    # Add TMM CPU metric option into autoscale templates - pass key into autoscale.sh
+    addtl_script_args += ", ' --appInsightsKey ', variables('singleQuote'), reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsApiVersion')).InstrumentationKey, variables('singleQuote')"
     if template_name in ('waf_autoscale'):
         post_cmd_to_execute = ", '; if [[ $? == 0 ]]; then tmsh modify cm device-group Sync asm-sync enabled; tmsh load sys application template f5.service_discovery.tmpl;<BIGIQ_PWD_DELETE> bash /config/customConfig.sh; else exit 1; fi'"
     else:
@@ -813,10 +809,9 @@ if template_name in ('ltm_autoscale', 'waf_autoscale'):
 
 
 ###### Appliction Insight Workspace(s) ######
-# Add TMM CPU metric option into autoscale experimental templates
+# Add TMM CPU metric option into autoscale templates
 if template_name in ('ltm_autoscale', 'waf_autoscale'):
-    if 'experimental' in support_type:
-        resources_list += [{ "type": "microsoft.insights/components", "condition": "[contains(toUpper(parameters('appInsights')), 'CREATE_NEW')]", "kind": "other", "name": "[variables('appInsightsName')]", "apiVersion": "[variables('appInsightsApiVersion')]", "location": "[variables('appInsightsLocation')]", "tags": tags, "properties": { "ApplicationId": "[variables('appInsightsName')]", "Application_Type": "other" }, "dependsOn": [] }]
+    resources_list += [{ "type": "microsoft.insights/components", "condition": "[contains(toUpper(parameters('appInsights')), 'CREATE_NEW')]", "kind": "other", "name": "[variables('appInsightsName')]", "apiVersion": "[variables('appInsightsApiVersion')]", "location": "[variables('appInsightsLocation')]", "tags": tags, "properties": { "ApplicationId": "[variables('appInsightsName')]", "Application_Type": "other" }, "dependsOn": [] }]
 
 ## Sort resources section - Expand to choose order of resources instead of just alphabetical?
 resources_sorted = json.dumps(resources_list, sort_keys=True, indent=4, ensure_ascii=False)
@@ -864,14 +859,11 @@ with open(createdfile_params, 'w') as finished_params:
 
 
 ###### Prepare some information prior to creating Scripts/Readme's ######
-lic_support = {'standalone_1nic': 'All', 'standalone_2nic': 'All', 'standalone_3nic': 'All', 'standalone_n-nic': 'All', 'cluster_1nic': 'All', 'cluster_3nic': 'All', 'ha-avset': 'All', 'ltm_autoscale': 'PAYG', 'waf_autoscale': 'PAYG'}
+lic_support = {'standalone_1nic': 'All', 'standalone_2nic': 'All', 'standalone_3nic': 'All', 'standalone_n-nic': 'All', 'cluster_1nic': 'All', 'cluster_3nic': 'All', 'ha-avset': 'All', 'ltm_autoscale': ['PAYG', 'BIG-IQ'], 'waf_autoscale': ['PAYG', 'BIG-IQ']}
 lic_key_count = {'standalone_1nic': 1, 'standalone_2nic': 1, 'standalone_3nic': 1, 'standalone_n-nic': 1, 'cluster_1nic': 2, 'cluster_3nic': 2, 'ha-avset': 2, 'ltm_autoscale': 0, 'waf_autoscale': 0}
 api_access_needed = {'standalone_1nic': None, 'standalone_2nic': None, 'standalone_3nic': None, 'standalone_n-nic': None, 'cluster_1nic': None, 'cluster_3nic': None, 'ha-avset': 'read_write', 'ltm_autoscale': 'read', 'waf_autoscale': 'read'}
 template_info = {'template_name': template_name, 'location': script_location, 'lic_support': lic_support, 'lic_key_count': lic_key_count, 'api_access_needed': api_access_needed}
 
-if template_name in ('ltm_autoscale', 'waf_autoscale') and 'experimental' in support_type:
-        lic_support['ltm_autoscale'] = ['PAYG', 'BIG-IQ']
-        lic_support['waf_autoscale'] = ['PAYG', 'BIG-IQ']
 ######################################## Create/Modify Scripts ########################################
 # Manually adding templates to create scripts proc for now as a 'check'...
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'cluster_1nic', 'cluster_3nic', 'ha-avset', 'ltm_autoscale', 'waf_autoscale') and script_location:
