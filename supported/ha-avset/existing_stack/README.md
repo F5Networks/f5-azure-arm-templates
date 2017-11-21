@@ -43,6 +43,7 @@ The template also supports updating the next hop of Azure User-Defined Routes (U
   - To have the UDRs managed by BIG-IP, you must configure it with an Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group you have configured on the BIG-IP VE.
   - This template now supports associating Azure Public IP Address resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.
   - The BIG-IP VE failover log can be found at **/var/tmp/azureFailover.log**.
+  - F5 recommends you deploy this template into a unique Azure resource group.  Deploying into a resource group with other BIG-IP virtual machines can cause unexpected results.
 
 
 ## Security
