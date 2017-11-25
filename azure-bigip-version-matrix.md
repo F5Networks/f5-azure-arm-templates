@@ -3,6 +3,16 @@ The following table contains all of the tagged releases of the F5 ARM templates 
 
 | Release Tag | Template Family | BIG-IP Versions | License Bundles and Throughput Rates |
 | --- | --- | --- | --- |
+| [v4.2.0.0](https://github.com/F5Networks/f5-azure-arm-templates/releases/tag/v4.2.0.0) | Standalone | BIG-IP v13.0.0300, v12.1.2200 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps |
+|  | Cluster | BIG-IP v13.0.0300, v12.1.2200 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps |
+|  | Auto Scale WAF | BIG-IP v13.0.0300, v12.1.2200 | *Best*: 1Gbps, 200Mbps, 25Mbps |
+|  | Auto Scale LTM |BIG-IP v13.0.0300, v12.1.2200 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps |
+|  | HA-AVSET | BIG-IP v13.0.0300, v12.1.2200 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps |
+| [v4.1.0.0](https://github.com/F5Networks/f5-azure-arm-templates/releases/tag/v4.1.0.0) | Standalone | BIG-IP v13.0.021, v12.1.24 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps |
+|  | Cluster | BIG-IP v13.0.021, v12.1.24 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps |
+|  | Auto Scale WAF | BIG-IP v13.0.021, v12.1.24 | *Best*: 1Gbps, 200Mbps, 25Mbps |
+|  | Auto Scale LTM | BIG-IP v13.0.021, v12.1.24 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps |
+|  | HA-AVSET | BIG-IP v13.0.021, v12.1.24 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps |
 | [v4.0.0.0](https://github.com/F5Networks/f5-azure-arm-templates/releases/tag/v4.0.0.0) | Standalone | BIG-IP v13.0.021, v12.1.24 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps |
 |  | Cluster | BIG-IP v13.0.021, v12.1.24 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps |
 |  | Auto Scale WAF | BIG-IP v13.0.021, v12.1.24 | *Best*: 1Gbps, 200Mbps, 25Mbps |

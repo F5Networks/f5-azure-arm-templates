@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json", 
-    "contentVersion": "4.0.0.0", 
+    "contentVersion": "4.2.0.0", 
     "parameters": {
         "vmScaleSetMinCount": {
             "allowedValues": [
@@ -212,11 +212,11 @@
         }, 
         "bigIpVersion": {
             "allowedValues": [
-                "13.0.021", 
-                "12.1.24", 
+                "13.0.0300", 
+                "12.1.2200", 
                 "latest"
             ], 
-            "defaultValue": "13.0.021", 
+            "defaultValue": "13.0.0300", 
             "metadata": {
                 "description": "F5 BIG-IP version you want to use."
             }, 
@@ -357,10 +357,10 @@
             }
         }, 
         "bigIpVersionPortMap": {
-            "12.1.24": {
+            "12.1.2200": {
                 "Port": 443
             }, 
-            "13.0.021": {
+            "13.0.0300": {
                 "Port": 8443
             }, 
             "443": {
@@ -617,7 +617,7 @@
             }, 
             "Yes": {
                 "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]", 
-                "metricsCmd": "[concat(' --usageAnalytics \" --metrics customerId:${custId},deploymentId:${deployId},templateName:ltm_autoscale-existing_stack-experimental,templateVersion:4.0.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BIGIQ,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure\"')]"
+                "metricsCmd": "[concat(' --usageAnalytics \" --metrics customerId:${custId},deploymentId:${deployId},templateName:ltm_autoscale-existing_stack-experimental,templateVersion:4.2.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BIGIQ,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure\"')]"
             }
         }, 
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n", 

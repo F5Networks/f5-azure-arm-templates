@@ -39,17 +39,17 @@ command_to_execute = ""
 route_add_cmd = ""
 
 ## Static Variable Assignment ##
-content_version = '4.0.0.0'
+content_version = '4.2.0.0'
 f5_networks_tag = 'develop'
 f5_cloud_libs_tag = 'develop'
 f5_cloud_libs_azure_tag = 'develop'
 f5_cloud_iapps_tag = 'v1.1.1'
 f5_cloud_workers_tag = 'v1.0.0'
 # Set BIG-IP versions to allow
-default_big_ip_version = '13.0.021'
-allowed_big_ip_versions = ["13.0.021", "12.1.24", "latest"]
-version_port_map = {"latest": {"Port": 8443}, "13.0.021": {"Port": 8443}, "12.1.24": {"Port": 443}, "443": {"Port": 443}}
-route_cmd_array = {"latest": "route", "13.0.021": "route", "12.1.24": "[concat('route add 168.63.129.16 gw ', variables('mgmtRouteGw'), ' eth0')]"}
+default_big_ip_version = '13.0.0300'
+allowed_big_ip_versions = ["13.0.0300", "12.1.2200", "latest"]
+version_port_map = {"latest": {"Port": 8443}, "13.0.0300": {"Port": 8443}, "12.1.2200": {"Port": 443}, "443": {"Port": 443}}
+route_cmd_array = {"latest": "route", "13.0.0300": "route", "12.1.2200": "[concat('route add 168.63.129.16 gw ', variables('mgmtRouteGw'), ' eth0')]"}
 
 install_cloud_libs = """[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit 1\nfi\necho loaded verifyHash\n\nconfig_loc="/config/cloud/"\nhashed_file_list="<HASHED_FILE_LIST>"\nfor file in $hashed_file_list; do\necho "verifying $file"\n/usr/bin/tmsh run cli script verifyHash $file\nif [ $? != 0 ]; then\necho "$file is not valid"\nexit 1\nfi\necho "verified $file"\ndone\necho "expanding $hashed_file_list"\ntar xfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud/azure/node_modules\n<TAR_LIST>touch /config/cloud/cloudLibsReady', variables('singleQuote'))]"""
 
