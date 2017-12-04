@@ -3,21 +3,6 @@
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
 [![Issues](https://img.shields.io/github/issues/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/issues)
 
-<table>
- <tr>
-  <td align=center>:warning: <strong>CRITICAL<strong> :warning:  </td>
- </tr>
- <tr>
-  <td>BIG-IP virtual servers configured with a Client SSL profile may be vulnerable to an Adaptive Chosen Ciphertext attack (AKA Bleichenbacher attack). For complete information on this vulnerability, see https://support.f5.com/csp/article/K21905460. <br>F5 has released hotfixes for all vulnerable releases. <br>  
-   <ul>
-    <li><em>If you have an existing BIG-IP VE deployment in Azure</em>  <br>See the <a href="https://support.f5.com/csp/article/K21905460">Security Advisory</a>, which contains information about upgrading your BIG-IP VE to a non-vulnerable version.</li>
-    <li><em>For <strong>new</strong> BIG-IP VE deployments in Azure</em><br> The F5 ARM templates in the latest release (4.2.0.0) use non-vulnerable images. We recommending using the templates in this release for new deployments.</li>
-    <li><em>For <strong>new</strong> BIG-IP VE deployments using a template in an older tagged release on GitHub</em><br>  If you have a specific need for using an older F5 ARM template, see <a href="azure-update-bigip-image.md">Changing the BIG-IP VE image in an F5 ARM template</a> for instructions on updating the BIG-IP images referenced in the template.</li>
-   </ul>
-  </td>
- </tr>
- </table>
-
 
 ## Introduction
 
@@ -191,6 +176,21 @@ The following is a list of the current **supported** F5 ARM templates. See the *
 
 ---
 
+<table>
+ <tr>
+  <td align=center>:warning: <strong>Important<strong> :warning:  </td>
+ </tr>
+ <tr>
+  <td>BIG-IP virtual servers configured with a Client SSL profile may be vulnerable to an Adaptive Chosen Ciphertext attack (AKA Bleichenbacher attack). For complete information on this vulnerability, see https://support.f5.com/csp/article/K21905460. <br>F5 has released hotfixes for all vulnerable releases. <br>  
+   <ul>
+    <li><em>If you have an existing BIG-IP VE deployment in Azure</em>  <br>See the <a href="https://support.f5.com/csp/article/K21905460">Security Advisory</a>, which contains information about upgrading your BIG-IP VE to a non-vulnerable version.</li>
+    <li><em>For <strong>new</strong> BIG-IP VE deployments in Azure</em><br> The F5 ARM templates in the release 4.2.0.0 and later use non-vulnerable images. We recommending using the templates in this release for new deployments.</li>
+    <li><em>For <strong>new</strong> BIG-IP VE deployments using a template in an older tagged release on GitHub</em><br>  If you have a specific need for using an older F5 ARM template, see <a href="azure-update-bigip-image.md">Changing the BIG-IP VE image in an F5 ARM template</a> for instructions on updating the BIG-IP images referenced in the template.</li>
+   </ul>
+  </td>
+ </tr>
+ </table>
+
 ### Copyright
 
 Copyright 2014-2017 F5 Networks Inc.
@@ -199,8 +199,8 @@ Copyright 2014-2017 F5 Networks Inc.
 ### License
 
 
-Apache V2.0
-~~~~~~~~~~~
+#### Apache V2.0
+
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License. You may obtain a copy of the
 License at
@@ -213,7 +213,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations
 under the License.
 
-Contributor License Agreement
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Contributor License Agreement
+
 Individuals or business entities who contribute to this project must have
 completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html).
