@@ -26,7 +26,7 @@ This template supports creating up to 20 additional public/private IP address co
 
 The template also supports updating the next hop of Azure User-Defined Routes (UDRs) to use the active BIG-IP VEs internal self IP address.
 
-**Networking Stack Type:** This template deploys into an existing networking stack; the networking infrastructure must be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.
+**Networking Stack Type:** This template deploys into an existing networking stack; so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.
 
 ## Prerequisites
   - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See https://support.f5.com/csp/article/K2873 for details.
@@ -69,7 +69,7 @@ The following is a map that shows the available options for the template paramet
 
 
 ## Supported instance types and hypervisors
-  - For a list of supported Azure instance types for this solutions, see the **Azure instances for BIG-IP VE** section of https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/1.html#guid-71265d82-3a1a-43d2-bae5-892c184cc59b
+  - For a list of supported Azure instance types for this solution, see the [Azure instances for BIG-IP VE](http://clouddocs.f5.com/cloud/public/v1/azure/Azure_singleNIC.html#azure-instances-for-big-ip-ve.
 
   - For a list versions of the BIG-IP Virtual Edition (VE) and F5 licenses that are supported on specific hypervisors and Microsoft Azure, see https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/ve-supported-hypervisor-matrix.html.
 
@@ -133,7 +133,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | servicePrincipalSecret | Yes | Your Azure service principal application secret. |
 | managedRoutes | Yes | A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24. Specifying a comma-delimited list of managedRoutes and a routeTableTag in the template defines the UDRs to be updated. To have the UDRs managed by BIG-IP, you will now also need to create an Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group you have configured on the BIG-IP VE. All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with 'f5_ha:' will use the active BIG-IP VE as the next hop for those routes. |
 | routeTableTag | Yes | Azure tag value to identify the route tables to be managed by this cluster. For example tag value: myRoute.  Example Azure tag: f5_ha:myRoute. |
-| ntpServer | Yes | If you want to change the NTP server the BIG-IP uses then replace the default NTP server with your choice. |
+| ntpServer | Yes | Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use. |
 | timeZone | Yes | If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |
 | restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources |
 | tagValues | Yes | Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key. |
@@ -208,7 +208,7 @@ Ensure the Azure Route Table(s) containing the routes with these destinations ar
 
 ## Documentation
 
-The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html) describes how to create a single NIC and multi-NIC BIG-IP without using an ARM template.
+For more information on F5 solutions for Azure, including manual configuration procedures for some deployment scenarios, see the Azure section of http://clouddocs.f5.com/cloud/public/v1/.
 
 ### Service Discovery
 Once you launch your BIG-IP instance using the ARM template, you can use the Service Discovery iApp template on the BIG-IP VE to automatically update pool members based on auto-scaled cloud application hosts.  In the iApp template, you enter information about your cloud environment, including the tag key and tag value for the pool members you want to include, and then the BIG-IP VE programmatically discovers (or removes) members using those tags.
@@ -368,8 +368,8 @@ Copyright 2014-2017 F5 Networks Inc.
 ## License
 
 
-Apache V2.0
-~~~~~~~~~~~
+### Apache V2.0
+
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License. You may obtain a copy of the
 License at
@@ -382,7 +382,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations
 under the License.
 
-Contributor License Agreement
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Contributor License Agreement
+
 Individuals or business entities who contribute to this project must have
 completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html).

@@ -61,7 +61,7 @@ The following is a map that shows the available options for the template paramet
 
 
 ## Supported instance types and hypervisors
-  - For a list of supported Azure instance types for this solutions, see the **Azure instances for BIG-IP VE** section of https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/1.html#guid-71265d82-3a1a-43d2-bae5-892c184cc59b
+  - For a list of supported Azure instance types for this solution, see the [Azure instances for BIG-IP VE](http://clouddocs.f5.com/cloud/public/v1/azure/Azure_singleNIC.html#azure-instances-for-big-ip-ve.
 
   - For a list versions of the BIG-IP Virtual Edition (VE) and F5 licenses that are supported on specific hypervisors and Microsoft Azure, see https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/ve-supported-hypervisor-matrix.html.
 
@@ -128,7 +128,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | clientId | Yes | Your Azure service principal application client ID. |
 | servicePrincipalSecret | Yes | Your Azure service principal application secret. |
 | notificationEmail | Yes | If you want email notifications on scale events, specify an email address, otherwise leave the parameter as **OPTIONAL**. Note: You can specify multiple emails by separating them with a semi-colon, such as *email@domain.com;email2@domain.com*. |
-| ntpServer | Yes | If you want to change the NTP server the BIG-IP uses then replace the default NTP server with your choice. |
+| ntpServer | Yes | Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use. |
 | timeZone | Yes | If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |
 | restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources |
 | tagValues | Yes | Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key. |
@@ -214,7 +214,7 @@ Log in to the [Azure Resource Explorer](https://resources.azure.com) and then na
 
 ## Documentation
 
-The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html) describes how to create a single NIC and multi-NIC BIG-IP without using an ARM template.
+For more information on F5 solutions for Azure, including manual configuration procedures for some deployment scenarios, see the Azure section of http://clouddocs.f5.com/cloud/public/v1/.
 
 ### Service Discovery
 Once you launch your BIG-IP instance using the ARM template, you can use the Service Discovery iApp template on the BIG-IP VE to automatically update pool members based on auto-scaled cloud application hosts.  In the iApp template, you enter information about your cloud environment, including the tag key and tag value for the pool members you want to include, and then the BIG-IP VE programmatically discovers (or removes) members using those tags.
@@ -352,8 +352,8 @@ Copyright 2014-2017 F5 Networks Inc.
 ## License
 
 
-Apache V2.0
-~~~~~~~~~~~
+### Apache V2.0
+
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License. You may obtain a copy of the
 License at
@@ -366,7 +366,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations
 under the License.
 
-Contributor License Agreement
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Contributor License Agreement
+
 Individuals or business entities who contribute to this project must have
 completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html).

@@ -1,4 +1,4 @@
-# Deploying the BIG-IP VE in Azure - N NIC (variable # of extra nics)
+# Deploying the BIG-IP VE in Azure - N NIC (variable # of extra NICs)
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
@@ -34,7 +34,7 @@ This solution uses an ARM template to launch a three NIC deployment of a cloud-f
   - In order to pass traffic from your clients to the servers, after launching the template, you must create virtual server(s) on the BIG-IP VE.  See [Creating a virtual server](#creating-virtual-servers-on-the-big-ip-ve).
   - F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughputs available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
-  - As a result of this template deploying a variable number of NICs using the parameter **numberOfAdditionalNics** it will pre-configure the BIG-IP VLAN(s) and place the interfaces into the corresponding VLAN (based on the subnet name(s) in **additionalNicLocation**).  Be aware that after template deployment, the self IP(s) will need to be created corresponding to the Azure IP config object for that NIC, and you must set the IP Config object to a **static** address instead of **dynamic** to ensure it does not change on reboot.
+  - As a result of this template deploying a variable number of NICs using the parameter **numberOfAdditionalNics**, it will preconfigure the BIG-IP VLAN(s) and place the interfaces into the corresponding VLAN (based on the subnet name(s) in **additionalNicLocation**).  Be aware that after the template deploys, the BIG-IP self IP address(es) need to be created that correspond to the Azure IP Config object for that NIC.  You must also set the IP Config object to a **static** address instead of *dynamic* to ensure it does not change on reboot.
 
 
 ## Security
@@ -58,7 +58,7 @@ The following is a map that shows the available options for the template paramet
 
 
 ## Supported instance types and hypervisors
-  - For a list of supported Azure instance types for this solutions, see the **Azure instances for BIG-IP VE** section of https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/1.html#guid-71265d82-3a1a-43d2-bae5-892c184cc59b
+  - For a list of supported Azure instance types for this solution, see the [Azure instances for BIG-IP VE](http://clouddocs.f5.com/cloud/public/v1/azure/Azure_singleNIC.html#azure-instances-for-big-ip-ve.
 
   - For a list versions of the BIG-IP Virtual Edition (VE) and F5 licenses that are supported on specific hypervisors and Microsoft Azure, see https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/ve-supported-hypervisor-matrix.html.
 
@@ -110,7 +110,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | additionalNicLocation | Yes | This parameter specifies where the additional NICs should go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example (for 2 additional NICs): **subnet01;subnet02**. NOTE: Ensure that there are no spaces and that the correct number of subnets are provided based on the value chosen in **numberOfAdditionalNics**. IMPORTANT: The subnet you provide for each additional NIC MUST be unique. |
 | numberOfExternalIps | Yes | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
-| ntpServer | Yes | If you want to change the NTP server the BIG-IP uses then replace the default NTP server with your choice. |
+| ntpServer | Yes | Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use. |
 | timeZone | Yes | If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |
 | restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources |
 | tagValues | Yes | Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key. |
@@ -164,13 +164,13 @@ The deployment template supports creation of 1-20 external public IP addresses f
 - Create a new Azure public IP address resource in the deployment resource group
 - Create a new IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*)
 
-When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server Destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. See the BIG-IP documentation for specific instructions on creating virtual servers.
+When you create virtual servers on the BIG-IP VE for these additional addresses, the BIG-IP network virtual server destination IP address should match the private IP addresses of both secondary Azure IP configurations assigned to the backend pool that is referenced by the application's Azure load balancing rule.
 
 
 
 ## Documentation
 
-The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html) describes how to create a single NIC and multi-NIC BIG-IP without using an ARM template.
+For more information on F5 solutions for Azure, including manual configuration procedures for some deployment scenarios, see the Azure section of http://clouddocs.f5.com/cloud/public/v1/.
 
 ### Service Discovery
 Once you launch your BIG-IP instance using the ARM template, you can use the Service Discovery iApp template on the BIG-IP VE to automatically update pool members based on auto-scaled cloud application hosts.  In the iApp template, you enter information about your cloud environment, including the tag key and tag value for the pool members you want to include, and then the BIG-IP VE programmatically discovers (or removes) members using those tags.
@@ -281,8 +281,8 @@ Copyright 2014-2017 F5 Networks Inc.
 ## License
 
 
-Apache V2.0
-~~~~~~~~~~~
+### Apache V2.0
+
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License. You may obtain a copy of the
 License at
@@ -295,7 +295,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations
 under the License.
 
-Contributor License Agreement
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Contributor License Agreement
+
 Individuals or business entities who contribute to this project must have
 completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html).

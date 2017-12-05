@@ -191,14 +191,14 @@
         "avSetChoice": {
             "defaultValue": "CREATE_NEW", 
             "metadata": {
-                "description": "If you would like the VM placed in a new Azure Availability Set, leave the default value of **CREATE_NEW**, otherwise specify the name of the existing Availability Set you want to use. Note: If you are using an existing AV Set then this deployment must be in the same Azure Resource Group as the AV Set."
+                "description": "If you would like the VM placed in a new Azure Availability Set, leave the default value of **CREATE_NEW**, otherwise specify the name of the existing Availability Set you want to use. Note: If you are using an existing AV Set, this deployment must be in the same Azure Resource Group as the AV Set."
             }, 
             "type": "string"
         }, 
         "ntpServer": {
             "defaultValue": "0.pool.ntp.org", 
             "metadata": {
-                "description": "If you want to change the NTP server the BIG-IP uses then replace the default NTP server with your choice."
+                "description": "Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use."
             }, 
             "type": "string"
         }, 

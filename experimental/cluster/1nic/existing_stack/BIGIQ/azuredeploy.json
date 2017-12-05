@@ -169,7 +169,7 @@
         "ntpServer": {
             "defaultValue": "0.pool.ntp.org", 
             "metadata": {
-                "description": "If you want to change the NTP server the BIG-IP uses then replace the default NTP server with your choice."
+                "description": "Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use."
             }, 
             "type": "string"
         }, 

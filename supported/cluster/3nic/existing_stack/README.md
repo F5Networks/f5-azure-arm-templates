@@ -18,9 +18,13 @@
 
 ## Introduction
 
-This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE cluster (Active/Active) in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard "on-premise like" cloud design where the  BIG-IP VE instance is running with a management, front-end application traffic (Virtual Server) and back-end application interface.
+This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE cluster (Active/Active) in Microsoft Azure. It also allows you to choose to deploy the HA cluster with or without network failover enabled. With network failover disabled, the cluster is created in a limited *Active/Active* configuration and traffic groups are not available; consequently, you cannot use connection, persistence, or session mirroring.  
 
-**Networking Stack Type:** This template deploys into an existing networking stack; the networking infrastructure must be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.
+When network failover is enabled, the cluster is configured in a traditional *Active/Standby* mode. Alternately, you can configure multiple traffic groups in the traditional *Active/Active* mode to allow each device to process traffic for the traffic group to which it is associated. In both of these network failover modes, Azure load balancer probes determine which BIG-IP VE device will receive application traffic. Mirroring and failover are available in both scenarios. 
+
+This template also configures an optional internal Azure Load Balancer (ILB) for forwarding traffic to the internal interfaces of the BIG-IP VE devices. The ILB will be pre-configured with either a per-protocol or all-protocol load balancing rule, based on the internalLoadBalancer parameter value.  When using all-protocol load balancing, you can configure the next hop on Azure User Defined Routes (UDRs) to point to the private IP address of the ILB.  Deploy an IP forwarding virtual server on BIG-IP VE to accept this traffic and forward it to the destination.  When using per-protocol load balancing, deploy a network virtual server on BIG-IP VE with a destination address that matches the secondary private IP addresses of the ILB load balancing rule's backend pool members.  Note: The all-protocol ILB is currently only available in preview; you must sign up through Microsoft to enable this functionality before deploying the template.
+
+**Networking Stack Type:** This template deploys into an existing networking stack; so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.
 
 ## Prerequisites
   - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See https://support.f5.com/csp/article/K2873 for details.
@@ -57,7 +61,7 @@ The following is a map that shows the available options for the template paramet
 
 
 ## Supported instance types and hypervisors
-  - For a list of supported Azure instance types for this solutions, see the **Azure instances for BIG-IP VE** section of https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0/1.html#guid-71265d82-3a1a-43d2-bae5-892c184cc59b
+  - For a list of supported Azure instance types for this solution, see the [Azure instances for BIG-IP VE](http://clouddocs.f5.com/cloud/public/v1/azure/Azure_singleNIC.html#azure-instances-for-big-ip-ve.
 
   - For a list versions of the BIG-IP Virtual Edition (VE) and F5 licenses that are supported on specific hypervisors and Microsoft Azure, see https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/ve-supported-hypervisor-matrix.html.
 
@@ -119,7 +123,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | enableNetworkFailover | Yes | Enabling failover creates a traditional active/active deployment with traffic groups and mirroring. When failover is disabled, all devices are active; use traffic group none. |
 | internalLoadBalancerType | Yes | Specify a the type of internal Azure load balancer to deploy. Note: As of the initial release of this template, the all-protocol Azure load balancer is in public preview. Please ensure that this feature is enabled before selecting **All-protocol**. |
 | internalLoadBalancerProbePort | Yes | Specify a TCP port for the internal load balancer to monitor. If you specified DO_NOT_USE for internal load balancer type, this setting has no effect. |
-| ntpServer | Yes | If you want to change the NTP server the BIG-IP uses then replace the default NTP server with your choice. |
+| ntpServer | Yes | Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use. |
 | timeZone | Yes | If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |
 | restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources |
 | tagValues | Yes | Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key. |
@@ -173,13 +177,13 @@ The deployment template supports creation of 1-20 external public IP addresses f
 - Create a new Azure public IP address resource in the deployment resource group
 - Create a new IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*)
 
-When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server Destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. See the BIG-IP documentation for specific instructions on creating virtual servers.
+When you create virtual servers on the BIG-IP VE for these additional addresses, the BIG-IP network virtual server destination IP address should match the private IP addresses of both secondary Azure IP configurations assigned to the backend pool that is referenced by the application's Azure load balancing rule.
 
 
 
 ## Documentation
 
-The ***BIG-IP Virtual Edition and Microsoft Azure: Setup*** guide (https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-1-0.html) describes how to create a single NIC and multi-NIC BIG-IP without using an ARM template.
+For more information on F5 solutions for Azure, including manual configuration procedures for some deployment scenarios, see the Azure section of http://clouddocs.f5.com/cloud/public/v1/.
 
 ### Service Discovery
 Once you launch your BIG-IP instance using the ARM template, you can use the Service Discovery iApp template on the BIG-IP VE to automatically update pool members based on auto-scaled cloud application hosts.  In the iApp template, you enter information about your cloud environment, including the tag key and tag value for the pool members you want to include, and then the BIG-IP VE programmatically discovers (or removes) members using those tags.
@@ -305,8 +309,8 @@ Copyright 2014-2017 F5 Networks Inc.
 ## License
 
 
-Apache V2.0
-~~~~~~~~~~~
+### Apache V2.0
+
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License. You may obtain a copy of the
 License at
@@ -319,7 +323,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations
 under the License.
 
-Contributor License Agreement
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Contributor License Agreement
+
 Individuals or business entities who contribute to this project must have
 completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html).

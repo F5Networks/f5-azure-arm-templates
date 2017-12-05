@@ -78,7 +78,7 @@ The deployment template supports creation of 1-20 external public IP addresses f
 - Create a new Azure public IP address resource in the deployment resource group
 - Create a new IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*)
 
-When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server Destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. See the BIG-IP documentation for specific instructions on creating virtual servers.
+When you create virtual servers on the BIG-IP VE for these additional addresses, the BIG-IP network virtual server destination IP address should match the private IP addresses of both secondary Azure IP configurations assigned to the backend pool that is referenced by the application's Azure load balancing rule.
 
 }}
 
