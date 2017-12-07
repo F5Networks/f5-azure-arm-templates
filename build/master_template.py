@@ -41,9 +41,9 @@ route_add_cmd = ""
 ## Static Variable Assignment ##
 content_version = '4.2.0.0'
 f5_networks_tag = 'develop'
-f5_cloud_libs_tag = 'develop'
-f5_cloud_libs_azure_tag = 'develop'
-f5_cloud_iapps_tag = 'v1.1.1'
+f5_cloud_libs_tag = 'release-3.5.0'
+f5_cloud_libs_azure_tag = 'release-1.4.0'
+f5_cloud_iapps_tag = 'release-1.2.0'
 f5_cloud_workers_tag = 'v1.0.0'
 # Set BIG-IP versions to allow
 default_big_ip_version = '13.0.0300'
