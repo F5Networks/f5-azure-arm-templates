@@ -40,7 +40,7 @@ In this solution, the BIG-IP VEs have the [LTM](https://f5.com/products/big-ip/l
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
   - After deploying the template, you must see [this section](#backup-big-ip-configuration-for-cluster-recovery) to create and store a backup of your BIG-IP configuration.
   - **Important**: After the template successfully deploys, you must log into one of the BIG-IP VEs to modify the Application Security Synchronization settings.  Log in to the BIG-IP VE, and then click **Security > Options > Synchronization > Application Security Synchronization**.  From the **Device Group** list, select **Sync**, and then click **Save**. This ensures any changes to the ASM security policy are synchronized to other devices in the cluster.
-  - For important information on choosing a metric on which to base autoscaling events and the thresholds used by the template, see [Scaling Thresholds](#scaling_thresholds).
+  - For important information on choosing a metric on which to base autoscaling events and the thresholds used by the template, see [Scaling Thresholds](#scaling-thresholds).
 
 
 ## Security
