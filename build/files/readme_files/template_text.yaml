@@ -91,6 +91,7 @@ templates:
       - master_election
       - post_config
       - config_backup
+      - scaling_note
     extra_text:
       - <POST_CONFIG_TXT>: <POST_CONFIG_AUTOSCALE_TXT>
       - <VS_CREATION>
@@ -107,6 +108,7 @@ templates:
       - post_config
       - config_backup: 'After deploying the template, you must see [this section](#backup-big-ip-configuration-for-cluster-recovery) to create and store a backup of your BIG-IP configuration.'
       - asm_sync
+      - scaling_note
     extra_text:
       - <POST_CONFIG_TXT>: <POST_CONFIG_AUTOSCALE_TXT>
       - <VS_CREATION>
@@ -127,6 +129,7 @@ note_text:
   asm_sync: '**Important**: After the template successfully deploys, you must log into one of the BIG-IP VEs to modify the Application Security Synchronization settings.  Log in to the BIG-IP VE, and then click **Security > Options > Synchronization > Application Security Synchronization**.  From the **Device Group** list, select **Sync**, and then click **Save**. This ensures any changes to the ASM security policy are synchronized to other devices in the cluster.'
   tg_config: 'This template now supports associating Azure Public IP Address resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.'
   failover_log: 'The BIG-IP VE failover log can be found at **/var/tmp/azureFailover.log**.'
+  scaling_note: 'For important information on choosing a metric on which to base autoscaling events and the thresholds used by the template, see [Scaling Thresholds](#scaling_thresholds).'
 help_text:
   supported: 'Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K40701984).'
   experimental: 'While this template has been created by F5 Networks, it is in the **experimental** directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.'

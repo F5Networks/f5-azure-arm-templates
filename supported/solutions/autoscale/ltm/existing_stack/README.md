@@ -39,6 +39,7 @@ The BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-
   - This template includes a master election feature, which ensures that if the existing master BIG-IP VE is unavailable, a new master is selected from the BIG-IP VEs in the cluster.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
   - After deploying the template, if you make manual changes to the BIG-IP configuration, you must see [this section](#backup-big-ip-configuration-for-cluster-recovery).
+  - For important information on choosing a metric on which to base autoscaling events and the thresholds used by the template, see [Scaling Thresholds](#scaling_thresholds).
 
 
 ## Security
