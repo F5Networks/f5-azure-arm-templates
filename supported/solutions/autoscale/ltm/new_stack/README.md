@@ -141,6 +141,16 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 ## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --vmScaleSetMinCount 2 --vmScaleSetMaxCount 4 --autoScaleMetric Host_Throughput --appInsights CREATE_NEW --calculatedBandwidth 200m --scaleOutThreshold 90 --scaleInThreshold 10 --scaleTimeWindow 10 --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceType Standard_DS2_v2 --imageName Good --bigIpVersion 13.0.0300 --vnetAddressPrefix 10.0 --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --notificationEmail OPTIONAL --ntpServer 0.pool.ntp.org --timeZone UTC --restrictedSrcAddress "*" --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 ```
 
+## Scaling Thresholds
+
+ You have three choices on which metric to use for auto scale events, each based on a percentage of the metric which you set in the ARM template:  
+
+  -	**F5_TMM_CPU** - Choosing this option means scaling events are triggered based on the utilization of the BIG-IP VE CPU, specifically the F5 TMM (Traffic Management Microkernel) CPU.  
+  -	**F5_TMM_Traffic** - Choosing this option means that scaling events are triggered based on traffic going through the BIG-IP VE TMM.  These thresholds are based on an aggregate of traffic both in and out, and are based on a percentage of the value you chose in the Calculated Bandwidth option (see below).
+  -	**Host_Throughput** - Choosing this option means scaling events are based on a metric being gathered by Azure on the host itself, specifically Network_Out. This is based on a percentage of the value you chose in the Calculated Bandwidth option (see below).
+
+Both F5_TMM_Traffic and Host_Throughput are based on a percentage of the value you choose from the **Calculated Bandwidth** list.  For PAYG deployments, this value should match (or could be lower than) the **Licensed Bandwidth** value you are using.  For example, if you plan to use 200Mbps BIG-IP VEs, you should select 200m from the Calculated Bandwidth list.  The system then uses this value together with the percentages you enter in **Scale Out Threshold** and **Scale In Threshold** to determine when scaling events occur for these two metrics.  If you are using the BIG-IQ with a pool of BIG-IP BYOL licenses, there is no Licensed Bandwidth field, so you must specify the bandwidth level in the Calculated Bandwidth field in order for scaling to function properly. 
+
 
 ## Configuration Example <a name="config">
 
