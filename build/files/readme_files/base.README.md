@@ -53,7 +53,7 @@ The following is a map that shows the available options for the template paramet
 <VERSION_MAP_TXT>
 
 ## Supported instance types and hypervisors
-  - For a list of supported Azure instance types for this solution, see the [Azure instances for BIG-IP VE](http://clouddocs.f5.com/cloud/public/v1/azure/Azure_singleNIC.html#azure-instances-for-big-ip-ve.
+  - For a list of supported Azure instance types for this solution, see the [Azure instances for BIG-IP VE](http://clouddocs.f5.com/cloud/public/v1/azure/Azure_singleNIC.html#azure-instances-for-big-ip-ve).
 
   - For a list versions of the BIG-IP Virtual Edition (VE) and F5 licenses that are supported on specific hypervisors and Microsoft Azure, see https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/ve-supported-hypervisor-matrix.html.
 
@@ -96,6 +96,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 ```bash
 <BASH_SCRIPT>
 ```
+<SCALING_THRESHOLDS>
 
 ## Configuration Example <a name="config">
 
