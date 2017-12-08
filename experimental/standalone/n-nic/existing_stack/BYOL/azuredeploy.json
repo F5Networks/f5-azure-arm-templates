@@ -90,7 +90,7 @@
             ], 
             "defaultValue": "Good", 
             "metadata": {
-                "description": "F5 SKU (IMAGE) to you want to deploy. Note: The disk size of the VM will be determined based on the option chosen."
+                "description": "F5 SKU (IMAGE) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select."
             }, 
             "type": "string"
         }, 
@@ -129,7 +129,7 @@
         }, 
         "additionalNicLocation": {
             "metadata": {
-                "description": "This parameter specifies where the additional NICs should go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example (for 2 additional NICs): **subnet01;subnet02**. NOTE: Ensure that there are no spaces and that the correct number of subnets are provided based on the value chosen in **numberOfAdditionalNics**. IMPORTANT: The subnet you provide for each additional NIC MUST be unique."
+                "description": "This parameter specifies where the additional NICs should go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. NOTE: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. IMPORTANT: The subnet you provide for each additional NIC MUST be unique."
             }, 
             "type": "string"
         }, 
@@ -214,7 +214,7 @@
         "avSetChoice": {
             "defaultValue": "CREATE_NEW", 
             "metadata": {
-                "description": "If you would like the VM placed in a new Azure Availability Set, leave the default value of **CREATE_NEW**, otherwise specify the name of the existing Availability Set you want to use. Note: If you are using an existing AV Set, this deployment must be in the same Azure Resource Group as the AV Set."
+                "description": "If you want the VM placed in a new Azure Availability Set, leave the default value of **CREATE_NEW**, otherwise specify the name of the existing Availability Set you want to use. Note: If you are using an existing AV Set, this deployment must be in the same Azure Resource Group as the AV Set."
             }, 
             "type": "string"
         }, 

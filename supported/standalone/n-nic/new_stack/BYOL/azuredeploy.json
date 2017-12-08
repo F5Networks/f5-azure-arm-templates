@@ -90,7 +90,7 @@
             ], 
             "defaultValue": "Good", 
             "metadata": {
-                "description": "F5 SKU (IMAGE) to you want to deploy. Note: The disk size of the VM will be determined based on the option chosen."
+                "description": "F5 SKU (IMAGE) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select."
             }, 
             "type": "string"
         }, 
@@ -129,7 +129,7 @@
         }, 
         "additionalNicLocation": {
             "metadata": {
-                "description": "This parameter specifies where the additional NICs should go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example (for 2 additional NICs): **subnet01;subnet02**. NOTE: Ensure that there are no spaces and that the correct number of subnets are provided based on the value chosen in **numberOfAdditionalNics**. IMPORTANT: The subnet you provide for each additional NIC MUST be unique."
+                "description": "This parameter specifies where the additional NICs should go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. NOTE: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. IMPORTANT: The subnet you provide for each additional NIC MUST be unique."
             }, 
             "type": "string"
         }, 

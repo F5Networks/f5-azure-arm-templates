@@ -102,7 +102,7 @@
             ], 
             "defaultValue": "Good", 
             "metadata": {
-                "description": "F5 SKU (IMAGE) to you want to deploy. Note: The disk size of the VM will be determined based on the option chosen."
+                "description": "F5 SKU (IMAGE) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select."
             }, 
             "type": "string"
         }, 
