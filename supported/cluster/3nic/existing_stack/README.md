@@ -22,7 +22,11 @@ This solution uses an ARM template to launch a three NIC deployment of a cloud-f
 
 When network failover is enabled, the cluster is configured in a traditional *Active/Standby* mode. Alternately, you can configure multiple traffic groups in the traditional *Active/Active* mode to allow each device to process traffic for the traffic group to which it is associated. In both of these network failover modes, Azure load balancer probes determine which BIG-IP VE device will receive application traffic. Mirroring and failover are available in both scenarios. 
 
-This template also configures an optional internal Azure Load Balancer (ILB) for forwarding traffic to the internal interfaces of the BIG-IP VE devices. The ILB will be pre-configured with either a per-protocol or all-protocol load balancing rule, based on the internalLoadBalancer parameter value.  When using all-protocol load balancing, you can configure the next hop on Azure User Defined Routes (UDRs) to point to the private IP address of the ILB.  Deploy an IP forwarding virtual server on BIG-IP VE to accept this traffic and forward it to the destination.  When using per-protocol load balancing, deploy a network virtual server on BIG-IP VE with a destination address that matches the secondary private IP addresses of the ILB load balancing rule's backend pool members.  Note: The all-protocol ILB is currently only available in preview; you must sign up through Microsoft to enable this functionality before deploying the template. 
+This template also configures an optional internal Azure Load Balancer (ILB) for forwarding traffic to the internal interfaces of the BIG-IP VE devices. The ILB will be pre-configured with either a per-protocol or all-protocol load balancing rule, based on the **internalLoadBalancer** parameter value.  
+
+When using all-protocol load balancing, you can configure the next hop on Azure User Defined Routes (UDRs) to point to the private IP address of the ILB.  Deploy an IP forwarding virtual server on BIG-IP VE to accept this traffic and forward it to the destination.  
+
+When using per-protocol load balancing, deploy a network virtual server on BIG-IP VE with a destination address that matches the secondary private IP addresses of the ILB load balancing rule's backend pool members.  Note: The all-protocol ILB is currently only available in preview; you must sign up through Microsoft to enable this functionality before deploying the template. 
 
 The BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management.
 
@@ -40,6 +44,7 @@ The BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/bi
   - In order to pass traffic from your clients to the servers, after launching the template, you must create virtual server(s) on the BIG-IP VE.  See [Creating a virtual server](#creating-virtual-servers-on-the-big-ip-ve).
   - F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughputs available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md.
   - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
+  - This template creates separate Azure storage accounts for each BIG-IP device that is a part of this deployment.
 
 
 ## Security
@@ -70,7 +75,7 @@ The following is a map that shows the available options for the template paramet
 ### Help
 Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K40701984).
 
-We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates.  This channel is typically monitored Monday-Friday 9-5 PST by F5 employees who will offer best-effort support.
+We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 CloudFormation templates. There are F5 employees who are members of this community who typically monitor the channel Monday-Friday 9-5 PST and will offer best-effort assistance. This slack channel community support should **not** be considered a substitute for F5 Technical Support.
 
 
 ## Installation
