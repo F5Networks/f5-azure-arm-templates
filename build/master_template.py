@@ -41,7 +41,7 @@ route_add_cmd = ""
 ## Static Variable Assignment ##
 content_version = '4.3.0.0'
 f5_networks_tag = 'release-4.3.0.0'
-f5_cloud_libs_tag = 'v3.5.0'
+f5_cloud_libs_tag = 'v3.5.1'
 f5_cloud_libs_azure_tag = 'v1.4.0'
 f5_cloud_iapps_tag = 'v1.2.1'
 f5_cloud_workers_tag = 'v1.0.0'
@@ -245,7 +245,7 @@ if template_name in ('ltm_autoscale', 'waf_autoscale'):
     data['parameters']['vmScaleSetMinCount'] = {"type": "int", "defaultValue": 2, "allowedValues": [1, 2, 3, 4, 5, 6], "metadata": {"description": ""}}
     data['parameters']['vmScaleSetMaxCount'] = {"type": "int", "defaultValue": 4, "allowedValues": [2, 3, 4, 5, 6, 7, 8], "metadata": {"description": ""}}
     # Add TMM CPU metric option into autoscale templates
-    data['parameters']['autoScaleMetric'] = {"type": "string", "defaultValue": "Host_Throughput", "allowedValues": ["TMM_CPU", "TMM_Traffic", "Host_Throughput"],  "metadata": {"description": ""}}
+    data['parameters']['autoScaleMetric'] = {"type": "string", "defaultValue": "Host_Throughput", "allowedValues": ["F5_TMM_CPU", "F5_TMM_Traffic", "Host_Throughput"],  "metadata": {"description": ""}}
     data['parameters']['appInsights'] = {"type": "string", "defaultValue": "CREATE_NEW", "metadata": {"description": ""}}
     data['parameters']['calculatedBandwidth'] = {"type": "string", "defaultValue": "200m", "allowedValues": ["10m", "25m", "100m", "200m", "1g"], "metadata": {"description": ""}}
     data['parameters']['scaleOutThreshold'] = {"type": "int", "defaultValue": 90, "allowedValues": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95], "metadata": {"description": ""}}
@@ -472,7 +472,7 @@ if template_name in ('cluster_1nic', 'cluster_3nic', 'ltm_autoscale', 'waf_autos
         data['variables']['scaleMetricMap'] = { "Host_Throughput": { "metricName": "Network Out", "metricResourceUri": "[variables('vmssId')]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]"  } }
         data['variables']['appInsightsApiVersion'] = "2015-05-01"
         data['variables']['autoScaleMetric'] = "[parameters('autoScaleMetric')]"
-        data['variables']['scaleMetricMap'] = { "Host_Throughput": { "metricName": "Network Out", "metricResourceUri": "[variables('vmssId')]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]"  }, "TMM_CPU": { "metricName": "customMetrics/F5_TMM_CPU", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[parameters('scaleOutThreshold')]", "thresholdIn": "[parameters('scaleInThreshold')]" }, "TMM_Traffic": { "metricName": "customMetrics/F5_TMM_TRAFFIC", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]" } }
+        data['variables']['scaleMetricMap'] = { "Host_Throughput": { "metricName": "Network Out", "metricResourceUri": "[variables('vmssId')]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]"  }, "F5_TMM_CPU": { "metricName": "customMetrics/F5_TMM_CPU", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[parameters('scaleOutThreshold')]", "thresholdIn": "[parameters('scaleInThreshold')]" }, "F5_TMM_Traffic": { "metricName": "customMetrics/F5_TMM_TRAFFIC", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]" } }
         data['variables']['defaultAppInsightsLocation'] = "eastus"
         data['variables']['appInsightsLocation'] = "[split(concat(parameters('appInsights'), ':', variables('defaultAppInsightsLocation')), ':')[1]]"
         data['variables']['appInsightsName'] = "[replace(split(parameters('appInsights'), ':')[0], 'CREATE_NEW', concat(deployment().name, '-appinsights'))]"
