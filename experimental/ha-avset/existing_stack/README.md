@@ -49,6 +49,7 @@ The BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/bi
   - Persistence and connection mirroring are now supported in this template.  It also supports mirroring of APM sessions.
   - The BIG-IP VE failover log can be found at **/var/tmp/azureFailover.log**.
   - This template creates separate Azure storage accounts for each BIG-IP device that is a part of this deployment.
+  - When configuring the template, you have the option of selecting 0 (zero) public IP addresses.  If you select 0 public IP addresses, the BIG-IP systems **will not** create any additional IP configurations on the Azure network interfaces; however, failover of UDR next hop is still supported.  If you require failover for your IP configurations, each IP configuration must be assigned a correctly tagged public IP address.
 
 
 ## Security
