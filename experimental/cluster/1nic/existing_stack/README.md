@@ -35,6 +35,7 @@ The BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/bi
   - This template can send non-identifiable statistical information to F5 Networks to help us improve our templates.  See [Sending statistical information to F5](#sending-statistical-information-to-f5).
   - In order to pass traffic from your clients to the servers, after launching the template, you must create virtual server(s) on the BIG-IP VE.  See [Creating a virtual server](#creating-virtual-servers-on-the-big-ip-ve).
   - F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughputs available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md.
+  - F5 has created an iApp (currently **Experimental**) for configuring logging for BIG-IP modules to be sent to a specific set of cloud analytics solutions.  See [Experimental Logging iApp](#experimental-logging-iApp)
   - This template creates separate Azure storage accounts for each BIG-IP device that is a part of this deployment.
 
 
@@ -213,6 +214,25 @@ Warning: F5 does not support the template if you change anything other than the 
 Depending on the deployment requirements, the default management port for the BIG-IP may need to be changed. To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>
 ***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP. BIG-IP v13.x and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.<br>
 ***Important***: If you perform the procedure to change the port, you must check the Azure Network Security Group associated with the interface on the BIG-IP that was deployed and adjust the ports accordingly.
+
+### Experimental Logging iApp
+F5 has created an iApp for configuring logging for BIG-IP modules to be sent to a specific set of cloud analytics solutions. The iApp creates logging profiles which can be attached to the appropriate objects (virtual servers, APM policy, and so on) which results in logs being sent to the selected cloud analaytics solution, Azure in this case. Note that even if your F5 ARM template is F5 Supported, this iApp template is still Experimental.
+
+**Important**: Be aware that this may (depending on the level of logging required) affect performance of the BIG-IP as a result of the processing to construct and send the log messages over HTTP to the cloud analytics solution.  
+
+Use the following guidance for downloading and importing the iApp template.
+  1. From a web browser, go to https://github.com/F5Networks/f5-cloud-iapps/tree/master/f5-cloud-logger.
+  2. Click **f5.cloud_logger.v1.0.0.tmpl** (or later version if applicable).
+  3. On the right side of the code box, click **Raw**.
+  4. Save the code to a location accessible by your BIG-IP system (for example, right-click the raw output and then click Save as).
+  5. Log on to the BIG-IP system web-based Configuration utility.
+  6. On the Main tab, expand **iApp**, and then click **Templates**.
+  7. Click the **Import** button on the right side of the screen.
+  8. Click the **Browse** button, and then browse to the location you saved the Cloud Logger iApp file.
+  9. Click the **Upload** button. The iApp is now available for use.
+
+For assistance running the iApp template, once you open the iApp, from the *Do you want to see inline help?* question, select **Yes, show inline help**.
+
 
 ### Sending statistical information to F5
 All of the F5 templates now have an option to send anonymous statistical data to F5 Networks to help us improve future templates.  
