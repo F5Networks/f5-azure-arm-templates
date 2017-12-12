@@ -20,7 +20,9 @@
 
 This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. Be sure to see [Scaling Thresholds](#scaling-thresholds) for information on scaling options. 
 
-The BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management.
+The BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management. 
+
+You have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment.
 
 **Networking Stack Type:** This template deploys into an existing networking stack; so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.
 
@@ -28,6 +30,7 @@ The BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-
   - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See https://support.f5.com/csp/article/K2873 for details.
   - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
   - This template requires service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details.
+  - If you are using the Licensing using BIG-IQ template only: This solution only supports only BIG-IQ versions 5.0 - 5.3. 
 
 ## Important configuration notes
   - See the **[Configuration Example](#config)** section for a configuration diagram and description for this solution.
@@ -345,7 +348,8 @@ If you find an issue, we would love to hear about it.
 You have a choice when it comes to filing issues:
   - Use the **Issues** link on the GitHub menu bar in this repository for items such as enhancement or feature requests and non-urgent bug fixes. Tell us as much as you can about what you found and how you found it.
   - Contact us at [solutionsfeedback@f5.com](mailto:solutionsfeedback@f5.com?subject=GitHub%20Feedback) for general feedback or enhancement requests.
-  - Contact F5 Technical support via your typical method for more time sensitive changes and other issues requiring immediate support.
+  - Use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 cloud templates.  There are F5 employees who are members of this community who typically monitor the channel Monday-Friday 9-5 PST and will offer best-effort assistance.
+  - For templates in the **supported** directory, contact F5 Technical support via your typical method for more time sensitive changes and other issues requiring immediate support.
 
 
 ## Copyright

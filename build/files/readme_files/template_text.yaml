@@ -80,6 +80,7 @@ templates:
       - persist_msg
       - failover_log
       - storage_account
+      - ha_failover
     extra_text:
       - <POST_CONFIG_TXT>: <POST_CONFIG_FAILOVER_TXT>
       - <VS_CREATION>: <VS_CREATION_CLUSTER_AVSET>
@@ -87,10 +88,11 @@ templates:
       - <TG_CONFIG_TEXT>
   ltm_autoscale:
     title: 'AutoScale BIG-IP LTM - VM Scale Set'
-    intro: "This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. Be sure to see [Scaling Thresholds](#scaling-thresholds) for information on scaling options. \n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
+    intro: "This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. Be sure to see [Scaling Thresholds](#scaling-thresholds) for information on scaling options. \n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management. \n\nYou have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment."
     config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
     prereq_list:
       - service_principal
+      - bigiq_note
     config_note_list:
       - master_election
       - post_config
@@ -103,10 +105,11 @@ templates:
       - <SCALING_THRESHOLDS>
   waf_autoscale:
     title: 'Auto Scale BIG-IP WAF (LTM + ASM) - VM Scale Set'
-    intro: "This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. As traffic increases or decreases, the number of BIG-IP VE LTM instances automatically increases or decreases accordingly.  Scaling thresholds are currently based on *network out* throughput. \n\nIn this solution, the BIG-IP VEs have the [LTM](https://f5.com/products/big-ip/local-traffic-manager-ltm) and [ASM](https://f5.com/products/big-ip/application-security-manager-asm) modules enabled to provide advanced traffic management and web application security functionality."
+    intro: "This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. Be sure to see [Scaling Thresholds](#scaling-thresholds) for information on scaling options. \n\nIn this solution, the BIG-IP VEs have the [LTM](https://f5.com/products/big-ip/local-traffic-manager-ltm) and [ASM](https://f5.com/products/big-ip/application-security-manager-asm) modules enabled to provide advanced traffic management and web application security functionality. \n\nYou have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment."
     config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
     prereq_list:
       - service_principal
+      - bigiq_note
     config_note_list:
       - master_election
       - post_config
@@ -135,6 +138,9 @@ note_text:
   failover_log: 'The BIG-IP VE failover log can be found at **/var/tmp/azureFailover.log**.'
   scaling_note: 'For important information on choosing a metric on which to base autoscaling events and the thresholds used by the template, see [Scaling Thresholds](#scaling-thresholds).'
   storage_account: 'This template creates separate Azure storage accounts for each BIG-IP device that is a part of this deployment.'
+  ha_failover: 'When configuring the template, you have the option of selecting 0 (zero) public IP addresses.  If you select 0 public IP addresses, the BIG-IP systems **will not** create any additional IP configurations on the Azure network interfaces; however, failover of UDR next hop is still supported.  If you require failover for your IP configurations, each IP configuration must be assigned a correctly tagged public IP address.'
+  bigiq_note: 'If you are using the Licensing using BIG-IQ template only: This solution only supports only BIG-IQ versions 5.0 - 5.3.
+'
 help_text:
   supported: 'Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K40701984).'
   experimental: 'While this template has been created by F5 Networks, it is in the **experimental** directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.'
