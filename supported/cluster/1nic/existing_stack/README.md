@@ -230,6 +230,8 @@ Use the following guidance for downloading and importing the iApp template.
   7. Click the **Import** button on the right side of the screen.
   8. Click the **Browse** button, and then browse to the location you saved the Cloud Logger iApp file.
   9. Click the **Upload** button. The iApp is now available for use.
+  10. From the iApp menu, click **Application Services > Applications > Create**.
+  11. From the **Template** list, select f5.cloud_logger.v1.0.0.tmpl (or later version if applicable). 
 
 For assistance running the iApp template, once you open the iApp, from the *Do you want to see inline help?* question, select **Yes, show inline help**.
 
