@@ -20,6 +20,8 @@
 
 <INTRO_TXT>
 
+For information on getting started using F5's ARM templates on GitHub, see [Microsoft Azure: Solutions 101](http://clouddocs.f5.com/cloud/public/v1/azure/Azure_solutions101.html).
+
 **Networking Stack Type:** <STACK_TYPE_TXT>
 
 ## Prerequisites

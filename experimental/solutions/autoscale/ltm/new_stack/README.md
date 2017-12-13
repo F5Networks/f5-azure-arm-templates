@@ -24,6 +24,8 @@ The BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-
 
 You have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment.
 
+For information on getting started using F5's ARM templates on GitHub, see [Microsoft Azure: Solutions 101](http://clouddocs.f5.com/cloud/public/v1/azure/Azure_solutions101.html).
+
 **Networking Stack Type:** This solution deploys into a new networking stack, which is created along with the solution.
 
 ## Prerequisites
