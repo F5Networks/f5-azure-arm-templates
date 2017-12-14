@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "4.2.0.0", 
+    "contentVersion": "4.3.0.0", 
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -60,7 +60,10 @@
             "value": "GEN_UNIQUE"
         }, 
         "enableNetworkFailover": {
-            "value": "No"
+            "value": "Yes"
+        }, 
+        "internalLoadBalancerType": {
+            "value": "Per-protocol"
         }, 
         "internalLoadBalancerProbePort": {
             "value": "3456"

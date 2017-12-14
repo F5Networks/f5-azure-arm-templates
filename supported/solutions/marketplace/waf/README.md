@@ -161,7 +161,7 @@ Note: The lowest number you can use is 100. If 100, 101, and 102 are already in 
 | Name | A unique, descriptive name for the rule, for example allow_http_waf_appsrv0. |
 | Priority | A unique priority that is lower than any other security rule. |
 | Source | Choose CIDR block. |
-| Source IP address range	 | The public IPs of the management interfaces end with **-mgmt-pip0** through **-mgmt-pip3**. |
+| Source IP address range	 | The public IP address(es) of the BIG-IP VE management interface(s).  The public IPs of the management interfaces end with **-mgmt-pip0** through **-mgmt-pip3**. |
 | Service	| The service on the application server, for example HTTP or HTTPS. |
 | Protocol | Choose TCP. |
 | Port range | The TCP port on which your application server listens for traffic, for example, 80. |

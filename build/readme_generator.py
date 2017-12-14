@@ -21,8 +21,15 @@ class ReadmeGen(object):
         self.loaded_files = fd
         return
 
+    def misc_readme_grep(self, tag):
+        """ Pull in any additional items that exist in the misc README file, based on <TAG> """
+        text = self.loaded_files['misc_readme_file']
+        reg_ex = tag + '{{' + r"(.*?)}}"
+        tag_text = re.findall(reg_ex, text, re.DOTALL)
+        return "".join(tag_text)
+
     def get_custom_text(self, parent_key, child_key, template_name=None):
-        """ Pull in custom text for each solution from the YAML file """
+        """ Pull in custom text from the YAML file """
         yaml_dict = self.loaded_files['doc_text_file']
         try:
             yaml_value = yaml_dict[parent_key][child_key]
@@ -32,9 +39,6 @@ class ReadmeGen(object):
             support_type = self.i_data['support_type']
         except:
             support_type = None
-        if not template_name:
-            template_name = self.i_data['template_info']['template_name']
-        # Check if supported/experimental/template_name keys exist, defaults to 'default'
         if isinstance(yaml_value, dict):
             if support_type in yaml_value: 
                 yaml_value = yaml_value[support_type]
@@ -47,19 +51,51 @@ class ReadmeGen(object):
                 yaml_value = yaml_value['default']
         return yaml_value
 
+    def get_tmpl_text(self, p_key, s_key, t_key):
+        """ Pull in custom template text for each solution from the YAML file """
+        ydict = self.loaded_files['doc_text_file']
+        yvalue = ydict[p_key][s_key]
+        sp_type = self.i_data['support_type']
+        result = ''
+        if t_key in ('prereq_list', 'config_note_list') and t_key in yvalue:
+            t_list = yvalue[t_key]
+            for item in t_list:
+                if isinstance(item, dict):
+                    result += '  - ' + item[next(iter(item))] + '\n'
+                else:
+                    result += '  - ' + ydict['note_text'][item] + '\n'
+        elif t_key == 'extra_text':
+            result = self.loaded_files['base_readme']
+            if t_key in yvalue:
+                for item in yvalue['extra_text']:
+                    if isinstance(item, dict):
+                        key = next(iter(item))
+                        value = item[key]
+                    else: 
+                        key = item
+                        value = item
+                    result = result.replace(key, self.misc_readme_grep(value))
+        elif t_key in ('title', 'intro', 'config_ex_text') and t_key in yvalue:
+            if sp_type in yvalue[t_key]:
+                result = yvalue[t_key][sp_type]
+            else:
+                result = yvalue[t_key]
+        return result
+
+    def delete_tags(self, readme):
+        """ Delete left over tags from the README file """
+        reg_ex = r"<([A-Z-_]{0,50})>"
+        tag_text = re.findall(reg_ex, readme)
+        for match in tag_text:
+            readme = readme.replace('<' + match + '>', '')
+        return readme
+
     def param_exist(self, param):
         """ Check if a specific parameter exists, will add that blob in README if true """
         for p in self.data['parameters']:
             if param in p:
                 return True
         return False
-
-    def misc_readme_grep(self, tag):
-        """ Pull in any additional items that exist in the misc README file, based on <TAG> """
-        text = self.loaded_files['misc_readme_file']
-        reg_ex = tag + '{{' + r"(.*?)}}"
-        tag_text = re.findall(reg_ex, text, re.DOTALL)
-        return "".join(tag_text)
 
     def md_param_array(self):
         """ Create README example paramaters: | adminUsername | Yes | Description | """
@@ -102,9 +138,8 @@ class ReadmeGen(object):
             stack_type_text = self.get_custom_text('stack_type_text', 'new_stack')
         return stack_type_text
 
-    def sp_access_required(self):
+    def sp_access_required(self, text):
         """ Determine what Service Principal Access is needed, return full Service Principal Text """
-        text = self.misc_readme_grep('<SERVICE_PRINCIPAL_TXT>')
         template_name = self.i_data['template_info']['template_name']
         api_access_required = self.i_data['template_info']['api_access_needed'][template_name]
         if api_access_required == 'read_write':
@@ -129,9 +164,7 @@ class ReadmeGen(object):
         v_tag = self.i_data['readme_text']['deploy_links']['version_tag']
         deploy_links = ''
         base_url = 'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2F' + v_tag
-        if 'All' in lic_type:
-            lic_list = ['BYOL', 'PAYG', 'BIG-IQ']
-        elif isinstance(lic_type, list):
+        if isinstance(lic_type, list):
             lic_list = lic_type
         else:
             lic_list = [lic_type]
@@ -155,79 +188,35 @@ class ReadmeGen(object):
         template_name = i_data['template_info']['template_name']
         readme_location = i_data['template_info']['location']
         final_readme = readme_location + 'README.md'
-        post_config_text = ''; sp_text = ''; extra_prereq_text = ''; tg_config_text = ''; vs_creation = ''
         if 'supported' in readme_location:
             self.i_data['support_type'] = 'supported'
             help_text = self.get_custom_text('help_text', 'supported')
         else:
             self.i_data['support_type'] = 'experimental'
             help_text = self.get_custom_text('help_text', 'experimental')
-        title_text = self.get_custom_text('title_text', template_name)
-        intro_text = self.get_custom_text('intro_text', template_name)
-        example_text = self.get_custom_text('config_example_text', template_name)
+        title_text = self.get_tmpl_text('templates', template_name, 'title')
+        intro_text = self.get_tmpl_text('templates', template_name, 'intro')
+        example_text = self.get_tmpl_text('templates', template_name, 'config_ex_text')
+        extra_prereq = self.get_tmpl_text('templates', template_name, 'prereq_list')
+        extra_config_note = self.get_tmpl_text('templates', template_name, 'config_note_list')
         stack_type_text = self.stack_type_check()
         version_map = self.md_version_map()
         deploy_links = self.create_deploy_links()
-        bash_script = i_data['readme_text']['bash_script']
-        ps_script = i_data['readme_text']['ps_script']
-
-        ### Check for optional readme items ###
-        # Add service principal text if needed
-        if self.param_exist('servicePrincipalSecret'):
-            sp_text = self.sp_access_required()
-            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'service_principal') + '\n'
-        # Post-Deployment Configuration Text Substitution
-        if 'autoscale' in template_name:
-            post_config_text = self.misc_readme_grep('<POST_CONFIG_AUTOSCALE_TXT>')
-            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'post_config') + '\n'
-            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'master_election') + '\n'
-            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'config_backup') + '\n'
-        if self.param_exist('numberOfExternalIps'):
-            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'post_config') + '\n'
-            if template_name in 'ha-avset':
-                post_config_text = self.misc_readme_grep('<POST_CONFIG_FAILOVER_TXT>')
-                extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'rg_limit') + '\n'
-            else:
-                post_config_text = self.misc_readme_grep('<POST_CONFIG_TXT>')
-        if self.param_exist('numberOfAdditionalNics'):
-            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'nic_sizing') + '\n'
-            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'addtl_nic_config') + '\n'
-        if template_name in ('ha-avset'):
-            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'traffic_group_msg') + '\n'
-            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'udr_tags') + '\n'
-            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'tg_config') + '\n'
-            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'failover_log') + '\n'
-            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'ha_avset') + '\n'
-            tg_config_text = self.misc_readme_grep('<TG_CONFIG_TEXT>')
-        if template_name in ('waf_autoscale'):
-            extra_prereq_text += '  - ' + self.get_custom_text('prereq_text', 'asm_sync') + '\n'
-        if template_name in ('ha-avset'):
-            vs_creation = self.misc_readme_grep('<VS_CREATION_CLUSTER_AVSET>')
-        elif template_name in ('cluster_1nic'):
-            vs_creation = self.misc_readme_grep('<VS_CREATION_CLUSTER_1NIC>')
-        elif template_name in ('cluster_3nic'):
-            vs_creation = self.misc_readme_grep('<VS_CREATION_CLUSTER_3NIC>')
-        else:
-            vs_creation = self.misc_readme_grep('<VS_CREATION>')
-
+        bash_script = [l for l in i_data['readme_text']['bash_script'].split('\n') if "Example Command" in l][0]
+        ps_script = [l for l in i_data['readme_text']['ps_script'].split('\n') if "Example Command" in l][0]
         ### Map in dynamic values ###
         readme = self.loaded_files['base_readme']
-        readme = readme.replace('<TITLE_TXT>', title_text)
-        readme = readme.replace('<INTRO_TXT>', intro_text)
+        readme = readme.replace('<TITLE_TXT>', title_text).replace('<INTRO_TXT>', intro_text)
         readme = readme.replace('<STACK_TYPE_TXT>', stack_type_text)
-        readme = readme.replace('<EXTRA_PREREQS>', extra_prereq_text)
-        readme = readme.replace('<VERSION_MAP_TXT>', version_map)
-        readme = readme.replace('<HELP_TXT>', help_text)
-        readme = readme.replace('<DEPLOY_LINKS>', deploy_links)
-        readme = readme.replace('<EXAMPLE_PARAMS>', self.md_param_array())
-        readme = readme.replace('<PS_SCRIPT>', ps_script)
-        readme = readme.replace('<BASH_SCRIPT>', bash_script)
+        readme = readme.replace('<EXTRA_PREREQS>', extra_prereq).replace('<EXTRA_CONFIG_NOTES>', extra_config_note)
+        readme = readme.replace('<VERSION_MAP_TXT>', version_map).replace('<HELP_TXT>', help_text)
+        readme = readme.replace('<DEPLOY_LINKS>', deploy_links).replace('<EXAMPLE_PARAMS>', self.md_param_array())
+        readme = readme.replace('<PS_SCRIPT>', ps_script).replace('<BASH_SCRIPT>', bash_script)
         readme = readme.replace('<EXAMPLE_TEXT>', example_text)
-        readme = readme.replace('<POST_CONFIG_TXT>', post_config_text)
-        readme = readme.replace('<SERVICE_PRINCIPAL>', sp_text)
-        readme = readme.replace('<TG_CONFIG_TEXT>', tg_config_text)
-        readme = readme.replace('<VS_CREATION>', vs_creation)
-
+        self.loaded_files['base_readme'] = readme
+        readme = self.get_tmpl_text('templates', template_name, 'extra_text')
+        readme = self.sp_access_required(readme)
+        readme = self.delete_tags(readme)
         ### Write to solution location ###
         with open(final_readme, 'w') as readme_complete:
             readme_complete.write(readme)

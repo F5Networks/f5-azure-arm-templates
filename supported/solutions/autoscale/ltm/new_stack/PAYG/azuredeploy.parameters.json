@@ -1,12 +1,18 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "4.2.0.0", 
+    "contentVersion": "4.3.0.0", 
     "parameters": {
         "vmScaleSetMinCount": {
             "value": 2
         }, 
         "vmScaleSetMaxCount": {
             "value": 4
+        }, 
+        "autoScaleMetric": {
+            "value": "Host_Throughput"
+        }, 
+        "appInsights": {
+            "value": "CREATE_NEW"
         }, 
         "calculatedBandwidth": {
             "value": "200m"

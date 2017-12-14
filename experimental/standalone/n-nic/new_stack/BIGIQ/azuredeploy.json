@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json", 
-    "contentVersion": "4.2.0.0", 
+    "contentVersion": "4.3.0.0", 
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser", 
@@ -90,7 +90,7 @@
             ], 
             "defaultValue": "Good", 
             "metadata": {
-                "description": "F5 SKU (IMAGE) to you want to deploy."
+                "description": "F5 SKU (IMAGE) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select."
             }, 
             "type": "string"
         }, 
@@ -108,7 +108,7 @@
         }, 
         "bigIqLicenseHost": {
             "metadata": {
-                "description": "The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP.  Note: The BIG-IP will make a REST call to the BIG-IQ (already existing) to let it know a BIG-IP needs to be licensed, it will then license the BIG-IP using the provided BIG-IQ credentials and license pool."
+                "description": "The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP.  Note: The BIG-IP will make a REST call to the BIG-IQ (already existing) to let it know a BIG-IP needs to be licensed. It will then license the BIG-IP using the provided BIG-IQ credentials and license pool."
             }, 
             "type": "string"
         }, 
@@ -146,12 +146,13 @@
         }, 
         "additionalNicLocation": {
             "metadata": {
-                "description": "This parameter specifies where the additional NICs should go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example (for 2 additional NICs): **subnet01;subnet02**. NOTE: Ensure that there are no spaces and that the correct number of subnets are provided based on the value chosen in **numberOfAdditionalNics**. IMPORTANT: The subnet you provide for each additional NIC MUST be unique."
+                "description": "This parameter specifies where the additional NICs should go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. NOTE: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. IMPORTANT: The subnet you provide for each additional NIC MUST be unique."
             }, 
             "type": "string"
         }, 
         "numberOfExternalIps": {
             "allowedValues": [
+                0, 
                 1, 
                 2, 
                 3, 
@@ -189,7 +190,7 @@
         "ntpServer": {
             "defaultValue": "0.pool.ntp.org", 
             "metadata": {
-                "description": "If you want to change the NTP server the BIG-IP uses then replace the default NTP server with your choice."
+                "description": "Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use."
             }, 
             "type": "string"
         }, 
@@ -276,14 +277,12 @@
         "subscriptionID": "[subscription().subscriptionId]", 
         "resourceGroupName": "[resourceGroup().name]", 
         "singleQuote": "'", 
-        "f5Tag": "82e08e16-fc62-4bf0-8916-e1c02dc871cd", 
-        "f5TemplateTag": "standalone_n-nic", 
-        "f5CloudLibsTag": "v3.4.2", 
-        "f5CloudLibsAzureTag": "v1.3.0", 
-        "f5NetworksTag": "v4.2.0.0", 
-        "f5CloudIappsTag": "v1.1.1", 
-        "verifyHash": "[concat(variables('singleQuote'), 'cli script /Common/verifyHash {\nproc script::run {} {\n        if {[catch {\n            set hashes(f5-cloud-libs.tar.gz) 5b5035fe7e1d98260be409cc29d65da49bcaaa9becb4124b308023ce8790439356a2b85de4ce5a4433532967e1d5f13379e98eeadcf251b607032f47481d832f\n            set hashes(f5-cloud-libs-aws.tar.gz) 279254b05d175df4ba1155fa810b3ea66a38e69198d7a6840ac9443ce730a5997e12c3b76af76ebadf13550d8bb0d45a5b09badfff4aac89e75d121bc166358d\n            set hashes(f5-cloud-libs-azure.tar.gz) 3c52145334fe80da577f980cdfbb1ef71fa4284b2f7fb4fa6f241cf50528e9fdc8df088a8312c3f6b90d3db198c787f7c10739e4098efb071cc29bf0ed70437b\n            set hashes(f5-cloud-libs-gce.tar.gz) 6ef33cc94c806b1e4e9e25ebb96a20eb1fe5975a83b2cd82b0d6ccbc8374be113ac74121d697f3bfc26bf49a55e948200f731607ce9aa9d23cd2e81299a653c1\n            set hashes(asm-policy-linux.tar.gz) 63b5c2a51ca09c43bd89af3773bbab87c71a6e7f6ad9410b229b4e0a1c483d46f1a9fff39d9944041b02ee9260724027414de592e99f4c2475415323e18a72e0\n            set hashes(f5.http.v1.2.0rc4.tmpl) 47c19a83ebfc7bd1e9e9c35f3424945ef8694aa437eedd17b6a387788d4db1396fefe445199b497064d76967b0d50238154190ca0bd73941298fc257df4dc034\n            set hashes(f5.http.v1.2.0rc6.tmpl) 811b14bffaab5ed0365f0106bb5ce5e4ec22385655ea3ac04de2a39bd9944f51e3714619dae7ca43662c956b5212228858f0592672a2579d4a87769186e2cbfe\n            set hashes(f5.http.v1.2.0rc7.tmpl) 21f413342e9a7a281a0f0e1301e745aa86af21a697d2e6fdc21dd279734936631e92f34bf1c2d2504c201f56ccd75c5c13baa2fe7653213689ec3c9e27dff77d\n            set hashes(f5.aws_advanced_ha.v1.3.0rc1.tmpl) 9e55149c010c1d395abdae3c3d2cb83ec13d31ed39424695e88680cf3ed5a013d626b326711d3d40ef2df46b72d414b4cb8e4f445ea0738dcbd25c4c843ac39d\n            set hashes(f5.aws_advanced_ha.v1.4.0rc1.tmpl) de068455257412a949f1eadccaee8506347e04fd69bfb645001b76f200127668e4a06be2bbb94e10fefc215cfc3665b07945e6d733cbe1a4fa1b88e881590396\n            set hashes(asm-policy.tar.gz) 2d39ec60d006d05d8a1567a1d8aae722419e8b062ad77d6d9a31652971e5e67bc4043d81671ba2a8b12dd229ea46d205144f75374ed4cae58cefa8f9ab6533e6\n            set hashes(deploy_waf.sh) 7ac8caac0f4e6f3907cd541a2d905931e97cd0220b443403dfbaaa30f3cad615fcd9420a3123327c2609441bd4a87d86a1a35b7567dbe78e3f97bd954a3cc5df\n            set hashes(f5.policy_creator.tmpl) 06539e08d115efafe55aa507ecb4e443e83bdb1f5825a9514954ef6ca56d240ed00c7b5d67bd8f67b815ee9dd46451984701d058c89dae2434c89715d375a620\n            set hashes(f5.service_discovery.tmpl) d4008a2c5a7f26cc42eb5cbe2171e15e6e95afb1b34fb03d04f6c1b80f154d896e6faaa2e04fbb85fd8e0e51b479dbfcd286357ce0967b162233cc57e0138b96\n\n            set file_path [lindex $tmsh::argv 1]\n            set file_name [file tail $file_path]\n\n            if {![info exists hashes($file_name)]} {\n                tmsh::log err \"No hash found for $file_name\"\n                exit 1\n            }\n\n            set expected_hash $hashes($file_name)\n            set computed_hash [lindex [exec /usr/bin/openssl dgst -r -sha512 $file_path] 0]\n            if { $expected_hash eq $computed_hash } {\n                exit 0\n            }\n            tmsh::log err \"Hash does not match for $file_path\"\n            exit 1\n        }]} {\n            tmsh::log err {Unexpected error in verifyHash}\n            exit 1\n        }\n    }\n    script-signature Ta4Gw6Snzfn7VC9D1S4f5CZiYfFyxDJWJTUEAbQ17i5ZQ2CPuQ8TBiNQy2Z/s3mmiJ2ZYdPTTST8FfTq5DsWobvZt1eQrsLjV9TR+FVyPzL2ePOBPmofUq/TKV2RhF1Vhm7mIEk+YbkxTmwaNnba1dLWj9KY7lN5ue6t1PfqqZmHQuMaOtywn0bX+Jhp0VdrS70PkH4NkRmFHVzuoC+NmMXLagr198yXW3IAHu7aViWFj8F4Y+asI8HO2+dAJ3srd/y00RjfNBANvXpEZHoi2hU4uLHuqBiJRa+4L2ADmj+x3a4Q1hVTxCCVWoItrUbPheQqgVOXpr4h7vdAL/eI/w==\n    signing-key /Common/f5-irule\n}', variables('singleQuote'))]", 
-        "installCloudLibs": "[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit 1\nfi\necho loaded verifyHash\n\nconfig_loc=\"/config/cloud/\"\nhashed_file_list=\"${config_loc}f5-cloud-libs.tar.gz f5.service_discovery.tmpl\"\nfor file in $hashed_file_list; do\necho \"verifying $file\"\n/usr/bin/tmsh run cli script verifyHash $file\nif [ $? != 0 ]; then\necho \"$file is not valid\"\nexit 1\nfi\necho \"verified $file\"\ndone\necho \"expanding $hashed_file_list\"\ntar xvfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud/azure/node_modules\ntouch /config/cloud/cloudLibsReady', variables('singleQuote'))]", 
+        "f5CloudLibsTag": "v3.5.1", 
+        "f5CloudLibsAzureTag": "v1.4.0", 
+        "f5NetworksTag": "v4.3.0.0", 
+        "f5CloudIappsTag": "v1.2.1", 
+        "verifyHash": "[concat(variables('singleQuote'), 'cli script /Common/verifyHash {\nproc script::run {} {\n        if {[catch {\n            set hashes(f5-cloud-libs.tar.gz) a2ff53027542356b42d6431a395de94e8a350b9ba54f969f2d32d28c6875532b512af52077d124cc3d00837ff9ff66a0aebbf4219453e1a4681300151ec01e65\n            set hashes(f5-cloud-libs-aws.tar.gz) 1a4ba191e997b2cfaaee0104deccc0414a6c4cc221aedc65fbdec8e47a72f1d5258b047d6487a205fa043fdbd6c8fcb1b978cac36788e493e94a4542f90bd92b\n            set hashes(f5-cloud-libs-azure.tar.gz) f3b24e383b81090996f051279400679f26eb7c0ec1c1de3d712b446eea4a2cbd7d5edb4e1638033078339ba606451b35afaaa0a9e71fd04de3e3151434917b5d\n            set hashes(f5-cloud-libs-gce.tar.gz) 6ef33cc94c806b1e4e9e25ebb96a20eb1fe5975a83b2cd82b0d6ccbc8374be113ac74121d697f3bfc26bf49a55e948200f731607ce9aa9d23cd2e81299a653c1\n            set hashes(f5-cloud-libs-openstack.tar.gz) fb6d63771bf0c8d9cae9271553372f7fb50ce2e7a653bb3fb8b7d57330a18d72fa620e844b579fe79c8908a3873b2d33ee41803f23ea6c5dc9f7d7e943e68c3a\n            set hashes(asm-policy-linux.tar.gz) 63b5c2a51ca09c43bd89af3773bbab87c71a6e7f6ad9410b229b4e0a1c483d46f1a9fff39d9944041b02ee9260724027414de592e99f4c2475415323e18a72e0\n            set hashes(f5.http.v1.2.0rc4.tmpl) 47c19a83ebfc7bd1e9e9c35f3424945ef8694aa437eedd17b6a387788d4db1396fefe445199b497064d76967b0d50238154190ca0bd73941298fc257df4dc034\n            set hashes(f5.http.v1.2.0rc6.tmpl) 811b14bffaab5ed0365f0106bb5ce5e4ec22385655ea3ac04de2a39bd9944f51e3714619dae7ca43662c956b5212228858f0592672a2579d4a87769186e2cbfe\n            set hashes(f5.http.v1.2.0rc7.tmpl) 21f413342e9a7a281a0f0e1301e745aa86af21a697d2e6fdc21dd279734936631e92f34bf1c2d2504c201f56ccd75c5c13baa2fe7653213689ec3c9e27dff77d\n            set hashes(f5.aws_advanced_ha.v1.3.0rc1.tmpl) 9e55149c010c1d395abdae3c3d2cb83ec13d31ed39424695e88680cf3ed5a013d626b326711d3d40ef2df46b72d414b4cb8e4f445ea0738dcbd25c4c843ac39d\n            set hashes(f5.aws_advanced_ha.v1.4.0rc1.tmpl) de068455257412a949f1eadccaee8506347e04fd69bfb645001b76f200127668e4a06be2bbb94e10fefc215cfc3665b07945e6d733cbe1a4fa1b88e881590396\n            set hashes(asm-policy.tar.gz) 2d39ec60d006d05d8a1567a1d8aae722419e8b062ad77d6d9a31652971e5e67bc4043d81671ba2a8b12dd229ea46d205144f75374ed4cae58cefa8f9ab6533e6\n            set hashes(deploy_waf.sh) eebaf8593a29fa6e28bb65942d2b795edca0da08b357aa06277b0f4d2f25fe416da6438373f9955bdb231fa1de1a7c8d0ba7c224fa1f09bd852006070d887812\n            set hashes(f5.policy_creator.tmpl) 06539e08d115efafe55aa507ecb4e443e83bdb1f5825a9514954ef6ca56d240ed00c7b5d67bd8f67b815ee9dd46451984701d058c89dae2434c89715d375a620\n            set hashes(f5.service_discovery.tmpl) acc7c482a1eb8787a371091f969801b422cb92830b46460a3313b6a8e1cda0759f8013380e0c46d5214a351a248c029ec3ff04220aaef3e42a66badf9804041f\n\n            set file_path [lindex $tmsh::argv 1]\n            set file_name [file tail $file_path]\n\n            if {![info exists hashes($file_name)]} {\n                tmsh::log err \"No hash found for $file_name\"\n                exit 1\n            }\n\n            set expected_hash $hashes($file_name)\n            set computed_hash [lindex [exec /usr/bin/openssl dgst -r -sha512 $file_path] 0]\n            if { $expected_hash eq $computed_hash } {\n                exit 0\n            }\n            tmsh::log err \"Hash does not match for $file_path\"\n            exit 1\n        }]} {\n            tmsh::log err {Unexpected error in verifyHash}\n            exit 1\n        }\n    }\n    script-signature LGY5ag/moDktsoAjA7iI6MpaMNooIsAYRLDWTaqV1+YOXUcbeo1KDkbsZoVb6dNKajZEtUBcS9jCNBNiK54zOr1Zjq0NrKoSfFKTLrHaPd+WIqbttmb2Bo5x+RWiltl+DwffMF0gLxMXZPSVckkFN8VMZU/z6l0D00+M9SJQpsQLqlHfgC8GbovP+z8Z0skV+w+6vfPox7MmgUpXaZHjltXlxUZKNs3TxpRNtjbK/B2CyK3+Cg8XyhP49xMaFXeIPZnJ4Hwf+Aifi3bTIby3EpBgzogMPDkDOOjU4UFXRRHYi5uVWOtXn3KJVzSRz3jv+23t6ytExrpmSzjxh4j9rA==\n    signing-key /Common/f5-irule\n}', variables('singleQuote'))]", 
+        "installCloudLibs": "[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit 1\nfi\necho loaded verifyHash\n\nconfig_loc=\"/config/cloud/\"\nhashed_file_list=\"${config_loc}f5-cloud-libs.tar.gz f5.service_discovery.tmpl\"\nfor file in $hashed_file_list; do\necho \"verifying $file\"\n/usr/bin/tmsh run cli script verifyHash $file\nif [ $? != 0 ]; then\necho \"$file is not valid\"\nexit 1\nfi\necho \"verified $file\"\ndone\necho \"expanding $hashed_file_list\"\ntar xfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud/azure/node_modules\ntouch /config/cloud/cloudLibsReady', variables('singleQuote'))]", 
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]", 
@@ -392,304 +391,6 @@
                 "name": "[variables('addtlNicRefSplit')[4]]", 
                 "properties": {
                     "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.8.0/24')]"
-                }
-            }
-        ], 
-        "selfIpconfigArray": [
-            {
-                "name": "[concat(variables('instanceName'), '-self-ipconfig')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '0')]"
-                    }, 
-                    "primary": true, 
-                    "privateIPAddress": "[variables('extSubnetPrivateAddress')]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }
-        ], 
-        "extIpconfigArray": [
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig0')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 0)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 10)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig1')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 1)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 11)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig2')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 2)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 12)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig3')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 3)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 13)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig4')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 4)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 14)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig5')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 5)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 15)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig6')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 6)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 16)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig7')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 7)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 17)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig8')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 8)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 18)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig9')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 9)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 19)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig10')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 10)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 20)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig11')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 11)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 21)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig12')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 12)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 22)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig13')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 13)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 23)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig14')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 14)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 24)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig15')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 15)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 25)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig16')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 16)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 26)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig17')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 17)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 27)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig18')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 18)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 28)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
-                }
-            }, 
-            {
-                "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig19')]", 
-                "properties": {
-                    "PublicIpAddress": {
-                        "Id": "[concat(variables('extPublicIPAddressIdPrefix'), 19)]"
-                    }, 
-                    "primary": false, 
-                    "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 29)]", 
-                    "privateIPAllocationMethod": "Static", 
-                    "subnet": {
-                        "id": "[variables('extSubnetId')]"
-                    }
                 }
             }
         ], 
@@ -918,9 +619,9 @@
                 "storageAccountType": "Premium_LRS"
             }
         }, 
-        "newStorageAccountName": "[concat(uniqueString(resourceGroup().id, deployment().name), 'stor')]", 
+        "newStorageAccountName0": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'stor0')]", 
         "storageAccountType": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]", 
-        "newDataStorageAccountName": "[concat(uniqueString(resourceGroup().id, deployment().name), 'data000')]", 
+        "newDataStorageAccountName": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data000')]", 
         "dataStorageAccountType": "Standard_LRS", 
         "deploymentId": "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('dnsLabel'))]", 
         "allowUsageAnalytics": {
@@ -930,7 +631,7 @@
             }, 
             "Yes": {
                 "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]", 
-                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:standalone_n-nic-new_stack-experimental,templateVersion:4.2.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BIGIQ,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
+                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:standalone_n-nic-new_stack-experimental,templateVersion:4.3.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BIGIQ,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
             }
         }, 
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n", 
@@ -952,8 +653,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -971,8 +670,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -980,8 +677,9 @@
         }, 
         {
             "apiVersion": "[variables('networkApiVersion')]", 
+            "condition": "[not(equals(variables('numberOfExternalIps'),0))]", 
             "copy": {
-                "count": "[variables('numberOfExternalIps')]", 
+                "count": "[if(not(equals(variables('numberOfExternalIps'), 0)), variables('numberOfExternalIps'), 1)]", 
                 "name": "extpipcopy"
             }, 
             "location": "[variables('location')]", 
@@ -997,8 +695,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -1020,8 +716,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -1060,8 +754,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -1078,7 +770,26 @@
             "location": "[variables('location')]", 
             "name": "[variables('extNicName')]", 
             "properties": {
-                "ipConfigurations": "[concat(take(variables('selfIpConfigArray'), 1), take(variables('extIpconfigArray'),variables('numberofExternalIps')))]", 
+                "copy": [
+                    {
+                        "count": "[add(variables('numberOfExternalIps'), 1)]", 
+                        "input": {
+                            "name": "[if(equals(copyIndex('ipConfigurations', 1), 1), concat(variables('instanceName'), '-self-ipconfig'), concat(variables('resourceGroupName'), '-ext-ipconfig', sub(copyIndex('ipConfigurations', 1), 2)))]", 
+                            "properties": {
+                                "PublicIpAddress": {
+                                    "Id": "[if(equals(copyIndex('ipConfigurations', 1), 1), concat(variables('extSelfPublicIpAddressIdPrefix'), '0'), concat(variables('extPublicIPAddressIdPrefix'), sub(copyIndex('ipConfigurations', 1), 2)))]"
+                                }, 
+                                "primary": "[if(equals(copyIndex('ipConfigurations', 1), 1), 'True', 'False')]", 
+                                "privateIPAddress": "[if(equals(copyIndex('ipConfigurations', 1), 1), variables('extSubnetPrivateAddress'), concat(variables('extSubnetPrivateAddressPrefix'), 1, sub(copyIndex('ipConfigurations', 1), 2)))]", 
+                                "privateIPAllocationMethod": "Static", 
+                                "subnet": {
+                                    "id": "[variables('extSubnetId')]"
+                                }
+                            }
+                        }, 
+                        "name": "ipConfigurations"
+                    }
+                ], 
                 "networkSecurityGroup": {
                     "id": "[concat(variables('extNsgID'))]"
                 }
@@ -1087,8 +798,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -1121,8 +830,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -1162,8 +869,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -1209,8 +914,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -1227,8 +930,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -1242,8 +943,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -1252,7 +951,7 @@
         {
             "apiVersion": "[variables('storageApiVersion')]", 
             "location": "[variables('location')]", 
-            "name": "[variables('newStorageAccountName')]", 
+            "name": "[variables('newStorageAccountName0')]", 
             "properties": {
                 "accountType": "[variables('storageAccountType')]"
             }, 
@@ -1260,8 +959,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -1278,8 +975,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -1288,7 +983,7 @@
         {
             "apiVersion": "[variables('apiVersion')]", 
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]", 
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0'))]", 
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", 
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'))]", 
@@ -1310,7 +1005,7 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true, 
-                        "storageUri": "[concat('http://',variables('newDataStorageAccountName'),'.blob.core.windows.net')]"
+                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
                     }
                 }, 
                 "hardwareProfile": {
@@ -1336,7 +1031,7 @@
                         "createOption": "FromImage", 
                         "name": "osdisk", 
                         "vhd": {
-                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vhds/', variables('instanceName'),'.vhd')]"
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vhds/', variables('instanceName'),'.vhd')]"
                         }
                     }
                 }
@@ -1345,8 +1040,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 
@@ -1361,7 +1054,7 @@
             "name": "[concat(variables('instanceName'),'/start')]", 
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir -p /config/cloud/azure/node_modules && cp f5-cloud-libs.tar.gz* /config/cloud; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), ' >> $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  unset IFS; bash /config/installCloudLibs.sh;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, '; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, ' --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u admin --password-url file:///config/cloud/.passwd --default-gw ', variables('tmmRouteGw'), ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'),  ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress'),  ',vlan:internal ', variables('netCmd'), ' --log-level debug', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; ', variables('routeCmdArray')[parameters('bigIpVersion')], '; rm -f /config/cloud/.passwd; rm -f /config/cloud/.bigIqPasswd; bash /config/customConfig.sh; else exit 1; fi')]"
+                    "commandToExecute": "[concat('mkdir -p /config/cloud/azure/node_modules && cp f5-cloud-libs.tar.gz* /config/cloud; TMP_DIR=/mnt/creds; TMP_CREDENTIALS_FILE=$TMP_DIR/.passwd; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  unset IFS; bash /config/installCloudLibs.sh; . /config/cloud/azure/node_modules/f5-cloud-libs/scripts/util.sh; create_temp_dir $TMP_DIR; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), '|sha512sum|cut -d \" \" -f 1|tr -d \"\n\" > $TMP_CREDENTIALS_FILE; bash /config/cloud/azure/node_modules/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file $TMP_CREDENTIALS_FILE; f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/encryptDataToFile.js --data-file $TMP_CREDENTIALS_FILE --out-file $BIG_IP_CREDENTIALS_FILE; wipe_temp_dir $TMP_DIR;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, '; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ', variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --hostname ', concat(variables('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, ' --module ltm:nominal --module afm:none; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/network.js --output /var/log/network.log --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --default-gw ', variables('tmmRouteGw'), ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'),  ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress'),  ',vlan:internal ', variables('netCmd'), ' --log-level debug', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; ', variables('routeCmdArray')[parameters('bigIpVersion')], '; rm -f /config/cloud/.passwd; rm -f /config/cloud/.bigIqPasswd; bash /config/customConfig.sh; else exit 1; fi')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {
@@ -1377,8 +1070,6 @@
                 "application": "[parameters('tagValues').application]", 
                 "costCenter": "[parameters('tagValues').cost]", 
                 "environment": "[parameters('tagValues').environment]", 
-                "f5": "[variables('f5Tag')]", 
-                "f5Template": "[variables('f5TemplateTag')]", 
                 "group": "[parameters('tagValues').group]", 
                 "owner": "[parameters('tagValues').owner]"
             }, 

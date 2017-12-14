@@ -50,6 +50,7 @@ def parameter_initialize(data):
     data['parameters']['internalIpAddressRangeStart'] = "OPTIONAL"
     data['parameters']['internalIpAddress'] = "OPTIONAL"
     data['parameters']['enableNetworkFailover'] = "OPTIONAL"
+    data['parameters']['internalLoadBalancerType'] = "OPTIONAL"
     data['parameters']['internalLoadBalancerProbePort'] = "OPTIONAL"
     data['parameters']['avSetChoice'] = "OPTIONAL"
     data['parameters']['solutionDeploymentName'] = "OPTIONAL"
@@ -93,8 +94,6 @@ def variable_initialize(data):
     data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
     data['variables']['resourceGroupName'] = "[resourceGroup().name]"
     data['variables']['singleQuote'] = "'"
-    data['variables']['f5Tag'] = "MANDATORY"
-    data['variables']['f5TemplateTag'] = "MANDATORY"
     data['variables']['f5CloudLibsTag'] = "MANDATORY"
     data['variables']['f5CloudLibsAzureTag'] = "MANDATORY"
     data['variables']['f5NetworksTag'] = "MANDATORY"
@@ -150,24 +149,6 @@ def variable_initialize(data):
     data['variables']['extSubnetPrivateAddressSuffixInt'] = "OPTIONAL"
     data['variables']['extSubnetPrivateAddressSuffix0'] = "OPTIONAL"
     data['variables']['extSubnetPrivateAddressSuffix1'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix2'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix3'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix4'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix5'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix6'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix7'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix8'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix9'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix10'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix11'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix12'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix13'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix14'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix15'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix16'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix17'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix18'] = "OPTIONAL"
-    data['variables']['extSubnetPrivateAddressSuffix19'] = "OPTIONAL"
     data['variables']['intNicName'] = "OPTIONAL"
     data['variables']['intSubnetName'] = "OPTIONAL"
     data['variables']['intSubnetPrefix'] = "OPTIONAL"
@@ -200,11 +181,9 @@ def variable_initialize(data):
     data['variables']['routeCmdArray'] = "OPTIONAL"
     data['variables']['subnetArray'] = "OPTIONAL"
     data['variables']['addtlSubnetArray'] = "OPTIONAL"
-    data['variables']['selfIpconfigArray'] = "OPTIONAL"
-    data['variables']['extIpconfigArray'] = "OPTIONAL"
     data['variables']['selfNicConfigArray'] = "OPTIONAL"
     data['variables']['addtlNicConfigArray'] = "OPTIONAL"
-    data['variables']['lbFrontEndArray'] = "OPTIONAL"
+    data['variables']['backEndAddressPoolArray'] = "OPTIONAL"
     data['variables']['failoverCmdArray'] = "OPTIONAL"
     data['variables']['ipAddress'] = "OPTIONAL"
     data['variables']['deviceNamePrefix'] = "OPTIONAL"
@@ -243,9 +222,10 @@ def variable_initialize(data):
     data['variables']['commandArgs'] = "OPTIONAL"
     # Add storage array variables at the end
     data['variables']['instanceTypeMap'] = { "Standard_A3": { "storageAccountType": "Standard_LRS" }, "Standard_A4": { "storageAccountType": "Standard_LRS" }, "Standard_A5": { "storageAccountType": "Standard_LRS" }, "Standard_A6": { "storageAccountType": "Standard_LRS" }, "Standard_A7": { "storageAccountType": "Standard_LRS" }, "Standard_D2": { "storageAccountType": "Standard_LRS" }, "Standard_D3": { "storageAccountType": "Standard_LRS" }, "Standard_D4": { "storageAccountType": "Standard_LRS" }, "Standard_D11": { "storageAccountType": "Standard_LRS" }, "Standard_D12": { "storageAccountType": "Standard_LRS" }, "Standard_D13": { "storageAccountType": "Standard_LRS" }, "Standard_D14": { "storageAccountType": "Standard_LRS" }, "Standard_D2_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D3_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D4_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D5_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D11_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D12_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D13_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D14_v2": { "storageAccountType": "Standard_LRS" }, "Standard_D15_v2": { "storageAccountType": "Standard_LRS" }, "Standard_F2": { "storageAccountType": "Standard_LRS" }, "Standard_F4": { "storageAccountType": "Standard_LRS" }, "Standard_G1": { "storageAccountType": "Standard_LRS" }, "Standard_G2": { "storageAccountType": "Standard_LRS" }, "Standard_G3": { "storageAccountType": "Standard_LRS" }, "Standard_G4": { "storageAccountType": "Standard_LRS" }, "Standard_G5": { "storageAccountType": "Standard_LRS" }, "Standard_DS1": { "storageAccountType": "Premium_LRS" }, "Standard_DS2": { "storageAccountType": "Premium_LRS" }, "Standard_DS3": { "storageAccountType": "Premium_LRS" }, "Standard_DS4": { "storageAccountType": "Premium_LRS" }, "Standard_DS11": { "storageAccountType": "Premium_LRS" }, "Standard_DS12": { "storageAccountType": "Premium_LRS" }, "Standard_DS13": { "storageAccountType": "Premium_LRS" }, "Standard_DS14": { "storageAccountType": "Premium_LRS" }, "Standard_DS1_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS2_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS3_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS4_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS5_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS11_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS12_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS13_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS14_v2": { "storageAccountType": "Premium_LRS" }, "Standard_DS15_v2": { "storageAccountType": "Premium_LRS" }, "Standard_GS1": { "storageAccountType": "Premium_LRS" }, "Standard_GS2": { "storageAccountType": "Premium_LRS" }, "Standard_GS3": { "storageAccountType": "Premium_LRS" }, "Standard_GS4": { "storageAccountType": "Premium_LRS" }, "Standard_GS5": { "storageAccountType": "Premium_LRS" } }
-    data['variables']['newStorageAccountName'] = "[concat(uniqueString(resourceGroup().id, deployment().name), 'stor')]"
+    data['variables']['newStorageAccountName0'] = "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'stor0')]"
+    data['variables']['newStorageAccountName1'] = "OPTIONAL"
     data['variables']['storageAccountType'] = "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]"
-    data['variables']['newDataStorageAccountName'] = "[concat(uniqueString(resourceGroup().id, deployment().name), 'data000')]"
+    data['variables']['newDataStorageAccountName'] = "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data000')]"
     data['variables']['dataStorageAccountType'] = "Standard_LRS"
     data['variables']['deploymentId'] = "MANDATORY"
     data['variables']['allowUsageAnalytics'] = "MANDATORY"
@@ -281,13 +261,19 @@ def pub_ip_strip(data, resource, tmpl_type):
     if resource == 'PublicIpAddress':
         for item in data:
             if tmpl_type == 'resources':
-                try:
-                    if isinstance(item['properties']['ipConfigurations'], list):
-                        for ipconfig in range(0, len(item['properties']['ipConfigurations'])):
-                            if resource in item['properties']['ipConfigurations'][ipconfig]['properties']:
-                                item['properties']['ipConfigurations'][ipconfig]['properties'][resource] = None
-                except:
-                    continue
+                if 'properties' in item:
+                    obj = 'ipConfigurations'
+                    if obj in item['properties']:
+                        # declared as a list
+                        for ipconfig in range(0, len(item['properties'][obj])):
+                            if resource in item['properties'][obj][ipconfig]['properties']:
+                                item['properties'][obj][ipconfig]['properties'][resource] = None
+                    # Check if ipConfigurations is a copy and strip there as well if so
+                    obj = 'copy'
+                    if obj in item['properties']:
+                        for copy in range(0, len(item['properties'][obj])):
+                            if resource in item['properties'][obj][copy]['input']['properties']:
+                                item['properties'][obj][copy]['input']['properties'][resource] = None
             elif tmpl_type == 'variables':
                 try:
                     if isinstance(data[item], list):
