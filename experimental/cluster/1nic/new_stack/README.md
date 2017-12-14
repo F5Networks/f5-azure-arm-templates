@@ -197,7 +197,7 @@ When you have completed the virtual server configuration, you must modify the vi
 14. Click **Update**.
 15. Repeat for each virtual server.
 
-## Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
+### Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
 
 Once the solution has been deployed there may be a need to perform some additional configuration of the BIG-IP.  This can be accomplished via traditional methods such as via the GUI, logging into the CLI or using the REST API.  However, depending on the requirements it might be preferred to perform this custom configuration as a part of the initial deployment of the solution.  This can be accomplished in the below manner.
 

@@ -201,7 +201,9 @@ When this ARM template was initially deployed, a storage account was created in 
      3. Click the **Upgrade** action button.
 
 #### Configure Scale Event Notifications
-You can add notifications when scale up/down events happen, either in the form of email or webhooks. The following shows an example of adding an email address that receives an email from Azure whenever a scale up/down event occurs.
+**Note:** Email addresses for notification can now be specified within the solution and will be applied automatically, they can also be configured manually via the VM Scale Set configuration options available within the Azure Portal.
+
+You can add notifications when scale up/down events happen, either in the form of email or webhooks. The following shows an example of adding an email address via the Azure Resources Explorer that receives an email from Azure whenever a scale up/down event occurs.
 
 Log in to the [Azure Resource Explorer](https://resources.azure.com) and then navigate to the Auto Scale settings (**Subscriptions > Resource Groups >** *resource group where deployed* **> Providers > Microsoft.Insights > Autoscalesettings > autoscaleconfig**).  At the top of the screen click Read/Write, and then from the Auto Scale settings, click **Edit**.  Replace the current **notifications** json key with the example below, making sure to update the email address(es). Select PUT and notifications will be sent to the email addresses listed.
 
@@ -293,7 +295,7 @@ In order to pass traffic from your clients to the servers through the BIG-IP sys
 8. Click the **Finished** button.
 9. Repeat as necessary.
 
-## Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
+### Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
 
 Once the solution has been deployed there may be a need to perform some additional configuration of the BIG-IP.  This can be accomplished via traditional methods such as via the GUI, logging into the CLI or using the REST API.  However, depending on the requirements it might be preferred to perform this custom configuration as a part of the initial deployment of the solution.  This can be accomplished in the below manner.
 
