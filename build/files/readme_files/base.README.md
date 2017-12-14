@@ -138,7 +138,7 @@ To launch the template:
   5.	When you are done, click the **Finished** button.
 
 <SERVICE_PRINCIPAL><VS_CREATION><TG_CONFIG_TEXT>
-## Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
+### Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
 
 Once the solution has been deployed there may be a need to perform some additional configuration of the BIG-IP.  This can be accomplished via traditional methods such as via the GUI, logging into the CLI or using the REST API.  However, depending on the requirements it might be preferred to perform this custom configuration as a part of the initial deployment of the solution.  This can be accomplished in the below manner.
 

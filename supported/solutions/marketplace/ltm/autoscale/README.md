@@ -31,8 +31,8 @@ The following is a map that shows the available options for the template paramet
 
 | Azure BIG-IP Image Version | BIG-IP Version |
 | --- | --- |
-| 13.0.021 | 13.0.0 HF2 Build 2.10.1671 |
-| 12.1.24 | 12.1.2 HF1 Build 1.34.271 |
+| 13.0.0300 | 13.0.0 HF3 Build 3.0.1679 |
+| 12.1.2200 | 12.1.2 HF2 Build 2.0.276 |
 
 
 ## Supported instance types and hypervisors
