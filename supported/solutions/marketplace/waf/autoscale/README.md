@@ -32,9 +32,8 @@ The following is a map that shows the available options for the template paramet
 
 | Azure BIG-IP Image Version | BIG-IP Version |
 | --- | --- |
-| 13.0.021 | 13.0.0 HF2 Build 2.10.1671 |
-| 12.1.24 | 12.1.2 HF1 Build 1.34.271 |
-
+| 13.0.0300 | 13.0.0 HF3 Build 3.0.1679 |
+| 12.1.2200 | 12.1.2 HF2 Build 2.0.276 |
 
 ## Supported instance types and hypervisors
   - This solution supports the following Azure instance types: Standard_DS2, Standard_DS3, Standard_DS4, Standard_DS11, Standard_DS12, Standard_DS13, Standard_DS14, Standard_DS2_v2, Standard_DS3_v2, Standard_DS4_v2, Standard_DS5_v2, Standard_DS11_v2, Standard_DS12_v2, Standard_DS13_v2, Standard_DS14_v2, Standard_DS15_v2, Standard_F2S, Standard_F4S, Standard_F8S.
