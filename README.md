@@ -56,11 +56,6 @@ Note that many of the solutions now include *Production Stack* templates.  This 
       - *PAYG* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-4.3.0.0%2Fsupported%2Fstandalone%2F1nic%2Fprod_stack%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-      - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-4.3.0.0%2Fsupported%2Fstandalone%2F1nic%2Fprod_stack%2FBIGIQ%2Fazuredeploy.json">
-    <img src="http://azuredeploy.net/deploybutton.png"/></a>
-
-
-
 -  **Deploying the BIG-IP VE in Azure - 2 NICs**
     - [New Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/standalone/2nic/new_stack)
       - *BYOL* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.3.0.0%2Fsupported%2Fstandalone%2F2nic%2Fnew_stack%2FBYOL%2Fazuredeploy.json">
@@ -88,10 +83,6 @@ Note that many of the solutions now include *Production Stack* templates.  This 
 
       - *PAYG* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-4.3.0.0%2Fsupported%2Fstandalone%2F2nic%2Fprod_stack%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a>
-
-      - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-4.3.0.0%2Fsupported%2Fstandalone%2F2nic%2Fprod_stack%2FBIGIQ%2Fazuredeploy.json">
-    <img src="http://azuredeploy.net/deploybutton.png"/></a>
-
 
 - **Deploying the BIG-IP VE in Azure - 3 NICs**
     - [New Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/standalone/3nic/new_stack)
@@ -121,10 +112,6 @@ Note that many of the solutions now include *Production Stack* templates.  This 
       - *PAYG* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-4.3.0.0%2Fsupported%2Fstandalone%2F3nic%2Fprod_stack%2FPAYG%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-      - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-4.3.0.0%2Fsupported%2Fstandalone%2F3nic%2Fprod_stack%2FBIGIQ%2Fazuredeploy.json">
-    <img src="http://azuredeploy.net/deploybutton.png"/></a>
-
-
 - **Deploying the BIG-IP VE in Azure - N NICs**
     - [New Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/standalone/n-nic/new_stack)
       - *BYOL* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.3.0.0%2Fsupported%2Fstandalone%2Fn-nic%2Fnew_stack%2FBYOL%2Fazuredeploy.json">
@@ -151,9 +138,6 @@ Note that many of the solutions now include *Production Stack* templates.  This 
     <img src="http://azuredeploy.net/deploybutton.png"/></a><br>
 
       - *PAYG* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-4.3.0.0%2Fsupported%2Fstandalone%2Fn-nic%2Fprod_stack%2FPAYG%2Fazuredeploy.json">
-    <img src="http://azuredeploy.net/deploybutton.png"/></a>
-
-      - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-4.3.0.0%2Fsupported%2Fstandalone%2Fn-nic%2Fprod_stack%2FBIGIQ%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
 - **Deploying the BIG-IP VE in Azure - Cluster**
