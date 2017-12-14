@@ -147,6 +147,12 @@ elif license_type == 'BIGIQ':
 license_params = ['licenseKey1', 'licenseKey2', 'licensedBandwidth', 'bigIqLicenseHost', 'bigIqLicenseUsername', 'bigIqLicensePassword', 'bigIqLicensePool']
 if template_name not in ('cluster_1nic', 'cluster_3nic', 'ha-avset'):
     license_params.remove('licenseKey2')
+# BIG-IQ does not exist for prod_stack currently
+if stack_type in ('prod_stack'):
+    license_params.remove('bigIqLicenseHost')
+    license_params.remove('bigIqLicenseUsername')
+    license_params.remove('bigIqLicensePassword')
+    license_params.remove('bigIqLicensePool')
 ## Check if supported or experimental
 if 'supported' in created_file:
     support_type = 'supported'
@@ -859,7 +865,11 @@ with open(createdfile_params, 'w') as finished_params:
 
 
 ###### Prepare some information prior to creating Scripts/Readme's ######
-lic_support = {'standalone_1nic': 'All', 'standalone_2nic': 'All', 'standalone_3nic': 'All', 'standalone_n-nic': 'All', 'cluster_1nic': 'All', 'cluster_3nic': 'All', 'ha-avset': 'All', 'ltm_autoscale': ['PAYG', 'BIG-IQ'], 'waf_autoscale': ['PAYG', 'BIG-IQ']}
+if stack_type in ('prod_stack'):
+    all_lic = ['BYOL', 'PAYG']
+else:
+    all_lic = ['BYOL', 'PAYG', 'BIG-IQ']
+lic_support = {'standalone_1nic': all_lic, 'standalone_2nic': all_lic, 'standalone_3nic': all_lic, 'standalone_n-nic': all_lic, 'cluster_1nic': all_lic, 'cluster_3nic': all_lic, 'ha-avset': all_lic, 'ltm_autoscale': ['PAYG', 'BIG-IQ'], 'waf_autoscale': ['PAYG', 'BIG-IQ']}
 lic_key_count = {'standalone_1nic': 1, 'standalone_2nic': 1, 'standalone_3nic': 1, 'standalone_n-nic': 1, 'cluster_1nic': 2, 'cluster_3nic': 2, 'ha-avset': 2, 'ltm_autoscale': 0, 'waf_autoscale': 0}
 api_access_needed = {'standalone_1nic': None, 'standalone_2nic': None, 'standalone_3nic': None, 'standalone_n-nic': None, 'cluster_1nic': None, 'cluster_3nic': None, 'ha-avset': 'read_write', 'ltm_autoscale': 'read', 'waf_autoscale': 'read'}
 template_info = {'template_name': template_name, 'location': script_location, 'lic_support': lic_support, 'lic_key_count': lic_key_count, 'api_access_needed': api_access_needed}

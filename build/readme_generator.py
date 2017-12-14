@@ -164,9 +164,7 @@ class ReadmeGen(object):
         v_tag = self.i_data['readme_text']['deploy_links']['version_tag']
         deploy_links = ''
         base_url = 'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2F' + v_tag
-        if 'All' in lic_type:
-            lic_list = ['BYOL', 'PAYG', 'BIG-IQ']
-        elif isinstance(lic_type, list):
+        if isinstance(lic_type, list):
             lic_list = lic_type
         else:
             lic_list = [lic_type]
