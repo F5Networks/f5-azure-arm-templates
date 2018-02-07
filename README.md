@@ -157,14 +157,14 @@ Note that many of the solutions now include *Production Stack* templates.  This 
           - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.3.0.0%2Fsupported%2Fcluster%2F1nic%2Fexisting_stack%2FBIGIQ%2Fazuredeploy.json"> <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
     - *3 NICs*
-      - [New Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/cluster/1nic/new_stack)
+      - [New Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/cluster/3nic/new_stack)
           - *BYOL* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fnew_stack%2FBYOL%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
           - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fnew_stack%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
           - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fnew_stack%2FBIGIQ%2Fazuredeploy.json"> <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-      - [Existing Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/cluster/1nic/existing_stack)
+      - [Existing Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/cluster/3nic/existing_stack)
           - *BYOL* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fexisting_stack%2FBYOL%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
           - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv4.3.0.0%2Fsupported%2Fcluster%2F3nic%2Fexisting_stack%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
