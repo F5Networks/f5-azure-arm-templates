@@ -1,6 +1,6 @@
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
-## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some(such as region) can     ##
-## be supplied inline when running this script but if they aren't then the default will be used as specificed below.   ##
+## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some (such as region) can     ##
+## be supplied inline when running this script but if they aren't then the default will be used as specified below.   ##
 <EXAMPLE_CMD>
 
 param(
@@ -30,8 +30,9 @@ try {
 # Create Resource Group for ARM Deployment
 New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
 
-# Create Arm Deployment
 <PWD_CMD><SPS_CMD><SSL_PWD_CMD>
+<DICT_CMDS>
+# Create Arm Deployment
 <DEPLOYMENT_CREATE>
 
 # Print Output of Deployment to Console

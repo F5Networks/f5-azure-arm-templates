@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "4.3.0.0", 
+    "contentVersion": "4.4.0.0", 
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -21,7 +21,7 @@
             "value": "Good"
         }, 
         "bigIpVersion": {
-            "value": "13.0.0300"
+            "value": "13.1.0200"
         }, 
         "bigIqLicenseHost": {
             "value": "GEN_UNIQUE"

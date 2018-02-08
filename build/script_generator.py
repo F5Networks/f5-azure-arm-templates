@@ -1,6 +1,7 @@
 #/usr/bin/python env
 import sys
 import os
+import json
 
 def lic_count_check(lic_key_count):
     """ Determine Number of Licenses Needed for BYOL Template """
@@ -78,8 +79,6 @@ def script_param_array(data):
             mandatory = False
         if 'license' in parameter.lower():
             skip_param = True
-        elif parameter == 'tagValues':
-            skip_param = True
         param_array.append([parameter, default_value, mandatory, skip_param])
     return param_array
 
@@ -90,7 +89,7 @@ def script_creation(template_info, data, default_payg_bw, language):
     script_location = template_info['location']
     lic_type_all = lic_type_check(template_info['lic_support'][template_name])
     multi_lic = lic_count_check(template_info['lic_key_count'][template_name])
-    param_str = ''; pwd_cmd = ''; sps_cmd = ''; ssl_pwd_cmd = ''; lic2_param = ''; mandatory_vars = ''; lic_check = ''; lic2_check = ''; lic_params = ''
+    param_str = ''; pwd_cmd = ''; sps_cmd = ''; ssl_pwd_cmd = ''; dict_cmds = ''; lic2_param = ''; mandatory_vars = ''; lic_check = ''; lic2_check = ''; lic_params = ''
     if language == 'powershell':
         deploy_cmd_params = ''; script_dash = ' -'
         meta_script = 'files/script_files/base.deploy_via_ps.ps1'; script_loc = script_location + 'Deploy_via_PS.ps1'
@@ -150,9 +149,11 @@ def script_creation(template_info, data, default_payg_bw, language):
             elif language == 'bash':
                 mandatory_vars += parameter[0] + ' '
         else:
-            param_value = ' = "' + str(parameter[1]) + '",'
+            if isinstance(parameter[1], dict):
+                param_value = " = '" + json.dumps(parameter[1]) + "',"
+            else:
+                param_value = ' = "' + str(parameter[1]) + '",'
         if language == 'powershell':
-            param_str += '\n  [string]' + mandatory_cmd +  ' $' + parameter[0] + param_value
             if parameter[0] == 'adminPassword':
                 deploy_cmd_params += '-' + parameter[0] + ' $pwd '
                 pwd_cmd = '$pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force'
@@ -163,31 +164,31 @@ def script_creation(template_info, data, default_payg_bw, language):
                 deploy_cmd_params += '-' + parameter[0] + ' $sslpwd '
                 ssl_pwd_cmd = '\n$sslpwd = ConvertTo-SecureString -String $sslPswd -AsPlainText -Force'
             else:
-                deploy_cmd_params += '-' + parameter[0] + ' "$' + parameter[0] + '" '
+                deploy_cmd_params += '-' + parameter[0] + ' $' + parameter[0] + ' '
+            if isinstance(parameter[1], dict):
+                param_str += '\n ' + mandatory_cmd +  ' $' + parameter[0] + param_value
+                dict_cmds += '(ConvertFrom-Json $' + parameter[0] + ').psobject.properties | ForEach -Begin {$' + parameter[0] + '=@{}} -process {$' + parameter[0] + '."$($_.Name)" = $_.Value}\n'
+            else:
+                param_str += '\n  [string]' + mandatory_cmd +  ' $' + parameter[0] + param_value
         elif language == 'bash':
             param_str += '\n        --' + parameter[0] + ')\n            ' + parameter[0] + '=$2\n            shift 2;;'
-            ## Handle bash quoting for int's in template create command ##
-            if isinstance(parameter[1], int):
+            ## Handle bash quoting for int's and dict's in template create command ##
+            if isinstance(parameter[1], int) or isinstance(parameter[1], dict):
                 deploy_cmd_params += '\\"' + parameter[0] + '\\":{\\"value\\":$' + parameter[0] + '},'
             else:
                 deploy_cmd_params += '\\"' + parameter[0] + '\\":{\\"value\\":\\"$' + parameter[0] + '\\"},'
         ## Add parameter to example command, use default value if exists ##
-        if parameter[1]:
-            ## Handle special example command cases ##
-            if parameter[0] == 'restrictedSrcAddress':
-                parameter[1] = '"' + str(parameter[1]) + '"'
-            base_ex += script_dash + parameter[0] + ' ' + str(parameter[1])
-        else:
-            base_ex += script_dash + parameter[0] + ' ' + '<value>'
+        if parameter[0] not in ('restrictedSrcAddress', 'tagValues'):
+            if parameter[1]:
+                base_ex += script_dash + parameter[0] + ' ' + str(parameter[1])
+            else:
+                base_ex += script_dash + parameter[0] + ' ' + '<value>'
 
     ######## Add any additional script items ########
     if language == 'bash':
         ## Add any additional mandatory parameters ##
         for required_param in ['resourceGroupName', 'licenseType']:
             mandatory_vars += required_param + ' '
-        ## Add any additional parameters to the deployment command ##
-        for addtl_param in ['tagValues']:
-            deploy_cmd_params += '\\"' + addtl_param + '\\":{\\"value\\":$' + addtl_param + '},'
     ## Handle adding additional example command script parameters ##
     for named_param in addtl_ex_param:
         base_ex += script_dash + named_param + ' <value>'
@@ -198,6 +199,7 @@ def script_creation(template_info, data, default_payg_bw, language):
     script_str = script_str.replace('<EXAMPLE_CMD>', base_ex)
     script_str = script_str.replace('<DEPLOYMENT_CREATE>', build_deploy_cmd(language, base_deploy, deploy_cmd_params, template_info))
     script_str = script_str.replace('<PWD_CMD>', pwd_cmd).replace('<SPS_CMD>', sps_cmd).replace('<SSL_PWD_CMD>', ssl_pwd_cmd)
+    script_str = script_str.replace('<DICT_CMDS>', dict_cmds)
     script_str = script_str.replace('<LICENSE_PARAMETERS>', lic_params)
     script_str = script_str.replace('<DYNAMIC_PARAMETERS>', param_str)
     script_str = script_str.replace('<REQUIRED_PARAMETERS>', mandatory_vars)

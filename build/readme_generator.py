@@ -34,19 +34,27 @@ class ReadmeGen(object):
         try:
             yaml_value = yaml_dict[parent_key][child_key]
         except KeyError:
-            yaml_value = "Please input a value."
+            yaml_value = "No Value"
         try:
             support_type = self.i_data['support_type']
-        except:
+        except KeyError:
             support_type = None
         if isinstance(yaml_value, dict):
-            if support_type in yaml_value: 
-                yaml_value = yaml_value[support_type]
-            elif template_name in yaml_value:
-                if isinstance(yaml_value[template_name], dict) and support_type in yaml_value[template_name]: 
-                    yaml_value = yaml_value[template_name][support_type]
+            if 'exclude' in yaml_value:
+                exclude = yaml_value['exclude']
+                if 'stack_type' in exclude:
+                    if self.stack_type_check() in exclude['stack_type']:
+                        return None
+            if 'template_name' in yaml_value:
+                yvalue = yaml_value['template_name']
+                if template_name in yvalue:
+                    yvalue_tmpl = yvalue[template_name]
+                    if isinstance(yvalue_tmpl, dict) and support_type in yvalue_tmpl:
+                        yaml_value = yvalue_tmpl[support_type]
+                    else:
+                        yaml_value = yvalue_tmpl
                 else:
-                    yaml_value = yaml_value[template_name]
+                    yaml_value = yaml_value['default']
             else:
                 yaml_value = yaml_value['default']
         return yaml_value
@@ -63,7 +71,9 @@ class ReadmeGen(object):
                 if isinstance(item, dict):
                     result += '  - ' + item[next(iter(item))] + '\n'
                 else:
-                    result += '  - ' + ydict['note_text'][item] + '\n'
+                    result_value = self.get_custom_text('note_text', item)
+                    if result_value is not None:
+                        result += '  - ' + result_value + '\n'
         elif t_key == 'extra_text':
             result = self.loaded_files['base_readme']
             if t_key in yvalue:
@@ -76,7 +86,7 @@ class ReadmeGen(object):
                         value = item
                     result = result.replace(key, self.misc_readme_grep(value))
         elif t_key in ('title', 'intro', 'config_ex_text') and t_key in yvalue:
-            if sp_type in yvalue[t_key]:
+            if isinstance(yvalue[t_key], dict) and sp_type in yvalue[t_key]:
                 result = yvalue[t_key][sp_type]
             else:
                 result = yvalue[t_key]
@@ -98,7 +108,7 @@ class ReadmeGen(object):
         return False
 
     def md_param_array(self):
-        """ Create README example paramaters: | adminUsername | Yes | Description | """
+        """ Create README example parameters: | adminUsername | Yes | Description | """
         template_name = self.i_data['template_info']['template_name']
         license_params = self.i_data['license_params']
         lic_type = self.i_data['readme_text']['deploy_links']['lic_support'][template_name]
@@ -128,15 +138,17 @@ class ReadmeGen(object):
         return param_array
 
     def stack_type_check(self):
-        """ Determine what stack type the template is, return appropriate readme text """
+        """ Determine what stack type the template is """
         t_loc = self.i_data['template_location']
-        if 'existing_stack' in t_loc:
-            stack_type_text = self.get_custom_text('stack_type_text', 'existing_stack')
+        if 'new_stack' in t_loc:
+            stack_type = 'new_stack'
+        elif 'existing_stack' in t_loc:
+            stack_type = 'existing_stack'
         elif 'prod_stack' in t_loc:
-            stack_type_text = self.get_custom_text('stack_type_text', 'prod_stack')
+            stack_type = 'prod_stack'
         else:
-            stack_type_text = self.get_custom_text('stack_type_text', 'new_stack')
-        return stack_type_text
+            stack_type = 'unkown_stack_type'
+        return stack_type
 
     def sp_access_required(self, text):
         """ Determine what Service Principal Access is needed, return full Service Principal Text """
@@ -170,8 +182,7 @@ class ReadmeGen(object):
             lic_list = [lic_type]
         for lic in lic_list:
             deploy_links += '''   - **<LIC_TYPE>**<LIC_TEXT> <br><a href="<DEPLOY_LINK_URL>">\n    <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>\n\n'''
-            t_loc = t_loc.replace('/', '%2F')
-            t_loc = t_loc.replace('..', '')
+            t_loc = t_loc.replace('/', '%2F').replace('..', '')
             t_loc = t_loc.replace('PAYG', lic).replace('BYOL', lic).replace('BIGIQ', lic).replace('BIG-IQ', 'BIGIQ')
             url = base_url + t_loc
             deploy_links = deploy_links.replace('<DEPLOY_LINK_URL>', url).replace('<LIC_TYPE>', lic)
@@ -199,7 +210,7 @@ class ReadmeGen(object):
         example_text = self.get_tmpl_text('templates', template_name, 'config_ex_text')
         extra_prereq = self.get_tmpl_text('templates', template_name, 'prereq_list')
         extra_config_note = self.get_tmpl_text('templates', template_name, 'config_note_list')
-        stack_type_text = self.stack_type_check()
+        stack_type_text = self.get_custom_text('stack_type_text', self.stack_type_check())
         version_map = self.md_version_map()
         deploy_links = self.create_deploy_links()
         bash_script = [l for l in i_data['readme_text']['bash_script'].split('\n') if "Example Command" in l][0]
