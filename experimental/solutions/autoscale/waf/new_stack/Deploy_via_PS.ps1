@@ -1,6 +1,6 @@
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
-## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some (such as region) can     ##
-## be supplied inline when running this script but if they aren't then the default will be used as specified below.   ##
+## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some (such as region) can    ##
+## be supplied inline when running this script but if they aren't then the default will be used as specified below.    ##
 ## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -autoScaleMetric Host_Throughput -appInsights CREATE_NEW -calculatedBandwidth 200m -scaleOutThreshold 90 -scaleInThreshold 10 -scaleTimeWindow 10 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_DS2_v2 -imageName Best -bigIpVersion 13.1.0200 -vnetAddressPrefix 10.0 -solutionDeploymentName <value> -applicationProtocols http-https -applicationAddress <value> -applicationServiceFqdn NOT_SPECIFIED -applicationPort 80 -applicationSecurePort 443 -sslCert NOT_SPECIFIED -sslPswd NOT_SPECIFIED -applicationType Linux -blockingLevel medium -customPolicy NOT_SPECIFIED -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -notificationEmail OPTIONAL -ntpServer 0.pool.ntp.org -timeZone UTC -allowUsageAnalytics Yes -resourceGroupName <value>
 
 param(
@@ -61,9 +61,9 @@ try {
     Get-AzureRmSubscription | Out-Null
     Write-Host "Already logged in, continuing..."
     }
-    Catch {
-    Write-Host "Not logged in, please login..."
-    Login-AzureRmAccount
+    catch {
+      Write-Host "Not logged in, please login..."
+      Login-AzureRmAccount
     }
 
 # Create Resource Group for ARM Deployment

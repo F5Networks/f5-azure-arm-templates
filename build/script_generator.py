@@ -89,7 +89,7 @@ def script_creation(template_info, data, default_payg_bw, language):
     script_location = template_info['location']
     lic_type_all = lic_type_check(template_info['lic_support'][template_name])
     multi_lic = lic_count_check(template_info['lic_key_count'][template_name])
-    param_str = ''; pwd_cmd = ''; sps_cmd = ''; ssl_pwd_cmd = ''; dict_cmds = ''; lic2_param = ''; mandatory_vars = ''; lic_check = ''; lic2_check = ''; lic_params = ''
+    param_str = ''; pwd_cmd = ''; sps_cmd = ''; ssl_pwd_cmd = ''; dns_pwd_cmd = ''; dict_cmds = ''; lic2_param = ''; mandatory_vars = ''; lic_check = ''; lic2_check = ''; lic_params = ''
     if language == 'powershell':
         deploy_cmd_params = ''; script_dash = ' -'
         meta_script = 'files/script_files/base.deploy_via_ps.ps1'; script_loc = script_location + 'Deploy_via_PS.ps1'
@@ -163,6 +163,9 @@ def script_creation(template_info, data, default_payg_bw, language):
             elif parameter[0] == 'sslPswd':
                 deploy_cmd_params += '-' + parameter[0] + ' $sslpwd '
                 ssl_pwd_cmd = '\n$sslpwd = ConvertTo-SecureString -String $sslPswd -AsPlainText -Force'
+            elif parameter[0] == 'dnsProviderPassword':
+                deploy_cmd_params += '-' + parameter[0] + ' $dnsProviderPasswordSecure '
+                dns_pwd_cmd = '\n$dnsProviderPasswordSecure = ConvertTo-SecureString -String $dnsProviderPassword -AsPlainText -Force'
             else:
                 deploy_cmd_params += '-' + parameter[0] + ' $' + parameter[0] + ' '
             if isinstance(parameter[1], dict):
@@ -198,7 +201,7 @@ def script_creation(template_info, data, default_payg_bw, language):
         script_str = script.read()
     script_str = script_str.replace('<EXAMPLE_CMD>', base_ex)
     script_str = script_str.replace('<DEPLOYMENT_CREATE>', build_deploy_cmd(language, base_deploy, deploy_cmd_params, template_info))
-    script_str = script_str.replace('<PWD_CMD>', pwd_cmd).replace('<SPS_CMD>', sps_cmd).replace('<SSL_PWD_CMD>', ssl_pwd_cmd)
+    script_str = script_str.replace('<PWD_CMD>', pwd_cmd).replace('<SPS_CMD>', sps_cmd).replace('<SSL_PWD_CMD>', ssl_pwd_cmd).replace('<DNS_PWD_CMD>', dns_pwd_cmd)
     script_str = script_str.replace('<DICT_CMDS>', dict_cmds)
     script_str = script_str.replace('<LICENSE_PARAMETERS>', lic_params)
     script_str = script_str.replace('<DYNAMIC_PARAMETERS>', param_str)

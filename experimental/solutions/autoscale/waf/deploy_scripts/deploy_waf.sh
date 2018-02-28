@@ -2,7 +2,7 @@
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin/"
 
 function passwd() {
-  echo | f5-rest-node /config/cloud/azure/node_modules/f5-cloud-libs/scripts/decryptDataFromFile.js --data-file /config/cloud/.passwd | awk '{print $1}'
+  echo | f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/decryptDataFromFile.js --data-file /config/cloud/.passwd | awk '{print $1}'
 }
 
 while getopts m:d:n:j:k:h:s:t:l:a:c:r:o:u: option

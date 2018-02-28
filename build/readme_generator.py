@@ -28,11 +28,14 @@ class ReadmeGen(object):
         tag_text = re.findall(reg_ex, text, re.DOTALL)
         return "".join(tag_text)
 
-    def get_custom_text(self, parent_key, child_key, template_name=None):
+    def get_custom_text(self, parent_key, child_key=None, template_name=None):
         """ Pull in custom text from the YAML file """
         yaml_dict = self.loaded_files['doc_text_file']
         try:
-            yaml_value = yaml_dict[parent_key][child_key]
+            if child_key is not None:
+                yaml_value = yaml_dict[parent_key][child_key]
+            else:
+                yaml_value = yaml_dict[parent_key]
         except KeyError:
             yaml_value = "No Value"
         try:
@@ -69,11 +72,11 @@ class ReadmeGen(object):
             t_list = yvalue[t_key]
             for item in t_list:
                 if isinstance(item, dict):
-                    result += '  - ' + item[next(iter(item))] + '\n'
+                    result += '- ' + item[next(iter(item))] + '\n'
                 else:
                     result_value = self.get_custom_text('note_text', item)
                     if result_value is not None:
-                        result += '  - ' + result_value + '\n'
+                        result += '- ' + result_value + '\n'
         elif t_key == 'extra_text':
             result = self.loaded_files['base_readme']
             if t_key in yvalue:
@@ -146,18 +149,18 @@ class ReadmeGen(object):
             stack_type = 'existing_stack'
         elif 'prod_stack' in t_loc:
             stack_type = 'prod_stack'
+        elif 'learning_stack' in t_loc:
+            stack_type = 'learning_stack'
         else:
             stack_type = 'unkown_stack_type'
         return stack_type
 
     def sp_access_required(self, text):
-        """ Determine what Service Principal Access is needed, return full Service Principal Text """
+        """ Determine what Service Principal Access is needed, map in what is needed """
         template_name = self.i_data['template_info']['template_name']
-        api_access_required = self.i_data['template_info']['api_access_needed'][template_name]
-        if api_access_required == 'read_write':
-            text = text.replace('<SP_REQUIRED_ACCESS>', self.get_custom_text('sp_access_text', 'read_write'))
-        else:
-            text = text.replace('<SP_REQUIRED_ACCESS>', self.get_custom_text('sp_access_text', 'read'))
+        api_access_required = self.i_data['template_info']['api_access_required'][template_name]
+        if api_access_required == 'required':
+            text = text.replace('<SP_REQUIRED_ACCESS>', self.get_custom_text('sp_access_text', None, template_name))
         return text
 
     def md_version_map(self):
@@ -181,7 +184,7 @@ class ReadmeGen(object):
         else:
             lic_list = [lic_type]
         for lic in lic_list:
-            deploy_links += '''   - **<LIC_TYPE>**<LIC_TEXT> <br><a href="<DEPLOY_LINK_URL>">\n    <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>\n\n'''
+            deploy_links += '''- **<LIC_TYPE>**<LIC_TEXT>\n\n  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](<DEPLOY_LINK_URL>)\n\n'''
             t_loc = t_loc.replace('/', '%2F').replace('..', '')
             t_loc = t_loc.replace('PAYG', lic).replace('BYOL', lic).replace('BIGIQ', lic).replace('BIG-IQ', 'BIGIQ')
             url = base_url + t_loc

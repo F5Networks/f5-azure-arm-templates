@@ -1,38 +1,47 @@
 <POST_CONFIG_AUTOSCALE_TXT>{{## Post-Deployment Configuration
+
 This solution deploys an ARM template that fully configures BIG-IP VE(s) and handles clustering (DSC) and Azure creation of objects needed for management of those BIG-IP VEs.  However, once deployed the assumption is configuration will be performed on the BIG-IP VE(s) to create virtual servers, pools, and other objects used for processing application traffic.  An example of the steps required to add an application are listed [here](#post-deployment-application-configuration).
 
 ### Backup BIG-IP configuration for cluster recovery
+
 After you initially launch the template, if you make manual changes to the BIG-IP configuration, you must make a backup of your BIG-IP configuration and store the resulting UCS file in the **backup** container of the storage account ending in **data000** created by the template to ensure the master election process will include the custom configuration in the cluster in the event of failure. Note: If necessary to recover from this UCS it will pick the one with the latest timestamp.
-  1. Backup your BIG-IP configuration (ideally the cluster primary) by creating a [UCS](https://support.f5.com/csp/article/K13132) archive.  Use the following syntax to save the backup UCS file:
-     - From the CLI command: ```# tmsh save /sys ucs /var/tmp/original.ucs```
-     - From the Configuration utility: **System > Archives > Create**
-  2. Upload the UCS into the **backup** container of the storage account ending in **data000** (it is a Blob container).
+
+1. Backup your BIG-IP configuration (ideally the cluster primary) by creating a [UCS](https://support.f5.com/csp/article/K13132) archive.  Use the following syntax to save the backup UCS file:
+    - From the CLI command: ```# tmsh save /sys ucs /var/tmp/original.ucs```
+    - From the Configuration utility: **System > Archives > Create**
+2. Upload the UCS into the **backup** container of the storage account ending in **data000** (it is a Blob container).
 
 ### Post-deployment application configuration
+
 Note: Steps are for an example application on port 443
-  1. Add a "Health Probe" to the ALB (Azure Load Balancer) for port 443, you can choose TCP or HTTP depending on your needs.  This queries each BIG-IP at that port to determine if it is available for traffic.
-  2. Add a "Load Balancing Rule" to the ALB where the port is 443 and the backend port is also 443 (assuming you are using same port on the BIG-IP), make sure the backend pool is selected (there should only be one backend pool which was created and is managed by the VM Scale set)
-  3. Add an "Inbound Security Rule" to the Network Security Group (NSG) for port 443 as the NSG is added to the subnet where the BIG-IP VE(s) are deployed - You could optionally just remove the NSG from the subnet as the VM Scale Set is fronted by the ALB.
+
+1. Add a "Health Probe" to the ALB (Azure Load Balancer) for port 443, you can choose TCP or HTTP depending on your needs.  This queries each BIG-IP at that port to determine if it is available for traffic.
+2. Add a "Load Balancing Rule" to the ALB where the port is 443 and the backend port is also 443 (assuming you are using same port on the BIG-IP), make sure the backend pool is selected (there should only be one backend pool which was created and is managed by the VM Scale set)
+3. Add an "Inbound Security Rule" to the Network Security Group (NSG) for port 443 as the NSG is added to the subnet where the BIG-IP VE(s) are deployed - You could optionally just remove the NSG from the subnet as the VM Scale Set is fronted by the ALB.
 
 ### Additional Optional Configuration Items
+
 Here are some post-deployment options that are entirely optional but could be useful based on your needs.
 
 #### BIG-IP Lifecycle Management
+
 As new BIG-IP versions are released, existing VM scale sets can be upgraded to use those new images. In an existing implementation, we assume you have created different types of BIG-IP configuration objects (such as virtual servers, pools, and monitors), and you want to retain this BIG-IP configuration after an upgrade. This section describes the process of upgrading and retaining the configuration.
 
 When this ARM template was initially deployed, a storage account was created in the same Resource Group as the VM scale set. This account name ends with **data000*** (the name of storage accounts have to be globally unique, so the prefix is a unique string). In this storage account, the template created a container named **backup**.  We use this backup container to hold backup [UCS](https://support.f5.com/csp/article/K13132) configuration files. Once the UCS is present in the container, you update the scale set "model" to use the newer BIG-IP version. Once the scale set is updated, you upgrade the BIG-IP VE(s). As a part of this upgrade, the provisioning checks the backup container for a UCS file and if one exists, it uploads the configuration (if more than one exists, it uses the latest).
 
 **To upgrade the BIG-IP VE Image**
-  1. Backup configuration as outlined [here](#backup-big-ip-configuration-for-cluster-recovery)
-  3. Update the VM Scale Set Model to the new BIG-IP version
-     - From PowerShell: Use the PowerShell script in the **scripts** folder in this directory
-     - Using the Azure redeploy functionality: From the Resource Group where the ARM template was initially deployed, click the successful deployment and then select to redeploy the template. If necessary, re-select all the same variables, and **only change** the BIG-IP version to the latest.
-  4. Upgrade the Instances
-     1. In Azure, navigate to the VM Scale Set instances pane and verify the *Latest model* does not say **Yes** (it should have a caution sign instead of the word Yes)
-     2. Select either all instances at once or each instance one at a time (starting with instance ID 0 and working up).
-     3. Click the **Upgrade** action button.
+
+1. Backup configuration as outlined [here](#backup-big-ip-configuration-for-cluster-recovery)
+2. Update the VM Scale Set Model to the new BIG-IP version
+    - From PowerShell: Use the PowerShell script in the **scripts** folder in this directory
+    - Using the Azure redeploy functionality: From the Resource Group where the ARM template was initially deployed, click the successful deployment and then select to redeploy the template. If necessary, re-select all the same variables, and **only change** the BIG-IP version to the latest.
+3. Upgrade the Instances
+    1. In Azure, navigate to the VM Scale Set instances pane and verify the *Latest model* does not say **Yes** (it should have a caution sign instead of the word Yes)
+    2. Select either all instances at once or each instance one at a time (starting with instance ID 0 and working up).
+    3. Click the **Upgrade** action button.
 
 #### Configure Scale Event Notifications
+
 **Note:** Email addresses for notification can now be specified within the solution and will be applied automatically, they can also be configured manually via the VM Scale Set configuration options available within the Azure Portal.
 
 You can add notifications when scale up/down events happen, either in the form of email or webhooks. The following shows an example of adding an email address via the Azure Resources Explorer that receives an email from Azure whenever a scale up/down event occurs.
@@ -56,86 +65,93 @@ Log in to the [Azure Resource Explorer](https://resources.azure.com) and then na
 ```}}
 
 <POST_CONFIG_TXT>{{## Post-Deployment Configuration
+
 Use this section for optional configuration changes after you have deployed the template.
 
 ### Additional public IP addresses
+
 This ARM template supports using up to 20 public IP addresses.  When you initially deployed the template, if you chose fewer than 20 public IP addresses and now want to include additional public IP addresses (up to the template-supported limit of 20) use the following guidance.  If you want to include more than 20 public IP addresses available from the template, see [Adding more than 20 Public IP addresses](#adding-more-than-20-public-ip-addresses-to-the-deployment).
 
 #### Adding up to 20 public IP addresses after initially deploying the template
+
 To add public IP addresses up to the template-supported limit of 20 after you have initially deployed the template, use the Azure Portal to redeploy the template, updating the parameters for the changes you want to make.  Use the following guidance:
 
-1.	From the Azure Portal, click the Azure Resource Group where you deployed the template.
-2.	Click **Deployments**.
-3.	Find the deployment and highlight it in the list.
-4.	Click **Redeploy**.
-5.	For the Resource Group, click **Use existing** and then select the resource group in which you initially deployed.
-6.	Enter the Admin password and Service Principal Secret parameters with the same values used in the initial deployment.
-7.	To add public IP addresses, change the value of the **Number Of External Ips** parameter to the number of IP addresses you want to use.
-8.	Agree to the terms and conditions.
-10.	Click **Purchase**.
+1. From the Azure Portal, click the Azure Resource Group where you deployed the template.
+2. Click **Deployments**.
+3. Find the deployment and highlight it in the list.
+4. Click **Redeploy**.
+5. For the Resource Group, click **Use existing** and then select the resource group in which you initially deployed.
+6. Enter the Admin password and Service Principal Secret parameters with the same values used in the initial deployment.
+7. To add public IP addresses, change the value of the **Number Of External Ips** parameter to the number of IP addresses you want to use.
+8. Agree to the terms and conditions.
+10. Click **Purchase**.
 
 #### Adding more than 20 public IP addresses to the deployment
+
 The deployment template supports creation of 1-20 external public IP addresses for application traffic (first one is used for external NIC Self IP).  Follow the steps below to add **more** than 20 public IP addresses to the deployment:
 
 - Create a new Azure public IP address resource in the deployment resource group
 - Create a new IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*)
 
 When you create virtual servers on the BIG-IP VE for these additional addresses, the BIG-IP network virtual server destination IP address should match the private IP addresses of both secondary Azure IP configurations assigned to the backend pool that is referenced by the application's Azure load balancing rule.
-
 }}
 
 <POST_CONFIG_FAILOVER_TXT>{{## Post-Deployment Configuration
+
 Use this section for optional configuration changes after you have deployed the template.
 
 ### Additional Public IP Addresses - Failover
+
 This ARM template supports using up to 20 public IP addresses for the external 'application' NIC to be used for passing traffic to BIG-IP virtual servers. Each virtual server should be configured with a destination address matching the private IP address value of the Azure IP configuration receiving traffic for the application. In the event the active BIG-IP VE becomes unavailable, the IP configuration(s) are migrated using network failover, seamlessly shifting application traffic to the current active BIG-IP VE (the template now supports [multiple traffic groups](#traffic-group-configuration) which enables active/active deployments).   When you initially deployed the template, if you chose fewer than 20 public IP addresses and now want to include additional public IP addresses (up to the template-supported limit of 20) and/or if you want to add or remove the user-defined routes (UDRs) to be managed by the BIG-IP, use the following guidance.  If you want to include more than 20 public IP addresses, see [Adding more than 20 Public IP addresses](#adding-more-than-20-public-ip-addresses-to-the-deployment).
 
 #### Adding up to 20 public IP addresses after initially deploying the template
+
 To add public IP addresses up to the template-supported limit of 20 after you have initially deployed the template, use the Azure Portal to redeploy the template, updating the parameters for the changes you want to make.  Use the following guidance:
 
-1.	Ensure that the first BIG-IP (VM 0) in the cluster is in an active state (from the BIG-IP Configuration utility, click **Device Management>Devices**, the device with the lowest IP address should be active).
-2.	From the Azure Portal, click the Azure Resource Group where you deployed the template.
-3.	Click **Deployments**.
-4.	Find the deployment and highlight it in the list.
-5.	Click **Redeploy**.
-6.	For the Resource Group, click Use existing and select the resource group in which you initially deployed.
-7.	Enter the Admin password and Service Principal Secret parameters with the same values used in the initial deployment.
-8.	To add public IP addresses, change the value of the **Number Of External Ips** parameter to the number of IP addresses you want to use.
-9.	To add or change managed routes, change the value of the **Managed Routes** parameter.
-10.	Agree to the terms and conditions.
-11.	Click **Purchase**.
+1. Ensure that the first BIG-IP (VM 0) in the cluster is in an active state (from the BIG-IP Configuration utility, click **Device Management>Devices**, the device with the lowest IP address should be active).
+2. From the Azure Portal, click the Azure Resource Group where you deployed the template.
+3. Click **Deployments**.
+4. Find the deployment and highlight it in the list.
+5. Click **Redeploy**.
+6. For the Resource Group, click Use existing and select the resource group in which you initially deployed.
+7. Enter the Admin password and Service Principal Secret parameters with the same values used in the initial deployment.
+8. To add public IP addresses, change the value of the **Number Of External Ips** parameter to the number of IP addresses you want to use.
+9. To add or change managed routes, change the value of the **Managed Routes** parameter.
+10. Agree to the terms and conditions.
+11. Click **Purchase**.
 
 #### Adding more than 20 public IP addresses to the deployment
+
 The deployment template supports creation of 1-20 external public IP addresses for application traffic (first one is used for external NIC Self IP). Use the following guidance to add **more** than 20 public IP addresses to the deployment:
 
-  -	Create a new Azure public IP address resource in the deployment resource group.  You ***must*** use the following syntax: ```<ResourceGroupName>-ext-pip<number>```.  For example: **SeattleResourceGroup-ext-pip9**.
-  -	Create a new IP configuration resource in the properties of the external Azure network interface (for example *myResourceGroupName-ext0*).  You ***must*** use the following syntax: ```<ResourceGroupName>-ext-ipconfig<number>```.  For example: **SeattleResourceGroup-ext-ipconfig9**.
-  -	Add these Azure tags to the public IP address resource:
-    -	For example: ```f5_privateIp=10.10.10.10``` (the tag value should correspond to the new private IP address of the IP configuration that references this public IP address).
-    -	For example: ```f5_extSubnetId=/subscriptions/<subscriptionId>/resourceGroups/<myResourceGroupName>/providers/Microsoft.Network/virtualNetworks/*< myVnetName >*/subnets/<mySubnetName>``` (you can get this value from a public IP address resource previously configured by the ARM template, or from resources.azure.com: **Subscriptions > Resource Groups > myResourceGroupName > providers > Microsoft.Network > virtualNetworks > myVnetName > subnets > mySubnetName.id**).
-    - An Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group you have configured on the BIG-IP VE.
-  - Again, you MUST follow the resource naming conventions in the provided examples for failover to work correctly.
+- Create a new Azure public IP address resource in the deployment resource group.  You ***must*** use the following syntax: ```<ResourceGroupName>-ext-pip<number>```.  For example: **SeattleResourceGroup-ext-pip9**.
+- Create a new IP configuration resource in the properties of the external Azure network interface (for example *myResourceGroupName-ext0*).  You ***must*** use the following syntax: ```<ResourceGroupName>-ext-ipconfig<number>```.  For example: **SeattleResourceGroup-ext-ipconfig9**.
+- Add these Azure tags to the public IP address resource:
+  1. For example: ```f5_privateIp=10.10.10.10``` (the tag value should correspond to the new private IP address of the IP configuration that references this public IP address).
+  2. For example: ```f5_extSubnetId=/subscriptions/<subscriptionId>/resourceGroups/<myResourceGroupName>/providers/Microsoft.Network/virtualNetworks/*< myVnetName >*/subnets/<mySubnetName>``` (you can get this value from a public IP address resource previously configured by the ARM template, or from resources.azure.com: **Subscriptions > Resource Groups > myResourceGroupName > providers > Microsoft.Network > virtualNetworks > myVnetName > subnets > mySubnetName.id**).
+  3. An Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group you have configured on the BIG-IP VE.
+- Again, you MUST follow the resource naming conventions in the provided examples for failover to work correctly.
 
 When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. See the BIG-IP documentation for specific instructions on creating virtual servers.
 
 ### Configuring additional routes
+
 If you want to configure additional routes to use the active BIG-IP VE as the next hop virtual appliance, you must edit the **/config/cloud/managedRoutes** file on each BIG-IP VE device.
 
-The managedRoutes file is a comma-separated list of route destinations. For example, if you entered **192.168.0.0/24,192.168.1.0/24** in the **managedRoutes** parameter of the ARM template deployment, and want to set the active BIG-IP VE device as the next hop for the routes 192.168.2.0/24 and 0.0.0.0/0, log in via SSH to each device and manually edit the **/config/cloud/managedRoutes** file to:
+The managedRoutes file is a comma-separated list of route destinations. For example, if you entered **192.168.0.0/24,192.168.1.0/24** in the **managedRoutes** parameter of the ARM template deployment, and want to set the active BIG-IP VE device as the next hop for the routes 192.168.2.0/24 and 0.0.0.0/0, log in via SSH to each device and manually edit the **/config/cloud/managedRoutes** file to: **192.168.0.0/24,192.168.1.0/24, 192.168.2.0/24,0.0.0.0/0**
 
-**192.168.0.0/24,192.168.1.0/24, 192.168.2.0/24,0.0.0.0/0**
+Ensure the Azure Route Table(s) containing the routes with these destinations are tagged with key **f5_ha** and the value you provided for the **routeTableTag** parameter of the ARM template deployment.}}
 
-Ensure the Azure Route Table(s) containing the routes with these destinations are tagged with key **f5_ha** and the value you provided for the **routeTableTag** parameter of the ARM template deployment.
-}}
+<SERVICE_PRINCIPAL>{{
+### Service Principal Authentication
 
-<SERVICE_PRINCIPAL>{{### Service Principal Authentication
 This solution requires access to the Azure API to determine how the BIG-IP VEs should be configured.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication, for all the typical security reasons.  The following provides information/links on the options for configuring a service principal within Azure if this is the first time it is needed in a subscription.
 
-_Ensure that however the creation of the service principal occurs to verify it only has minimum required access based on the solutions need(read vs read/write) prior to this template being deployed and used by the solution within the resource group selected(new or existing)._
+_Ensure that however the creation of the service principal occurs to verify it only has the minimum required access based on the solutions need prior to this template being deployed and used by the solution within the resource group selected (new or existing)._
 
 **Minimum Required Access:** <SP_REQUIRED_ACCESS>
 
-The end result should be possession of a client (application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some troubleshooting post-deployment if the service principal is in fact not fully configured.
+The end result should be possession of a client (application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some post-deployment troubleshooting if the service principal is in fact not configured correctly.
 
 **NOTE:** Service principal information is stored locally in the **/config/cloud/.azCredentials file.  If for any reason you need to update the service principal information, you must manually edit the .azCredentials file on both BIG-IP systems.
 
@@ -147,31 +163,34 @@ Follow the steps outlined in the [Azure Portal documentation](https://azure.micr
 
 This method can be used with either the [Azure CLI v2.0 (Python)](https://github.com/Azure/azure-cli) or the [Azure Cross-Platform CLI (npm module)](https://github.com/Azure/azure-xplat-cli).
 
-_Using the Python Azure CLI v2.0 - requires just one step_
+##### Using the Python Azure CLI v2.0 - requires just one step
+
 ```shell
-$ az ad sp create-for-rbac
+az ad sp create-for-rbac
 ```
 
-_Using the Node.js cross-platform CLI - requires additional steps for setting up_
-https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal-cli
+##### Using the Node.js cross-platform CLI - requires additional steps for setting up
+
+[Link](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal-cli)
 
 #### 3. Azure PowerShell
+
 Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
 }}
 
 <TG_CONFIG_TEXT>{{
 ### Traffic Group Configuration
 
-This template supports associating Azure Public IP Address and Route Table resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  
+This template supports associating Azure Public IP Address and Route Table resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.
 At deployment time, an Azure tag with key **f5_tg** and value **traffic-group-1** is created on each public IP address resource. Use the following guidance to configure multiple traffic groups.  Note you must create the **f5_tg** on any route tables with routes that will be managed by BIG-IP VE. At a minimum, these route tables must be tagged with a default value of **traffic-group-1**.
 
-  1. Select the Azure public IP address or route table you want to associate with the second traffic group (in our example, the second traffic group name is **traffic-group-2**).
-  2. From the public IP address or route table Tags blade, select the **f5_tg** tag.
-  3. Modify the tag value to **traffic-group-2** and then save the tag.
-  4. From the BIG-IP VE management Configuration utility, click **Device Management > Traffic Groups > Create**, and then complete the following.
-     - *Name*: **traffic-group-2**
-     - *Failover Order*: Select the preferred order of the devices for this traffic group; F5 recommends setting the current standby device as the preferred device for this second traffic group, so that each traffic group has a different preferred device (device will become active after creating the traffic group).
-     - Click **Create Traffic Group**. 
+1. Select the Azure public IP address or route table you want to associate with the second traffic group (in our example, the second traffic group name is **traffic-group-2**).
+2. From the public IP address or route table Tags blade, select the **f5_tg** tag.
+3. Modify the tag value to **traffic-group-2** and then save the tag.
+4. From the BIG-IP VE management Configuration utility, click **Device Management > Traffic Groups > Create**, and then complete the following.
+    - *Name*: **traffic-group-2**
+    - *Failover Order*: Select the preferred order of the devices for this traffic group; F5 recommends setting the current standby device as the preferred device for this second traffic group, so that each traffic group has a different preferred device (device will become active after creating the traffic group).
+    - Click **Create Traffic Group**.
 
 The public IP address resources tagged with **traffic-group-2** will be associated with the preferred device for that traffic group.
 }}
@@ -179,26 +198,26 @@ The public IP address resources tagged with **traffic-group-2** will be associat
 <VS_CREATION>{{
 ## Creating virtual servers on the BIG-IP VE
 
-In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the private IP address of the IP configuration(s) for each BIG-IP VE network interface created by the template. If you need additional virtual servers for your applications/servers, you can add more secondary IP configurations on the Azure network interface, and corresponding virtual servers on the BIG-IP system. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-multiple-ip-addresses-portal for information on multiple IP addresses.
+In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the private IP address of the IP configuration(s) for each BIG-IP VE network interface created by the template. If you need additional virtual servers for your applications/servers, you can add more secondary IP configurations on the Azure network interface, and corresponding virtual servers on the BIG-IP system. See [virtual-network-multiple-ip-addresses-portal](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-multiple-ip-addresses-portal) for information on multiple IP addresses.
 **Important**: For 1 NIC BIG-IP VEs, the virtual server configuration uses a wildcard destination address (example: 0.0.0.0/0) and should use different ports (if behind an ALB) or hostnames to differentiate services.
 
-**To create virtual servers on the BIG-IP system**
+### To create virtual servers on the BIG-IP system
 
 1. Once your BIG-IP VE has launched, open the BIG-IP VE Configuration utility.
 2. On the Main tab, click **Local Traffic > Virtual Servers** and then click the **Create** button.
 3. In the **Name** field, give the Virtual Server a unique name.
 4. In the **Destination/Mask** field, type the Azure secondary private IP address.
-5. In the **Service Port** field, type the appropriate port. 
+5. In the **Service Port** field, type the appropriate port.
 6. Configure the rest of the virtual server as appropriate.
-7. If you used the Service Discovery iApp template: <br>In the Resources section, from the **Default Pool** list, select the name of the pool created by the iApp.
+7. If you used the Service Discovery iApp template: In the Resources section, from the **Default Pool** list, select the name of the pool created by the iApp.
 8. Click the **Finished** button.
 9. Repeat as necessary.
 }}
 
-<VS_CREATION_CLUSTER_AVSET>{{
+<VS_CREATION_FAILOVER_API>{{
 ## Creating virtual servers on the BIG-IP VE
 
-In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the private IP address of the secondary IP configuration(s) for each BIG-IP VE network interface created by the template. If you need additional virtual servers for your applications/servers, you can add more secondary IP configurations on the Azure network interface, and corresponding virtual servers on the BIG-IP system. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-multiple-ip-addresses-portal for information on multiple IP addresses.
+In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the private IP address of the secondary IP configuration(s) for each BIG-IP VE network interface created by the template. If you need additional virtual servers for your applications/servers, you can add more secondary IP configurations on the Azure network interface, and corresponding virtual servers on the BIG-IP system. See [virtual-network-multiple-ip-addresses-portal](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-multiple-ip-addresses-portal) for information on multiple IP addresses.
 
 In this template, each Azure public IP address is associated with a secondary IP configuration attached to the external network interface of the BIG-IP VE. Because this IP configuration will be moved to the active BIG-IP device, you need to create a single virtual server in **traffic-group-1** that corresponds to the private IP address of that IP configuration.
 
@@ -206,11 +225,11 @@ In this template, each Azure public IP address is associated with a secondary IP
 2. On the Main tab, click **Local Traffic > Virtual Servers** and then click the **Create** button.
 3. In the **Name** field, give the Virtual Server a unique name.
 4. In the **Destination/Mask** field, type the private IP address of the secondary IP configuration associated with the Azure public IP address for your application (for example: 10.0.1.10/32).
-5. In the **Service Port** field, type the appropriate port. 
+5. In the **Service Port** field, type the appropriate port.
 6. Configure the rest of the virtual server as appropriate.
-7. If you used the Service Discovery iApp template: <br>In the Resources section, from the **Default Pool** list, select the name of the pool created by the iApp.
+7. If you used the Service Discovery iApp template: In the Resources section, from the **Default Pool** list, select the name of the pool created by the iApp.
 8. Click the **Finished** button.
-9. Repeat as necessary.  <br>
+9. Repeat as necessary.
 
 When you have completed the virtual server configuration, you may modify the virtual addresses to use an alternative Traffic Group using the following guidance.
 10. On the Main tab, click **Local Traffic > Virtual Servers**.
@@ -221,10 +240,10 @@ When you have completed the virtual server configuration, you may modify the vir
 15. Repeat for each virtual server.
 }}
 
-<VS_CREATION_CLUSTER_3NIC>{{
+<VS_CREATION_FAILOVER_LB_3NIC>{{
 ## Creating virtual servers on the BIG-IP VE
 
-In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the private IP address of the secondary IP configuration(s) for each BIG-IP VE network interface created by the template. If you need additional virtual servers for your applications/servers, you can add more secondary IP configurations on the Azure network interface, and corresponding virtual servers on the BIG-IP system. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-multiple-ip-addresses-portal for information on multiple IP addresses.
+In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the private IP address of the secondary IP configuration(s) for each BIG-IP VE network interface created by the template. If you need additional virtual servers for your applications/servers, you can add more secondary IP configurations on the Azure network interface, and corresponding virtual servers on the BIG-IP system. See [virtual-network-multiple-ip-addresses-portal](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-multiple-ip-addresses-portal) for information on multiple IP addresses.
 
 In this template, the Azure public IP address is associated with an Azure Load Balancer that forwards traffic to a backend pool that includes secondary IP configurations for *each* BIG-IP network interface.  You must create a single virtual server with a destination that matches both private IP addresses in the Azure Load Balancer's backend pool.  In this example, the backend pool private IP addresses are 10.0.1.36 and 10.0.1.37.
 
@@ -232,11 +251,11 @@ In this template, the Azure public IP address is associated with an Azure Load B
 2. On the Main tab, click **Local Traffic > Virtual Servers** and then click the **Create** button.
 3. In the **Name** field, give the Virtual Server a unique name.
 4. In the **Destination/Mask** field, type the destination address (for example: 10.0.1.32/27).
-5. In the **Service Port** field, type the appropriate port. 
+5. In the **Service Port** field, type the appropriate port.
 6. Configure the rest of the virtual server as appropriate.
-7. If you used the Service Discovery iApp template: <br>In the Resources section, from the **Default Pool** list, select the name of the pool created by the iApp.
+7. If you used the Service Discovery iApp template: In the Resources section, from the **Default Pool** list, select the name of the pool created by the iApp.
 8. Click the **Finished** button.
-9. Repeat as necessary.  <br>
+9. Repeat as necessary.
 
 If network failover is disabled (default), when you have completed the virtual server configuration, you must modify the virtual addresses to use Traffic Group None using the following guidance.
 10. On the Main tab, click **Local Traffic > Virtual Servers**.
@@ -255,7 +274,7 @@ If network failover is enabled (if, for example, you have deployed the experimen
 15. Repeat for each virtual server.
 }}
 
-<VS_CREATION_CLUSTER_1NIC>{{
+<VS_CREATION_FAILOVER_LB_1NIC>{{
 ## Creating virtual servers on the BIG-IP VE
 
 In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. 
@@ -266,11 +285,11 @@ In this template, the Azure public IP address is associated with an Azure Load B
 2. On the Main tab, click **Local Traffic > Virtual Servers** and then click the **Create** button.
 3. In the **Name** field, give the Virtual Server a unique name.
 4. In the **Destination/Mask** field, type the destination address ( for example: 0.0.0.0/0).
-5. In the **Service Port** field, type the appropriate port. 
+5. In the **Service Port** field, type the appropriate port.
 6. Configure the rest of the virtual server as appropriate.
-7. If you used the Service Discovery iApp template: <br>In the Resources section, from the **Default Pool** list, select the name of the pool created by the iApp.
+7. If you used the Service Discovery iApp template: In the Resources section, from the **Default Pool** list, select the name of the pool created by the iApp.
 8. Click the **Finished** button.
-9. Repeat as necessary.  <br>
+9. Repeat as necessary.
 
 When you have completed the virtual server configuration, you must modify the virtual addresses to use Traffic Group None using the following guidance.
 10. On the Main tab, click **Local Traffic > Virtual Servers**.
@@ -284,11 +303,11 @@ When you have completed the virtual server configuration, you must modify the vi
 <SCALING_THRESHOLDS>{{
 ## Scaling Thresholds
 
- You have three choices on which metric to use for auto scale events, each based on a percentage of the metric which you set in the ARM template:  
+ You have three choices on which metric to use for auto scale events, each based on a percentage of the metric which you set in the ARM template:
 
-  -	**F5_TMM_CPU** - Choosing this option means scaling events are triggered based on the utilization of the BIG-IP VE CPU, specifically the F5 TMM (Traffic Management Microkernel) CPU.  
-  -	**F5_TMM_Traffic** - Choosing this option means that scaling events are triggered based on traffic going through the BIG-IP VE TMM.  These thresholds are based on an aggregate of traffic both in and out, and are based on a percentage of the value you chose in the Calculated Bandwidth option (see below).
-  -	**Host_Throughput** - Choosing this option means scaling events are based on a metric being gathered by Azure on the host itself, specifically Network_Out. This is based on a percentage of the value you chose in the Calculated Bandwidth option (see below).
+- **F5_TMM_CPU** - Choosing this option means scaling events are triggered based on the utilization of the BIG-IP VE CPU, specifically the F5 TMM (Traffic Management Microkernel) CPU.
+- **F5_TMM_Traffic** - Choosing this option means that scaling events are triggered based on traffic going through the BIG-IP VE TMM.  These thresholds are based on an aggregate of traffic both in and out, and are based on a percentage of the value you chose in the Calculated Bandwidth option (see below).
+- **Host_Throughput** - Choosing this option means scaling events are based on a metric being gathered by Azure on the host itself, specifically Network_Out. This is based on a percentage of the value you chose in the Calculated Bandwidth option (see below).
 
-Both F5_TMM_Traffic and Host_Throughput are based on a percentage of the value you choose from the **Calculated Bandwidth** list.  For PAYG deployments, this value should match (or could be lower than) the **Licensed Bandwidth** value you are using.  For example, if you plan to use 200Mbps BIG-IP VEs, you should select 200m from the Calculated Bandwidth list.  The system then uses this value together with the percentages you enter in **Scale Out Threshold** and **Scale In Threshold** to determine when scaling events occur for these two metrics.  If you are using the BIG-IQ with a pool of BIG-IP BYOL licenses, there is no Licensed Bandwidth field, so you must specify the bandwidth level in the Calculated Bandwidth field in order for scaling to function properly. 
+Both F5_TMM_Traffic and Host_Throughput are based on a percentage of the value you choose from the **Calculated Bandwidth** list.  For PAYG deployments, this value should match (or could be lower than) the **Licensed Bandwidth** value you are using.  For example, if you plan to use 200Mbps BIG-IP VEs, you should select 200m from the Calculated Bandwidth list.  The system then uses this value together with the percentages you enter in **Scale Out Threshold** and **Scale In Threshold** to determine when scaling events occur for these two metrics.  If you are using the BIG-IQ with a pool of BIG-IP BYOL licenses, there is no Licensed Bandwidth field, so you must specify the bandwidth level in the Calculated Bandwidth field in order for scaling to function properly.
 }}
