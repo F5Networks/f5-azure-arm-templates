@@ -119,13 +119,12 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 
   [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fsupported%2Fcluster%2Ffailover-api%2Fnew_stack%2FBIGIQ%2Fazuredeploy.json)
 
-
 ### Template parameters
 
 | Parameter | Required | Description |
 | --- | --- | --- |
 | adminUsername | Yes | User name for the Virtual Machine. |
-| adminPassword | Yes | Password to login to the Virtual Machine. |
+| adminPassword | Yes | Password to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. |
 | dnsLabel | Yes | Unique DNS Name for the Public IP address used to access the Virtual Machine. |
 | instanceName | Yes | Name of the Virtual Machine. |
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
@@ -310,12 +309,13 @@ In this template, each Azure public IP address is associated with a secondary IP
 9. Repeat as necessary.
 
 When you have completed the virtual server configuration, you may modify the virtual addresses to use an alternative Traffic Group using the following guidance.
-10. On the Main tab, click **Local Traffic > Virtual Servers**.
-11. On the Menu bar, click the **Virtual Address List** tab.
-12. Click the address of one of the virtual servers you just created.
-13. From the **Traffic Group** list, select **traffic-group-2** (or the additional traffic group you created previously).
-14. Click **Update**.
-15. Repeat for each virtual server.
+
+1. On the Main tab, click **Local Traffic > Virtual Servers**.
+2. On the Menu bar, click the **Virtual Address List** tab.
+3. Click the address of one of the virtual servers you just created.
+4. From the **Traffic Group** list, select **traffic-group-2** (or the additional traffic group you created previously).
+5. Click **Update**.
+6. Repeat for each virtual server.
 
 ### Traffic Group Configuration
 

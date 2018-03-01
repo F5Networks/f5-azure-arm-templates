@@ -125,7 +125,7 @@
         }, 
         "adminPassword": {
             "metadata": {
-                "description": "Password to login to the Virtual Machine."
+                "description": "Password to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details."
             }, 
             "type": "securestring"
         }, 

@@ -107,7 +107,6 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 
   [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fsupported%2Fsolutions%2Fautoscale%2Fltm%2Fnew_stack%2FBIGIQ%2Fazuredeploy.json)
 
-
 ### Template parameters
 
 | Parameter | Required | Description |
@@ -121,7 +120,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | scaleInThreshold | Yes | The percentage the metric should be below to trigger a Scale In event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'.  See [Scaling Thresholds](#scaling-thresholds) for more information. |
 | scaleTimeWindow | Yes | The time window required to trigger a scale event (in and out). This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). |
 | adminUsername | Yes | User name for the Virtual Machine. |
-| adminPassword | Yes | Password to login to the Virtual Machine. |
+| adminPassword | Yes | Password to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. |
 | dnsLabel | Yes | Unique DNS Name for the Public IP address used to access the Virtual Machine. |
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (IMAGE) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select. |
@@ -207,7 +206,7 @@ As new BIG-IP versions are released, existing VM scale sets can be upgraded to u
 
 When this ARM template was initially deployed, a storage account was created in the same Resource Group as the VM scale set. This account name ends with **data000*** (the name of storage accounts have to be globally unique, so the prefix is a unique string). In this storage account, the template created a container named **backup**.  We use this backup container to hold backup [UCS](https://support.f5.com/csp/article/K13132) configuration files. Once the UCS is present in the container, you update the scale set "model" to use the newer BIG-IP version. Once the scale set is updated, you upgrade the BIG-IP VE(s). As a part of this upgrade, the provisioning checks the backup container for a UCS file and if one exists, it uploads the configuration (if more than one exists, it uses the latest).
 
-**To upgrade the BIG-IP VE Image**
+#### To upgrade the BIG-IP VE Image
 
 1. Backup configuration as outlined [here](#backup-big-ip-configuration-for-cluster-recovery)
 2. Update the VM Scale Set Model to the new BIG-IP version

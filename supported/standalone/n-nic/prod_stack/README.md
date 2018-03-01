@@ -102,13 +102,12 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 
   [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fsupported%2Fstandalone%2Fn-nic%2Fprod_stack%2FPAYG%2Fazuredeploy.json)
 
-
 ### Template parameters
 
 | Parameter | Required | Description |
 | --- | --- | --- |
 | adminUsername | Yes | User name for the Virtual Machine. |
-| adminPassword | Yes | Password to login to the Virtual Machine. |
+| adminPassword | Yes | Password to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. |
 | uniqueLabel | Yes | Unique Name for the deployment to be used when creating resources. |
 | instanceName | Yes | Name of the Virtual Machine. |
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
@@ -178,7 +177,7 @@ To add public IP addresses up to the template-supported limit of 20 after you ha
 6. Enter the Admin password and Service Principal Secret parameters with the same values used in the initial deployment.
 7. To add public IP addresses, change the value of the **Number Of External Ips** parameter to the number of IP addresses you want to use.
 8. Agree to the terms and conditions.
-10. Click **Purchase**.
+9. Click **Purchase**.
 
 #### Adding more than 20 public IP addresses to the deployment
 
@@ -188,7 +187,6 @@ The deployment template supports creation of 1-20 external public IP addresses f
 - Create a new IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*)
 
 When you create virtual servers on the BIG-IP VE for these additional addresses, the BIG-IP network virtual server destination IP address should match the private IP addresses of both secondary Azure IP configurations assigned to the backend pool that is referenced by the application's Azure load balancing rule.
-
 
 ## Documentation
 

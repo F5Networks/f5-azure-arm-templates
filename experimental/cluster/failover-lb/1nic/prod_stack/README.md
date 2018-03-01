@@ -101,14 +101,13 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 
   [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fexperimental%2Fcluster%2Ffailover-lb%2F1nic%2Fprod_stack%2FPAYG%2Fazuredeploy.json)
 
-
 ### Template parameters
 
 | Parameter | Required | Description |
 | --- | --- | --- |
 | numberOfInstances | Yes | The number of BIG-IP VEs that will be deployed in front of your application(s). |
 | adminUsername | Yes | User name for the Virtual Machine. |
-| adminPassword | Yes | Password to login to the Virtual Machine. |
+| adminPassword | Yes | Password to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. |
 | uniqueLabel | Yes | Unique Name for the deployment to be used when creating resources. |
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (IMAGE) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select. |
@@ -150,8 +149,6 @@ The following is an example configuration diagram for this solution deployment. 
 
 ![Configuration Example](images/azure-example-diagram.png)
 
-
-
 ## Documentation
 
 For more information on F5 solutions for Azure, including manual configuration procedures for some deployment scenarios, see the Azure section of [Public Cloud Docs](http://clouddocs.f5.com/cloud/public/v1/).
@@ -190,7 +187,7 @@ To launch the template:
 
 ## Creating virtual servers on the BIG-IP VE
 
-In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. 
+In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE.
 
 In this template, the Azure public IP address is associated with an Azure Load Balancer that forwards traffic to a backend pool that includes the primary (self) IP configurations for *each* BIG-IP network interface.  Because traffic is destined for the self IP addresses of the BIG-IP VEs, you must create a single virtual server with a wildcard destination in Traffic Group **None**.
 
@@ -205,12 +202,13 @@ In this template, the Azure public IP address is associated with an Azure Load B
 9. Repeat as necessary.
 
 When you have completed the virtual server configuration, you must modify the virtual addresses to use Traffic Group None using the following guidance.
-10. On the Main tab, click **Local Traffic > Virtual Servers**.
-11. On the Menu bar, click the **Virtual Address List** tab.
-12. Click the address of one of the virtual servers you just created.
-13. From the **Traffic Group** list, select **None**.
-14. Click **Update**.
-15. Repeat for each virtual server.
+
+1. On the Main tab, click **Local Traffic > Virtual Servers**.
+2. On the Menu bar, click the **Virtual Address List** tab.
+3. Click the address of one of the virtual servers you just created.
+4. From the **Traffic Group** list, select **None**.
+5. Click **Update**.
+6. Repeat for each virtual server.
 
 ### Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
 

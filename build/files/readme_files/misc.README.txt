@@ -29,7 +29,7 @@ As new BIG-IP versions are released, existing VM scale sets can be upgraded to u
 
 When this ARM template was initially deployed, a storage account was created in the same Resource Group as the VM scale set. This account name ends with **data000*** (the name of storage accounts have to be globally unique, so the prefix is a unique string). In this storage account, the template created a container named **backup**.  We use this backup container to hold backup [UCS](https://support.f5.com/csp/article/K13132) configuration files. Once the UCS is present in the container, you update the scale set "model" to use the newer BIG-IP version. Once the scale set is updated, you upgrade the BIG-IP VE(s). As a part of this upgrade, the provisioning checks the backup container for a UCS file and if one exists, it uploads the configuration (if more than one exists, it uses the latest).
 
-**To upgrade the BIG-IP VE Image**
+#### To upgrade the BIG-IP VE Image
 
 1. Backup configuration as outlined [here](#backup-big-ip-configuration-for-cluster-recovery)
 2. Update the VM Scale Set Model to the new BIG-IP version
@@ -84,7 +84,7 @@ To add public IP addresses up to the template-supported limit of 20 after you ha
 6. Enter the Admin password and Service Principal Secret parameters with the same values used in the initial deployment.
 7. To add public IP addresses, change the value of the **Number Of External Ips** parameter to the number of IP addresses you want to use.
 8. Agree to the terms and conditions.
-10. Click **Purchase**.
+9. Click **Purchase**.
 
 #### Adding more than 20 public IP addresses to the deployment
 
@@ -93,8 +93,7 @@ The deployment template supports creation of 1-20 external public IP addresses f
 - Create a new Azure public IP address resource in the deployment resource group
 - Create a new IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*)
 
-When you create virtual servers on the BIG-IP VE for these additional addresses, the BIG-IP network virtual server destination IP address should match the private IP addresses of both secondary Azure IP configurations assigned to the backend pool that is referenced by the application's Azure load balancing rule.
-}}
+When you create virtual servers on the BIG-IP VE for these additional addresses, the BIG-IP network virtual server destination IP address should match the private IP addresses of both secondary Azure IP configurations assigned to the backend pool that is referenced by the application's Azure load balancing rule.}}
 
 <POST_CONFIG_FAILOVER_TXT>{{## Post-Deployment Configuration
 
@@ -232,12 +231,13 @@ In this template, each Azure public IP address is associated with a secondary IP
 9. Repeat as necessary.
 
 When you have completed the virtual server configuration, you may modify the virtual addresses to use an alternative Traffic Group using the following guidance.
-10. On the Main tab, click **Local Traffic > Virtual Servers**.
-11. On the Menu bar, click the **Virtual Address List** tab.
-12. Click the address of one of the virtual servers you just created.
-13. From the **Traffic Group** list, select **traffic-group-2** (or the additional traffic group you created previously).
-14. Click **Update**.
-15. Repeat for each virtual server.
+
+1. On the Main tab, click **Local Traffic > Virtual Servers**.
+2. On the Menu bar, click the **Virtual Address List** tab.
+3. Click the address of one of the virtual servers you just created.
+4. From the **Traffic Group** list, select **traffic-group-2** (or the additional traffic group you created previously).
+5. Click **Update**.
+6. Repeat for each virtual server.
 }}
 
 <VS_CREATION_FAILOVER_LB_3NIC>{{
@@ -258,26 +258,28 @@ In this template, the Azure public IP address is associated with an Azure Load B
 9. Repeat as necessary.
 
 If network failover is disabled (default), when you have completed the virtual server configuration, you must modify the virtual addresses to use Traffic Group None using the following guidance.
-10. On the Main tab, click **Local Traffic > Virtual Servers**.
-11. On the Menu bar, click the **Virtual Address List** tab.
-12. Click the address of one of the virtual servers you just created.
-13. From the **Traffic Group** list, select **None**.
-14. Click **Update**.
-15. Repeat for each virtual server.
+
+1. On the Main tab, click **Local Traffic > Virtual Servers**.
+2. On the Menu bar, click the **Virtual Address List** tab.
+3. Click the address of one of the virtual servers you just created.
+4. From the **Traffic Group** list, select **None**.
+5. Click **Update**.
+6. Repeat for each virtual server.
 
 If network failover is enabled (if, for example, you have deployed the experimental HA Cluster 3 NIC template, or manually enabled network failover with traffic groups), when you have completed the virtual server configuration, you may modify the virtual addresses to use an alternative Traffic Group using the following guidance.
-10. On the Main tab, click **Local Traffic > Virtual Servers**.
-11. On the Menu bar, click the **Virtual Address List** tab.
-12. Click the address of one of the virtual servers you just created.
-13. From the **Traffic Group** list, select **traffic-group-2** (or the additional traffic group you created previously).
-14. Click **Update**.
-15. Repeat for each virtual server.
+
+1. On the Main tab, click **Local Traffic > Virtual Servers**.
+2. On the Menu bar, click the **Virtual Address List** tab.
+3. Click the address of one of the virtual servers you just created.
+4. From the **Traffic Group** list, select **traffic-group-2** (or the additional traffic group you created previously).
+5. Click **Update**.
+6. Repeat for each virtual server.
 }}
 
 <VS_CREATION_FAILOVER_LB_1NIC>{{
 ## Creating virtual servers on the BIG-IP VE
 
-In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. 
+In order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE.
 
 In this template, the Azure public IP address is associated with an Azure Load Balancer that forwards traffic to a backend pool that includes the primary (self) IP configurations for *each* BIG-IP network interface.  Because traffic is destined for the self IP addresses of the BIG-IP VEs, you must create a single virtual server with a wildcard destination in Traffic Group **None**.
 
@@ -292,12 +294,13 @@ In this template, the Azure public IP address is associated with an Azure Load B
 9. Repeat as necessary.
 
 When you have completed the virtual server configuration, you must modify the virtual addresses to use Traffic Group None using the following guidance.
-10. On the Main tab, click **Local Traffic > Virtual Servers**.
-11. On the Menu bar, click the **Virtual Address List** tab.
-12. Click the address of one of the virtual servers you just created.
-13. From the **Traffic Group** list, select **None**.
-14. Click **Update**.
-15. Repeat for each virtual server.
+
+1. On the Main tab, click **Local Traffic > Virtual Servers**.
+2. On the Menu bar, click the **Virtual Address List** tab.
+3. Click the address of one of the virtual servers you just created.
+4. From the **Traffic Group** list, select **None**.
+5. Click **Update**.
+6. Repeat for each virtual server.
 }}
 
 <SCALING_THRESHOLDS>{{

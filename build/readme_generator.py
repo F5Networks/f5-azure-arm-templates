@@ -95,6 +95,12 @@ class ReadmeGen(object):
                 result = yvalue[t_key]
         return result
 
+    def clean_up(self, readme):
+        """ Final clean up of README file """
+        # Remove extra new lines
+        readme = readme.replace('\n\n\n\n', '\n\n').replace('\n\n\n', '\n\n')
+        return readme
+
     def delete_tags(self, readme):
         """ Delete left over tags from the README file """
         reg_ex = r"<([A-Z-_]{0,50})>"
@@ -231,6 +237,7 @@ class ReadmeGen(object):
         readme = self.get_tmpl_text('templates', template_name, 'extra_text')
         readme = self.sp_access_required(readme)
         readme = self.delete_tags(readme)
+        readme = self.clean_up(readme)
         ### Write to solution location ###
         with open(final_readme, 'w') as readme_complete:
             readme_complete.write(readme)
