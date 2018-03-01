@@ -16,7 +16,7 @@
             "type": "securestring"
         }, 
         "uniqueLabel": {
-            "defaultValue": "REQUIRED", 
+            "defaultValue": "", 
             "metadata": {
                 "description": "Unique Name for the deployment to be used when creating resources."
             }, 

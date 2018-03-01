@@ -130,7 +130,7 @@
             "type": "securestring"
         }, 
         "dnsLabel": {
-            "defaultValue": "REQUIRED", 
+            "defaultValue": "", 
             "metadata": {
                 "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine."
             }, 

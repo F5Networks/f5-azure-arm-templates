@@ -16,7 +16,7 @@
             "type": "securestring"
         }, 
         "dnsLabel": {
-            "defaultValue": "REQUIRED", 
+            "defaultValue": "", 
             "metadata": {
                 "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine."
             }, 
@@ -108,14 +108,14 @@
             "type": "string"
         }, 
         "licenseKey1": {
-            "defaultValue": "REQUIRED", 
+            "defaultValue": "", 
             "metadata": {
                 "description": "The license token for the F5 BIG-IP VE (BYOL)."
             }, 
             "type": "string"
         }, 
         "licenseKey2": {
-            "defaultValue": "REQUIRED", 
+            "defaultValue": "", 
             "metadata": {
                 "description": "The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices."
             }, 

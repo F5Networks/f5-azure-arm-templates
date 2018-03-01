@@ -188,15 +188,15 @@ master_helper.parameter_initialize(data)
 data['parameters']['adminUsername'] = {"type": "string", "defaultValue": "azureuser", "metadata": {"description": ""}}
 data['parameters']['adminPassword'] = {"type": "securestring", "metadata": {"description": ""}}
 if stack_type not in ('prod_stack'):
-    data['parameters']['dnsLabel'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": ""}}
+    data['parameters']['dnsLabel'] = {"type": "string", "defaultValue": "", "metadata": {"description": ""}}
 data['parameters']['instanceType'] = {"type": "string", "defaultValue": default_instance, "allowedValues": instance_type_list, "metadata": {"description": ""}}
 data['parameters']['imageName'] = {"type": "string", "defaultValue": "Good", "allowedValues": ["Good", "Better", "Best"], "metadata": {"description": ""}}
 data['parameters']['bigIpVersion'] = {"type": "string", "defaultValue": default_big_ip_version, "allowedValues": allowed_big_ip_versions, "metadata": {"description": ""}}
 if license_type == 'BYOL':
-    data['parameters']['licenseKey1'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": ""}}
+    data['parameters']['licenseKey1'] = {"type": "string", "defaultValue": "", "metadata": {"description": ""}}
     if template_name in ('failover-lb_1nic', 'failover-lb_3nic', 'failover-api'):
         for license_key in ['licenseKey2']:
-            data['parameters'][license_key] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": ""}}
+            data['parameters'][license_key] = {"type": "string", "defaultValue": "", "metadata": {"description": ""}}
 elif license_type == 'PAYG':
     data['parameters']['licensedBandwidth'] = {"type": "string", "defaultValue": default_payg_bw, "allowedValues": ["25m", "200m", "1g"], "metadata": {"description": ""}}
 elif license_type == 'BIGIQ':
@@ -248,7 +248,7 @@ elif stack_type in ('existing_stack', 'prod_stack'):
     if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic'):
         data['parameters']['avSetChoice'] = {"defaultValue": "CREATE_NEW", "metadata": {"description": ""}, "type": "string"}
 if stack_type in ('prod_stack'):
-    data['parameters']['uniqueLabel'] = {"type": "string", "defaultValue": "REQUIRED", "metadata": {"description": ""}}
+    data['parameters']['uniqueLabel'] = {"type": "string", "defaultValue": "", "metadata": {"description": ""}}
 
 # Set unique solution parameters
 if template_name in ('standalone_n-nic'):

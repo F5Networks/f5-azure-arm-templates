@@ -16,7 +16,7 @@
             "type": "securestring"
         }, 
         "uniqueLabel": {
-            "defaultValue": "REQUIRED", 
+            "defaultValue": "", 
             "metadata": {
                 "description": "Unique Name for the deployment to be used when creating resources."
             }, 
@@ -117,7 +117,7 @@
             "type": "string"
         }, 
         "licenseKey1": {
-            "defaultValue": "REQUIRED", 
+            "defaultValue": "", 
             "metadata": {
                 "description": "The license token for the F5 BIG-IP VE (BYOL)."
             }, 

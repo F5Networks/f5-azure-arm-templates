@@ -33,7 +33,7 @@
             "value": "GEN_UNIQUE"
         }, 
         "dnsLabel": {
-            "value": "REQUIRED"
+            "value": ""
         }, 
         "instanceType": {
             "value": "Standard_DS2_v2"

@@ -9,7 +9,7 @@
             "value": "GEN_UNIQUE"
         }, 
         "uniqueLabel": {
-            "value": "REQUIRED"
+            "value": ""
         }, 
         "instanceName": {
             "value": "f5vm01"
