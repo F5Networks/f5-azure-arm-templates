@@ -66,10 +66,10 @@ verify_hash = verify_hash.replace('<CLI_SCRIPT>', master_helper.verify_hash(veri
 
 hashed_file_list = "${config_loc}f5-cloud-libs.tar.gz f5.service_discovery.tmpl"
 additional_tar_list = ""
-if template_name in ('ltm_autoscale', 'dns_autoscale', 'failover-api'):
+if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'failover-api'):
     hashed_file_list += " ${config_loc}f5-cloud-libs-azure.tar.gz"
     additional_tar_list = "tar xfz /config/cloud/f5-cloud-libs-azure.tar.gz -C /config/cloud/azure/node_modules/@f5devcentral\n"
-elif template_name in 'waf_autoscale':
+elif template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     hashed_file_list += " ${config_loc}f5-cloud-libs-azure.tar.gz deploy_waf.sh f5.http.v1.2.0rc7.tmpl f5.policy_creator.tmpl asm-policy.tar.gz"
     additional_tar_list = "tar xfz /config/cloud/f5-cloud-libs-azure.tar.gz -C /config/cloud/azure/node_modules/@f5devcentral\n"
 
@@ -99,7 +99,7 @@ if template_name in ('standalone_3nic', 'standalone_n-nic', 'failover-api', 'fai
 
 ## Update allowed instances available based on solution
 disallowed_instance_list = []
-if template_name in 'waf_autoscale':
+if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     disallowed_instance_list = ["Standard_A2", "Standard_F2"]
 if template_name in ('standalone_3nic', 'standalone_n-nic', 'failover-api', 'failover-lb_3nic'):
     default_instance = "Standard_DS3_v2"
@@ -151,7 +151,7 @@ elif license_type == 'BIGIQ':
     license1_command = "' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', " + big_iq_mgmt_ip_ref
     license2_command = "' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', " + big_iq_mgmt_ip_ref2
     bigiq_pwd_delete = ' rm -f /config/cloud/.bigIqPasswd;'
-    if template_name in ('ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
+    if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
         license1_command =  ", ' --bigIqLicenseHost ', parameters('bigIqLicenseHost'), ' --bigIqLicenseUsername ', parameters('bigIqLicenseUsername'), ' --bigIqLicensePassword /config/cloud/.bigIqPasswd --bigIqLicensePool ', parameters('bigIqLicensePool'), ' --bigIpExtMgmtAddress ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --bigIpExtMgmtPort via-api'"
         # Need to keep BIG-IQ password around in autoscale case for license revocation
         bigiq_pwd_delete = ''
@@ -227,7 +227,7 @@ elif stack_type in ('existing_stack', 'prod_stack'):
     data['parameters']['mgmtSubnetName'] = {"type": "string", "metadata": {"description": ""}}
     if template_name in ('failover-api', 'failover-lb_1nic', 'failover-lb_3nic'):
         data['parameters']['mgmtIpAddressRangeStart'] = {"metadata": {"description": ""}, "type": "string"}
-    elif template_name in ('ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
+    elif template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
         # Auto Scale(VM Scale Set) solutions get the IP address dynamically
         pass
     else:
@@ -259,7 +259,7 @@ if template_name in ('failover-lb_1nic'):
 if template_name in ('failover-api'):
     data['parameters']['managedRoutes'] = {"defaultValue": "NOT_SPECIFIED", "metadata": {"description": ""}, "type": "string"}
     data['parameters']['routeTableTag'] = {"defaultValue": "NOT_SPECIFIED", "metadata": {"description": ""}, "type": "string"}
-if template_name in ('ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
+if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     data['parameters']['vmScaleSetMinCount'] = {"type": "int", "defaultValue": 2, "allowedValues": [1, 2, 3, 4, 5, 6], "metadata": {"description": ""}}
     data['parameters']['vmScaleSetMaxCount'] = {"type": "int", "defaultValue": 4, "allowedValues": [2, 3, 4, 5, 6, 7, 8], "metadata": {"description": ""}}
     # Add TMM CPU metric option into autoscale templates
@@ -270,7 +270,7 @@ if template_name in ('ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
     data['parameters']['scaleInThreshold'] = {"type": "int", "defaultValue": 10, "allowedValues": [5, 10, 15, 20, 25, 30, 35, 40, 45], "metadata": {"description": ""}}
     data['parameters']['scaleTimeWindow'] = {"type": "int", "defaultValue": 10, "allowedValues": [5, 10, 15, 30], "metadata": {"description": ""}}
     data['parameters']['notificationEmail'] = {"defaultValue": "OPTIONAL", "metadata": {"description": ""}, "type": "string"}
-if template_name in ('waf_autoscale'):
+if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     # WAF-like templates need the 'Best' Image, still prompt as a parameter so they are aware of what they are paying for with PAYG
     data['parameters']['imageName'] = {"type": "string", "defaultValue": "Best", "allowedValues": ["Best"], "metadata": {"description": ""}}
     data['parameters']['solutionDeploymentName'] = {"type": "string", "metadata": {"description": ""}}
@@ -284,7 +284,7 @@ if template_name in ('waf_autoscale'):
     data['parameters']['applicationType'] = {"type": "string", "defaultValue": "Linux", "metadata": {"description": ""}, "allowedValues": ["Windows", "Linux"]}
     data['parameters']['blockingLevel'] = {"type": "string", "defaultValue": "medium", "metadata": {"description": ""}, "allowedValues": ["low", "medium", "high", "off", "custom"]}
     data['parameters']['customPolicy'] = {"type": "string", "defaultValue": "NOT_SPECIFIED", "metadata": {"description": ""}}
-if template_name in ('dns_autoscale'):
+if template_name in ('autoscale_ltm_via-dns', 'autoscale_waf_via-dns'):
     data['parameters']['dnsMemberIpType'] = {"type": "string", "defaultValue": "private", "allowedValues": ["private", "public"], "metadata": {"description": ""}}
     data['parameters']['dnsMemberPort'] = {"type": "string", "defaultValue": "80", "metadata": {"description": ""}}
     data['parameters']['dnsProviderHost'] = {"type": "string", "metadata": {"description": ""}}
@@ -294,7 +294,7 @@ if template_name in ('dns_autoscale'):
     data['parameters']['dnsProviderPool'] = {"type": "string", "metadata": {"description": ""}}
     data['parameters']['dnsProviderDataCenter'] = {"type": "string", "defaultValue": "azure_datacenter", "metadata": {"description": ""}}
 # Add service principal parameters to necessary solutions
-if template_name in ('ltm_autoscale', 'waf_autoscale', 'failover-api', 'dns_autoscale'):
+if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns', 'failover-api'):
     data['parameters']['tenantId'] = {"type": "string", "metadata": {"description": ""}}
     data['parameters']['clientId'] = {"type": "string", "metadata": {"description": ""}}
     data['parameters']['servicePrincipalSecret'] = {"type": "securestring", "metadata": {"description": ""}}
@@ -331,14 +331,14 @@ data['variables']['bigIpNicPortValue'] = nic_port_map
 ## Configure usage analytics variables
 data['variables']['deploymentId'] = "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('dnsLabel'))]"
 metrics_cmd = "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:<TMPL_NAME>,templateVersion:<TMPL_VER>,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:<LIC_TYPE>,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
-if template_name in ('ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
+if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     # Pass down to autoscale.sh for autoscale templates
     metrics_cmd = "[concat(' --usageAnalytics \" --metrics customerId:${custId},deploymentId:${deployId},templateName:<TMPL_NAME>,templateVersion:<TMPL_VER>,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:<LIC_TYPE>,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure\"')]"
 metrics_cmd = metrics_cmd.replace('<TMPL_NAME>', template_name + '-' + stack_type + '-' + support_type).replace('<TMPL_VER>', content_version).replace('<LIC_TYPE>', license_type)
 hash_cmd = "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]"
 data['variables']['allowUsageAnalytics'] = { "Yes": { "hashCmd": hash_cmd, "metricsCmd": metrics_cmd}, "No": { "hashCmd": "echo AllowUsageAnalytics:No", "metricsCmd": ""} }
 ## Handle new_stack/existing_stack variable differences
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-api', 'failover-lb_1nic', 'failover-lb_3nic', 'ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-api', 'failover-lb_1nic', 'failover-lb_3nic', 'autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_3nic', 'failover-api'):
         data['variables']['instanceName'] = "[toLower(parameters('instanceName'))]"
     if template_name in ('failover-api', 'failover-lb_1nic', 'failover-lb_3nic'):
@@ -495,13 +495,13 @@ if template_name in ('failover-api'):
     elif stack_type in ('existing_stack', 'prod_stack'):
         private_ip_value = "[concat(split(parameters('externalIpAddressRangeStart'), '.')[0], '.', split(parameters('externalIpAddressRangeStart'), '.')[1], '.', split(parameters('externalIpAddressRangeStart'), '.')[2], '.', add(int(split(parameters('externalIpAddressRangeStart'), '.')[3]), copyIndex('values')))]"
     data['variables']['pipTagValues'] = {"copy": [{"name": "values","count": 20,"input": {"f5_extSubnetId": "[variables('extSubnetId')]","f5_privateIp": private_ip_value,"f5_tg": "traffic-group-1"}}]}
-if template_name in ('failover-lb_1nic', 'failover-lb_3nic', 'ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
+if template_name in ('failover-lb_1nic', 'failover-lb_3nic', 'autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     data['variables']['externalLoadBalancerName'] = "[concat(variables('dnsLabel'),'-ext-alb')]"
     data['variables']['extLbId'] = "[resourceId('Microsoft.Network/loadBalancers',variables('externalLoadBalancerName'))]"
-    if template_name in ('failover-lb_1nic', 'ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
+    if template_name in ('failover-lb_1nic', 'autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
         data['variables']['deviceNamePrefix'] = "[concat(variables('dnsLabel'),'-device')]"
         data['variables']['frontEndIPConfigID'] = "[concat(variables('extLbId'),'/frontendIPConfigurations/loadBalancerFrontEnd')]"
-    if template_name in ('ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
+    if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
         data['variables']['appInsightsApiVersion'] = "2015-04-01"
         data['variables']['appInsightsComponentsApiVersion'] = "2015-05-01"
         data['variables']['mgmtSubnetPrivateAddress'] = "OPTIONAL"
@@ -532,7 +532,7 @@ if template_name in ('failover-lb_1nic', 'failover-lb_3nic', 'ltm_autoscale', 'w
         data['variables']['timeWindow'] = "[concat('PT', parameters('scaleTimeWindow'), 'M')]"
         data['variables']['customEmailBaseArray'] = [""]
         data['variables']['customEmail'] = "[skip(union(variables('customEmailBaseArray'), split(replace(parameters('notificationEmail'), 'OPTIONAL', ''), ';')), 1)]"
-    if template_name in ('waf_autoscale'):
+    if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
         data['variables']['f5NetworksSolutionScripts'] = "[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/', variables('f5NetworksTag'), '/" + solution_location + "/solutions/autoscale/waf/deploy_scripts/')]"
         data['variables']['lbTcpProbeNameHttp'] = "tcp_probe_http"
         data['variables']['lbTcpProbeIdHttp'] = "[concat(variables('extLbId'),'/probes/',variables('lbTcpProbeNameHttp'))]"
@@ -563,7 +563,7 @@ resources_list = []
 ###### Public IP Resource(s) ######
 # Don't create public IP's for production stack
 if stack_type in ('new_stack', 'existing_stack'):
-    if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_1nic', 'ltm_autoscale', 'waf_autoscale'):
+    if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_1nic', 'autoscale_ltm_via-lb', 'autoscale_waf_via-lb'):
         resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[variables('mgmtPublicIPAddressName')]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[variables('dnsLabel')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
     if template_name in ('failover-api', 'failover-lb_3nic'):
         resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('mgmtPublicIPAddressName'), 0)]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabel'), '-0')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } },{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('mgmtPublicIPAddressName'), 1)]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabel'), '-1')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
@@ -591,7 +591,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
     if stack_type == 'new_stack':
         resources_list += [{ "type": "Microsoft.Network/virtualNetworks", "apiVersion": api_version, "location": location, "name": "[variables('virtualNetworkName')]", "tags": tags, "properties": { "addressSpace": { "addressPrefixes": [ "[variables('vnetAddressPrefix')]" ] }, "subnets": subnets } }]
 
-if template_name in ('ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
+if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     subnets = [{ "name": "[variables('mgmtSubnetName')]", "properties": { "addressPrefix": "[variables('mgmtSubnetPrefix')]" } }]
     scale_depends_on = []
     if stack_type == 'new_stack':
@@ -669,17 +669,17 @@ ext_nsg_security_rules = []
 if learning_stack:
     ext_nsg_security_rules += [{ "name": "allow_example_app", "properties": { "description": "", "priority": 101, "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "[variables('webVmVsPort')]", "protocol": "Tcp", "direction": "Inbound", "access": "Allow" } }]
 
-if template_name in ('waf_autoscale'):
+if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     mgmt_nsg_security_rules += [{ "name": "app_allow_http", "properties": { "description": "", "priority": 110, "sourceAddressPrefix": "*", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "[variables('httpBackendPort')]", "protocol": "Tcp", "direction": "Inbound", "access": "Allow" } }, { "name": "app_allow_https", "properties": { "description": "", "priority": 111, "sourceAddressPrefix": "*", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "[variables('httpsBackendPort')]", "protocol": "Tcp", "direction": "Inbound", "access": "Allow" } }]
 
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-api', 'failover-lb_1nic', 'failover-lb_3nic', 'ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-api', 'failover-lb_1nic', 'failover-lb_3nic', 'autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkSecurityGroups", "location": location, "name": "[concat(variables('dnsLabel'), '-mgmt-nsg')]", "tags": tags, "properties": { "securityRules": mgmt_nsg_security_rules } }]
 if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_3nic', 'failover-api'):
     resources_list += [{ "apiVersion": api_version, "type": "Microsoft.Network/networkSecurityGroups", "location": location, "name": "[concat(variables('dnsLabel'), '-ext-nsg')]", "tags": tags, "properties": { "securityRules": ext_nsg_security_rules } }]
 
 ###### Load Balancer Resource(s) ######
 probes_to_use = ""; lb_rules_to_use = ""
-if template_name in ('waf_autoscale'):
+if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     probes_to_use = [ { "name": "[variables('lbTcpProbeNameHttp')]", "properties": { "protocol": "Tcp", "port": "[variables('httpBackendPort')]", "intervalInSeconds": 15, "numberOfProbes": 3 } }, { "name": "[variables('lbTcpProbeNameHttps')]", "properties": { "protocol": "Tcp", "port": "[variables('httpsBackendPort')]", "intervalInSeconds": 15, "numberOfProbes": 3 } } ]
     lb_rules_to_use = [{ "Name": "app-http", "properties": { "frontendIPConfiguration": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]" }, "backendAddressPool": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]" }, "probe": { "id": "[variables('lbTcpProbeIdHttp')]" }, "protocol": "Tcp", "frontendPort": "[parameters('applicationPort')]", "backendPort": "[variables('httpBackendPort')]", "idleTimeoutInMinutes": 15 } }, { "Name": "app-https", "properties": { "frontendIPConfiguration": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]" }, "backendAddressPool": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]" }, "probe": { "id": "[variables('lbTcpProbeIdHttps')]" }, "protocol": "Tcp", "frontendPort": "[parameters('applicationSecurePort')]", "backendPort": "[variables('httpsBackendPort')]", "idleTimeoutInMinutes": 15 } }]
 
@@ -695,7 +695,7 @@ if template_name == 'failover-lb_3nic':
     probes_to_use = [{"name": "[concat('tcp-probe-', parameters('internalLoadBalancerProbePort'))]", "properties": { "protocol": "Tcp", "port": "[parameters('internalLoadBalancerProbePort')]", "intervalInSeconds": 5, "numberOfProbes": 2 }}]
     lb_rules_to_use = [{"name": "[if(equals(parameters('internalLoadBalancerType'),'Per-protocol'), concat('lbRule-', parameters('internalLoadBalancerProbePort')), 'allProtocolLbRule')]", "properties": { "frontendIPConfiguration": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]" }, "backendAddressPool": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]" }, "probe": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancerName')), '/probes/tcp-probe-', parameters('internalLoadBalancerProbePort'))]" }, "frontendPort": "[if(equals(parameters('internalLoadBalancerType'),'Per-protocol'), parameters('internalLoadBalancerProbePort'), 0)]", "backendPort": "[if(equals(parameters('internalLoadBalancerType'),'Per-protocol'), parameters('internalLoadBalancerProbePort'), 0)]", "enableFloatingIP": False, "idleTimeoutInMinutes": 15, "protocol": "[if(equals(parameters('internalLoadBalancerType'),'Per-protocol'), 'Tcp', 'All')]", "loadDistribution": "Default" }}]
     resources_list += [{ "apiVersion": network_api_version, "name": "[variables('internalLoadBalancerName')]", "condition": "[not(equals(parameters('internalLoadBalancerType'),'DO_NOT_USE'))]", "type": "Microsoft.Network/loadBalancers", "location": location, "tags": tags, "dependsOn": depends_on_ext, "properties": { "frontendIPConfigurations": [ { "name": "LoadBalancerFrontEnd", "properties": { "privateIPAddress":  "[variables('internalLoadBalancerAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('intSubnetId')]" } } } ], "backendAddressPools": [ { "name": "LoadBalancerBackEnd" } ], "loadBalancingRules": lb_rules_to_use, "probes": probes_to_use } }]
-if template_name in ('ltm_autoscale', 'waf_autoscale'):
+if template_name in ('autoscale_ltm_via-lb', 'autoscale_waf_via-lb'):
     resources_list += [{ "apiVersion": network_api_version, "name": "[variables('externalLoadBalancerName')]", "type": "Microsoft.Network/loadBalancers", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtPublicIPAddressName'))]" ], "properties": { "frontendIPConfigurations": [ { "name": "loadBalancerFrontEnd", "properties": { "publicIPAddress": { "id": "[variables('mgmtPublicIPAddressId')]" } } } ], "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ], "inboundNatPools": [ { "name": "sshnatpool", "properties": { "frontendIPConfiguration": { "id": "[variables('frontEndIPConfigID')]" }, "protocol": "Tcp", "frontendPortRangeStart": 50001, "frontendPortRangeEnd": 50100, "backendPort": 22 } }, { "name": "mgmtnatpool", "properties": { "frontendIPConfiguration": { "id": "[variables('frontEndIPConfigID')]" }, "protocol": "Tcp", "frontendPortRangeStart": 50101, "frontendPortRangeEnd": 50200, "backendPort": "[variables('bigIpMgmtPort')]" } } ], "loadBalancingRules": lb_rules_to_use, "probes": probes_to_use } }]
 
 ###### Load Balancer Inbound NAT Rule(s) ######
@@ -840,18 +840,18 @@ autoscale_file_uris = ["[concat('https://raw.githubusercontent.com/F5Networks/f5
 addtl_setup = ""
 addtl_encrypt_calls = ""
 addtl_script_args = ""
-if template_name in ('dns_autoscale'):
+if template_name in ('autoscale_ltm_via-dns', 'autoscale_waf_via-dns'):
     addtl_encrypt_calls = " echo ', variables('singleQuote'), parameters('dnsProviderPassword'), variables('singleQuote'), ' | tr -d \"\n\" > $TMP_CREDENTIALS_FILE; f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/encryptDataToFile.js --data-file $TMP_CREDENTIALS_FILE --out-file /config/cloud/.dnsPasswd;"
     addtl_script_args += ", ' --dnsOptions \"--dns gtm --dns-ip-type ', parameters('dnsMemberIpType'), ' --dns-app-port ', parameters('dnsMemberPort'), ' --dns-provider-options ', variables('singleQuote'), 'host:', parameters('dnsProviderHost'), ',port:', parameters('dnsProviderPort'), ',user:', parameters('dnsProviderUser'), ',passwordUrl:file:///config/cloud/.dnsPasswd,passwordEncrypted:true,serverName:', variables('vmssName'), ',poolName:', parameters('dnsProviderPool'), ',datacenter:', parameters('dnsProviderDataCenter'), variables('singleQuote'), '\"'"
-if template_name in ('waf_autoscale'):
+if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     addtl_setup += "cp asm-policy.tar.gz deploy_waf.sh *.tmpl /config/cloud;"
     addtl_script_args += ", ' --wafScriptArgs \"', variables('commandArgs'), '\"'"
     autoscale_file_uris += ["[concat(variables('f5NetworksSolutionScripts'), 'deploy_waf.sh')]", "[concat(variables('f5NetworksSolutionScripts'), 'f5.http.v1.2.0rc7.tmpl')]", "[concat(variables('f5NetworksSolutionScripts'), 'f5.policy_creator.tmpl')]", "[concat(variables('f5NetworksSolutionScripts'), 'asm-policy.tar.gz')]"]
 
-if template_name in ('ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
+if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     # Add TMM CPU metric option into autoscale templates - pass key into autoscale.sh
     addtl_script_args += ", ' --appInsightsKey \"', reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsComponentsApiVersion')).InstrumentationKey, '\"'"
-    if template_name in ('waf_autoscale'):
+    if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
         post_cmd_to_execute = ", '; if [[ $? == 0 ]]; then tmsh modify cm device-group Sync asm-sync enabled; tmsh load sys application template f5.service_discovery.tmpl;<BIGIQ_PWD_DELETE> bash /config/customConfig.sh; reboot_signal=\"/tmp/f5-cloud-libs-signals/REBOOT_REQUIRED\"; if [ -f $reboot_signal ]; then echo \"Reboot signaled by cloud libs, rebooting\"; rm -f $reboot_signal; reboot; else echo \"Cloud libs did not signal a reboot\"; fi; $(cp_logs); else $(cp_logs); exit 1; fi'" + waagent_restart_cmd
     else:
         post_cmd_to_execute = ", '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl;<BIGIQ_PWD_DELETE> bash /config/customConfig.sh; reboot_signal=\"/tmp/f5-cloud-libs-signals/REBOOT_REQUIRED\"; if [ -f $reboot_signal ]; then echo \"Reboot signaled by cloud libs, rebooting\"; rm -f $reboot_signal; reboot; else echo \"Cloud libs did not signal a reboot\"; fi; $(cp_logs); else $(cp_logs); exit 1; fi'" + waagent_restart_cmd
@@ -871,20 +871,20 @@ if template_name in ('ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
     autoscale_command_to_execute = autoscale_command_to_execute.replace('<SCALE_SCRIPT_CALL>', scale_script_call).replace('<POST_CMD_TO_EXECUTE>', post_cmd_to_execute)
     autoscale_command_to_execute = autoscale_command_to_execute.replace('<ANALYTICS_HASH>', metrics_hash_to_exec).replace('<ADDTL_ENCRYPT_CALLS>', addtl_encrypt_calls)
 
-if template_name in ('ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
+if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     ipConfigProperties = { "subnet": { "id": "[variables('mgmtSubnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]" } ], "loadBalancerInboundNatPools": [ { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/inboundNatPools/sshnatpool')]" }, { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/inboundNatPools/mgmtnatpool')]" } ] }
-    if template_name in ('dns_autoscale'):
+    if template_name in ('autoscale_ltm_via-dns', 'autoscale_waf_via-dns'):
         ipConfigProperties = { "subnet": { "id": "[variables('mgmtSubnetId')]" }, "publicIpAddressConfiguration": { "name": "publicIp01", "properties": { "idleTimeoutInMinutes": 15 } } }
     resources_list += [{ "type": "Microsoft.Compute/virtualMachineScaleSets", "apiVersion": compute_api_version, "name": "[variables('vmssName')]", "location": location, "tags": tags, "dependsOn": scale_depends_on + ["[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0'))]"], "sku": { "name": "[parameters('instanceType')]", "tier": "Standard", "capacity": "[parameters('vmScaleSetMinCount')]" }, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "[variables('offerToUse')]" }, "properties": { "upgradePolicy": { "mode": "Manual" }, "virtualMachineProfile": { "storageProfile": { "osDisk": { "vhdContainers": [ "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vmss1/')]" ], "name": "vmssosdisk", "caching": "ReadOnly", "createOption": "FromImage" }, "imageReference": { "publisher": "f5-networks", "offer": "[variables('offerToUse')]", "sku": "[variables('skuToUse')]", "version": image_to_use } }, "osProfile": { "computerNamePrefix": "[variables('vmssName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "networkProfile": { "networkInterfaceConfigurations": [ { "name": "nic1", "properties": { "primary": True, "networkSecurityGroup": {"id": "[variables('mgmtNsgID')]"}, "ipConfigurations": [ { "name": "ipconfig1", "properties": ipConfigProperties } ] } } ] }, "extensionProfile": { "extensions": [ { "name":"main", "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": autoscale_file_uris }, "protectedSettings": { "commandToExecute": autoscale_command_to_execute } } } ] } }, "overprovision": False } }]
 
 ###### Compute VM Scale Set(s) AutoScale Settings ######
-if template_name in ('ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
+if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     resources_list += [{ "type": "Microsoft.Insights/autoscaleSettings", "apiVersion": "[variables('appInsightsApiVersion')]", "name": "autoscaleconfig", "location": location, "dependsOn": [ "[variables('vmssId')]" ], "properties": { "name": "autoscaleconfig", "targetResourceUri": "[variables('vmssId')]", "enabled": True, "profiles": [ { "name": "Profile1", "capacity": { "minimum": "[parameters('vmScaleSetMinCount')]", "maximum": "[parameters('vmScaleSetMaxCount')]", "default": "[parameters('vmScaleSetMinCount')]" }, "rules": [ { "metricTrigger": { "metricName": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricName]", "metricNamespace": "", "metricResourceUri": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricResourceUri]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "[variables('timeWindow')]", "timeAggregation": "Average", "operator": "GreaterThan", "threshold": "[variables('scaleMetricMap')[variables('autoScaleMetric')].thresholdOut]" }, "scaleAction": { "direction": "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } }, { "metricTrigger": { "metricName": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricName]", "metricNamespace": "", "metricResourceUri": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricResourceUri]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "[variables('timeWindow')]", "timeAggregation": "Average", "operator": "LessThan", "threshold": "[variables('scaleMetricMap')[variables('autoScaleMetric')].thresholdIn]" }, "scaleAction": { "direction": "Decrease", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } } ] } ], "notifications": [ { "operation": "Scale", "email": { "sendToSubscriptionAdministrator": False, "sendToSubscriptionCoAdministrators": False, "customEmails": "[variables('customEmail')]" }, "webhooks": [] } ] } }]
 
 
 ###### Appliction Insight Workspace(s) ######
 # Add TMM CPU metric option into autoscale templates
-if template_name in ('ltm_autoscale', 'waf_autoscale', 'dns_autoscale'):
+if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     resources_list += [{ "type": "Microsoft.Insights/components", "condition": "[contains(toUpper(parameters('appInsights')), 'CREATE_NEW')]", "kind": "other", "name": "[variables('appInsightsName')]", "apiVersion": "[variables('appInsightsComponentsApiVersion')]", "location": "[variables('appInsightsLocation')]", "tags": tags, "properties": { "ApplicationId": "[variables('appInsightsName')]", "Application_Type": "other" }, "dependsOn": [] }]
 
 ## Sort resources section - Expand to choose order of resources instead of just alphabetical?
@@ -925,10 +925,10 @@ if template_name in ('failover-api', 'failover-lb_3nic'):
     # Add learning stack output(s)
     if learning_stack:
         data['outputs']['EXAMPLE-APP-URL'] = { "type": "string", "value": "[concat('http://', reference(concat(variables('extPublicIPAddressIdPrefix'), '0')).dnsSettings.fqdn, ':', variables('webVmVsPort'))]" }
-if template_name in ('ltm_autoscale', 'waf_autoscale'):
+if template_name in ('autoscale_ltm_via-lb', 'autoscale_waf_via-lb'):
     data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50101', ' - 50200')]" }
     data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50001, ' - 50100')]" }
-if template_name in ('dns_autoscale'):
+if template_name in ('autoscale_ltm_via-dns', 'autoscale_waf_via-dns'):
     # Do nothing currently
     data['outputs']['GUI-URL'] = { "type": "string", "value": "N/A" }
     data['outputs']['SSH-URL'] = { "type": "string", "value": "N/A" }
@@ -946,14 +946,14 @@ if stack_type in ('prod_stack'):
     all_lic = ['BYOL', 'PAYG']
 else:
     all_lic = ['BYOL', 'PAYG', 'BIG-IQ']
-lic_support = {'standalone_1nic': all_lic, 'standalone_2nic': all_lic, 'standalone_3nic': all_lic, 'standalone_n-nic': all_lic, 'failover-lb_1nic': all_lic, 'failover-lb_3nic': all_lic, 'failover-api': all_lic, 'ltm_autoscale': ['PAYG', 'BIG-IQ'], 'waf_autoscale': ['PAYG', 'BIG-IQ'], 'dns_autoscale': ['PAYG', 'BIG-IQ']}
-lic_key_count = {'standalone_1nic': 1, 'standalone_2nic': 1, 'standalone_3nic': 1, 'standalone_n-nic': 1, 'failover-lb_1nic': 2, 'failover-lb_3nic': 2, 'failover-api': 2, 'ltm_autoscale': 0, 'waf_autoscale': 0, 'dns_autoscale': 0}
-api_access_required = {'standalone_1nic': None, 'standalone_2nic': None, 'standalone_3nic': None, 'standalone_n-nic': None, 'failover-lb_1nic': None, 'failover-lb_3nic': None, 'failover-api': 'required', 'ltm_autoscale': 'required', 'waf_autoscale': 'required', 'dns_autoscale': 'required'}
+lic_support = {'standalone_1nic': all_lic, 'standalone_2nic': all_lic, 'standalone_3nic': all_lic, 'standalone_n-nic': all_lic, 'failover-lb_1nic': all_lic, 'failover-lb_3nic': all_lic, 'failover-api': all_lic, 'autoscale_ltm_via-lb': ['PAYG', 'BIG-IQ'], 'autoscale_ltm_via-dns': ['PAYG', 'BIG-IQ'], 'autoscale_waf_via-lb': ['PAYG', 'BIG-IQ'], 'autoscale_waf_via-dns': ['PAYG', 'BIG-IQ']}
+lic_key_count = {'standalone_1nic': 1, 'standalone_2nic': 1, 'standalone_3nic': 1, 'standalone_n-nic': 1, 'failover-lb_1nic': 2, 'failover-lb_3nic': 2, 'failover-api': 2, 'autoscale_ltm_via-lb': 0, 'autoscale_ltm_via-dns': 0, 'autoscale_waf_via-lb': 0, 'autoscale_waf_via-dns': 0}
+api_access_required = {'standalone_1nic': None, 'standalone_2nic': None, 'standalone_3nic': None, 'standalone_n-nic': None, 'failover-lb_1nic': None, 'failover-lb_3nic': None, 'failover-api': 'required', 'autoscale_ltm_via-lb': 'required', 'autoscale_ltm_via-dns': 'required', 'autoscale_waf_via-lb': 'required', 'autoscale_waf_via-dns': 'required'}
 template_info = {'template_name': template_name, 'location': script_location, 'lic_support': lic_support, 'lic_key_count': lic_key_count, 'api_access_required': api_access_required}
 
 ######################################## Create/Modify Scripts ###########################################
 # Manually adding templates to create scripts proc for now as a 'check'...
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_1nic', 'failover-lb_3nic', 'failover-api', 'ltm_autoscale', 'waf_autoscale', 'dns_autoscale') and script_location:
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_1nic', 'failover-lb_3nic', 'failover-api', 'autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns') and script_location:
     bash_script = script_generator.script_creation(template_info, data, default_payg_bw, 'bash')
     ps_script = script_generator.script_creation(template_info, data, default_payg_bw, 'powershell')
 ######################################## END Create/Modify Scripts ########################################

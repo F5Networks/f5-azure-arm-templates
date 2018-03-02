@@ -1,0 +1,159 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
+    "contentVersion": "4.4.0.0", 
+    "parameters": {
+        "vmScaleSetMinCount": {
+            "value": 2
+        }, 
+        "vmScaleSetMaxCount": {
+            "value": 4
+        }, 
+        "autoScaleMetric": {
+            "value": "Host_Throughput"
+        }, 
+        "appInsights": {
+            "value": "CREATE_NEW"
+        }, 
+        "calculatedBandwidth": {
+            "value": "200m"
+        }, 
+        "scaleOutThreshold": {
+            "value": 90
+        }, 
+        "scaleInThreshold": {
+            "value": 10
+        }, 
+        "scaleTimeWindow": {
+            "value": 10
+        }, 
+        "adminUsername": {
+            "value": "azureuser"
+        }, 
+        "adminPassword": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "dnsLabel": {
+            "value": ""
+        }, 
+        "instanceType": {
+            "value": "Standard_DS2_v2"
+        }, 
+        "imageName": {
+            "value": "Best"
+        }, 
+        "bigIpVersion": {
+            "value": "13.1.0200"
+        }, 
+        "bigIqLicenseHost": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "bigIqLicenseUsername": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "bigIqLicensePassword": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "bigIqLicensePool": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "vnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "vnetResourceGroupName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "mgmtSubnetName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "solutionDeploymentName": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "applicationProtocols": {
+            "value": "http-https"
+        }, 
+        "applicationAddress": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "applicationServiceFqdn": {
+            "value": "NOT_SPECIFIED"
+        }, 
+        "applicationPort": {
+            "value": "80"
+        }, 
+        "applicationSecurePort": {
+            "value": "443"
+        }, 
+        "sslCert": {
+            "value": "NOT_SPECIFIED"
+        }, 
+        "sslPswd": {
+            "value": "NOT_SPECIFIED"
+        }, 
+        "applicationType": {
+            "value": "Linux"
+        }, 
+        "blockingLevel": {
+            "value": "medium"
+        }, 
+        "customPolicy": {
+            "value": "NOT_SPECIFIED"
+        }, 
+        "dnsMemberIpType": {
+            "value": "private"
+        }, 
+        "dnsMemberPort": {
+            "value": "80"
+        }, 
+        "dnsProviderHost": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "dnsProviderPort": {
+            "value": "443"
+        }, 
+        "dnsProviderUser": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "dnsProviderPassword": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "dnsProviderPool": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "dnsProviderDataCenter": {
+            "value": "azure_datacenter"
+        }, 
+        "tenantId": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "clientId": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "servicePrincipalSecret": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "notificationEmail": {
+            "value": "OPTIONAL"
+        }, 
+        "ntpServer": {
+            "value": "0.pool.ntp.org"
+        }, 
+        "timeZone": {
+            "value": "UTC"
+        }, 
+        "restrictedSrcAddress": {
+            "value": "*"
+        }, 
+        "tagValues": {
+            "value": {
+                "application": "APP", 
+                "cost": "COST", 
+                "environment": "ENV", 
+                "group": "GROUP", 
+                "owner": "OWNER"
+            }
+        }, 
+        "allowUsageAnalytics": {
+            "value": "Yes"
+        }
+    }
+}

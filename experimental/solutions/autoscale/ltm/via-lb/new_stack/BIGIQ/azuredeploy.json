@@ -247,21 +247,10 @@
             }, 
             "type": "string"
         }, 
-        "vnetName": {
+        "vnetAddressPrefix": {
+            "defaultValue": "10.0", 
             "metadata": {
-                "description": "The name of the existing virtual network to which you want to connect the BIG-IP VEs."
-            }, 
-            "type": "string"
-        }, 
-        "vnetResourceGroupName": {
-            "metadata": {
-                "description": "The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed."
-            }, 
-            "type": "string"
-        }, 
-        "mgmtSubnetName": {
-            "metadata": {
-                "description": "Name of the existing MGMT subnet - with external access to the Internet."
+                "description": "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'."
             }, 
             "type": "string"
         }, 
@@ -399,16 +388,18 @@
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['1'].Port]", 
         "bigIpMgmtPort": 8443, 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
-        "virtualNetworkName": "[parameters('vnetName')]", 
-        "vnetId": "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]", 
+        "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]", 
+        "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]", 
+        "vnetAddressPrefix": "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]", 
         "publicIPAddressType": "Static", 
         "mgmtPublicIPAddressName": "[concat(variables('dnsLabel'), '-mgmt-pip')]", 
         "mgmtPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('mgmtPublicIPAddressName'))]", 
         "mgmtNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-mgmt-nsg'))]", 
         "mgmtNicName": "[concat(variables('dnsLabel'), '-mgmt')]", 
         "mgmtNicID": "[resourceId('Microsoft.Network/NetworkInterfaces', variables('mgmtNicName'))]", 
-        "mgmtSubnetName": "[parameters('mgmtSubnetName')]", 
+        "mgmtSubnetName": "mgmt", 
         "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]", 
+        "mgmtSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.1.0/24')]", 
         "deviceNamePrefix": "[concat(variables('dnsLabel'),'-device')]", 
         "externalLoadBalancerName": "[concat(variables('dnsLabel'),'-ext-alb')]", 
         "extLbId": "[resourceId('Microsoft.Network/loadBalancers',variables('externalLoadBalancerName'))]", 
@@ -674,7 +665,7 @@
             }, 
             "Yes": {
                 "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]", 
-                "metricsCmd": "[concat(' --usageAnalytics \" --metrics customerId:${custId},deploymentId:${deployId},templateName:autoscale_ltm_via-lb-existing_stack-supported,templateVersion:4.4.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BIGIQ,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure\"')]"
+                "metricsCmd": "[concat(' --usageAnalytics \" --metrics customerId:${custId},deploymentId:${deployId},templateName:autoscale_ltm_via-lb-new_stack-experimental,templateVersion:4.4.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BIGIQ,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure\"')]"
             }
         }, 
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n", 
@@ -694,6 +685,31 @@
             }, 
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
             "type": "Microsoft.Network/publicIPAddresses"
+        }, 
+        {
+            "apiVersion": "[variables('apiVersion')]", 
+            "dependsOn": [
+                "[variables('mgmtNsgID')]"
+            ], 
+            "location": "[variables('location')]", 
+            "name": "[variables('virtualNetworkName')]", 
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('vnetAddressPrefix')]"
+                    ]
+                }, 
+                "subnets": [
+                    {
+                        "name": "[variables('mgmtSubnetName')]", 
+                        "properties": {
+                            "addressPrefix": "[variables('mgmtSubnetPrefix')]"
+                        }
+                    }
+                ]
+            }, 
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            "type": "Microsoft.Network/virtualNetworks"
         }, 
         {
             "apiVersion": "[variables('apiVersion')]", 
@@ -816,6 +832,7 @@
         {
             "apiVersion": "[variables('computeApiVersion')]", 
             "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]", 
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0'))]"
             ], 
             "location": "[variables('location')]", 

@@ -39,12 +39,12 @@ for tmpl in $template_list; do
     done
 done
 
-## BIGIP ARM Templates - Solutions (autoscale/ltm, autoscale/waf)
-template_list="autoscale/ltm autoscale/waf"
+## BIGIP ARM Templates - Solutions: autoscale/ltm, autoscale/waf
+template_list="autoscale/ltm/via-lb autoscale/waf/via-lb"
 for tmpl in $template_list; do
-    loc=$tmpl
+    loc=`echo $tmpl | sed 's/\/via-lb//g'|sed 's/\/via-dns//g'`
     if [[ $loc == *"autoscale"* ]]; then
-        tmpl=`basename $loc`"_autoscale"
+        tmpl=`echo $tmpl | sed 's/\//_/g'`
     fi
     stack_list="new_stack existing_stack"
     for stack_type in $stack_list; do
@@ -86,12 +86,12 @@ for tmpl in $template_list; do
     done
 done
 
-## BIGIP ARM Templates - Solutions (autoscale/ltm, autoscale/waf, autoscale/dns)
-template_list="autoscale/ltm autoscale/waf autoscale/dns"
+## BIGIP ARM Templates - Solutions: autoscale/ltm (via-dns, via-lb), autoscale/waf (via-dns, via-lb)
+template_list="autoscale/ltm/via-lb autoscale/ltm/via-dns autoscale/waf/via-lb autoscale/waf/via-dns"
 for tmpl in $template_list; do
     loc=$tmpl
     if [[ $loc == *"autoscale"* ]]; then
-        tmpl=`basename $loc`"_autoscale"
+        tmpl=`echo $tmpl | sed 's/\//_/g'`
     fi
     stack_list="new_stack existing_stack"
     for stack_type in $stack_list; do
