@@ -97,6 +97,9 @@ for tmpl in $template_list; do
     for stack_type in $stack_list; do
         python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../experimental/solutions/$loc/$stack_type/PAYG/" --script-location "../experimental/solutions/$loc/$stack_type/" --solution-location 'experimental' $release_prep
         python -B '.\master_template.py' --template-name $tmpl --license-type BIGIQ --stack-type $stack_type --template-location "../experimental/solutions/$loc/$stack_type/BIGIQ/" --script-location "../experimental/solutions/$loc/$stack_type/" --solution-location 'experimental' $release_prep
+        if [[ $tmpl == *"via-lb"* ]]; then
+            python -B '.\master_template.py' --template-name $tmpl --license-type BIGIQ_PAYG --stack-type $stack_type --template-location "../experimental/solutions/$loc/$stack_type/BIGIQ_PAYG/" --script-location "../experimental/solutions/$loc/$stack_type/" --solution-location 'experimental' $release_prep
+        fi
     done
 done
 

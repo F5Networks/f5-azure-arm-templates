@@ -125,23 +125,26 @@ class ReadmeGen(object):
         license_flag = True
         for p in self.data['parameters']:
             mandatory = 'Yes'
-            # Specify optional parameters that README, need to pull in all license options
-            if 'license' in p.lower():
+            # Specify optional parameters for README, need to pull in all license specific options
+            if p in license_params:
                 if license_flag:
                     license_flag = False
-                    for key in license_params:
-                        if key == 'licensedBandwidth':
-                            mandatory = 'PAYG only:'
-                        elif 'licenseKey' in key:
-                            mandatory = 'BYOL only:'
+                    for k, v in license_params.iteritems():
+                        # Check if value is list
+                        if isinstance(v, list):
+                            sep = ' or '
+                            lic_type_text = sep.join(v)
                         else:
-                            mandatory = 'BIG-IQ licensing only:'
-                        if lic_type == 'PAYG' and key != 'licensedBandwidth':
+                            lic_type_text = v
+                        only = ' only:'
+                        if 'BIG-IQ' in lic_type_text:
+                            only = ' licensing only:'
+                        mandatory = lic_type_text + only
+                        # Skip licenseKey parameters if BYOL not in the list
+                        if all(x in ['PAYG', 'BIG-IQ', 'BIG-IQ+PAYG'] for x in lic_type) and 'licenseKey' in k:
                             continue
-                        elif all(x in ['PAYG', 'BIG-IQ'] for x in lic_type) and 'licenseKey' in key:
-                            continue                       
                         else:
-                            param_array += "| " + key + " | " + mandatory + " | " + self.get_custom_text('parameter_list', key) + " |\n"
+                            param_array += "| " + k + " | " + mandatory + " | " + self.get_custom_text('parameter_list', k) + " |\n"
             else:
                 param_array += "| " + p + " | " + mandatory + " | " + self.data['parameters'][p]['metadata']['description'] + " |\n"
         return param_array
@@ -192,7 +195,10 @@ class ReadmeGen(object):
         for lic in lic_list:
             deploy_links += '''- **<LIC_TYPE>**<LIC_TEXT>\n\n  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](<DEPLOY_LINK_URL>)\n\n'''
             t_loc = t_loc.replace('/', '%2F').replace('..', '')
-            t_loc = t_loc.replace('PAYG', lic).replace('BYOL', lic).replace('BIGIQ', lic).replace('BIG-IQ', 'BIGIQ')
+            # Convert current license specified with list of licenses that should be used
+            t_loc = t_loc.replace('BIGIQ_PAYG', 'LICENSE').replace('BIGIQ', 'LICENSE').replace('PAYG', 'LICENSE').replace('BYOL', 'LICENSE')
+            t_loc = t_loc.replace('LICENSE', lic)
+            t_loc = t_loc.replace('BIG-IQ+PAYG', 'BIGIQ_PAYG').replace('BIG-IQ', 'BIGIQ')
             url = base_url + t_loc
             deploy_links = deploy_links.replace('<DEPLOY_LINK_URL>', url).replace('<LIC_TYPE>', lic)
             deploy_links = deploy_links.replace('<LIC_TEXT>', self.get_custom_text('license_text', lic))

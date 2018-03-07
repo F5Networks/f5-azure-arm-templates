@@ -124,19 +124,29 @@ if stack_type in ('existing_stack', 'prod_stack'):
 
 ## Determine PAYG/BYOL/BIGIQ variables
 image_to_use = "[parameters('bigIpVersion')]"
-sku_to_use = "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]"
-offer_to_use = "[if(or(equals(parameters('bigIpVersion'), '12.1.2200'), equals(parameters('bigIpVersion'), '13.0.0300')), 'f5-big-ip', concat('f5-big-ip-', variables('imageNameToLower')))]"
+byol_sku_to_use = "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]"
+byol_offer_to_use = "[if(or(equals(parameters('bigIpVersion'), '12.1.2200'), equals(parameters('bigIpVersion'), '13.0.0300')), 'f5-big-ip', concat('f5-big-ip-', variables('imageNameToLower')))]"
+payg_sku_to_use = "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]"
+payg_offer_to_use = "[if(or(equals(parameters('bigIpVersion'), '12.1.2200'), equals(parameters('bigIpVersion'), '13.0.0300')), 'f5-big-ip-hourly', concat('f5-big-ip-', variables('imageNameToLower')))]"
 license1_command = ''
 license2_command = ''
 big_iq_pwd_cmd = ''
 bigiq_pwd_delete = ''
 if license_type == 'BYOL':
+    sku_to_use = byol_sku_to_use
+    offer_to_use = byol_offer_to_use
     license1_command = "' --license ', parameters('licenseKey1'),"
     license2_command = "' --license ', parameters('licenseKey2'),"
 elif license_type == 'PAYG':
-    sku_to_use = "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]"
-    offer_to_use = "[if(or(equals(parameters('bigIpVersion'), '12.1.2200'), equals(parameters('bigIpVersion'), '13.0.0300')), 'f5-big-ip-hourly', concat('f5-big-ip-', variables('imageNameToLower')))]"
-elif license_type == 'BIGIQ':
+    sku_to_use = payg_sku_to_use
+    offer_to_use = payg_offer_to_use
+elif license_type == 'BIGIQ' or license_type == 'BIGIQ_PAYG':
+    if license_type == 'BIGIQ':
+        sku_to_use = byol_sku_to_use
+        offer_to_use = byol_offer_to_use
+    elif license_type == 'BIGIQ_PAYG':
+        sku_to_use = payg_sku_to_use
+        offer_to_use = payg_offer_to_use
     big_iq_mgmt_ip_ref = ''
     big_iq_mgmt_ip_ref2 = ''
     big_iq_pwd_cmd = " echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd; "
@@ -155,16 +165,7 @@ elif license_type == 'BIGIQ':
         license1_command =  ", ' --bigIqLicenseHost ', parameters('bigIqLicenseHost'), ' --bigIqLicenseUsername ', parameters('bigIqLicenseUsername'), ' --bigIqLicensePassword /config/cloud/.bigIqPasswd --bigIqLicensePool ', parameters('bigIqLicensePool'), ' --bigIpExtMgmtAddress ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --bigIpExtMgmtPort via-api'"
         # Need to keep BIG-IQ password around in autoscale case for license revocation
         bigiq_pwd_delete = ''
-## Abstract license key parameters for readme_generator
-license_params = ['licenseKey1', 'licenseKey2', 'licensedBandwidth', 'bigIqLicenseHost', 'bigIqLicenseUsername', 'bigIqLicensePassword', 'bigIqLicensePool']
-if template_name not in ('failover-lb_1nic', 'failover-lb_3nic', 'failover-api'):
-    license_params.remove('licenseKey2')
-# BIG-IQ does not exist for prod_stack currently
-if stack_type in ('prod_stack'):
-    license_params.remove('bigIqLicenseHost')
-    license_params.remove('bigIqLicenseUsername')
-    license_params.remove('bigIqLicensePassword')
-    license_params.remove('bigIqLicensePool')
+
 ## Check if supported or experimental
 if 'supported' in created_file:
     support_type = 'supported'
@@ -197,13 +198,15 @@ if license_type == 'BYOL':
     if template_name in ('failover-lb_1nic', 'failover-lb_3nic', 'failover-api'):
         for license_key in ['licenseKey2']:
             data['parameters'][license_key] = {"type": "string", "defaultValue": "", "metadata": {"description": ""}}
-elif license_type == 'PAYG':
+if license_type == 'PAYG' or license_type == 'BIGIQ_PAYG':
     data['parameters']['licensedBandwidth'] = {"type": "string", "defaultValue": default_payg_bw, "allowedValues": ["25m", "200m", "1g"], "metadata": {"description": ""}}
-elif license_type == 'BIGIQ':
+if license_type == 'BIGIQ' or license_type == 'BIGIQ_PAYG':
     data['parameters']['bigIqLicenseHost'] = {"type": "string", "metadata": {"description": ""}}
     data['parameters']['bigIqLicenseUsername'] = {"type": "string", "metadata": {"description": ""}}
     data['parameters']['bigIqLicensePassword'] = {"type": "securestring", "metadata": {"description": ""}}
     data['parameters']['bigIqLicensePool'] = {"type": "string", "metadata": {"description": ""}}
+    if license_type == 'BIGIQ_PAYG':
+        data['parameters']['numberOfStaticInstances'] = {"type": "int", "allowedValues": [1, 2, 3, 4], "metadata": {"description": ""}}
 data['parameters']['ntpServer'] = {"type": "string", "defaultValue": "0.pool.ntp.org", "metadata": {"description": ""}}
 data['parameters']['timeZone'] = {"type": "string", "defaultValue": "UTC", "metadata": {"description": ""}}
 data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": "*", "metadata": {"description": ""}}
@@ -214,7 +217,7 @@ data['parameters']['allowUsageAnalytics'] = {"type": "string", "defaultValue": "
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_3nic', 'failover-api'):
     data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": {"description": ""}}
 if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_3nic', 'failover-api'):
-    data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [0,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "metadata": {"description": ""}}
+    data['parameters']['numberOfExternalIps'] = {"type": "int", "defaultValue": 1, "allowedValues": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "metadata": {"description": ""}}
 if template_name in ('failover-lb_3nic'):
     data['parameters']['enableNetworkFailover'] = {"allowedValues": [ "No", "Yes" ], "defaultValue": "Yes", "metadata": { "description": "" }, "type": "string"}
     data['parameters']['internalLoadBalancerType'] = {"defaultValue": "Per-protocol", "allowedValues": ["Per-protocol", "All-protocol", "DO_NOT_USE"], "metadata": { "description": "" }, "type": "string"}
@@ -532,6 +535,11 @@ if template_name in ('failover-lb_1nic', 'failover-lb_3nic', 'autoscale_ltm_via-
         data['variables']['timeWindow'] = "[concat('PT', parameters('scaleTimeWindow'), 'M')]"
         data['variables']['customEmailBaseArray'] = [""]
         data['variables']['customEmail'] = "[skip(union(variables('customEmailBaseArray'), split(replace(parameters('notificationEmail'), 'OPTIONAL', ''), ';')), 1)]"
+        if license_type == 'BIGIQ_PAYG':
+            data['variables']['staticVmssName'] = "[concat(parameters('dnsLabel'),'-vmss', '-static')]"
+            data['variables']['staticVmssId'] = "[resourceId('Microsoft.Compute/virtualMachineScaleSets', variables('staticVmssName'))]"
+            data['variables']['staticSkuToUse'] = byol_sku_to_use
+            data['variables']['staticOfferToUse'] = byol_offer_to_use
     if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
         data['variables']['f5NetworksSolutionScripts'] = "[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/', variables('f5NetworksTag'), '/" + solution_location + "/solutions/autoscale/waf/deploy_scripts/')]"
         data['variables']['lbTcpProbeNameHttp'] = "tcp_probe_http"
@@ -871,11 +879,14 @@ if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale
     autoscale_command_to_execute = autoscale_command_to_execute.replace('<SCALE_SCRIPT_CALL>', scale_script_call).replace('<POST_CMD_TO_EXECUTE>', post_cmd_to_execute)
     autoscale_command_to_execute = autoscale_command_to_execute.replace('<ANALYTICS_HASH>', metrics_hash_to_exec).replace('<ADDTL_ENCRYPT_CALLS>', addtl_encrypt_calls)
 
-if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
+if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):   
     ipConfigProperties = { "subnet": { "id": "[variables('mgmtSubnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]" } ], "loadBalancerInboundNatPools": [ { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/inboundNatPools/sshnatpool')]" }, { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/inboundNatPools/mgmtnatpool')]" } ] }
     if template_name in ('autoscale_ltm_via-dns', 'autoscale_waf_via-dns'):
         ipConfigProperties = { "subnet": { "id": "[variables('mgmtSubnetId')]" }, "publicIpAddressConfiguration": { "name": "publicIp01", "properties": { "idleTimeoutInMinutes": 15 } } }
     resources_list += [{ "type": "Microsoft.Compute/virtualMachineScaleSets", "apiVersion": compute_api_version, "name": "[variables('vmssName')]", "location": location, "tags": tags, "dependsOn": scale_depends_on + ["[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0'))]"], "sku": { "name": "[parameters('instanceType')]", "tier": "Standard", "capacity": "[parameters('vmScaleSetMinCount')]" }, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "[variables('offerToUse')]" }, "properties": { "upgradePolicy": { "mode": "Manual" }, "virtualMachineProfile": { "storageProfile": { "osDisk": { "vhdContainers": [ "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vmss1/')]" ], "name": "vmssosdisk", "caching": "ReadOnly", "createOption": "FromImage" }, "imageReference": { "publisher": "f5-networks", "offer": "[variables('offerToUse')]", "sku": "[variables('skuToUse')]", "version": image_to_use } }, "osProfile": { "computerNamePrefix": "[variables('vmssName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "networkProfile": { "networkInterfaceConfigurations": [ { "name": "nic1", "properties": { "primary": True, "networkSecurityGroup": {"id": "[variables('mgmtNsgID')]"}, "ipConfigurations": [ { "name": "ipconfig1", "properties": ipConfigProperties } ] } } ] }, "extensionProfile": { "extensions": [ { "name":"main", "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": autoscale_file_uris }, "protectedSettings": { "commandToExecute": autoscale_command_to_execute } } } ] } }, "overprovision": False } }]
+    if license_type == 'BIGIQ_PAYG':
+        # Static VMSS
+        resources_list += [{ "type": "Microsoft.Compute/virtualMachineScaleSets", "apiVersion": compute_api_version, "name": "[variables('staticVmssName')]", "location": location, "tags": tags, "dependsOn": scale_depends_on + ["[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0'))]"], "sku": { "name": "[parameters('instanceType')]", "tier": "Standard", "capacity": "[parameters('numberOfStaticInstances')]" }, "plan": { "name": "[variables('skuToUse')]", "publisher": "f5-networks", "product": "[variables('offerToUse')]" }, "properties": { "upgradePolicy": { "mode": "Manual" }, "virtualMachineProfile": { "storageProfile": { "osDisk": { "vhdContainers": [ "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'static_vmss/')]" ], "name": "vmssosdisk", "caching": "ReadOnly", "createOption": "FromImage" }, "imageReference": { "publisher": "f5-networks", "offer": "[variables('staticOfferToUse')]", "sku": "[variables('staticSkuToUse')]", "version": image_to_use } }, "osProfile": { "computerNamePrefix": "[variables('vmssName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[parameters('adminPassword')]" }, "networkProfile": { "networkInterfaceConfigurations": [ { "name": "nic1", "properties": { "primary": True, "networkSecurityGroup": {"id": "[variables('mgmtNsgID')]"}, "ipConfigurations": [ { "name": "ipconfig1", "properties": ipConfigProperties } ] } } ] }, "extensionProfile": { "extensions": [ { "name":"main", "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": autoscale_file_uris }, "protectedSettings": { "commandToExecute": autoscale_command_to_execute } } } ] } }, "overprovision": False } }]
 
 ###### Compute VM Scale Set(s) AutoScale Settings ######
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
@@ -947,15 +958,35 @@ if stack_type in ('prod_stack'):
 else:
     all_lic = ['BYOL', 'PAYG', 'BIG-IQ']
 lic_support = {'standalone_1nic': all_lic, 'standalone_2nic': all_lic, 'standalone_3nic': all_lic, 'standalone_n-nic': all_lic, 'failover-lb_1nic': all_lic, 'failover-lb_3nic': all_lic, 'failover-api': all_lic, 'autoscale_ltm_via-lb': ['PAYG', 'BIG-IQ'], 'autoscale_ltm_via-dns': ['PAYG', 'BIG-IQ'], 'autoscale_waf_via-lb': ['PAYG', 'BIG-IQ'], 'autoscale_waf_via-dns': ['PAYG', 'BIG-IQ']}
+# Experimental autoscale templates have new licensing options
+if support_type == 'experimental':
+    lic_support['autoscale_ltm_via-lb'] = ['PAYG', 'BIG-IQ', 'BIG-IQ+PAYG']
+    lic_support['autoscale_waf_via-lb'] = ['PAYG', 'BIG-IQ', 'BIG-IQ+PAYG']
 lic_key_count = {'standalone_1nic': 1, 'standalone_2nic': 1, 'standalone_3nic': 1, 'standalone_n-nic': 1, 'failover-lb_1nic': 2, 'failover-lb_3nic': 2, 'failover-api': 2, 'autoscale_ltm_via-lb': 0, 'autoscale_ltm_via-dns': 0, 'autoscale_waf_via-lb': 0, 'autoscale_waf_via-dns': 0}
 api_access_required = {'standalone_1nic': None, 'standalone_2nic': None, 'standalone_3nic': None, 'standalone_n-nic': None, 'failover-lb_1nic': None, 'failover-lb_3nic': None, 'failover-api': 'required', 'autoscale_ltm_via-lb': 'required', 'autoscale_ltm_via-dns': 'required', 'autoscale_waf_via-lb': 'required', 'autoscale_waf_via-dns': 'required'}
 template_info = {'template_name': template_name, 'location': script_location, 'lic_support': lic_support, 'lic_key_count': lic_key_count, 'api_access_required': api_access_required}
 
+## Abstract license key parameters for readme_generator/script_generator ##
+license_params = OrderedDict([('licenseKey1',['BYOL']), ('licenseKey2',['BYOL']), ('licensedBandwidth',['PAYG',]), ('bigIqLicenseHost',['BIG-IQ']), ('bigIqLicenseUsername',['BIG-IQ']), ('bigIqLicensePassword',['BIG-IQ']), ('bigIqLicensePool',['BIG-IQ']), ('numberOfStaticInstances',['BIG-IQ+PAYG'])])
+# licenseKey2 is only used by cluster templates
+if template_name not in ('failover-lb_1nic', 'failover-lb_3nic', 'failover-api'):
+    license_params.pop('licenseKey2')
+# BIGIQ+PAYG is only in experimental autoscale
+if template_name in ('autoscale_ltm_via-lb', 'autoscale_waf_via-lb') and 'experimental' in support_type:
+    bigiq_payg_list = ['licensedBandwidth', 'bigIqLicenseHost', 'bigIqLicenseUsername', 'bigIqLicensePassword', 'bigIqLicensePool']
+    [license_params[k].append('BIG-IQ+PAYG') for k in bigiq_payg_list]
+else:
+    license_params.pop('numberOfStaticInstances')
+# BIG-IQ does not exist for prod_stack currently
+if stack_type in ('prod_stack'):
+    [license_params.pop(k) for k in ['bigIqLicenseHost', 'bigIqLicenseUsername', 'bigIqLicensePassword', 'bigIqLicensePool']]
+
 ######################################## Create/Modify Scripts ###########################################
 # Manually adding templates to create scripts proc for now as a 'check'...
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_1nic', 'failover-lb_3nic', 'failover-api', 'autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns') and script_location:
-    bash_script = script_generator.script_creation(template_info, data, default_payg_bw, 'bash')
-    ps_script = script_generator.script_creation(template_info, data, default_payg_bw, 'powershell')
+    s_data = {'template_info': template_info, 'license_params': license_params, 'default_payg_bw': default_payg_bw}
+    bash_script = script_generator.script_creation(data, s_data, 'bash')
+    ps_script = script_generator.script_creation(data, s_data, 'powershell')
 ######################################## END Create/Modify Scripts ########################################
 
 ######################################## Create/Modify README's ########################################
