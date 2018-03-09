@@ -473,6 +473,12 @@
             ""
         ], 
         "customEmail": "[skip(union(variables('customEmailBaseArray'), split(replace(parameters('notificationEmail'), 'OPTIONAL', ''), ';')), 1)]", 
+        "lbTcpProbeNameHttp": "tcp_probe_http", 
+        "lbTcpProbeIdHttp": "[concat(variables('extLbId'),'/probes/',variables('lbTcpProbeNameHttp'))]", 
+        "lbTcpProbeNameHttps": "tcp_probe_https", 
+        "lbTcpProbeIdHttps": "[concat(variables('extLbId'),'/probes/',variables('lbTcpProbeNameHttps'))]", 
+        "httpBackendPort": 880, 
+        "httpsBackendPort": 8445, 
         "instanceTypeMap": {
             "Standard_A3": {
                 "storageAccountTier": "Standard", 
@@ -680,6 +686,9 @@
             }
         }, 
         "tagValues": "[parameters('tagValues')]", 
+        "staticVmssTagValues": {
+            "f5ClusterTag": "[variables('dnsLabel')]"
+        }, 
         "newStorageAccountName0": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'stor0')]", 
         "storageAccountType": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]", 
         "storageAccountTier": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountTier]", 
@@ -710,6 +719,9 @@
                 }, 
                 "idleTimeoutInMinutes": 30, 
                 "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+            }, 
+            "sku": {
+                "name": "Standard"
             }, 
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
             "type": "Microsoft.Network/publicIPAddresses"
@@ -810,7 +822,7 @@
                                 "id": "[variables('frontEndIPConfigID')]"
                             }, 
                             "frontendPortRangeEnd": 50100, 
-                            "frontendPortRangeStart": 50001, 
+                            "frontendPortRangeStart": 50010, 
                             "protocol": "Tcp"
                         }
                     }, 
@@ -822,13 +834,96 @@
                                 "id": "[variables('frontEndIPConfigID')]"
                             }, 
                             "frontendPortRangeEnd": 50200, 
+                            "frontendPortRangeStart": 50110, 
+                            "protocol": "Tcp"
+                        }
+                    }, 
+                    {
+                        "name": "sshnatpool-static", 
+                        "properties": {
+                            "backendPort": 22, 
+                            "frontendIPConfiguration": {
+                                "id": "[variables('frontEndIPConfigID')]"
+                            }, 
+                            "frontendPortRangeEnd": 50009, 
+                            "frontendPortRangeStart": 50001, 
+                            "protocol": "Tcp"
+                        }
+                    }, 
+                    {
+                        "name": "mgmtnatpool-static", 
+                        "properties": {
+                            "backendPort": "[variables('bigIpMgmtPort')]", 
+                            "frontendIPConfiguration": {
+                                "id": "[variables('frontEndIPConfigID')]"
+                            }, 
+                            "frontendPortRangeEnd": 50109, 
                             "frontendPortRangeStart": 50101, 
                             "protocol": "Tcp"
                         }
                     }
                 ], 
-                "loadBalancingRules": "", 
-                "probes": ""
+                "loadBalancingRules": [
+                    {
+                        "Name": "app-http", 
+                        "properties": {
+                            "backendAddressPool": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+                            }, 
+                            "backendPort": "[variables('httpBackendPort')]", 
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
+                            }, 
+                            "frontendPort": 80, 
+                            "idleTimeoutInMinutes": 15, 
+                            "probe": {
+                                "id": "[variables('lbTcpProbeIdHttp')]"
+                            }, 
+                            "protocol": "Tcp"
+                        }
+                    }, 
+                    {
+                        "Name": "app-https", 
+                        "properties": {
+                            "backendAddressPool": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+                            }, 
+                            "backendPort": "[variables('httpsBackendPort')]", 
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
+                            }, 
+                            "frontendPort": 443, 
+                            "idleTimeoutInMinutes": 15, 
+                            "probe": {
+                                "id": "[variables('lbTcpProbeIdHttps')]"
+                            }, 
+                            "protocol": "Tcp"
+                        }
+                    }
+                ], 
+                "probes": [
+                    {
+                        "name": "[variables('lbTcpProbeNameHttp')]", 
+                        "properties": {
+                            "intervalInSeconds": 15, 
+                            "numberOfProbes": 3, 
+                            "port": "[variables('httpBackendPort')]", 
+                            "protocol": "Tcp"
+                        }
+                    }, 
+                    {
+                        "name": "[variables('lbTcpProbeNameHttps')]", 
+                        "properties": {
+                            "intervalInSeconds": 15, 
+                            "numberOfProbes": 3, 
+                            "port": "[variables('httpsBackendPort')]", 
+                            "protocol": "Tcp"
+                        }
+                    }
+                ]
+            }, 
+            "sku": {
+                "name": "Standard"
             }, 
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
             "type": "Microsoft.Network/loadBalancers"
@@ -882,7 +977,7 @@
                                 "name": "main", 
                                 "properties": {
                                     "protectedSettings": {
-                                        "commandToExecute": "[concat('mkdir -p /config/cloud/azure/node_modules/@f5devcentral; mkdir -p /var/log/cloud/azure; function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; }; AZURE_CREDENTIALS_FILE=/config/cloud/.azCredentials; TMP_DIR=/mnt/creds; TMP_CREDENTIALS_FILE=$TMP_DIR/.passwd; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -m 400 /dev/null $AZURE_CREDENTIALS_FILE; /usr/bin/install -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).keys[0].value, '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"loadBalancerName\": \"', variables('externalLoadBalancerName'), '\", \"appInsightsName\": \"', variables('appInsightsName'), '\", \"appInsightsId\": \"', reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsComponentsApiVersion')).AppId, '\"}', variables('singleQuote'), ' > $AZURE_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; bash /config/installCloudLibs.sh; . /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/util.sh; create_temp_dir $TMP_DIR; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), '|sha512sum|cut -d \" \" -f 1|tr -d \"\n\" > $TMP_CREDENTIALS_FILE; bash /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file $TMP_CREDENTIALS_FILE; f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/encryptDataToFile.js --data-file $TMP_CREDENTIALS_FILE --out-file $BIG_IP_CREDENTIALS_FILE; wipe_temp_dir $TMP_DIR;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, ';  /usr/bin/f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/runScript.js --output /var/log/cloud/azure/autoScaleScript.log --log-level debug --file /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs-azure/scripts/autoscale.sh --shell /bin/bash --cl-args ', variables('singleQuote'), '--resourceGroup ', resourceGroup().name, ' --vmssName ', variables('vmssName'), ' --userName svc_user --password /config/cloud/.passwd --azureSecretFile /config/cloud/.azCredentials --managementPort ', variables('bigIpMgmtPort'), ' --ntpServer ', parameters('ntpServer'), ' --timeZone ', parameters('timeZone'), variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, ' --appInsightsKey \"', reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsComponentsApiVersion')).InstrumentationKey, '\"', ' --bigIqLicenseHost ', parameters('bigIqLicenseHost'), ' --bigIqLicenseUsername ', parameters('bigIqLicenseUsername'), ' --bigIqLicensePassword /config/cloud/.bigIqPasswd --bigIqLicensePool ', parameters('bigIqLicensePool'), ' --bigIpExtMgmtAddress ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --bigIpExtMgmtPort via-api', variables('singleQuote'), ' --signal AUTOSCALE_SCRIPT_DONE', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; bash /config/customConfig.sh; reboot_signal=\"/tmp/f5-cloud-libs-signals/REBOOT_REQUIRED\"; if [ -f $reboot_signal ]; then echo \"Reboot signaled by cloud libs, rebooting\"; rm -f $reboot_signal; reboot; else echo \"Cloud libs did not signal a reboot\"; fi; $(cp_logs); else $(cp_logs); exit 1; fi', '; if grep -i \"PUT failed\" /var/log/waagent.log -q; then echo \"Killing waagent exthandler, daemon should restart it\"; pkill -f \"python -u /usr/sbin/waagent -run-exthandlers\"; fi')]"
+                                        "commandToExecute": "[concat('mkdir -p /config/cloud/azure/node_modules/@f5devcentral; mkdir -p /var/log/cloud/azure; function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; }; AZURE_CREDENTIALS_FILE=/config/cloud/.azCredentials; TMP_DIR=/mnt/creds; TMP_CREDENTIALS_FILE=$TMP_DIR/.passwd; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -m 400 /dev/null $AZURE_CREDENTIALS_FILE; /usr/bin/install -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).keys[0].value, '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"loadBalancerName\": \"', variables('externalLoadBalancerName'), '\", \"appInsightsName\": \"', variables('appInsightsName'), '\", \"appInsightsId\": \"', reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsComponentsApiVersion')).AppId, '\"}', variables('singleQuote'), ' > $AZURE_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; bash /config/installCloudLibs.sh; . /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/util.sh; create_temp_dir $TMP_DIR; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), '|sha512sum|cut -d \" \" -f 1|tr -d \"\n\" > $TMP_CREDENTIALS_FILE; bash /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file $TMP_CREDENTIALS_FILE; f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/encryptDataToFile.js --data-file $TMP_CREDENTIALS_FILE --out-file $BIG_IP_CREDENTIALS_FILE; wipe_temp_dir $TMP_DIR;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, ';  /usr/bin/f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/runScript.js --output /var/log/cloud/azure/autoScaleScript.log --log-level debug --file /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs-azure/scripts/autoscale.sh --shell /bin/bash --cl-args ', variables('singleQuote'), '--resourceGroup ', resourceGroup().name, ' --vmssName ', variables('vmssName'), ' --userName svc_user --password /config/cloud/.passwd --azureSecretFile /config/cloud/.azCredentials --managementPort ', variables('bigIpMgmtPort'), ' --ntpServer ', parameters('ntpServer'), ' --timeZone ', parameters('timeZone'), variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, ' --appInsightsKey \"', reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsComponentsApiVersion')).InstrumentationKey, '\"', ' --externalTag \"key:f5ClusterTag,value:', variables('dnsLabel'), '\"', variables('singleQuote'), ' --signal AUTOSCALE_SCRIPT_DONE', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; bash /config/customConfig.sh; reboot_signal=\"/tmp/f5-cloud-libs-signals/REBOOT_REQUIRED\"; if [ -f $reboot_signal ]; then echo \"Reboot signaled by cloud libs, rebooting\"; rm -f $reboot_signal; reboot; else echo \"Cloud libs did not signal a reboot\"; fi; $(cp_logs); else $(cp_logs); exit 1; fi', '; if grep -i \"PUT failed\" /var/log/waagent.log -q; then echo \"Killing waagent exthandler, daemon should restart it\"; pkill -f \"python -u /usr/sbin/waagent -run-exthandlers\"; fi')]"
                                     }, 
                                     "publisher": "Microsoft.Azure.Extensions", 
                                     "settings": {
@@ -974,8 +1069,8 @@
             "location": "[variables('location')]", 
             "name": "[variables('staticVmssName')]", 
             "plan": {
-                "name": "[variables('skuToUse')]", 
-                "product": "[variables('offerToUse')]", 
+                "name": "[variables('staticSkuToUse')]", 
+                "product": "[variables('staticOfferToUse')]", 
                 "publisher": "f5-networks"
             }, 
             "properties": {
@@ -990,7 +1085,7 @@
                                 "name": "main", 
                                 "properties": {
                                     "protectedSettings": {
-                                        "commandToExecute": "[concat('mkdir -p /config/cloud/azure/node_modules/@f5devcentral; mkdir -p /var/log/cloud/azure; function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; }; AZURE_CREDENTIALS_FILE=/config/cloud/.azCredentials; TMP_DIR=/mnt/creds; TMP_CREDENTIALS_FILE=$TMP_DIR/.passwd; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -m 400 /dev/null $AZURE_CREDENTIALS_FILE; /usr/bin/install -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).keys[0].value, '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"loadBalancerName\": \"', variables('externalLoadBalancerName'), '\", \"appInsightsName\": \"', variables('appInsightsName'), '\", \"appInsightsId\": \"', reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsComponentsApiVersion')).AppId, '\"}', variables('singleQuote'), ' > $AZURE_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; bash /config/installCloudLibs.sh; . /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/util.sh; create_temp_dir $TMP_DIR; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), '|sha512sum|cut -d \" \" -f 1|tr -d \"\n\" > $TMP_CREDENTIALS_FILE; bash /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file $TMP_CREDENTIALS_FILE; f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/encryptDataToFile.js --data-file $TMP_CREDENTIALS_FILE --out-file $BIG_IP_CREDENTIALS_FILE; wipe_temp_dir $TMP_DIR;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, ';  /usr/bin/f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/runScript.js --output /var/log/cloud/azure/autoScaleScript.log --log-level debug --file /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs-azure/scripts/autoscale.sh --shell /bin/bash --cl-args ', variables('singleQuote'), '--resourceGroup ', resourceGroup().name, ' --vmssName ', variables('vmssName'), ' --userName svc_user --password /config/cloud/.passwd --azureSecretFile /config/cloud/.azCredentials --managementPort ', variables('bigIpMgmtPort'), ' --ntpServer ', parameters('ntpServer'), ' --timeZone ', parameters('timeZone'), variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, ' --appInsightsKey \"', reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsComponentsApiVersion')).InstrumentationKey, '\"', ' --bigIqLicenseHost ', parameters('bigIqLicenseHost'), ' --bigIqLicenseUsername ', parameters('bigIqLicenseUsername'), ' --bigIqLicensePassword /config/cloud/.bigIqPasswd --bigIqLicensePool ', parameters('bigIqLicensePool'), ' --bigIpExtMgmtAddress ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --bigIpExtMgmtPort via-api', variables('singleQuote'), ' --signal AUTOSCALE_SCRIPT_DONE', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; bash /config/customConfig.sh; reboot_signal=\"/tmp/f5-cloud-libs-signals/REBOOT_REQUIRED\"; if [ -f $reboot_signal ]; then echo \"Reboot signaled by cloud libs, rebooting\"; rm -f $reboot_signal; reboot; else echo \"Cloud libs did not signal a reboot\"; fi; $(cp_logs); else $(cp_logs); exit 1; fi', '; if grep -i \"PUT failed\" /var/log/waagent.log -q; then echo \"Killing waagent exthandler, daemon should restart it\"; pkill -f \"python -u /usr/sbin/waagent -run-exthandlers\"; fi')]"
+                                        "commandToExecute": "[concat('mkdir -p /config/cloud/azure/node_modules/@f5devcentral; mkdir -p /var/log/cloud/azure; function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; }; AZURE_CREDENTIALS_FILE=/config/cloud/.azCredentials; TMP_DIR=/mnt/creds; TMP_CREDENTIALS_FILE=$TMP_DIR/.passwd; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -m 400 /dev/null $AZURE_CREDENTIALS_FILE; /usr/bin/install -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).keys[0].value, '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"loadBalancerName\": \"', variables('externalLoadBalancerName'), '\", \"appInsightsName\": \"', variables('appInsightsName'), '\", \"appInsightsId\": \"', reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsComponentsApiVersion')).AppId, '\"}', variables('singleQuote'), ' > $AZURE_CREDENTIALS_FILE; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; bash /config/installCloudLibs.sh; . /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/util.sh; create_temp_dir $TMP_DIR; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), '|sha512sum|cut -d \" \" -f 1|tr -d \"\n\" > $TMP_CREDENTIALS_FILE; bash /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file $TMP_CREDENTIALS_FILE; f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/encryptDataToFile.js --data-file $TMP_CREDENTIALS_FILE --out-file $BIG_IP_CREDENTIALS_FILE; wipe_temp_dir $TMP_DIR;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, ';  /usr/bin/f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/runScript.js --output /var/log/cloud/azure/autoScaleScript.log --log-level debug --file /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs-azure/scripts/autoscale.sh --shell /bin/bash --cl-args ', variables('singleQuote'), '--resourceGroup ', resourceGroup().name, ' --vmssName ', variables('vmssName'), ' --userName svc_user --password /config/cloud/.passwd --azureSecretFile /config/cloud/.azCredentials --managementPort ', variables('bigIpMgmtPort'), ' --ntpServer ', parameters('ntpServer'), ' --timeZone ', parameters('timeZone'), variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, ' --appInsightsKey \"', reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsComponentsApiVersion')).InstrumentationKey, '\"', ' --bigIqLicenseHost ', parameters('bigIqLicenseHost'), ' --bigIqLicenseUsername ', parameters('bigIqLicenseUsername'), ' --bigIqLicensePassword /config/cloud/.bigIqPasswd --bigIqLicensePool ', parameters('bigIqLicensePool'), ' --bigIpExtMgmtAddress ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --bigIpExtMgmtPort via-api --static --externalTag \"key:f5ClusterTag,value:', variables('dnsLabel'), '\"', variables('singleQuote'), ' --signal AUTOSCALE_SCRIPT_DONE', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; bash /config/customConfig.sh; reboot_signal=\"/tmp/f5-cloud-libs-signals/REBOOT_REQUIRED\"; if [ -f $reboot_signal ]; then echo \"Reboot signaled by cloud libs, rebooting\"; rm -f $reboot_signal; reboot; else echo \"Cloud libs did not signal a reboot\"; fi; $(cp_logs); else $(cp_logs); exit 1; fi', '; if grep -i \"PUT failed\" /var/log/waagent.log -q; then echo \"Killing waagent exthandler, daemon should restart it\"; pkill -f \"python -u /usr/sbin/waagent -run-exthandlers\"; fi')]"
                                     }, 
                                     "publisher": "Microsoft.Azure.Extensions", 
                                     "settings": {
@@ -1022,10 +1117,10 @@
                                                 ], 
                                                 "loadBalancerInboundNatPools": [
                                                     {
-                                                        "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/inboundNatPools/sshnatpool')]"
+                                                        "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/inboundNatPools/sshnatpool-static')]"
                                                     }, 
                                                     {
-                                                        "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/inboundNatPools/mgmtnatpool')]"
+                                                        "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/inboundNatPools/mgmtnatpool-static')]"
                                                     }
                                                 ], 
                                                 "subnet": {
@@ -1059,7 +1154,7 @@
                             "createOption": "FromImage", 
                             "name": "vmssosdisk", 
                             "vhdContainers": [
-                                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'static_vmss/')]"
+                                "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'static-vmss/')]"
                             ]
                         }
                     }
@@ -1070,7 +1165,7 @@
                 "name": "[parameters('instanceType')]", 
                 "tier": "Standard"
             }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            "tags": "[if(empty(variables('tagValues')), union(json('{}'), variables('staticVmssTagValues')), union(variables('tagValues'), variables('staticVmssTagValues')))]", 
             "type": "Microsoft.Compute/virtualMachineScaleSets"
         }, 
         {
