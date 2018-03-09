@@ -167,7 +167,7 @@ elif license_type == 'BIGIQ' or license_type == 'BIGIQ_PAYG':
             # Dynamic VMSS (PAYG)
             license1_command =  ", ' --externalTag \"key:f5ClusterTag,value:', variables('dnsLabel'), '\"'"
             # Static VMSS
-            static_license1_command =  ", ' --bigIqLicenseHost ', parameters('bigIqLicenseHost'), ' --bigIqLicenseUsername ', parameters('bigIqLicenseUsername'), ' --bigIqLicensePassword /config/cloud/.bigIqPasswd --bigIqLicensePool ', parameters('bigIqLicensePool'), ' --bigIpExtMgmtAddress ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --bigIpExtMgmtPort via-api --static --externalTag \"key:f5ClusterTag,value:', variables('dnsLabel'), '\"'"
+            static_license1_command =  ", ' --bigIqLicenseHost ', parameters('bigIqLicenseHost'), ' --bigIqLicenseUsername ', parameters('bigIqLicenseUsername'), ' --bigIqLicensePassword /config/cloud/.bigIqPasswd --bigIqLicensePool ', parameters('bigIqLicensePool'), ' --bigIpExtMgmtAddress ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --bigIpExtMgmtPort via-api --static --natBase \"mgmtnatpool-static.\" --externalTag \"key:f5ClusterTag,value:', variables('dnsLabel'), '\"'"
         else:
             license1_command =  ", ' --bigIqLicenseHost ', parameters('bigIqLicenseHost'), ' --bigIqLicenseUsername ', parameters('bigIqLicenseUsername'), ' --bigIqLicensePassword /config/cloud/.bigIqPasswd --bigIqLicensePool ', parameters('bigIqLicensePool'), ' --bigIpExtMgmtAddress ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --bigIpExtMgmtPort via-api'"
         
