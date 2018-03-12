@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json", 
-    "contentVersion": "4.4.0.0", 
+    "contentVersion": "4.4.0.1", 
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser", 
@@ -106,8 +106,6 @@
         "bigIpVersion": {
             "allowedValues": [
                 "13.1.0200", 
-                "13.0.0300", 
-                "12.1.2200", 
                 "latest"
             ], 
             "defaultValue": "13.1.0200", 
@@ -230,9 +228,6 @@
             "12.1.2200": {
                 "Port": 443
             }, 
-            "13.0.0300": {
-                "Port": 8443
-            }, 
             "13.1.0200": {
                 "Port": 8443
             }, 
@@ -260,7 +255,7 @@
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]", 
-        "offerToUse": "[if(or(equals(parameters('bigIpVersion'), '12.1.2200'), equals(parameters('bigIpVersion'), '13.0.0300')), 'f5-big-ip-hourly', concat('f5-big-ip-', variables('imageNameToLower')))]", 
+        "offerToUse": "[if(equals(parameters('bigIpVersion'), '12.1.2200'), 'f5-big-ip-hourly', concat('f5-big-ip-', variables('imageNameToLower')))]", 
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['1'].Port]", 
         "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
         "instanceName": "[toLower(parameters('instanceName'))]", 
@@ -281,7 +276,6 @@
         "mgmtRouteGw": "`tmsh list sys management-route default gateway | grep gateway | sed 's/gateway //;s/ //g'`", 
         "networkMtuArray": {
             "12.1.2200": "[concat('tmsh modify net vlan internal mtu 1400; RUN_NETWORK=0; EXT_ROUTE=\"\"')]", 
-            "13.0.0300": "[concat('tmsh modify sys global-settings mgmt-dhcp disabled; tmsh save sys config; tmsh modify net vlan internal mtu 1400; RUN_NETWORK=1; EXT_ROUTE=\"\"')]", 
             "13.1.0200": "[concat('tmsh modify sys global-settings mgmt-dhcp disabled; tmsh save sys config; RUN_NETWORK=1; EXT_ROUTE=\"--route name:ext_route,gw:', variables('mgmtRouteGw'), ',network:168.63.129.16/32\"')]", 
             "latest": "[concat('tmsh modify sys global-settings mgmt-dhcp disabled; tmsh save sys config; RUN_NETWORK=1; EXT_ROUTE=\"--route name:ext_route,gw:', variables('mgmtRouteGw'), ',network:168.63.129.16/32\"')]"
         }, 
@@ -505,7 +499,7 @@
             }, 
             "Yes": {
                 "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]", 
-                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:standalone_1nic-existing_stack-experimental,templateVersion:4.4.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:PAYG,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
+                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:standalone_1nic-existing_stack-experimental,templateVersion:4.4.0.1,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:PAYG,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
             }
         }, 
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n", 

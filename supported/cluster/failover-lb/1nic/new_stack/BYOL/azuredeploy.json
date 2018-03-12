@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json", 
-    "contentVersion": "4.4.0.0", 
+    "contentVersion": "4.4.0.1", 
     "parameters": {
         "numberOfInstances": {
             "allowedValues": [
@@ -109,8 +109,6 @@
         "bigIpVersion": {
             "allowedValues": [
                 "13.1.0200", 
-                "13.0.0300", 
-                "12.1.2200", 
                 "latest"
             ], 
             "defaultValue": "13.1.0200", 
@@ -211,9 +209,6 @@
             "12.1.2200": {
                 "Port": 443
             }, 
-            "13.0.0300": {
-                "Port": 8443
-            }, 
             "13.1.0200": {
                 "Port": 8443
             }, 
@@ -241,7 +236,7 @@
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]", 
-        "offerToUse": "[if(or(equals(parameters('bigIpVersion'), '12.1.2200'), equals(parameters('bigIpVersion'), '13.0.0300')), 'f5-big-ip', concat('f5-big-ip-', variables('imageNameToLower')))]", 
+        "offerToUse": "[if(equals(parameters('bigIpVersion'), '12.1.2200'), 'f5-big-ip', concat('f5-big-ip-', variables('imageNameToLower')))]", 
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['1'].Port]", 
         "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
@@ -485,7 +480,7 @@
             }, 
             "Yes": {
                 "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]", 
-                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:failover-lb_1nic-new_stack-supported,templateVersion:4.4.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BYOL,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
+                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:failover-lb_1nic-new_stack-supported,templateVersion:4.4.0.1,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BYOL,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
             }
         }, 
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n", 

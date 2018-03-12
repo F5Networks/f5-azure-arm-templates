@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json", 
-    "contentVersion": "4.4.0.0", 
+    "contentVersion": "4.4.0.1", 
     "parameters": {
         "vmScaleSetMinCount": {
             "allowedValues": [
@@ -209,8 +209,6 @@
         "bigIpVersion": {
             "allowedValues": [
                 "13.1.0200", 
-                "13.0.0300", 
-                "12.1.2200", 
                 "latest"
             ], 
             "defaultValue": "13.1.0200", 
@@ -426,9 +424,6 @@
             "12.1.2200": {
                 "Port": 443
             }, 
-            "13.0.0300": {
-                "Port": 8443
-            }, 
             "13.1.0200": {
                 "Port": 8443
             }, 
@@ -461,7 +456,7 @@
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]", 
-        "offerToUse": "[if(or(equals(parameters('bigIpVersion'), '12.1.2200'), equals(parameters('bigIpVersion'), '13.0.0300')), 'f5-big-ip-hourly', concat('f5-big-ip-', variables('imageNameToLower')))]", 
+        "offerToUse": "[if(equals(parameters('bigIpVersion'), '12.1.2200'), 'f5-big-ip-hourly', concat('f5-big-ip-', variables('imageNameToLower')))]", 
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['1'].Port]", 
         "bigIpMgmtPort": 8443, 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
@@ -749,7 +744,7 @@
             }, 
             "Yes": {
                 "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]", 
-                "metricsCmd": "[concat(' --usageAnalytics \" --metrics customerId:${custId},deploymentId:${deployId},templateName:autoscale_waf_via-lb-new_stack-experimental,templateVersion:4.4.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:PAYG,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure\"')]"
+                "metricsCmd": "[concat(' --usageAnalytics \" --metrics customerId:${custId},deploymentId:${deployId},templateName:autoscale_waf_via-lb-new_stack-experimental,templateVersion:4.4.0.1,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:PAYG,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure\"')]"
             }
         }, 
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n", 

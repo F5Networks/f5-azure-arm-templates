@@ -39,7 +39,7 @@ command_to_execute = ""
 route_add_cmd = ""
 
 ## Static Variable Assignment ##
-content_version = '4.4.0.0'
+content_version = '4.4.0.1'
 f5_networks_tag = 'develop'
 f5_cloud_libs_tag = 'develop'
 f5_cloud_libs_azure_tag = 'develop'
@@ -47,11 +47,10 @@ f5_cloud_iapps_tag = 'v1.2.1'
 f5_cloud_workers_tag = 'v1.0.0'
 # Set BIG-IP versions to allow
 default_big_ip_version = '13.1.0200'
-allowed_big_ip_versions = ["13.1.0200", "13.0.0300", "12.1.2200", "latest"]
-version_port_map = {"latest": {"Port": 8443}, "13.1.0200": {"Port": 8443}, "13.0.0300": {"Port": 8443}, "12.1.2200": {"Port": 443}, "443": {"Port": 443}}
-route_cmd_array = {"latest": "route", "13.1.0200": "route", "13.0.0300": "route", "12.1.2200": "[concat('tmsh create sys management-route waagent_route network 168.63.129.16/32 gateway ', variables('mgmtRouteGw'), '; tmsh save sys config')]"}
+allowed_big_ip_versions = ["13.1.0200", "latest"]
+version_port_map = {"latest": {"Port": 8443}, "13.1.0200": {"Port": 8443}, "12.1.2200": {"Port": 443}, "443": {"Port": 443}}
+route_cmd_array = {"latest": "route", "13.1.0200": "route", "12.1.2200": "[concat('tmsh create sys management-route waagent_route network 168.63.129.16/32 gateway ', variables('mgmtRouteGw'), '; tmsh save sys config')]"}
 network_mtu_array = {"12.1.2200": "[concat('tmsh modify net vlan internal mtu 1400; RUN_NETWORK=0; EXT_ROUTE=\"\"')]",
-    "13.0.0300": "[concat('tmsh modify sys global-settings mgmt-dhcp disabled; tmsh save sys config; tmsh modify net vlan internal mtu 1400; RUN_NETWORK=1; EXT_ROUTE=\"\"')]",
     "13.1.0200": "[concat('tmsh modify sys global-settings mgmt-dhcp disabled; tmsh save sys config; RUN_NETWORK=1; EXT_ROUTE=\"--route name:ext_route,gw:', variables('mgmtRouteGw'), ',network:168.63.129.16/32\"')]",
     "latest": "[concat('tmsh modify sys global-settings mgmt-dhcp disabled; tmsh save sys config; RUN_NETWORK=1; EXT_ROUTE=\"--route name:ext_route,gw:', variables('mgmtRouteGw'), ',network:168.63.129.16/32\"')]"
     }
@@ -126,9 +125,9 @@ if stack_type in ('existing_stack', 'prod_stack'):
 ## Determine PAYG/BYOL/BIGIQ variables
 image_to_use = "[parameters('bigIpVersion')]"
 byol_sku_to_use = "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]"
-byol_offer_to_use = "[if(or(equals(parameters('bigIpVersion'), '12.1.2200'), equals(parameters('bigIpVersion'), '13.0.0300')), 'f5-big-ip', concat('f5-big-ip-', variables('imageNameToLower')))]"
+byol_offer_to_use = "[if(equals(parameters('bigIpVersion'), '12.1.2200'), 'f5-big-ip', concat('f5-big-ip-', variables('imageNameToLower')))]"
 payg_sku_to_use = "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]"
-payg_offer_to_use = "[if(or(equals(parameters('bigIpVersion'), '12.1.2200'), equals(parameters('bigIpVersion'), '13.0.0300')), 'f5-big-ip-hourly', concat('f5-big-ip-', variables('imageNameToLower')))]"
+payg_offer_to_use = "[if(equals(parameters('bigIpVersion'), '12.1.2200'), 'f5-big-ip-hourly', concat('f5-big-ip-', variables('imageNameToLower')))]"
 license1_command = ''
 license2_command = ''
 big_iq_pwd_cmd = ''
@@ -359,7 +358,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
         data['variables']["intLbId"] = "[resourceId('Microsoft.Network/loadBalancers',variables('internalLoadBalancerName'))]"
         data['variables']['failoverCmdArray'] = {"No": {"first": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '0.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address none')]", "second": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '1.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address none')]" }, "Yes": {"first": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '0.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress'))]", "second": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '1.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress1'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress1'))]"}}
     if template_name in ('failover-api'):
-        data['variables']['failoverCmdArray'] = { "12.1.2200": "echo \"Failover db variable not required.\"", "13.0.0300": "echo \"Failover db variable not required.\"", "13.1.0200": "tmsh modify sys db failover.selinuxallowscripts value enable", "latest": "tmsh modify sys db failover.selinuxallowscripts value enable" }
+        data['variables']['failoverCmdArray'] = { "12.1.2200": "echo \"Failover db variable not required.\"", "13.1.0200": "tmsh modify sys db failover.selinuxallowscripts value enable", "latest": "tmsh modify sys db failover.selinuxallowscripts value enable" }
     if stack_type == 'new_stack':
         data['variables']['vnetId'] = "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
         data['variables']['vnetAddressPrefix'] = "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]"
