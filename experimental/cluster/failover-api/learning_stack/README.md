@@ -52,7 +52,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - Supported F5 ARM templates do not reconfigure existing Azure resources, such as network security groups.  Depending on your configuration, you may need to configure these resources to allow the BIG-IP VE(s) to receive traffic for your application.  Similarly, templates that deploy Azure load balancer(s) do not configure load balancing rules or probes on those resources to forward external traffic to the BIG-IP(s).  You must create these resources after the deployment has succeeded.
 - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
 - This template requires that the resource group name the deployment uses to be no longer than **35** characters as a result of limitations to tag size within Azure.
-- This template now supports associating Azure Public IP Address resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.
+- This template now supports associating Azure NIC IP configurations with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.
 - Persistence and connection mirroring are now supported in this template.  It also supports mirroring of APM sessions.
 - The BIG-IP VE failover log can be found at **/var/log/cloud/azure/azureFailover.log**.
 - This template creates separate Azure storage accounts for each BIG-IP device that is a part of this deployment.
@@ -180,35 +180,17 @@ Use this section for optional configuration changes after you have deployed the 
 
 ### Additional Public IP Addresses - Failover
 
-This ARM template supports using up to 20 public IP addresses for the external 'application' NIC to be used for passing traffic to BIG-IP virtual servers. Each virtual server should be configured with a destination address matching the private IP address value of the Azure IP configuration receiving traffic for the application. In the event the active BIG-IP VE becomes unavailable, the IP configuration(s) are migrated using network failover, seamlessly shifting application traffic to the current active BIG-IP VE (the template now supports [multiple traffic groups](#traffic-group-configuration) which enables active/active deployments).   When you initially deployed the template, if you chose fewer than 20 public IP addresses and now want to include additional public IP addresses (up to the template-supported limit of 20) and/or if you want to add or remove the user-defined routes (UDRs) to be managed by the BIG-IP, use the following guidance.  If you want to include more than 20 public IP addresses, see [Adding more than 20 Public IP addresses](#adding-more-than-20-public-ip-addresses-to-the-deployment).
+This ARM template supports using up to 20 public IP addresses for the external 'application' NIC to be used for passing traffic to BIG-IP virtual servers. Each virtual server should be configured with a destination address matching the private IP address value of the Azure IP configuration receiving traffic for the application. In the event the active BIG-IP VE becomes unavailable, the IP configuration(s) are migrated using network failover, seamlessly shifting application traffic to the current active BIG-IP VE (the template now supports [multiple traffic groups](#traffic-group-configuration) which enables active/active deployments).  After you initially deployed the template, if you now want to include additional public IP addresses and/or if you want to add or remove the user-defined routes (UDRs) to be managed by the BIG-IP, use the following guidance.
 
-#### Adding up to 20 public IP addresses after initially deploying the template
+#### Adding additional public IP addresses to the deployment
 
-To add public IP addresses up to the template-supported limit of 20 after you have initially deployed the template, use the Azure Portal to redeploy the template, updating the parameters for the changes you want to make.  Use the following guidance:
+The deployment template supports creation of 1-20 external public IP addresses for application traffic (first one is used for external NIC Self IP). Use the following guidance to add **additional** public IP addresses to the deployment:
 
-1. Ensure that the first BIG-IP (VM 0) in the cluster is in an active state (from the BIG-IP Configuration utility, click **Device Management>Devices**, the device with the lowest IP address should be active).
-2. From the Azure Portal, click the Azure Resource Group where you deployed the template.
-3. Click **Deployments**.
-4. Find the deployment and highlight it in the list.
-5. Click **Redeploy**.
-6. For the Resource Group, click Use existing and select the resource group in which you initially deployed.
-7. Enter the Admin password and Service Principal Secret parameters with the same values used in the initial deployment.
-8. To add public IP addresses, change the value of the **Number Of External Ips** parameter to the number of IP addresses you want to use.
-9. To add or change managed routes, change the value of the **Managed Routes** parameter.
-10. Agree to the terms and conditions.
-11. Click **Purchase**.
-
-#### Adding more than 20 public IP addresses to the deployment
-
-The deployment template supports creation of 1-20 external public IP addresses for application traffic (first one is used for external NIC Self IP). Use the following guidance to add **more** than 20 public IP addresses to the deployment:
-
-- Create a new Azure public IP address resource in the deployment resource group.  You ***must*** use the following syntax: ```<ResourceGroupName>-ext-pip<number>```.  For example: **SeattleResourceGroup-ext-pip9**.
-- Create a new IP configuration resource in the properties of the external Azure network interface (for example *myResourceGroupName-ext0*).  You ***must*** use the following syntax: ```<ResourceGroupName>-ext-ipconfig<number>```.  For example: **SeattleResourceGroup-ext-ipconfig9**.
-- Add these Azure tags to the public IP address resource:
-  1. For example: ```f5_privateIp=10.10.10.10``` (the tag value should correspond to the new private IP address of the IP configuration that references this public IP address).
-  2. For example: ```f5_extSubnetId=/subscriptions/<subscriptionId>/resourceGroups/<myResourceGroupName>/providers/Microsoft.Network/virtualNetworks/*< myVnetName >*/subnets/<mySubnetName>``` (you can get this value from a public IP address resource previously configured by the ARM template, or from resources.azure.com: **Subscriptions > Resource Groups > myResourceGroupName > providers > Microsoft.Network > virtualNetworks > myVnetName > subnets > mySubnetName.id**).
-  3. An Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group you have configured on the BIG-IP VE.
-- Again, you MUST follow the resource naming conventions in the provided examples for failover to work correctly.
+- Create a new Azure public IP address resource in the deployment resource group.
+- Create a new IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*) of the **active** BIG-IP.
+- Ensure a **Virtual Address** exists on the BIG-IP in the appropriate traffic group (such as traffic-group-1) that matches the private IP address of the IP configuration created.
+  1. Note: A Virtual Address will automatically be created for each Virtual Server created (if it does not already exist).
+  2. Note: This is what is matched on during a failover event to determine which NIC IP configurations to move.
 
 When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. See the BIG-IP documentation for specific instructions on creating virtual servers.
 
@@ -319,18 +301,18 @@ When you have completed the virtual server configuration, you may modify the vir
 
 ### Traffic Group Configuration
 
-This template supports associating Azure Public IP Address and Route Table resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.
-At deployment time, an Azure tag with key **f5_tg** and value **traffic-group-1** is created on each public IP address resource. Use the following guidance to configure multiple traffic groups.  Note you must create the **f5_tg** on any route tables with routes that will be managed by BIG-IP VE. At a minimum, these route tables must be tagged with a default value of **traffic-group-1**.
+This template supports associating Azure NIC IP Configurations and Route Table resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  Use the following guidance to configure multiple traffic groups.  Note you must create the **f5_tg** on any route tables with routes that will be managed by BIG-IP VE. At a minimum, these route tables must be tagged with a default value of **traffic-group-1**.
 
-1. Select the Azure public IP address or route table you want to associate with the second traffic group (in our example, the second traffic group name is **traffic-group-2**).
-2. From the public IP address or route table Tags blade, select the **f5_tg** tag.
+1. Select the route table you want to associate with the second traffic group (in our example, the second traffic group name is **traffic-group-2**).
+2. From the route table Tags blade, select the **f5_tg** tag.
 3. Modify the tag value to **traffic-group-2** and then save the tag.
 4. From the BIG-IP VE management Configuration utility, click **Device Management > Traffic Groups > Create**, and then complete the following.
     - *Name*: **traffic-group-2**
     - *Failover Order*: Select the preferred order of the devices for this traffic group; F5 recommends setting the current standby device as the preferred device for this second traffic group, so that each traffic group has a different preferred device (device will become active after creating the traffic group).
     - Click **Create Traffic Group**.
-
-The public IP address resources tagged with **traffic-group-2** will be associated with the preferred device for that traffic group.
+5. Ensure the BIG-IP **Virtual Address** corresponding with the created virtual servers is in the desired traffic group.
+    - Note: NIC IP Configurations are mapped to a specific traffic group by the Virtual Address configuration of the BIG-IP.
+    - Note: You can find the Virtual Address list by browsing to Local Traffic->Virtual Servers->Virtual Address List.
 
 ### Deploying Custom Configuration to the BIG-IP (Azure Virtual Machine)
 

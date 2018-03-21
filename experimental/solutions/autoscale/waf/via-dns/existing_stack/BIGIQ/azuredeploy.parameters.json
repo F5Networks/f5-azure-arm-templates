@@ -117,7 +117,7 @@
             "value": "GEN_UNIQUE"
         }, 
         "dnsProviderPool": {
-            "value": "GEN_UNIQUE"
+            "value": "autoscale_pool"
         }, 
         "dnsProviderDataCenter": {
             "value": "azure_datacenter"

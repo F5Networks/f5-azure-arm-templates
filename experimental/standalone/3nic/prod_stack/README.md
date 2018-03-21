@@ -160,25 +160,11 @@ Use this section for optional configuration changes after you have deployed the 
 
 ### Additional public IP addresses
 
-This ARM template supports using up to 20 public IP addresses.  When you initially deployed the template, if you chose fewer than 20 public IP addresses and now want to include additional public IP addresses (up to the template-supported limit of 20) use the following guidance.  If you want to include more than 20 public IP addresses available from the template, see [Adding more than 20 Public IP addresses](#adding-more-than-20-public-ip-addresses-to-the-deployment).
+This ARM template supports using up to 20 public IP addresses.  After you initially deployed the template, if you now want to include additional public IP addresses, use the following guidance.
 
-#### Adding up to 20 public IP addresses after initially deploying the template
+#### Adding additional public IP addresses to the deployment
 
-To add public IP addresses up to the template-supported limit of 20 after you have initially deployed the template, use the Azure Portal to redeploy the template, updating the parameters for the changes you want to make.  Use the following guidance:
-
-1. From the Azure Portal, click the Azure Resource Group where you deployed the template.
-2. Click **Deployments**.
-3. Find the deployment and highlight it in the list.
-4. Click **Redeploy**.
-5. For the Resource Group, click **Use existing** and then select the resource group in which you initially deployed.
-6. Enter the Admin password and Service Principal Secret parameters with the same values used in the initial deployment.
-7. To add public IP addresses, change the value of the **Number Of External Ips** parameter to the number of IP addresses you want to use.
-8. Agree to the terms and conditions.
-9. Click **Purchase**.
-
-#### Adding more than 20 public IP addresses to the deployment
-
-The deployment template supports creation of 1-20 external public IP addresses for application traffic (first one is used for external NIC Self IP).  Follow the steps below to add **more** than 20 public IP addresses to the deployment:
+The deployment template supports creation of 1-20 external public IP addresses for application traffic (first one is used for external NIC Self IP).  Follow the steps below to add **additional** public IP addresses to the deployment:
 
 - Create a new Azure public IP address resource in the deployment resource group
 - Create a new IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*)

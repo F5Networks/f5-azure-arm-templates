@@ -383,6 +383,7 @@
             "type": "securestring"
         }, 
         "dnsProviderPool": {
+            "defaultValue": "autoscale_pool", 
             "metadata": {
                 "description": "The GSLB pool on the BIG-IP DNS system to populate."
             }, 

@@ -79,7 +79,6 @@ install_cloud_libs = install_cloud_libs.replace('<HASHED_FILE_LIST>', hashed_fil
 install_cloud_libs = install_cloud_libs.replace('<TAR_LIST>', additional_tar_list)
 instance_type_list = ["Standard_A2", "Standard_A3", "Standard_A4", "Standard_A5", "Standard_A6", "Standard_A7", "Standard_D2", "Standard_D3", "Standard_D4", "Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14", "Standard_DS2", "Standard_DS3", "Standard_DS4", "Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2", "Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2", "Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2", "Standard_DS15_v2", "Standard_F2", "Standard_F4", "Standard_F8", "Standard_F2S", "Standard_F4S", "Standard_F8S", "Standard_F16S", "Standard_G2", "Standard_G3", "Standard_G4", "Standard_G5", "Standard_GS2", "Standard_GS3", "Standard_GS4", "Standard_GS5"]
 tags = "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
-pip_tags = "[if(empty(variables('tagValues')), union(json('{}'), variables('pipTagValues').values[copyIndex()]), union(variables('tagValues'), variables('pipTagValues').values[copyIndex()]))]"
 static_vmss_tags = "[if(empty(variables('tagValues')), union(json('{}'), variables('staticVmssTagValues')), union(variables('tagValues'), variables('staticVmssTagValues')))]"
 tag_values = {"application":"APP", "environment":"ENV", "group":"GROUP", "owner":"OWNER", "cost":"COST"}
 api_version = "[variables('apiVersion')]"
@@ -301,7 +300,7 @@ if template_name in ('autoscale_ltm_via-dns', 'autoscale_waf_via-dns'):
     data['parameters']['dnsProviderPort'] = {"type": "string", "defaultValue": "443", "metadata": {"description": ""}}
     data['parameters']['dnsProviderUser'] = {"type": "string", "metadata": {"description": ""}}
     data['parameters']['dnsProviderPassword'] = {"type": "securestring", "metadata": {"description": ""}}
-    data['parameters']['dnsProviderPool'] = {"type": "string", "metadata": {"description": ""}}
+    data['parameters']['dnsProviderPool'] = {"type": "string", "defaultValue": "autoscale_pool", "metadata": {"description": ""}}
     data['parameters']['dnsProviderDataCenter'] = {"type": "string", "defaultValue": "azure_datacenter", "metadata": {"description": ""}}
 # Add service principal parameters to necessary solutions
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns', 'failover-api'):
@@ -504,7 +503,6 @@ if template_name in ('failover-api'):
         private_ip_value = "[concat(parameters('vnetAddressPrefix'), '.2.', copyIndex('values', 10))]"
     elif stack_type in ('existing_stack', 'prod_stack'):
         private_ip_value = "[concat(split(parameters('externalIpAddressRangeStart'), '.')[0], '.', split(parameters('externalIpAddressRangeStart'), '.')[1], '.', split(parameters('externalIpAddressRangeStart'), '.')[2], '.', add(int(split(parameters('externalIpAddressRangeStart'), '.')[3]), copyIndex('values')))]"
-    data['variables']['pipTagValues'] = {"copy": [{"name": "values","count": 20,"input": {"f5_extSubnetId": "[variables('extSubnetId')]","f5_privateIp": private_ip_value,"f5_tg": "traffic-group-1"}}]}
 if template_name in ('failover-lb_1nic', 'failover-lb_3nic', 'autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     data['variables']['externalLoadBalancerName'] = "[concat(variables('dnsLabel'),'-ext-alb')]"
     data['variables']['extLbId'] = "[resourceId('Microsoft.Network/loadBalancers',variables('externalLoadBalancerName'))]"
@@ -592,11 +590,8 @@ if stack_type in ('new_stack', 'existing_stack'):
         resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('extSelfPublicIpAddressNamePrefix'), '0')]", "tags": tags, "properties": { "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
         if template_name in ('failover-api', 'failover-lb_3nic'):
             resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[concat(variables('extSelfPublicIpAddressNamePrefix'), '1')]", "tags": tags, "properties": { "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
-        pip_tags_to_use = tags
-        if template_name in ('failover-api'):
-            pip_tags_to_use = pip_tags
         # Add Traffic Public IP's - for external NIC
-        resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "condition": "[not(equals(variables('numberOfExternalIps'),0))]", "location": location, "name": "[concat(variables('extPublicIPAddressNamePrefix'), copyIndex())]", "copy": { "count": "[if(not(equals(variables('numberOfExternalIps'), 0)), variables('numberOfExternalIps'), 1)]", "name": "extpipcopy"}, "tags": pip_tags_to_use, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabel'), copyIndex(0))]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
+        resources_list += [{ "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "condition": "[not(equals(variables('numberOfExternalIps'),0))]", "location": location, "name": "[concat(variables('extPublicIPAddressNamePrefix'), copyIndex())]", "copy": { "count": "[if(not(equals(variables('numberOfExternalIps'), 0)), variables('numberOfExternalIps'), 1)]", "name": "extpipcopy"}, "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[concat(variables('dnsLabel'), copyIndex(0))]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }]
 
 ###### Virtual Network Resources(s) ######
 if template_name in ('standalone_1nic', 'failover-lb_1nic'):

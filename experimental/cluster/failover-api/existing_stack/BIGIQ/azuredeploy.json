@@ -613,19 +613,6 @@
             }
         }, 
         "tagValues": "[parameters('tagValues')]", 
-        "pipTagValues": {
-            "copy": [
-                {
-                    "count": 20, 
-                    "input": {
-                        "f5_extSubnetId": "[variables('extSubnetId')]", 
-                        "f5_privateIp": "[concat(split(parameters('externalIpAddressRangeStart'), '.')[0], '.', split(parameters('externalIpAddressRangeStart'), '.')[1], '.', split(parameters('externalIpAddressRangeStart'), '.')[2], '.', add(int(split(parameters('externalIpAddressRangeStart'), '.')[3]), copyIndex('values')))]", 
-                        "f5_tg": "traffic-group-1"
-                    }, 
-                    "name": "values"
-                }
-            ]
-        }, 
         "newStorageAccountName0": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'stor0')]", 
         "newStorageAccountName1": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'stor1')]", 
         "storageAccountType": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]", 
@@ -713,7 +700,7 @@
                 "idleTimeoutInMinutes": 30, 
                 "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
             }, 
-            "tags": "[if(empty(variables('tagValues')), union(json('{}'), variables('pipTagValues').values[copyIndex()]), union(variables('tagValues'), variables('pipTagValues').values[copyIndex()]))]", 
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
             "type": "Microsoft.Network/publicIPAddresses"
         }, 
         {
