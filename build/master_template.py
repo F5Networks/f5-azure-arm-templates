@@ -271,8 +271,10 @@ if template_name in ('failover-api'):
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     data['parameters']['vmScaleSetMinCount'] = {"type": "int", "defaultValue": 2, "allowedValues": [1, 2, 3, 4, 5, 6], "metadata": {"description": ""}}
     data['parameters']['vmScaleSetMaxCount'] = {"type": "int", "defaultValue": 4, "allowedValues": [2, 3, 4, 5, 6, 7, 8], "metadata": {"description": ""}}
-    # Add TMM CPU metric option into autoscale templates
-    data['parameters']['autoScaleMetric'] = {"type": "string", "defaultValue": "Host_Throughput", "allowedValues": ["F5_TMM_CPU", "F5_TMM_Traffic", "Host_Throughput"],  "metadata": {"description": ""}}
+    allowedValues = ["F5_TMM_CPU", "F5_TMM_Traffic", "Host_Throughput"]
+    if template_name in ('autoscale_ltm_via-dns', 'autoscale_waf_via-dns'):
+        allowedValues = ["F5_TMM_CPU", "F5_TMM_Traffic"]
+    data['parameters']['autoScaleMetric'] = {"type": "string", "defaultValue": "F5_TMM_Traffic", "allowedValues": allowedValues,  "metadata": {"description": ""}}
     data['parameters']['appInsights'] = {"type": "string", "defaultValue": "CREATE_NEW", "metadata": {"description": ""}}
     data['parameters']['calculatedBandwidth'] = {"type": "string", "defaultValue": "200m", "allowedValues": ["10m", "25m", "100m", "200m", "1g"], "metadata": {"description": ""}}
     data['parameters']['scaleOutThreshold'] = {"type": "int", "defaultValue": 90, "allowedValues": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95], "metadata": {"description": ""}}
@@ -518,8 +520,6 @@ if template_name in ('failover-lb_1nic', 'failover-lb_3nic', 'autoscale_ltm_via-
         data['variables']['vmssId'] = "[resourceId('Microsoft.Compute/virtualMachineScaleSets', variables('vmssName'))]"
         data['variables']['newDataStorageAccountName'] = "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data000')]"
         data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
-        data['variables']['autoScaleMetric'] = "Host_Throughput"
-        data['variables']['scaleMetricMap'] = { "Host_Throughput": { "metricName": "Network Out", "metricResourceUri": "[variables('vmssId')]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]"  } }
         data['variables']['autoScaleMetric'] = "[parameters('autoScaleMetric')]"
         data['variables']['scaleMetricMap'] = { "Host_Throughput": { "metricName": "Network Out", "metricResourceUri": "[variables('vmssId')]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]"  }, "F5_TMM_CPU": { "metricName": "customMetrics/F5_TMM_CPU", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[parameters('scaleOutThreshold')]", "thresholdIn": "[parameters('scaleInThreshold')]" }, "F5_TMM_Traffic": { "metricName": "customMetrics/F5_TMM_TRAFFIC", "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", "thresholdOut": "[variables('scaleOutNetworkBytes')]", "thresholdIn": "[variables('scaleInNetworkBytes')]" } }
         data['variables']['defaultAppInsightsLocation'] = "eastus"

@@ -35,8 +35,8 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 
 - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details.
 - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
-- This template requires a service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details, including what permissions are required.
-- To have the UDRs managed by BIG-IP, you must configure it with an Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group you have configured on the BIG-IP VE.
+- This template requires a service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details, including required permissions.
+- To indicate that a user-defined route's (UDR) next hop should be updated during failover, you must configure each UDR's parent route table resource with an Azure tag with key name f5_tg and value traffic-group-1 (or the name of a different traffic group you have configured on the BIG-IP VE).
 - This solution uses calls to the Azure REST API to read and update Azure resources such as storage accounts, network interfaces, and route tables.  For the solution to function correctly, you must ensure that the BIG-IP(s) can connect to the Azure REST API on port 443.
 
 ## Important configuration notes
@@ -195,10 +195,11 @@ This ARM template supports using up to 20 public IP addresses for the external '
 The deployment template supports creation of 1-20 external public IP addresses for application traffic (first one is used for external NIC Self IP). Use the following guidance to add **additional** public IP addresses to the deployment:
 
 - Create a new Azure public IP address resource in the deployment resource group.
-- Create a new IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*) of the **active** BIG-IP.
-- Ensure a **Virtual Address** exists on the BIG-IP in the appropriate traffic group (such as traffic-group-1) that matches the private IP address of the IP configuration created.
+- Create a new, secondary IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*) of the **active** BIG-IP.
+- Ensure a **Virtual Address** exists on the BIG-IP in the appropriate traffic group (such as traffic-group-1), and that the Virtual Address matches the private IP address of the secondary IP configuration you created.
   1. Note: A Virtual Address will automatically be created for each Virtual Server created (if it does not already exist).
   2. Note: This is what is matched on during a failover event to determine which NIC IP configurations to move.
+  3. Note: F5 recommends creating the IP configuration on the network interface of the BIG-IP VE that is active for the traffic group assigned to the matching Virtual Address.
 
 When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. See the BIG-IP documentation for specific instructions on creating virtual servers.
 
@@ -248,17 +249,15 @@ To launch the template:
 
 ### Service Principal Authentication
 
-This solution requires access to the Azure API to determine how the BIG-IP VEs should be configured.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication, for all the typical security reasons.  The following provides information/links on the options for configuring a service principal within Azure if this is the first time it is needed in a subscription.
+This solution requires access to the Azure API to correctly configure both the BIG-IP VE(s) as well as the Azure resources managed by the solution.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication, for all the typical security reasons.  The following information describes the initial configuration of an Azure service principal application for use with this solution.
 
-_Ensure that however the creation of the service principal occurs to verify it only has the minimum required access based on the solutions need prior to this template being deployed and used by the solution within the resource group selected (new or existing)._
+_However you decide to create the the service principal application, prior to deploying this template you must verify that it has the minimum required access based on the solution requirements._
 
 **Minimum Required Access:** The service principal account must have read/write permissions to certain objects and it is *recommended* to apply the built-in **Contributor** role to the account being used. If applying a custom role, it must have *read/write* permissions to the following resources:
 
 - Microsoft.Network/*
 
-The end result should be possession of a client (application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some post-deployment troubleshooting if the service principal is in fact not configured correctly.
-
-**NOTE:** Service principal information is stored locally in the **/config/cloud/.azCredentials file.  If for any reason you need to update the service principal information, you must manually edit the .azCredentials file on both BIG-IP systems.
+**NOTE:** Service principal information is stored locally in the **/config/cloud/.azCredentials file.  If for any reason you need to update the service principal information, you must manually edit the .azCredentials file on all BIG-IP systems.
 
 #### 1. Azure Portal
 
@@ -281,6 +280,8 @@ az ad sp create-for-rbac
 #### 3. Azure PowerShell
 
 Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
+
+After creating the service principal application in the same subscription where the template will be deployed, you should be in possession of the client ID (sometimes called the application ID), tenant ID, and service principal secret required in the template parameters.  Ensuring this is correctly configured prior to deploying this ARM template will reduce post-deployment troubleshooting.
 
 ## Creating virtual servers on the BIG-IP VE
 

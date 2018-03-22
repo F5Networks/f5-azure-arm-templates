@@ -31,7 +31,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 
 - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details.
 - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
-- This template requires a service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details, including what permissions are required.
+- This template requires a service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details, including required permissions.
 - This solution uses calls to the Azure REST API to read and update Azure resources such as storage accounts, network interfaces, and route tables.  For the solution to function correctly, you must ensure that the BIG-IP(s) can connect to the Azure REST API on port 443.
 - This solution uses a DNS provider instead of an Azure oad Balancer for distribution of traffic.  The DNS provider **must** already exist prior to deployment.
 
@@ -159,7 +159,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### PowerShell Script Example
 
 ```powershell
-## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -autoScaleMetric Host_Throughput -appInsights CREATE_NEW -calculatedBandwidth 200m -scaleOutThreshold 90 -scaleInThreshold 10 -scaleTimeWindow 10 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_DS2_v2 -imageName Good -bigIpVersion 13.1.0200 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -dnsMemberIpType private -dnsMemberPort 80 -dnsProviderHost <value> -dnsProviderPort 443 -dnsProviderUser <value> -dnsProviderPassword <value> -dnsProviderPool autoscale_pool -dnsProviderDataCenter azure_datacenter -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -notificationEmail OPTIONAL -ntpServer 0.pool.ntp.org -timeZone UTC -allowUsageAnalytics Yes -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -autoScaleMetric F5_TMM_Traffic -appInsights CREATE_NEW -calculatedBandwidth 200m -scaleOutThreshold 90 -scaleInThreshold 10 -scaleTimeWindow 10 -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceType Standard_DS2_v2 -imageName Good -bigIpVersion 13.1.0200 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -dnsMemberIpType private -dnsMemberPort 80 -dnsProviderHost <value> -dnsProviderPort 443 -dnsProviderUser <value> -dnsProviderPassword <value> -dnsProviderPool autoscale_pool -dnsProviderDataCenter azure_datacenter -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -notificationEmail OPTIONAL -ntpServer 0.pool.ntp.org -timeZone UTC -allowUsageAnalytics Yes -resourceGroupName <value>
 ```
 
 =======
@@ -167,7 +167,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### Azure CLI (1.0) Script Example
 
 ```bash
-## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --vmScaleSetMinCount 2 --vmScaleSetMaxCount 4 --autoScaleMetric Host_Throughput --appInsights CREATE_NEW --calculatedBandwidth 200m --scaleOutThreshold 90 --scaleInThreshold 10 --scaleTimeWindow 10 --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceType Standard_DS2_v2 --imageName Good --bigIpVersion 13.1.0200 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --dnsMemberIpType private --dnsMemberPort 80 --dnsProviderHost <value> --dnsProviderPort 443 --dnsProviderUser <value> --dnsProviderPassword <value> --dnsProviderPool autoscale_pool --dnsProviderDataCenter azure_datacenter --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --notificationEmail OPTIONAL --ntpServer 0.pool.ntp.org --timeZone UTC --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --vmScaleSetMinCount 2 --vmScaleSetMaxCount 4 --autoScaleMetric F5_TMM_Traffic --appInsights CREATE_NEW --calculatedBandwidth 200m --scaleOutThreshold 90 --scaleInThreshold 10 --scaleTimeWindow 10 --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceType Standard_DS2_v2 --imageName Good --bigIpVersion 13.1.0200 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --dnsMemberIpType private --dnsMemberPort 80 --dnsProviderHost <value> --dnsProviderPort 443 --dnsProviderUser <value> --dnsProviderPassword <value> --dnsProviderPool autoscale_pool --dnsProviderDataCenter azure_datacenter --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --notificationEmail OPTIONAL --ntpServer 0.pool.ntp.org --timeZone UTC --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 ```
 
 ## Scaling Thresholds
@@ -290,9 +290,9 @@ To launch the template:
 
 ### Service Principal Authentication
 
-This solution requires access to the Azure API to determine how the BIG-IP VEs should be configured.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication, for all the typical security reasons.  The following provides information/links on the options for configuring a service principal within Azure if this is the first time it is needed in a subscription.
+This solution requires access to the Azure API to correctly configure both the BIG-IP VE(s) as well as the Azure resources managed by the solution.  The most efficient and security-conscious way to handle this is to utilize Azure service principal authentication, for all the typical security reasons.  The following information describes the initial configuration of an Azure service principal application for use with this solution.
 
-_Ensure that however the creation of the service principal occurs to verify it only has the minimum required access based on the solutions need prior to this template being deployed and used by the solution within the resource group selected (new or existing)._
+_However you decide to create the the service principal application, prior to deploying this template you must verify that it has the minimum required access based on the solution requirements._
 
 **Minimum Required Access:** The service principal account must have read permissions to certain objects and it is *recommended* to apply the built-in **Reader** role to the account being used. If applying a custom role, it must have at least *read* permissions to the following resources:
 
@@ -300,9 +300,7 @@ _Ensure that however the creation of the service principal occurs to verify it o
 - Microsoft.Network/*
 - Microsoft.Storage/*
 
-The end result should be possession of a client (application) ID, tenant ID and service principal secret that can login to the same subscription this template will be deployed into.  Ensuring this is fully functioning prior to deploying this ARM template will save on some post-deployment troubleshooting if the service principal is in fact not configured correctly.
-
-**NOTE:** Service principal information is stored locally in the **/config/cloud/.azCredentials file.  If for any reason you need to update the service principal information, you must manually edit the .azCredentials file on both BIG-IP systems.
+**NOTE:** Service principal information is stored locally in the **/config/cloud/.azCredentials file.  If for any reason you need to update the service principal information, you must manually edit the .azCredentials file on all BIG-IP systems.
 
 #### 1. Azure Portal
 
@@ -325,6 +323,8 @@ az ad sp create-for-rbac
 #### 3. Azure PowerShell
 
 Follow the steps outlined in the [Azure Powershell documentation](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-authenticate-service-principal) to generate the service principal.
+
+After creating the service principal application in the same subscription where the template will be deployed, you should be in possession of the client ID (sometimes called the application ID), tenant ID, and service principal secret required in the template parameters.  Ensuring this is correctly configured prior to deploying this ARM template will reduce post-deployment troubleshooting.
 
 ## Creating virtual servers on the BIG-IP VE
 

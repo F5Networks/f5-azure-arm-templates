@@ -170,7 +170,7 @@ This ARM template supports using up to 20 public IP addresses.  After you initia
 The deployment template supports creation of 1-20 external public IP addresses for application traffic (first one is used for external NIC Self IP).  Follow the steps below to add **additional** public IP addresses to the deployment:
 
 - Create a new Azure public IP address resource in the deployment resource group
-- Create a new IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*)
+- Create a new, secondary IP configuration resource (for example: *myResourceGroupName-ext-ipconfig9*) in the properties of the external Azure network interface (for example: *myResourceGroupName-ext0*)
 
 When you create virtual servers on the BIG-IP VE for these additional addresses, the BIG-IP network virtual server destination IP address should match the private IP addresses of both secondary Azure IP configurations assigned to the backend pool that is referenced by the application's Azure load balancing rule.
 

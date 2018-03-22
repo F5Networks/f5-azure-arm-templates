@@ -36,10 +36,9 @@
         "autoScaleMetric": {
             "allowedValues": [
                 "F5_TMM_CPU", 
-                "F5_TMM_Traffic", 
-                "Host_Throughput"
+                "F5_TMM_Traffic"
             ], 
-            "defaultValue": "Host_Throughput", 
+            "defaultValue": "F5_TMM_Traffic", 
             "metadata": {
                 "description": "Select the metric on which auto scale events should be triggered. The following parameters determine individual settings for the scaling rules based on the metric you choose. Note: Custom BIG-IP metrics (for use by additional autoscale rules or for device visibility) are sent to Application Insights regardless of the metric you select."
             }, 
