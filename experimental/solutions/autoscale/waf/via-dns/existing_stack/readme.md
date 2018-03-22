@@ -305,7 +305,7 @@ This solution requires access to the Azure API to correctly configure both the B
 
 _However you decide to create the the service principal application, prior to deploying this template you must verify that it has the minimum required access based on the solution requirements._
 
-**Minimum Required Access:** The service principal account must have read permissions to certain objects and it is *recommended* to apply the built-in **Reader** role to the account being used. If applying a custom role, it must have at least *read* permissions to the following resources:
+**Minimum Required Access:** The service principal account must have read permissions to the following objects and it is *recommended* to apply the built-in **Reader** role to the account being used. If applying a custom role, it must have at least *read* permissions to the following resources:
 
 - Microsoft.Compute/*
 - Microsoft.Network/*
