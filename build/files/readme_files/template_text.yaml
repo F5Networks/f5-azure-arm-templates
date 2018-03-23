@@ -276,7 +276,7 @@ parameter_list:
   numberOfInstances: "The number of BIG-IP VEs that will be deployed in front of your application(s)."
   numberOfStaticInstances: "The number of static BIG-IP VEs that will be deployed in this solution."
   restrictedSrcAddress: 'This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources'
-  routeTableTag: "Azure tag value to identify the route tables to be managed by this cluster. For example tag value: myRoute.  Example Azure tag: f5_ha:myRoute."
+  routeTableTag: "Azure tag value to identify the route tables to be managed by this cluster. For example tag value: myRoute.  Example Azure tag: f5_ha:myRoute (*f5_ha* is the key and *myRoute* is the example value)."
   scaleOutThreshold: "The percentage the metric should be above to trigger a Scale Out event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'. See [Scaling Thresholds](#scaling-thresholds) for more information."
   scaleInThreshold: "The percentage the metric should be below to trigger a Scale In event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'.  See [Scaling Thresholds](#scaling-thresholds) for more information."
   scaleTimeWindow: "The time window required to trigger a scale event (in and out). This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping)."
@@ -286,7 +286,7 @@ parameter_list:
   sslPswd: "The SSL certificate .pfx password corresponding to the certificate you entered."
   tagValues: "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."
   tenantId: "Your Azure service principal application tenant ID."
-  timeZone: "If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo. Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."
+  timeZone: "If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list at https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."
   uniqueLabel: "Unique Name for the deployment to be used when creating resources."
   vmScaleSetMinCount: "The minimum (and default) number of BIG-IP VEs that will be deployed into the VM Scale Set."
   vmScaleSetMaxCount: "The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set."
