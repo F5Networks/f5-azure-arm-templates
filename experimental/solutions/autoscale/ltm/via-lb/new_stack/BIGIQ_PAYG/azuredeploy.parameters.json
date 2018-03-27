@@ -44,6 +44,9 @@
         "bigIpVersion": {
             "value": "13.1.0200"
         }, 
+        "numberOfStaticInstances": {
+            "value": "GEN_UNIQUE"
+        }, 
         "licensedBandwidth": {
             "value": "200m"
         }, 
@@ -57,9 +60,6 @@
             "value": "GEN_UNIQUE"
         }, 
         "bigIqLicensePool": {
-            "value": "GEN_UNIQUE"
-        }, 
-        "numberOfStaticInstances": {
             "value": "GEN_UNIQUE"
         }, 
         "vnetAddressPrefix": {

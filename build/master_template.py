@@ -269,10 +269,16 @@ if template_name in ('failover-api'):
     data['parameters']['managedRoutes'] = {"defaultValue": "NOT_SPECIFIED", "metadata": {"description": ""}, "type": "string"}
     data['parameters']['routeTableTag'] = {"defaultValue": "NOT_SPECIFIED", "metadata": {"description": ""}, "type": "string"}
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
-    data['parameters']['vmScaleSetMinCount'] = {"type": "int", "defaultValue": 2, "allowedValues": [1, 2, 3, 4, 5, 6], "metadata": {"description": ""}}
-    data['parameters']['vmScaleSetMaxCount'] = {"type": "int", "defaultValue": 4, "allowedValues": [2, 3, 4, 5, 6, 7, 8], "metadata": {"description": ""}}
+    if license_type == 'BIGIQ_PAYG':
+        min_allowed_values = [0, 1, 2, 3, 4, 5, 6]
+        max_allowed_values = [1, 2, 3, 4, 5, 6, 7, 8]
+    else:
+        min_allowed_values = [1, 2, 3, 4, 5, 6]
+        max_allowed_values = [2, 3, 4, 5, 6, 7, 8]
+    data['parameters']['vmScaleSetMinCount'] = {"type": "int", "defaultValue": 2, "allowedValues": min_allowed_values, "metadata": {"description": ""}}
+    data['parameters']['vmScaleSetMaxCount'] = {"type": "int", "defaultValue": 4, "allowedValues": max_allowed_values, "metadata": {"description": ""}}
     allowedValues = ["F5_TMM_CPU", "F5_TMM_Traffic", "Host_Throughput"]
-    if template_name in ('autoscale_ltm_via-dns', 'autoscale_waf_via-dns'):
+    if license_type == 'BIGIQ_PAYG':
         allowedValues = ["F5_TMM_CPU", "F5_TMM_Traffic"]
     data['parameters']['autoScaleMetric'] = {"type": "string", "defaultValue": "F5_TMM_Traffic", "allowedValues": allowedValues,  "metadata": {"description": ""}}
     data['parameters']['appInsights'] = {"type": "string", "defaultValue": "CREATE_NEW", "metadata": {"description": ""}}
@@ -920,7 +926,10 @@ if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale
 
 ###### Compute VM Scale Set(s) AutoScale Settings ######
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
-    resources_list += [{ "type": "Microsoft.Insights/autoscaleSettings", "apiVersion": "[variables('appInsightsApiVersion')]", "name": "autoscaleconfig", "location": location, "dependsOn": [ "[variables('vmssId')]" ], "properties": { "name": "autoscaleconfig", "targetResourceUri": "[variables('vmssId')]", "enabled": True, "profiles": [ { "name": "Profile1", "capacity": { "minimum": "[parameters('vmScaleSetMinCount')]", "maximum": "[parameters('vmScaleSetMaxCount')]", "default": "[parameters('vmScaleSetMinCount')]" }, "rules": [ { "metricTrigger": { "metricName": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricName]", "metricNamespace": "", "metricResourceUri": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricResourceUri]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "[variables('timeWindow')]", "timeAggregation": "Average", "operator": "GreaterThan", "threshold": "[variables('scaleMetricMap')[variables('autoScaleMetric')].thresholdOut]" }, "scaleAction": { "direction": "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } }, { "metricTrigger": { "metricName": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricName]", "metricNamespace": "", "metricResourceUri": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricResourceUri]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "[variables('timeWindow')]", "timeAggregation": "Average", "operator": "LessThan", "threshold": "[variables('scaleMetricMap')[variables('autoScaleMetric')].thresholdIn]" }, "scaleAction": { "direction": "Decrease", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } } ] } ], "notifications": [ { "operation": "Scale", "email": { "sendToSubscriptionAdministrator": False, "sendToSubscriptionCoAdministrators": False, "customEmails": "[variables('customEmail')]" }, "webhooks": [] } ] } }]
+    depends_on = ["[variables('vmssId')]"]
+    if license_type == 'BIGIQ_PAYG':
+        depends_on.append("[variables('staticVmssId')]")
+    resources_list += [{ "type": "Microsoft.Insights/autoscaleSettings", "apiVersion": "[variables('appInsightsApiVersion')]", "name": "autoscaleconfig", "location": location, "dependsOn": depends_on, "properties": { "name": "autoscaleconfig", "targetResourceUri": "[variables('vmssId')]", "enabled": True, "profiles": [ { "name": "Profile1", "capacity": { "minimum": "[parameters('vmScaleSetMinCount')]", "maximum": "[parameters('vmScaleSetMaxCount')]", "default": "[parameters('vmScaleSetMinCount')]" }, "rules": [ { "metricTrigger": { "metricName": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricName]", "metricNamespace": "", "metricResourceUri": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricResourceUri]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "[variables('timeWindow')]", "timeAggregation": "Average", "operator": "GreaterThan", "threshold": "[variables('scaleMetricMap')[variables('autoScaleMetric')].thresholdOut]" }, "scaleAction": { "direction": "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } }, { "metricTrigger": { "metricName": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricName]", "metricNamespace": "", "metricResourceUri": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricResourceUri]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "[variables('timeWindow')]", "timeAggregation": "Average", "operator": "LessThan", "threshold": "[variables('scaleMetricMap')[variables('autoScaleMetric')].thresholdIn]" }, "scaleAction": { "direction": "Decrease", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } } ] } ], "notifications": [ { "operation": "Scale", "email": { "sendToSubscriptionAdministrator": False, "sendToSubscriptionCoAdministrators": False, "customEmails": "[variables('customEmail')]" }, "webhooks": [] } ] } }]
 
 
 ###### Appliction Insight Workspace(s) ######
@@ -967,8 +976,14 @@ if template_name in ('failover-api', 'failover-lb_3nic'):
     if learning_stack:
         data['outputs']['EXAMPLE-APP-URL'] = { "type": "string", "value": "[concat('http://', reference(concat(variables('extPublicIPAddressIdPrefix'), '0')).dnsSettings.fqdn, ':', variables('webVmVsPort'))]" }
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_waf_via-lb'):
-    data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50101', ' - 50200')]" }
-    data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50001, ' - 50100')]" }
+    if license_type == 'BIGIQ_PAYG':
+        data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50101', ' - 50110')]" }
+        data['outputs']['GUI-URL-DYNAMIC'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50111', ' - 50200')]" }
+        data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50001, ' - 50010')]" }
+        data['outputs']['SSH-URL-DYAMIC'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50011, ' - 50100')]" }
+    else:
+        data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50101', ' - 50200')]" }
+        data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50001, ' - 50100')]" }
 if template_name in ('autoscale_ltm_via-dns', 'autoscale_waf_via-dns'):
     # Do nothing currently
     data['outputs']['GUI-URL'] = { "type": "string", "value": "N/A" }
@@ -997,7 +1012,7 @@ api_access_required = {'standalone_1nic': None, 'standalone_2nic': None, 'standa
 template_info = {'template_name': template_name, 'location': script_location, 'lic_support': lic_support, 'lic_key_count': lic_key_count, 'api_access_required': api_access_required}
 
 ## Abstract license key parameters for readme_generator/script_generator ##
-license_params = OrderedDict([('licenseKey1',['BYOL']), ('licenseKey2',['BYOL']), ('licensedBandwidth',['PAYG',]), ('bigIqLicenseHost',['BIG-IQ']), ('bigIqLicenseUsername',['BIG-IQ']), ('bigIqLicensePassword',['BIG-IQ']), ('bigIqLicensePool',['BIG-IQ']), ('numberOfStaticInstances',['BIG-IQ+PAYG'])])
+license_params = OrderedDict([('numberOfStaticInstances',['BIG-IQ+PAYG']), ('licenseKey1',['BYOL']), ('licenseKey2',['BYOL']), ('licensedBandwidth',['PAYG',]), ('bigIqLicenseHost',['BIG-IQ']), ('bigIqLicenseUsername',['BIG-IQ']), ('bigIqLicensePassword',['BIG-IQ']), ('bigIqLicensePool',['BIG-IQ'])])
 # licenseKey2 is only used by cluster templates
 if template_name not in ('failover-lb_1nic', 'failover-lb_3nic', 'failover-api'):
     license_params.pop('licenseKey2')

@@ -36,7 +36,8 @@
         "autoScaleMetric": {
             "allowedValues": [
                 "F5_TMM_CPU", 
-                "F5_TMM_Traffic"
+                "F5_TMM_Traffic", 
+                "Host_Throughput"
             ], 
             "defaultValue": "F5_TMM_Traffic", 
             "metadata": {

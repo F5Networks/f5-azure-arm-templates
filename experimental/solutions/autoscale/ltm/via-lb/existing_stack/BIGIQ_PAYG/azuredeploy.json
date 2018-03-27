@@ -4,6 +4,7 @@
     "parameters": {
         "vmScaleSetMinCount": {
             "allowedValues": [
+                0, 
                 1, 
                 2, 
                 3, 
@@ -19,6 +20,7 @@
         }, 
         "vmScaleSetMaxCount": {
             "allowedValues": [
+                1, 
                 2, 
                 3, 
                 4, 
@@ -36,8 +38,7 @@
         "autoScaleMetric": {
             "allowedValues": [
                 "F5_TMM_CPU", 
-                "F5_TMM_Traffic", 
-                "Host_Throughput"
+                "F5_TMM_Traffic"
             ], 
             "defaultValue": "F5_TMM_Traffic", 
             "metadata": {
@@ -221,6 +222,18 @@
             }, 
             "type": "string"
         }, 
+        "numberOfStaticInstances": {
+            "allowedValues": [
+                1, 
+                2, 
+                3, 
+                4
+            ], 
+            "metadata": {
+                "description": "The number of static BIG-IP VEs that will be deployed in this solution."
+            }, 
+            "type": "int"
+        }, 
         "licensedBandwidth": {
             "allowedValues": [
                 "25m", 
@@ -256,18 +269,6 @@
                 "description": "The BIG-IQ license pool to use during BIG-IP licensing via BIG-IQ."
             }, 
             "type": "string"
-        }, 
-        "numberOfStaticInstances": {
-            "allowedValues": [
-                1, 
-                2, 
-                3, 
-                4
-            ], 
-            "metadata": {
-                "description": "The number of static BIG-IP VEs that will be deployed in this solution."
-            }, 
-            "type": "int"
         }, 
         "vnetName": {
             "metadata": {
@@ -1148,7 +1149,8 @@
         {
             "apiVersion": "[variables('appInsightsApiVersion')]", 
             "dependsOn": [
-                "[variables('vmssId')]"
+                "[variables('vmssId')]", 
+                "[variables('staticVmssId')]"
             ], 
             "location": "[variables('location')]", 
             "name": "autoscaleconfig", 
@@ -1238,11 +1240,19 @@
     "outputs": {
         "GUI-URL": {
             "type": "string", 
-            "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50101', ' - 50200')]"
+            "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50101', ' - 50110')]"
+        }, 
+        "GUI-URL-DYNAMIC": {
+            "type": "string", 
+            "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50111', ' - 50200')]"
         }, 
         "SSH-URL": {
             "type": "string", 
-            "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50001, ' - 50100')]"
+            "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50001, ' - 50010')]"
+        }, 
+        "SSH-URL-DYAMIC": {
+            "type": "string", 
+            "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50011, ' - 50100')]"
         }
     }
 }

@@ -204,7 +204,7 @@ def script_creation(data, i_data, language):
                 deploy_cmd_params += '\\"' + parameter[0] + '\\":{\\"value\\":\\"$' + parameter[0] + '\\"},'
         ## Add parameter to example command, use default value if exists ##
         if parameter[0] not in ('restrictedSrcAddress', 'tagValues'):
-            if parameter[1]:
+            if parameter[1] or isinstance(parameter[1], int):
                 base_ex += script_dash + parameter[0] + ' ' + str(parameter[1])
             else:
                 base_ex += script_dash + parameter[0] + ' ' + '<value>'
