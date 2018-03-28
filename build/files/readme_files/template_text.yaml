@@ -274,7 +274,7 @@ parameter_list:
   notificationEmail: "If you want email notifications on scale events, specify an email address, otherwise leave the parameter as **OPTIONAL**. Note: You can specify multiple emails by separating them with a semi-colon, such as *email@domain.com;email2@domain.com*."
   numberOfAdditionalNics: "By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a select number of additional NICs to the BIG-IP using this parameter."
   numberOfInstances: "The number of BIG-IP VEs that will be deployed in front of your application(s)."
-  numberOfStaticInstances: "The number of static BIG-IP VEs that will be deployed in this solution."
+  numberOfStaticInstances: "The number of static BYOL BIG-IP VEs that will be deployed in this solution."
   restrictedSrcAddress: 'This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources'
   routeTableTag: "Azure tag value to identify the route tables to be managed by this cluster. For example tag value: myRoute.  Example Azure tag: f5_ha:myRoute (*f5_ha* is the key and *myRoute* is the example value)."
   scaleOutThreshold: "The percentage the metric should be above to trigger a Scale Out event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'. See [Scaling Thresholds](#scaling-thresholds) for more information."

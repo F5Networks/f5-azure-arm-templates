@@ -230,7 +230,7 @@
                 4
             ], 
             "metadata": {
-                "description": "The number of static BIG-IP VEs that will be deployed in this solution."
+                "description": "The number of static BYOL BIG-IP VEs that will be deployed in this solution."
             }, 
             "type": "int"
         }, 
