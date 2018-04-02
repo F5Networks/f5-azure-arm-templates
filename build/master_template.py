@@ -39,18 +39,18 @@ command_to_execute = ""
 route_add_cmd = ""
 
 ## Static Variable Assignment ##
-content_version = '4.4.0.1'
+content_version = '5.0.0.0'
 f5_networks_tag = 'develop'
-f5_cloud_libs_tag = 'develop'
-f5_cloud_libs_azure_tag = 'develop'
-f5_cloud_iapps_tag = 'v1.2.1'
+f5_cloud_libs_tag = 'release-4.0.0'
+f5_cloud_libs_azure_tag = 'release-2.0.0'
+f5_cloud_iapps_tag = 'release-2.0.0'
 f5_cloud_workers_tag = 'v1.0.0'
 # Set BIG-IP versions to allow
 default_big_ip_version = '13.1.0200'
-allowed_big_ip_versions = ["13.1.0200", "latest"]
-version_port_map = {"latest": {"Port": 8443}, "13.1.0200": {"Port": 8443}, "12.1.2200": {"Port": 443}, "443": {"Port": 443}}
-route_cmd_array = {"latest": "route", "13.1.0200": "route", "12.1.2200": "[concat('tmsh create sys management-route waagent_route network 168.63.129.16/32 gateway ', variables('mgmtRouteGw'), '; tmsh save sys config')]"}
-network_mtu_array = {"12.1.2200": "[concat('tmsh modify net vlan internal mtu 1400; RUN_NETWORK=0; EXT_ROUTE=\"\"')]",
+allowed_big_ip_versions = ["13.1.0200", "12.1.303000", "latest"]
+version_port_map = {"latest": {"Port": 8443}, "13.1.0200": {"Port": 8443}, "12.1.303000": {"Port": 443}, "443": {"Port": 443}}
+route_cmd_array = {"latest": "route", "13.1.0200": "route", "12.1.303000": "[concat('tmsh create sys management-route waagent_route network 168.63.129.16/32 gateway ', variables('mgmtRouteGw'), '; tmsh save sys config')]"}
+network_mtu_array = {"12.1.303000": "[concat('tmsh modify net vlan internal mtu 1400; RUN_NETWORK=0; EXT_ROUTE=\"\"')]",
     "13.1.0200": "[concat('tmsh modify sys global-settings mgmt-dhcp disabled; tmsh save sys config; RUN_NETWORK=1; EXT_ROUTE=\"--route name:ext_route,gw:', variables('mgmtRouteGw'), ',network:168.63.129.16/32\"')]",
     "latest": "[concat('tmsh modify sys global-settings mgmt-dhcp disabled; tmsh save sys config; RUN_NETWORK=1; EXT_ROUTE=\"--route name:ext_route,gw:', variables('mgmtRouteGw'), ',network:168.63.129.16/32\"')]"
     }
@@ -124,9 +124,9 @@ if stack_type in ('existing_stack', 'prod_stack'):
 ## Determine PAYG/BYOL/BIGIQ variables
 image_to_use = "[parameters('bigIpVersion')]"
 byol_sku_to_use = "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]"
-byol_offer_to_use = "[if(equals(parameters('bigIpVersion'), '12.1.2200'), 'f5-big-ip', concat('f5-big-ip-', variables('imageNameToLower')))]"
+byol_offer_to_use = "[concat('f5-big-ip-', variables('imageNameToLower'), '-preview')]"
 payg_sku_to_use = "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]"
-payg_offer_to_use = "[if(equals(parameters('bigIpVersion'), '12.1.2200'), 'f5-big-ip-hourly', concat('f5-big-ip-', variables('imageNameToLower')))]"
+payg_offer_to_use = "[concat('f5-big-ip-', variables('imageNameToLower'), '-preview')]"
 license1_command = ''
 license2_command = ''
 big_iq_pwd_cmd = ''
@@ -365,7 +365,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
         data['variables']["intLbId"] = "[resourceId('Microsoft.Network/loadBalancers',variables('internalLoadBalancerName'))]"
         data['variables']['failoverCmdArray'] = {"No": {"first": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '0.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address none')]", "second": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '1.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address none')]" }, "Yes": {"first": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '0.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress'))]", "second": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '1.', resourceGroup().location, '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress1'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress1'))]"}}
     if template_name in ('failover-api'):
-        data['variables']['failoverCmdArray'] = { "12.1.2200": "echo \"Failover db variable not required.\"", "13.1.0200": "tmsh modify sys db failover.selinuxallowscripts value enable", "latest": "tmsh modify sys db failover.selinuxallowscripts value enable" }
+        data['variables']['failoverCmdArray'] = { "12.1.303000": "echo \"Failover db variable not required.\"", "13.1.0200": "tmsh modify sys db failover.selinuxallowscripts value enable", "latest": "tmsh modify sys db failover.selinuxallowscripts value enable" }
     if stack_type == 'new_stack':
         data['variables']['vnetId'] = "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
         data['variables']['vnetAddressPrefix'] = "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]"
@@ -895,7 +895,7 @@ if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale
     else:
         post_cmd_to_execute = ", '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; tmsh load sys application template f5.cloud_logger.v1.0.0.tmpl;<BIGIQ_PWD_DELETE> bash /config/customConfig.sh; reboot_signal=\"/tmp/f5-cloud-libs-signals/REBOOT_REQUIRED\"; if [ -f $reboot_signal ]; then echo \"Reboot signaled by cloud libs, rebooting\"; rm -f $reboot_signal; reboot; else echo \"Cloud libs did not signal a reboot\"; fi; $(cp_logs); else $(cp_logs); exit 1; fi'" + waagent_restart_cmd
     autoscale_command_to_execute = "[concat('mkdir -p /config/cloud/azure/node_modules/@f5devcentral; mkdir -p /var/log/cloud/azure; function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; }; <ADDTL_SETUP>AZURE_CREDENTIALS_FILE=/config/cloud/.azCredentials; TMP_DIR=/mnt/creds; TMP_CREDENTIALS_FILE=$TMP_DIR/.passwd; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -m 400 /dev/null $AZURE_CREDENTIALS_FILE; /usr/bin/install -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).keys[0].value, '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"loadBalancerName\": \"', variables('externalLoadBalancerName'), '\", \"appInsightsName\": \"', variables('appInsightsName'), '\", \"appInsightsId\": \"', reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsComponentsApiVersion')).AppId, '\"}', variables('singleQuote'), ' > $AZURE_CREDENTIALS_FILE;<BIGIQ_PWD_CMD> cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; bash /config/installCloudLibs.sh; . /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/util.sh; create_temp_dir $TMP_DIR; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), '|sha512sum|cut -d \" \" -f 1|tr -d \"\n\" > $TMP_CREDENTIALS_FILE; bash /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file $TMP_CREDENTIALS_FILE; f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/encryptDataToFile.js --data-file $TMP_CREDENTIALS_FILE --out-file $BIG_IP_CREDENTIALS_FILE;<ADDTL_ENCRYPT_CALLS> wipe_temp_dir $TMP_DIR;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, '; <SCALE_SCRIPT_CALL><POST_CMD_TO_EXECUTE>)]"
-    scale_script_call = " /usr/bin/f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/runScript.js --output /var/log/cloud/azure/autoScaleScript.log --log-level debug --file /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs-azure/scripts/autoscale.sh --shell /bin/bash --cl-args \"--logLevel info --resourceGroup ', resourceGroup().name, ' --vmssName ', variables('vmssName'), ' --userName svc_user --password /config/cloud/.passwd --azureSecretFile /config/cloud/.azCredentials --managementPort ', variables('bigIpMgmtPort'), ' --ntpServer ', parameters('ntpServer'), ' --timeZone ', parameters('timeZone'), variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd<ADDTL_SCRIPT_ARGS>"
+    scale_script_call = " /usr/bin/f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/runScript.js --output /var/log/cloud/azure/autoScaleScript.log --log-level debug --file /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs-azure/scripts/autoscale.sh --shell /bin/bash --cl-args \"--logLevel info --backupUcs 7 --resourceGroup ', resourceGroup().name, ' --vmssName ', variables('vmssName'), ' --userName svc_user --password /config/cloud/.passwd --azureSecretFile /config/cloud/.azCredentials --managementPort ', variables('bigIpMgmtPort'), ' --ntpServer ', parameters('ntpServer'), ' --timeZone ', parameters('timeZone'), variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd<ADDTL_SCRIPT_ARGS>"
     scale_script_call = scale_script_call.replace('<ADDTL_SCRIPT_ARGS>', addtl_script_args)
     # Add licensing (BIG-IQ)
     if license_type == 'BIGIQ_PAYG':
@@ -977,10 +977,10 @@ if template_name in ('failover-api', 'failover-lb_3nic'):
         data['outputs']['EXAMPLE-APP-URL'] = { "type": "string", "value": "[concat('http://', reference(concat(variables('extPublicIPAddressIdPrefix'), '0')).dnsSettings.fqdn, ':', variables('webVmVsPort'))]" }
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_waf_via-lb'):
     if license_type == 'BIGIQ_PAYG':
-        data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50101', ' - 50110')]" }
-        data['outputs']['GUI-URL-DYNAMIC'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50111', ' - 50200')]" }
-        data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50001, ' - 50010')]" }
-        data['outputs']['SSH-URL-DYAMIC'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50011, ' - 50100')]" }
+        data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50101', ' - 50109')]" }
+        data['outputs']['GUI-URL-DYNAMIC'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50110', ' - 50200')]" }
+        data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50001, ' - 50009')]" }
+        data['outputs']['SSH-URL-DYAMIC'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50010, ' - 50100')]" }
     else:
         data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50101', ' - 50200')]" }
         data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50001, ' - 50100')]" }

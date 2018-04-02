@@ -63,6 +63,7 @@ The following is a map that shows the available options for the template paramet
 | Azure BIG-IP Image Version | BIG-IP Version |
 | --- | --- |
 | 13.1.0200 | 13.1.0 Build 0.0.6 |
+| 12.1.303000 | 12.1.3.3 Build 0.0.1 |
 | latest | This will select the latest BIG-IP version available |
 
 ## Supported instance types and hypervisors
