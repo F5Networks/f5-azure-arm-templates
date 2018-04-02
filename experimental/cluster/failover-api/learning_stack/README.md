@@ -143,8 +143,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | tenantId | Yes | Your Azure service principal application tenant ID. |
 | clientId | Yes | Your Azure service principal application client ID. |
 | servicePrincipalSecret | Yes | Your Azure service principal application secret. |
-| managedRoutes | Yes | A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24. Specifying a comma-delimited list of managedRoutes and a routeTableTag in the template defines the UDRs to be updated. To have the UDRs managed by BIG-IP, you will now also need to create an Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group you have configured on the BIG-IP VE. All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with 'f5_ha:' will use the active BIG-IP VE as the next hop for those routes. |
-| routeTableTag | Yes | Azure tag value to identify the route tables to be managed by this cluster. For example tag value: myRoute.  Example Azure tag: f5_ha:myRoute (*f5_ha* is the key and *myRoute* is the example value). |
+| managedRoutes | Yes | A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24. Specifying a comma-delimited list of managedRoutes and an f5_ha tag on the Azure Route Table defines the UDRs to be updated. To have the UDRs managed by BIG-IP, you will need to create an Azure tag with key **f5_ha** and value **self_2nic**, or the name of a different self IP address configured on the BIG-IP VE. All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with 'f5_ha:' will use the corresponding self IP address on the active BIG-IP VE as the next hop for those routes. |
 | ntpServer | Yes | Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use. |
 | timeZone | Yes | If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list at https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |
 | restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources |
@@ -158,7 +157,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### PowerShell Script Example
 
 ```powershell
-## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceName f5vm01 -instanceType Standard_DS3_v2 -imageName Good -bigIpVersion 13.1.0200 -numberOfExternalIps 1 -vnetAddressPrefix 10.0 -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -managedRoutes NOT_SPECIFIED -routeTableTag NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -allowUsageAnalytics Yes -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -adminUsername azureuser -adminPassword <value> -dnsLabel <value> -instanceName f5vm01 -instanceType Standard_DS3_v2 -imageName Good -bigIpVersion 13.1.0200 -numberOfExternalIps 1 -vnetAddressPrefix 10.0 -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -managedRoutes NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -allowUsageAnalytics Yes -resourceGroupName <value>
 ```
 
 =======
@@ -166,7 +165,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### Azure CLI (1.0) Script Example
 
 ```bash
-## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_DS3_v2 --imageName Good --bigIpVersion 13.1.0200 --numberOfExternalIps 1 --vnetAddressPrefix 10.0 --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --managedRoutes NOT_SPECIFIED --routeTableTag NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --licenseType PAYG --licensedBandwidth 200m --adminUsername azureuser --adminPassword <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_DS3_v2 --imageName Good --bigIpVersion 13.1.0200 --numberOfExternalIps 1 --vnetAddressPrefix 10.0 --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --managedRoutes NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 ```
 
 ## Configuration Example

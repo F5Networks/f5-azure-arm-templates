@@ -71,9 +71,6 @@
         "managedRoutes": {
             "value": "NOT_SPECIFIED"
         }, 
-        "routeTableTag": {
-            "value": "NOT_SPECIFIED"
-        }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"
         }, 

@@ -77,7 +77,6 @@ def parameter_initialize(data):
     data['parameters']['servicePrincipalSecret'] = "OPTIONAL"
     data['parameters']['notificationEmail'] = "OPTIONAL"
     data['parameters']['managedRoutes'] = "OPTIONAL"
-    data['parameters']['routeTableTag'] = "OPTIONAL"
     data['parameters']['ntpServer'] = "MANDATORY"
     data['parameters']['timeZone'] = "MANDATORY"
     data['parameters']['restrictedSrcAddress'] = "MANDATORY"
