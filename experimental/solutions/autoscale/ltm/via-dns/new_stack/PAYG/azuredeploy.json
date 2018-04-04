@@ -425,7 +425,7 @@
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]", 
-        "offerToUse": "[concat('f5-big-ip-', variables('imageNameToLower'), '-preview')]", 
+        "offerToUse": "[concat('f5-big-ip-', variables('imageNameToLower'))]", 
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['1'].Port]", 
         "bigIpMgmtPort": 8443, 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
