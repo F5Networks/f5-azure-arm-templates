@@ -108,7 +108,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 
   [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fexperimental%2Fsolutions%2Fautoscale%2Fltm%2Fvia-lb%2Fexisting_stack%2FBIGIQ%2Fazuredeploy.json)
 
-- **BIG-IQ+PAYG**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s), as well as utilize PAYG instances.
+- **BIG-IQ+PAYG**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s), as well as use PAYG instances.
 
   [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fexperimental%2Fsolutions%2Fautoscale%2Fltm%2Fvia-lb%2Fexisting_stack%2FBIGIQ_PAYG%2Fazuredeploy.json)
 
