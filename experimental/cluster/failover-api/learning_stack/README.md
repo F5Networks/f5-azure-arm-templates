@@ -203,6 +203,45 @@ The managedRoutes file is a comma-separated list of route destinations. For exam
 
 Ensure the Azure Route Table(s) containing the routes with these destinations are tagged with key **f5_ha** and the value you provided for the **routeTableTag** parameter of the ARM template deployment.
 
+## Customizing the Next Hop of Azure User-Defined Routes
+
+This template supports associating specific sets of self IP addresses with Azure Route Tables.  Each route table that references routes that use the active BIG-IP VE as the next hop must be configured in Azure with both **f5_ha** and **f5_tg** tags.  The **f5_ha** tag value specifies the set of self IP addresses to which traffic will be forwarded, while the **f5_tg** tag associates the route table with a traffic group on the BIG-IP VE cluster. For example, if you want the routes specified in the **managedRoutes** parameter to use the default internal self IP address in **traffic-group-1** as the virtual appliance next hop, configure these Azure tags on the route table:
+
+  - Key: "f5_ha", value: "self_2nic"
+  - Key: "f5_tg", value: "traffic-group-1"
+
+If you have the same route destinations (a wildcard destination of 0.0.0.0/0, for example) in multiple route tables, with each destination targeting a different interface of the BIG-IP VEs, we recommend creating a new set of self IP addresses and their corresponding IP configurations in Azure, and then tagging the route table appropriately.  
+
+Use the following examples steps to create a secondary set of self IP addresses and corresponding Azure IP configurations, and add the required Azure tags to the route table resource:
+
+  - Add: Azure IP configuration (internal NIC0)
+    - Type: Secondary
+    - Private IP address allocation: Static
+    - Private IP address: 10.1.3.50 
+
+  - Add: BIG-IP VE self IP address (BIG-IP VE0)
+    - Name: internal_2_self
+    - IP Address: 10.1.3.50
+    - VLAN: external
+    - Traffic Group: traffic-group-local-only
+
+  - Add: Azure IP configuration (internal NIC1)
+    - Type: Secondary
+    - Private IP address allocation: Static
+    - Private IP address: 10.1.3.51 
+
+  - Add: BIG-IP VE self IP address (BIG-IP VE1)
+    - Name: internal_2_self
+    - IP Address: 10.1.3.51
+    - VLAN: external
+    - Traffic Group: traffic-group-local-only
+
+  - Azure route table: myRouteTable
+    - Add tag with key: "f5_ha", value: "internal_2_self"
+    - Add tag with key: "f5_tg", value: "traffic-group-1"
+
+In this case, on failover, the routes in **myRouteTable** with destinations matching the **managedRoutes** template parameter are updated to use either 10.1.3.50 or 10.1.3.51 (depending on which BIG-IP VE device is active for traffic-group-1) as the next hop virtual appliance.
+
 ## Documentation
 
 For more information on F5 solutions for Azure, including manual configuration procedures for some deployment scenarios, see the Azure section of [Public Cloud Docs](http://clouddocs.f5.com/cloud/public/v1/).

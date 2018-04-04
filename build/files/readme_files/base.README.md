@@ -118,6 +118,8 @@ The following is an example configuration diagram for this solution deployment. 
 
 <POST_CONFIG_TXT>
 
+<SELF_IP_ROUTE_TABLES>
+
 ## Documentation
 
 For more information on F5 solutions for Azure, including manual configuration procedures for some deployment scenarios, see the Azure section of [Public Cloud Docs](http://clouddocs.f5.com/cloud/public/v1/).
