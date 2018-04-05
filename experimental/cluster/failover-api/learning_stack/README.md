@@ -201,9 +201,7 @@ If you want to configure additional routes to use the active BIG-IP VE as the ne
 
 The managedRoutes file is a comma-separated list of route destinations. For example, if you entered **192.168.0.0/24,192.168.1.0/24** in the **managedRoutes** parameter of the ARM template deployment, and want to set the active BIG-IP VE device as the next hop for the routes 192.168.2.0/24 and 0.0.0.0/0, log in via SSH to each device and manually edit the **/config/cloud/managedRoutes** file to: **192.168.0.0/24,192.168.1.0/24, 192.168.2.0/24,0.0.0.0/0**
 
-Ensure the Azure Route Table(s) containing the routes with these destinations are tagged with key **f5_ha** and the value you provided for the **routeTableTag** parameter of the ARM template deployment.
-
-## Customizing the Next Hop of Azure User-Defined Routes
+### Customizing the Next Hop of Azure User-Defined Routes
 
 This template supports associating specific sets of self IP addresses with Azure Route Tables.  Each route table that references routes that use the active BIG-IP VE as the next hop must be configured in Azure with both **f5_ha** and **f5_tg** tags.  The **f5_ha** tag value specifies the set of self IP addresses to which traffic will be forwarded, while the **f5_tg** tag associates the route table with a traffic group on the BIG-IP VE cluster. For example, if you want the routes specified in the **managedRoutes** parameter to use the default internal self IP address in **traffic-group-1** as the virtual appliance next hop, configure these Azure tags on the route table:
 
@@ -211,6 +209,8 @@ This template supports associating specific sets of self IP addresses with Azure
   - Key: "f5_tg", value: "traffic-group-1"
 
 If you have the same route destinations (a wildcard destination of 0.0.0.0/0, for example) in multiple route tables, with each destination targeting a different interface of the BIG-IP VEs, we recommend creating a new set of self IP addresses and their corresponding IP configurations in Azure, and then tagging the route table appropriately.  
+
+To find the self IP address from the BIG-IP VE Configuration utility, on the Main tab, click **Network > Self IPs**.
 
 Use the following examples steps to create a secondary set of self IP addresses and corresponding Azure IP configurations, and add the required Azure tags to the route table resource:
 
