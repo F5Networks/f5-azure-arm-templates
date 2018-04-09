@@ -97,11 +97,11 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 
 - **BYOL** (bring your own license): This allows you to use an existing BIG-IP license.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fexperimental%2Fstandalone%2Fn-nic%2Fprod_stack%2FBYOL%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-5.0.0.0%2Fexperimental%2Fstandalone%2Fn-nic%2Fprod_stack%2FBYOL%2Fazuredeploy.json)
 
 - **PAYG**: This allows you to use pay-as-you-go hourly billing.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fdevelop%2Fexperimental%2Fstandalone%2Fn-nic%2Fprod_stack%2FPAYG%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Frelease-5.0.0.0%2Fexperimental%2Fstandalone%2Fn-nic%2Fprod_stack%2FPAYG%2Fazuredeploy.json)
 
 ### Template parameters
 
