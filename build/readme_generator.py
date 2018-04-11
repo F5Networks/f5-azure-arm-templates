@@ -89,8 +89,12 @@ class ReadmeGen(object):
                         value = item
                     result = result.replace(key, self.misc_readme_grep(value))
         elif t_key in ('title', 'intro', 'config_ex_text') and t_key in yvalue:
-            if isinstance(yvalue[t_key], dict) and sp_type in yvalue[t_key]:
-                result = yvalue[t_key][sp_type]
+            sp_type_key = 'support_type'
+            if isinstance(yvalue[t_key], dict) and sp_type_key in yvalue[t_key]:
+                try:
+                    result = yvalue[t_key][sp_type_key][sp_type]
+                except KeyError:
+                    result = yvalue[t_key]['default']
             else:
                 result = yvalue[t_key]
         return result
