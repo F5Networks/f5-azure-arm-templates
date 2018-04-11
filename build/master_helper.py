@@ -189,7 +189,6 @@ def variable_initialize(data):
     data['variables']['mgmtRouteGw'] = "OPTIONAL"
     data['variables']['tmmRouteGw'] = "OPTIONAL"
     data['variables']['routeCmdArray'] = "OPTIONAL"
-    data['variables']['networkMtuArray'] = "OPTIONAL"
     data['variables']['subnetArray'] = "OPTIONAL"
     data['variables']['addtlSubnetArray'] = "OPTIONAL"
     data['variables']['selfNicConfigArray'] = "OPTIONAL"
