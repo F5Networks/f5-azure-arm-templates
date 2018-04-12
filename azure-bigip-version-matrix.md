@@ -3,6 +3,7 @@ The following table contains all of the tagged releases of the F5 ARM templates 
 
 | Release Tag | Template Family | BIG-IP Versions | License Bundles and Throughput Rates |
 | --- | --- | --- | --- |
+| [v5.0.0.0](https://github.com/F5Networks/f5-azure-arm-templates/releases/tag/v5.0.0.0) | Standalone | BIG-IP v13.1.0200, 12.1.303000 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps |
 | [v4.4.0.1](https://github.com/F5Networks/f5-azure-arm-templates/releases/tag/v4.4.0.1) | Standalone | BIG-IP v13.1.0200 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps |
 | [v4.4.0.0](https://github.com/F5Networks/f5-azure-arm-templates/releases/tag/v4.4.0.0) | Standalone | BIG-IP v13.1.0200, v13.0.0300, v12.1.2200 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps |
 |  | Cluster | BIG-IP v13.1.0200, BIG-IP v13.0.0300, v12.1.2200 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps |
