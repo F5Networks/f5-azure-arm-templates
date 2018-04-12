@@ -23,6 +23,8 @@ In this solution, the BIG-IP VEs have the [LTM](https://f5.com/products/big-ip/l
 
 You have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment.
 
+If you have a BIG-IQ device, you have the additional option of BIG-IQ + PAYG (pay as you go/hourly). In this scenario, the solution launches at least one BIG-IP VE with a BYOL (bring your own license) license, but then uses PAYG BIG-IP VEs when auto scale events occur.  The template relies on an existing BIG-IQ device with a pool of 1-4 BYOL licenses.  But instead of scaling BYOL BIG-IP VE instances, up to 8 hourly BIG-IP VE LTM instances automatically instantiate to seamlessly handle the load (based on values you enter in the template). When traffic or CPU utilization decreases, the hourly BIG-IP VEs are automatically removed.
+
 For information on getting started using F5's ARM templates on GitHub, see [Microsoft Azure: Solutions 101](http://clouddocs.f5.com/cloud/public/v1/azure/Azure_solutions101.html).
 
 **Networking Stack Type:** This solution deploys into a new networking stack, which is created along with the solution.
@@ -85,7 +87,7 @@ The following is a map that shows the available options for the template paramet
 
 While this template has been created by F5 Networks, it is in the **experimental** directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.
 
-## Community Support
+## Community Help
 
 We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates. There are F5 employees who are members of this community who typically monitor the channel Monday-Friday 9-5 PST and will offer best-effort assistance. This slack channel community support should **not** be considered a substitute for F5 Technical Support for supported templates. See the [Slack Channel Statement](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/slack-channel-statement.md) for guidelines on using this channel.
 

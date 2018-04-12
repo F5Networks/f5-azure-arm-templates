@@ -3,18 +3,7 @@
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
 [![Issues](https://img.shields.io/github/issues/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/issues)
 
-<a name="important"></a>
-<table>
- <tr>
-  <td align=center>:warning: <strong>Important<strong> :warning:  </td>
- </tr>
- <tr>
-  <td>As a result of changes within the Azure environment, <strong><em>deployments of F5 ARM templates using BIG-IP version 12.1 and 13.0 are experiencing a high rate of failure</strong></em>. We strongly recommend deploying F5 ARM templates using BIG-IP version 13.1, as this version is not susceptible to these failures. 
-  <br> We will update the templates to add the option to select an updated BIG-IP v12.1 image as soon as it is available. Until that time, when you are configuring a template, from the BIG-IP Version list, both options (<strong>latest</strong> and 13.1.0200) deploy BIG-IP version 13.1.0200.
-   
-  </td>
- </tr>
- </table>
+
 
 ## Introduction
 

@@ -33,7 +33,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - If you are deploying the BYOL template, you must have a valid BIG-IP license token.
 - This template requires a service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details, including required permissions.
 - This solution uses calls to the Azure REST API to read and update Azure resources such as storage accounts, network interfaces, and route tables.  For the solution to function correctly, you must ensure that the BIG-IP(s) can connect to the Azure REST API on port 443.
-- This solution uses a DNS provider instead of an Azure oad Balancer for distribution of traffic.  The DNS provider **must** already exist prior to deployment.
+- This solution uses a DNS provider instead of an Azure load Balancer for distribution of traffic.  The DNS provider **must** already exist prior to deployment. Currently ***only BIG-IP DNS is supported***.
 
 ## Important configuration notes
 
@@ -85,7 +85,7 @@ The following is a map that shows the available options for the template paramet
 
 While this template has been created by F5 Networks, it is in the **experimental** directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.
 
-## Community Support
+## Community Help
 
 We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates. There are F5 employees who are members of this community who typically monitor the channel Monday-Friday 9-5 PST and will offer best-effort assistance. This slack channel community support should **not** be considered a substitute for F5 Technical Support for supported templates. See the [Slack Channel Statement](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/slack-channel-statement.md) for guidelines on using this channel.
 
