@@ -13,18 +13,20 @@ if [[ $1 == "release-prep" ]]; then
 fi
 
 ############################### Supported ###############################
-## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), Cluster (1nic, 3nic), HA-AVSET
-template_list="standalone/1nic standalone/2nic standalone/3nic standalone/n-nic cluster/1nic cluster/3nic ha-avset"
+## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), Cluster Failover-LB (1nic, 3nic), Cluster Failover-API
+template_list="standalone/1nic standalone/2nic standalone/3nic standalone/n-nic cluster/failover-lb/1nic cluster/failover-lb/3nic cluster/failover-api"
 for tmpl in $template_list; do
     loc=$tmpl
     if [[ $loc == *"standalone"* ]]; then
         tmpl="standalone_"`basename $loc`
-    elif [[ $loc == *"cluster"* ]]; then
-        tmpl="cluster_"`basename $loc`
+    elif [[ $loc == *"failover-lb"* ]]; then
+        tmpl="failover-lb_"`basename $loc`
+    elif [[ $loc == *"failover-api"* ]]; then
+        tmpl="failover-api"
     fi
     # Do not build prod_stack for certain templates
     stack_list="new_stack existing_stack prod_stack"
-    if [[ $tmpl == *"ha-avset"* ]] || [[ $tmpl == *"cluster_"* ]]; then
+    if [[ $tmpl == *"failover-api"* ]] || [[ $tmpl == *"failover-lb"* ]]; then
         stack_list="new_stack existing_stack"
     fi
     for stack_type in $stack_list; do
@@ -37,12 +39,12 @@ for tmpl in $template_list; do
     done
 done
 
-## BIGIP ARM Templates - Solutions (autoscale/ltm, autoscale/waf)
-template_list="autoscale/ltm autoscale/waf"
+## BIGIP ARM Templates - Solutions: autoscale/ltm, autoscale/waf
+template_list="autoscale/ltm/via-lb autoscale/waf/via-lb"
 for tmpl in $template_list; do
-    loc=$tmpl
+    loc=`echo $tmpl | sed 's/\/via-lb//g'|sed 's/\/via-dns//g'`
     if [[ $loc == *"autoscale"* ]]; then
-        tmpl=`basename $loc`"_autoscale"
+        tmpl=`echo $tmpl | sed 's/\//_/g'`
     fi
     stack_list="new_stack existing_stack"
     for stack_type in $stack_list; do
@@ -54,19 +56,25 @@ done
 ############################### End Supported ###############################
 
 ############################### Experimental ###############################
-## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), Cluster (1nic, 3nic), HA-AVSET
-template_list="standalone/1nic standalone/2nic standalone/3nic standalone/n-nic cluster/1nic cluster/3nic ha-avset"
+## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), Cluster Failover-LB (1nic, 3nic), Cluster Failover-API
+template_list="standalone/1nic standalone/2nic standalone/3nic standalone/n-nic cluster/failover-lb/1nic cluster/failover-lb/3nic cluster/failover-api"
 for tmpl in $template_list; do
     loc=$tmpl
     if [[ $loc == *"standalone"* ]]; then
         tmpl="standalone_"`basename $loc`
-    elif [[ $loc == *"cluster"* ]]; then
-        tmpl="cluster_"`basename $loc`
+    elif [[ $loc == *"failover-lb"* ]]; then 
+        tmpl="failover-lb_"`basename $loc`
+    elif [[ $loc == *"failover-api"* ]]; then
+        tmpl="failover-api"
     fi
     # Do not build prod_stack for certain templates
     stack_list="new_stack existing_stack prod_stack"
-    if [[ $tmpl == *"ha-avset"* ]] || [[ $tmpl == *"cluster_3nic"* ]]; then
+    if [[ $tmpl == *"failover-api"* ]] || [[ $tmpl == *"failover-lb_3nic"* ]]; then
         stack_list="new_stack existing_stack"
+    fi
+    # Build learning_stack for certain templates
+    if [[ $tmpl == *"standalone_3nic"* ]] || [[ $tmpl == *"failover-api"* ]]; then
+        stack_list+=" learning_stack"
     fi
     for stack_type in $stack_list; do
         python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/PAYG/" --script-location "../experimental/$loc/$stack_type/" $release_prep
@@ -78,17 +86,20 @@ for tmpl in $template_list; do
     done
 done
 
-## BIGIP ARM Templates - Solutions (autoscale/ltm, autoscale/waf)
-template_list="autoscale/ltm autoscale/waf"
+## BIGIP ARM Templates - Solutions: autoscale/ltm (via-dns, via-lb), autoscale/waf (via-dns, via-lb)
+template_list="autoscale/ltm/via-lb autoscale/ltm/via-dns autoscale/waf/via-lb autoscale/waf/via-dns"
 for tmpl in $template_list; do
     loc=$tmpl
     if [[ $loc == *"autoscale"* ]]; then
-        tmpl=`basename $loc`"_autoscale"
+        tmpl=`echo $tmpl | sed 's/\//_/g'`
     fi
     stack_list="new_stack existing_stack"
     for stack_type in $stack_list; do
         python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../experimental/solutions/$loc/$stack_type/PAYG/" --script-location "../experimental/solutions/$loc/$stack_type/" --solution-location 'experimental' $release_prep
         python -B '.\master_template.py' --template-name $tmpl --license-type BIGIQ --stack-type $stack_type --template-location "../experimental/solutions/$loc/$stack_type/BIGIQ/" --script-location "../experimental/solutions/$loc/$stack_type/" --solution-location 'experimental' $release_prep
+        if [[ $tmpl == *"via-lb"* ]]; then
+            python -B '.\master_template.py' --template-name $tmpl --license-type BIGIQ_PAYG --stack-type $stack_type --template-location "../experimental/solutions/$loc/$stack_type/BIGIQ_PAYG/" --script-location "../experimental/solutions/$loc/$stack_type/" --solution-location 'experimental' $release_prep
+        fi
     done
 done
 

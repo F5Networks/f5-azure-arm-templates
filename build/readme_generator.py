@@ -28,11 +28,14 @@ class ReadmeGen(object):
         tag_text = re.findall(reg_ex, text, re.DOTALL)
         return "".join(tag_text)
 
-    def get_custom_text(self, parent_key, child_key, template_name=None):
+    def get_custom_text(self, parent_key, child_key=None, template_name=None):
         """ Pull in custom text from the YAML file """
         yaml_dict = self.loaded_files['doc_text_file']
         try:
-            yaml_value = yaml_dict[parent_key][child_key]
+            if child_key is not None:
+                yaml_value = yaml_dict[parent_key][child_key]
+            else:
+                yaml_value = yaml_dict[parent_key]
         except KeyError:
             yaml_value = "No Value"
         try:
@@ -69,11 +72,11 @@ class ReadmeGen(object):
             t_list = yvalue[t_key]
             for item in t_list:
                 if isinstance(item, dict):
-                    result += '  - ' + item[next(iter(item))] + '\n'
+                    result += '- ' + item[next(iter(item))] + '\n'
                 else:
                     result_value = self.get_custom_text('note_text', item)
                     if result_value is not None:
-                        result += '  - ' + result_value + '\n'
+                        result += '- ' + result_value + '\n'
         elif t_key == 'extra_text':
             result = self.loaded_files['base_readme']
             if t_key in yvalue:
@@ -86,11 +89,21 @@ class ReadmeGen(object):
                         value = item
                     result = result.replace(key, self.misc_readme_grep(value))
         elif t_key in ('title', 'intro', 'config_ex_text') and t_key in yvalue:
-            if isinstance(yvalue[t_key], dict) and sp_type in yvalue[t_key]:
-                result = yvalue[t_key][sp_type]
+            sp_type_key = 'support_type'
+            if isinstance(yvalue[t_key], dict) and sp_type_key in yvalue[t_key]:
+                try:
+                    result = yvalue[t_key][sp_type_key][sp_type]
+                except KeyError:
+                    result = yvalue[t_key]['default']
             else:
                 result = yvalue[t_key]
         return result
+
+    def clean_up(self, readme):
+        """ Final clean up of README file """
+        # Remove extra new lines
+        readme = readme.replace('\n\n\n\n', '\n\n').replace('\n\n\n', '\n\n')
+        return readme
 
     def delete_tags(self, readme):
         """ Delete left over tags from the README file """
@@ -116,23 +129,26 @@ class ReadmeGen(object):
         license_flag = True
         for p in self.data['parameters']:
             mandatory = 'Yes'
-            # Specify optional parameters that README, need to pull in all license options
-            if 'license' in p.lower():
+            # Specify optional parameters for README, need to pull in all license specific options
+            if p in license_params:
                 if license_flag:
                     license_flag = False
-                    for key in license_params:
-                        if key == 'licensedBandwidth':
-                            mandatory = 'PAYG only:'
-                        elif 'licenseKey' in key:
-                            mandatory = 'BYOL only:'
+                    for k, v in license_params.iteritems():
+                        # Check if value is list
+                        if isinstance(v, list):
+                            sep = ' or '
+                            lic_type_text = sep.join(v)
                         else:
-                            mandatory = 'BIG-IQ licensing only:'
-                        if lic_type == 'PAYG' and key != 'licensedBandwidth':
+                            lic_type_text = v
+                        only = ' only:'
+                        if 'BIG-IQ' in lic_type_text:
+                            only = ' licensing only:'
+                        mandatory = lic_type_text + only
+                        # Skip licenseKey parameters if BYOL not in the list
+                        if all(x in ['PAYG', 'BIG-IQ', 'BIG-IQ+PAYG'] for x in lic_type) and 'licenseKey' in k:
                             continue
-                        elif all(x in ['PAYG', 'BIG-IQ'] for x in lic_type) and 'licenseKey' in key:
-                            continue                       
                         else:
-                            param_array += "| " + key + " | " + mandatory + " | " + self.get_custom_text('parameter_list', key) + " |\n"
+                            param_array += "| " + k + " | " + mandatory + " | " + self.get_custom_text('parameter_list', k) + " |\n"
             else:
                 param_array += "| " + p + " | " + mandatory + " | " + self.data['parameters'][p]['metadata']['description'] + " |\n"
         return param_array
@@ -146,18 +162,18 @@ class ReadmeGen(object):
             stack_type = 'existing_stack'
         elif 'prod_stack' in t_loc:
             stack_type = 'prod_stack'
+        elif 'learning_stack' in t_loc:
+            stack_type = 'learning_stack'
         else:
             stack_type = 'unkown_stack_type'
         return stack_type
 
     def sp_access_required(self, text):
-        """ Determine what Service Principal Access is needed, return full Service Principal Text """
+        """ Determine what Service Principal Access is needed, map in what is needed """
         template_name = self.i_data['template_info']['template_name']
-        api_access_required = self.i_data['template_info']['api_access_needed'][template_name]
-        if api_access_required == 'read_write':
-            text = text.replace('<SP_REQUIRED_ACCESS>', self.get_custom_text('sp_access_text', 'read_write'))
-        else:
-            text = text.replace('<SP_REQUIRED_ACCESS>', self.get_custom_text('sp_access_text', 'read'))
+        api_access_required = self.i_data['template_info']['api_access_required'][template_name]
+        if api_access_required == 'required':
+            text = text.replace('<SP_REQUIRED_ACCESS>', self.get_custom_text('sp_access_text', None, template_name))
         return text
 
     def md_version_map(self):
@@ -181,9 +197,12 @@ class ReadmeGen(object):
         else:
             lic_list = [lic_type]
         for lic in lic_list:
-            deploy_links += '''   - **<LIC_TYPE>**<LIC_TEXT> <br><a href="<DEPLOY_LINK_URL>">\n    <img src="http://azuredeploy.net/deploybutton.png"/></a><br><br>\n\n'''
+            deploy_links += '''- **<LIC_TYPE>**<LIC_TEXT>\n\n  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](<DEPLOY_LINK_URL>)\n\n'''
             t_loc = t_loc.replace('/', '%2F').replace('..', '')
-            t_loc = t_loc.replace('PAYG', lic).replace('BYOL', lic).replace('BIGIQ', lic).replace('BIG-IQ', 'BIGIQ')
+            # Convert current license specified with list of licenses that should be used
+            t_loc = t_loc.replace('BIGIQ_PAYG', 'LICENSE').replace('BIGIQ', 'LICENSE').replace('PAYG', 'LICENSE').replace('BYOL', 'LICENSE')
+            t_loc = t_loc.replace('LICENSE', lic)
+            t_loc = t_loc.replace('BIG-IQ+PAYG', 'BIGIQ_PAYG').replace('BIG-IQ', 'BIGIQ')
             url = base_url + t_loc
             deploy_links = deploy_links.replace('<DEPLOY_LINK_URL>', url).replace('<LIC_TYPE>', lic)
             deploy_links = deploy_links.replace('<LIC_TEXT>', self.get_custom_text('license_text', lic))
@@ -228,6 +247,7 @@ class ReadmeGen(object):
         readme = self.get_tmpl_text('templates', template_name, 'extra_text')
         readme = self.sp_access_required(readme)
         readme = self.delete_tags(readme)
+        readme = self.clean_up(readme)
         ### Write to solution location ###
         with open(final_readme, 'w') as readme_complete:
             readme_complete.write(readme)

@@ -1,0 +1,57 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
+    "contentVersion": "5.0.0.0", 
+    "parameters": {
+        "numberOfInstances": {
+            "value": 2
+        }, 
+        "adminUsername": {
+            "value": "azureuser"
+        }, 
+        "adminPassword": {
+            "value": "GEN_UNIQUE"
+        }, 
+        "dnsLabel": {
+            "value": ""
+        }, 
+        "instanceType": {
+            "value": "Standard_DS2_v2"
+        }, 
+        "imageName": {
+            "value": "Good"
+        }, 
+        "bigIpVersion": {
+            "value": "13.1.0200"
+        }, 
+        "licenseKey1": {
+            "value": ""
+        }, 
+        "licenseKey2": {
+            "value": ""
+        }, 
+        "vnetAddressPrefix": {
+            "value": "10.0"
+        }, 
+        "ntpServer": {
+            "value": "0.pool.ntp.org"
+        }, 
+        "timeZone": {
+            "value": "UTC"
+        }, 
+        "restrictedSrcAddress": {
+            "value": "*"
+        }, 
+        "tagValues": {
+            "value": {
+                "application": "APP", 
+                "cost": "COST", 
+                "environment": "ENV", 
+                "group": "GROUP", 
+                "owner": "OWNER"
+            }
+        }, 
+        "allowUsageAnalytics": {
+            "value": "Yes"
+        }
+    }
+}
