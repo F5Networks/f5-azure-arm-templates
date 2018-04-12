@@ -23,7 +23,7 @@ The BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-
 
 For information on getting started using F5's ARM templates on GitHub, see [Microsoft Azure: Solutions 101](http://clouddocs.f5.com/cloud/public/v1/azure/Azure_solutions101.html).
 
-**Networking Stack Type:** This solution deploys into a new networking stack, which is created along with the solution.  This is a learning stack which means that in addition to creating a new networking stack it also creates the appropriate configuration for an example web service.
+**Networking Stack Type:** This solution deploys into a new networking stack, which is created along with the solution.  This is a *learning stack*, which means that in addition to creating a new networking stack it also creates all of the appropriate configuration for an example web service.
 
 ## Prerequisites
 
@@ -77,7 +77,7 @@ The following is a map that shows the available options for the template paramet
 
 While this template has been created by F5 Networks, it is in the **experimental** directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.
 
-## Community Help
+### Community Help
 
 We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates. There are F5 employees who are members of this community who typically monitor the channel Monday-Friday 9-5 PST and will offer best-effort assistance. This slack channel community support should **not** be considered a substitute for F5 Technical Support for supported templates. See the [Slack Channel Statement](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/slack-channel-statement.md) for guidelines on using this channel.
 

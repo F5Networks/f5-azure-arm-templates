@@ -4,7 +4,9 @@ This solution deploys an ARM template that fully configures BIG-IP VE(s) and han
 
 ### Backup BIG-IP configuration for cluster recovery
 
-After you initially launch the template, if you make manual changes to the BIG-IP configuration, you must make a backup of your BIG-IP configuration and store the resulting UCS file in the **backup** container of the storage account ending in **data000** created by the template to ensure the master election process will include the custom configuration in the cluster in the event of failure. Note: If necessary to recover from this UCS it will pick the one with the latest timestamp.
+The template now automatically saves a BIG-IP back up UCS file (into the **backup** container of the storage account ending in **data000** (it is a Blob container)) every night at 12am, and saves 7 days of back up UCS files.  If you make manual changes to the configuration, we recommend immediately making a backup of your BIG-IP configuration manually and storing the resulting UCS file in the backup container to ensure the master election process functions properly.  Note: If it is necessary to recover from this UCS backup, the system picks the backup file with the latest timestamp.
+
+To manually save the BIG-IP configuration to a UCS file:
 
 1. Backup your BIG-IP configuration (ideally the cluster primary) by creating a [UCS](https://support.f5.com/csp/article/K13132) archive.  Use the following syntax to save the backup UCS file:
     - From the CLI command: ```# tmsh save /sys ucs /var/tmp/original.ucs```
@@ -31,7 +33,7 @@ When this ARM template was initially deployed, a storage account was created in 
 
 #### To upgrade the BIG-IP VE Image
 
-1. Backup configuration as outlined [here](#backup-big-ip-configuration-for-cluster-recovery)
+1. Ensure the configuration is backed up as outlined [here](#backup-big-ip-configuration-for-cluster-recovery)
 2. Update the VM Scale Set Model to the new BIG-IP version
     - From PowerShell: Use the PowerShell script in the **scripts** folder in this directory
     - Using the Azure redeploy functionality: From the Resource Group where the ARM template was initially deployed, click the successful deployment and then select to redeploy the template. If necessary, re-select all the same variables, and **only change** the BIG-IP version to the latest.
