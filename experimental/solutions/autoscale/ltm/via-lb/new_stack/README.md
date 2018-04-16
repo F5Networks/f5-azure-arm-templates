@@ -132,10 +132,10 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
 | numberOfStaticInstances | BIG-IQ+PAYG licensing only: | The number of static BYOL BIG-IP VEs that will be deployed in this solution. |
 | licensedBandwidth | PAYG or BIG-IQ+PAYG licensing only: | The amount of licensed bandwidth (Mbps) you want the PAYG image to use. |
-| bigIqLicenseHost | BIG-IQ or BIG-IQ+PAYG licensing only: | The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP.  Note: The BIG-IP will make a REST call to the BIG-IQ (already existing) to let it know a BIG-IP needs to be licensed. It will then license the BIG-IP using the provided BIG-IQ credentials and license pool. |
-| bigIqLicenseUsername | BIG-IQ or BIG-IQ+PAYG licensing only: | The BIG-IQ username to use during BIG-IP licensing via BIG-IQ. |
-| bigIqLicensePassword | BIG-IQ or BIG-IQ+PAYG licensing only: | The BIG-IQ password to use during BIG-IP licensing via BIG-IQ. |
-| bigIqLicensePool | BIG-IQ or BIG-IQ+PAYG licensing only: | The BIG-IQ license pool to use during BIG-IP licensing via BIG-IQ. |
+| bigIqAddress | BIG-IQ or BIG-IQ+PAYG licensing only: | The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP.  Note: The BIG-IP will make a REST call to the BIG-IQ (already existing) to let it know a BIG-IP needs to be licensed. It will then license the BIG-IP using the provided BIG-IQ credentials and license pool. |
+| bigIqUsername | BIG-IQ or BIG-IQ+PAYG licensing only: | The BIG-IQ username to use during BIG-IP licensing via BIG-IQ. |
+| bigIqPassword | BIG-IQ or BIG-IQ+PAYG licensing only: | The BIG-IQ password to use during BIG-IP licensing via BIG-IQ. |
+| bigIqLicensePoolName | BIG-IQ or BIG-IQ+PAYG licensing only: | The BIG-IQ license pool to use during BIG-IP licensing via BIG-IQ. |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
 | tenantId | Yes | Your Azure service principal application tenant ID. |
 | clientId | Yes | Your Azure service principal application client ID. |

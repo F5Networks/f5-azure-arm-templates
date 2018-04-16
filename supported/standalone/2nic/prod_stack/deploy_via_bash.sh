@@ -24,11 +24,11 @@ while [[ $# -gt 1 ]]; do
         --licenseType)
             licenseType=$2
             shift 2;;
-        --licensedBandwidth)
-            licensedBandwidth=$2
-            shift 2;;
         --licenseKey1)
             licenseKey1=$2
+            shift 2;;
+        --licensedBandwidth)
+            licensedBandwidth=$2
             shift 2;;
         --adminUsername)
             adminUsername=$2
@@ -110,9 +110,6 @@ if [ $licenseType == "BYOL" ]; then
     if [ -z $licenseKey1 ] ; then
             read -p "Please enter value for licenseKey1:" licenseKey1
     fi
-    template_file="./BYOL/azuredeploy.json"
-    parameter_file="./BYOL/azuredeploy.parameters.json"
-fi
 # Prompt for licensed bandwidth if not supplied and PAYG is selected
 if [ $licenseType == "PAYG" ]; then
     if [ -z $licensedBandwidth ] ; then

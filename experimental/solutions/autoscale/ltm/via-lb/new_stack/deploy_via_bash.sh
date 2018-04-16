@@ -27,8 +27,20 @@ while [[ $# -gt 1 ]]; do
         --licensedBandwidth)
             licensedBandwidth=$2
             shift 2;;
-        --licenseKey1)
-            licenseKey1=$2
+        --bigIqAddress)
+            bigIqAddress=$2
+            shift 2;;
+        --bigIqUsername)
+            bigIqUsername=$2
+            shift 2;;
+        --bigIqPassword)
+            bigIqPassword=$2
+            shift 2;;
+        --bigIqLicensePoolName)
+            bigIqLicensePoolName=$2
+            shift 2;;
+        --numberOfStaticInstances)
+            numberOfStaticInstances=$2
             shift 2;;
         --vmScaleSetMinCount)
             vmScaleSetMinCount=$2
@@ -127,7 +139,7 @@ if [ $licenseType == "PAYG" ]; then
 fi
 # Prompt for BIGIQ parameters if not supplied and BIGIQ is selected
 if [ $licenseType == "BIGIQ" ]; then
-	big_iq_vars="bigIqLicenseHost bigIqLicenseUsername bigIqLicensePassword bigIqLicensePool"
+	big_iq_vars="bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName"
 	for variable in $big_iq_vars
 			do
 			if [ -z ${!variable} ] ; then
@@ -138,7 +150,7 @@ fi
 
 # Prompt for BIGIQ_PAYG parameters if not supplied and BIGIQ_PAYG is selected
 if [ $licenseType == "BIGIQ_PAYG" ]; then
-	big_iq_payg_vars="bigIqLicenseHost bigIqLicenseUsername bigIqLicensePassword bigIqLicensePool numberOfStaticInstances"
+	big_iq_payg_vars="licensedBandwidth bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName numberOfStaticInstances"
 	for variable in $big_iq_payg_vars
 			do
 			if [ -z ${!variable} ] ; then
@@ -168,9 +180,9 @@ azure group create -n $resourceGroupName -l $region
 if [ $licenseType == "PAYG" ]; then
     azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetMinCount\":{\"value\":$vmScaleSetMinCount},\"vmScaleSetMaxCount\":{\"value\":$vmScaleSetMaxCount},\"autoScaleMetric\":{\"value\":\"$autoScaleMetric\"},\"appInsights\":{\"value\":\"$appInsights\"},\"calculatedBandwidth\":{\"value\":\"$calculatedBandwidth\"},\"scaleOutThreshold\":{\"value\":$scaleOutThreshold},\"scaleInThreshold\":{\"value\":$scaleInThreshold},\"scaleTimeWindow\":{\"value\":$scaleTimeWindow},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"notificationEmail\":{\"value\":\"$notificationEmail\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
 elif [ $licenseType == "BIGIQ" ]; then
-    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetMinCount\":{\"value\":$vmScaleSetMinCount},\"vmScaleSetMaxCount\":{\"value\":$vmScaleSetMaxCount},\"autoScaleMetric\":{\"value\":\"$autoScaleMetric\"},\"appInsights\":{\"value\":\"$appInsights\"},\"calculatedBandwidth\":{\"value\":\"$calculatedBandwidth\"},\"scaleOutThreshold\":{\"value\":$scaleOutThreshold},\"scaleInThreshold\":{\"value\":$scaleInThreshold},\"scaleTimeWindow\":{\"value\":$scaleTimeWindow},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"notificationEmail\":{\"value\":\"$notificationEmail\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"},\"bigIqLicenseHost\":{\"value\":\"$bigIqLicenseHost\"},\"bigIqLicenseUsername\":{\"value\":\"$bigIqLicenseUsername\"}},\"bigIqLicensePassword\":{\"value\":\"$bigIqLicensePassword\"}},\"bigIqLicensePool\":{\"value\":\"$bigIqLicensePool\"}}"
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetMinCount\":{\"value\":$vmScaleSetMinCount},\"vmScaleSetMaxCount\":{\"value\":$vmScaleSetMaxCount},\"autoScaleMetric\":{\"value\":\"$autoScaleMetric\"},\"appInsights\":{\"value\":\"$appInsights\"},\"calculatedBandwidth\":{\"value\":\"$calculatedBandwidth\"},\"scaleOutThreshold\":{\"value\":$scaleOutThreshold},\"scaleInThreshold\":{\"value\":$scaleInThreshold},\"scaleTimeWindow\":{\"value\":$scaleTimeWindow},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"notificationEmail\":{\"value\":\"$notificationEmail\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"},\"bigIqAddress\":{\"value\":\"$bigIqAddress\"},\"bigIqUsername\":{\"value\":\"$bigIqUsername\"}},\"bigIqPassword\":{\"value\":\"$bigIqPassword\"}},\"bigIqLicensePoolName\":{\"value\":\"$bigIqLicensePoolName\"}}"
 elif [ $licenseType == "BIGIQ_PAYG" ]; then
-    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetMinCount\":{\"value\":$vmScaleSetMinCount},\"vmScaleSetMaxCount\":{\"value\":$vmScaleSetMaxCount},\"autoScaleMetric\":{\"value\":\"$autoScaleMetric\"},\"appInsights\":{\"value\":\"$appInsights\"},\"calculatedBandwidth\":{\"value\":\"$calculatedBandwidth\"},\"scaleOutThreshold\":{\"value\":$scaleOutThreshold},\"scaleInThreshold\":{\"value\":$scaleInThreshold},\"scaleTimeWindow\":{\"value\":$scaleTimeWindow},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"notificationEmail\":{\"value\":\"$notificationEmail\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"},\"bigIqLicenseHost\":{\"value\":\"$bigIqLicenseHost\"},\"bigIqLicenseUsername\":{\"value\":\"$bigIqLicenseUsername\"}},\"bigIqLicensePassword\":{\"value\":\"$bigIqLicensePassword\"}},\"bigIqLicensePool\":{\"value\":\"$bigIqLicensePool\"}},\"numberOfStaticInstances\":{\"value\":$numberOfStaticInstances}}"
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetMinCount\":{\"value\":$vmScaleSetMinCount},\"vmScaleSetMaxCount\":{\"value\":$vmScaleSetMaxCount},\"autoScaleMetric\":{\"value\":\"$autoScaleMetric\"},\"appInsights\":{\"value\":\"$appInsights\"},\"calculatedBandwidth\":{\"value\":\"$calculatedBandwidth\"},\"scaleOutThreshold\":{\"value\":$scaleOutThreshold},\"scaleInThreshold\":{\"value\":$scaleInThreshold},\"scaleTimeWindow\":{\"value\":$scaleTimeWindow},\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"notificationEmail\":{\"value\":\"$notificationEmail\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"},\"bigIqAddress\":{\"value\":\"$bigIqAddress\"},\"bigIqUsername\":{\"value\":\"$bigIqUsername\"}},\"bigIqPassword\":{\"value\":\"$bigIqPassword\"}},\"bigIqLicensePoolName\":{\"value\":\"$bigIqLicensePoolName\"}},\"numberOfStaticInstances\":{\"value\":$numberOfStaticInstances}}"
 else
     echo "Please select a valid license type of PAYG, BIGIQ or BIGIQ_PAYG."
     exit 1

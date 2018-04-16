@@ -50,16 +50,16 @@
         "licensedBandwidth": {
             "value": "200m"
         }, 
-        "bigIqLicenseHost": {
+        "bigIqAddress": {
             "value": "GEN_UNIQUE"
         }, 
-        "bigIqLicenseUsername": {
+        "bigIqUsername": {
             "value": "GEN_UNIQUE"
         }, 
-        "bigIqLicensePassword": {
+        "bigIqPassword": {
             "value": "GEN_UNIQUE"
         }, 
-        "bigIqLicensePool": {
+        "bigIqLicensePoolName": {
             "value": "GEN_UNIQUE"
         }, 
         "vnetName": {

@@ -24,11 +24,23 @@ while [[ $# -gt 1 ]]; do
         --licenseType)
             licenseType=$2
             shift 2;;
+        --licenseKey1)
+            licenseKey1=$2
+            shift 2;;
         --licensedBandwidth)
             licensedBandwidth=$2
             shift 2;;
-        --licenseKey1)
-            licenseKey1=$2
+        --bigIqAddress)
+            bigIqAddress=$2
+            shift 2;;
+        --bigIqUsername)
+            bigIqUsername=$2
+            shift 2;;
+        --bigIqPassword)
+            bigIqPassword=$2
+            shift 2;;
+        --bigIqLicensePoolName)
+            bigIqLicensePoolName=$2
             shift 2;;
         --adminUsername)
             adminUsername=$2
@@ -116,9 +128,6 @@ if [ $licenseType == "BYOL" ]; then
     if [ -z $licenseKey1 ] ; then
             read -p "Please enter value for licenseKey1:" licenseKey1
     fi
-    template_file="./BYOL/azuredeploy.json"
-    parameter_file="./BYOL/azuredeploy.parameters.json"
-fi
 # Prompt for licensed bandwidth if not supplied and PAYG is selected
 if [ $licenseType == "PAYG" ]; then
     if [ -z $licensedBandwidth ] ; then
@@ -129,7 +138,7 @@ if [ $licenseType == "PAYG" ]; then
 fi
 # Prompt for BIGIQ parameters if not supplied and BIGIQ is selected
 if [ $licenseType == "BIGIQ" ]; then
-	big_iq_vars="bigIqLicenseHost bigIqLicenseUsername bigIqLicensePassword bigIqLicensePool"
+	big_iq_vars="bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName"
 	for variable in $big_iq_vars
 			do
 			if [ -z ${!variable} ] ; then
@@ -161,7 +170,7 @@ if [ $licenseType == "BYOL" ]; then
 elif [ $licenseType == "PAYG" ]; then
     azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddress\":{\"value\":\"$mgmtIpAddress\"},\"externalSubnetName\":{\"value\":\"$externalSubnetName\"},\"externalIpAddressRangeStart\":{\"value\":\"$externalIpAddressRangeStart\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddress\":{\"value\":\"$internalIpAddress\"},\"avSetChoice\":{\"value\":\"$avSetChoice\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"},\"licensedBandwidth\":{\"value\":\"$licensedBandwidth\"}}"
 elif [ $licenseType == "BIGIQ" ]; then
-    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddress\":{\"value\":\"$mgmtIpAddress\"},\"externalSubnetName\":{\"value\":\"$externalSubnetName\"},\"externalIpAddressRangeStart\":{\"value\":\"$externalIpAddressRangeStart\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddress\":{\"value\":\"$internalIpAddress\"},\"avSetChoice\":{\"value\":\"$avSetChoice\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"},\"bigIqLicenseHost\":{\"value\":\"$bigIqLicenseHost\"},\"bigIqLicenseUsername\":{\"value\":\"$bigIqLicenseUsername\"}},\"bigIqLicensePassword\":{\"value\":\"$bigIqLicensePassword\"}},\"bigIqLicensePool\":{\"value\":\"$bigIqLicensePool\"}}"
+    azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddress\":{\"value\":\"$mgmtIpAddress\"},\"externalSubnetName\":{\"value\":\"$externalSubnetName\"},\"externalIpAddressRangeStart\":{\"value\":\"$externalIpAddressRangeStart\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddress\":{\"value\":\"$internalIpAddress\"},\"avSetChoice\":{\"value\":\"$avSetChoice\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"},\"bigIqAddress\":{\"value\":\"$bigIqAddress\"},\"bigIqUsername\":{\"value\":\"$bigIqUsername\"}},\"bigIqPassword\":{\"value\":\"$bigIqPassword\"}},\"bigIqLicensePoolName\":{\"value\":\"$bigIqLicensePoolName\"}}"
 else
     echo "Please select a valid license type of PAYG, BYOL or BIGIQ."
     exit 1

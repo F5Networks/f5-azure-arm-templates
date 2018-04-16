@@ -24,14 +24,14 @@ while [[ $# -gt 1 ]]; do
         --licenseType)
             licenseType=$2
             shift 2;;
-        --licensedBandwidth)
-            licensedBandwidth=$2
-            shift 2;;
         --licenseKey1)
             licenseKey1=$2
             shift 2;;
         --licenseKey2)
             licenseKey2=$2
+            shift 2;;
+        --licensedBandwidth)
+            licensedBandwidth=$2
             shift 2;;
         --numberOfInstances)
             numberOfInstances=$2
