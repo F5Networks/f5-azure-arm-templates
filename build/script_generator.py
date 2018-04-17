@@ -33,13 +33,13 @@ def build_deploy_cmd(language, base_deploy, deploy_cmd_params, template_info):
         single_lic_cmd = ' -licenseKey1 "$licenseKey1"'
         multi_lic_cmd = ' -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2"'
         payg_cmd = ' -licensedBandwidth "$licensedBandwidth"'
-        big_iq_cmd = ' -bigIqAddress "$bigIqAddress" -bigIqUsername "$bigIqUsername" -bigIqPassword $bigiq_pwd -bigIqLicensePoolName "$bigIqLicensePoolName"'
+        big_iq_cmd = ' -bigIqAddress "$bigIqAddress" -bigIqUsername "$bigIqUsername" -bigIqPassword $bigiq_pwd -bigIqLicensePoolName "$bigIqLicensePoolName" -bigIqLicenseSkuKeyword1 "$bigIqLicenseSkuKeyword1" -bigIqLicenseSkuKeyword2 "$bigIqLicenseSkuKeyword2" -bigIqLicenseUnitOfMeasure "$bigIqLicenseUnitOfMeasure"'
         big_iq_payg_cmd = ' -numberOfStaticInstances $numberOfStaticInstances'
     elif language == 'bash':
         single_lic_cmd = '\\"licenseKey1\\":{\\"value\\":\\"$licenseKey1\\"}}"'
         multi_lic_cmd = '\\"licenseKey1\\":{\\"value\\":\\"$licenseKey1\\"},\\"licenseKey2\\":{\\"value\\":\\"$licenseKey2\\"}}"'
         payg_cmd = '\\"licensedBandwidth\\":{\\"value\\":\\"$licensedBandwidth\\"}}"'
-        big_iq_cmd = '\\"bigIqAddress\\":{\\"value\\":\\"$bigIqAddress\\"},\\"bigIqUsername\\":{\\"value\\":\\"$bigIqUsername\\"}},\\"bigIqPassword\\":{\\"value\\":\\"$bigIqPassword\\"}},\\"bigIqLicensePoolName\\":{\\"value\\":\\"$bigIqLicensePoolName\\"}}"'
+        big_iq_cmd = '\\"bigIqAddress\\":{\\"value\\":\\"$bigIqAddress\\"},\\"bigIqUsername\\":{\\"value\\":\\"$bigIqUsername\\"}},\\"bigIqPassword\\":{\\"value\\":\\"$bigIqPassword\\"}},\\"bigIqLicensePoolName\\":{\\"value\\":\\"$bigIqLicensePoolName\\"}},\\"bigIqLicenseSkuKeyword1\\":{\\"value\\":\\"$bigIqLicenseSkuKeyword1\\"}},\\"bigIqLicenseSkuKeyword2\\":{\\"value\\":\\"$bigIqLicenseSkuKeyword2\\"}},\\"bigIqLicenseUnitOfMeasure\\":{\\"value\\":\\"$bigIqLicenseUnitOfMeasure\\"}}"'
         big_iq_payg_cmd = ',\\"numberOfStaticInstances\\":{\\"value\\":$numberOfStaticInstances}}"'
     if multi_lic is True:
         byol_cmd = deploy_cmd_params + multi_lic_cmd
@@ -113,8 +113,8 @@ def script_creation(data, i_data, language):
         if multi_lic is True:
             lic2_param = '\n  [string] $licenseKey2 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey2"}),'
         payg_params = '  [string] $licensedBandwidth = $(if($licenseType -eq "PAYG") { Read-Host -prompt "licensedBandwidth"}),'
-        big_iq_params = '\n  [string] $bigIqAddress = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqAddress"}),\n  [string] $bigIqUsername = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqUsername"}),\n  [string] $bigIqPassword = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqPassword"}),\n  [string] $bigIqLicensePoolName = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicensePoolName"}),'
-        big_iq_payg_params = '  [string] $licensedBandwidth = $(if($licenseType -like "*PAYG*") { Read-Host -prompt "licensedBandwidth"}),\n  [string] $bigIqAddress = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqAddress"}),\n  [string] $bigIqUsername = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqUsername"}),\n  [string] $bigIqPassword = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqPassword"}),\n  [string] $bigIqLicensePoolName = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqLicensePoolName"}),\n  [string] $numberOfStaticInstances = $(if($licenseType -eq "BIGIQ_PAYG") { Read-Host -prompt "numberOfStaticInstances"}),'
+        big_iq_params = '\n  [string] $bigIqAddress = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqAddress"}),\n  [string] $bigIqUsername = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqUsername"}),\n  [string] $bigIqPassword = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqPassword"}),\n  [string] $bigIqLicensePoolName = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicensePoolName"}),\n  [string] $bigIqLicenseSkuKeyword1 = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseSkuKeyword1"}),\n  [string] $bigIqLicenseSkuKeyword2 = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseSkuKeyword2"}),\n  [string] $bigIqLicenseUnitOfMeasure = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseUnitOfMeasure"}),'
+        big_iq_payg_params = '  [string] $licensedBandwidth = $(if($licenseType -like "*PAYG*") { Read-Host -prompt "licensedBandwidth"}),\n  [string] $bigIqAddress = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqAddress"}),\n  [string] $bigIqUsername = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqUsername"}),\n  [string] $bigIqPassword = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqPassword"}),\n  [string] $bigIqLicensePoolName = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqLicensePoolName"}),\n  [string] $bigIqLicenseSkuKeyword1 = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqLicenseSkuKeyword1"}),\n  [string] $bigIqLicenseSkuKeyword2 = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqLicenseSkuKeyword2"}),\n  [string] $bigIqLicenseUnitOfMeasure = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqLicenseUnitOfMeasure"}),\n  [string] $numberOfStaticInstances = $(if($licenseType -eq "BIGIQ_PAYG") { Read-Host -prompt "numberOfStaticInstances"}),'
         if lic_type_all is True:
             lic_params = payg_params + '\n  [string] $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),' + lic2_param + big_iq_params
         elif lic_type_all == 'PAYG,BIGIQ':
@@ -141,8 +141,8 @@ def script_creation(data, i_data, language):
         byol_args = ['licenseKey1', 'licenseKey2']
         if_payg = '# Prompt for licensed bandwidth if not supplied and PAYG is selected\nif [ $licenseType == "PAYG" ]; then\n    if [ -z $licensedBandwidth ] ; then\n            read -p "Please enter value for licensedBandwidth:" licensedBandwidth\n    fi\n    template_file="./PAYG/azuredeploy.json"\n    parameter_file="./PAYG/azuredeploy.parameters.json"\nfi'
         payg_args = ['licensedBandwidth']
-        if_bigiq = '\n# Prompt for BIGIQ parameters if not supplied and BIGIQ is selected\nif [ $licenseType == "BIGIQ" ]; then\n	big_iq_vars="bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName"\n	for variable in $big_iq_vars\n			do\n			if [ -z ${!variable} ] ; then\n					read -p "Please enter value for $variable:" $variable\n			fi\n	done\nfi\n'
-        bigiq_args = ['bigIqAddress', 'bigIqUsername', 'bigIqPassword', 'bigIqLicensePoolName']
+        if_bigiq = '\n# Prompt for BIGIQ parameters if not supplied and BIGIQ is selected\nif [ $licenseType == "BIGIQ" ]; then\n	big_iq_vars="bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName bigIqLicenseSkuKeyword1 bigIqLicenseSkuKeyword2 bigIqLicenseUnitOfMeasure"\n	for variable in $big_iq_vars\n			do\n			if [ -z ${!variable} ] ; then\n					read -p "Please enter value for $variable:" $variable\n			fi\n	done\nfi\n'
+        bigiq_args = ['bigIqAddress', 'bigIqUsername', 'bigIqPassword', 'bigIqLicensePoolName', 'bigIqLicenseSkuKeyword1', 'bigIqLicenseSkuKeyword2', 'bigIqLicenseUnitOfMeasure']
         bigiq_payg_args = ['numberOfStaticInstances']
         license_args = []
         if lic_type_all is True:
@@ -153,7 +153,7 @@ def script_creation(data, i_data, language):
             lic_check = if_payg + if_bigiq
             license_args = payg_args + bigiq_args
         elif lic_type_all == 'PAYG,BIGIQ,BIGIQ+PAYG':
-            lic_check = if_payg + if_bigiq + '\n# Prompt for BIGIQ_PAYG parameters if not supplied and BIGIQ_PAYG is selected\nif [ $licenseType == "BIGIQ_PAYG" ]; then\n	big_iq_payg_vars="licensedBandwidth bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName numberOfStaticInstances"\n	for variable in $big_iq_payg_vars\n			do\n			if [ -z ${!variable} ] ; then\n					read -p "Please enter value for $variable:" $variable\n			fi\n	done\nfi\n'
+            lic_check = if_payg + if_bigiq + '\n# Prompt for BIGIQ_PAYG parameters if not supplied and BIGIQ_PAYG is selected\nif [ $licenseType == "BIGIQ_PAYG" ]; then\n	big_iq_payg_vars="licensedBandwidth bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName bigIqLicenseSkuKeyword1 bigIqLicenseSkuKeyword2 bigIqLicenseUnitOfMeasure numberOfStaticInstances"\n	for variable in $big_iq_payg_vars\n			do\n			if [ -z ${!variable} ] ; then\n					read -p "Please enter value for $variable:" $variable\n			fi\n	done\nfi\n'
             license_args = payg_args + bigiq_args + bigiq_payg_args
         elif lic_type_all == 'BYOL,PAYG':
             lic_check = if_byol + lic2_check + if_payg

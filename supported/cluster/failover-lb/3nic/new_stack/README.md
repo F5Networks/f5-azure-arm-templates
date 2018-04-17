@@ -134,6 +134,9 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | bigIqUsername | BIG-IQ licensing only: | The BIG-IQ username to use during BIG-IP licensing via BIG-IQ. |
 | bigIqPassword | BIG-IQ licensing only: | The BIG-IQ password to use during BIG-IP licensing via BIG-IQ. |
 | bigIqLicensePoolName | BIG-IQ licensing only: | The BIG-IQ license pool to use during BIG-IP licensing via BIG-IQ. |
+| bigIqLicenseSkuKeyword1 | BIG-IQ licensing only: | The BIG-IQ license filter to use for sku keyword 1 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
+| bigIqLicenseSkuKeyword2 | BIG-IQ licensing only: | The BIG-IQ license filter to use for sku keyword 2 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
+| bigIqLicenseUnitOfMeasure | BIG-IQ licensing only: | The BIG-IQ license unit of measure to use during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
 | numberOfExternalIps | Yes | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
 | enableNetworkFailover | Yes | Enabling failover creates a traditional active/active deployment with traffic groups and mirroring. When failover is disabled, all devices are active; use traffic group none. |

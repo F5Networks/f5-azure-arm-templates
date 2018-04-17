@@ -121,6 +121,9 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | bigIqUsername | BIG-IQ licensing only: | The BIG-IQ username to use during BIG-IP licensing via BIG-IQ. |
 | bigIqPassword | BIG-IQ licensing only: | The BIG-IQ password to use during BIG-IP licensing via BIG-IQ. |
 | bigIqLicensePoolName | BIG-IQ licensing only: | The BIG-IQ license pool to use during BIG-IP licensing via BIG-IQ. |
+| bigIqLicenseSkuKeyword1 | BIG-IQ licensing only: | The BIG-IQ license filter to use for sku keyword 1 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
+| bigIqLicenseSkuKeyword2 | BIG-IQ licensing only: | The BIG-IQ license filter to use for sku keyword 2 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
+| bigIqLicenseUnitOfMeasure | BIG-IQ licensing only: | The BIG-IQ license unit of measure to use during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
 | vnetName | Yes | The name of the existing virtual network to which you want to connect the BIG-IP VEs. |
 | vnetResourceGroupName | Yes | The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed. |
 | mgmtSubnetName | Yes | Name of the existing MGMT subnet - with external access to the Internet. |

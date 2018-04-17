@@ -10,6 +10,9 @@ param(
   [string] $bigIqUsername = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqUsername"}),
   [string] $bigIqPassword = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqPassword"}),
   [string] $bigIqLicensePoolName = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicensePoolName"}),
+  [string] $bigIqLicenseSkuKeyword1 = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseSkuKeyword1"}),
+  [string] $bigIqLicenseSkuKeyword2 = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseSkuKeyword2"}),
+  [string] $bigIqLicenseUnitOfMeasure = $(if($licenseType -eq "BIGIQ") { Read-Host -prompt "bigIqLicenseUnitOfMeasure"}),
 
   [string] [Parameter(Mandatory=$True)] $vmScaleSetMinCount,
   [string] [Parameter(Mandatory=$True)] $vmScaleSetMaxCount,
@@ -69,7 +72,7 @@ if ($licenseType -eq "PAYG") {
 } elseif ($licenseType -eq "BIGIQ") {
   if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BIGIQ\azuredeploy.json"; $parametersFilePath = ".\BIGIQ\azuredeploy.parameters.json" }
   $bigiq_pwd = ConvertTo-SecureString -String $bigIqPassword -AsPlainText -Force
-  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -vmScaleSetMinCount $vmScaleSetMinCount -vmScaleSetMaxCount $vmScaleSetMaxCount -autoScaleMetric $autoScaleMetric -appInsights $appInsights -calculatedBandwidth $calculatedBandwidth -scaleOutThreshold $scaleOutThreshold -scaleInThreshold $scaleInThreshold -scaleTimeWindow $scaleTimeWindow -adminUsername $adminUsername -adminPassword $pwd -dnsLabel $dnsLabel -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -vnetAddressPrefix $vnetAddressPrefix -tenantId $tenantId -clientId $clientId -servicePrincipalSecret $sps -notificationEmail $notificationEmail -ntpServer $ntpServer -timeZone $timeZone -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics  -bigIqAddress "$bigIqAddress" -bigIqUsername "$bigIqUsername" -bigIqPassword $bigiq_pwd -bigIqLicensePoolName "$bigIqLicensePoolName"
+  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -vmScaleSetMinCount $vmScaleSetMinCount -vmScaleSetMaxCount $vmScaleSetMaxCount -autoScaleMetric $autoScaleMetric -appInsights $appInsights -calculatedBandwidth $calculatedBandwidth -scaleOutThreshold $scaleOutThreshold -scaleInThreshold $scaleInThreshold -scaleTimeWindow $scaleTimeWindow -adminUsername $adminUsername -adminPassword $pwd -dnsLabel $dnsLabel -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -vnetAddressPrefix $vnetAddressPrefix -tenantId $tenantId -clientId $clientId -servicePrincipalSecret $sps -notificationEmail $notificationEmail -ntpServer $ntpServer -timeZone $timeZone -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics  -bigIqAddress "$bigIqAddress" -bigIqUsername "$bigIqUsername" -bigIqPassword $bigiq_pwd -bigIqLicensePoolName "$bigIqLicensePoolName" -bigIqLicenseSkuKeyword1 "$bigIqLicenseSkuKeyword1" -bigIqLicenseSkuKeyword2 "$bigIqLicenseSkuKeyword2" -bigIqLicenseUnitOfMeasure "$bigIqLicenseUnitOfMeasure"
 } else {
   Write-Error -Message "Please select a valid license type of PAYG or BIGIQ."
 }

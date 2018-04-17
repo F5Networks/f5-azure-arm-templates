@@ -132,6 +132,9 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | bigIqUsername | BIG-IQ licensing only: | The BIG-IQ username to use during BIG-IP licensing via BIG-IQ. |
 | bigIqPassword | BIG-IQ licensing only: | The BIG-IQ password to use during BIG-IP licensing via BIG-IQ. |
 | bigIqLicensePoolName | BIG-IQ licensing only: | The BIG-IQ license pool to use during BIG-IP licensing via BIG-IQ. |
+| bigIqLicenseSkuKeyword1 | BIG-IQ licensing only: | The BIG-IQ license filter to use for sku keyword 1 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
+| bigIqLicenseSkuKeyword2 | BIG-IQ licensing only: | The BIG-IQ license filter to use for sku keyword 2 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
+| bigIqLicenseUnitOfMeasure | BIG-IQ licensing only: | The BIG-IQ license unit of measure to use during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
 | solutionDeploymentName | Yes | A unique name for this deployment. |
 | applicationProtocols | Yes | The protocol(s) used by your application. |

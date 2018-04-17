@@ -32,6 +32,9 @@ def parameter_initialize(data):
     data['parameters']['bigIqUsername'] = "OPTIONAL"
     data['parameters']['bigIqPassword'] = "OPTIONAL"
     data['parameters']['bigIqLicensePoolName'] = "OPTIONAL"
+    data['parameters']['bigIqLicenseSkuKeyword1'] = "OPTIONAL"
+    data['parameters']['bigIqLicenseSkuKeyword2'] = "OPTIONAL"
+    data['parameters']['bigIqLicenseUnitOfMeasure'] = "OPTIONAL"
     data['parameters']['numberOfAdditionalNics'] = "OPTIONAL"
     data['parameters']['additionalNicLocation'] = "OPTIONAL"
     data['parameters']['additionalNicIpRangeStart'] = "OPTIONAL"
@@ -266,7 +269,7 @@ def param_descr_update(data, template_name):
     """ Fill in parameter descriptions from the YAML doc file """
     yaml_doc_loc = {'doc_text_file': 'files/readme_files/template_text.yaml'}
     rG = readme_generator.ReadmeGen()
-    files = rG.open_files(yaml_doc_loc)
+    rG.open_files(yaml_doc_loc)
     for param in data:
         if data[param]['metadata']['description'] != "":
             # If parameter description is filled in then don't replace

@@ -51,7 +51,6 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - F5 Azure ARM templates now capture all deployment logs to the BIG-IP VE in **/var/log/cloud/azure**.  Depending on which template you are using, this includes deployment logs (stdout/stderr), Cloud Libs execution logs, recurring solution logs (metrics, failover, and so on), and more.
 - Supported F5 ARM templates do not reconfigure existing Azure resources, such as network security groups.  Depending on your configuration, you may need to configure these resources to allow the BIG-IP VE(s) to receive traffic for your application.  Similarly, templates that deploy Azure load balancer(s) do not configure load balancing rules or probes on those resources to forward external traffic to the BIG-IP(s).  You must create these resources after the deployment has succeeded.
 - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
-- This template requires that the resource group name the deployment uses to be no longer than **35** characters as a result of limitations to tag size within Azure.
 - This template now supports associating Azure NIC IP configurations with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.
 - Persistence and connection mirroring are now supported in this template.  It also supports mirroring of APM sessions.
 - The BIG-IP VE failover log can be found at **/var/log/cloud/azure/azureFailover.log**.
@@ -138,6 +137,9 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | bigIqUsername | BIG-IQ licensing only: | The BIG-IQ username to use during BIG-IP licensing via BIG-IQ. |
 | bigIqPassword | BIG-IQ licensing only: | The BIG-IQ password to use during BIG-IP licensing via BIG-IQ. |
 | bigIqLicensePoolName | BIG-IQ licensing only: | The BIG-IQ license pool to use during BIG-IP licensing via BIG-IQ. |
+| bigIqLicenseSkuKeyword1 | BIG-IQ licensing only: | The BIG-IQ license filter to use for sku keyword 1 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
+| bigIqLicenseSkuKeyword2 | BIG-IQ licensing only: | The BIG-IQ license filter to use for sku keyword 2 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
+| bigIqLicenseUnitOfMeasure | BIG-IQ licensing only: | The BIG-IQ license unit of measure to use during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
 | numberOfExternalIps | Yes | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
 | tenantId | Yes | Your Azure service principal application tenant ID. |

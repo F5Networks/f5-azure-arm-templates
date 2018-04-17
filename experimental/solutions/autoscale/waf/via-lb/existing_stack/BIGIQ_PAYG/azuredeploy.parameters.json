@@ -62,6 +62,15 @@
         "bigIqLicensePoolName": {
             "value": "GEN_UNIQUE"
         }, 
+        "bigIqLicenseSkuKeyword1": {
+            "value": "OPTIONAL"
+        }, 
+        "bigIqLicenseSkuKeyword2": {
+            "value": "OPTIONAL"
+        }, 
+        "bigIqLicenseUnitOfMeasure": {
+            "value": "OPTIONAL"
+        }, 
         "vnetName": {
             "value": "GEN_UNIQUE"
         }, 
