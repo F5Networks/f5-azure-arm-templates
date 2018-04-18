@@ -41,7 +41,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - F5 has created an iApp for configuring logging for BIG-IP modules to be sent to a specific set of cloud analytics solutions.  See [Logging iApp](#logging-iapp).
 - F5 Azure ARM templates now capture all deployment logs to the BIG-IP VE in **/var/log/cloud/azure**.  Depending on which template you are using, this includes deployment logs (stdout/stderr), Cloud Libs execution logs, recurring solution logs (metrics, failover, and so on), and more.
 - Supported F5 ARM templates do not reconfigure existing Azure resources, such as network security groups.  Depending on your configuration, you may need to configure these resources to allow the BIG-IP VE(s) to receive traffic for your application.  Similarly, templates that deploy Azure load balancer(s) do not configure load balancing rules or probes on those resources to forward external traffic to the BIG-IP(s).  You must create these resources after the deployment has succeeded.
-- You have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) with a pool of BIG-IP licenses in order to license BIG-IP VEs using BYOL licenses. This solution only supports only BIG-IQ versions 5.0 - 5.3, and your BIG-IQ system must have at least 2 NICs.
+- You have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) with a pool of BIG-IP licenses in order to license BIG-IP VEs using BYOL licenses. This solution only supports BIG-IQ versions 5.0 - 5.4, and your BIG-IQ system must have at least 2 NICs.
 
 ## Security
 
@@ -121,12 +121,12 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | bigIqUsername | BIG-IQ licensing only: | The BIG-IQ username to use during BIG-IP licensing via BIG-IQ. |
 | bigIqPassword | BIG-IQ licensing only: | The BIG-IQ password to use during BIG-IP licensing via BIG-IQ. |
 | bigIqLicensePoolName | BIG-IQ licensing only: | The BIG-IQ license pool to use during BIG-IP licensing via BIG-IQ. |
-| bigIqLicenseSkuKeyword1 | BIG-IQ licensing only: | The BIG-IQ license filter to use for sku keyword 1 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
-| bigIqLicenseSkuKeyword2 | BIG-IQ licensing only: | The BIG-IQ license filter to use for sku keyword 2 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
-| bigIqLicenseUnitOfMeasure | BIG-IQ licensing only: | The BIG-IQ license unit of measure to use during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ. |
+| bigIqLicenseSkuKeyword1 | BIG-IQ licensing only: | The BIG-IQ license filter to use for sku keyword 1 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 (utility) pool on the BIG-IQ, if not using this pool type leave the default of **OPTIONAL**. |
+| bigIqLicenseSkuKeyword2 | BIG-IQ licensing only: | The BIG-IQ license filter to use for sku keyword 2 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 (utility) pool on the BIG-IQ, if not using this pool type leave the default of **OPTIONAL**. |
+| bigIqLicenseUnitOfMeasure | BIG-IQ licensing only: | The BIG-IQ license unit of measure to use during BIG-IP licensing via BIG-IQ, such as **yearly**, **monthly**, **daily** or **hourly**. Note: This is only required when licensing with an ELA/CLPv2 (utility) pool on the BIG-IQ, if not using this pool type leave the default of **OPTIONAL**. |
 | vnetName | Yes | The name of the existing virtual network to which you want to connect the BIG-IP VEs. |
 | vnetResourceGroupName | Yes | The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed. |
-| mgmtSubnetName | Yes | Name of the existing MGMT subnet - with external access to the Internet. |
+| mgmtSubnetName | Yes | Name of the existing mgmt subnet - with external access to the Internet. IMPORTANT: The subnet you provide for the mgmt NIC **must** be unique. |
 | mgmtIpAddress | Yes | MGMT subnet IP Address to use for the BIG-IP management IP address. |
 | avSetChoice | Yes | If you want the VM placed in a new Azure Availability Set, leave the default value of **CREATE_NEW**, otherwise specify the name of the existing Availability Set you want to use. Note: If you are using an existing AV Set, this deployment must be in the same Azure Resource Group as the AV Set. |
 | ntpServer | Yes | Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use. |

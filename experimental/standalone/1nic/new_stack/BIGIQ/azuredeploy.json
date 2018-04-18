@@ -142,21 +142,21 @@
         "bigIqLicenseSkuKeyword1": {
             "defaultValue": "OPTIONAL", 
             "metadata": {
-                "description": "The BIG-IQ license filter to use for sku keyword 1 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ."
+                "description": "The BIG-IQ license filter to use for sku keyword 1 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 (utility) pool on the BIG-IQ, if not using this pool type leave the default of **OPTIONAL**."
             }, 
             "type": "string"
         }, 
         "bigIqLicenseSkuKeyword2": {
             "defaultValue": "OPTIONAL", 
             "metadata": {
-                "description": "The BIG-IQ license filter to use for sku keyword 2 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ."
+                "description": "The BIG-IQ license filter to use for sku keyword 2 during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 (utility) pool on the BIG-IQ, if not using this pool type leave the default of **OPTIONAL**."
             }, 
             "type": "string"
         }, 
         "bigIqLicenseUnitOfMeasure": {
             "defaultValue": "OPTIONAL", 
             "metadata": {
-                "description": "The BIG-IQ license unit of measure to use during BIG-IP licensing via BIG-IQ. Note: This is only required when licensing with an ELA/CLPv2 utility pool on the BIG-IQ."
+                "description": "The BIG-IQ license unit of measure to use during BIG-IP licensing via BIG-IQ, such as **yearly**, **monthly**, **daily** or **hourly**. Note: This is only required when licensing with an ELA/CLPv2 (utility) pool on the BIG-IQ, if not using this pool type leave the default of **OPTIONAL**."
             }, 
             "type": "string"
         }, 

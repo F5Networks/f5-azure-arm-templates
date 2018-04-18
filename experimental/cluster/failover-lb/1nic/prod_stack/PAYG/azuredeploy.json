@@ -144,7 +144,7 @@
         }, 
         "mgmtSubnetName": {
             "metadata": {
-                "description": "Name of the existing MGMT subnet - with external access to the Internet."
+                "description": "Name of the existing mgmt subnet - with external access to the Internet. IMPORTANT: The subnet you provide for the mgmt NIC **must** be unique."
             }, 
             "type": "string"
         }, 

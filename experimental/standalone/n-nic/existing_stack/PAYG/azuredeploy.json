@@ -134,7 +134,7 @@
         }, 
         "additionalNicLocation": {
             "metadata": {
-                "description": "This parameter specifies where the additional NICs should go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. NOTE: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. IMPORTANT: The subnet you provide for each additional NIC MUST be unique."
+                "description": "This parameter specifies where the additional NICs should go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. NOTE: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. IMPORTANT: The subnet you provide for each additional NIC **must** be unique."
             }, 
             "type": "string"
         }, 
@@ -182,7 +182,7 @@
         }, 
         "mgmtSubnetName": {
             "metadata": {
-                "description": "Name of the existing MGMT subnet - with external access to the Internet."
+                "description": "Name of the existing mgmt subnet - with external access to the Internet. IMPORTANT: The subnet you provide for the mgmt NIC **must** be unique."
             }, 
             "type": "string"
         }, 
@@ -194,7 +194,7 @@
         }, 
         "externalSubnetName": {
             "metadata": {
-                "description": "Name of the existing external subnet - with external access to Internet."
+                "description": "Name of the existing external subnet - with external access to Internet. IMPORTANT: The subnet you provide for the external NIC **must** be unique."
             }, 
             "type": "string"
         }, 
@@ -206,7 +206,7 @@
         }, 
         "internalSubnetName": {
             "metadata": {
-                "description": "Name of the existing internal subnet."
+                "description": "Name of the existing internal subnet. IMPORTANT: The subnet you provide for the internal NIC **must** be unique."
             }, 
             "type": "string"
         }, 
