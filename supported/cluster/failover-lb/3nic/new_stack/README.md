@@ -250,7 +250,7 @@ If network failover is disabled (default), when you have completed the virtual s
 5. Click **Update**.
 6. Repeat for each virtual server.
 
-If network failover is enabled (if, for example, you have deployed the experimental HA Cluster 3 NIC template, or manually enabled network failover with traffic groups), when you have completed the virtual server configuration, you may modify the virtual addresses to use an alternative Traffic Group using the following guidance.
+If network failover is enabled (if, for example, you have deployed the HA Cluster 3 NIC template, or manually enabled network failover with traffic groups), when you have completed the virtual server configuration, you may modify the virtual addresses to use an alternative Traffic Group using the following guidance.
 
 1. On the Main tab, click **Local Traffic > Virtual Servers**.
 2. On the Menu bar, click the **Virtual Address List** tab.
