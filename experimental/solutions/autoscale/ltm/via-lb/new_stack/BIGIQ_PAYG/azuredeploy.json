@@ -495,8 +495,6 @@
         "lbTcpProbeIdHttp": "[concat(variables('extLbId'),'/probes/',variables('lbTcpProbeNameHttp'))]", 
         "lbTcpProbeNameHttps": "tcp_probe_https", 
         "lbTcpProbeIdHttps": "[concat(variables('extLbId'),'/probes/',variables('lbTcpProbeNameHttps'))]", 
-        "httpBackendPort": 880, 
-        "httpsBackendPort": 8445, 
         "instanceTypeMap": {
             "Standard_A3": {
                 "storageAccountTier": "Standard", 
@@ -888,7 +886,7 @@
                             "backendAddressPool": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
                             }, 
-                            "backendPort": "[variables('httpBackendPort')]", 
+                            "backendPort": 80, 
                             "frontendIPConfiguration": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
                             }, 
@@ -906,7 +904,7 @@
                             "backendAddressPool": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
                             }, 
-                            "backendPort": "[variables('httpsBackendPort')]", 
+                            "backendPort": 443, 
                             "frontendIPConfiguration": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
                             }, 
@@ -925,7 +923,7 @@
                         "properties": {
                             "intervalInSeconds": 15, 
                             "numberOfProbes": 3, 
-                            "port": "[variables('httpBackendPort')]", 
+                            "port": 80, 
                             "protocol": "Tcp"
                         }
                     }, 
@@ -934,7 +932,7 @@
                         "properties": {
                             "intervalInSeconds": 15, 
                             "numberOfProbes": 3, 
-                            "port": "[variables('httpsBackendPort')]", 
+                            "port": 443, 
                             "protocol": "Tcp"
                         }
                     }

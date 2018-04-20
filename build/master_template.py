@@ -559,11 +559,11 @@ if template_name in ('failover-lb_1nic', 'failover-lb_3nic', 'autoscale_ltm_via-
         data['variables']['lbTcpProbeIdHttp'] = "[concat(variables('extLbId'),'/probes/',variables('lbTcpProbeNameHttp'))]"
         data['variables']['lbTcpProbeNameHttps'] = "tcp_probe_https"
         data['variables']['lbTcpProbeIdHttps'] = "[concat(variables('extLbId'),'/probes/',variables('lbTcpProbeNameHttps'))]"
-        data['variables']['httpBackendPort'] = 880
-        data['variables']['httpsBackendPort'] = 8445
         if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
+            data['variables']['httpBackendPort'] = "[parameters('applicationPort')]"
+            data['variables']['httpsBackendPort'] = "[parameters('applicationSecurePort')]"
             data['variables']['f5NetworksSolutionScripts'] = "[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/', variables('f5NetworksTag'), '/" + solution_location + "/solutions/autoscale/waf/deploy_scripts/')]"
-            data['variables']['commandArgs'] = "[concat('-m ', parameters('applicationProtocols'), ' -d ', parameters('solutionDeploymentName'), ' -n ', parameters('applicationAddress'), ' -j 880 -k 8445 -h ', parameters('applicationPort'), ' -s ', parameters('applicationSecurePort'), ' -t ', toLower(parameters('applicationType')), ' -l ', toLower(parameters('blockingLevel')), ' -a ', parameters('customPolicy'), ' -c ', parameters('sslCert'), ' -r ', parameters('sslPswd'), ' -o ', parameters('applicationServiceFqdn'), ' -u svc_user')]"
+            data['variables']['commandArgs'] = "[concat('-m ', parameters('applicationProtocols'), ' -d ', parameters('solutionDeploymentName'), ' -n ', parameters('applicationAddress'), ' -j ', parameters('applicationPort'), ' -k ', parameters('applicationSecurePort'), ' -h ', parameters('applicationPort'), ' -s ', parameters('applicationSecurePort'), ' -t ', toLower(parameters('applicationType')), ' -l ', toLower(parameters('blockingLevel')), ' -a ', parameters('customPolicy'), ' -c ', parameters('sslCert'), ' -r ', parameters('sslPswd'), ' -o ', parameters('applicationServiceFqdn'), ' -u svc_user')]"
 
 # Add learning stack variables
 if learning_stack:
@@ -706,11 +706,17 @@ lb_rules_to_use = ""
 if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns') or license_type == 'BIGIQ_PAYG':
     frontend_port = "[parameters('applicationPort')]"
     frontend_port_https = "[parameters('applicationSecurePort')]"
-    if license_type == 'BIGIQ_PAYG' and template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns'):
+    backend_port = "[variables('httpBackendPort')]"
+    backend_port_https = "[variables('httpsBackendPort')]"
+    # Outbound connections for standard sku load balancer does not work without an LB rule
+    # so add to LTM templates
+    if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns'):
         frontend_port = 80
         frontend_port_https = 443
-    probes_to_use = [ { "name": "[variables('lbTcpProbeNameHttp')]", "properties": { "protocol": "Tcp", "port": "[variables('httpBackendPort')]", "intervalInSeconds": 15, "numberOfProbes": 3 } }, { "name": "[variables('lbTcpProbeNameHttps')]", "properties": { "protocol": "Tcp", "port": "[variables('httpsBackendPort')]", "intervalInSeconds": 15, "numberOfProbes": 3 } } ]
-    lb_rules_to_use = [{ "Name": "app-http", "properties": { "frontendIPConfiguration": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]" }, "backendAddressPool": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]" }, "probe": { "id": "[variables('lbTcpProbeIdHttp')]" }, "protocol": "Tcp", "frontendPort": frontend_port, "backendPort": "[variables('httpBackendPort')]", "idleTimeoutInMinutes": 15 } }, { "Name": "app-https", "properties": { "frontendIPConfiguration": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]" }, "backendAddressPool": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]" }, "probe": { "id": "[variables('lbTcpProbeIdHttps')]" }, "protocol": "Tcp", "frontendPort": frontend_port_https, "backendPort": "[variables('httpsBackendPort')]", "idleTimeoutInMinutes": 15 } }]
+        backend_port = 80
+        backend_port_https = 443
+    probes_to_use = [ { "name": "[variables('lbTcpProbeNameHttp')]", "properties": { "protocol": "Tcp", "port": backend_port, "intervalInSeconds": 15, "numberOfProbes": 3 } }, { "name": "[variables('lbTcpProbeNameHttps')]", "properties": { "protocol": "Tcp", "port": backend_port_https, "intervalInSeconds": 15, "numberOfProbes": 3 } } ]
+    lb_rules_to_use = [{ "Name": "app-http", "properties": { "frontendIPConfiguration": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]" }, "backendAddressPool": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]" }, "probe": { "id": "[variables('lbTcpProbeIdHttp')]" }, "protocol": "Tcp", "frontendPort": frontend_port, "backendPort": backend_port, "idleTimeoutInMinutes": 15 } }, { "Name": "app-https", "properties": { "frontendIPConfiguration": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]" }, "backendAddressPool": { "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]" }, "probe": { "id": "[variables('lbTcpProbeIdHttps')]" }, "protocol": "Tcp", "frontendPort": frontend_port_https, "backendPort": backend_port_https, "idleTimeoutInMinutes": 15 } }]
 
 if template_name == 'failover-lb_1nic':
     lb_fe_properties = { "publicIPAddress": { "id": "[variables('mgmtPublicIPAddressId')]" } }

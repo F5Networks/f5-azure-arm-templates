@@ -612,9 +612,9 @@
         "lbTcpProbeIdHttp": "[concat(variables('extLbId'),'/probes/',variables('lbTcpProbeNameHttp'))]", 
         "lbTcpProbeNameHttps": "tcp_probe_https", 
         "lbTcpProbeIdHttps": "[concat(variables('extLbId'),'/probes/',variables('lbTcpProbeNameHttps'))]", 
-        "httpBackendPort": 880, 
-        "httpsBackendPort": 8445, 
-        "commandArgs": "[concat('-m ', parameters('applicationProtocols'), ' -d ', parameters('solutionDeploymentName'), ' -n ', parameters('applicationAddress'), ' -j 880 -k 8445 -h ', parameters('applicationPort'), ' -s ', parameters('applicationSecurePort'), ' -t ', toLower(parameters('applicationType')), ' -l ', toLower(parameters('blockingLevel')), ' -a ', parameters('customPolicy'), ' -c ', parameters('sslCert'), ' -r ', parameters('sslPswd'), ' -o ', parameters('applicationServiceFqdn'), ' -u svc_user')]", 
+        "httpBackendPort": "[parameters('applicationPort')]", 
+        "httpsBackendPort": "[parameters('applicationSecurePort')]", 
+        "commandArgs": "[concat('-m ', parameters('applicationProtocols'), ' -d ', parameters('solutionDeploymentName'), ' -n ', parameters('applicationAddress'), ' -j ', parameters('applicationPort'), ' -k ', parameters('applicationSecurePort'), ' -h ', parameters('applicationPort'), ' -s ', parameters('applicationSecurePort'), ' -t ', toLower(parameters('applicationType')), ' -l ', toLower(parameters('blockingLevel')), ' -a ', parameters('customPolicy'), ' -c ', parameters('sslCert'), ' -r ', parameters('sslPswd'), ' -o ', parameters('applicationServiceFqdn'), ' -u svc_user')]", 
         "instanceTypeMap": {
             "Standard_A3": {
                 "storageAccountTier": "Standard", 
