@@ -162,7 +162,7 @@
             ], 
             "defaultValue": "Yes", 
             "metadata": {
-                "description": "Enabling failover creates a traditional active/active deployment with traffic groups and mirroring. When failover is disabled, all devices are active; use traffic group none."
+                "description": "Enabling failover creates a traditional active/standby deployment with traffic groups and mirroring. When failover is disabled, all devices are active; use traffic group none."
             }, 
             "type": "string"
         }, 

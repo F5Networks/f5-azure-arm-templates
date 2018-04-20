@@ -250,7 +250,7 @@ parameter_list:
   dnsProviderPassword: "The management password for the DNS provider to use when updating DNS."
   dnsProviderPool: "The GSLB pool on the BIG-IP DNS system to populate."
   dnsProviderDataCenter: "The GSLB datacenter on the BIG-IP DNS system to use when creating GSLB server(s). Note: If the datacenter provided does not exist the template will create one with the value given."
-  enableNetworkFailover: "Enabling failover creates a traditional active/active deployment with traffic groups and mirroring. When failover is disabled, all devices are active; use traffic group none."
+  enableNetworkFailover: "Enabling failover creates a traditional active/standby deployment with traffic groups and mirroring. When failover is disabled, all devices are active; use traffic group none."
   externalSubnetName: "Name of the existing external subnet - with external access to Internet. IMPORTANT: The subnet you provide for the external NIC **must** be unique."
   externalIpSelfAddressRangeStart: "The static private IP address you want to assign to the external self IP (primary) of the first BIG-IP VE. The next contiguous address will be used for the second BIG-IP device."
   externalIpAddressRangeStart:
