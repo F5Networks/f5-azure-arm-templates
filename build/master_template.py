@@ -154,8 +154,8 @@ elif license_type == 'BIGIQ' or license_type == 'BIGIQ_PAYG':
     if template_name in ('failover-api', 'failover-lb_3nic'):
         big_iq_mgmt_ip_ref =  "reference(concat(variables('mgmtPublicIPAddressId'), '0')).ipAddress,"
         big_iq_mgmt_ip_ref2 =  "reference(concat(variables('mgmtPublicIPAddressId'), '1')).ipAddress,"
-    license1_command = "' --license-pool --big-iq-host ', parameters('bigIqAddress'), ' --big-iq-user ', parameters('bigIqUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePoolName'), ' $(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',sku-keyword-2:', parameters('bigIqLicenseSkuKeyWord2'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ') --big-ip-mgmt-address ', " + big_iq_mgmt_ip_ref
-    license2_command = "' --license-pool --big-iq-host ', parameters('bigIqAddress'), ' --big-iq-user ', parameters('bigIqUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePoolName'), ' $(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',sku-keyword-2:', parameters('bigIqLicenseSkuKeyWord2'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ') --big-ip-mgmt-address ', " + big_iq_mgmt_ip_ref2
+    license1_command = "' --license-pool --big-iq-host ', parameters('bigIqAddress'), ' --big-iq-user ', parameters('bigIqUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePoolName'), ' $(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ') --big-ip-mgmt-address ', " + big_iq_mgmt_ip_ref
+    license2_command = "' --license-pool --big-iq-host ', parameters('bigIqAddress'), ' --big-iq-user ', parameters('bigIqUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePoolName'), ' $(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ') --big-ip-mgmt-address ', " + big_iq_mgmt_ip_ref2
     bigiq_pwd_delete = ' rm -f /config/cloud/.bigIqPasswd;'
     if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
         big_ip_ext_params = "--bigIpExtMgmtAddress ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --bigIpExtMgmtPort via-api'"
@@ -165,9 +165,9 @@ elif license_type == 'BIGIQ' or license_type == 'BIGIQ_PAYG':
             # Dynamic VMSS (PAYG)
             license1_command =  ", ' --externalTag key:f5ClusterTag,value:', variables('dnsLabel')"
             # Static VMSS
-            static_license1_command =  ", ' --bigIqAddress ', parameters('bigIqAddress'), ' --bigIqUsername ', parameters('bigIqUsername'), ' --bigIqPassword /config/cloud/.bigIqPasswd --bigIqLicensePoolName ', parameters('bigIqLicensePoolName'), ' --bigIqExtraLicenseOptions \\\"$(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',sku-keyword-2:', parameters('bigIqLicenseSkuKeyWord2'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ')\\\" " + big_ip_ext_params + ", ' --static --natBase mgmtnatpool-static. --externalTag key:f5ClusterTag,value:', variables('dnsLabel')"
+            static_license1_command =  ", ' --bigIqAddress ', parameters('bigIqAddress'), ' --bigIqUsername ', parameters('bigIqUsername'), ' --bigIqPassword /config/cloud/.bigIqPasswd --bigIqLicensePoolName ', parameters('bigIqLicensePoolName'), ' --bigIqExtraLicenseOptions \\\"$(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ')\\\" " + big_ip_ext_params + ", ' --static --natBase mgmtnatpool-static. --externalTag key:f5ClusterTag,value:', variables('dnsLabel')"
         else:
-            license1_command =  ", ' --bigIqAddress ', parameters('bigIqAddress'), ' --bigIqUsername ', parameters('bigIqUsername'), ' --bigIqPassword /config/cloud/.bigIqPasswd --bigIqLicensePoolName ', parameters('bigIqLicensePoolName'), ' --bigIqExtraLicenseOptions \\\"$(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',sku-keyword-2:', parameters('bigIqLicenseSkuKeyWord2'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ')\\\" " + big_ip_ext_params
+            license1_command =  ", ' --bigIqAddress ', parameters('bigIqAddress'), ' --bigIqUsername ', parameters('bigIqUsername'), ' --bigIqPassword /config/cloud/.bigIqPasswd --bigIqLicensePoolName ', parameters('bigIqLicensePoolName'), ' --bigIqExtraLicenseOptions \\\"$(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ')\\\" " + big_ip_ext_params
 
         # Need to keep BIG-IQ password around in autoscale case for license revocation
         bigiq_pwd_delete = ''
@@ -212,7 +212,6 @@ if license_type == 'BIGIQ' or license_type == 'BIGIQ_PAYG':
     data['parameters']['bigIqPassword'] = {"type": "securestring", "metadata": {"description": ""}}
     data['parameters']['bigIqLicensePoolName'] = {"type": "string", "metadata": {"description": ""}}
     data['parameters']['bigIqLicenseSkuKeyword1'] = {"type": "string", "defaultValue": "OPTIONAL", "metadata": {"description": ""}}
-    data['parameters']['bigIqLicenseSkuKeyword2'] = {"type": "string", "defaultValue": "OPTIONAL", "metadata": {"description": ""}}
     data['parameters']['bigIqLicenseUnitOfMeasure'] = {"type": "string", "defaultValue": "OPTIONAL", "metadata": {"description": ""}}
     if license_type == 'BIGIQ_PAYG':
         data['parameters']['numberOfStaticInstances'] = {"type": "int", "allowedValues": [1, 2, 3, 4], "metadata": {"description": ""}}
@@ -1011,19 +1010,19 @@ api_access_required = {'standalone_1nic': None, 'standalone_2nic': None, 'standa
 template_info = {'template_name': template_name, 'location': script_location, 'lic_support': lic_support, 'lic_key_count': lic_key_count, 'api_access_required': api_access_required}
 
 ## Abstract license key parameters for readme_generator/script_generator ##
-license_params = OrderedDict([('numberOfStaticInstances',['BIG-IQ+PAYG']), ('licenseKey1',['BYOL']), ('licenseKey2',['BYOL']), ('licensedBandwidth',['PAYG',]), ('bigIqAddress',['BIG-IQ']), ('bigIqUsername',['BIG-IQ']), ('bigIqPassword',['BIG-IQ']), ('bigIqLicensePoolName',['BIG-IQ']), ('bigIqLicenseSkuKeyword1',['BIG-IQ']), ('bigIqLicenseSkuKeyword2',['BIG-IQ']), ('bigIqLicenseUnitOfMeasure',['BIG-IQ'])])
+license_params = OrderedDict([('numberOfStaticInstances',['BIG-IQ+PAYG']), ('licenseKey1',['BYOL']), ('licenseKey2',['BYOL']), ('licensedBandwidth',['PAYG',]), ('bigIqAddress',['BIG-IQ']), ('bigIqUsername',['BIG-IQ']), ('bigIqPassword',['BIG-IQ']), ('bigIqLicensePoolName',['BIG-IQ']), ('bigIqLicenseSkuKeyword1',['BIG-IQ']), ('bigIqLicenseUnitOfMeasure',['BIG-IQ'])])
 # licenseKey2 is only used by cluster templates
 if template_name not in ('failover-lb_1nic', 'failover-lb_3nic', 'failover-api'):
     license_params.pop('licenseKey2')
 # BIGIQ+PAYG is only in experimental autoscale
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_waf_via-lb') and 'experimental' in support_type:
-    bigiq_payg_list = ['licensedBandwidth', 'bigIqAddress', 'bigIqUsername', 'bigIqPassword', 'bigIqLicensePoolName', 'bigIqLicenseSkuKeyword1', 'bigIqLicenseSkuKeyword2', 'bigIqLicenseUnitOfMeasure']
+    bigiq_payg_list = ['licensedBandwidth', 'bigIqAddress', 'bigIqUsername', 'bigIqPassword', 'bigIqLicensePoolName', 'bigIqLicenseSkuKeyword1', 'bigIqLicenseUnitOfMeasure']
     [license_params[k].append('BIG-IQ+PAYG') for k in bigiq_payg_list]
 else:
     license_params.pop('numberOfStaticInstances')
 # BIG-IQ does not exist for prod_stack currently
 if stack_type in ('prod_stack'):
-    [license_params.pop(k) for k in ['bigIqAddress', 'bigIqUsername', 'bigIqPassword', 'bigIqLicensePoolName', 'bigIqLicenseSkuKeyword1', 'bigIqLicenseSkuKeyword2', 'bigIqLicenseUnitOfMeasure']]
+    [license_params.pop(k) for k in ['bigIqAddress', 'bigIqUsername', 'bigIqPassword', 'bigIqLicensePoolName', 'bigIqLicenseSkuKeyword1', 'bigIqLicenseUnitOfMeasure']]
 
 ######################################## Create/Modify Scripts ###########################################
 # Manually adding templates to create scripts proc for now as a 'check'...

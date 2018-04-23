@@ -33,7 +33,6 @@ def parameter_initialize(data):
     data['parameters']['bigIqPassword'] = "OPTIONAL"
     data['parameters']['bigIqLicensePoolName'] = "OPTIONAL"
     data['parameters']['bigIqLicenseSkuKeyword1'] = "OPTIONAL"
-    data['parameters']['bigIqLicenseSkuKeyword2'] = "OPTIONAL"
     data['parameters']['bigIqLicenseUnitOfMeasure'] = "OPTIONAL"
     data['parameters']['numberOfAdditionalNics'] = "OPTIONAL"
     data['parameters']['additionalNicLocation'] = "OPTIONAL"

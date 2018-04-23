@@ -65,9 +65,6 @@
         "bigIqLicenseSkuKeyword1": {
             "value": "OPTIONAL"
         }, 
-        "bigIqLicenseSkuKeyword2": {
-            "value": "OPTIONAL"
-        }, 
         "bigIqLicenseUnitOfMeasure": {
             "value": "OPTIONAL"
         }, 
