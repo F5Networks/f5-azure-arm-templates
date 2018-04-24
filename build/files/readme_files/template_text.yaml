@@ -185,7 +185,7 @@ note_text:
   storage_account: 'This template creates separate Azure storage accounts for each BIG-IP device that is a part of this deployment.'
   ha_failover: 'When configuring the template, you have the option of selecting 0 (zero) public IP addresses.  If you select 0 public IP addresses, the BIG-IP systems **will not** create any additional IP configurations on the Azure network interfaces; however, failover of UDR next hop is still supported.  If you require failover for your IP configurations, each IP configuration must be assigned a correctly tagged public IP address.'
   bigiq_note:
-    default: 'You have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) with a pool of BIG-IP licenses in order to license BIG-IP VEs using BYOL licenses. This solution only supports BIG-IQ versions 5.0 - 5.4, and your BIG-IQ system must have at least 2 NICs.'
+    default: 'You have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) with a pool of BIG-IP licenses in order to license BIG-IP VEs using BYOL licenses. **Note:** The templates now support BIG-IQ licensing using an [ELA/CLPv2 (utility) pool](https://www.f5.com/pdf/licensing/big-ip-virtual-edition-enterprise-licensing-agreement-overview.pdf). **IMPORTANT:** This solution only supports BIG-IQ versions 5.0 - 5.4, and your BIG-IQ system must have at least 2 NICs.'
     exclude:
       stack_type:
         - prod_stack
@@ -265,7 +265,7 @@ parameter_list:
   instanceName: "Name of the Virtual Machine."
   instanceType: "Azure instance size of the Virtual Machine."
   imageName:
-    default: "F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules,  ensure the appropriate value is selected, such as **Best** instead of **Good**."
+    default: "F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as **Best** instead of **Good**."
     template_name:
       autoscale_waf_via-lb: "F5 SKU (image) you want to deploy. **Best** is the only option because BIG-IP ASM is required. Note: The disk size of the VM will be determined based on the option you select."
       autoscale_waf_via-dns: "F5 SKU (image) you want to deploy. **Best** is the only option because BIG-IP ASM is required. Note: The disk size of the VM will be determined based on the option you select."
