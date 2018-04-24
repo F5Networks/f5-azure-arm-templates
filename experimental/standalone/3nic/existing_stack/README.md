@@ -59,8 +59,6 @@ Additionally, F5 provides checksums for all of our supported templates. For inst
 
 The following is a map that shows the available options for the template parameter **bigIpVersion** as it corresponds to the BIG-IP version itself. Only the latest version of BIG-IP VE is posted in the Azure Marketplace. For older versions, see downloads.f5.com.
 
-**NOTE**:  Due to changes within the Azure environment, only BIG-IP version 13.1.0200 is available (even if you select **Latest** in the template). We will update the template to include a new BIG-IP v12.1 image as soon as it is available.
-
 | Azure BIG-IP Image Version | BIG-IP Version |
 | --- | --- |
 | 13.1.0200 | 13.1.0 Build 0.0.6 |
