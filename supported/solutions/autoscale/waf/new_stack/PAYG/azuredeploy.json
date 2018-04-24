@@ -202,7 +202,7 @@
             ], 
             "defaultValue": "Best", 
             "metadata": {
-                "description": "F5 SKU (IMAGE) you want to deploy. **Best** is the only option because BIG-IP ASM is required. Note: The disk size of the VM will be determined based on the option you select."
+                "description": "F5 SKU (image) you want to deploy. **Best** is the only option because BIG-IP ASM is required. Note: The disk size of the VM will be determined based on the option you select."
             }, 
             "type": "string"
         }, 

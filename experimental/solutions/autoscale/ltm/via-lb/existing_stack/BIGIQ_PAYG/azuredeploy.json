@@ -205,9 +205,9 @@
                 "Better", 
                 "Best"
             ], 
-            "defaultValue": "Good", 
+            "defaultValue": "Best", 
             "metadata": {
-                "description": "F5 SKU (IMAGE) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select."
+                "description": "F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules,  ensure the appropriate value is selected, such as **Best** instead of **Good**."
             }, 
             "type": "string"
         }, 
@@ -299,7 +299,7 @@
         }, 
         "mgmtSubnetName": {
             "metadata": {
-                "description": "Name of the existing mgmt subnet - with external access to the Internet. IMPORTANT: The subnet you provide for the mgmt NIC **must** be unique."
+                "description": "Name of the existing mgmt subnet - with external access to the Internet. **Important**: The subnet you provide for the mgmt NIC **must** be unique."
             }, 
             "type": "string"
         }, 

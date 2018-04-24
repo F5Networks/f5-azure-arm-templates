@@ -88,9 +88,9 @@
                 "Better", 
                 "Best"
             ], 
-            "defaultValue": "Good", 
+            "defaultValue": "Best", 
             "metadata": {
-                "description": "F5 SKU (IMAGE) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select."
+                "description": "F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules,  ensure the appropriate value is selected, such as **Best** instead of **Good**."
             }, 
             "type": "string"
         }, 

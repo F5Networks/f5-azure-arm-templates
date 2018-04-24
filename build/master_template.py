@@ -197,7 +197,7 @@ data['parameters']['adminPassword'] = {"type": "securestring", "metadata": {"des
 if stack_type not in ('prod_stack'):
     data['parameters']['dnsLabel'] = {"type": "string", "defaultValue": "", "metadata": {"description": ""}}
 data['parameters']['instanceType'] = {"type": "string", "defaultValue": default_instance, "allowedValues": instance_type_list, "metadata": {"description": ""}}
-data['parameters']['imageName'] = {"type": "string", "defaultValue": "Good", "allowedValues": ["Good", "Better", "Best"], "metadata": {"description": ""}}
+data['parameters']['imageName'] = {"type": "string", "defaultValue": "Best", "allowedValues": ["Good", "Better", "Best"], "metadata": {"description": ""}}
 data['parameters']['bigIpVersion'] = {"type": "string", "defaultValue": default_big_ip_version, "allowedValues": allowed_big_ip_versions, "metadata": {"description": ""}}
 if license_type == 'BYOL':
     data['parameters']['licenseKey1'] = {"type": "string", "defaultValue": "", "metadata": {"description": ""}}
