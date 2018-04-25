@@ -240,7 +240,6 @@
                 "Port": 8443
             }
         }, 
-        "apiVersion": "2015-06-15", 
         "computeApiVersion": "2017-12-01", 
         "networkApiVersion": "2017-11-01", 
         "storageApiVersion": "2017-10-01", 
@@ -294,216 +293,7 @@
             "13.1.0200": "route", 
             "latest": "route"
         }, 
-        "instanceTypeMap": {
-            "Standard_A3": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_A4": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_A5": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_A6": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_A7": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D11": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D11_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D12": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D12_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D13": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D13_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D14": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D14_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D15_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D2_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D3": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D3_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D4": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D4_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D5_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_DS1": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS11": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS11_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS12": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS12_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS13": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS13_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS14": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS14_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS15_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS1_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS2_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS3": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS3_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS4": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS4_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS5_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_F2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_F4": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_G1": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_G2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_G3": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_G4": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_G5": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_GS1": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_GS2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_GS3": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_GS4": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_GS5": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }
-        }, 
         "tagValues": "[parameters('tagValues')]", 
-        "newStorageAccountName0": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'stor0')]", 
-        "storageAccountType": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]", 
-        "storageAccountTier": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountTier]", 
         "newDataStorageAccountName": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data000')]", 
         "dataStorageAccountType": "Standard_LRS", 
         "deploymentId": "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('dnsLabel'))]", 
@@ -566,7 +356,7 @@
             "type": "Microsoft.Network/publicIPAddresses"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[variables('virtualNetworkName')]", 
             "properties": {
@@ -594,7 +384,7 @@
             "type": "Microsoft.Network/virtualNetworks"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]", 
             "dependsOn": [
                 "[variables('vnetId')]", 
                 "[variables('mgmtPublicIPAddressId')]", 
@@ -626,7 +416,7 @@
             "type": "Microsoft.Network/networkInterfaces"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]", 
             "dependsOn": [
                 "[variables('vnetId')]", 
                 "[variables('extNsgID')]", 
@@ -664,7 +454,7 @@
             "type": "Microsoft.Network/networkInterfaces"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[concat(variables('dnsLabel'), '-mgmt-nsg')]", 
             "properties": {
@@ -703,7 +493,7 @@
             "type": "Microsoft.Network/networkSecurityGroups"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[concat(variables('dnsLabel'), '-ext-nsg')]", 
             "properties": {
@@ -713,23 +503,18 @@
             "type": "Microsoft.Network/networkSecurityGroups"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('computeApiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[variables('availabilitySetName')]", 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
-            "type": "Microsoft.Compute/availabilitySets"
-        }, 
-        {
-            "apiVersion": "[variables('storageApiVersion')]", 
-            "kind": "Storage", 
-            "location": "[variables('location')]", 
-            "name": "[variables('newStorageAccountName0')]", 
+            "properties": {
+                "PlatformFaultDomainCount": 2, 
+                "PlatformUpdateDomainCount": 2
+            }, 
             "sku": {
-                "name": "[variables('storageAccountType')]", 
-                "tier": "[variables('storageAccountTier')]"
+                "name": "Aligned"
             }, 
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
-            "type": "Microsoft.Storage/storageAccounts"
+            "type": "Microsoft.Compute/availabilitySets"
         }, 
         {
             "apiVersion": "[variables('storageApiVersion')]", 
@@ -744,9 +529,8 @@
             "type": "Microsoft.Storage/storageAccounts"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('computeApiVersion')]", 
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0'))]", 
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", 
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'))]", 
@@ -801,12 +585,7 @@
                         "version": "[parameters('bigIpVersion')]"
                     }, 
                     "osDisk": {
-                        "caching": "ReadWrite", 
-                        "createOption": "FromImage", 
-                        "name": "osdisk", 
-                        "vhd": {
-                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vhds/', variables('instanceName'),'.vhd')]"
-                        }
+                        "createOption": "FromImage"
                     }
                 }
             }, 
