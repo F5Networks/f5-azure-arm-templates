@@ -33,7 +33,7 @@ def build_deploy_cmd(language, base_deploy, deploy_cmd_params, template_info):
         single_lic_cmd = ' -licenseKey1 "$licenseKey1"'
         multi_lic_cmd = ' -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2"'
         payg_cmd = ' -licensedBandwidth "$licensedBandwidth"'
-        big_iq_cmd = ' -bigIqAddress "$bigIqAddress" -bigIqUsername "$bigIqUsername" -bigIqPassword $bigiq_pwd -bigIqLicensePoolName "$bigIqLicensePoolName" -bigIqLicenseSkuKeyword1 "$bigIqLicenseSkuKeyword1" -bigIqLicenseUnitOfMeasure "$bigIqLicenseUnitOfMeasure"'
+        big_iq_cmd = ' -bigIqAddress "$bigIqAddress" -bigIqUsername "$bigIqUsername" -bigIqPassword $bigIqPasswordSecure -bigIqLicensePoolName "$bigIqLicensePoolName" -bigIqLicenseSkuKeyword1 "$bigIqLicenseSkuKeyword1" -bigIqLicenseUnitOfMeasure "$bigIqLicenseUnitOfMeasure"'
         big_iq_payg_cmd = ' -numberOfStaticInstances $numberOfStaticInstances'
     elif language == 'bash':
         single_lic_cmd = '\\"licenseKey1\\":{\\"value\\":\\"$licenseKey1\\"}}"'
@@ -51,13 +51,13 @@ def build_deploy_cmd(language, base_deploy, deploy_cmd_params, template_info):
     if language == 'powershell':
         if_byol = 'if ($licenseType -eq "BYOL") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\\azuredeploy.json"; $parametersFilePath = ".\BYOL\\azuredeploy.parameters.json" }\n  '
         if_payg = 'if ($licenseType -eq "PAYG") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\\azuredeploy.json"; $parametersFilePath = ".\PAYG\\azuredeploy.parameters.json" }\n  '
-        if_bigiq = 'if ($licenseType -eq "BIGIQ") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BIGIQ\\azuredeploy.json"; $parametersFilePath = ".\BIGIQ\\azuredeploy.parameters.json" }\n  $bigiq_pwd = ConvertTo-SecureString -String $bigIqPassword -AsPlainText -Force\n  '
+        if_bigiq = 'if ($licenseType -eq "BIGIQ") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BIGIQ\\azuredeploy.json"; $parametersFilePath = ".\BIGIQ\\azuredeploy.parameters.json" }\n  $bigIqPasswordSecure = ConvertTo-SecureString -String $bigIqPassword -AsPlainText -Force\n  '
         if lic_type_all is True:
             deploy_cmd = if_byol + base_deploy + byol_cmd + '\n} else' + if_payg + base_deploy + payg_cmd + '\n} else' + if_bigiq + base_deploy + big_iq_cmd + '\n} else {\n  Write-Error -Message "Please select a valid license type of PAYG, BYOL or BIGIQ."\n}'
         elif lic_type_all == 'PAYG,BIGIQ':
             deploy_cmd = if_payg + base_deploy + payg_cmd + '\n} else' + if_bigiq + base_deploy + big_iq_cmd + '\n} else {\n  Write-Error -Message "Please select a valid license type of PAYG or BIGIQ."\n}'
         elif lic_type_all == 'PAYG,BIGIQ,BIGIQ+PAYG':
-            deploy_cmd = if_payg + base_deploy + payg_cmd + '\n} else' + if_bigiq + base_deploy + big_iq_cmd + '\n} elseif ($licenseType -eq "BIGIQ_PAYG") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BIGIQ_PAYG\\azuredeploy.json"; $parametersFilePath = ".\BIGIQ_PAYG\\azuredeploy.parameters.json" }\n  $bigiq_pwd = ConvertTo-SecureString -String $bigIqPassword -AsPlainText -Force\n  ' + base_deploy + big_iq_cmd + big_iq_payg_cmd + '\n} else {\n  Write-Error -Message "Please select a valid license type of PAYG, BIGIQ or BIGIQ_PAYG."\n}'
+            deploy_cmd = if_payg + base_deploy + payg_cmd + '\n} else' + if_bigiq + base_deploy + big_iq_cmd + '\n} elseif ($licenseType -eq "BIGIQ_PAYG") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BIGIQ_PAYG\\azuredeploy.json"; $parametersFilePath = ".\BIGIQ_PAYG\\azuredeploy.parameters.json" }\n  $bigIqPasswordSecure = ConvertTo-SecureString -String $bigIqPassword -AsPlainText -Force\n  ' + base_deploy + big_iq_cmd + big_iq_payg_cmd + '\n} else {\n  Write-Error -Message "Please select a valid license type of PAYG, BIGIQ or BIGIQ_PAYG."\n}'
         elif lic_type_all == 'BYOL,PAYG':
             deploy_cmd = if_byol + base_deploy + byol_cmd + '\n} else' + if_payg + base_deploy + payg_cmd + '\n} else {\n  Write-Error -Message "Please select a valid license type of PAYG or BYOL."\n}'
         else:
@@ -80,18 +80,22 @@ def script_param_array(data, i_data):
     """ Create Dynamic Parameter Array - (Parameter, default value, mandatory parameter flag, skip parameter flag) """
     param_array = []
     for parameter in data['parameters']:
-        default_value = None; mandatory = True; skip_param = False
+        mandatory = True; skip_param = False
         try:
             if data['parameters'][parameter]['defaultValue'] != 'REQUIRED':
                 default_value = data['parameters'][parameter]['defaultValue']
         except:
             default_value = None
+        try:
+            param_type = data['parameters'][parameter]['type']
+        except:
+            param_type = None
         # Specify parameters that aren't mandatory or should be skipped
         if parameter in ('restrictedSrcAddress', 'tagValues'):
             mandatory = False
         if parameter in i_data['license_params']:
             skip_param = True
-        param_array.append([parameter, default_value, mandatory, skip_param])
+        param_array.append([parameter, default_value, mandatory, skip_param, param_type])
     return param_array
 
 def script_creation(data, i_data, language):
@@ -103,7 +107,7 @@ def script_creation(data, i_data, language):
     script_location = template_info['location']
     lic_type_all = lic_type_check(template_info['lic_support'][template_name])
     multi_lic = lic_count_check(template_info['lic_key_count'][template_name])
-    param_str = ''; pwd_cmd = ''; sps_cmd = ''; ssl_pwd_cmd = ''; dns_pwd_cmd = ''; dict_cmds = ''; lic2_param = ''; mandatory_vars = ''; lic_check = ''; lic2_check = ''; lic_params = ''
+    param_str = ''; pwd_cmds = ''; dict_cmds = ''; lic2_param = ''; mandatory_vars = ''; lic_check = ''; lic2_check = ''; lic_params = ''
     if language == 'powershell':
         deploy_cmd_params = ''; script_dash = ' -'
         meta_script = 'files/script_files/base.deploy_via_ps.ps1'; script_loc = script_location + 'Deploy_via_PS.ps1'
@@ -188,18 +192,11 @@ def script_creation(data, i_data, language):
             else:
                 param_value = ' = "' + str(parameter[1]) + '",'
         if language == 'powershell':
-            if parameter[0] == 'adminPassword':
-                deploy_cmd_params += '-' + parameter[0] + ' $pwd '
-                pwd_cmd = '$pwd = ConvertTo-SecureString -String $adminPassword -AsPlainText -Force'
-            elif parameter[0] == 'servicePrincipalSecret':
-                deploy_cmd_params += '-' + parameter[0] + ' $sps '
-                sps_cmd = '\n$sps = ConvertTo-SecureString -String $servicePrincipalSecret -AsPlainText -Force'
-            elif parameter[0] == 'sslPswd':
-                deploy_cmd_params += '-' + parameter[0] + ' $sslpwd '
-                ssl_pwd_cmd = '\n$sslpwd = ConvertTo-SecureString -String $sslPswd -AsPlainText -Force'
-            elif parameter[0] == 'dnsProviderPassword':
-                deploy_cmd_params += '-' + parameter[0] + ' $dnsProviderPasswordSecure '
-                dns_pwd_cmd = '\n$dnsProviderPasswordSecure = ConvertTo-SecureString -String $dnsProviderPassword -AsPlainText -Force'
+            if parameter[4] == 'securestring':
+                param = '$' + parameter[0]
+                param_secure = param + 'Secure'
+                deploy_cmd_params += '-' + parameter[0] + ' ' + param_secure + ' '
+                pwd_cmds += param_secure + ' = ConvertTo-SecureString -String ' + param + ' -AsPlainText -Force\n'
             else:
                 deploy_cmd_params += '-' + parameter[0] + ' $' + parameter[0] + ' '
             if isinstance(parameter[1], dict):
@@ -235,7 +232,7 @@ def script_creation(data, i_data, language):
         script_str = script.read()
     script_str = script_str.replace('<EXAMPLE_CMD>', base_ex)
     script_str = script_str.replace('<DEPLOYMENT_CREATE>', build_deploy_cmd(language, base_deploy, deploy_cmd_params, template_info))
-    script_str = script_str.replace('<PWD_CMD>', pwd_cmd).replace('<SPS_CMD>', sps_cmd).replace('<SSL_PWD_CMD>', ssl_pwd_cmd).replace('<DNS_PWD_CMD>', dns_pwd_cmd)
+    script_str = script_str.replace('<PWD_CMDS>', pwd_cmds)
     script_str = script_str.replace('<DICT_CMDS>', dict_cmds)
     script_str = script_str.replace('<LICENSE_PARAMETERS>', lic_params)
     script_str = script_str.replace('<DYNAMIC_PARAMETERS>', param_str)

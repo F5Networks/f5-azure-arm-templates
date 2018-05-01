@@ -5,8 +5,11 @@
         "adminUsername": {
             "value": "azureuser"
         }, 
-        "adminPassword": {
-            "value": "GEN_UNIQUE"
+        "authenticationType": {
+            "value": "password"
+        }, 
+        "adminPasswordOrKey": {
+            "value": ""
         }, 
         "uniqueLabel": {
             "value": ""
@@ -30,22 +33,22 @@
             "value": 1
         }, 
         "vnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "vnetResourceGroupName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "mgmtSubnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "mgmtIpAddress": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "externalSubnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "externalIpAddressRangeStart": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "avSetChoice": {
             "value": "CREATE_NEW"

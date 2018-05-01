@@ -29,8 +29,11 @@
         "adminUsername": {
             "value": "azureuser"
         }, 
-        "adminPassword": {
-            "value": "GEN_UNIQUE"
+        "authenticationType": {
+            "value": "password"
+        }, 
+        "adminPasswordOrKey": {
+            "value": ""
         }, 
         "dnsLabel": {
             "value": ""
@@ -51,13 +54,13 @@
             "value": "10.0"
         }, 
         "solutionDeploymentName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "applicationProtocols": {
             "value": "http-https"
         }, 
         "applicationAddress": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "applicationServiceFqdn": {
             "value": "NOT_SPECIFIED"
@@ -84,13 +87,13 @@
             "value": "NOT_SPECIFIED"
         }, 
         "tenantId": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "clientId": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "servicePrincipalSecret": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "notificationEmail": {
             "value": "OPTIONAL"

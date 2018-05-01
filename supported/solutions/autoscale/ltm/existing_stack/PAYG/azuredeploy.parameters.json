@@ -29,8 +29,11 @@
         "adminUsername": {
             "value": "azureuser"
         }, 
-        "adminPassword": {
-            "value": "GEN_UNIQUE"
+        "authenticationType": {
+            "value": "password"
+        }, 
+        "adminPasswordOrKey": {
+            "value": ""
         }, 
         "dnsLabel": {
             "value": ""
@@ -48,22 +51,22 @@
             "value": "200m"
         }, 
         "vnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "vnetResourceGroupName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "mgmtSubnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "tenantId": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "clientId": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "servicePrincipalSecret": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "notificationEmail": {
             "value": "OPTIONAL"

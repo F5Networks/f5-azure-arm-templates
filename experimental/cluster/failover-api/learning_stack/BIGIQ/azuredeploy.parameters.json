@@ -5,8 +5,11 @@
         "adminUsername": {
             "value": "azureuser"
         }, 
-        "adminPassword": {
-            "value": "GEN_UNIQUE"
+        "authenticationType": {
+            "value": "password"
+        }, 
+        "adminPasswordOrKey": {
+            "value": ""
         }, 
         "dnsLabel": {
             "value": ""
@@ -24,16 +27,16 @@
             "value": "13.1.0200"
         }, 
         "bigIqAddress": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "bigIqUsername": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "bigIqPassword": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "bigIqLicensePoolName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "bigIqLicenseSkuKeyword1": {
             "value": "OPTIONAL"
@@ -48,13 +51,13 @@
             "value": "10.0"
         }, 
         "tenantId": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "clientId": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "servicePrincipalSecret": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "managedRoutes": {
             "value": "NOT_SPECIFIED"
