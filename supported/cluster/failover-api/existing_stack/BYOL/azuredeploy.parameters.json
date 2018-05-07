@@ -36,7 +36,7 @@
             "value": 0
         }, 
         "additionalNicLocation": {
-            "value": ""
+            "value": "OPTIONAL"
         }, 
         "numberOfExternalIps": {
             "value": 1

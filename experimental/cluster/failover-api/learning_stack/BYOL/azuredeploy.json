@@ -147,6 +147,7 @@
             "type": "int"
         }, 
         "additionalNicLocation": {
+            "defaultValue": "OPTIONAL", 
             "metadata": {
                 "description": "This parameter specifies where the additional NICs should go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. NOTE: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique."
             }, 

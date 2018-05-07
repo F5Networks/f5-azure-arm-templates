@@ -269,7 +269,7 @@ if template_name in ('failover-lb_1nic'):
     data['parameters']['numberOfInstances'] = {"type": "int", "defaultValue": 2, "allowedValues": [2], "metadata": {"description": ""}}
 if template_name in ('failover-api'):
     data['parameters']['numberOfAdditionalNics'] = {"type": "int", "defaultValue": 0, "allowedValues": [0, 1, 2, 3, 4, 5], "metadata": {"description": ""}}
-    data['parameters']['additionalNicLocation'] = {"type": "string", "metadata": {"description": ""}}
+    data['parameters']['additionalNicLocation'] = {"type": "string", "defaultValue": "OPTIONAL", "metadata": {"description": ""}}
     data['parameters']['managedRoutes'] = {"defaultValue": "NOT_SPECIFIED", "metadata": {"description": ""}, "type": "string"}
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     if license_type == 'BIGIQ_PAYG':
