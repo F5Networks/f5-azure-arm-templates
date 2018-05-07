@@ -32,6 +32,12 @@
         "licenseKey2": {
             "value": ""
         }, 
+        "numberOfAdditionalNics": {
+            "value": 0
+        }, 
+        "additionalNicLocation": {
+            "value": ""
+        }, 
         "numberOfExternalIps": {
             "value": 1
         }, 

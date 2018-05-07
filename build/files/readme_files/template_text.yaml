@@ -282,7 +282,10 @@ parameter_list:
   mgmtIpAddressRangeStart: "The static private IP address you want to assign to the management self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."
   mgmtIpAddress: "MGMT subnet IP Address to use for the BIG-IP management IP address."
   notificationEmail: "If you want email notifications on scale events, specify an email address, otherwise leave the parameter as **OPTIONAL**. Note: You can specify multiple emails by separating them with a semi-colon, such as *email@domain.com;email2@domain.com*."
-  numberOfAdditionalNics: "By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a select number of additional NICs to the BIG-IP using this parameter."
+  numberOfAdditionalNics:
+    default: "By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a configurable number of additional NICs to the BIG-IP using this parameter."
+    template_name:
+      failover-api: 'By default this solution deploys the BIG-IP(s) in a 3 NIC configuration, however additional NICs can be added to the BIG-IP(s) using this parameter.  **Note**: The default value is 0, additional NICs will only be created if 1 or higher is specified.'
   numberOfInstances: "The number of BIG-IP VEs that will be deployed in front of your application(s)."
   numberOfStaticInstances: "The number of static BYOL BIG-IP VEs that will be deployed in this solution."
   restrictedSrcAddress: 'This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources'

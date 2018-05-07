@@ -29,6 +29,12 @@
         "licensedBandwidth": {
             "value": "200m"
         }, 
+        "numberOfAdditionalNics": {
+            "value": 0
+        }, 
+        "additionalNicLocation": {
+            "value": ""
+        }, 
         "numberOfExternalIps": {
             "value": 1
         }, 

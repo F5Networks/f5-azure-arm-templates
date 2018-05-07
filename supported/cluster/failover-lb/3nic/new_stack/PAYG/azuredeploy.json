@@ -913,11 +913,11 @@
         {
             "apiVersion": "[variables('computeApiVersion')]", 
             "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", 
+                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), '0')]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'), '0')]", 
-                "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '0')]", 
-                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '0')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '0')]", 
@@ -985,11 +985,11 @@
         {
             "apiVersion": "[variables('computeApiVersion')]", 
             "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", 
+                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), '1')]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'), '1')]", 
-                "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '1')]", 
-                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '1')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '1')]", 

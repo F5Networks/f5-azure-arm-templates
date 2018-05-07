@@ -165,7 +165,7 @@
             ], 
             "defaultValue": 1, 
             "metadata": {
-                "description": "By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a select number of additional NICs to the BIG-IP using this parameter."
+                "description": "By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a configurable number of additional NICs to the BIG-IP using this parameter."
             }, 
             "type": "int"
         }, 

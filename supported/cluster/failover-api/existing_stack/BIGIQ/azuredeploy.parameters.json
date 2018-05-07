@@ -44,6 +44,12 @@
         "bigIqLicenseUnitOfMeasure": {
             "value": "OPTIONAL"
         }, 
+        "numberOfAdditionalNics": {
+            "value": 0
+        }, 
+        "additionalNicLocation": {
+            "value": ""
+        }, 
         "numberOfExternalIps": {
             "value": 1
         }, 

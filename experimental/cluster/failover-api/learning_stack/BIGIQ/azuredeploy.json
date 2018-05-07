@@ -155,6 +155,27 @@
             }, 
             "type": "string"
         }, 
+        "numberOfAdditionalNics": {
+            "allowedValues": [
+                0, 
+                1, 
+                2, 
+                3, 
+                4, 
+                5
+            ], 
+            "defaultValue": 0, 
+            "metadata": {
+                "description": "By default this solution deploys the BIG-IP(s) in a 3 NIC configuration, however additional NICs can be added to the BIG-IP(s) using this parameter.  **Note**: The default value is 0, additional NICs will only be created if 1 or higher is specified."
+            }, 
+            "type": "int"
+        }, 
+        "additionalNicLocation": {
+            "metadata": {
+                "description": "This parameter specifies where the additional NICs should go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. NOTE: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique."
+            }, 
+            "type": "string"
+        }, 
         "numberOfExternalIps": {
             "allowedValues": [
                 0, 
@@ -364,6 +385,22 @@
         "intSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]", 
         "intSubnetPrivateAddress": "[concat(parameters('vnetAddressPrefix'), '.3.4')]", 
         "intSubnetPrivateAddress1": "[concat(parameters('vnetAddressPrefix'), '.3.5')]", 
+        "addtlNicName": "[concat(variables('dnsLabel'), '-addtlnic')]", 
+        "addtlNicFillerArray": [
+            "filler01", 
+            "filler02", 
+            "filler03", 
+            "filler04", 
+            "filler05"
+        ], 
+        "addtlNicRefSplit": "[concat(split(parameters('additionalNicLocation'), ';'), variables('addtlNicFillerArray'))]", 
+        "netCmd00": "[concat('')]", 
+        "netCmd01": "[concat(' --vlan name:', variables('addtlNicRefSplit')[0], ',nic:1.3')]", 
+        "netCmd02": "[concat(variables('netCmd01'), ' --vlan name:', variables('addtlNicRefSplit')[1], ',nic:1.4')]", 
+        "netCmd03": "[concat(variables('netCmd02'), ' --vlan name:', variables('addtlNicRefSplit')[2], ',nic:1.5')]", 
+        "netCmd04": "[concat(variables('netCmd03'), ' --vlan name:', variables('addtlNicRefSplit')[3], ',nic:1.6')]", 
+        "netCmd05": "[concat(variables('netCmd04'), ' --vlan name:', variables('addtlNicRefSplit')[4], ',nic:1.7')]", 
+        "netCmd": "[variables(concat('netCmd0', parameters('numberOfAdditionalNics')))]", 
         "numberOfExternalIps": "[parameters('numberOfExternalIps')]", 
         "mgmtRouteGw": "[concat(parameters('vnetAddressPrefix'), '.1.1')]", 
         "tmmRouteGw": "[concat(parameters('vnetAddressPrefix'), '.2.1')]", 
@@ -371,6 +408,124 @@
             "12.1.303000": "[concat('tmsh create sys management-route waagent_route network 168.63.129.16/32 gateway ', variables('mgmtRouteGw'), '; tmsh save sys config')]", 
             "13.1.0200": "route", 
             "latest": "route"
+        }, 
+        "subnetArray": [
+            {
+                "name": "[variables('mgmtSubnetName')]", 
+                "properties": {
+                    "addressPrefix": "[variables('mgmtSubnetPrefix')]"
+                }
+            }, 
+            {
+                "name": "[variables('extSubnetName')]", 
+                "properties": {
+                    "addressPrefix": "[variables('extSubnetPrefix')]"
+                }
+            }, 
+            {
+                "name": "[variables('intSubnetName')]", 
+                "properties": {
+                    "addressPrefix": "[variables('intSubnetPrefix')]"
+                }
+            }
+        ], 
+        "addtlSubnetArray": [
+            {
+                "name": "[variables('addtlNicRefSplit')[0]]", 
+                "properties": {
+                    "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.4.0/24')]"
+                }
+            }, 
+            {
+                "name": "[variables('addtlNicRefSplit')[1]]", 
+                "properties": {
+                    "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.5.0/24')]"
+                }
+            }, 
+            {
+                "name": "[variables('addtlNicRefSplit')[2]]", 
+                "properties": {
+                    "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.6.0/24')]"
+                }
+            }, 
+            {
+                "name": "[variables('addtlNicRefSplit')[3]]", 
+                "properties": {
+                    "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.7.0/24')]"
+                }
+            }, 
+            {
+                "name": "[variables('addtlNicRefSplit')[4]]", 
+                "properties": {
+                    "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.8.0/24')]"
+                }
+            }
+        ], 
+        "selfNicConfigArray": {
+            "0": [
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('mgmtNicName'), '0'))]", 
+                    "properties": {
+                        "primary": true
+                    }
+                }, 
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('extNicName'), '0'))]", 
+                    "properties": {
+                        "primary": false
+                    }
+                }, 
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('intNicName'), '0'))]", 
+                    "properties": {
+                        "primary": false
+                    }
+                }
+            ], 
+            "1": [
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('mgmtNicName'), '1'))]", 
+                    "properties": {
+                        "primary": true
+                    }
+                }, 
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('extNicName'), '1'))]", 
+                    "properties": {
+                        "primary": false
+                    }
+                }, 
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('intNicName'), '1'))]", 
+                    "properties": {
+                        "primary": false
+                    }
+                }
+            ]
+        }, 
+        "addtlNicConfigArray": {
+            "copy": [
+                {
+                    "count": 5, 
+                    "input": {
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(toLower(parameters('dnsLabel')), '-addtlnic', copyIndex('values0', 1), '0'))]", 
+                        "properties": {
+                            "primary": false
+                        }
+                    }, 
+                    "name": "values0"
+                }, 
+                {
+                    "count": 5, 
+                    "input": {
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(toLower(parameters('dnsLabel')), '-addtlnic', copyIndex('values1', 1), '1'))]", 
+                        "properties": {
+                            "primary": false
+                        }
+                    }, 
+                    "name": "values1"
+                }
+            ]
         }, 
         "failoverCmdArray": {
             "12.1.303000": "echo \"Failover db variable not required.\"", 
@@ -478,26 +633,7 @@
                         "[variables('vnetAddressPrefix')]"
                     ]
                 }, 
-                "subnets": [
-                    {
-                        "name": "[variables('mgmtSubnetName')]", 
-                        "properties": {
-                            "addressPrefix": "[variables('mgmtSubnetPrefix')]"
-                        }
-                    }, 
-                    {
-                        "name": "[variables('extSubnetName')]", 
-                        "properties": {
-                            "addressPrefix": "[variables('extSubnetPrefix')]"
-                        }
-                    }, 
-                    {
-                        "name": "[variables('intSubnetName')]", 
-                        "properties": {
-                            "addressPrefix": "[variables('intSubnetPrefix')]"
-                        }
-                    }
-                ]
+                "subnets": "[concat(take(variables('subnetArray'), 3), take(variables('addtlSubnetArray'), parameters('numberOfAdditionalNics')))]"
             }, 
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
             "type": "Microsoft.Network/virtualNetworks"
@@ -634,6 +770,64 @@
                 "networkSecurityGroup": {
                     "id": "[concat(variables('extNsgId'))]"
                 }
+            }, 
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            "type": "Microsoft.Network/networkInterfaces"
+        }, 
+        {
+            "apiVersion": "[variables('networkApiVersion')]", 
+            "condition": "[greaterOrEquals(parameters('numberOfAdditionalNics'), 1)]", 
+            "copy": {
+                "count": "[if(greaterOrEquals(parameters('numberOfAdditionalNics'), 1), parameters('numberOfAdditionalNics'), 1)]", 
+                "name": "addtlniccopy0"
+            }, 
+            "dependsOn": [
+                "[variables('vnetId')]", 
+                "[variables('mgmtNsgID')]"
+            ], 
+            "location": "[variables('location')]", 
+            "name": "[concat(variables('addtlNicName'), copyIndex(1), '0')]", 
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig", 
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic", 
+                            "subnet": {
+                                "id": "[concat(variables('vnetId'), '/subnets/', variables('addtlNicRefSplit')[copyIndex()])]"
+                            }
+                        }
+                    }
+                ]
+            }, 
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            "type": "Microsoft.Network/networkInterfaces"
+        }, 
+        {
+            "apiVersion": "[variables('networkApiVersion')]", 
+            "condition": "[greaterOrEquals(parameters('numberOfAdditionalNics'), 1)]", 
+            "copy": {
+                "count": "[if(greaterOrEquals(parameters('numberOfAdditionalNics'), 1), parameters('numberOfAdditionalNics'), 1)]", 
+                "name": "addtlniccopy1"
+            }, 
+            "dependsOn": [
+                "[variables('vnetId')]", 
+                "[variables('mgmtNsgID')]"
+            ], 
+            "location": "[variables('location')]", 
+            "name": "[concat(variables('addtlNicName'), copyIndex(1), '1')]", 
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig", 
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic", 
+                            "subnet": {
+                                "id": "[concat(variables('vnetId'), '/subnets/', variables('addtlNicRefSplit')[copyIndex()])]"
+                            }
+                        }
+                    }
+                ]
             }, 
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
             "type": "Microsoft.Network/networkInterfaces"
@@ -813,11 +1007,13 @@
         {
             "apiVersion": "[variables('computeApiVersion')]", 
             "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", 
+                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
+                "addtlniccopy0", 
+                "addtlniccopy1", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), '0')]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'), '0')]", 
-                "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '0')]", 
-                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '0')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '0')]", 
@@ -840,26 +1036,7 @@
                     "vmSize": "[parameters('instanceType')]"
                 }, 
                 "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(variables('mgmtNicName'), '0'))]", 
-                            "properties": {
-                                "primary": true
-                            }
-                        }, 
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(variables('extNicName'), '0'))]", 
-                            "properties": {
-                                "primary": false
-                            }
-                        }, 
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(variables('intNicName'), '0'))]", 
-                            "properties": {
-                                "primary": false
-                            }
-                        }
-                    ]
+                    "networkInterfaces": "[concat(take(variables('selfNicConfigArray')['0'], 3), take(variables('addtlNicConfigArray')['values0'], parameters('numberOfAdditionalNics')))]"
                 }, 
                 "osProfile": {
                     "adminPassword": "[variables('adminPasswordOrKey')]", 
@@ -885,11 +1062,13 @@
         {
             "apiVersion": "[variables('computeApiVersion')]", 
             "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", 
+                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
+                "addtlniccopy0", 
+                "addtlniccopy1", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), '1')]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'), '1')]", 
-                "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '1')]", 
-                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '1')]"
             ], 
             "location": "[variables('location')]", 
             "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '1')]", 
@@ -912,26 +1091,7 @@
                     "vmSize": "[parameters('instanceType')]"
                 }, 
                 "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(variables('mgmtNicName'), '1'))]", 
-                            "properties": {
-                                "primary": true
-                            }
-                        }, 
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(variables('extNicName'), '1'))]", 
-                            "properties": {
-                                "primary": false
-                            }
-                        }, 
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(variables('intNicName'), '1'))]", 
-                            "properties": {
-                                "primary": false
-                            }
-                        }
-                    ]
+                    "networkInterfaces": "[concat(take(variables('selfNicConfigArray')['1'], 3), take(variables('addtlNicConfigArray')['values1'], parameters('numberOfAdditionalNics')))]"
                 }, 
                 "osProfile": {
                     "adminPassword": "[variables('adminPasswordOrKey')]", 
@@ -1005,7 +1165,7 @@
             "properties": {
                 "autoUpgradeMinorVersion": "true", 
                 "protectedSettings": {
-                    "commandToExecute": "[concat('CLOUD_LIB_DIR=/config/cloud/azure/node_modules/@f5devcentral; mkdir -p $CLOUD_LIB_DIR && cp f5-cloud-libs*.tar.gz* /config/cloud; mkdir -p /var/log/cloud/azure; function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; }; TMP_DIR=/mnt/creds; TMP_CREDENTIALS_FILE=$TMP_DIR/.passwd; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; /usr/bin/install -b -m 400 /dev/null /config/cloud/.azCredentials; /usr/bin/install -b -m 755 /dev/null /config/cloud/managedRoutes; echo ', variables('singleQuote'), parameters('bigIqPassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' > /config/verifyHash; echo -e ', variables('installCloudLibs'), ' > /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).keys[0].value, '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"uniqueLabel\": \"', variables('dnsLabel'), '\"}', variables('singleQuote'), ' > /config/cloud/.azCredentials; echo -e ', parameters('managedRoutes'), ' > /config/cloud/managedRoutes; unset IFS; bash /config/installCloudLibs.sh; source $CLOUD_LIB_DIR/f5-cloud-libs/scripts/util.sh; create_temp_dir $TMP_DIR; echo ', variables('singleQuote'), variables('adminPasswordOrKey'), variables('singleQuote'), '|sha512sum|cut -d \" \" -f 1|tr -d \"\n\" > $TMP_CREDENTIALS_FILE; bash $CLOUD_LIB_DIR/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file $TMP_CREDENTIALS_FILE; f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/encryptDataToFile.js --data-file $TMP_CREDENTIALS_FILE --out-file $BIG_IP_CREDENTIALS_FILE; wipe_temp_dir $TMP_DIR;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, '; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/onboard.js --output /var/log/cloud/azure/onboard.log --signal ONBOARD_DONE --log-level info --cloud azure --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --hostname ', concat(variables('instanceName'), '0.', variables('location'), '.cloudapp.azure.com'), ' --license-pool --big-iq-host ', parameters('bigIqAddress'), ' --big-iq-user ', parameters('bigIqUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePoolName'), ' $(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ') --big-ip-mgmt-address ', reference(concat(variables('mgmtPublicIPAddressId'), '0')).ipAddress, ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, ' --module ltm:nominal; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/network.js --output /var/log/cloud/azure/network.log --wait-for ONBOARD_DONE --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --default-gw ', variables('tmmRouteGw'), ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'),  ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress'),  ',vlan:internal --log-level info; echo \"/usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs-azure/scripts/failoverProvider.js\" >> /config/failover/tgactive; echo \"/usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs-azure/scripts/failoverProvider.js\" >> /config/failover/tgrefresh; tmsh modify cm device ', concat(variables('instanceName'), '0.', variables('location'), '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress'), '; ', variables('failoverCmdArray')[parameters('bigIpVersion')], '; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/cluster.js --output /var/log/cloud/azure/cluster.log --log-level info --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --config-sync-ip ', variables('intSubnetPrivateAddress'), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(variables('instanceName'), '0.', variables('location'), '.cloudapp.azure.com'), ' --network-failover --auto-sync --save-on-auto-sync', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; tmsh load sys application template f5.cloud_logger.v1.0.0.tmpl; base=', variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffixInt'), '; f3=$(echo $base | cut -d. -f1-3); last=$(echo $base | cut -d. -f4); for i in $(seq 1 ', variables('numberOfExternalIps'), '); do addr=${f3}.${last}; last=$((last+1)); tmsh create ltm virtual-address $addr address $addr; done; ', variables('routeCmdArray')[parameters('bigIpVersion')], '; rm -f /config/cloud/.bigIqPasswd; bash /config/customConfig.sh; $(cp_logs); else $(cp_logs); exit 1; fi', '; if grep -i \"PUT failed\" /var/log/waagent.log -q; then echo \"Killing waagent exthandler, daemon should restart it\"; pkill -f \"python -u /usr/sbin/waagent -run-exthandlers\"; fi')]"
+                    "commandToExecute": "[concat('CLOUD_LIB_DIR=/config/cloud/azure/node_modules/@f5devcentral; mkdir -p $CLOUD_LIB_DIR && cp f5-cloud-libs*.tar.gz* /config/cloud; mkdir -p /var/log/cloud/azure; function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; }; TMP_DIR=/mnt/creds; TMP_CREDENTIALS_FILE=$TMP_DIR/.passwd; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; /usr/bin/install -b -m 400 /dev/null /config/cloud/.azCredentials; /usr/bin/install -b -m 755 /dev/null /config/cloud/managedRoutes; echo ', variables('singleQuote'), parameters('bigIqPassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' > /config/verifyHash; echo -e ', variables('installCloudLibs'), ' > /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).keys[0].value, '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"uniqueLabel\": \"', variables('dnsLabel'), '\"}', variables('singleQuote'), ' > /config/cloud/.azCredentials; echo -e ', parameters('managedRoutes'), ' > /config/cloud/managedRoutes; unset IFS; bash /config/installCloudLibs.sh; source $CLOUD_LIB_DIR/f5-cloud-libs/scripts/util.sh; create_temp_dir $TMP_DIR; echo ', variables('singleQuote'), variables('adminPasswordOrKey'), variables('singleQuote'), '|sha512sum|cut -d \" \" -f 1|tr -d \"\n\" > $TMP_CREDENTIALS_FILE; bash $CLOUD_LIB_DIR/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file $TMP_CREDENTIALS_FILE; f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/encryptDataToFile.js --data-file $TMP_CREDENTIALS_FILE --out-file $BIG_IP_CREDENTIALS_FILE; wipe_temp_dir $TMP_DIR;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, '; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/onboard.js --output /var/log/cloud/azure/onboard.log --signal ONBOARD_DONE --log-level info --cloud azure --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --hostname ', concat(variables('instanceName'), '0.', variables('location'), '.cloudapp.azure.com'), ' --license-pool --big-iq-host ', parameters('bigIqAddress'), ' --big-iq-user ', parameters('bigIqUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePoolName'), ' $(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ') --big-ip-mgmt-address ', reference(concat(variables('mgmtPublicIPAddressId'), '0')).ipAddress, ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, ' --module ltm:nominal; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/network.js --output /var/log/cloud/azure/network.log --wait-for ONBOARD_DONE --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --default-gw ', variables('tmmRouteGw'), ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 ', variables('netCmd'), ' --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'),  ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress'),  ',vlan:internal --log-level info; echo \"/usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs-azure/scripts/failoverProvider.js\" >> /config/failover/tgactive; echo \"/usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs-azure/scripts/failoverProvider.js\" >> /config/failover/tgrefresh; tmsh modify cm device ', concat(variables('instanceName'), '0.', variables('location'), '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress'), '; ', variables('failoverCmdArray')[parameters('bigIpVersion')], '; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/cluster.js --output /var/log/cloud/azure/cluster.log --log-level info --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --config-sync-ip ', variables('intSubnetPrivateAddress'), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(variables('instanceName'), '0.', variables('location'), '.cloudapp.azure.com'), ' --network-failover --auto-sync --save-on-auto-sync', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; tmsh load sys application template f5.cloud_logger.v1.0.0.tmpl; base=', variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffixInt'), '; f3=$(echo $base | cut -d. -f1-3); last=$(echo $base | cut -d. -f4); for i in $(seq 1 ', variables('numberOfExternalIps'), '); do addr=${f3}.${last}; last=$((last+1)); tmsh create ltm virtual-address $addr address $addr; done; ', variables('routeCmdArray')[parameters('bigIpVersion')], '; rm -f /config/cloud/.bigIqPasswd; bash /config/customConfig.sh; $(cp_logs); else $(cp_logs); exit 1; fi', '; if grep -i \"PUT failed\" /var/log/waagent.log -q; then echo \"Killing waagent exthandler, daemon should restart it\"; pkill -f \"python -u /usr/sbin/waagent -run-exthandlers\"; fi')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {
@@ -1032,7 +1192,7 @@
             "properties": {
                 "autoUpgradeMinorVersion": "true", 
                 "protectedSettings": {
-                    "commandToExecute": "[concat('CLOUD_LIB_DIR=/config/cloud/azure/node_modules/@f5devcentral; mkdir -p $CLOUD_LIB_DIR && cp f5-cloud-libs*.tar.gz* /config/cloud; mkdir -p /var/log/cloud/azure; function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; }; TMP_DIR=/mnt/creds; TMP_CREDENTIALS_FILE=$TMP_DIR/.passwd; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; /usr/bin/install -b -m 400 /dev/null /config/cloud/.azCredentials; /usr/bin/install -b -m 755 /dev/null /config/cloud/managedRoutes; echo ', variables('singleQuote'), parameters('bigIqPassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' > /config/verifyHash; echo -e ', variables('installCloudLibs'), ' > /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).keys[0].value, '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"uniqueLabel\": \"', variables('dnsLabel'), '\"}', variables('singleQuote'), ' > /config/cloud/.azCredentials; echo -e ', parameters('managedRoutes'), ' > /config/cloud/managedRoutes; unset IFS; bash /config/installCloudLibs.sh; source $CLOUD_LIB_DIR/f5-cloud-libs/scripts/util.sh; create_temp_dir $TMP_DIR; echo ', variables('singleQuote'), variables('adminPasswordOrKey'), variables('singleQuote'), '|sha512sum|cut -d \" \" -f 1|tr -d \"\n\" > $TMP_CREDENTIALS_FILE; bash $CLOUD_LIB_DIR/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file $TMP_CREDENTIALS_FILE; f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/encryptDataToFile.js --data-file $TMP_CREDENTIALS_FILE --out-file $BIG_IP_CREDENTIALS_FILE; wipe_temp_dir $TMP_DIR;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, '; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/onboard.js --output /var/log/cloud/azure/onboard.log --signal ONBOARD_DONE --log-level info --cloud azure --host ', variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --hostname ', concat(variables('instanceName'), '1.', variables('location'), '.cloudapp.azure.com'), ' --license-pool --big-iq-host ', parameters('bigIqAddress'), ' --big-iq-user ', parameters('bigIqUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePoolName'), ' $(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ') --big-ip-mgmt-address ', reference(concat(variables('mgmtPublicIPAddressId'), '1')).ipAddress, ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, ' --module ltm:nominal; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/network.js --output /var/log/cloud/azure/network.log --wait-for ONBOARD_DONE --host ', variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --default-gw ', variables('tmmRouteGw'), ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress1'),  ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress1'),  ',vlan:internal --log-level info; echo \"/usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs-azure/scripts/failoverProvider.js\" >> /config/failover/tgactive; echo \"/usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs-azure/scripts/failoverProvider.js\" >> /config/failover/tgrefresh; tmsh modify cm device ', concat(variables('instanceName'), '1.', variables('location'), '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress1'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress1'), '; ', variables('failoverCmdArray')[parameters('bigIpVersion')], '; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/cluster.js --output /var/log/cloud/azure/cluster.log --log-level info --host ', variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --config-sync-ip ', variables('intSubnetPrivateAddress1'), ' --join-group --device-group Sync --sync --remote-host ', variables('mgmtSubnetPrivateAddress'), ' --remote-user svc_user --remote-password-url file:///config/cloud/.passwd', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; tmsh load sys application template f5.cloud_logger.v1.0.0.tmpl; base=', variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffixInt'), '; f3=$(echo $base | cut -d. -f1-3); last=$(echo $base | cut -d. -f4); for i in $(seq 1 ', variables('numberOfExternalIps'), '); do addr=${f3}.${last}; last=$((last+1)); tmsh create ltm virtual-address $addr address $addr; done; ', variables('routeCmdArray')[parameters('bigIpVersion')], '; rm -f /config/cloud/.bigIqPasswd; bash /config/customConfig.sh; $(cp_logs); else $(cp_logs); exit 1; fi', '; if grep -i \"PUT failed\" /var/log/waagent.log -q; then echo \"Killing waagent exthandler, daemon should restart it\"; pkill -f \"python -u /usr/sbin/waagent -run-exthandlers\"; fi')]"
+                    "commandToExecute": "[concat('CLOUD_LIB_DIR=/config/cloud/azure/node_modules/@f5devcentral; mkdir -p $CLOUD_LIB_DIR && cp f5-cloud-libs*.tar.gz* /config/cloud; mkdir -p /var/log/cloud/azure; function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; }; TMP_DIR=/mnt/creds; TMP_CREDENTIALS_FILE=$TMP_DIR/.passwd; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; /usr/bin/install -b -m 400 /dev/null /config/cloud/.azCredentials; /usr/bin/install -b -m 755 /dev/null /config/cloud/managedRoutes; echo ', variables('singleQuote'), parameters('bigIqPassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' > /config/verifyHash; echo -e ', variables('installCloudLibs'), ' > /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).keys[0].value, '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"uniqueLabel\": \"', variables('dnsLabel'), '\"}', variables('singleQuote'), ' > /config/cloud/.azCredentials; echo -e ', parameters('managedRoutes'), ' > /config/cloud/managedRoutes; unset IFS; bash /config/installCloudLibs.sh; source $CLOUD_LIB_DIR/f5-cloud-libs/scripts/util.sh; create_temp_dir $TMP_DIR; echo ', variables('singleQuote'), variables('adminPasswordOrKey'), variables('singleQuote'), '|sha512sum|cut -d \" \" -f 1|tr -d \"\n\" > $TMP_CREDENTIALS_FILE; bash $CLOUD_LIB_DIR/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file $TMP_CREDENTIALS_FILE; f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/encryptDataToFile.js --data-file $TMP_CREDENTIALS_FILE --out-file $BIG_IP_CREDENTIALS_FILE; wipe_temp_dir $TMP_DIR;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, '; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/onboard.js --output /var/log/cloud/azure/onboard.log --signal ONBOARD_DONE --log-level info --cloud azure --host ', variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --hostname ', concat(variables('instanceName'), '1.', variables('location'), '.cloudapp.azure.com'), ' --license-pool --big-iq-host ', parameters('bigIqAddress'), ' --big-iq-user ', parameters('bigIqUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePoolName'), ' $(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ') --big-ip-mgmt-address ', reference(concat(variables('mgmtPublicIPAddressId'), '1')).ipAddress, ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, ' --module ltm:nominal; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/network.js --output /var/log/cloud/azure/network.log --wait-for ONBOARD_DONE --host ', variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --default-gw ', variables('tmmRouteGw'), ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 ', variables('netCmd'), ' --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress1'),  ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress1'),  ',vlan:internal --log-level info; echo \"/usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs-azure/scripts/failoverProvider.js\" >> /config/failover/tgactive; echo \"/usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs-azure/scripts/failoverProvider.js\" >> /config/failover/tgrefresh; tmsh modify cm device ', concat(variables('instanceName'), '1.', variables('location'), '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress1'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress1'), '; ', variables('failoverCmdArray')[parameters('bigIpVersion')], '; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/cluster.js --output /var/log/cloud/azure/cluster.log --log-level info --host ', variables('mgmtSubnetPrivateAddress1'), ' --port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --config-sync-ip ', variables('intSubnetPrivateAddress1'), ' --join-group --device-group Sync --sync --remote-host ', variables('mgmtSubnetPrivateAddress'), ' --remote-user svc_user --remote-password-url file:///config/cloud/.passwd', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; tmsh load sys application template f5.cloud_logger.v1.0.0.tmpl; base=', variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffixInt'), '; f3=$(echo $base | cut -d. -f1-3); last=$(echo $base | cut -d. -f4); for i in $(seq 1 ', variables('numberOfExternalIps'), '); do addr=${f3}.${last}; last=$((last+1)); tmsh create ltm virtual-address $addr address $addr; done; ', variables('routeCmdArray')[parameters('bigIpVersion')], '; rm -f /config/cloud/.bigIqPasswd; bash /config/customConfig.sh; $(cp_logs); else $(cp_logs); exit 1; fi', '; if grep -i \"PUT failed\" /var/log/waagent.log -q; then echo \"Killing waagent exthandler, daemon should restart it\"; pkill -f \"python -u /usr/sbin/waagent -run-exthandlers\"; fi')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {
