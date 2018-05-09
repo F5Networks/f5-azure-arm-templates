@@ -164,6 +164,13 @@
             }, 
             "type": "string"
         }, 
+        "customImageUrl": {
+            "defaultValue": "OPTIONAL", 
+            "metadata": {
+                "description": "If you would like to deploy using a local BIG-IP image, provide the full URL to the VHD in Azure storage.  **Note**: Unless specifically required, leave the default of **OPTIONAL**."
+            }, 
+            "type": "string"
+        }, 
         "restrictedSrcAddress": {
             "defaultValue": "*", 
             "metadata": {
@@ -260,6 +267,11 @@
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]", 
         "offerToUse": "[concat('f5-big-ip-', variables('imageNameToLower'))]", 
+        "imagePlan": {
+            "name": "[variables('skuToUse')]", 
+            "product": "[variables('offerToUse')]", 
+            "publisher": "f5-networks"
+        }, 
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['1'].Port]", 
         "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
@@ -294,6 +306,26 @@
             "Yes": {
                 "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]", 
                 "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:failover-lb_1nic-new_stack-supported,templateVersion:5.0.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BYOL,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
+            }
+        }, 
+        "customImageName": "[concat(variables('dnsLabel'), 'customimage')]", 
+        "customImageUrl": "[replace(parameters('customImageUrl'), 'OPTIONAL', '')]", 
+        "storageProfileArray": {
+            "customImage": {
+                "imageReference": {
+                    "id": "[resourceId('Microsoft.Compute/images', variables('customImageName'))]"
+                }
+            }, 
+            "platformImage": {
+                "imageReference": {
+                    "offer": "[variables('offerToUse')]", 
+                    "publisher": "f5-networks", 
+                    "sku": "[variables('skuToUse')]", 
+                    "version": "[parameters('bigIpVersion')]"
+                }, 
+                "osDisk": {
+                    "createOption": "FromImage"
+                }
             }
         }, 
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n", 
@@ -523,6 +555,24 @@
         }, 
         {
             "apiVersion": "[variables('computeApiVersion')]", 
+            "condition": "[not(empty(variables('customImageUrl')))]", 
+            "location": "[variables('location')]", 
+            "name": "[variables('customImageName')]", 
+            "properties": {
+                "storageProfile": {
+                    "osDisk": {
+                        "blobUri": "[variables('customImageUrl')]", 
+                        "osState": "Generalized", 
+                        "osType": "Linux", 
+                        "storageAccountType": "Standard_LRS"
+                    }
+                }
+            }, 
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            "type": "Microsoft.Compute/images"
+        }, 
+        {
+            "apiVersion": "[variables('computeApiVersion')]", 
             "copy": {
                 "count": "[parameters('numberOfInstances')]", 
                 "name": "devicecopy"
@@ -534,11 +584,7 @@
             ], 
             "location": "[variables('location')]", 
             "name": "[concat(variables('deviceNamePrefix'),copyindex())]", 
-            "plan": {
-                "name": "[variables('skuToUse')]", 
-                "product": "[variables('offerToUse')]", 
-                "publisher": "f5-networks"
-            }, 
+            "plan": "[if(not(empty(variables('customImageUrl'))), json('null'), variables('imagePlan'))]", 
             "properties": {
                 "availabilitySet": {
                     "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
@@ -565,17 +611,7 @@
                     "computerName": "[concat(variables('deviceNamePrefix'),copyindex())]", 
                     "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
                 }, 
-                "storageProfile": {
-                    "imageReference": {
-                        "offer": "[variables('offerToUse')]", 
-                        "publisher": "f5-networks", 
-                        "sku": "[variables('skuToUse')]", 
-                        "version": "[parameters('bigIpVersion')]"
-                    }, 
-                    "osDisk": {
-                        "createOption": "FromImage"
-                    }
-                }
+                "storageProfile": "[if(not(empty(variables('customImageUrl'))), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
             }, 
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
             "type": "Microsoft.Compute/virtualMachines"
