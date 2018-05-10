@@ -75,6 +75,7 @@ hashed_file_list = ""
 install_cloud_libs = install_cloud_libs.replace('<HASHED_FILE_LIST>', hashed_file_list)
 install_cloud_libs = install_cloud_libs.replace('<TAR_LIST>', additional_tar_list)
 instance_type_list = ["Standard_A2", "Standard_A3", "Standard_A4", "Standard_A5", "Standard_A6", "Standard_A7", "Standard_D2", "Standard_D3", "Standard_D4", "Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14", "Standard_DS2", "Standard_DS3", "Standard_DS4", "Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2", "Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2", "Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2", "Standard_DS15_v2", "Standard_F2", "Standard_F4", "Standard_F8", "Standard_F2S", "Standard_F4S", "Standard_F8S", "Standard_F16S", "Standard_G2", "Standard_G3", "Standard_G4", "Standard_G5", "Standard_GS2", "Standard_GS3", "Standard_GS4", "Standard_GS5"]
+premium_instance_type_list = ["Standard_DS2", "Standard_DS3", "Standard_DS4", "Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14", "Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2", "Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2", "Standard_DS15_v2", "Standard_F2S", "Standard_F4S", "Standard_F8S", "Standard_F16S", "Standard_GS2", "Standard_GS3", "Standard_GS4", "Standard_GS5"]
 tags = "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
 static_vmss_tags = "[if(empty(variables('tagValues')), union(json('{}'), variables('staticVmssTagValues')), union(variables('tagValues'), variables('staticVmssTagValues')))]"
 tag_values = {"application":"APP", "environment":"ENV", "group":"GROUP", "owner":"OWNER", "cost":"COST"}
@@ -350,6 +351,7 @@ data['variables']['skuToUse'] = sku_to_use
 data['variables']['offerToUse'] = offer_to_use
 data['variables']['bigIpNicPortValue'] = nic_port_map
 data['variables']['storageProfileArray'] = {"platformImage": {"imageReference": {"offer": "[variables('offerToUse')]", "publisher": "f5-networks", "sku": "[variables('skuToUse')]", "version": "[parameters('bigIpVersion')]"}, "osDisk": {"createOption": "FromImage"}}, "customImage": {"imageReference": {"id": "[resourceId('Microsoft.Compute/images', variables('customImageName'))]"}}}
+data['variables']['premiumInstanceArray'] = premium_instance_type_list
 ## Add additional default variables
 # CLI Tools *may* take \n and send up in deployment as \\n, which fails
 data['variables']['adminPasswordOrKey'] = "[replace(parameters('adminPasswordOrKey'),'\\n', '\n')]"
@@ -775,7 +777,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
 resources_list += [{ "type": "Microsoft.Storage/storageAccounts", "apiVersion": storage_api_version, "kind": "Storage", "location": location, "name": "[variables('newDataStorageAccountName')]", "tags": tags, "sku": { "name": "[variables('dataStorageAccountType')]", "tier": "Standard" } }]
 
 ###### Compute/image Resource(s) ######
-resources_list += [{"type": "Microsoft.Compute/images", "apiVersion": compute_api_version, "name": "[variables('customImageName')]", "condition": "[not(empty(variables('customImageUrl')))]", "location": location, "tags": tags, "properties": {"storageProfile": {"osDisk": {"blobUri": "[variables('customImageUrl')]", "osState": "Generalized", "osType": "Linux", "storageAccountType": "Standard_LRS"}}}}]
+resources_list += [{"type": "Microsoft.Compute/images", "apiVersion": compute_api_version, "name": "[variables('customImageName')]", "condition": "[not(empty(variables('customImageUrl')))]", "location": location, "tags": tags, "properties": {"storageProfile": {"osDisk": {"blobUri": "[variables('customImageUrl')]", "osState": "Generalized", "osType": "Linux", "storageAccountType": "[if(contains(variables('premiumInstanceArray'), parameters('instanceType')), 'Premium_LRS', 'Standard_LRS')]"}}}}]
 
 ###### Compute/VM Resource(s) ######
 depends_on = "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", "[variables('customImageName')]"

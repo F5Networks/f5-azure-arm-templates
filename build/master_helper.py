@@ -256,6 +256,7 @@ def variable_initialize(data):
     data['variables']['customImageName'] = "[concat(variables('dnsLabel'), 'customimage')]"
     data['variables']['customImageUrl'] = "[replace(parameters('customImageUrl'), 'OPTIONAL', '')]"
     data['variables']['storageProfileArray'] = "MANDATORY"
+    data['variables']['premiumInstanceArray'] = "MANDATORY"
     data['variables']['customConfig'] = "### START (INPUT) CUSTOM CONFIGURATION HERE\n"
     data['variables']['installCustomConfig'] = "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
 

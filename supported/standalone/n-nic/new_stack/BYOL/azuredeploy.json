@@ -478,6 +478,32 @@
                 }
             }
         }, 
+        "premiumInstanceArray": [
+            "Standard_DS2", 
+            "Standard_DS3", 
+            "Standard_DS4", 
+            "Standard_DS11", 
+            "Standard_DS12", 
+            "Standard_DS13", 
+            "Standard_DS14", 
+            "Standard_DS2_v2", 
+            "Standard_DS3_v2", 
+            "Standard_DS4_v2", 
+            "Standard_DS5_v2", 
+            "Standard_DS11_v2", 
+            "Standard_DS12_v2", 
+            "Standard_DS13_v2", 
+            "Standard_DS14_v2", 
+            "Standard_DS15_v2", 
+            "Standard_F2S", 
+            "Standard_F4S", 
+            "Standard_F8S", 
+            "Standard_F16S", 
+            "Standard_GS2", 
+            "Standard_GS3", 
+            "Standard_GS4", 
+            "Standard_GS5"
+        ], 
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n", 
         "installCustomConfig": "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
     }, 
@@ -756,7 +782,7 @@
                         "blobUri": "[variables('customImageUrl')]", 
                         "osState": "Generalized", 
                         "osType": "Linux", 
-                        "storageAccountType": "Standard_LRS"
+                        "storageAccountType": "[if(contains(variables('premiumInstanceArray'), parameters('instanceType')), 'Premium_LRS', 'Standard_LRS')]"
                     }
                 }
             }, 
