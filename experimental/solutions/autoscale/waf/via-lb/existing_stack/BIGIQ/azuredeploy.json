@@ -416,6 +416,13 @@
             }, 
             "type": "string"
         }, 
+        "customImageUrl": {
+            "defaultValue": "OPTIONAL", 
+            "metadata": {
+                "description": "If you would like to deploy using a local BIG-IP image, provide the full URL to the VHD in Azure storage.  **Note**: Unless specifically required, leave the default of **OPTIONAL**."
+            }, 
+            "type": "string"
+        }, 
         "restrictedSrcAddress": {
             "defaultValue": "*", 
             "metadata": {
@@ -517,6 +524,11 @@
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]", 
         "offerToUse": "[concat('f5-big-ip-', variables('imageNameToLower'))]", 
+        "imagePlan": {
+            "name": "[variables('skuToUse')]", 
+            "product": "[variables('offerToUse')]", 
+            "publisher": "f5-networks"
+        }, 
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['1'].Port]", 
         "bigIpMgmtPort": 8443, 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
@@ -596,6 +608,52 @@
                 "metricsCmd": "[concat(' --usageAnalytics \\\" --metrics customerId:${custId},deploymentId:${deployId},templateName:autoscale_waf_via-lb-existing_stack-experimental,templateVersion:5.0.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BIGIQ,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure\\\"')]"
             }
         }, 
+        "customImageName": "[concat(variables('dnsLabel'), 'customimage')]", 
+        "customImageUrl": "[replace(parameters('customImageUrl'), 'OPTIONAL', '')]", 
+        "storageProfileArray": {
+            "customImage": {
+                "imageReference": {
+                    "id": "[resourceId('Microsoft.Compute/images', variables('customImageName'))]"
+                }
+            }, 
+            "platformImage": {
+                "imageReference": {
+                    "offer": "[variables('offerToUse')]", 
+                    "publisher": "f5-networks", 
+                    "sku": "[variables('skuToUse')]", 
+                    "version": "[parameters('bigIpVersion')]"
+                }, 
+                "osDisk": {
+                    "createOption": "FromImage"
+                }
+            }
+        }, 
+        "premiumInstanceArray": [
+            "Standard_DS2", 
+            "Standard_DS3", 
+            "Standard_DS4", 
+            "Standard_DS11", 
+            "Standard_DS12", 
+            "Standard_DS13", 
+            "Standard_DS14", 
+            "Standard_DS2_v2", 
+            "Standard_DS3_v2", 
+            "Standard_DS4_v2", 
+            "Standard_DS5_v2", 
+            "Standard_DS11_v2", 
+            "Standard_DS12_v2", 
+            "Standard_DS13_v2", 
+            "Standard_DS14_v2", 
+            "Standard_DS15_v2", 
+            "Standard_F2S", 
+            "Standard_F4S", 
+            "Standard_F8S", 
+            "Standard_F16S", 
+            "Standard_GS2", 
+            "Standard_GS3", 
+            "Standard_GS4", 
+            "Standard_GS5"
+        ], 
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n", 
         "installCustomConfig": "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
     }, 
@@ -806,14 +864,28 @@
         }, 
         {
             "apiVersion": "[variables('computeApiVersion')]", 
+            "condition": "[not(empty(variables('customImageUrl')))]", 
+            "location": "[variables('location')]", 
+            "name": "[variables('customImageName')]", 
+            "properties": {
+                "storageProfile": {
+                    "osDisk": {
+                        "blobUri": "[variables('customImageUrl')]", 
+                        "osState": "Generalized", 
+                        "osType": "Linux", 
+                        "storageAccountType": "[if(contains(variables('premiumInstanceArray'), parameters('instanceType')), 'Premium_LRS', 'Standard_LRS')]"
+                    }
+                }
+            }, 
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            "type": "Microsoft.Compute/images"
+        }, 
+        {
+            "apiVersion": "[variables('computeApiVersion')]", 
             "dependsOn": [], 
             "location": "[variables('location')]", 
             "name": "[variables('vmssName')]", 
-            "plan": {
-                "name": "[variables('skuToUse')]", 
-                "product": "[variables('offerToUse')]", 
-                "publisher": "f5-networks"
-            }, 
+            "plan": "[if(not(empty(variables('customImageUrl'))), json('null'), variables('imagePlan'))]", 
             "properties": {
                 "overprovision": false, 
                 "upgradePolicy": {
@@ -889,17 +961,7 @@
                         "computerNamePrefix": "[variables('vmssName')]", 
                         "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
                     }, 
-                    "storageProfile": {
-                        "imageReference": {
-                            "offer": "[variables('offerToUse')]", 
-                            "publisher": "f5-networks", 
-                            "sku": "[variables('skuToUse')]", 
-                            "version": "[parameters('bigIpVersion')]"
-                        }, 
-                        "osDisk": {
-                            "createOption": "FromImage"
-                        }
-                    }
+                    "storageProfile": "[if(not(empty(variables('customImageUrl'))), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
                 }
             }, 
             "sku": {

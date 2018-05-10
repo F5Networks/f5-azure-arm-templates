@@ -82,6 +82,7 @@ def parameter_initialize(data):
     data['parameters']['managedRoutes'] = "OPTIONAL"
     data['parameters']['ntpServer'] = "MANDATORY"
     data['parameters']['timeZone'] = "MANDATORY"
+    data['parameters']['customImageUrl'] = "MANDATORY"
     data['parameters']['restrictedSrcAddress'] = "MANDATORY"
     data['parameters']['tagValues'] = "MANDATORY"
     data['parameters']['allowUsageAnalytics'] = "MANDATORY"
@@ -117,6 +118,7 @@ def variable_initialize(data):
     data['variables']['skuToUse'] = "MANDATORY"
     data['variables']['offerToUse'] = "MANDATORY"
     data['variables']['staticSkuToUse'] = "OPTIONAL"
+    data['variables']['imagePlan'] = {"name": "[variables('skuToUse')]", "product": "[variables('offerToUse')]", "publisher": "f5-networks"}
     data['variables']['staticOfferToUse'] = "OPTIONAL"
     data['variables']['bigIpNicPortValue'] = "MANDATORY"
     data['variables']['bigIpMgmtPort'] = "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]"
@@ -251,6 +253,10 @@ def variable_initialize(data):
     data['variables']['webVmSubnetPrivateAddress'] = "OPTIONAL"
     data['variables']['webVmVsAddr'] = "OPTIONAL"
     data['variables']['webVmVsPort'] = "OPTIONAL"
+    data['variables']['customImageName'] = "[concat(variables('dnsLabel'), 'customimage')]"
+    data['variables']['customImageUrl'] = "[replace(parameters('customImageUrl'), 'OPTIONAL', '')]"
+    data['variables']['storageProfileArray'] = "MANDATORY"
+    data['variables']['premiumInstanceArray'] = "MANDATORY"
     data['variables']['customConfig'] = "### START (INPUT) CUSTOM CONFIGURATION HERE\n"
     data['variables']['installCustomConfig'] = "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
 

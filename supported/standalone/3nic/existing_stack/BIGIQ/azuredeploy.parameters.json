@@ -80,6 +80,9 @@
         "timeZone": {
             "value": "UTC"
         }, 
+        "customImageUrl": {
+            "value": "OPTIONAL"
+        }, 
         "restrictedSrcAddress": {
             "value": "*"
         }, 
