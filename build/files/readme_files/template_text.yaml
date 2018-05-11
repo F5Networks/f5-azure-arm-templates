@@ -246,7 +246,7 @@ parameter_list:
   blockingLevel: "Select how aggressive you want the blocking level of this WAF.  Remember that the more aggressive the blocking level, the more potential there is for false-positives the WAF might detect. Select **Custom** to specify your own security policy."
   calculatedBandwidth: "Specify the amount of bandwidth (in Mbps) that should be used to base the throughput percentage calculation on for scale events. For PAYG, we recommend this matches the parameter **licensedBandwidth**, or at minimum is a lower value. See [Scaling Thresholds](#scaling-thresholds) for more information."
   clientId: "Your Azure service principal application client ID."
-  customImageUrl: 'If you would like to deploy using a local BIG-IP image, provide the full URL to the VHD in Azure storage.  **Note**: Unless specifically required, leave the default of **OPTIONAL**.'
+  customImage: 'If you would like to deploy using a local BIG-IP image, provide either the full URL to the VHD in Azure storage **or** the full resource id to an existing Microsoft.Compute image resource to use.  **Note**: Unless specifically required, leave the default of **OPTIONAL**.'
   customPolicy: "Specify the publicly available URL of a custom ASM security policy in XML format. This policy will be applied in place of the standard High/Medium/Low policy."
   dnsLabel: "Unique DNS Name for the Public IP address used to access the Virtual Machine."
   dnsMemberIpType: "The IP type to add as the record when updating the DNS provider."

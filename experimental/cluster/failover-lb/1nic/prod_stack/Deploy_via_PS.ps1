@@ -1,7 +1,7 @@
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some (such as region) can    ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specified below.    ##
-## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -numberOfInstances 2 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -uniqueLabel <value> -instanceType Standard_DS2_v2 -imageName Best -bigIpVersion 13.1.0200 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddressRangeStart <value> -ntpServer 0.pool.ntp.org -timeZone UTC -customImageUrl OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -licenseType PAYG -licensedBandwidth 200m -numberOfInstances 2 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -uniqueLabel <value> -instanceType Standard_DS2_v2 -imageName Best -bigIpVersion 13.1.0200 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddressRangeStart <value> -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
 
 param(
   [string] [Parameter(Mandatory=$True)] $licenseType,
@@ -23,7 +23,7 @@ param(
   [string] [Parameter(Mandatory=$True)] $mgmtIpAddressRangeStart,
   [string] [Parameter(Mandatory=$True)] $ntpServer,
   [string] [Parameter(Mandatory=$True)] $timeZone,
-  [string] [Parameter(Mandatory=$True)] $customImageUrl,
+  [string] [Parameter(Mandatory=$True)] $customImage,
   [string] $restrictedSrcAddress = "*",
   $tagValues = '{"application": "APP", "cost": "COST", "environment": "ENV", "group": "GROUP", "owner": "OWNER"}',
   [string] [Parameter(Mandatory=$True)] $allowUsageAnalytics,
@@ -57,10 +57,10 @@ $adminPasswordOrKeySecure = ConvertTo-SecureString -String $adminPasswordOrKey -
 # Create Arm Deployment
 if ($licenseType -eq "BYOL") {
   if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\azuredeploy.json"; $parametersFilePath = ".\BYOL\azuredeploy.parameters.json" }
-  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -numberOfInstances $numberOfInstances -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -uniqueLabel $uniqueLabel -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -vnetName $vnetName -vnetResourceGroupName $vnetResourceGroupName -mgmtSubnetName $mgmtSubnetName -mgmtIpAddressRangeStart $mgmtIpAddressRangeStart -ntpServer $ntpServer -timeZone $timeZone -customImageUrl $customImageUrl -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics  -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2"
+  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -numberOfInstances $numberOfInstances -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -uniqueLabel $uniqueLabel -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -vnetName $vnetName -vnetResourceGroupName $vnetResourceGroupName -mgmtSubnetName $mgmtSubnetName -mgmtIpAddressRangeStart $mgmtIpAddressRangeStart -ntpServer $ntpServer -timeZone $timeZone -customImage $customImage -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics  -licenseKey1 "$licenseKey1" -licenseKey2 "$licenseKey2"
 } elseif ($licenseType -eq "PAYG") {
   if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\azuredeploy.json"; $parametersFilePath = ".\PAYG\azuredeploy.parameters.json" }
-  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -numberOfInstances $numberOfInstances -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -uniqueLabel $uniqueLabel -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -vnetName $vnetName -vnetResourceGroupName $vnetResourceGroupName -mgmtSubnetName $mgmtSubnetName -mgmtIpAddressRangeStart $mgmtIpAddressRangeStart -ntpServer $ntpServer -timeZone $timeZone -customImageUrl $customImageUrl -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics  -licensedBandwidth "$licensedBandwidth"
+  $deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -numberOfInstances $numberOfInstances -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -uniqueLabel $uniqueLabel -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -vnetName $vnetName -vnetResourceGroupName $vnetResourceGroupName -mgmtSubnetName $mgmtSubnetName -mgmtIpAddressRangeStart $mgmtIpAddressRangeStart -ntpServer $ntpServer -timeZone $timeZone -customImage $customImage -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics  -licensedBandwidth "$licensedBandwidth"
 } else {
   Write-Error -Message "Please select a valid license type of PAYG or BYOL."
 }

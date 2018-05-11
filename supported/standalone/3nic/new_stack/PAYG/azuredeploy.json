@@ -180,10 +180,10 @@
             }, 
             "type": "string"
         }, 
-        "customImageUrl": {
+        "customImage": {
             "defaultValue": "OPTIONAL", 
             "metadata": {
-                "description": "If you would like to deploy using a local BIG-IP image, provide the full URL to the VHD in Azure storage.  **Note**: Unless specifically required, leave the default of **OPTIONAL**."
+                "description": "If you would like to deploy using a local BIG-IP image, provide either the full URL to the VHD in Azure storage **or** the full resource id to an existing Microsoft.Compute image resource to use.  **Note**: Unless specifically required, leave the default of **OPTIONAL**."
             }, 
             "type": "string"
         }, 
@@ -343,12 +343,14 @@
                 "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:standalone_3nic-new_stack-supported,templateVersion:5.0.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:PAYG,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
             }
         }, 
-        "customImageName": "[concat(variables('dnsLabel'), 'customimage')]", 
-        "customImageUrl": "[replace(parameters('customImageUrl'), 'OPTIONAL', '')]", 
+        "customImage": "[replace(parameters('customImage'), 'OPTIONAL', '')]", 
+        "useCustomImage": "[not(empty(variables('customImage')))]", 
+        "createNewCustomImage": "[contains(variables('customImage'), 'https://')]", 
+        "newCustomImageName": "[concat(variables('dnsLabel'), 'image')]", 
         "storageProfileArray": {
             "customImage": {
                 "imageReference": {
-                    "id": "[resourceId('Microsoft.Compute/images', variables('customImageName'))]"
+                    "id": "[if(variables('createNewCustomImage'), resourceId('Microsoft.Compute/images', variables('newCustomImageName')), variables('customImage'))]"
                 }
             }, 
             "platformImage": {
@@ -644,13 +646,13 @@
         }, 
         {
             "apiVersion": "[variables('computeApiVersion')]", 
-            "condition": "[not(empty(variables('customImageUrl')))]", 
+            "condition": "[and(variables('useCustomImage'), variables('createNewCustomImage'))]", 
             "location": "[variables('location')]", 
-            "name": "[variables('customImageName')]", 
+            "name": "[variables('newCustomImageName')]", 
             "properties": {
                 "storageProfile": {
                     "osDisk": {
-                        "blobUri": "[variables('customImageUrl')]", 
+                        "blobUri": "[variables('customImage')]", 
                         "osState": "Generalized", 
                         "osType": "Linux", 
                         "storageAccountType": "[if(contains(variables('premiumInstanceArray'), parameters('instanceType')), 'Premium_LRS', 'Standard_LRS')]"
@@ -665,14 +667,14 @@
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", 
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
-                "[variables('customImageName')]", 
+                "[variables('newCustomImageName')]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'))]"
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('instanceName')]", 
-            "plan": "[if(not(empty(variables('customImageUrl'))), json('null'), variables('imagePlan'))]", 
+            "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]", 
             "properties": {
                 "availabilitySet": {
                     "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
@@ -714,7 +716,7 @@
                     "computerName": "[variables('instanceName')]", 
                     "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
                 }, 
-                "storageProfile": "[if(not(empty(variables('customImageUrl'))), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
+                "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
             }, 
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
             "type": "Microsoft.Compute/virtualMachines"

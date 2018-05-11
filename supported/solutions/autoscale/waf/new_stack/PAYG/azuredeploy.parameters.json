@@ -104,7 +104,7 @@
         "timeZone": {
             "value": "UTC"
         }, 
-        "customImageUrl": {
+        "customImage": {
             "value": "OPTIONAL"
         }, 
         "restrictedSrcAddress": {
