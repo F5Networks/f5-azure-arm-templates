@@ -8,7 +8,7 @@ class test_template_generator(unittest.TestCase):
     #### Very Simple Example Test Case
     def test_1nic_template_tag(self):
         """ Test 1nic Template Tag is Correct """
-        tmpl_loc = 'supported/standalone/1nic/new_stack/PAYG/'
+        tmpl_loc = 'supported/standalone/1nic/new-stack/PAYG/'
         tmpl_file = tmpl_loc + 'azuredeploy.json'
         with open(tmpl_file, 'r') as file_str:
             file_data = json.load(file_str)

@@ -141,11 +141,11 @@ class ReadmeGen(object):
                         else:
                             lic_type_text = v
                         only = ' only:'
-                        if 'BIG-IQ' in lic_type_text:
+                        if 'big-iq' in lic_type_text:
                             only = ' licensing only:'
                         mandatory = lic_type_text + only
                         # Skip licenseKey parameters if BYOL not in the list
-                        if all(x in ['PAYG', 'BIG-IQ', 'BIG-IQ+PAYG'] for x in lic_type) and 'licenseKey' in k:
+                        if all(x in ['payg', 'big-iq', 'big-iq+payg'] for x in lic_type) and 'licenseKey' in k:
                             continue
                         else:
                             param_array += "| " + k + " | " + mandatory + " | " + self.get_custom_text('parameter_list', k) + " |\n"
@@ -156,16 +156,16 @@ class ReadmeGen(object):
     def stack_type_check(self):
         """ Determine what stack type the template is """
         t_loc = self.i_data['template_location']
-        if 'new_stack' in t_loc:
-            stack_type = 'new_stack'
-        elif 'existing_stack' in t_loc:
-            stack_type = 'existing_stack'
-        elif 'prod_stack' in t_loc:
-            stack_type = 'prod_stack'
-        elif 'learning_stack' in t_loc:
-            stack_type = 'learning_stack'
+        if 'new-stack' in t_loc:
+            stack_type = 'new-stack'
+        elif 'existing-stack' in t_loc:
+            stack_type = 'existing-stack'
+        elif 'production-stack' in t_loc:
+            stack_type = 'production-stack'
+        elif 'learning-stack' in t_loc:
+            stack_type = 'learning-stack'
         else:
-            stack_type = 'unkown_stack_type'
+            stack_type = 'unknown_stack'
         return stack_type
 
     def sp_access_required(self, text):
@@ -200,9 +200,9 @@ class ReadmeGen(object):
             deploy_links += '''- **<LIC_TYPE>**<LIC_TEXT>\n\n  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](<DEPLOY_LINK_URL>)\n\n'''
             t_loc = t_loc.replace('/', '%2F').replace('..', '')
             # Convert current license specified with list of licenses that should be used
-            t_loc = t_loc.replace('BIGIQ_PAYG', 'LICENSE').replace('BIGIQ', 'LICENSE').replace('PAYG', 'LICENSE').replace('BYOL', 'LICENSE')
+            t_loc = t_loc.replace('bigiq-payg', 'LICENSE').replace('bigiq', 'LICENSE').replace('payg', 'LICENSE').replace('byol', 'LICENSE')
             t_loc = t_loc.replace('LICENSE', lic)
-            t_loc = t_loc.replace('BIG-IQ+PAYG', 'BIGIQ_PAYG').replace('BIG-IQ', 'BIGIQ')
+            t_loc = t_loc.replace('big-iq+payg', 'bigiq-payg').replace('big-iq', 'bigiq')
             url = base_url + t_loc
             deploy_links = deploy_links.replace('<DEPLOY_LINK_URL>', url).replace('<LIC_TYPE>', lic)
             deploy_links = deploy_links.replace('<LIC_TEXT>', self.get_custom_text('license_text', lic))

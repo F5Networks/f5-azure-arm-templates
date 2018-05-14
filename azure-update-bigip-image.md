@@ -11,7 +11,7 @@ Refer to the [Azure ARM Template Matrix](https://github.com/F5Networks/f5-azure-
   *  Go to the F5 ARM Template main page (https://github.com/F5Networks/f5-azure-arm-templates).  
   *  From the **Branch** list, click the arrow, and then click the **Tags** tab. <br> ![Finding tagged releases](images/tag-location.png)<br>  
   *  Select the Tagged version that contains the template you want to update.  
-3.  Browse to the template file (**azuredeploy.json**) which contains the BIG-IP image you want to replace.  For example, for a 1-NIC, new stack, PAYG template, we click **supported > standalone > 1nic > new_stack > PAYG > azuredeploy.json**.
+3.  Browse to the template file (**azuredeploy.json**) which contains the BIG-IP image you want to replace.  For example, for a 1-NIC, new stack, PAYG template, we click **supported > standalone > 1nic > new-stack > PAYG > azuredeploy.json**.
 4.  Click the **Raw** button and save the file locally.  
 5.  Open the azuredeploy.json file and search for the BIG-IP version (image SKU) you want to replace (for example, **13.0.021**).  Replace this number with the new BIG-IP version (image SKU) everywhere it appears in the file (for example, with **13.0.0300**) .   The following is a snippet of the file showing where you would change the version.
     ```

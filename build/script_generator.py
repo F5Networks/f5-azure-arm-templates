@@ -12,14 +12,14 @@ def lic_count_check(lic_key_count):
 
 def lic_type_check(lic_type):
     """ Determine License Type for Template """
-    if all(x in ['PAYG', 'BIG-IQ'] for x in lic_type):
-        return 'PAYG,BIGIQ'
-    elif all(x in  ['PAYG', 'BIG-IQ', 'BIG-IQ+PAYG'] for x in lic_type):
-        return 'PAYG,BIGIQ,BIGIQ+PAYG'
-    elif all(x in ['BYOL', 'PAYG'] for x in lic_type):
-        return 'BYOL,PAYG'
-    # For now don't add BIGIQ+PAYG option to 'all'
-    elif all(x in ['BYOL', 'PAYG', 'BIG-IQ'] for x in lic_type):
+    if all(x in ['payg', 'big-iq'] for x in lic_type):
+        return 'payg,bigiq'
+    elif all(x in  ['payg', 'big-iq', 'big-iq+payg'] for x in lic_type):
+        return 'payg,bigiq,bigiq+payg'
+    elif all(x in ['byol', 'payg'] for x in lic_type):
+        return 'byol,payg'
+    # For now don't add bigiq+payg option to 'all'
+    elif all(x in ['byol', 'payg', 'big-iq'] for x in lic_type):
         return True
     else:
         return lic_type
@@ -49,27 +49,27 @@ def build_deploy_cmd(language, base_deploy, deploy_cmd_params, template_info):
     big_iq_cmd = deploy_cmd_params + big_iq_cmd
     ## Compile full license Command ##
     if language == 'powershell':
-        if_byol = 'if ($licenseType -eq "BYOL") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BYOL\\azuredeploy.json"; $parametersFilePath = ".\BYOL\\azuredeploy.parameters.json" }\n  '
-        if_payg = 'if ($licenseType -eq "PAYG") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\PAYG\\azuredeploy.json"; $parametersFilePath = ".\PAYG\\azuredeploy.parameters.json" }\n  '
-        if_bigiq = 'if ($licenseType -eq "BIGIQ") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BIGIQ\\azuredeploy.json"; $parametersFilePath = ".\BIGIQ\\azuredeploy.parameters.json" }\n  $bigIqPasswordSecure = ConvertTo-SecureString -String $bigIqPassword -AsPlainText -Force\n  '
+        if_byol = 'if ($licenseType -eq "BYOL") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\\byol\\azuredeploy.json"; $parametersFilePath = ".\\byol\\azuredeploy.parameters.json" }\n  '
+        if_payg = 'if ($licenseType -eq "PAYG") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\\payg\\azuredeploy.json"; $parametersFilePath = ".\\payg\\azuredeploy.parameters.json" }\n  '
+        if_bigiq = 'if ($licenseType -eq "BIGIQ") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\\bigiq\\azuredeploy.json"; $parametersFilePath = ".\\bigiq\\azuredeploy.parameters.json" }\n  $bigIqPasswordSecure = ConvertTo-SecureString -String $bigIqPassword -AsPlainText -Force\n  '
         if lic_type_all is True:
             deploy_cmd = if_byol + base_deploy + byol_cmd + '\n} else' + if_payg + base_deploy + payg_cmd + '\n} else' + if_bigiq + base_deploy + big_iq_cmd + '\n} else {\n  Write-Error -Message "Please select a valid license type of PAYG, BYOL or BIGIQ."\n}'
-        elif lic_type_all == 'PAYG,BIGIQ':
+        elif lic_type_all == 'payg,bigiq':
             deploy_cmd = if_payg + base_deploy + payg_cmd + '\n} else' + if_bigiq + base_deploy + big_iq_cmd + '\n} else {\n  Write-Error -Message "Please select a valid license type of PAYG or BIGIQ."\n}'
-        elif lic_type_all == 'PAYG,BIGIQ,BIGIQ+PAYG':
-            deploy_cmd = if_payg + base_deploy + payg_cmd + '\n} else' + if_bigiq + base_deploy + big_iq_cmd + '\n} elseif ($licenseType -eq "BIGIQ_PAYG") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\BIGIQ_PAYG\\azuredeploy.json"; $parametersFilePath = ".\BIGIQ_PAYG\\azuredeploy.parameters.json" }\n  $bigIqPasswordSecure = ConvertTo-SecureString -String $bigIqPassword -AsPlainText -Force\n  ' + base_deploy + big_iq_cmd + big_iq_payg_cmd + '\n} else {\n  Write-Error -Message "Please select a valid license type of PAYG, BIGIQ or BIGIQ_PAYG."\n}'
-        elif lic_type_all == 'BYOL,PAYG':
+        elif lic_type_all == 'payg,bigiq,bigiq+payg':
+            deploy_cmd = if_payg + base_deploy + payg_cmd + '\n} else' + if_bigiq + base_deploy + big_iq_cmd + '\n} elseif ($licenseType -eq "BIGIQ_PAYG") {\n  if ($templateFilePath -eq "azuredeploy.json") { $templateFilePath = ".\\bigiq-payg\\azuredeploy.json"; $parametersFilePath = ".\\bigiq-payg\\azuredeploy.parameters.json" }\n  $bigIqPasswordSecure = ConvertTo-SecureString -String $bigIqPassword -AsPlainText -Force\n  ' + base_deploy + big_iq_cmd + big_iq_payg_cmd + '\n} else {\n  Write-Error -Message "Please select a valid license type of PAYG, BIGIQ or BIGIQ_PAYG."\n}'
+        elif lic_type_all == 'byol,payg':
             deploy_cmd = if_byol + base_deploy + byol_cmd + '\n} else' + if_payg + base_deploy + payg_cmd + '\n} else {\n  Write-Error -Message "Please select a valid license type of PAYG or BYOL."\n}'
         else:
             deploy_cmd = if_payg + base_deploy + deploy_cmd_params + ' -licensedBandwidth "$licensedBandwidth"' + '\n} else {\n  Write-Error -Message "Please select a valid license type of PAYG."\n}'
     elif language == 'bash':
         if lic_type_all is True:
             deploy_cmd = 'if [ $licenseType == "BYOL" ]; then\n    ' + base_deploy + byol_cmd + '\nelif [ $licenseType == "PAYG" ]; then\n    ' + base_deploy + payg_cmd + '\nelif [ $licenseType == "BIGIQ" ]; then\n    ' + base_deploy + big_iq_cmd + '\nelse\n    echo "Please select a valid license type of PAYG, BYOL or BIGIQ."\n    exit 1\nfi'
-        elif lic_type_all == 'PAYG,BIGIQ':
+        elif lic_type_all == 'payg,bigiq':
             deploy_cmd = 'if [ $licenseType == "PAYG" ]; then\n    ' + base_deploy + payg_cmd + '\nelif [ $licenseType == "BIGIQ" ]; then\n    ' + base_deploy + big_iq_cmd + '\nelse\n    echo "Please select a valid license type of PAYG or BIGIQ."\n    exit 1\nfi'
-        elif lic_type_all == 'PAYG,BIGIQ,BIGIQ+PAYG':
+        elif lic_type_all == 'payg,bigiq,bigiq+payg':
             deploy_cmd = 'if [ $licenseType == "PAYG" ]; then\n    ' + base_deploy + payg_cmd + '\nelif [ $licenseType == "BIGIQ" ]; then\n    ' + base_deploy + big_iq_cmd + '\nelif [ $licenseType == "BIGIQ_PAYG" ]; then\n    ' + base_deploy + big_iq_cmd[:-1] + big_iq_payg_cmd + '\nelse\n    echo "Please select a valid license type of PAYG, BIGIQ or BIGIQ_PAYG."\n    exit 1\nfi'
-        elif lic_type_all == 'BYOL,PAYG':
+        elif lic_type_all == 'byol,payg':
             deploy_cmd = 'if [ $licenseType == "BYOL" ]; then\n    ' + base_deploy + byol_cmd + '\nelif [ $licenseType == "PAYG" ]; then\n    ' + base_deploy + payg_cmd + '\nelse\n    echo "Please select a valid license type of PAYG or BYOL."\n    exit 1\nfi'
         else:
             deploy_cmd = 'if [ $licenseType == "PAYG" ]; then\n    '  + base_deploy + deploy_cmd_params + '\\"licensedBandwidth\\":{\\"value\\":\\"$licensedBandwidth\\"}}"' + '\nelse\n    echo "Please select a valid license type of PAYG."\n    exit 1\nfi'
@@ -121,11 +121,11 @@ def script_creation(data, i_data, language):
         big_iq_payg_params = '  [string] $licensedBandwidth = $(if($licenseType -like "*PAYG*") { Read-Host -prompt "licensedBandwidth"}),\n  [string] $bigIqAddress = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqAddress"}),\n  [string] $bigIqUsername = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqUsername"}),\n  [string] $bigIqPassword = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqPassword"}),\n  [string] $bigIqLicensePoolName = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqLicensePoolName"}),\n  [string] $bigIqLicenseSkuKeyword1 = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqLicenseSkuKeyword1"}),\n  [string] $bigIqLicenseUnitOfMeasure = $(if($licenseType -like "*BIGIQ*") { Read-Host -prompt "bigIqLicenseUnitOfMeasure"}),\n  [string] $numberOfStaticInstances = $(if($licenseType -eq "BIGIQ_PAYG") { Read-Host -prompt "numberOfStaticInstances"}),'
         if lic_type_all is True:
             lic_params = payg_params + '\n  [string] $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),' + lic2_param + big_iq_params
-        elif lic_type_all == 'PAYG,BIGIQ':
+        elif lic_type_all == 'payg,bigiq':
             lic_params = payg_params + big_iq_params
-        elif lic_type_all == 'PAYG,BIGIQ,BIGIQ+PAYG':
+        elif lic_type_all == 'payg,bigiq,bigiq+payg':
             lic_params = big_iq_payg_params
-        elif lic_type_all == 'BYOL,PAYG':
+        elif lic_type_all == 'byol,payg':
             lic_params = payg_params + '\n  [string] $licenseKey1 = $(if($licenseType -eq "BYOL") { Read-Host -prompt "licenseKey1"}),' + lic2_param       
         else:
             lic_params = payg_params
@@ -139,13 +139,15 @@ def script_creation(data, i_data, language):
         ###### Create license parameters ######
 
         if multi_lic is True:
-            lic2_check += '    if [ -z $licenseKey2 ] ; then\n            read -p "Please enter value for licenseKey2:" licenseKey2\n    fi\n    template_file="./BYOL/azuredeploy.json"\n    parameter_file="./BYOL/azuredeploy.parameters.json"\nfi\n'
+            lic2_check += '    if [ -z $licenseKey2 ] ; then\n            read -p "Please enter value for licenseKey2:" licenseKey2\n    fi\n    template_file="./byol/azuredeploy.json"\n    parameter_file="./byol/azuredeploy.parameters.json"\nfi\n'
+        else:
+            lic2_check += '    template_file="./byol/azuredeploy.json"\n    parameter_file="./byol/azuredeploy.parameters.json"\nfi\n'
 
         if_byol = '# Prompt for license key if not supplied and BYOL is selected\nif [ $licenseType == "BYOL" ]; then\n    if [ -z $licenseKey1 ] ; then\n            read -p "Please enter value for licenseKey1:" licenseKey1\n    fi\n'
         byol_args = ['licenseKey1', 'licenseKey2']
-        if_payg = '# Prompt for licensed bandwidth if not supplied and PAYG is selected\nif [ $licenseType == "PAYG" ]; then\n    if [ -z $licensedBandwidth ] ; then\n            read -p "Please enter value for licensedBandwidth:" licensedBandwidth\n    fi\n    template_file="./PAYG/azuredeploy.json"\n    parameter_file="./PAYG/azuredeploy.parameters.json"\nfi'
+        if_payg = '# Prompt for licensed bandwidth if not supplied and PAYG is selected\nif [ $licenseType == "PAYG" ]; then\n    if [ -z $licensedBandwidth ] ; then\n            read -p "Please enter value for licensedBandwidth:" licensedBandwidth\n    fi\n    template_file="./payg/azuredeploy.json"\n    parameter_file="./payg/azuredeploy.parameters.json"\nfi'
         payg_args = ['licensedBandwidth']
-        if_bigiq = '\n# Prompt for BIGIQ parameters if not supplied and BIGIQ is selected\nif [ $licenseType == "BIGIQ" ]; then\n	big_iq_vars="bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName bigIqLicenseSkuKeyword1 bigIqLicenseUnitOfMeasure"\n	for variable in $big_iq_vars\n			do\n			if [ -z ${!variable} ] ; then\n					read -p "Please enter value for $variable:" $variable\n			fi\n	done\nfi\n'
+        if_bigiq = '\n# Prompt for BIGIQ parameters if not supplied and BIGIQ is selected\nif [ $licenseType == "BIGIQ" ]; then\n	big_iq_vars="bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName bigIqLicenseSkuKeyword1 bigIqLicenseUnitOfMeasure"\n	for variable in $big_iq_vars\n			do\n			if [ -z ${!variable} ] ; then\n					read -p "Please enter value for $variable:" $variable\n			fi\n	done\n    template_file="./bigiq/azuredeploy.json"\n    parameter_file="./bigiq/azuredeploy.parameters.json"\nfi\n'
         bigiq_args = ['bigIqAddress', 'bigIqUsername', 'bigIqPassword', 'bigIqLicensePoolName', 'bigIqLicenseSkuKeyword1', 'bigIqLicenseUnitOfMeasure']
         bigiq_payg_args = ['numberOfStaticInstances']
         license_args = []
@@ -153,13 +155,13 @@ def script_creation(data, i_data, language):
             lic_check = if_byol + lic2_check + if_payg + if_bigiq
             # BIG-IQ + PAYG not in lic_type_all for now
             license_args = byol_args + payg_args + bigiq_args
-        elif lic_type_all == 'PAYG,BIGIQ':
+        elif lic_type_all == 'payg,bigiq':
             lic_check = if_payg + if_bigiq
             license_args = payg_args + bigiq_args
-        elif lic_type_all == 'PAYG,BIGIQ,BIGIQ+PAYG':
-            lic_check = if_payg + if_bigiq + '\n# Prompt for BIGIQ_PAYG parameters if not supplied and BIGIQ_PAYG is selected\nif [ $licenseType == "BIGIQ_PAYG" ]; then\n	big_iq_payg_vars="licensedBandwidth bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName bigIqLicenseSkuKeyword1 bigIqLicenseUnitOfMeasure numberOfStaticInstances"\n	for variable in $big_iq_payg_vars\n			do\n			if [ -z ${!variable} ] ; then\n					read -p "Please enter value for $variable:" $variable\n			fi\n	done\nfi\n'
+        elif lic_type_all == 'payg,bigiq,bigiq+payg':
+            lic_check = if_payg + if_bigiq + '\n# Prompt for BIGIQ_PAYG parameters if not supplied and BIGIQ_PAYG is selected\nif [ $licenseType == "BIGIQ_PAYG" ]; then\n	big_iq_payg_vars="licensedBandwidth bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName bigIqLicenseSkuKeyword1 bigIqLicenseUnitOfMeasure numberOfStaticInstances"\n	for variable in $big_iq_payg_vars\n			do\n			if [ -z ${!variable} ] ; then\n					read -p "Please enter value for $variable:" $variable\n			fi\n	done\n    template_file="./bigiq-payg/azuredeploy.json"\n    parameter_file="./bigiq-payg/azuredeploy.parameters.json"\nfi\n'
             license_args = payg_args + bigiq_args + bigiq_payg_args
-        elif lic_type_all == 'BYOL,PAYG':
+        elif lic_type_all == 'byol,payg':
             lic_check = if_byol + lic2_check + if_payg
             license_args = byol_args + payg_args
         else:

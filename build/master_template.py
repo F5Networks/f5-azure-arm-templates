@@ -12,9 +12,9 @@ import readme_generator
 # Process Script Parameters ##
 parser = OptionParser()
 parser.add_option("-n", "--template-name", action="store", type="string", dest="template_name", help="Template Name: standalone_1nic, standalone_2nic, failover-lb_1nic, etc.")
-parser.add_option("-l", "--license-type", action="store", type="string", dest="license_type", help="License Type: BYOL or PAYG")
-parser.add_option("-m", "--stack-type", action="store", type="string", dest="stack_type", default="new_stack", help="Networking Stack Type: new_stack, existing_stack or prod_stack.")
-parser.add_option("-t", "--template-location", action="store", type="string", dest="template_location", help="Template Location: such as ../experimental/standalone/1nic/PAYG/")
+parser.add_option("-l", "--license-type", action="store", type="string", dest="license_type", help="License Type: byol, payg, bigiq or bigiq-payg")
+parser.add_option("-m", "--stack-type", action="store", type="string", dest="stack_type", default="new-stack", help="Networking Stack Type: new-stack, existing-stack, production-stack or learning-stack")
+parser.add_option("-t", "--template-location", action="store", type="string", dest="template_location", help="Template Location: such as ../experimental/standalone/1nic/payg/")
 parser.add_option("-s", "--script-location", action="store", type="string", dest="script_location", help="Script Location: such as ../experimental/standalone/1nic/")
 parser.add_option("-v", "--solution-location", action="store", type="string", dest="solution_location", default="experimental", help="Solution location: experimental or supported")
 parser.add_option("-r", "--release-prep", action="store_true", dest="release_prep", default=False, help="Release Prep Flag: If passed will equal True.")
@@ -104,21 +104,21 @@ for instance in disallowed_instance_list:
     instance_type_list.remove(instance)
 
 ## Determine if learning stack and set flags ##
-learning_stack = False
-if stack_type in ('learning_stack'):
-    learning_stack = True
-    stack_type = 'new_stack'
+learningStack = False
+if stack_type in ('learning-stack'):
+    learningStack = True
+    stack_type = 'new-stack'
 
 ## Set stack mask commands ##
 ext_mask_cmd = ''
 int_mask_cmd = ''
-if stack_type in ('existing_stack', 'prod_stack'):
+if stack_type in ('existing-stack', 'production-stack'):
     if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-api', 'failover-lb_3nic'):
         ext_mask_cmd = "skip(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, indexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '/')),"
     if template_name in ('standalone_3nic', 'standalone_n-nic', 'failover-api', 'failover-lb_3nic'):
         int_mask_cmd = "skip(reference(variables('intSubnetRef'), variables('networkApiVersion')).addressPrefix, indexOf(reference(variables('intSubnetRef'), variables('networkApiVersion')).addressPrefix, '/')),"
 
-## Determine PAYG/BYOL/BIGIQ variables
+## Determine payg/byol/bigiq variables
 image_to_use = "[parameters('bigIpVersion')]"
 byol_sku_to_use = "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]"
 byol_offer_to_use = "[concat('f5-big-ip-', variables('imageNameToLower'))]"
@@ -128,19 +128,19 @@ license1_command = ''
 license2_command = ''
 big_iq_pwd_cmd = ''
 bigiq_pwd_delete = ''
-if license_type == 'BYOL':
+if license_type == 'byol':
     sku_to_use = byol_sku_to_use
     offer_to_use = byol_offer_to_use
     license1_command = "' --license ', parameters('licenseKey1'),"
     license2_command = "' --license ', parameters('licenseKey2'),"
-elif license_type == 'PAYG':
+elif license_type == 'payg':
     sku_to_use = payg_sku_to_use
     offer_to_use = payg_offer_to_use
-elif license_type == 'BIGIQ' or license_type == 'BIGIQ_PAYG':
-    if license_type == 'BIGIQ':
+elif license_type == 'bigiq' or license_type == 'bigiq-payg':
+    if license_type == 'bigiq':
         sku_to_use = byol_sku_to_use
         offer_to_use = byol_offer_to_use
-    elif license_type == 'BIGIQ_PAYG':
+    elif license_type == 'bigiq-payg':
         sku_to_use = payg_sku_to_use
         offer_to_use = payg_offer_to_use
     big_iq_mgmt_ip_ref = ''
@@ -161,15 +161,15 @@ elif license_type == 'BIGIQ' or license_type == 'BIGIQ_PAYG':
         big_ip_ext_params = "--bigIpExtMgmtAddress ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --bigIpExtMgmtPort via-api'"
         if template_name in ('autoscale_ltm_via-dns', 'autoscale_waf_via-dns'):
             big_ip_ext_params = "--bigIpExtMgmtAddress via-api --bigIpExtMgmtPort ', variables('bigIpMgmtPort')"
-        if license_type == 'BIGIQ_PAYG':
-            # Dynamic VMSS (PAYG)
+        if license_type == 'bigiq-payg':
+            # Dynamic VMSS (payg)
             license1_command =  ", ' --externalTag key:f5ClusterTag,value:', variables('dnsLabel')"
             # Static VMSS
             static_license1_command =  ", ' --bigIqAddress ', parameters('bigIqAddress'), ' --bigIqUsername ', parameters('bigIqUsername'), ' --bigIqPassword /config/cloud/.bigIqPasswd --bigIqLicensePoolName ', parameters('bigIqLicensePoolName'), ' --bigIqExtraLicenseOptions \\\"$(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ')\\\" " + big_ip_ext_params + ", ' --static --natBase mgmtnatpool-static. --externalTag key:f5ClusterTag,value:', variables('dnsLabel')"
         else:
             license1_command =  ", ' --bigIqAddress ', parameters('bigIqAddress'), ' --bigIqUsername ', parameters('bigIqUsername'), ' --bigIqPassword /config/cloud/.bigIqPasswd --bigIqLicensePoolName ', parameters('bigIqLicensePoolName'), ' --bigIqExtraLicenseOptions \\\"$(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ')\\\" " + big_ip_ext_params
 
-        # Need to keep BIG-IQ password around in autoscale case for license revocation
+        # Need to keep big-iq password around in autoscale case for license revocation
         bigiq_pwd_delete = ''
 
 ## Check if supported or experimental
@@ -195,26 +195,26 @@ master_helper.parameter_initialize(data)
 data['parameters']['adminUsername'] = {"type": "string", "defaultValue": "azureuser", "metadata": {"description": ""}}
 data['parameters']['authenticationType'] = {"type": "string", "defaultValue": "password", "allowedValues": [ "password", "sshPublicKey"], "metadata": {"description": ""}}
 data['parameters']['adminPasswordOrKey'] = {"type": "securestring", "metadata": {"description": ""}}
-if stack_type not in ('prod_stack'):
+if stack_type not in ('production-stack'):
     data['parameters']['dnsLabel'] = {"type": "string", "defaultValue": "", "metadata": {"description": ""}}
 data['parameters']['instanceType'] = {"type": "string", "defaultValue": default_instance, "allowedValues": instance_type_list, "metadata": {"description": ""}}
 data['parameters']['imageName'] = {"type": "string", "defaultValue": "Best", "allowedValues": ["Good", "Better", "Best"], "metadata": {"description": ""}}
 data['parameters']['bigIpVersion'] = {"type": "string", "defaultValue": default_big_ip_version, "allowedValues": allowed_big_ip_versions, "metadata": {"description": ""}}
-if license_type == 'BYOL':
+if license_type == 'byol':
     data['parameters']['licenseKey1'] = {"type": "string", "defaultValue": "", "metadata": {"description": ""}}
     if template_name in ('failover-lb_1nic', 'failover-lb_3nic', 'failover-api'):
         for license_key in ['licenseKey2']:
             data['parameters'][license_key] = {"type": "string", "defaultValue": "", "metadata": {"description": ""}}
-if license_type == 'PAYG' or license_type == 'BIGIQ_PAYG':
+if license_type == 'payg' or license_type == 'bigiq-payg':
     data['parameters']['licensedBandwidth'] = {"type": "string", "defaultValue": default_payg_bw, "allowedValues": ["25m", "200m", "1g"], "metadata": {"description": ""}}
-if license_type == 'BIGIQ' or license_type == 'BIGIQ_PAYG':
+if license_type == 'bigiq' or license_type == 'bigiq-payg':
     data['parameters']['bigIqAddress'] = {"type": "string", "metadata": {"description": ""}}
     data['parameters']['bigIqUsername'] = {"type": "string", "metadata": {"description": ""}}
     data['parameters']['bigIqPassword'] = {"type": "securestring", "metadata": {"description": ""}}
     data['parameters']['bigIqLicensePoolName'] = {"type": "string", "metadata": {"description": ""}}
     data['parameters']['bigIqLicenseSkuKeyword1'] = {"type": "string", "defaultValue": "OPTIONAL", "metadata": {"description": ""}}
     data['parameters']['bigIqLicenseUnitOfMeasure'] = {"type": "string", "defaultValue": "OPTIONAL", "metadata": {"description": ""}}
-    if license_type == 'BIGIQ_PAYG':
+    if license_type == 'bigiq-payg':
         data['parameters']['numberOfStaticInstances'] = {"type": "int", "allowedValues": [1, 2, 3, 4], "metadata": {"description": ""}}
 data['parameters']['ntpServer'] = {"type": "string", "defaultValue": "0.pool.ntp.org", "metadata": {"description": ""}}
 data['parameters']['timeZone'] = {"type": "string", "defaultValue": "UTC", "metadata": {"description": ""}}
@@ -223,7 +223,7 @@ data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": 
 data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values, "metadata": {"description": ""}}
 data['parameters']['allowUsageAnalytics'] = {"type": "string", "defaultValue": "Yes", "allowedValues": ["Yes", "No"], "metadata": {"description": ""}}
 
-# Set new_stack/existing_stack/prod_stack parameters for templates
+# Set new-stack/existing-stack/production-stack parameters for templates
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_3nic', 'failover-api'):
     data['parameters']['instanceName'] = {"type": "string", "defaultValue": "f5vm01", "metadata": {"description": ""}}
 if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_3nic', 'failover-api'):
@@ -232,9 +232,9 @@ if template_name in ('failover-lb_3nic'):
     data['parameters']['enableNetworkFailover'] = {"allowedValues": [ "No", "Yes" ], "defaultValue": "Yes", "metadata": { "description": "" }, "type": "string"}
     data['parameters']['internalLoadBalancerType'] = {"defaultValue": "Per-protocol", "allowedValues": ["Per-protocol", "All-protocol", "DO_NOT_USE"], "metadata": { "description": "" }, "type": "string"}
     data['parameters']['internalLoadBalancerProbePort'] = {"defaultValue": "3456", "metadata": { "description": "" }, "type": "string"}
-if stack_type == 'new_stack':
+if stack_type == 'new-stack':
     data['parameters']['vnetAddressPrefix'] = {"type": "string", "defaultValue": "10.0", "metadata": {"description": ""}}
-elif stack_type in ('existing_stack', 'prod_stack'):
+elif stack_type in ('existing-stack', 'production-stack'):
     data['parameters']['vnetName'] = {"type": "string", "metadata": {"description": ""}}
     data['parameters']['vnetResourceGroupName'] = {"type": "string", "metadata": {"description": ""}}
     data['parameters']['mgmtSubnetName'] = {"type": "string", "metadata": {"description": ""}}
@@ -260,7 +260,7 @@ elif stack_type in ('existing_stack', 'prod_stack'):
             data['parameters']['internalIpAddress'] = {"type": "string", "metadata": {"description": ""}}
     if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic'):
         data['parameters']['avSetChoice'] = {"defaultValue": "CREATE_NEW", "metadata": {"description": ""}, "type": "string"}
-if stack_type in ('prod_stack'):
+if stack_type in ('production-stack'):
     data['parameters']['uniqueLabel'] = {"type": "string", "defaultValue": "", "metadata": {"description": ""}}
 
 # Set unique solution parameters
@@ -274,7 +274,7 @@ if template_name in ('failover-api'):
     data['parameters']['additionalNicLocation'] = {"type": "string", "defaultValue": "OPTIONAL", "metadata": {"description": ""}}
     data['parameters']['managedRoutes'] = {"defaultValue": "NOT_SPECIFIED", "metadata": {"description": ""}, "type": "string"}
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
-    if license_type == 'BIGIQ_PAYG':
+    if license_type == 'bigiq-payg':
         min_allowed_values = [0, 1, 2, 3, 4, 5, 6]
         max_allowed_values = [1, 2, 3, 4, 5, 6, 7, 8]
     else:
@@ -283,7 +283,7 @@ if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale
     data['parameters']['vmScaleSetMinCount'] = {"type": "int", "defaultValue": 2, "allowedValues": min_allowed_values, "metadata": {"description": ""}}
     data['parameters']['vmScaleSetMaxCount'] = {"type": "int", "defaultValue": 4, "allowedValues": max_allowed_values, "metadata": {"description": ""}}
     allowedValues = ["F5_TMM_CPU", "F5_TMM_Traffic", "Host_Throughput"]
-    if license_type == 'BIGIQ_PAYG':
+    if license_type == 'bigiq-payg':
         allowedValues = ["F5_TMM_CPU", "F5_TMM_Traffic"]
     data['parameters']['autoScaleMetric'] = {"type": "string", "defaultValue": "F5_TMM_Traffic", "allowedValues": allowedValues,  "metadata": {"description": ""}}
     data['parameters']['appInsights'] = {"type": "string", "defaultValue": "CREATE_NEW", "metadata": {"description": ""}}
@@ -293,7 +293,7 @@ if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale
     data['parameters']['scaleTimeWindow'] = {"type": "int", "defaultValue": 10, "allowedValues": [5, 10, 15, 30], "metadata": {"description": ""}}
     data['parameters']['notificationEmail'] = {"defaultValue": "OPTIONAL", "metadata": {"description": ""}, "type": "string"}
 if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
-    # WAF-like templates need the 'Best' Image, still prompt as a parameter so they are aware of what they are paying for with PAYG
+    # WAF-like templates need the 'Best' Image, still prompt as a parameter so they are aware of what they are paying for with payg
     data['parameters']['imageName'] = {"type": "string", "defaultValue": "Best", "allowedValues": ["Best"], "metadata": {"description": ""}}
     data['parameters']['solutionDeploymentName'] = {"type": "string", "metadata": {"description": ""}}
     data['parameters']['applicationProtocols'] = {"type": "string", "defaultValue": "http-https", "metadata": {"description": ""}, "allowedValues" : ["http", "https", "http-https", "https-offload"]}
@@ -365,7 +365,7 @@ if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale
 metrics_cmd = metrics_cmd.replace('<TMPL_NAME>', template_name + '-' + stack_type + '-' + support_type).replace('<TMPL_VER>', content_version).replace('<LIC_TYPE>', license_type)
 hash_cmd = "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]"
 data['variables']['allowUsageAnalytics'] = { "Yes": { "hashCmd": hash_cmd, "metricsCmd": metrics_cmd}, "No": { "hashCmd": "echo AllowUsageAnalytics:No", "metricsCmd": ""} }
-## Handle new_stack/existing_stack variable differences
+## Handle new-stack/existing-stack variable differences
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-api', 'failover-lb_1nic', 'failover-lb_3nic', 'autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_3nic', 'failover-api'):
         data['variables']['instanceName'] = "[toLower(parameters('instanceName'))]"
@@ -375,7 +375,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
         data['variables']['failoverCmdArray'] = {"No": {"first": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '0.', variables('location'), '.cloudapp.azure.com'), ' unicast-address none')]", "second": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '1.', variables('location'), '.cloudapp.azure.com'), ' unicast-address none')]" }, "Yes": {"first": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '0.', variables('location'), '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress'))]", "second": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '1.', variables('location'), '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress1'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress1'))]"}}
     if template_name in ('failover-api'):
         data['variables']['failoverCmdArray'] = { "12.1.303000": "echo \"Failover db variable not required.\"", "13.1.0200": "tmsh modify sys db failover.selinuxallowscripts value enable", "latest": "tmsh modify sys db failover.selinuxallowscripts value enable" }
-    if stack_type == 'new_stack':
+    if stack_type == 'new-stack':
         data['variables']['vnetId'] = "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
         data['variables']['vnetAddressPrefix'] = "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]"
         data['variables']['mgmtSubnetPrefix'] = "[concat(parameters('vnetAddressPrefix'), '.1.0/24')]"
@@ -421,7 +421,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
             if template_name in ('standalone_n-nic', 'failover-api'):
                 data['variables']['subnetArray'] = [{ "name": "[variables('mgmtSubnetName')]", "properties": { "addressPrefix": "[variables('mgmtSubnetPrefix')]" } }, { "name": "[variables('extSubnetName')]", "properties": { "addressPrefix": "[variables('extSubnetPrefix')]" } }, { "name": "[variables('intSubnetName')]", "properties": { "addressPrefix": "[variables('intSubnetPrefix')]" } }]
                 data['variables']['addtlSubnetArray'] = [{ "name": "[variables('addtlNicRefSplit')[0]]", "properties": { "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.4.0/24')]" } }, { "name": "[variables('addtlNicRefSplit')[1]]", "properties": { "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.5.0/24')]" } }, { "name": "[variables('addtlNicRefSplit')[2]]", "properties": { "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.6.0/24')]" } }, { "name": "[variables('addtlNicRefSplit')[3]]", "properties": { "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.7.0/24')]" } }, { "name": "[variables('addtlNicRefSplit')[4]]", "properties": { "addressPrefix": "[concat(parameters('vnetAddressPrefix'), '.8.0/24')]" } }]
-    if stack_type in ('existing_stack', 'prod_stack'):
+    if stack_type in ('existing-stack', 'production-stack'):
         data['variables']['virtualNetworkName'] = "[parameters('vnetName')]"
         data['variables']['vnetId'] = "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]"
         data['variables']['mgmtSubnetName'] = "[parameters('mgmtSubnetName')]"
@@ -438,7 +438,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
             data['variables']['mgmtSubnetPrivateAddressSuffix'] = "[int(variables('mgmtSubnetPrivateAddressPrefixArray')[3])]"
             data['variables']['mgmtSubnetPrivateAddressSuffix1'] = "[add(variables('mgmtSubnetPrivateAddressSuffix'), 1)]"
             data['variables']['mgmtSubnetPrivateAddress'] = "[variables('mgmtSubnetPrivateAddressPrefix')]"
-            if stack_type in ('prod_stack'):
+            if stack_type in ('production-stack'):
                 data['variables']['externalLoadBalancerAddress'] = "[concat(variables('mgmtSubnetPrivateAddress'), add(variables('mgmtSubnetPrivateAddressSuffix1'), 1))]"
         if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_3nic', 'failover-api'):
             data['variables']['extNsgID'] = "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-ext-nsg'))]"
@@ -493,10 +493,10 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
                     data['variables']['intSubnetPrivateAddress3'] = "[concat(variables('intSubnetPrivateAddressPrefix'), variables('intSubnetPrivateAddressSuffix2'))]"
                     data['variables']['internalLoadBalancerAddress'] =  "[concat(variables('intSubnetPrivateAddressPrefix'), variables('intSubnetPrivateAddressSuffix3'))]"
                     lb_back_end_array = [ { "id": "[concat(variables('extLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]" }, { "id": "[concat(variables('intLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]" } ]
-    if stack_type in ('prod_stack'):
+    if stack_type in ('production-stack'):
         data['variables']['dnsLabel'] = "[toLower(parameters('uniqueLabel'))]"
 
-    # After adding variables for new_stack/existing_stack we need to add the ip config array
+    # After adding variables for new-stack/existing-stack we need to add the ip config array
     if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_3nic', 'failover-api'):
         data['variables']['numberOfExternalIps'] = "[parameters('numberOfExternalIps')]"
         if template_name in ('failover-lb_3nic'):
@@ -519,9 +519,9 @@ if template_name in ('standalone_n-nic', 'failover-api'):
         data['variables']['selfNicConfigArray'] = { "0": [{ "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('mgmtNicName'), '0'))]", "properties": { "primary": True } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('extNicName'), '0'))]", "properties": { "primary": False } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('intNicName'), '0'))]", "properties": { "primary": False } }], "1": [{ "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('mgmtNicName'), '1'))]", "properties": { "primary": True } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('extNicName'), '1'))]", "properties": { "primary": False } }, { "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('intNicName'), '1'))]", "properties": { "primary": False } }] }
         data['variables']['addtlNicConfigArray'] = {"copy": [{"count": 5, "input": {"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(toLower(parameters('dnsLabel')), '-addtlnic', copyIndex('values0', 1), '0'))]", "properties": {"primary": False}}, "name": "values0"},{"count": 5, "input": {"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(toLower(parameters('dnsLabel')), '-addtlnic', copyIndex('values1', 1), '1'))]", "properties": {"primary": False}}, "name": "values1"}]}
 if template_name in ('failover-api'):
-    if stack_type == 'new_stack':
+    if stack_type == 'new-stack':
         private_ip_value = "[concat(parameters('vnetAddressPrefix'), '.2.', copyIndex('values', 10))]"
-    elif stack_type in ('existing_stack', 'prod_stack'):
+    elif stack_type in ('existing-stack', 'production-stack'):
         private_ip_value = "[concat(split(parameters('externalIpAddressRangeStart'), '.')[0], '.', split(parameters('externalIpAddressRangeStart'), '.')[1], '.', split(parameters('externalIpAddressRangeStart'), '.')[2], '.', add(int(split(parameters('externalIpAddressRangeStart'), '.')[3]), copyIndex('values')))]"
 if template_name in ('failover-lb_1nic', 'failover-lb_3nic', 'autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     data['variables']['externalLoadBalancerName'] = "[concat(variables('dnsLabel'),'-ext-alb')]"
@@ -559,13 +559,13 @@ if template_name in ('failover-lb_1nic', 'failover-lb_3nic', 'autoscale_ltm_via-
         data['variables']['timeWindow'] = "[concat('PT', parameters('scaleTimeWindow'), 'M')]"
         data['variables']['customEmailBaseArray'] = [""]
         data['variables']['customEmail'] = "[skip(union(variables('customEmailBaseArray'), split(replace(parameters('notificationEmail'), 'OPTIONAL', ''), ';')), 1)]"
-        if license_type == 'BIGIQ_PAYG':
+        if license_type == 'bigiq-payg':
             data['variables']['staticVmssName'] = "[concat(parameters('dnsLabel'),'-vmss', '-static')]"
             data['variables']['staticVmssId'] = "[resourceId('Microsoft.Compute/virtualMachineScaleSets', variables('staticVmssName'))]"
             data['variables']['staticSkuToUse'] = byol_sku_to_use
             data['variables']['staticOfferToUse'] = byol_offer_to_use
             data['variables']['staticVmssTagValues'] = {"f5ClusterTag": "[variables('dnsLabel')]"}
-    if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns') or license_type == 'BIGIQ_PAYG':
+    if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns') or license_type == 'bigiq-payg':
         data['variables']['lbTcpProbeNameHttp'] = "tcp_probe_http"
         data['variables']['lbTcpProbeIdHttp'] = "[concat(variables('extLbId'),'/probes/',variables('lbTcpProbeNameHttp'))]"
         data['variables']['lbTcpProbeNameHttps'] = "tcp_probe_https"
@@ -573,11 +573,11 @@ if template_name in ('failover-lb_1nic', 'failover-lb_3nic', 'autoscale_ltm_via-
         if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
             data['variables']['httpBackendPort'] = "[parameters('applicationPort')]"
             data['variables']['httpsBackendPort'] = "[parameters('applicationSecurePort')]"
-            data['variables']['f5NetworksSolutionScripts'] = "[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/', variables('f5NetworksTag'), '/" + solution_location + "/solutions/autoscale/waf/deploy_scripts/')]"
+            data['variables']['f5NetworksSolutionScripts'] = "[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/', variables('f5NetworksTag'), '/" + solution_location + "/autoscale/waf/deploy_scripts/')]"
             data['variables']['commandArgs'] = "[concat('-m ', parameters('applicationProtocols'), ' -d ', parameters('solutionDeploymentName'), ' -n ', parameters('applicationAddress'), ' -j ', parameters('applicationPort'), ' -k ', parameters('applicationSecurePort'), ' -h ', parameters('applicationPort'), ' -s ', parameters('applicationSecurePort'), ' -t ', toLower(parameters('applicationType')), ' -l ', toLower(parameters('blockingLevel')), ' -a ', parameters('customPolicy'), ' -c ', parameters('sslCert'), ' -r ', parameters('sslPswd'), ' -o ', parameters('applicationServiceFqdn'), ' -u svc_user')]"
 
 # Add learning stack variables
-if learning_stack:
+if learningStack:
     data['variables']['webVmName'] = "[concat(variables('dnsLabel'), '-web01')]"
     data['variables']['webVmSubnetPrivateAddress'] = "[concat(parameters('vnetAddressPrefix'), '.3.10')]"
     data['variables']['webVmVsAddr'] = "[concat(variables('extSubnetPrivateAddressPrefix'), '10')]"
@@ -596,10 +596,10 @@ for variables in data['variables']:
 resources_list = []
 ###### Public IP Resource(s) ######
 # Don't create public IP's for production stack
-if stack_type in ('new_stack', 'existing_stack'):
+if stack_type in ('new-stack', 'existing-stack'):
     if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_1nic', 'autoscale_ltm_via-lb', 'autoscale_waf_via-lb'):
         pub_ip_def = { "type": "Microsoft.Network/publicIPAddresses", "apiVersion": network_api_version, "location": location, "name": "[variables('mgmtPublicIPAddressName')]", "tags": tags, "properties": { "dnsSettings": { "domainNameLabel": "[variables('dnsLabel')]" }, "idleTimeoutInMinutes": 30, "publicIPAllocationMethod": "[variables('publicIPAddressType')]" } }
-        if template_name in ('autoscale_ltm_via-lb', 'autoscale_waf_via-lb') and license_type == 'BIGIQ_PAYG':
+        if template_name in ('autoscale_ltm_via-lb', 'autoscale_waf_via-lb') and license_type == 'bigiq-payg':
             pub_ip_def['sku'] = { "name": "Standard" }
         resources_list += [pub_ip_def]
     if template_name in ('failover-api', 'failover-lb_3nic'):
@@ -624,13 +624,13 @@ if template_name in ('failover-api'):
 if template_name in ('standalone_n-nic'):
     subnets = "[concat(take(variables('subnetArray'), 3), take(variables('addtlSubnetArray'), parameters('numberOfAdditionalNics')))]"
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_1nic', 'failover-lb_3nic', 'failover-api'):
-    if stack_type == 'new_stack':
+    if stack_type == 'new-stack':
         resources_list += [{ "type": "Microsoft.Network/virtualNetworks", "apiVersion": network_api_version, "location": location, "name": "[variables('virtualNetworkName')]", "tags": tags, "properties": { "addressSpace": { "addressPrefixes": [ "[variables('vnetAddressPrefix')]" ] }, "subnets": subnets } }]
 
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     subnets = [{ "name": "[variables('mgmtSubnetName')]", "properties": { "addressPrefix": "[variables('mgmtSubnetPrefix')]" } }]
     scale_depends_on = []
-    if stack_type == 'new_stack':
+    if stack_type == 'new-stack':
         scale_depends_on += ["[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"]
         resources_list += [{ "type": "Microsoft.Network/virtualNetworks", "apiVersion": network_api_version, "dependsOn": [ "[variables('mgmtNsgID')]" ], "location": location, "name": "[variables('virtualNetworkName')]", "tags": tags, "properties": { "addressSpace": { "addressPrefixes": [ "[variables('vnetAddressPrefix')]" ] }, "subnets": subnets } }]
 
@@ -640,10 +640,10 @@ depends_on_ext = ["[variables('vnetId')]", "[variables('extNsgID')]", "extpipcop
 depends_on_ext_pub0 = ["[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '0')]"]
 depends_on_ext_pub1 = ["[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '1')]"]
 # Remove incorrect depends_on items based on stack and solution type
-if stack_type == 'existing_stack':
+if stack_type == 'existing-stack':
     depends_on.remove("[variables('vnetId')]")
     depends_on_ext.remove("[variables('vnetId')]")
-elif stack_type == 'prod_stack':
+elif stack_type == 'production-stack':
     depends_on.remove("[variables('vnetId')]")
     depends_on.remove("[variables('mgmtPublicIPAddressId')]")
     depends_on_ext.remove("[variables('vnetId')]")
@@ -656,14 +656,14 @@ if template_name in ('failover-api', 'failover-lb_3nic'):
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic',):
     resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": network_api_version, "dependsOn": depends_on, "location": location, "name": "[variables('mgmtNicName')]", "tags": tags, "properties": { "networkSecurityGroup": { "id": "[variables('mgmtNsgID')]" }, "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-ipconfig1')]", "properties": { "privateIPAddress": "[variables('mgmtSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "PublicIpAddress": { "Id": "[variables('mgmtPublicIPAddressId')]" }, "subnet": { "id": "[variables('mgmtSubnetId')]" } } } ] } }]
 if template_name in ('standalone_2nic'):
-    if stack_type in ('new_stack'):
+    if stack_type in ('new-stack'):
         resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": network_api_version, "dependsOn": depends_on_ext + depends_on_ext_pub0, "location": location, "name": "[variables('extNicName')]", "tags": tags, "properties": { "networkSecurityGroup": { "id": "[concat(variables('extNsgID'))]" }, "copy": [ { "name": "ipConfigurations", "count": "[add(variables('numberOfExternalIps'), 1)]", "input": { "name": "[if(equals(copyIndex('ipConfigurations', 1), 1), concat(variables('instanceName'), '-self-ipconfig'), concat(variables('resourceGroupName'), '-ext-ipconfig', sub(copyIndex('ipConfigurations', 1), 2)))]", "properties": { "PublicIpAddress": { "Id": "[if(equals(copyIndex('ipConfigurations', 1), 1), concat(variables('extSelfPublicIpAddressIdPrefix'), '0'), concat(variables('extPublicIPAddressIdPrefix'), sub(copyIndex('ipConfigurations', 1), 2)))]" }, "primary": "[if(equals(copyIndex('ipConfigurations', 1), 1), 'True', 'False')]", "privateIPAddress": "[if(equals(copyIndex('ipConfigurations', 1), 1), variables('extSubnetPrivateAddress'), concat(variables('extSubnetPrivateAddressPrefix'), 1, sub(copyIndex('ipConfigurations', 1), 2)))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } } } ] } } ]
-    if stack_type in ('existing_stack', 'prod_stack'):
+    if stack_type in ('existing-stack', 'production-stack'):
         resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": network_api_version, "dependsOn": depends_on_ext + depends_on_ext_pub0, "location": location, "name": "[variables('extNicName')]", "tags": tags, "properties": { "networkSecurityGroup": { "id": "[concat(variables('extNsgID'))]" }, "copy": [ { "name": "ipConfigurations", "count": "[add(variables('numberOfExternalIps'), 1)]", "input": { "name": "[if(equals(copyIndex('ipConfigurations', 1), 1), concat(variables('instanceName'), '-self-ipconfig'), concat(variables('resourceGroupName'), '-ext-ipconfig', sub(copyIndex('ipConfigurations', 1), 2)))]", "properties": { "PublicIpAddress": { "Id": "[if(equals(copyIndex('ipConfigurations', 1), 1), concat(variables('extSelfPublicIpAddressIdPrefix'), '0'), concat(variables('extPublicIPAddressIdPrefix'), sub(copyIndex('ipConfigurations', 1), 2)))]" }, "primary": "[if(equals(copyIndex('ipConfigurations', 1), 1), 'True', 'False')]", "privateIPAddress": "[if(equals(copyIndex('ipConfigurations', 1), 1), variables('extSubnetPrivateAddress'), concat(variables('extSubnetPrivateAddressPrefix'), add(variables('extSubnetPrivateAddressSuffixInt'), sub(copyIndex('ipConfigurations', 1), 1))))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } } } ] } } ]
 if template_name in ('standalone_3nic', 'standalone_n-nic'):
-    if stack_type in ('new_stack'):
+    if stack_type in ('new-stack'):
         resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": network_api_version, "dependsOn": depends_on_ext + depends_on_ext_pub0, "location": location, "name": "[variables('extNicName')]", "tags": tags, "properties": { "networkSecurityGroup": { "id": "[concat(variables('extNsgID'))]" }, "copy": [ { "name": "ipConfigurations", "count": "[add(variables('numberOfExternalIps'), 1)]", "input": { "name": "[if(equals(copyIndex('ipConfigurations', 1), 1), concat(variables('instanceName'), '-self-ipconfig'), concat(variables('resourceGroupName'), '-ext-ipconfig', sub(copyIndex('ipConfigurations', 1), 2)))]", "properties": { "PublicIpAddress": { "Id": "[if(equals(copyIndex('ipConfigurations', 1), 1), concat(variables('extSelfPublicIpAddressIdPrefix'), '0'), concat(variables('extPublicIPAddressIdPrefix'), sub(copyIndex('ipConfigurations', 1), 2)))]" }, "primary": "[if(equals(copyIndex('ipConfigurations', 1), 1), 'True', 'False')]", "privateIPAddress": "[if(equals(copyIndex('ipConfigurations', 1), 1), variables('extSubnetPrivateAddress'), concat(variables('extSubnetPrivateAddressPrefix'), 1, sub(copyIndex('ipConfigurations', 1), 2)))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } } } ] } }, { "type": "Microsoft.Network/networkInterfaces", "apiVersion": network_api_version, "dependsOn": depends_on_ext, "location": location, "name": "[variables('intNicName')]", "tags": tags, "properties": { "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-ipconfig1')]", "properties": { "privateIPAddress": "[variables('intSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('intSubnetId')]" } } } ] } } ]
-    if stack_type in ('existing_stack', 'prod_stack'):
+    if stack_type in ('existing-stack', 'production-stack'):
         resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": network_api_version, "dependsOn": depends_on_ext + depends_on_ext_pub0, "location": location, "name": "[variables('extNicName')]", "tags": tags, "properties": { "networkSecurityGroup": { "id": "[concat(variables('extNsgID'))]" }, "copy": [ { "name": "ipConfigurations", "count": "[add(variables('numberOfExternalIps'), 1)]", "input": { "name": "[if(equals(copyIndex('ipConfigurations', 1), 1), concat(variables('instanceName'), '-self-ipconfig'), concat(variables('resourceGroupName'), '-ext-ipconfig', sub(copyIndex('ipConfigurations', 1), 2)))]", "properties": { "PublicIpAddress": { "Id": "[if(equals(copyIndex('ipConfigurations', 1), 1), concat(variables('extSelfPublicIpAddressIdPrefix'), '0'), concat(variables('extPublicIPAddressIdPrefix'), sub(copyIndex('ipConfigurations', 1), 2)))]" }, "primary": "[if(equals(copyIndex('ipConfigurations', 1), 1), 'True', 'False')]", "privateIPAddress": "[if(equals(copyIndex('ipConfigurations', 1), 1), variables('extSubnetPrivateAddress'), concat(variables('extSubnetPrivateAddressPrefix'), add(variables('extSubnetPrivateAddressSuffixInt'), sub(copyIndex('ipConfigurations', 1), 1))))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } } } ] } }, { "type": "Microsoft.Network/networkInterfaces", "apiVersion": network_api_version, "dependsOn": depends_on_ext, "location": location, "name": "[variables('intNicName')]", "tags": tags, "properties": { "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-ipconfig1')]", "properties": { "privateIPAddress": "[variables('intSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('intSubnetId')]" } } } ] } } ]
 if template_name in ('standalone_n-nic'):
     resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": network_api_version, "condition": "[greaterOrEquals(parameters('numberOfAdditionalNics'), 1)]", "copy": { "count": "[parameters('numberOfAdditionalNics')]", "name": "addtlniccopy" }, "dependsOn": depends_on + ["[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'))]", "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]", "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'))]"], "location": location, "name": "[concat(variables('instanceName'), '-addtlNic', copyIndex(1))]", "properties": { "ipConfigurations": [ { "name": "ipconfig", "properties": { "privateIPAllocationMethod": "Dynamic", "subnet": { "id": "[concat(variables('vnetId'), '/subnets/', variables('addtlNicRefSplit')[copyIndex()])]" } } } ] }, "tags": tags }]
@@ -675,18 +675,18 @@ if template_name in ('failover-api', 'failover-lb_3nic'):
     resources_list += [{ "apiVersion": network_api_version, "dependsOn": depends_on + ["[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtPublicIPAddressName'), '0')]"], "location": location, "name": "[concat(variables('mgmtNicName'), '0')]", "properties": { "ipConfigurations": [ { "name": "[concat(variables('dnsLabel'), '-mgmt-ipconfig')]", "properties": { "PublicIpAddress": { "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('mgmtPublicIPAddressName'), '0'))]" }, "privateIPAddress": "[variables('mgmtSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('mgmtSubnetId')]" } } } ], "networkSecurityGroup": { "id": "[variables('mgmtNsgId')]" } }, "tags": tags, "type": "Microsoft.Network/networkInterfaces" }]
     resources_list += [{ "apiVersion": network_api_version, "dependsOn": depends_on + ["[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtPublicIPAddressName'), '1')]"], "location": location, "name": "[concat(variables('mgmtNicName'), '1')]", "properties": { "ipConfigurations": [ { "name": "[concat(variables('dnsLabel'), '-mgmt-ipconfig')]", "properties": { "PublicIpAddress": { "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('mgmtPublicIPAddressName'), '1'))]" }, "privateIPAddress": "[variables('mgmtSubnetPrivateAddress1')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('mgmtSubnetId')]" } } } ], "networkSecurityGroup": { "id": "[variables('mgmtNsgId')]" } }, "tags": tags, "type": "Microsoft.Network/networkInterfaces" }]
     if template_name in ('failover-api'):
-        if stack_type in ('new_stack'):
+        if stack_type in ('new-stack'):
             resources_list += [{ "apiVersion": network_api_version, "dependsOn": depends_on_ext + depends_on_ext_pub0, "location": location, "name": "[concat(variables('extNicName'), '0')]", "properties": { "copy": [ { "name": "ipConfigurations", "count": "[add(variables('numberOfExternalIps'), 1)]", "input": { "name": "[if(equals(copyIndex('ipConfigurations'), 0), concat(variables('instanceName'), '-self-ipconfig'), concat(variables('resourceGroupName'), '-ext-ipconfig', sub(copyIndex('ipConfigurations'), 1)))]", "properties": { "PublicIpAddress": { "Id": "[if(equals(copyIndex('ipConfigurations'), 0), concat(variables('extSelfPublicIpAddressIdPrefix'), '0'), concat(variables('extPublicIPAddressIdPrefix'), sub(copyIndex('ipConfigurations'), 1)))]" }, "primary": "[if(equals(copyIndex('ipConfigurations'), 0), 'True', 'False')]", "privateIPAddress": "[if(equals(copyIndex('ipConfigurations'), 0), variables('extSubnetPrivateAddress'), concat(variables('extSubnetPrivateAddressPrefix'), add(variables('extSubnetPrivateAddressSuffixInt'), sub(copyIndex('ipConfigurations'), 1))))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } } } ], "networkSecurityGroup": { "id": "[concat(variables('extNsgId'))]" } }, "tags": tags, "type": "Microsoft.Network/networkInterfaces" }]
-        if stack_type in ('existing_stack', 'prod_stack'):
+        if stack_type in ('existing-stack', 'production-stack'):
             resources_list += [{ "apiVersion": network_api_version, "dependsOn": depends_on_ext + depends_on_ext_pub0, "location": location, "name": "[concat(variables('extNicName'), '0')]", "properties": { "copy": [ { "name": "ipConfigurations", "count": "[add(variables('numberOfExternalIps'), 1)]", "input": { "name": "[if(equals(copyIndex('ipConfigurations'), 0), concat(variables('instanceName'), '-self-ipconfig'), concat(variables('resourceGroupName'), '-ext-ipconfig', sub(copyIndex('ipConfigurations'), 1)))]", "properties": { "PublicIpAddress": { "Id": "[if(equals(copyIndex('ipConfigurations'), 0), concat(variables('extSelfPublicIpAddressIdPrefix'), '0'), concat(variables('extPublicIPAddressIdPrefix'), sub(copyIndex('ipConfigurations'), 1)))]" }, "primary": "[if(equals(copyIndex('ipConfigurations'), 0), 'True', 'False')]", "privateIPAddress": "[if(equals(copyIndex('ipConfigurations'), 0), variables('extSubnetPrivateAddress'), concat(variables('extSubnetPrivateAddressPrefix'), add(variables('extSubnetPrivateAddressSuffixInt'), sub(copyIndex('ipConfigurations'), 1))))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } } } ], "networkSecurityGroup": { "id": "[concat(variables('extNsgId'))]" } }, "tags": tags, "type": "Microsoft.Network/networkInterfaces" }]
         resources_list += [{ "apiVersion": network_api_version, "dependsOn": depends_on_ext + depends_on_ext_pub1, "location": location, "name": "[concat(variables('extNicName'), '1')]", "properties": { "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '1')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress1')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } } ], "networkSecurityGroup": { "id": "[concat(variables('extNsgId'))]" } }, "tags": tags, "type": "Microsoft.Network/networkInterfaces" }]
         resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": network_api_version, "condition": "[greaterOrEquals(parameters('numberOfAdditionalNics'), 1)]", "copy": { "count": "[if(greaterOrEquals(parameters('numberOfAdditionalNics'), 1), parameters('numberOfAdditionalNics'), 1)]", "name": "addtlniccopy0" }, "dependsOn": depends_on, "location": location, "name": "[concat(variables('addtlNicName'), copyIndex(1), '0')]", "properties": { "ipConfigurations": [ { "name": "ipconfig", "properties": { "privateIPAllocationMethod": "Dynamic", "subnet": { "id": "[concat(variables('vnetId'), '/subnets/', variables('addtlNicRefSplit')[copyIndex()])]" } } } ] }, "tags": tags }]
         resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": network_api_version, "condition": "[greaterOrEquals(parameters('numberOfAdditionalNics'), 1)]", "copy": { "count": "[if(greaterOrEquals(parameters('numberOfAdditionalNics'), 1), parameters('numberOfAdditionalNics'), 1)]", "name": "addtlniccopy1" }, "dependsOn": depends_on, "location": location, "name": "[concat(variables('addtlNicName'), copyIndex(1), '1')]", "properties": { "ipConfigurations": [ { "name": "ipconfig", "properties": { "privateIPAllocationMethod": "Dynamic", "subnet": { "id": "[concat(variables('vnetId'), '/subnets/', variables('addtlNicRefSplit')[copyIndex()])]" } } } ] }, "tags": tags }]
     if template_name in ('failover-lb_3nic'):
-        if stack_type in ('new_stack'):
+        if stack_type in ('new-stack'):
             resources_list += [{ "apiVersion": network_api_version, "dependsOn": depends_on_ext + depends_on_ext_pub0 + ["[variables('extLbId')]"], "location": location, "name": "[concat(variables('extNicName'), '0')]", "properties": { "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '0')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig0')]", "properties": { "primary": False, "loadBalancerBackendAddressPools": "[if(equals(variables('numberOfExternalIps'), 0), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 1))]", "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 10)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } } ], "networkSecurityGroup": { "id": "[concat(variables('extNsgId'))]" } }, "tags": tags, "type": "Microsoft.Network/networkInterfaces" }]
             resources_list += [{ "apiVersion": network_api_version, "dependsOn": depends_on_ext + depends_on_ext_pub1 + ["[variables('extLbId')]"], "location": location, "name": "[concat(variables('extNicName'), '1')]", "properties": { "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '1')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress1')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig1')]", "properties": { "primary": False, "loadBalancerBackendAddressPools": "[if(equals(variables('numberOfExternalIps'), 0), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 1))]", "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 11)]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } } ], "networkSecurityGroup": { "id": "[concat(variables('extNsgId'))]" } }, "tags": tags, "type": "Microsoft.Network/networkInterfaces" }]
-        if stack_type in ('existing_stack', 'prod_stack'):
+        if stack_type in ('existing-stack', 'production-stack'):
             resources_list += [{ "apiVersion": network_api_version, "dependsOn": depends_on_ext + depends_on_ext_pub0 + ["[variables('extLbId')]"], "location": location, "name": "[concat(variables('extNicName'), '0')]", "properties": { "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '0')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig0')]", "properties": { "primary": False, "loadBalancerBackendAddressPools": "[if(equals(variables('numberOfExternalIps'), 0), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 1))]", "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix0'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } } ], "networkSecurityGroup": { "id": "[concat(variables('extNsgId'))]" } }, "tags": tags, "type": "Microsoft.Network/networkInterfaces" }]
             resources_list += [{ "apiVersion": network_api_version, "dependsOn": depends_on_ext + depends_on_ext_pub1 + ["[variables('extLbId')]"], "location": location, "name": "[concat(variables('extNicName'), '1')]", "properties": { "ipConfigurations": [ { "name": "[concat(variables('instanceName'), '-self-ipconfig')]", "properties": { "PublicIpAddress": { "Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '1')]" }, "primary": True, "privateIPAddress": "[variables('extSubnetPrivateAddress1')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } }, { "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig1')]", "properties": { "primary": False, "loadBalancerBackendAddressPools": "[if(equals(variables('numberOfExternalIps'), 0), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 1))]", "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix1'))]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('extSubnetId')]" } } } ], "networkSecurityGroup": { "id": "[concat(variables('extNsgId'))]" } }, "tags": tags, "type": "Microsoft.Network/networkInterfaces" }]
     if template_name in ('failover-lb_3nic'):
@@ -697,14 +697,14 @@ if template_name in ('failover-api', 'failover-lb_3nic'):
         resources_list += [{ "apiVersion": network_api_version, "dependsOn": depends_on_ext, "location": location, "name": "[concat(variables('intNicName'), '1')]", "properties": { "primary": True, "enableIPForwarding": True, "ipConfigurations": [ { "name": "[concat(variables('dnsLabel'), '-int-ipconfig')]", "properties": { "privateIPAddress": "[variables('intSubnetPrivateAddress1')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('intSubnetId')]" } } } ] }, "tags": tags, "type": "Microsoft.Network/networkInterfaces" }]
 
 # Add learning stack NIC(s)
-if learning_stack:
+if learningStack:
     resources_list += [{ "type": "Microsoft.Network/networkInterfaces", "apiVersion": network_api_version, "dependsOn": depends_on, "location": location, "name": "[concat(variables('webVmName'), '-nic')]", "tags": tags, "properties": { "ipConfigurations": [ { "name": "[concat(variables('webVmName'), '-nic', '-ipconfig1')]", "properties": { "privateIPAddress": "[variables('webVmSubnetPrivateAddress')]", "privateIPAllocationMethod": "Static", "PublicIpAddress": None, "subnet": { "id": "[variables('intSubnetId')]" } } } ] } }]
 
 ###### Network Security Group Resource(s) ######
 mgmt_nsg_security_rules = [{ "name": "mgmt_allow_https", "properties": { "description": "", "priority": 101, "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "[variables('bigIpMgmtPort')]", "protocol": "Tcp", "direction": "Inbound", "access": "Allow" } }, { "name": "ssh_allow_22", "properties": { "description": "", "priority": 102, "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "22", "protocol": "Tcp", "direction": "Inbound", "access": "Allow" } }]
 ext_nsg_security_rules = []
 # Add learning stack NSG rules
-if learning_stack:
+if learningStack:
     ext_nsg_security_rules += [{ "name": "allow_example_app", "properties": { "description": "", "priority": 101, "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", "sourcePortRange": "*", "destinationAddressPrefix": "*", "destinationPortRange": "[variables('webVmVsPort')]", "protocol": "Tcp", "direction": "Inbound", "access": "Allow" } }]
 
 if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
@@ -718,7 +718,7 @@ if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_n-nic', '
 ###### Load Balancer Resource(s) ######
 probes_to_use = ""
 lb_rules_to_use = ""
-if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns') or license_type == 'BIGIQ_PAYG':
+if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns') or license_type == 'bigiq-payg':
     frontend_port = "[parameters('applicationPort')]"
     frontend_port_https = "[parameters('applicationSecurePort')]"
     backend_port = "[variables('httpBackendPort')]"
@@ -736,7 +736,7 @@ if template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns') or license
 if template_name == 'failover-lb_1nic':
     lb_fe_properties = { "publicIPAddress": { "id": "[variables('mgmtPublicIPAddressId')]" } }
     depends_on_pip = ["[variables('mgmtPublicIPAddressId')]"]
-    if stack_type in ('prod_stack'):
+    if stack_type in ('production-stack'):
         lb_fe_properties = { "privateIPAddress":  "[variables('externalLoadBalancerAddress')]", "privateIPAllocationMethod": "Static", "subnet": { "id": "[variables('mgmtSubnetId')]" } }
         depends_on_pip.remove("[variables('mgmtPublicIPAddressId')]")
     resources_list += [{ "apiVersion": network_api_version, "dependsOn": [] + depends_on_pip, "location": location, "tags": tags, "name": "[variables('externalLoadBalancerName')]", "properties": { "frontendIPConfigurations": [ { "name": "loadBalancerFrontEnd", "properties": lb_fe_properties } ], "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ] }, "type": "Microsoft.Network/loadBalancers" }]
@@ -748,7 +748,7 @@ if template_name == 'failover-lb_3nic':
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_waf_via-lb'):
     scale_ports = { 'ssh_start': 50001, 'ssh_end': 50100, 'https_start': 50101, 'https_end': 50200 }
     inbound_nat_pools_static = []
-    if license_type == 'BIGIQ_PAYG':
+    if license_type == 'bigiq-payg':
         # Update ports if static VMSS is using start range
         scale_ports_static = { 'ssh_start': 50001, 'ssh_end': 50009, 'https_start': 50101, 'https_end': 50109 }
         scale_ports = { 'ssh_start': 50010, 'ssh_end': 50100, 'https_start': 50110, 'https_end': 50200 }
@@ -756,7 +756,7 @@ if template_name in ('autoscale_ltm_via-lb', 'autoscale_waf_via-lb'):
     inbound_nat_pools = [ { "name": "sshnatpool", "properties": { "frontendIPConfiguration": { "id": "[variables('frontEndIPConfigID')]" }, "protocol": "Tcp", "frontendPortRangeStart": scale_ports['ssh_start'], "frontendPortRangeEnd": scale_ports['ssh_end'], "backendPort": 22 } }, { "name": "mgmtnatpool", "properties": { "frontendIPConfiguration": { "id": "[variables('frontEndIPConfigID')]" }, "protocol": "Tcp", "frontendPortRangeStart":  scale_ports['https_start'], "frontendPortRangeEnd": scale_ports['https_end'], "backendPort": "[variables('bigIpMgmtPort')]" } } ]
     inbound_nat_pools = inbound_nat_pools + inbound_nat_pools_static
     lb_def = { "apiVersion": network_api_version, "name": "[variables('externalLoadBalancerName')]", "type": "Microsoft.Network/loadBalancers", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtPublicIPAddressName'))]" ], "properties": { "frontendIPConfigurations": [ { "name": "loadBalancerFrontEnd", "properties": { "publicIPAddress": { "id": "[variables('mgmtPublicIPAddressId')]" } } } ], "backendAddressPools": [ { "name": "loadBalancerBackEnd" } ], "inboundNatPools": inbound_nat_pools, "loadBalancingRules": lb_rules_to_use, "probes": probes_to_use } }
-    if license_type == 'BIGIQ_PAYG':
+    if license_type == 'bigiq-payg':
         lb_def['sku'] = { "name": "Standard" }
     resources_list += [lb_def]
 
@@ -769,7 +769,7 @@ if template_name == 'failover-lb_1nic':
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-api', 'failover-lb_1nic', 'failover-lb_3nic'):
     avset = { "apiVersion": compute_api_version, "location": location, "name": "[variables('availabilitySetName')]", "tags": tags, "properties": { "PlatformUpdateDomainCount": 2, "PlatformFaultDomainCount": 2 }, "sku": { "name": "Aligned" }, "type": "Microsoft.Compute/availabilitySets" }
     if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic'):
-        if stack_type in ('existing_stack', 'prod_stack'):
+        if stack_type in ('existing-stack', 'production-stack'):
             avset['condition'] = "[equals(toUpper(parameters('avSetChoice')), 'CREATE_NEW')]"
     resources_list += [avset]
 
@@ -818,7 +818,7 @@ if template_name in ('failover-api', 'failover-lb_3nic'):
     resources_list += [{ "apiVersion": compute_api_version, "dependsOn": depends_on + ["[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), '1')]", "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'), '1')]", "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '1')]"], "location": location, "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '1')]", "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]", "properties": { "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]" }, "diagnosticsProfile": { "bootDiagnostics": { "enabled": True, "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]" } }, "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "networkProfile": { "networkInterfaces": nic_reference_2 }, "osProfile": { "adminPassword": "[variables('adminPasswordOrKey')]", "adminUsername": "[parameters('adminUsername')]", "computerName": "[variables('instanceName')]", "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]" }, "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]" }, "tags": tags, "type": "Microsoft.Compute/virtualMachines" }]
 
 # Add learning stack VM(s)
-if learning_stack:
+if learningStack:
    resources_list += [{"apiVersion": compute_api_version, "type": "Microsoft.Compute/virtualMachines", "dependsOn": ["[concat('Microsoft.Network/networkInterfaces/', variables('webVmName'), '-nic')]", "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"], "location": location, "name": "[variables('webVmName')]", "tags": tags, "properties": { "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "networkProfile": { "networkInterfaces":  [{ "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('webVmName'), '-nic'))]" }] }, "osProfile": { "computerName": "[variables('webVmName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[variables('adminPasswordOrKey')]", "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]" }, "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]" } }]
 ###### Compute/VM Extension Resource(s) ######
 command_to_execute = ''; command_to_execute2 = ''; route_add_cmd = ''; default_gw_cmd = "variables('tmmRouteGw')"
@@ -856,8 +856,8 @@ if template_name in 'failover-api':
 # Link-local route command, for 2+ nic templates
 if template_name in ('standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_3nic', 'failover-api'):
     route_add_cmd = " ', variables('routeCmdArray')[parameters('bigIpVersion')], ';"
-# Default GW command is different for existing_stack
-if stack_type in ('existing_stack', 'prod_stack'):
+# Default GW command is different for existing-stack
+if stack_type in ('existing-stack', 'production-stack'):
     default_gw_cmd = "concat(take(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, add(lastIndexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.'), 1)), add(int(take(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], indexOf(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], '/'))), 1))"
 
 ## Map in some commandToExecute Elements
@@ -897,7 +897,7 @@ if template_name in ('failover-api', 'failover-lb_3nic'):
     resources_list += [{ "apiVersion": "[variables('computeApiVersion')]", "dependsOn": [ "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '1')]" ], "location": location, "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '1/start')]", "properties": { "protectedSettings": { "commandToExecute": command_to_execute2 }, "publisher": "Microsoft.Azure.Extensions", "settings": { "fileUris": file_uris }, "type": "CustomScript", "typeHandlerVersion": "2.0", "autoUpgradeMinorVersion":"true" }, "tags": tags, "type": "Microsoft.Compute/virtualMachines/extensions" }]
 
 # Add learning stack Custom Script Extension(s)
-if learning_stack:
+if learningStack:
     file_uris = ["[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/', variables('f5NetworksTag'), '/experimental/reference/learning-stack/scripts/init_web.sh')]"]
     command_to_execute = "[concat('./init_web.sh ', variables('f5NetworksTag'))]"
     resources_list += [{ "apiVersion": "[variables('computeApiVersion')]", "dependsOn": [ "[concat('Microsoft.Compute/virtualMachines/', variables('webVmName'))]" ], "location": location, "name": "[concat(variables('webVmName'), '/webstart')]", "properties": { "protectedSettings": { "commandToExecute": command_to_execute }, "publisher": "Microsoft.Azure.Extensions", "settings": { "fileUris": file_uris }, "type": "CustomScript", "typeHandlerVersion": "2.0", "autoUpgradeMinorVersion":"true" }, "tags": tags, "type": "Microsoft.Compute/virtualMachines/extensions" }]
@@ -925,8 +925,8 @@ if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale
     autoscale_command_to_execute = "[concat('CLOUD_LIB_DIR=/config/cloud/azure/node_modules/@f5devcentral; mkdir -p $CLOUD_LIB_DIR; mkdir -p /var/log/cloud/azure; function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; }; <ADDTL_SETUP>AZURE_CREDENTIALS_FILE=/config/cloud/.azCredentials; TMP_DIR=/mnt/creds; TMP_CREDENTIALS_FILE=$TMP_DIR/.passwd; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -m 400 /dev/null $AZURE_CREDENTIALS_FILE; /usr/bin/install -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; echo ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).keys[0].value, '\", \"vmssName\": \"', variables('vmssName'), '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"loadBalancerName\": \"', variables('externalLoadBalancerName'), '\", \"appInsightsName\": \"', variables('appInsightsName'), '\", \"appInsightsId\": \"', reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsComponentsApiVersion')).AppId, '\"}', variables('singleQuote'), ' > $AZURE_CREDENTIALS_FILE;<BIGIQ_PWD_CMD> cp f5-cloud-libs*.tar.gz* /config/cloud; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; bash /config/installCloudLibs.sh; source $CLOUD_LIB_DIR/f5-cloud-libs/scripts/util.sh; create_temp_dir $TMP_DIR; echo ', variables('singleQuote'), variables('adminPasswordOrKey'), variables('singleQuote'), '|sha512sum|cut -d \" \" -f 1|tr -d \"\n\" > $TMP_CREDENTIALS_FILE; bash $CLOUD_LIB_DIR/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file $TMP_CREDENTIALS_FILE; f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/encryptDataToFile.js --data-file $TMP_CREDENTIALS_FILE --out-file $BIG_IP_CREDENTIALS_FILE;<ADDTL_ENCRYPT_CALLS> wipe_temp_dir $TMP_DIR;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, '; <SCALE_SCRIPT_CALL><POST_CMD_TO_EXECUTE>)]"
     scale_script_call = " /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/runScript.js --output /var/log/cloud/azure/autoScaleScript.log --log-level info --file $CLOUD_LIB_DIR/f5-cloud-libs-azure/scripts/autoscale.sh --shell /bin/bash --cl-args \"--logLevel info --backupUcs 7 --resourceGroup ', resourceGroup().name, ' --vmssName ', variables('vmssName'), ' --userName svc_user --password /config/cloud/.passwd --azureSecretFile /config/cloud/.azCredentials --managementPort ', variables('bigIpMgmtPort'), ' --ntpServer ', parameters('ntpServer'), ' --timeZone ', parameters('timeZone'), variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd<ADDTL_SCRIPT_ARGS>"
     scale_script_call = scale_script_call.replace('<ADDTL_SCRIPT_ARGS>', addtl_script_args)
-    # Add licensing (BIG-IQ)
-    if license_type == 'BIGIQ_PAYG':
+    # Add licensing (big-iq)
+    if license_type == 'bigiq-payg':
         static_scale_script_call = scale_script_call + static_license1_command + ", '\" --signal AUTOSCALE_SCRIPT_DONE'"
     scale_script_call = scale_script_call + license1_command + ", '\" --signal AUTOSCALE_SCRIPT_DONE'"
 
@@ -936,7 +936,7 @@ if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale
     autoscale_command_to_execute = autoscale_command_to_execute.replace('<POST_CMD_TO_EXECUTE>', post_cmd_to_execute)
     autoscale_command_to_execute = autoscale_command_to_execute.replace('<ADDTL_ENCRYPT_CALLS>', addtl_encrypt_calls)
     # Modified command to execute for static VMSS
-    if license_type == 'BIGIQ_PAYG':
+    if license_type == 'bigiq-payg':
         static_autoscale_command_to_execute = autoscale_command_to_execute.replace('<SCALE_SCRIPT_CALL>', static_scale_script_call)
     autoscale_command_to_execute = autoscale_command_to_execute.replace('<SCALE_SCRIPT_CALL>', scale_script_call)
 
@@ -946,7 +946,7 @@ if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale
     if template_name in ('autoscale_ltm_via-dns', 'autoscale_waf_via-dns'):
         ipConfigProperties = { "subnet": { "id": "[variables('mgmtSubnetId')]" }, "publicIpAddressConfiguration": { "name": "publicIp01", "properties": { "idleTimeoutInMinutes": 15 } } }
     resources_list += [{ "type": "Microsoft.Compute/virtualMachineScaleSets", "apiVersion": compute_api_version, "name": "[variables('vmssName')]", "location": location, "tags": tags, "dependsOn": scale_depends_on, "sku": { "name": "[parameters('instanceType')]", "tier": "Standard", "capacity": "[parameters('vmScaleSetMinCount')]" }, "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]", "properties": { "upgradePolicy": { "mode": "Manual" }, "virtualMachineProfile": { "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]", "osProfile": { "computerNamePrefix": "[variables('vmssName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[variables('adminPasswordOrKey')]", "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]" }, "networkProfile": { "networkInterfaceConfigurations": [ { "name": "nic1", "properties": { "primary": True, "networkSecurityGroup": {"id": "[variables('mgmtNsgID')]"}, "ipConfigurations": [ { "name": "ipconfig1", "properties": ipConfigProperties } ] } } ] }, "extensionProfile": { "extensions": [ { "name":"main", "properties": { "publisher": "Microsoft.Azure.Extensions", "type": "CustomScript", "typeHandlerVersion": "2.0", "settings": { "fileUris": autoscale_file_uris }, "protectedSettings": { "commandToExecute": autoscale_command_to_execute } } } ] } }, "overprovision": False } }]
-    if license_type == 'BIGIQ_PAYG':
+    if license_type == 'bigiq-payg':
         # Static VMSS
         lb_inbound_nat_pools = [ { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/inboundNatPools/sshnatpool-static')]" }, { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/inboundNatPools/mgmtnatpool-static')]" } ]
         ipConfigProperties = { "subnet": { "id": "[variables('mgmtSubnetId')]" }, "loadBalancerBackendAddressPools": [ { "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]" } ], "loadBalancerInboundNatPools": lb_inbound_nat_pools }
@@ -955,7 +955,7 @@ if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale
 ###### Compute VM Scale Set(s) AutoScale Settings ######
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_ltm_via-dns', 'autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     depends_on = ["[variables('vmssId')]"]
-    if license_type == 'BIGIQ_PAYG':
+    if license_type == 'bigiq-payg':
         depends_on.append("[variables('staticVmssId')]")
     resources_list += [{ "type": "Microsoft.Insights/autoscaleSettings", "apiVersion": "[variables('appInsightsApiVersion')]", "name": "autoscaleconfig", "location": location, "dependsOn": depends_on, "properties": { "name": "autoscaleconfig", "targetResourceUri": "[variables('vmssId')]", "enabled": True, "profiles": [ { "name": "Profile1", "capacity": { "minimum": "[parameters('vmScaleSetMinCount')]", "maximum": "[parameters('vmScaleSetMaxCount')]", "default": "[parameters('vmScaleSetMinCount')]" }, "rules": [ { "metricTrigger": { "metricName": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricName]", "metricNamespace": "", "metricResourceUri": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricResourceUri]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "[variables('timeWindow')]", "timeAggregation": "Average", "operator": "GreaterThan", "threshold": "[variables('scaleMetricMap')[variables('autoScaleMetric')].thresholdOut]" }, "scaleAction": { "direction": "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } }, { "metricTrigger": { "metricName": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricName]", "metricNamespace": "", "metricResourceUri": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricResourceUri]", "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "[variables('timeWindow')]", "timeAggregation": "Average", "operator": "LessThan", "threshold": "[variables('scaleMetricMap')[variables('autoScaleMetric')].thresholdIn]" }, "scaleAction": { "direction": "Decrease", "type": "ChangeCount", "value": "1", "cooldown": "PT1M" } } ] } ], "notifications": [ { "operation": "Scale", "email": { "sendToSubscriptionAdministrator": False, "sendToSubscriptionCoAdministrators": False, "customEmails": "[variables('customEmail')]" }, "webhooks": [] } ] } }]
 
@@ -970,41 +970,41 @@ resources_sorted = json.dumps(resources_list, sort_keys=True, indent=4, ensure_a
 data['resources'] = json.loads(resources_sorted, object_pairs_hook=OrderedDict)
 
 # Prod Stack Strip Public IP Address Function
-if stack_type == 'prod_stack':
+if stack_type == 'production-stack':
     master_helper.pub_ip_strip(data['variables'], 'PublicIpAddress', 'variables')
     master_helper.pub_ip_strip(data['resources'], 'PublicIpAddress', 'resources')
 
 ######################################## ARM Outputs ########################################
-## Note: Change outputs if prod_stack as public IP's are not attached to the BIG-IP's
+## Note: Change outputs if production-stack as public IP's are not attached to the BIG-IP's
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic'):
-    if stack_type == 'prod_stack':
+    if stack_type == 'production-stack':
         data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://', reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress, ':', variables('bigIpMgmtPort'))]" }
         data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress, ' ',22)]" }
     else:
         data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://', reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]" }
         data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' ',22)]" }
     # Add learning stack output(s)
-    if learning_stack:
+    if learningStack:
         data['outputs']['EXAMPLE-APP-URL'] = { "type": "string", "value": "[concat('http://', reference(concat(variables('extPublicIPAddressIdPrefix'), '0')).dnsSettings.fqdn, ':', variables('webVmVsPort'))]" }
 if template_name == 'failover-lb_1nic':
-    if stack_type == 'prod_stack':
+    if stack_type == 'production-stack':
         data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(concat(variables('mgmtNicId'), 0)).ipConfigurations[0].properties.privateIPAddress,':8443')]" }
         data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(concat(variables('mgmtNicId'), 0)).ipConfigurations[0].properties.privateIPAddress,' ',8022)]" }
     else:
         data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':8443')]" }
         data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',8022)]" }
 if template_name in ('failover-api', 'failover-lb_3nic'):
-    if stack_type == 'prod_stack':
+    if stack_type == 'production-stack':
         data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(concat(variables('mgmtNicId'), '0')).ipConfigurations[0].properties.privateIPAddress, ':', variables('bigIpMgmtPort'))]" }
         data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(concat(variables('mgmtNicId'), '0')).ipConfigurations[0].properties.privateIPAddress,' ',22)]" }
     else:
         data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(concat(variables('mgmtPublicIPAddressId'), '0')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]" }
         data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(concat(variables('mgmtPublicIPAddressId'), '0')).dnsSettings.fqdn,' ',22)]" }
     # Add learning stack output(s)
-    if learning_stack:
+    if learningStack:
         data['outputs']['EXAMPLE-APP-URL'] = { "type": "string", "value": "[concat('http://', reference(concat(variables('extPublicIPAddressIdPrefix'), '0')).dnsSettings.fqdn, ':', variables('webVmVsPort'))]" }
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_waf_via-lb'):
-    if license_type == 'BIGIQ_PAYG':
+    if license_type == 'bigiq-payg':
         data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50101', ' - 50109')]" }
         data['outputs']['GUI-URL-DYNAMIC'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':50110', ' - 50200')]" }
         data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',50001, ' - 50009')]" }
@@ -1026,32 +1026,32 @@ with open(created_file_params, 'w') as finished_params:
 
 
 ###### Prepare some information prior to creating Scripts/Readme's ######
-if stack_type in ('prod_stack'):
-    all_lic = ['BYOL', 'PAYG']
+if stack_type in ('production-stack'):
+    all_lic = ['byol', 'payg']
 else:
-    all_lic = ['BYOL', 'PAYG', 'BIG-IQ']
-lic_support = {'standalone_1nic': all_lic, 'standalone_2nic': all_lic, 'standalone_3nic': all_lic, 'standalone_n-nic': all_lic, 'failover-lb_1nic': all_lic, 'failover-lb_3nic': all_lic, 'failover-api': all_lic, 'autoscale_ltm_via-lb': ['PAYG', 'BIG-IQ'], 'autoscale_ltm_via-dns': ['PAYG', 'BIG-IQ'], 'autoscale_waf_via-lb': ['PAYG', 'BIG-IQ'], 'autoscale_waf_via-dns': ['PAYG', 'BIG-IQ']}
+    all_lic = ['byol', 'payg', 'big-iq']
+lic_support = {'standalone_1nic': all_lic, 'standalone_2nic': all_lic, 'standalone_3nic': all_lic, 'standalone_n-nic': all_lic, 'failover-lb_1nic': all_lic, 'failover-lb_3nic': all_lic, 'failover-api': all_lic, 'autoscale_ltm_via-lb': ['payg', 'big-iq'], 'autoscale_ltm_via-dns': ['payg', 'big-iq'], 'autoscale_waf_via-lb': ['payg', 'big-iq'], 'autoscale_waf_via-dns': ['payg', 'big-iq']}
 # Experimental autoscale templates have new licensing options
 if support_type == 'experimental':
-    lic_support['autoscale_ltm_via-lb'] = ['PAYG', 'BIG-IQ', 'BIG-IQ+PAYG']
-    lic_support['autoscale_waf_via-lb'] = ['PAYG', 'BIG-IQ', 'BIG-IQ+PAYG']
+    lic_support['autoscale_ltm_via-lb'] = ['payg', 'big-iq', 'big-iq+payg']
+    lic_support['autoscale_waf_via-lb'] = ['payg', 'big-iq', 'big-iq+payg']
 lic_key_count = {'standalone_1nic': 1, 'standalone_2nic': 1, 'standalone_3nic': 1, 'standalone_n-nic': 1, 'failover-lb_1nic': 2, 'failover-lb_3nic': 2, 'failover-api': 2, 'autoscale_ltm_via-lb': 0, 'autoscale_ltm_via-dns': 0, 'autoscale_waf_via-lb': 0, 'autoscale_waf_via-dns': 0}
 api_access_required = {'standalone_1nic': None, 'standalone_2nic': None, 'standalone_3nic': None, 'standalone_n-nic': None, 'failover-lb_1nic': None, 'failover-lb_3nic': None, 'failover-api': 'required', 'autoscale_ltm_via-lb': 'required', 'autoscale_ltm_via-dns': 'required', 'autoscale_waf_via-lb': 'required', 'autoscale_waf_via-dns': 'required'}
 template_info = {'template_name': template_name, 'location': script_location, 'lic_support': lic_support, 'lic_key_count': lic_key_count, 'api_access_required': api_access_required}
 
 ## Abstract license key parameters for readme_generator/script_generator ##
-license_params = OrderedDict([('numberOfStaticInstances',['BIG-IQ+PAYG']), ('licenseKey1',['BYOL']), ('licenseKey2',['BYOL']), ('licensedBandwidth',['PAYG',]), ('bigIqAddress',['BIG-IQ']), ('bigIqUsername',['BIG-IQ']), ('bigIqPassword',['BIG-IQ']), ('bigIqLicensePoolName',['BIG-IQ']), ('bigIqLicenseSkuKeyword1',['BIG-IQ']), ('bigIqLicenseUnitOfMeasure',['BIG-IQ'])])
+license_params = OrderedDict([('numberOfStaticInstances',['big-iq+payg']), ('licenseKey1',['byol']), ('licenseKey2',['byol']), ('licensedBandwidth',['payg',]), ('bigIqAddress',['big-iq']), ('bigIqUsername',['big-iq']), ('bigIqPassword',['big-iq']), ('bigIqLicensePoolName',['big-iq']), ('bigIqLicenseSkuKeyword1',['big-iq']), ('bigIqLicenseUnitOfMeasure',['big-iq'])])
 # licenseKey2 is only used by cluster templates
 if template_name not in ('failover-lb_1nic', 'failover-lb_3nic', 'failover-api'):
     license_params.pop('licenseKey2')
-# BIGIQ+PAYG is only in experimental autoscale
+# bigiq+payg is only in experimental autoscale
 if template_name in ('autoscale_ltm_via-lb', 'autoscale_waf_via-lb') and 'experimental' in support_type:
     bigiq_payg_list = ['licensedBandwidth', 'bigIqAddress', 'bigIqUsername', 'bigIqPassword', 'bigIqLicensePoolName', 'bigIqLicenseSkuKeyword1', 'bigIqLicenseUnitOfMeasure']
-    [license_params[k].append('BIG-IQ+PAYG') for k in bigiq_payg_list]
+    [license_params[k].append('big-iq+payg') for k in bigiq_payg_list]
 else:
     license_params.pop('numberOfStaticInstances')
-# BIG-IQ does not exist for prod_stack currently
-if stack_type in ('prod_stack'):
+# big-iq does not exist for production-stack currently
+if stack_type in ('production-stack'):
     [license_params.pop(k) for k in ['bigIqAddress', 'bigIqUsername', 'bigIqPassword', 'bigIqLicensePoolName', 'bigIqLicenseSkuKeyword1', 'bigIqLicenseUnitOfMeasure']]
 
 ######################################## Create/Modify Scripts ###########################################

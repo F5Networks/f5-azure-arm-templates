@@ -192,7 +192,7 @@ note_text:
     default: 'You have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) with a pool of BIG-IP licenses in order to license BIG-IP VEs using BYOL licenses. **Note:** The templates now support BIG-IQ licensing using an [ELA](https://www.f5.com/pdf/licensing/big-ip-virtual-edition-enterprise-licensing-agreement-overview.pdf)/[CLPv2]( https://f5.com/partners/cloud-provider) pool, which enables self-licensing of BIG-IP virtual editions (VEs). **Important:** This solution supports the two most recent versions of BIG-IQ (see the [Version Matrix](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md) for specific versions), and your BIG-IQ system must have at least 2 NICs.'
     exclude:
       stack_type:
-        - prod_stack
+        - production-stack
   api_required: 'This solution uses calls to the Azure REST API to read and update Azure resources such as storage accounts, network interfaces, and route tables.  For the solution to function correctly, you must ensure that the BIG-IP(s) can connect to the Azure REST API on port 443.'
   cloud_env_support: 'This solution uses calls to the Azure REST API to read and update Azure resources, this has specifically been tested in Azure Commercial Cloud.  Additional cloud environments such as Azure Goverment, Azure Germany and Azure China cloud have not yet been tested.'
   dns_provider_required: 'This solution uses a DNS provider instead of an Azure load Balancer for distribution of traffic.  The DNS provider **must** already exist prior to deployment. Currently ***only BIG-IP DNS is supported***.'
@@ -201,19 +201,19 @@ help_text:
   supported: 'Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K40701984).'
   experimental: 'While this template has been created by F5 Networks, it is in the **experimental** directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.'
 stack_type_text:
-  new_stack: 'This solution deploys into a new networking stack, which is created along with the solution.'
-  existing_stack: 'This template deploys into an existing networking stack; so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.'
-  prod_stack: "This template deploys into an existing networking stack, so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.\n\nThis template differs from the *existing stack* template in that this template deploys without creating or attaching any public IP addresses to the BIG-IP VEs (note that outbound Internet access for the BIG-IP is still required).  This can be useful (or possibly required) in deployments where accessing resources does not require a public IP address on the BIG-IP VE, such as users connecting to internal applications using a VPN."
-  learning_stack: "This solution deploys into a new networking stack, which is created along with the solution.  This is a *learning stack*, which means that in addition to creating a new networking stack it also creates all of the appropriate configuration for an example web service."
+  new-stack: 'This solution deploys into a new networking stack, which is created along with the solution.'
+  existing-stack: 'This template deploys into an existing networking stack; so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.'
+  production-stack: "This template deploys into an existing networking stack, so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.\n\nThis template differs from the *existing stack* template in that this template deploys without creating or attaching any public IP addresses to the BIG-IP VEs (note that outbound Internet access for the BIG-IP is still required).  This can be useful (or possibly required) in deployments where accessing resources does not require a public IP address on the BIG-IP VE, such as users connecting to internal applications using a VPN."
+  learning-stack: "This solution deploys into a new networking stack, which is created along with the solution.  This is a *learning stack*, which means that in addition to creating a new networking stack it also creates all of the appropriate configuration for an example web service."
 sp_access_text:
   default: "The service principal account must have read permissions to the following objects and it is *recommended* to apply the built-in **Reader** role to the account being used. If applying a custom role, it must have at least *read* permissions to the following resources:\n\n- Microsoft.Compute/*\n- Microsoft.Network/*\n- Microsoft.Storage/*"
   template_name:
     failover-api: "The service principal account must have read/write permissions to the following objects and it is *recommended* to apply the built-in **Contributor** role to the account being used. If applying a custom role, it must have *read/write* permissions to the following resources:\n\n- Microsoft.Network/*\n- Microsoft.Storage/*"
 license_text:
-  BYOL: ' (bring your own license): This allows you to use an existing BIG-IP license.'
-  PAYG: ': This allows you to use pay-as-you-go hourly billing.'
-  BIG-IQ: ': This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s).'
-  BIG-IQ+PAYG: ': This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s), as well as use PAYG instances.'
+  byol: ' (bring your own license): This allows you to use an existing BIG-IP license.'
+  payg: ': This allows you to use pay-as-you-go hourly billing.'
+  big-iq: ': This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s).'
+  big-iq+payg: ': This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s), as well as use PAYG instances.'
 license_map:
   13.1.0200: '13.1.0 Build 0.0.6'
   12.1.303000: '12.1.3.3 Build 0.0.1'

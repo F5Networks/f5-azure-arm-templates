@@ -287,7 +287,7 @@ def param_descr_update(data, template_name):
     return data
 
 def pub_ip_strip(data, resource, tmpl_type):
-    """ Set Public IP address value to null within the IP Configuration Objects if exists - For use by prod_stack """
+    """ Set Public IP address value to null within the IP Configuration Objects if exists - For use by production-stack """
     if resource == 'PublicIpAddress':
         for item in data:
             if tmpl_type == 'resources':

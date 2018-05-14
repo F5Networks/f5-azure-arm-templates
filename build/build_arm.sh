@@ -24,17 +24,17 @@ for tmpl in $template_list; do
     elif [[ $loc == *"failover-api"* ]]; then
         tmpl="failover-api"
     fi
-    # Do not build prod_stack for certain templates
-    stack_list="new_stack existing_stack prod_stack"
-    if [[ $tmpl == *"failover-api"* ]] || [[ $tmpl == *"failover-lb"* ]]; then
-        stack_list="new_stack existing_stack"
+    # Do not build production-stack for certain templates
+    stack_list="new-stack existing-stack production-stack"
+    if [[ $tmpl == *"failover-api"* ]] || [[ $tmpl == *"failover-lb_3nic"* ]]; then
+        stack_list="new-stack existing-stack"
     fi
     for stack_type in $stack_list; do
-        python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../supported/$loc/$stack_type/PAYG/" --script-location "../supported/$loc/$stack_type/" $release_prep
-        python -B '.\master_template.py' --template-name $tmpl --license-type BYOL --stack-type $stack_type --template-location "../supported/$loc/$stack_type/BYOL/" --script-location "../supported/$loc/$stack_type/" $release_prep
-        # Don't build BIG-IQ template if stack type is prod_stack
-        if [[ $stack_type != *"prod_stack"* ]]; then
-            python -B '.\master_template.py' --template-name $tmpl --license-type BIGIQ --stack-type $stack_type --template-location "../supported/$loc/$stack_type/BIGIQ/" --script-location "../supported/$loc/$stack_type/" $release_prep
+        python -B '.\master_template.py' --template-name $tmpl --license-type payg --stack-type $stack_type --template-location "../supported/$loc/$stack_type/payg/" --script-location "../supported/$loc/$stack_type/" $release_prep
+        python -B '.\master_template.py' --template-name $tmpl --license-type byol --stack-type $stack_type --template-location "../supported/$loc/$stack_type/byol/" --script-location "../supported/$loc/$stack_type/" $release_prep
+        # Don't build BIG-IQ template if stack type is production-stack
+        if [[ $stack_type != *"production-stack"* ]]; then
+            python -B '.\master_template.py' --template-name $tmpl --license-type bigiq --stack-type $stack_type --template-location "../supported/$loc/$stack_type/bigiq/" --script-location "../supported/$loc/$stack_type/" $release_prep
         fi
     done
 done
@@ -46,10 +46,10 @@ for tmpl in $template_list; do
     if [[ $loc == *"autoscale"* ]]; then
         tmpl=`echo $tmpl | sed 's/\//_/g'`
     fi
-    stack_list="new_stack existing_stack"
+    stack_list="new-stack existing-stack"
     for stack_type in $stack_list; do
-        python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../supported/solutions/$loc/$stack_type/PAYG/" --script-location "../supported/solutions/$loc/$stack_type/" --solution-location 'supported' $release_prep
-        python -B '.\master_template.py' --template-name $tmpl --license-type BIGIQ --stack-type $stack_type --template-location "../supported/solutions/$loc/$stack_type/BIGIQ/" --script-location "../supported/solutions/$loc/$stack_type/" --solution-location 'supported' $release_prep
+        python -B '.\master_template.py' --template-name $tmpl --license-type payg --stack-type $stack_type --template-location "../supported/$loc/$stack_type/payg/" --script-location "../supported/$loc/$stack_type/" --solution-location 'supported' $release_prep
+        python -B '.\master_template.py' --template-name $tmpl --license-type bigiq --stack-type $stack_type --template-location "../supported/$loc/$stack_type/bigiq/" --script-location "../supported/$loc/$stack_type/" --solution-location 'supported' $release_prep
     done
 done
 
@@ -67,21 +67,21 @@ for tmpl in $template_list; do
     elif [[ $loc == *"failover-api"* ]]; then
         tmpl="failover-api"
     fi
-    # Do not build prod_stack for certain templates
-    stack_list="new_stack existing_stack prod_stack"
+    # Do not build production-stack for certain templates
+    stack_list="new-stack existing-stack production-stack"
     if [[ $tmpl == *"failover-api"* ]] || [[ $tmpl == *"failover-lb_3nic"* ]]; then
-        stack_list="new_stack existing_stack"
+        stack_list="new-stack existing-stack"
     fi
-    # Build learning_stack for certain templates
+    # Build learning-stack for certain templates
     if [[ $tmpl == *"standalone_3nic"* ]] || [[ $tmpl == *"failover-api"* ]]; then
-        stack_list+=" learning_stack"
+        stack_list+=" learning-stack"
     fi
     for stack_type in $stack_list; do
-        python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/PAYG/" --script-location "../experimental/$loc/$stack_type/" $release_prep
-        python -B '.\master_template.py' --template-name $tmpl --license-type BYOL --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/BYOL/" --script-location "../experimental/$loc/$stack_type/" $release_prep
-        # Don't build BIG-IQ template if stack type is prod_stack
-        if [[ $stack_type != *"prod_stack"* ]]; then
-            python -B '.\master_template.py' --template-name $tmpl --license-type BIGIQ --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/BIGIQ/" --script-location "../experimental/$loc/$stack_type/" $release_prep
+        python -B '.\master_template.py' --template-name $tmpl --license-type payg --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/payg/" --script-location "../experimental/$loc/$stack_type/" $release_prep
+        python -B '.\master_template.py' --template-name $tmpl --license-type byol --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/byol/" --script-location "../experimental/$loc/$stack_type/" $release_prep
+        # Don't build BIG-IQ template if stack type is production-stack
+        if [[ $stack_type != *"production-stack"* ]]; then
+            python -B '.\master_template.py' --template-name $tmpl --license-type bigiq --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/bigiq/" --script-location "../experimental/$loc/$stack_type/" $release_prep
         fi
     done
 done
@@ -93,12 +93,12 @@ for tmpl in $template_list; do
     if [[ $loc == *"autoscale"* ]]; then
         tmpl=`echo $tmpl | sed 's/\//_/g'`
     fi
-    stack_list="new_stack existing_stack"
+    stack_list="new-stack existing-stack"
     for stack_type in $stack_list; do
-        python -B '.\master_template.py' --template-name $tmpl --license-type PAYG --stack-type $stack_type --template-location "../experimental/solutions/$loc/$stack_type/PAYG/" --script-location "../experimental/solutions/$loc/$stack_type/" --solution-location 'experimental' $release_prep
-        python -B '.\master_template.py' --template-name $tmpl --license-type BIGIQ --stack-type $stack_type --template-location "../experimental/solutions/$loc/$stack_type/BIGIQ/" --script-location "../experimental/solutions/$loc/$stack_type/" --solution-location 'experimental' $release_prep
+        python -B '.\master_template.py' --template-name $tmpl --license-type payg --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/payg/" --script-location "../experimental/$loc/$stack_type/" --solution-location 'experimental' $release_prep
+        python -B '.\master_template.py' --template-name $tmpl --license-type bigiq --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/bigiq/" --script-location "../experimental/$loc/$stack_type/" --solution-location 'experimental' $release_prep
         if [[ $tmpl == *"via-lb"* ]]; then
-            python -B '.\master_template.py' --template-name $tmpl --license-type BIGIQ_PAYG --stack-type $stack_type --template-location "../experimental/solutions/$loc/$stack_type/BIGIQ_PAYG/" --script-location "../experimental/solutions/$loc/$stack_type/" --solution-location 'experimental' $release_prep
+            python -B '.\master_template.py' --template-name $tmpl --license-type bigiq-payg --stack-type $stack_type --template-location "../experimental/$loc/$stack_type/bigiq-payg/" --script-location "../experimental/$loc/$stack_type/" --solution-location 'experimental' $release_prep
         fi
     done
 done
