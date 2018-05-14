@@ -70,7 +70,7 @@ elif template_name in ('autoscale_waf_via-lb', 'autoscale_waf_via-dns'):
     additional_tar_list = "tar xfz /config/cloud/f5-cloud-libs-azure.tar.gz -C /config/cloud/azure/node_modules/@f5devcentral\n"
 
 #### Empty hashed file list when testing new code ####
-hashed_file_list = ""
+#hashed_file_list = ""
 ######################################################
 install_cloud_libs = install_cloud_libs.replace('<HASHED_FILE_LIST>', hashed_file_list)
 install_cloud_libs = install_cloud_libs.replace('<TAR_LIST>', additional_tar_list)
