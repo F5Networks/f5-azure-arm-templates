@@ -338,7 +338,7 @@
         "timeZone": {
             "defaultValue": "UTC", 
             "metadata": {
-                "description": "If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list at https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."
+                "description": "If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list [here](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md)). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."
             }, 
             "type": "string"
         }, 
