@@ -49,7 +49,6 @@ templates:
     intro: "This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE cluster (Active/Active) in Microsoft Azure. Traffic flows from an ALB to the BIG-IP VE which then processes the traffic to application servers. This is the standard cloud design where the BIG-IP VE instance is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.\n\nThe BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
     config_ex_text: 'In this scenario, all access to the BIG-IP VE cluster (Active/Active) is through an ALB. The IP addresses in this example may be different in your implementation.'
     config_note_list:
-      - storage_account
       - bigiq_note
     extra_text:
       - <VS_CREATION>: <VS_CREATION_FAILOVER_LB_1NIC>
@@ -59,7 +58,6 @@ templates:
     config_ex_text: 'In this scenario, all access to the BIG-IP VE cluster (Active/Active) is through an ALB. For diagrams of alternate deployment topologies, see [cluster 3 NIC alternate topologies](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/supported/cluster/3nic/alternate-deployment-topologies.md).'
     config_note_list:
       - post_config
-      - storage_account
       - bigiq_note
     extra_text:
       - <POST_CONFIG_TXT>
@@ -72,12 +70,12 @@ templates:
       - service_principal
       - udr_tags
       - api_required
+      - cloud_env_support
     config_note_list:
       - post_config
       - tg_config
       - persist_msg
       - failover_log
-      - storage_account
       - ha_failover
       - addtl_nic_config
       - ha_addtl_nic
@@ -98,6 +96,7 @@ templates:
     prereq_list:
       - service_principal
       - api_required
+      - cloud_env_support
     config_note_list:
       - master_election
       - post_config
@@ -116,6 +115,7 @@ templates:
     prereq_list:
       - service_principal
       - api_required
+      - cloud_env_support
       - dns_provider_required
     config_note_list:
       - master_election
@@ -138,6 +138,7 @@ templates:
     prereq_list:
       - service_principal
       - api_required
+      - cloud_env_support
     config_note_list:
       - master_election
       - post_config
@@ -157,6 +158,7 @@ templates:
     prereq_list:
       - service_principal
       - api_required
+      - cloud_env_support
     config_note_list:
       - master_election
       - post_config
@@ -184,7 +186,6 @@ note_text:
   tg_config: 'This template now supports associating Azure NIC IP configurations with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.'
   failover_log: 'The BIG-IP VE failover log can be found at **/var/log/cloud/azure/azureFailover.log**.'
   scaling_note: 'For important information on choosing a metric on which to base autoscaling events and the thresholds used by the template, see [Scaling Thresholds](#scaling-thresholds).'
-  storage_account: 'This template creates separate Azure storage accounts for each BIG-IP device that is a part of this deployment.'
   ha_addtl_nic: 'Adding additional NIC''s post-deployment is possible, it requires creating an additional NIC, powering off the VM and adding the network interface to the VM. See Microsoft documentation for more details on adding a NIC to an existing VM. **Important**: For failover to occur the additional NIC''s created must be named exactly the same except for the last character, such as **additionalnic0** and **additionalnic1**.'
   ha_failover: 'When configuring the template, you have the option of selecting 0 (zero) public IP addresses.  If you select 0 public IP addresses, the BIG-IP systems **will not** create any additional IP configurations on the Azure network interfaces; however, failover of UDR next hop is still supported.  If you create IP configurations post-deployment and would like them to failover, see the [Post-Deployment Configuration section](#post-deployment-configuration) for details.'
   bigiq_note:
@@ -193,6 +194,7 @@ note_text:
       stack_type:
         - prod_stack
   api_required: 'This solution uses calls to the Azure REST API to read and update Azure resources such as storage accounts, network interfaces, and route tables.  For the solution to function correctly, you must ensure that the BIG-IP(s) can connect to the Azure REST API on port 443.'
+  cloud_env_support: 'This solution uses calls to the Azure REST API to read and update Azure resources, this has specifically been tested in Azure Commercial Cloud.  Additional cloud environments such as Azure Goverment, Azure Germany and Azure China cloud have not yet been tested.'
   dns_provider_required: 'This solution uses a DNS provider instead of an Azure load Balancer for distribution of traffic.  The DNS provider **must** already exist prior to deployment. Currently ***only BIG-IP DNS is supported***.'
 
 help_text:
