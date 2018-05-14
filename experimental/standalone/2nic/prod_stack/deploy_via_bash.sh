@@ -116,6 +116,9 @@ if [ $licenseType == "BYOL" ]; then
     if [ -z $licenseKey1 ] ; then
             read -p "Please enter value for licenseKey1:" licenseKey1
     fi
+    template_file="./BYOL/azuredeploy.json"
+    parameter_file="./BYOL/azuredeploy.parameters.json"
+fi
 # Prompt for licensed bandwidth if not supplied and PAYG is selected
 if [ $licenseType == "PAYG" ]; then
     if [ -z $licensedBandwidth ] ; then

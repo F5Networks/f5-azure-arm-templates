@@ -155,6 +155,8 @@ if [ $licenseType == "BIGIQ" ]; then
 					read -p "Please enter value for $variable:" $variable
 			fi
 	done
+    template_file="./BIGIQ/azuredeploy.json"
+    parameter_file="./BIGIQ/azuredeploy.parameters.json"
 fi
 
 

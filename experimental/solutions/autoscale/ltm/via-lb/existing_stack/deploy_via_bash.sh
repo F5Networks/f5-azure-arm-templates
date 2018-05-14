@@ -164,6 +164,8 @@ if [ $licenseType == "BIGIQ" ]; then
 					read -p "Please enter value for $variable:" $variable
 			fi
 	done
+    template_file="./BIGIQ/azuredeploy.json"
+    parameter_file="./BIGIQ/azuredeploy.parameters.json"
 fi
 
 # Prompt for BIGIQ_PAYG parameters if not supplied and BIGIQ_PAYG is selected
@@ -175,6 +177,8 @@ if [ $licenseType == "BIGIQ_PAYG" ]; then
 					read -p "Please enter value for $variable:" $variable
 			fi
 	done
+    template_file="./BIGIQ_PAYG/azuredeploy.json"
+    parameter_file="./BIGIQ_PAYG/azuredeploy.parameters.json"
 fi
 
 

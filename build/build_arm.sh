@@ -26,7 +26,7 @@ for tmpl in $template_list; do
     fi
     # Do not build prod_stack for certain templates
     stack_list="new_stack existing_stack prod_stack"
-    if [[ $tmpl == *"failover-api"* ]] || [[ $tmpl == *"failover-lb"* ]]; then
+    if [[ $tmpl == *"failover-api"* ]] || [[ $tmpl == *"failover-lb_3nic"* ]]; then
         stack_list="new_stack existing_stack"
     fi
     for stack_type in $stack_list; do
