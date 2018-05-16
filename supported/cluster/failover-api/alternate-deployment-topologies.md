@@ -1,11 +1,11 @@
 # Alternate Deployment Topologies - cluster (failover-api)
 
-This page contains some alternate deployment topology diagrams for the F5 Cluster Failover-LB ARM template which can assist in your deployment planning.
+This page contains some alternate deployment topology diagrams for the F5 Cluster Failover-API ARM template which can assist in your deployment planning.
 
 ## Contents
 
-- [failover-lb alternate topology 1](#failover-lb-alternate-topology-1)
-- [failover-lb alternate topology 2](#failover-lb-alternate-topology-2)
+- [failover alternate topology 1](#alternate-topology-1)
+- [failover alternate topology 2](#alternate-topology-2)
 
 ### Alternate topology 1
 

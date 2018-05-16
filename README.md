@@ -3,8 +3,6 @@
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
 [![Issues](https://img.shields.io/github/issues/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/issues)
 
-
-
 ## Introduction
 
 Welcome to the GitHub repository for F5's ARM templates for Azure deployments.  All of the templates in this repository have been developed by F5 Networks engineers. Across all branches in this repository, there are two directories: *f5_supported* and *experimental*
@@ -16,16 +14,20 @@ Welcome to the GitHub repository for F5's ARM templates for Azure deployments.  
   The experimental directory also contains ARM templates that have been created by F5 Networks. However, these templates have not completed full testing and are subject to change. F5 Networks does not offer technical support for templates in the experimental directory, so use these templates with caution.
 
 ## Template information
+
 Descriptions for each template are contained at the top of each template in the *Description* key.
 For additional information, including how the templates are generated, and assistance in deploying a template, see the individual README.md file in the individual template directory.
 
 ### Matrix for tagged releases
-F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughputs available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md
+
+F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughputs available for a specific tagged release. See [matrix](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md).
 
 ## CVE-2017-6168 information
+
 If you have launched an F5 ARM template from a prior release, see the <a href="#important">important note</a> at the bottom of this page.
 
 ## List of F5 ARM templates for Azure deployments
+
 The following is a list of the current **supported** F5 ARM templates. See the **experimental** directory for experimental templates.
 Note that many of the solutions now include *Production Stack* templates.  This means that the templates deploy without creating or attaching any public IP addresses to the BIG-IP VEs, see the individual README files for more information.
 
@@ -101,6 +103,10 @@ Note that many of the solutions now include *Production Stack* templates.  This 
         - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv5.0.0.0%2Fsupported%2Fcluster%2Ffailover-lb%2F1nic%2Fexisting_stack%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
         - *Using BIG-IQ for Licensing* <br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv5.0.0.0%2Fsupported%2Fcluster%2Ffailover-lb%2F1nic%2Fexisting_stack%2FBIGIQ%2Fazuredeploy.json"> <img src="http://azuredeploy.net/deploybutton.png"/></a>
 
+      - [Production Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/cluster/failover-lb/1nic/prod_stack)
+        - *BYOL* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv5.0.0.0%2Fsupported%2Fcluster%2Ffailover-lb%2F1nic%2Fprod_stack%2FBYOL%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
+        - *PAYG* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv5.0.0.0%2Fsupported%2Fcluster%2Ffailover-lb%2F1nic%2Fprod_stack%2FPAYG%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
+
     - *3 NICs*
       - [New Networking Stack](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/supported/cluster/failover-lb/3nic/new_stack)
         - *BYOL* <br> <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv5.0.0.0%2Fsupported%2Fcluster%2Ffailover-lb%2F3nic%2Fnew_stack%2FBYOL%2Fazuredeploy.json">  <img src="http://azuredeploy.net/deploybutton.png"/></a>
@@ -162,9 +168,7 @@ Note that many of the solutions now include *Production Stack* templates.  This 
 
 Copyright 2014-2018 F5 Networks Inc.
 
-
 ### License
-
 
 #### Apache V2.0
 
