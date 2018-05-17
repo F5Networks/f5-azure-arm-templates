@@ -184,7 +184,7 @@
         "customImage": {
             "defaultValue": "OPTIONAL", 
             "metadata": {
-                "description": "If you would like to deploy using a local BIG-IP image, provide either the full URL to the VHD in Azure storage **or** the full resource id to an existing Microsoft.Compute image resource to use.  **Note**: Unless specifically required, leave the default of **OPTIONAL**."
+                "description": "If you would like to deploy using a local BIG-IP image, provide either the full URL to the VHD in Azure storage **or** the full resource ID to an existing Microsoft.Compute image resource.  **Note**: Unless specifically required, leave the default of **OPTIONAL**."
             }, 
             "type": "string"
         }, 
