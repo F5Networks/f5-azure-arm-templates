@@ -1,11 +1,11 @@
 # Alternate Deployment Topologies - cluster (failover-api)
 
-This page contains some alternate deployment topology diagrams for the F5 Cluster Failover-LB ARM template which can assist in your deployment planning.
+This page contains some alternate deployment topology diagrams for the F5 Cluster Failover-API ARM template which can assist in your deployment planning.
 
 ## Contents
 
-- [failover-lb alternate topology 1](#failover-lb-alternate-topology-1)
-- [failover-lb alternate topology 2](#failover-lb-alternate-topology-2)
+- [failover alternate topology 1](#alternate-topology-1)
+- [failover alternate topology 2](#alternate-topology-2)
 
 ### Alternate topology 1
 
@@ -13,7 +13,7 @@ In this example, a Node.js failover script moves the Azure IP configuration for 
 
 An external Azure load balancer forwards application traffic from the Internet to host destination virtual servers on BIG-IP VE.
 
-![Configuration Example alternate deployment 1](images/cluster-alternate-diagram1.png)
+![Configuration Example alternate deployment 1](images/alternate-diagram1.png)
 
 ---
 
@@ -23,6 +23,6 @@ In this example, a Node.js failover script moves the Azure IP configuration for 
 
 An external Azure load balancer forwards application traffic from the Internet to host destination virtual servers on BIG-IP VE.
 
-![Configuration Example alternate deployment 2](images/cluster-alternate-diagram2.png)
+![Configuration Example alternate deployment 2](images/alternate-diagram2.png)
 
 ---
