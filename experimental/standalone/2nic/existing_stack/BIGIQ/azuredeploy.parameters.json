@@ -1,12 +1,15 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "5.0.0.0", 
+    "contentVersion": "5.1.0.0", 
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
         }, 
-        "adminPassword": {
-            "value": "GEN_UNIQUE"
+        "authenticationType": {
+            "value": "password"
+        }, 
+        "adminPasswordOrKey": {
+            "value": ""
         }, 
         "dnsLabel": {
             "value": ""
@@ -18,43 +21,49 @@
             "value": "Standard_DS2_v2"
         }, 
         "imageName": {
-            "value": "Good"
+            "value": "Best"
         }, 
         "bigIpVersion": {
             "value": "13.1.0200"
         }, 
-        "bigIqLicenseHost": {
-            "value": "GEN_UNIQUE"
+        "bigIqAddress": {
+            "value": ""
         }, 
-        "bigIqLicenseUsername": {
-            "value": "GEN_UNIQUE"
+        "bigIqUsername": {
+            "value": ""
         }, 
-        "bigIqLicensePassword": {
-            "value": "GEN_UNIQUE"
+        "bigIqPassword": {
+            "value": ""
         }, 
-        "bigIqLicensePool": {
-            "value": "GEN_UNIQUE"
+        "bigIqLicensePoolName": {
+            "value": ""
+        }, 
+        "bigIqLicenseSkuKeyword1": {
+            "value": "OPTIONAL"
+        }, 
+        "bigIqLicenseUnitOfMeasure": {
+            "value": "OPTIONAL"
         }, 
         "numberOfExternalIps": {
             "value": 1
         }, 
         "vnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "vnetResourceGroupName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "mgmtSubnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "mgmtIpAddress": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "externalSubnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "externalIpAddressRangeStart": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "avSetChoice": {
             "value": "CREATE_NEW"
@@ -64,6 +73,9 @@
         }, 
         "timeZone": {
             "value": "UTC"
+        }, 
+        "customImage": {
+            "value": "OPTIONAL"
         }, 
         "restrictedSrcAddress": {
             "value": "*"

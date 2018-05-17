@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "5.0.0.0", 
+    "contentVersion": "5.1.0.0", 
     "parameters": {
         "numberOfInstances": {
             "value": 2
@@ -8,8 +8,11 @@
         "adminUsername": {
             "value": "azureuser"
         }, 
-        "adminPassword": {
-            "value": "GEN_UNIQUE"
+        "authenticationType": {
+            "value": "password"
+        }, 
+        "adminPasswordOrKey": {
+            "value": ""
         }, 
         "dnsLabel": {
             "value": ""
@@ -18,22 +21,28 @@
             "value": "Standard_DS2_v2"
         }, 
         "imageName": {
-            "value": "Good"
+            "value": "Best"
         }, 
         "bigIpVersion": {
             "value": "13.1.0200"
         }, 
-        "bigIqLicenseHost": {
-            "value": "GEN_UNIQUE"
+        "bigIqAddress": {
+            "value": ""
         }, 
-        "bigIqLicenseUsername": {
-            "value": "GEN_UNIQUE"
+        "bigIqUsername": {
+            "value": ""
         }, 
-        "bigIqLicensePassword": {
-            "value": "GEN_UNIQUE"
+        "bigIqPassword": {
+            "value": ""
         }, 
-        "bigIqLicensePool": {
-            "value": "GEN_UNIQUE"
+        "bigIqLicensePoolName": {
+            "value": ""
+        }, 
+        "bigIqLicenseSkuKeyword1": {
+            "value": "OPTIONAL"
+        }, 
+        "bigIqLicenseUnitOfMeasure": {
+            "value": "OPTIONAL"
         }, 
         "vnetAddressPrefix": {
             "value": "10.0"
@@ -43,6 +52,9 @@
         }, 
         "timeZone": {
             "value": "UTC"
+        }, 
+        "customImage": {
+            "value": "OPTIONAL"
         }, 
         "restrictedSrcAddress": {
             "value": "*"

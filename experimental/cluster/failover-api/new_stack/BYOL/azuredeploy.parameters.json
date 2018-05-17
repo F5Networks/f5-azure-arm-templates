@@ -1,12 +1,15 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "5.0.0.0", 
+    "contentVersion": "5.1.0.0", 
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
         }, 
-        "adminPassword": {
-            "value": "GEN_UNIQUE"
+        "authenticationType": {
+            "value": "password"
+        }, 
+        "adminPasswordOrKey": {
+            "value": ""
         }, 
         "dnsLabel": {
             "value": ""
@@ -18,7 +21,7 @@
             "value": "Standard_DS3_v2"
         }, 
         "imageName": {
-            "value": "Good"
+            "value": "Best"
         }, 
         "bigIpVersion": {
             "value": "13.1.0200"
@@ -29,6 +32,12 @@
         "licenseKey2": {
             "value": ""
         }, 
+        "numberOfAdditionalNics": {
+            "value": 0
+        }, 
+        "additionalNicLocation": {
+            "value": "OPTIONAL"
+        }, 
         "numberOfExternalIps": {
             "value": 1
         }, 
@@ -36,13 +45,13 @@
             "value": "10.0"
         }, 
         "tenantId": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "clientId": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "servicePrincipalSecret": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "managedRoutes": {
             "value": "NOT_SPECIFIED"
@@ -52,6 +61,9 @@
         }, 
         "timeZone": {
             "value": "UTC"
+        }, 
+        "customImage": {
+            "value": "OPTIONAL"
         }, 
         "restrictedSrcAddress": {
             "value": "*"

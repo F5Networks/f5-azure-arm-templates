@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "5.0.0.0", 
+    "contentVersion": "5.1.0.0", 
     "parameters": {
         "vmScaleSetMinCount": {
             "value": 2
@@ -29,8 +29,11 @@
         "adminUsername": {
             "value": "azureuser"
         }, 
-        "adminPassword": {
-            "value": "GEN_UNIQUE"
+        "authenticationType": {
+            "value": "password"
+        }, 
+        "adminPasswordOrKey": {
+            "value": ""
         }, 
         "dnsLabel": {
             "value": ""
@@ -44,35 +47,41 @@
         "bigIpVersion": {
             "value": "13.1.0200"
         }, 
-        "bigIqLicenseHost": {
-            "value": "GEN_UNIQUE"
+        "bigIqAddress": {
+            "value": ""
         }, 
-        "bigIqLicenseUsername": {
-            "value": "GEN_UNIQUE"
+        "bigIqUsername": {
+            "value": ""
         }, 
-        "bigIqLicensePassword": {
-            "value": "GEN_UNIQUE"
+        "bigIqPassword": {
+            "value": ""
         }, 
-        "bigIqLicensePool": {
-            "value": "GEN_UNIQUE"
+        "bigIqLicensePoolName": {
+            "value": ""
+        }, 
+        "bigIqLicenseSkuKeyword1": {
+            "value": "OPTIONAL"
+        }, 
+        "bigIqLicenseUnitOfMeasure": {
+            "value": "OPTIONAL"
         }, 
         "vnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "vnetResourceGroupName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "mgmtSubnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "solutionDeploymentName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "applicationProtocols": {
             "value": "http-https"
         }, 
         "applicationAddress": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "applicationServiceFqdn": {
             "value": "NOT_SPECIFIED"
@@ -99,13 +108,13 @@
             "value": "NOT_SPECIFIED"
         }, 
         "tenantId": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "clientId": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "servicePrincipalSecret": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "notificationEmail": {
             "value": "OPTIONAL"
@@ -115,6 +124,9 @@
         }, 
         "timeZone": {
             "value": "UTC"
+        }, 
+        "customImage": {
+            "value": "OPTIONAL"
         }, 
         "restrictedSrcAddress": {
             "value": "*"

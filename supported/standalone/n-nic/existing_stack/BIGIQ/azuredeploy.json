@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json", 
-    "contentVersion": "5.0.0.0", 
+    "contentVersion": "5.1.0.0", 
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser", 
@@ -9,9 +9,20 @@
             }, 
             "type": "string"
         }, 
-        "adminPassword": {
+        "authenticationType": {
+            "allowedValues": [
+                "password", 
+                "sshPublicKey"
+            ], 
+            "defaultValue": "password", 
             "metadata": {
-                "description": "Password to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details."
+                "description": "Type of authentication to use on the Virtual Machine, password based authentication or key based authentication."
+            }, 
+            "type": "string"
+        }, 
+        "adminPasswordOrKey": {
+            "metadata": {
+                "description": "Password or SSH public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key-based authentication, this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**."
             }, 
             "type": "securestring"
         }, 
@@ -88,9 +99,9 @@
                 "Better", 
                 "Best"
             ], 
-            "defaultValue": "Good", 
+            "defaultValue": "Best", 
             "metadata": {
-                "description": "F5 SKU (IMAGE) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select."
+                "description": "F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as **Best** instead of **Good**."
             }, 
             "type": "string"
         }, 
@@ -106,27 +117,41 @@
             }, 
             "type": "string"
         }, 
-        "bigIqLicenseHost": {
+        "bigIqAddress": {
             "metadata": {
                 "description": "The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP.  Note: The BIG-IP will make a REST call to the BIG-IQ (already existing) to let it know a BIG-IP needs to be licensed. It will then license the BIG-IP using the provided BIG-IQ credentials and license pool."
             }, 
             "type": "string"
         }, 
-        "bigIqLicenseUsername": {
+        "bigIqUsername": {
             "metadata": {
                 "description": "The BIG-IQ username to use during BIG-IP licensing via BIG-IQ."
             }, 
             "type": "string"
         }, 
-        "bigIqLicensePassword": {
+        "bigIqPassword": {
             "metadata": {
                 "description": "The BIG-IQ password to use during BIG-IP licensing via BIG-IQ."
             }, 
             "type": "securestring"
         }, 
-        "bigIqLicensePool": {
+        "bigIqLicensePoolName": {
             "metadata": {
                 "description": "The BIG-IQ license pool to use during BIG-IP licensing via BIG-IQ."
+            }, 
+            "type": "string"
+        }, 
+        "bigIqLicenseSkuKeyword1": {
+            "defaultValue": "OPTIONAL", 
+            "metadata": {
+                "description": "The BIG-IQ license filter (based on SKU keyword) you want to use for licensing the BIG-IPs from the BIG-IQ, for example **F5-BIG-MSP-LTM-25M**, **F5-BIG-MSP-BR-200M**, **F5-BIG-MSP-BT-1G** or **F5-BIG-MSP-ASM-1G**. ***Important***: This is only required when licensing with an ELA/CLPv2 (utility) pool on the BIG-IQ, if not using this pool type leave the default of **OPTIONAL**."
+            }, 
+            "type": "string"
+        }, 
+        "bigIqLicenseUnitOfMeasure": {
+            "defaultValue": "OPTIONAL", 
+            "metadata": {
+                "description": "The BIG-IQ license unit of measure to use during BIG-IP licensing via BIG-IQ, for example **yearly**, **monthly**, **daily** or **hourly**. ***Important***: This is only required when licensing with an ELA/CLPv2 (utility) pool on the BIG-IQ, if not using this pool type leave the default of **OPTIONAL**."
             }, 
             "type": "string"
         }, 
@@ -140,13 +165,13 @@
             ], 
             "defaultValue": 1, 
             "metadata": {
-                "description": "By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a select number of additional NICs to the BIG-IP using this parameter."
+                "description": "By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a configurable number of additional NICs to the BIG-IP using this parameter."
             }, 
             "type": "int"
         }, 
         "additionalNicLocation": {
             "metadata": {
-                "description": "This parameter specifies where the additional NICs should go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. NOTE: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. IMPORTANT: The subnet you provide for each additional NIC MUST be unique."
+                "description": "This parameter specifies where the additional NICs go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. **Note**: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique."
             }, 
             "type": "string"
         }, 
@@ -194,7 +219,7 @@
         }, 
         "mgmtSubnetName": {
             "metadata": {
-                "description": "Name of the existing MGMT subnet - with external access to the Internet."
+                "description": "Name of the existing mgmt subnet - with external access to the Internet. **Important**: The subnet you provide for the mgmt NIC **must** be unique."
             }, 
             "type": "string"
         }, 
@@ -206,7 +231,7 @@
         }, 
         "externalSubnetName": {
             "metadata": {
-                "description": "Name of the existing external subnet - with external access to Internet."
+                "description": "Name of the existing external subnet - with external access to Internet. **Important**: The subnet you provide for the external NIC **must** be unique."
             }, 
             "type": "string"
         }, 
@@ -218,7 +243,7 @@
         }, 
         "internalSubnetName": {
             "metadata": {
-                "description": "Name of the existing internal subnet."
+                "description": "Name of the existing internal subnet. **Important**: The subnet you provide for the internal NIC **must** be unique."
             }, 
             "type": "string"
         }, 
@@ -245,7 +270,14 @@
         "timeZone": {
             "defaultValue": "UTC", 
             "metadata": {
-                "description": "If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list at https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."
+                "description": "If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list [here](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md)). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."
+            }, 
+            "type": "string"
+        }, 
+        "customImage": {
+            "defaultValue": "OPTIONAL", 
+            "metadata": {
+                "description": "If you would like to deploy using a local BIG-IP image, provide either the full URL to the VHD in Azure storage **or** the full resource ID to an existing Microsoft.Compute image resource.  **Note**: Unless specifically required, leave the default of **OPTIONAL**."
             }, 
             "type": "string"
         }, 
@@ -316,24 +348,40 @@
                 "Port": 8443
             }
         }, 
-        "apiVersion": "2015-06-15", 
         "computeApiVersion": "2017-12-01", 
         "networkApiVersion": "2017-11-01", 
         "storageApiVersion": "2017-10-01", 
         "location": "[resourceGroup().location]", 
+        "adminPasswordOrKey": "[replace(parameters('adminPasswordOrKey'),'\\n', '\n')]", 
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": true, 
+            "ssh": {
+                "publicKeys": [
+                    {
+                        "keyData": "[variables('adminPasswordOrKey')]", 
+                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]"
+                    }
+                ]
+            }
+        }, 
         "subscriptionID": "[subscription().subscriptionId]", 
         "resourceGroupName": "[resourceGroup().name]", 
         "singleQuote": "'", 
-        "f5CloudLibsTag": "v4.0.3", 
-        "f5CloudLibsAzureTag": "v2.0.2", 
-        "f5NetworksTag": "v5.0.0.0", 
+        "f5CloudLibsTag": "v4.1.1", 
+        "f5CloudLibsAzureTag": "v2.1.0", 
+        "f5NetworksTag": "v5.1.0.0", 
         "f5CloudIappsTag": "v2.0.3", 
-        "verifyHash": "[concat(variables('singleQuote'), 'cli script /Common/verifyHash {\nproc script::run {} {\n        if {[catch {\n            set hashes(f5-cloud-libs.tar.gz) 8ddb28557f0b33ceff5b9a0ee1f30ec27a5fdd1d25f4d08682fd0e82f1a1637429949ddf5458eafd0f384d0f139d1852d91b6cdd4af081511e05de12bc95bec5\n            set hashes(f5-cloud-libs-aws.tar.gz) d99a776cd7d184d98161c0846fd2c4ff6876a344a4491e6b12a592efc99d5bcd9df4ba32d3f5c800fa93f5417cf6986e64fb3b51e038014fd829261ce295f3bb\n            set hashes(f5-cloud-libs-azure.tar.gz) 342fa4ccca856ca1829ac4d1364731983707fbfbe6d81f74078053ca328ec233b273edc40816263a8d3299ed67f6de4d631fc19aac5da74fd1842a544dd74863\n            set hashes(f5-cloud-libs-gce.tar.gz) 66072a397912a2f64ef74f2bb3fcc51c2ca90002d7df67534cf1ace031251d0a2d08f5efb492fa3c46718c65fb24234d2c863dd457e1d300b41dd6f82aca9849\n            set hashes(f5-cloud-libs-openstack.tar.gz) 5c83fe6a93a6fceb5a2e8437b5ed8cc9faf4c1621bfc9e6a0779f6c2137b45eab8ae0e7ed745c8cf821b9371245ca29749ca0b7e5663949d77496b8728f4b0f9\n            set hashes(asm-policy-linux.tar.gz) 63b5c2a51ca09c43bd89af3773bbab87c71a6e7f6ad9410b229b4e0a1c483d46f1a9fff39d9944041b02ee9260724027414de592e99f4c2475415323e18a72e0\n            set hashes(f5.http.v1.2.0rc4.tmpl) 47c19a83ebfc7bd1e9e9c35f3424945ef8694aa437eedd17b6a387788d4db1396fefe445199b497064d76967b0d50238154190ca0bd73941298fc257df4dc034\n            set hashes(f5.http.v1.2.0rc6.tmpl) 811b14bffaab5ed0365f0106bb5ce5e4ec22385655ea3ac04de2a39bd9944f51e3714619dae7ca43662c956b5212228858f0592672a2579d4a87769186e2cbfe\n            set hashes(f5.http.v1.2.0rc7.tmpl) 21f413342e9a7a281a0f0e1301e745aa86af21a697d2e6fdc21dd279734936631e92f34bf1c2d2504c201f56ccd75c5c13baa2fe7653213689ec3c9e27dff77d\n            set hashes(f5.aws_advanced_ha.v1.3.0rc1.tmpl) 9e55149c010c1d395abdae3c3d2cb83ec13d31ed39424695e88680cf3ed5a013d626b326711d3d40ef2df46b72d414b4cb8e4f445ea0738dcbd25c4c843ac39d\n            set hashes(f5.aws_advanced_ha.v1.4.0rc1.tmpl) de068455257412a949f1eadccaee8506347e04fd69bfb645001b76f200127668e4a06be2bbb94e10fefc215cfc3665b07945e6d733cbe1a4fa1b88e881590396\n            set hashes(f5.aws_advanced_ha.v1.4.0rc2.tmpl) 6ab0bffc426df7d31913f9a474b1a07860435e366b07d77b32064acfb2952c1f207beaed77013a15e44d80d74f3253e7cf9fbbe12a90ec7128de6facd097d68f\n            set hashes(asm-policy.tar.gz) 2d39ec60d006d05d8a1567a1d8aae722419e8b062ad77d6d9a31652971e5e67bc4043d81671ba2a8b12dd229ea46d205144f75374ed4cae58cefa8f9ab6533e6\n            set hashes(deploy_waf.sh) 1a3a3c6274ab08a7dc2cb73aedc8d2b2a23cd9e0eb06a2e1534b3632f250f1d897056f219d5b35d3eed1207026e89989f754840fd92969c515ae4d829214fb74\n            set hashes(f5.policy_creator.tmpl) 06539e08d115efafe55aa507ecb4e443e83bdb1f5825a9514954ef6ca56d240ed00c7b5d67bd8f67b815ee9dd46451984701d058c89dae2434c89715d375a620\n            set hashes(f5.service_discovery.tmpl) 7a4660468dffdc4f6d9aec4c1f9d22abfb3e484e7d6fe6a12fc9ab3eec3819dc34d133aea3cce4fdd87a0f4045069270061f2ea1ee7735922e4371592e498a0b\n            set hashes(f5.cloud_logger.v1.0.0.tmpl) a26d5c470e70b821621476bcfd0579dbc0964f6a54158bc6314fa1e2f63b23bf3f3eb43ade5081131c24e08579db2e1e574beb3f8d9789d28acb4f312fad8c3e\n\n            set file_path [lindex $tmsh::argv 1]\n            set file_name [file tail $file_path]\n\n            if {![info exists hashes($file_name)]} {\n                tmsh::log err \"No hash found for $file_name\"\n                exit 1\n            }\n\n            set expected_hash $hashes($file_name)\n            set computed_hash [lindex [exec /usr/bin/openssl dgst -r -sha512 $file_path] 0]\n            if { $expected_hash eq $computed_hash } {\n                exit 0\n            }\n            tmsh::log err \"Hash does not match for $file_path\"\n            exit 1\n        }]} {\n            tmsh::log err {Unexpected error in verifyHash}\n            exit 1\n        }\n    }\n    script-signature nJiyfuy+jIMb0W4aFXE5i2o2ujx3DWkiX47b2hz9wCXDoVv+4mT/LXPeY0i5IuGqHwm572VWXKu4mni7ib/orB2+kS7BLg6pAgEj0JKeoNNkHkP7BX91kxt75M0oDh1S6gbzh2+RXY+/kPNvZLVjLzx4946h4TlTnaaKWRrWafl94Cn7Xqv/TZoilaVQEqMMKKR7WABuGfe3V0duyO0vC6vnDg7nKGk5uJkC6nkPJd2YFkZ8kIE56zbgX/RshsE0isXqh4mpIxOb2aoa1PsDraOd1Sssl4FG4tDOeag+Xxc/GVp+HGJe441uIphGo3gd4973cAkD4K1WwsXmZLAw+A==\n    signing-key /Common/f5-irule\n}', variables('singleQuote'))]", 
-        "installCloudLibs": "[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit 1\nfi\necho loaded verifyHash\n\nconfig_loc=\"/config/cloud/\"\nhashed_file_list=\"\"\nfor file in $hashed_file_list; do\necho \"verifying $file\"\n/usr/bin/tmsh run cli script verifyHash $file\nif [ $? != 0 ]; then\necho \"$file is not valid\"\nexit 1\nfi\necho \"verified $file\"\ndone\necho \"expanding $hashed_file_list\"\ntar xfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud/azure/node_modules/@f5devcentral\ntouch /config/cloud/cloudLibsReady', variables('singleQuote'))]", 
+        "verifyHash": "[concat(variables('singleQuote'), 'cli script /Common/verifyHash {\nproc script::run {} {\n        if {[catch {\n            set hashes(f5-cloud-libs.tar.gz) dd2dbd1375f6fff639f87cd2ba781e9e09cd193c52b40a57697809a73658706f559a1825eede891590db4443cc33f89d76928f55034d352facd157e61ed3bb88\n            set hashes(f5-cloud-libs-aws.tar.gz) e06f724ff1c7fc41d95ef87fc6f7a118d7e64d5555b5e9548ee7582bc3eb8d461ca72266a0758837a951ccd465876c877329fe8a47b38da5183c832680b76b93\n            set hashes(f5-cloud-libs-azure.tar.gz) f1a5e8cfc639063885b595282cb5befdaf88d51ef62bd26e3658e2f3f3b5bbbb2ce0ba54ec1cd12ba87a2336134588affe63052511f7c6c93fb7fc73b8a0e095\n            set hashes(f5-cloud-libs-gce.tar.gz) 66072a397912a2f64ef74f2bb3fcc51c2ca90002d7df67534cf1ace031251d0a2d08f5efb492fa3c46718c65fb24234d2c863dd457e1d300b41dd6f82aca9849\n            set hashes(f5-cloud-libs-openstack.tar.gz) 5c83fe6a93a6fceb5a2e8437b5ed8cc9faf4c1621bfc9e6a0779f6c2137b45eab8ae0e7ed745c8cf821b9371245ca29749ca0b7e5663949d77496b8728f4b0f9\n            set hashes(asm-policy-linux.tar.gz) 63b5c2a51ca09c43bd89af3773bbab87c71a6e7f6ad9410b229b4e0a1c483d46f1a9fff39d9944041b02ee9260724027414de592e99f4c2475415323e18a72e0\n            set hashes(f5.http.v1.2.0rc4.tmpl) 47c19a83ebfc7bd1e9e9c35f3424945ef8694aa437eedd17b6a387788d4db1396fefe445199b497064d76967b0d50238154190ca0bd73941298fc257df4dc034\n            set hashes(f5.http.v1.2.0rc6.tmpl) 811b14bffaab5ed0365f0106bb5ce5e4ec22385655ea3ac04de2a39bd9944f51e3714619dae7ca43662c956b5212228858f0592672a2579d4a87769186e2cbfe\n            set hashes(f5.http.v1.2.0rc7.tmpl) 21f413342e9a7a281a0f0e1301e745aa86af21a697d2e6fdc21dd279734936631e92f34bf1c2d2504c201f56ccd75c5c13baa2fe7653213689ec3c9e27dff77d\n            set hashes(f5.aws_advanced_ha.v1.3.0rc1.tmpl) 9e55149c010c1d395abdae3c3d2cb83ec13d31ed39424695e88680cf3ed5a013d626b326711d3d40ef2df46b72d414b4cb8e4f445ea0738dcbd25c4c843ac39d\n            set hashes(f5.aws_advanced_ha.v1.4.0rc1.tmpl) de068455257412a949f1eadccaee8506347e04fd69bfb645001b76f200127668e4a06be2bbb94e10fefc215cfc3665b07945e6d733cbe1a4fa1b88e881590396\n            set hashes(f5.aws_advanced_ha.v1.4.0rc2.tmpl) 6ab0bffc426df7d31913f9a474b1a07860435e366b07d77b32064acfb2952c1f207beaed77013a15e44d80d74f3253e7cf9fbbe12a90ec7128de6facd097d68f\n            set hashes(f5.aws_advanced_ha.v1.4.0rc3.tmpl) 2f2339b4bc3a23c9cfd42aae2a6de39ba0658366f25985de2ea53410a745f0f18eedc491b20f4a8dba8db48970096e2efdca7b8efffa1a83a78e5aadf218b134\n            set hashes(asm-policy.tar.gz) 2d39ec60d006d05d8a1567a1d8aae722419e8b062ad77d6d9a31652971e5e67bc4043d81671ba2a8b12dd229ea46d205144f75374ed4cae58cefa8f9ab6533e6\n            set hashes(deploy_waf.sh) 1a3a3c6274ab08a7dc2cb73aedc8d2b2a23cd9e0eb06a2e1534b3632f250f1d897056f219d5b35d3eed1207026e89989f754840fd92969c515ae4d829214fb74\n            set hashes(f5.policy_creator.tmpl) 06539e08d115efafe55aa507ecb4e443e83bdb1f5825a9514954ef6ca56d240ed00c7b5d67bd8f67b815ee9dd46451984701d058c89dae2434c89715d375a620\n            set hashes(f5.service_discovery.tmpl) 7a4660468dffdc4f6d9aec4c1f9d22abfb3e484e7d6fe6a12fc9ab3eec3819dc34d133aea3cce4fdd87a0f4045069270061f2ea1ee7735922e4371592e498a0b\n            set hashes(f5.cloud_logger.v1.0.0.tmpl) a26d5c470e70b821621476bcfd0579dbc0964f6a54158bc6314fa1e2f63b23bf3f3eb43ade5081131c24e08579db2e1e574beb3f8d9789d28acb4f312fad8c3e\n\n            set file_path [lindex $tmsh::argv 1]\n            set file_name [file tail $file_path]\n\n            if {![info exists hashes($file_name)]} {\n                tmsh::log err \"No hash found for $file_name\"\n                exit 1\n            }\n\n            set expected_hash $hashes($file_name)\n            set computed_hash [lindex [exec /usr/bin/openssl dgst -r -sha512 $file_path] 0]\n            if { $expected_hash eq $computed_hash } {\n                exit 0\n            }\n            tmsh::log err \"Hash does not match for $file_path\"\n            exit 1\n        }]} {\n            tmsh::log err {Unexpected error in verifyHash}\n            exit 1\n        }\n    }\n    script-signature O+tf8OQziIu9bjatG6z35/qd8lx2wn2pgWBxRm5l2SpJ6LWuYSitk7VNqUpxz2iH/pq7Vrc8d1P/FGq4IoZUGRh5D94OHyODXc02pe/o+sla5g826xjHUrDfCAMval31cg7CRZ/htVx+bhpdiKhg4Zfypgg0USF1mKE9g8bEdvIKbPlWil4HIymEKV7gbq7ZbK86Mn0V05+B72D/k8ER/Lman0dle1XB3iHkiOBj2Qm9PPhNtvxS6ean0MDGoIrTewfIT41OSrDUd5YKrXt4Ee4YF8++8a2UBAW+UMGMibxF+vVLTxXUUM5/20goExy9yGkjHKHEVyS+9cJ40kdg9A==\n    signing-key /Common/f5-irule\n}', variables('singleQuote'))]", 
+        "installCloudLibs": "[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit 1\nfi\necho loaded verifyHash\n\nconfig_loc=\"/config/cloud/\"\nhashed_file_list=\"${config_loc}f5-cloud-libs.tar.gz f5.service_discovery.tmpl f5.cloud_logger.v1.0.0.tmpl\"\nfor file in $hashed_file_list; do\necho \"verifying $file\"\n/usr/bin/tmsh run cli script verifyHash $file\nif [ $? != 0 ]; then\necho \"$file is not valid\"\nexit 1\nfi\necho \"verified $file\"\ndone\necho \"expanding $hashed_file_list\"\ntar xfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud/azure/node_modules/@f5devcentral\ntouch /config/cloud/cloudLibsReady', variables('singleQuote'))]", 
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]", 
         "offerToUse": "[concat('f5-big-ip-', variables('imageNameToLower'))]", 
+        "imagePlan": {
+            "name": "[variables('skuToUse')]", 
+            "product": "[variables('offerToUse')]", 
+            "publisher": "f5-networks"
+        }, 
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['3'].Port]", 
         "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
         "instanceName": "[toLower(parameters('instanceName'))]", 
@@ -425,216 +473,7 @@
                 }
             ]
         }, 
-        "instanceTypeMap": {
-            "Standard_A3": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_A4": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_A5": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_A6": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_A7": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D11": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D11_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D12": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D12_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D13": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D13_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D14": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D14_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D15_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D2_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D3": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D3_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D4": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D4_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_D5_v2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_DS1": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS11": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS11_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS12": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS12_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS13": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS13_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS14": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS14_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS15_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS1_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS2_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS3": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS3_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS4": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS4_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_DS5_v2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_F2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_F4": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_G1": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_G2": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_G3": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_G4": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_G5": {
-                "storageAccountTier": "Standard", 
-                "storageAccountType": "Standard_LRS"
-            }, 
-            "Standard_GS1": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_GS2": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_GS3": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_GS4": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }, 
-            "Standard_GS5": {
-                "storageAccountTier": "Premium", 
-                "storageAccountType": "Premium_LRS"
-            }
-        }, 
         "tagValues": "[parameters('tagValues')]", 
-        "newStorageAccountName0": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'stor0')]", 
-        "storageAccountType": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]", 
-        "storageAccountTier": "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountTier]", 
         "newDataStorageAccountName": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data000')]", 
         "dataStorageAccountType": "Standard_LRS", 
         "deploymentId": "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('dnsLabel'))]", 
@@ -645,9 +484,57 @@
             }, 
             "Yes": {
                 "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]", 
-                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:standalone_n-nic-existing_stack-supported,templateVersion:5.0.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BIGIQ,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
+                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:standalone_n-nic-existing_stack-supported,templateVersion:5.1.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:BIGIQ,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
             }
         }, 
+        "customImage": "[replace(parameters('customImage'), 'OPTIONAL', '')]", 
+        "useCustomImage": "[not(empty(variables('customImage')))]", 
+        "createNewCustomImage": "[contains(variables('customImage'), 'https://')]", 
+        "newCustomImageName": "[concat(variables('dnsLabel'), 'image')]", 
+        "storageProfileArray": {
+            "customImage": {
+                "imageReference": {
+                    "id": "[if(variables('createNewCustomImage'), resourceId('Microsoft.Compute/images', variables('newCustomImageName')), variables('customImage'))]"
+                }
+            }, 
+            "platformImage": {
+                "imageReference": {
+                    "offer": "[variables('offerToUse')]", 
+                    "publisher": "f5-networks", 
+                    "sku": "[variables('skuToUse')]", 
+                    "version": "[parameters('bigIpVersion')]"
+                }, 
+                "osDisk": {
+                    "createOption": "FromImage"
+                }
+            }
+        }, 
+        "premiumInstanceArray": [
+            "Standard_DS2", 
+            "Standard_DS3", 
+            "Standard_DS4", 
+            "Standard_DS11", 
+            "Standard_DS12", 
+            "Standard_DS13", 
+            "Standard_DS14", 
+            "Standard_DS2_v2", 
+            "Standard_DS3_v2", 
+            "Standard_DS4_v2", 
+            "Standard_DS5_v2", 
+            "Standard_DS11_v2", 
+            "Standard_DS12_v2", 
+            "Standard_DS13_v2", 
+            "Standard_DS14_v2", 
+            "Standard_DS15_v2", 
+            "Standard_F2S", 
+            "Standard_F4S", 
+            "Standard_F8S", 
+            "Standard_F16S", 
+            "Standard_GS2", 
+            "Standard_GS3", 
+            "Standard_GS4", 
+            "Standard_GS5"
+        ], 
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n", 
         "installCustomConfig": "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
     }, 
@@ -697,7 +584,7 @@
             "type": "Microsoft.Network/publicIPAddresses"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]", 
             "dependsOn": [
                 "[variables('mgmtPublicIPAddressId')]", 
                 "[variables('mgmtNsgID')]"
@@ -728,7 +615,7 @@
             "type": "Microsoft.Network/networkInterfaces"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]", 
             "dependsOn": [
                 "[variables('extNsgID')]", 
                 "extpipcopy", 
@@ -765,7 +652,7 @@
             "type": "Microsoft.Network/networkInterfaces"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]", 
             "dependsOn": [
                 "[variables('extNsgID')]", 
                 "extpipcopy"
@@ -790,7 +677,7 @@
             "type": "Microsoft.Network/networkInterfaces"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]", 
             "condition": "[greaterOrEquals(parameters('numberOfAdditionalNics'), 1)]", 
             "copy": {
                 "count": "[parameters('numberOfAdditionalNics')]", 
@@ -822,7 +709,7 @@
             "type": "Microsoft.Network/networkInterfaces"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[concat(variables('dnsLabel'), '-mgmt-nsg')]", 
             "properties": {
@@ -861,7 +748,7 @@
             "type": "Microsoft.Network/networkSecurityGroups"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]", 
             "location": "[variables('location')]", 
             "name": "[concat(variables('dnsLabel'), '-ext-nsg')]", 
             "properties": {
@@ -871,24 +758,19 @@
             "type": "Microsoft.Network/networkSecurityGroups"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('computeApiVersion')]", 
             "condition": "[equals(toUpper(parameters('avSetChoice')), 'CREATE_NEW')]", 
             "location": "[variables('location')]", 
             "name": "[variables('availabilitySetName')]", 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
-            "type": "Microsoft.Compute/availabilitySets"
-        }, 
-        {
-            "apiVersion": "[variables('storageApiVersion')]", 
-            "kind": "Storage", 
-            "location": "[variables('location')]", 
-            "name": "[variables('newStorageAccountName0')]", 
+            "properties": {
+                "PlatformFaultDomainCount": 2, 
+                "PlatformUpdateDomainCount": 2
+            }, 
             "sku": {
-                "name": "[variables('storageAccountType')]", 
-                "tier": "[variables('storageAccountTier')]"
+                "name": "Aligned"
             }, 
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
-            "type": "Microsoft.Storage/storageAccounts"
+            "type": "Microsoft.Compute/availabilitySets"
         }, 
         {
             "apiVersion": "[variables('storageApiVersion')]", 
@@ -903,11 +785,29 @@
             "type": "Microsoft.Storage/storageAccounts"
         }, 
         {
-            "apiVersion": "[variables('apiVersion')]", 
+            "apiVersion": "[variables('computeApiVersion')]", 
+            "condition": "[and(variables('useCustomImage'), variables('createNewCustomImage'))]", 
+            "location": "[variables('location')]", 
+            "name": "[variables('newCustomImageName')]", 
+            "properties": {
+                "storageProfile": {
+                    "osDisk": {
+                        "blobUri": "[variables('customImage')]", 
+                        "osState": "Generalized", 
+                        "osType": "Linux", 
+                        "storageAccountType": "[if(contains(variables('premiumInstanceArray'), parameters('instanceType')), 'Premium_LRS', 'Standard_LRS')]"
+                    }
+                }
+            }, 
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            "type": "Microsoft.Compute/images"
+        }, 
+        {
+            "apiVersion": "[variables('computeApiVersion')]", 
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0'))]", 
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", 
                 "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
+                "[variables('newCustomImageName')]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]", 
                 "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'))]", 
@@ -915,11 +815,7 @@
             ], 
             "location": "[variables('location')]", 
             "name": "[variables('instanceName')]", 
-            "plan": {
-                "name": "[variables('skuToUse')]", 
-                "product": "[variables('offerToUse')]", 
-                "publisher": "f5-networks"
-            }, 
+            "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]", 
             "properties": {
                 "availabilitySet": {
                     "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
@@ -937,26 +833,12 @@
                     "networkInterfaces": "[concat(take(variables('selfNicConfigArray'), 3), take(variables('addtlNicConfigArray').values, parameters('numberOfAdditionalNics')))]"
                 }, 
                 "osProfile": {
-                    "adminPassword": "[parameters('adminPassword')]", 
+                    "adminPassword": "[variables('adminPasswordOrKey')]", 
                     "adminUsername": "[parameters('adminUsername')]", 
-                    "computerName": "[variables('instanceName')]"
+                    "computerName": "[variables('instanceName')]", 
+                    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
                 }, 
-                "storageProfile": {
-                    "imageReference": {
-                        "offer": "[variables('offerToUse')]", 
-                        "publisher": "f5-networks", 
-                        "sku": "[variables('skuToUse')]", 
-                        "version": "[parameters('bigIpVersion')]"
-                    }, 
-                    "osDisk": {
-                        "caching": "ReadWrite", 
-                        "createOption": "FromImage", 
-                        "name": "osdisk", 
-                        "vhd": {
-                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName0')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'vhds/', variables('instanceName'),'.vhd')]"
-                        }
-                    }
-                }
+                "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
             }, 
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
             "type": "Microsoft.Compute/virtualMachines"
@@ -970,7 +852,7 @@
             "name": "[concat(variables('instanceName'),'/start')]", 
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir -p /config/cloud/azure/node_modules/@f5devcentral && cp f5-cloud-libs.tar.gz* /config/cloud; mkdir -p /var/log/cloud/azure; function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; }; TMP_DIR=/mnt/creds; TMP_CREDENTIALS_FILE=$TMP_DIR/.passwd; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('bigIqLicensePassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  unset IFS; bash /config/installCloudLibs.sh; . /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/util.sh; create_temp_dir $TMP_DIR; echo ', variables('singleQuote'), parameters('adminPassword'), variables('singleQuote'), '|sha512sum|cut -d \" \" -f 1|tr -d \"\n\" > $TMP_CREDENTIALS_FILE; bash /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file $TMP_CREDENTIALS_FILE; f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/encryptDataToFile.js --data-file $TMP_CREDENTIALS_FILE --out-file $BIG_IP_CREDENTIALS_FILE; wipe_temp_dir $TMP_DIR;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, '; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/onboard.js --output /var/log/cloud/azure/onboard.log --signal ONBOARD_DONE --log-level info --host ', variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --hostname ', concat(variables('instanceName'), '.', variables('location'), '.cloudapp.azure.com'), ' --license-pool --big-iq-host ', parameters('bigIqLicenseHost'), ' --big-iq-user ', parameters('bigIqLicenseUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePool'), ' --big-ip-mgmt-address ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, ' --module ltm:nominal; /usr/bin/f5-rest-node /config/cloud/azure/node_modules/@f5devcentral/f5-cloud-libs/scripts/network.js --output /var/log/cloud/azure/network.log --wait-for ONBOARD_DONE --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --default-gw ', concat(take(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, add(lastIndexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.'), 1)), add(int(take(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], indexOf(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], '/'))), 1)), ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), skip(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, indexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '/')), ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress'), skip(reference(variables('intSubnetRef'), variables('networkApiVersion')).addressPrefix, indexOf(reference(variables('intSubnetRef'), variables('networkApiVersion')).addressPrefix, '/')), ',vlan:internal ', variables('netCmd'), ' --log-level info', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; tmsh load sys application template f5.cloud_logger.v1.0.0.tmpl; ', variables('routeCmdArray')[parameters('bigIpVersion')], '; rm -f /config/cloud/.bigIqPasswd; bash /config/customConfig.sh; $(cp_logs); else $(cp_logs); exit 1; fi', '; if grep -i \"PUT failed\" /var/log/waagent.log -q; then echo \"Killing waagent exthandler, daemon should restart it\"; pkill -f \"python -u /usr/sbin/waagent -run-exthandlers\"; fi')]"
+                    "commandToExecute": "[concat('CLOUD_LIB_DIR=/config/cloud/azure/node_modules/@f5devcentral; mkdir -p $CLOUD_LIB_DIR && cp f5-cloud-libs.tar.gz* /config/cloud; mkdir -p /var/log/cloud/azure; function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; }; TMP_DIR=/mnt/creds; TMP_CREDENTIALS_FILE=$TMP_DIR/.passwd; BIG_IP_CREDENTIALS_FILE=/config/cloud/.passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; /usr/bin/install -b -m 400 /dev/null $BIG_IP_CREDENTIALS_FILE; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; echo ', variables('singleQuote'), parameters('bigIqPassword'), variables('singleQuote'), ' >> /config/cloud/.bigIqPasswd;  unset IFS; bash /config/installCloudLibs.sh; source $CLOUD_LIB_DIR/f5-cloud-libs/scripts/util.sh; create_temp_dir $TMP_DIR; echo ', variables('singleQuote'), variables('adminPasswordOrKey'), variables('singleQuote'), '|sha512sum|cut -d \" \" -f 1|tr -d \"\n\" > $TMP_CREDENTIALS_FILE; bash $CLOUD_LIB_DIR/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file $TMP_CREDENTIALS_FILE; f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/encryptDataToFile.js --data-file $TMP_CREDENTIALS_FILE --out-file $BIG_IP_CREDENTIALS_FILE; wipe_temp_dir $TMP_DIR;', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, '; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/onboard.js --output /var/log/cloud/azure/onboard.log --signal ONBOARD_DONE --log-level info --cloud azure --host ', variables('mgmtSubnetPrivateAddress'), ' --ssl-port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --hostname ', concat(variables('instanceName'), '.', variables('location'), '.cloudapp.azure.com'), ' --license-pool --big-iq-host ', parameters('bigIqAddress'), ' --big-iq-user ', parameters('bigIqUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --license-pool-name ', parameters('bigIqLicensePoolName'), ' $(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ') --big-ip-mgmt-address ', reference(variables('mgmtPublicIPAddressId')).ipAddress, ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --db tmm.maxremoteloglength:2048', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, ' --module ltm:nominal; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/network.js --output /var/log/cloud/azure/network.log --wait-for ONBOARD_DONE --host ', variables('mgmtSubnetPrivateAddress'), ' --port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --default-gw ', concat(take(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, add(lastIndexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.'), 1)), add(int(take(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], indexOf(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], '/'))), 1)), ' --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), skip(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, indexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '/')), ',vlan:external --self-ip name:self_3nic,address:', variables('intSubnetPrivateAddress'), skip(reference(variables('intSubnetRef'), variables('networkApiVersion')).addressPrefix, indexOf(reference(variables('intSubnetRef'), variables('networkApiVersion')).addressPrefix, '/')), ',vlan:internal ', variables('netCmd'), ' --log-level info', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; tmsh load sys application template f5.cloud_logger.v1.0.0.tmpl; ', variables('routeCmdArray')[parameters('bigIpVersion')], '; rm -f /config/cloud/.bigIqPasswd; bash /config/customConfig.sh; $(cp_logs); else $(cp_logs); exit 1; fi', '; if grep -i \"PUT failed\" /var/log/waagent.log -q; then echo \"Killing waagent exthandler, daemon should restart it\"; pkill -f \"python -u /usr/sbin/waagent -run-exthandlers\"; fi')]"
                 }, 
                 "publisher": "Microsoft.Azure.Extensions", 
                 "settings": {

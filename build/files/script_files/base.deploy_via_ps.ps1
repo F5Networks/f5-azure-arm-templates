@@ -30,7 +30,7 @@ try {
 # Create Resource Group for ARM Deployment
 New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
 
-<PWD_CMD><SPS_CMD><SSL_PWD_CMD><DNS_PWD_CMD>
+<PWD_CMDS>
 <DICT_CMDS>
 # Create Arm Deployment
 <DEPLOYMENT_CREATE>

@@ -17,21 +17,24 @@ def parameter_initialize(data):
     data['parameters']['scaleInThreshold'] = "OPTIONAL"
     data['parameters']['scaleTimeWindow'] = "OPTIONAL"
     data['parameters']['adminUsername'] = "MANDATORY"
-    data['parameters']['adminPassword'] = "MANDATORY"
+    data['parameters']['authenticationType'] = "MANDATORY"
+    data['parameters']['adminPasswordOrKey'] = "MANDATORY"
     data['parameters']['uniqueLabel'] = "OPTIONAL"
     data['parameters']['dnsLabel'] = "OPTIONAL"
     data['parameters']['instanceName'] = "OPTIONAL"
     data['parameters']['instanceType'] = "MANDATORY"
-    data['parameters']['imageName'] = "OPTIONAL"
+    data['parameters']['imageName'] = "MANDATORY"
     data['parameters']['bigIpVersion'] = "MANDATORY"
     data['parameters']['numberOfStaticInstances'] = "OPTIONAL"
     data['parameters']['licenseKey1'] = "OPTIONAL"
     data['parameters']['licenseKey2'] = "OPTIONAL"
     data['parameters']['licensedBandwidth'] = "OPTIONAL"
-    data['parameters']['bigIqLicenseHost'] = "OPTIONAL"
-    data['parameters']['bigIqLicenseUsername'] = "OPTIONAL"
-    data['parameters']['bigIqLicensePassword'] = "OPTIONAL"
-    data['parameters']['bigIqLicensePool'] = "OPTIONAL"
+    data['parameters']['bigIqAddress'] = "OPTIONAL"
+    data['parameters']['bigIqUsername'] = "OPTIONAL"
+    data['parameters']['bigIqPassword'] = "OPTIONAL"
+    data['parameters']['bigIqLicensePoolName'] = "OPTIONAL"
+    data['parameters']['bigIqLicenseSkuKeyword1'] = "OPTIONAL"
+    data['parameters']['bigIqLicenseUnitOfMeasure'] = "OPTIONAL"
     data['parameters']['numberOfAdditionalNics'] = "OPTIONAL"
     data['parameters']['additionalNicLocation'] = "OPTIONAL"
     data['parameters']['additionalNicIpRangeStart'] = "OPTIONAL"
@@ -79,6 +82,7 @@ def parameter_initialize(data):
     data['parameters']['managedRoutes'] = "OPTIONAL"
     data['parameters']['ntpServer'] = "MANDATORY"
     data['parameters']['timeZone'] = "MANDATORY"
+    data['parameters']['customImage'] = "MANDATORY"
     data['parameters']['restrictedSrcAddress'] = "MANDATORY"
     data['parameters']['tagValues'] = "MANDATORY"
     data['parameters']['allowUsageAnalytics'] = "MANDATORY"
@@ -89,13 +93,14 @@ def variable_initialize(data):
     """ Set default variables, as well as all optional ones in a specific order """
     data['variables']['bigIpNicPortMap'] = { "1": { "Port": "[parameters('bigIpVersion')]" }, "2": { "Port": "443" }, "3": { "Port": "443" }, "4": { "Port": "443" }, "5": { "Port": "443" }, "6": { "Port": "443" } }
     data['variables']['bigIpVersionPortMap'] = "MANDATORY"
-    data['variables']['apiVersion'] = "2015-06-15"
     data['variables']['computeApiVersion'] = "2017-12-01"
     data['variables']['networkApiVersion'] = "2017-11-01"
     data['variables']['storageApiVersion'] = "2017-10-01"
     data['variables']['appInsightsApiVersion'] = "OPTIONAL"
     data['variables']['appInsightsComponentsApiVersion'] = "OPTIONAL"
     data['variables']['location'] = "[resourceGroup().location]"
+    data['variables']['adminPasswordOrKey'] = "MANDATORY"
+    data['variables']['linuxConfiguration'] = "MANDATORY"
     data['variables']['defaultAppInsightsLocation'] = "OPTIONAL"
     data['variables']['appInsightsLocation'] = "OPTIONAL"
     data['variables']['subscriptionID'] = "[subscription().subscriptionId]"
@@ -113,6 +118,7 @@ def variable_initialize(data):
     data['variables']['skuToUse'] = "MANDATORY"
     data['variables']['offerToUse'] = "MANDATORY"
     data['variables']['staticSkuToUse'] = "OPTIONAL"
+    data['variables']['imagePlan'] = {"name": "[variables('skuToUse')]", "product": "[variables('offerToUse')]", "publisher": "f5-networks"}
     data['variables']['staticOfferToUse'] = "OPTIONAL"
     data['variables']['bigIpNicPortValue'] = "MANDATORY"
     data['variables']['bigIpMgmtPort'] = "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]"
@@ -177,8 +183,10 @@ def variable_initialize(data):
     data['variables']['mgmtSubnetRef'] = "OPTIONAL"
     data['variables']['extSubnetRef'] = "OPTIONAL"
     data['variables']['intSubnetRef'] = "OPTIONAL"
+    data['variables']['addtlNicName'] = "OPTIONAL"
     data['variables']['addtlNicFillerArray'] = "OPTIONAL"
     data['variables']['addtlNicRefSplit'] = "OPTIONAL"
+    data['variables']['netCmd00'] = "OPTIONAL"
     data['variables']['netCmd01'] = "OPTIONAL"
     data['variables']['netCmd02'] = "OPTIONAL"
     data['variables']['netCmd03'] = "OPTIONAL"
@@ -232,14 +240,11 @@ def variable_initialize(data):
     data['variables']['httpBackendPort'] = "OPTIONAL"
     data['variables']['httpsBackendPort'] = "OPTIONAL"
     data['variables']['commandArgs'] = "OPTIONAL"
-    # Add storage array variables at the end
-    data['variables']['instanceTypeMap'] = { "Standard_A3": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_A4": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_A5": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_A6": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_A7": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D2": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D3": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D4": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D11": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D12": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D13": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D14": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D2_v2": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D3_v2": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D4_v2": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D5_v2": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D11_v2": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D12_v2": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D13_v2": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D14_v2": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_D15_v2": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_F2": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_F4": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_G1": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_G2": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_G3": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_G4": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_G5": { "storageAccountType": "Standard_LRS", "storageAccountTier": "Standard" }, "Standard_DS1": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS2": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS3": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS4": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS11": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS12": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS13": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS14": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS1_v2": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS2_v2": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS3_v2": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS4_v2": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS5_v2": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS11_v2": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS12_v2": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS13_v2": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS14_v2": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_DS15_v2": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_GS1": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_GS2": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_GS3": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_GS4": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" }, "Standard_GS5": { "storageAccountType": "Premium_LRS", "storageAccountTier": "Premium" } }
     data['variables']['tagValues'] = "[parameters('tagValues')]"
     data['variables']['staticVmssTagValues'] = "OPTIONAL"
-    data['variables']['newStorageAccountName0'] = "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'stor0')]"
-    data['variables']['newStorageAccountName1'] = "OPTIONAL"
-    data['variables']['storageAccountType'] = "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountType]"
-    data['variables']['storageAccountTier'] = "[variables('instanceTypeMap')[parameters('instanceType')].storageAccountTier]"
+    # If manually setting managed disk size, use below
+    #data['variables']['storageDiskSizeMap'] = { "good": { "size": 31 }, "better": { "size": 63 }, "best": { "size": 127 } }
+    #data['variables']['storageDiskSize'] = "[variables('storageDiskSizeMap')[variables('imageNameToLower')].size]"
     data['variables']['newDataStorageAccountName'] = "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data000')]"
     data['variables']['dataStorageAccountType'] = "Standard_LRS"
     data['variables']['deploymentId'] = "MANDATORY"
@@ -248,6 +253,12 @@ def variable_initialize(data):
     data['variables']['webVmSubnetPrivateAddress'] = "OPTIONAL"
     data['variables']['webVmVsAddr'] = "OPTIONAL"
     data['variables']['webVmVsPort'] = "OPTIONAL"
+    data['variables']['customImage'] = "[replace(parameters('customImage'), 'OPTIONAL', '')]"
+    data['variables']['useCustomImage'] = "[not(empty(variables('customImage')))]"
+    data['variables']['createNewCustomImage'] = "[contains(variables('customImage'), 'https://')]"
+    data['variables']['newCustomImageName'] = "[concat(variables('dnsLabel'), 'image')]"
+    data['variables']['storageProfileArray'] = "MANDATORY"
+    data['variables']['premiumInstanceArray'] = "MANDATORY"
     data['variables']['customConfig'] = "### START (INPUT) CUSTOM CONFIGURATION HERE\n"
     data['variables']['installCustomConfig'] = "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
 
@@ -266,7 +277,7 @@ def param_descr_update(data, template_name):
     """ Fill in parameter descriptions from the YAML doc file """
     yaml_doc_loc = {'doc_text_file': 'files/readme_files/template_text.yaml'}
     rG = readme_generator.ReadmeGen()
-    files = rG.open_files(yaml_doc_loc)
+    rG.open_files(yaml_doc_loc)
     for param in data:
         if data[param]['metadata']['description'] != "":
             # If parameter description is filled in then don't replace

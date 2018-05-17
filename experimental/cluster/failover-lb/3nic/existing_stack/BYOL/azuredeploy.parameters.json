@@ -1,12 +1,15 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "5.0.0.0", 
+    "contentVersion": "5.1.0.0", 
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
         }, 
-        "adminPassword": {
-            "value": "GEN_UNIQUE"
+        "authenticationType": {
+            "value": "password"
+        }, 
+        "adminPasswordOrKey": {
+            "value": ""
         }, 
         "dnsLabel": {
             "value": ""
@@ -18,7 +21,7 @@
             "value": "Standard_DS3_v2"
         }, 
         "imageName": {
-            "value": "Good"
+            "value": "Best"
         }, 
         "bigIpVersion": {
             "value": "13.1.0200"
@@ -33,31 +36,31 @@
             "value": 1
         }, 
         "vnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "vnetResourceGroupName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "mgmtSubnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "mgmtIpAddressRangeStart": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "externalSubnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "externalIpSelfAddressRangeStart": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "externalIpAddressRangeStart": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "internalSubnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "internalIpAddressRangeStart": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "enableNetworkFailover": {
             "value": "Yes"
@@ -73,6 +76,9 @@
         }, 
         "timeZone": {
             "value": "UTC"
+        }, 
+        "customImage": {
+            "value": "OPTIONAL"
         }, 
         "restrictedSrcAddress": {
             "value": "*"

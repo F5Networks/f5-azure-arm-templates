@@ -1,12 +1,15 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "5.0.0.0", 
+    "contentVersion": "5.1.0.0", 
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
         }, 
-        "adminPassword": {
-            "value": "GEN_UNIQUE"
+        "authenticationType": {
+            "value": "password"
+        }, 
+        "adminPasswordOrKey": {
+            "value": ""
         }, 
         "uniqueLabel": {
             "value": ""
@@ -18,7 +21,7 @@
             "value": "Standard_DS2_v2"
         }, 
         "imageName": {
-            "value": "Good"
+            "value": "Best"
         }, 
         "bigIpVersion": {
             "value": "13.1.0200"
@@ -27,16 +30,16 @@
             "value": "200m"
         }, 
         "vnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "vnetResourceGroupName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "mgmtSubnetName": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "mgmtIpAddress": {
-            "value": "GEN_UNIQUE"
+            "value": ""
         }, 
         "avSetChoice": {
             "value": "CREATE_NEW"
@@ -46,6 +49,9 @@
         }, 
         "timeZone": {
             "value": "UTC"
+        }, 
+        "customImage": {
+            "value": "OPTIONAL"
         }, 
         "restrictedSrcAddress": {
             "value": "*"
