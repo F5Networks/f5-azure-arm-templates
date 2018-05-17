@@ -223,7 +223,7 @@ license_map:
 parameter_list:
   adminUsername: "User name for the Virtual Machine."
   authenticationType: "Type of authentication to use on the Virtual Machine, password based authentication or key based authentication."
-  adminPasswordOrKey: "Password or ssh public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key based authentication this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**."
+  adminPasswordOrKey: "Password or SSH public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key-based authentication, this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**."
   additionalNicLocation:
     default: "This parameter specifies where the additional NICs go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. **Note**: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique."
     template_name:

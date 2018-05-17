@@ -34,7 +34,7 @@ This template differs from the *existing stack* template in that this template d
 
 ## Important configuration notes
 
-- See the **[Configuration Example](#configuration-example)** section for a configuration diagram and description for this solution.
+- You have the option of using a password or SSH public key for authentication.  If you choose to use an SSH public key and want access to the BIG-IP web-based Configuration utility, you must first SSH into the BIG-IP VE using the SSH key you provided in the template.  You can then create a user account with admin-level permissions on the BIG-IP VE to allow access if necessary.
 - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
 - This template supports service discovery.  See the [Service Discovery section](#service-discovery) for details.
 - F5 has created an iApp for configuring logging for BIG-IP modules to be sent to a specific set of cloud analytics solutions.  See [Logging iApp](#logging-iapp).
@@ -44,6 +44,7 @@ This template differs from the *existing stack* template in that this template d
 - F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughputs available for a specific tagged release. See [azure-bigip-version-matrix](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md).
 - F5 ARM templates now capture all deployment logs to the BIG-IP VE in **/var/log/cloud/azure**.  Depending on which template you are using, this includes deployment logs (stdout/stderr), f5-cloud-libs execution logs, recurring solution logs (failover, metrics, and so on), and more.
 - Supported F5 ARM templates do not reconfigure existing Azure resources, such as network security groups.  Depending on your configuration, you may need to configure these resources to allow the BIG-IP VE(s) to receive traffic for your application.  Similarly, templates that deploy Azure load balancer(s) do not configure load balancing rules or probes on those resources to forward external traffic to the BIG-IP(s).  You must create these resources after the deployment has succeeded.
+- See the **[Configuration Example](#configuration-example)** section for a configuration diagram and description for this solution.
 - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
 
 ## Security
@@ -107,7 +108,7 @@ Use the appropriate button, depending on what type of BIG-IP licensing required:
 | --- | --- | --- |
 | adminUsername | Yes | User name for the Virtual Machine. |
 | authenticationType | Yes | Type of authentication to use on the Virtual Machine, password based authentication or key based authentication. |
-| adminPasswordOrKey | Yes | Password or ssh public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key based authentication this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**. |
+| adminPasswordOrKey | Yes | Password or SSH public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key-based authentication, this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**. |
 | uniqueLabel | Yes | Unique Name for the deployment to be used when creating resources. |
 | instanceName | Yes | Name of the Virtual Machine. |
 | instanceType | Yes | Azure instance size of the Virtual Machine. |
