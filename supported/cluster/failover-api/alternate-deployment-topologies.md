@@ -13,7 +13,7 @@ In this example, a Node.js failover script moves the Azure IP configuration for 
 
 An external Azure load balancer forwards application traffic from the Internet to host destination virtual servers on BIG-IP VE.
 
-![Configuration Example alternate deployment 1](images/cluster-alternate-diagram1.png)
+![Configuration Example alternate deployment 1](images/alternate-diagram1.png)
 
 ---
 
@@ -23,6 +23,6 @@ In this example, a Node.js failover script moves the Azure IP configuration for 
 
 An external Azure load balancer forwards application traffic from the Internet to host destination virtual servers on BIG-IP VE.
 
-![Configuration Example alternate deployment 2](images/cluster-alternate-diagram2.png)
+![Configuration Example alternate deployment 2](images/alternate-diagram2.png)
 
 ---

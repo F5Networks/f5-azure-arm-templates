@@ -14,7 +14,7 @@ This page contains some alternate deployment topology diagrams for the F5 cluste
 
 In this example, we show an HA pair of BIG-IP VEs load balancing application traffic received from a redundant pair of firewalls. Traffic is forwarded to an Azure Internal Load Balancer with a backend pool whose members’ private IP addresses match the destination address and port of a BIG-IP network virtual server configured on *traffic-group-1*.
 
-![Configuration Example alternate deployment 1](images/azure-alternate-diagram1.png)
+![Configuration Example alternate deployment 1](images/alternate-diagram1.png)
 
 ---
 
@@ -22,7 +22,7 @@ In this example, we show an HA pair of BIG-IP VEs load balancing application tra
 
 In this example, traffic for a second application is forwarded to an Azure Internal Load Balancer with a backend pool whose members’ private IP addresses match the destination address and port of a BIG-IP network virtual server configured on *traffic-group-1*. The network virtual server’s destination address is the same as in the first example, while the destination port is unique. Because the virtual servers in examples #1 and #2 share a destination address, they must be created in the same traffic group.
 
-![Configuration Example alternate deployment 2](images/azure-alternate-diagram2.png)
+![Configuration Example alternate deployment 2](images/alternate-diagram2.png)
 
 ---
 
@@ -30,7 +30,7 @@ In this example, traffic for a second application is forwarded to an Azure Inter
 
 In this example, traffic for a second application is forwarded to an Azure Internal Load Balancer with a second backend pool whose members’ private IP addresses match the destination address and port of a BIG-IP network virtual server configured on *traffic-group-2*. The network virtual server’s destination address is different from example #1. For scaling purposes, the destination address can be a segment of the existing Azure subnet address space.
 
-![Configuration Example alternate deployment 3](images/azure-alternate-diagram3.png)
+![Configuration Example alternate deployment 3](images/alternate-diagram3.png)
 
 ---
 
@@ -49,7 +49,7 @@ After deployment, for this scenario you must perform the following post-deployme
 - Create UDR (optional)
 - BIG-IP: Create Virtual Server in traffic-group-1
 
-![Configuration Example alternate deployment 4](images/azure-alternate-diagram4.png)
+![Configuration Example alternate deployment 4](images/alternate-diagram4.png)
 
 ---
 
@@ -57,4 +57,4 @@ After deployment, for this scenario you must perform the following post-deployme
 
 In this example, reverse proxy traffic is load balanced between an HA pair of BIG-IP VEs using a per-protocol external Azure load balancer, while forward proxy traffic is load balanced between the same HA pair using an internal Azure load balancer configured with an all-protocol load balancing rule.
 
-![Configuration Example alternate deployment 5](images/azure-alternate-diagram5.png)
+![Configuration Example alternate deployment 5](images/alternate-diagram5.png)
