@@ -40,11 +40,13 @@ for tmpl in $template_list; do
 done
 
 ## BIGIP ARM Templates - Solutions: autoscale/ltm, autoscale/waf
-template_list="autoscale/ltm/via-lb autoscale/waf/via-lb"
+template_list="autoscale/ltm/1nic autoscale/waf/1nic"
 for tmpl in $template_list; do
-    loc=`echo $tmpl | sed 's/\/via-lb//g'|sed 's/\/via-dns//g'`
-    if [[ $loc == *"autoscale"* ]]; then
-        tmpl=`echo $tmpl | sed 's/\//_/g'`
+    loc=$tmpl
+    if [[ $loc == *"autoscale/ltm"* ]]; then
+        tmpl='as_ltm_lb'
+    elif [[ $loc == *"autoscale/waf"* ]]; then
+        tmpl='as_waf_lb'
     fi
     stack_list="new-stack existing-stack"
     for stack_type in $stack_list; do
@@ -87,11 +89,17 @@ for tmpl in $template_list; do
 done
 
 ## BIGIP ARM Templates - Solutions: autoscale/ltm (via-dns, via-lb), autoscale/waf (via-dns, via-lb)
-template_list="autoscale/ltm/via-lb autoscale/ltm/via-dns autoscale/waf/via-lb autoscale/waf/via-dns"
+template_list="autoscale/ltm/via-lb/1nic autoscale/ltm/via-dns/1nic autoscale/waf/via-lb/1nic autoscale/waf/via-dns/1nic"
 for tmpl in $template_list; do
     loc=$tmpl
-    if [[ $loc == *"autoscale"* ]]; then
-        tmpl=`echo $tmpl | sed 's/\//_/g'`
+    if [[ $loc == *"autoscale/ltm/via-lb"* ]]; then
+        tmpl='as_ltm_lb'
+    elif [[ $loc == *"autoscale/ltm/via-dns"* ]]; then
+        tmpl='as_ltm_dns'
+    elif [[ $loc == *"autoscale/waf/via-lb"* ]]; then
+        tmpl='as_waf_lb'
+    elif [[ $loc == *"autoscale/waf/via-dns"* ]]; then
+        tmpl='as_waf_dns'
     fi
     stack_list="new-stack existing-stack"
     for stack_type in $stack_list; do
@@ -102,5 +110,4 @@ for tmpl in $template_list; do
         fi
     done
 done
-
 ############################### End Experimental ###############################

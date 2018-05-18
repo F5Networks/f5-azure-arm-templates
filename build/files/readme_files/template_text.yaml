@@ -86,7 +86,7 @@ templates:
       - <SERVICE_PRINCIPAL>
       - <SELF_IP_ROUTE_TABLES>
       - <TG_CONFIG_TEXT>
-  autoscale_ltm_via-lb:
+  as_ltm_lb:
     title: 'AutoScale BIG-IP LTM - VM Scale Set (Frontend via ALB)'
     intro:
       default: "This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. Be sure to see [Scaling Thresholds](#scaling-thresholds) for information on scaling options.\n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management.\n\nYou have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment."
@@ -108,7 +108,7 @@ templates:
       - <VS_CREATION>
       - <SERVICE_PRINCIPAL>
       - <SCALING_THRESHOLDS>
-  autoscale_ltm_via-dns:
+  as_ltm_dns:
     title: 'AutoScale BIG-IP LTM - VM Scale Set (Frontend via DNS)'
     intro: "This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. By virtue of a DNS request made by the client to the DNS provider, traffic will flow to the current BIG-IP VE (cluster) members directly which will then process traffic to the application servers, which allows you to deploy without using an Azure Load Balancer (ALB). The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. Be sure to see [Scaling Thresholds](#scaling-thresholds) for information on scaling options.\n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management.\n\nYou have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment."
     config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
@@ -128,7 +128,7 @@ templates:
       - <VS_CREATION>
       - <SERVICE_PRINCIPAL>
       - <SCALING_THRESHOLDS>
-  autoscale_waf_via-lb:
+  as_waf_lb:
     title: 'Auto Scale BIG-IP WAF (LTM + ASM) - VM Scale Set (Frontend via ALB)'
     intro:
       default: "This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. Be sure to see [Scaling Thresholds](#scaling-thresholds) for information on scaling options.\n\nIn this solution, the BIG-IP VEs have the [LTM](https://f5.com/products/big-ip/local-traffic-manager-ltm) and [ASM](https://f5.com/products/big-ip/application-security-manager-asm) modules enabled to provide advanced traffic management and web application security functionality.\n\nYou have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment."
@@ -151,7 +151,7 @@ templates:
       - <VS_CREATION>
       - <SERVICE_PRINCIPAL>
       - <SCALING_THRESHOLDS>
-  autoscale_waf_via-dns:
+  as_waf_dns:
     title: 'Auto Scale BIG-IP WAF (LTM + ASM) - VM Scale Set (Frontend via DNS)'
     intro: "This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. By virtue of a DNS request made by the client to the DNS provider (currently only BIG-IP DNS (formerly BIG-IP GTM) is supported), traffic will flow to the current BIG-IP VE (cluster) members directly which will then process traffic to the application servers, which allows you to deploy without using an Azure Load Balancer (ALB). The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. Be sure to see [Scaling Thresholds](#scaling-thresholds) for information on scaling options.\n\nIn this solution, the BIG-IP VEs have the [LTM](https://f5.com/products/big-ip/local-traffic-manager-ltm) and [ASM](https://f5.com/products/big-ip/application-security-manager-asm) modules enabled to provide advanced traffic management and web application security functionality.\n\nYou have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment."
     config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
@@ -277,8 +277,8 @@ parameter_list:
   imageName:
     default: "F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as **Best** instead of **Good**."
     template_name:
-      autoscale_waf_via-lb: "F5 SKU (image) you want to deploy. **Best** is the only option because BIG-IP ASM is required. Note: The disk size of the VM will be determined based on the option you select."
-      autoscale_waf_via-dns: "F5 SKU (image) you want to deploy. **Best** is the only option because BIG-IP ASM is required. Note: The disk size of the VM will be determined based on the option you select."
+      as_waf_lb: "F5 SKU (image) you want to deploy. **Best** is the only option because BIG-IP ASM is required. Note: The disk size of the VM will be determined based on the option you select."
+      as_waf_dns: "F5 SKU (image) you want to deploy. **Best** is the only option because BIG-IP ASM is required. Note: The disk size of the VM will be determined based on the option you select."
   licenseKey1: "The license token for the F5 BIG-IP VE (BYOL)."
   licenseKey2: "The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices."
   licensedBandwidth: "The amount of licensed bandwidth (Mbps) you want the PAYG image to use."
