@@ -13,15 +13,15 @@ if [[ $1 == "release-prep" ]]; then
 fi
 
 ############################### Supported ###############################
-## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), Cluster Failover-LB (1nic, 3nic), Cluster Failover-API
-template_list="standalone/1nic standalone/2nic standalone/3nic standalone/n-nic cluster/failover-lb/1nic cluster/failover-lb/3nic cluster/failover-api"
+## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), Failover via-lb (1nic, 3nic), Failover via-api (n-nic)
+template_list="standalone/1nic standalone/2nic standalone/3nic standalone/n-nic failover/same-net/via-lb/1nic failover/same-net/via-lb/3nic failover/same-net/via-api/n-nic"
 for tmpl in $template_list; do
     loc=$tmpl
     if [[ $loc == *"standalone"* ]]; then
         tmpl="standalone_"`basename $loc`
-    elif [[ $loc == *"failover-lb"* ]]; then
+    elif [[ $loc == *"via-lb"* ]]; then
         tmpl="failover-lb_"`basename $loc`
-    elif [[ $loc == *"failover-api"* ]]; then
+    elif [[ $loc == *"via-api"* ]]; then
         tmpl="failover-api"
     fi
     # Do not build production-stack for certain templates
@@ -56,15 +56,15 @@ done
 ############################### End Supported ###############################
 
 ############################### Experimental ###############################
-## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), Cluster Failover-LB (1nic, 3nic), Cluster Failover-API
-template_list="standalone/1nic standalone/2nic standalone/3nic standalone/n-nic cluster/failover-lb/1nic cluster/failover-lb/3nic cluster/failover-api"
+## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), Failover via-lb (1nic, 3nic), Failover via-api (n-nic)
+template_list="standalone/1nic standalone/2nic standalone/3nic standalone/n-nic failover/same-net/via-lb/1nic failover/same-net/via-lb/3nic failover/same-net/via-api/n-nic"
 for tmpl in $template_list; do
     loc=$tmpl
     if [[ $loc == *"standalone"* ]]; then
         tmpl="standalone_"`basename $loc`
-    elif [[ $loc == *"failover-lb"* ]]; then 
+    elif [[ $loc == *"via-lb"* ]]; then 
         tmpl="failover-lb_"`basename $loc`
-    elif [[ $loc == *"failover-api"* ]]; then
+    elif [[ $loc == *"via-api"* ]]; then
         tmpl="failover-api"
     fi
     # Do not build production-stack for certain templates
