@@ -682,11 +682,11 @@
     "outputs": {
         "GUI-URL": {
             "type": "string", 
-            "value": "[concat('https://',reference(concat(variables('mgmtNicId'), 0)).ipConfigurations[0].properties.privateIPAddress,':8443')]"
+            "value": "[concat('https://', variables('externalLoadBalancerAddress'), ':8443')]"
         }, 
         "SSH-URL": {
             "type": "string", 
-            "value": "[concat(reference(concat(variables('mgmtNicId'), 0)).ipConfigurations[0].properties.privateIPAddress,' ',8022)]"
+            "value": "[concat(variables('externalLoadBalancerAddress'), ' ', 8022)]"
         }
     }
 }

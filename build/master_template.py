@@ -988,8 +988,8 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
         data['outputs']['EXAMPLE-APP-URL'] = { "type": "string", "value": "[concat('http://', reference(concat(variables('extPublicIPAddressIdPrefix'), '0')).dnsSettings.fqdn, ':', variables('webVmVsPort'))]" }
 if template_name == 'failover-lb_1nic':
     if stack_type == 'production-stack':
-        data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(concat(variables('mgmtNicId'), 0)).ipConfigurations[0].properties.privateIPAddress,':8443')]" }
-        data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(concat(variables('mgmtNicId'), 0)).ipConfigurations[0].properties.privateIPAddress,' ',8022)]" }
+        data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://', variables('externalLoadBalancerAddress'), ':8443')]" }
+        data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(variables('externalLoadBalancerAddress'), ' ', 8022)]" }
     else:
         data['outputs']['GUI-URL'] = { "type": "string", "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':8443')]" }
         data['outputs']['SSH-URL'] = { "type": "string", "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',8022)]" }
