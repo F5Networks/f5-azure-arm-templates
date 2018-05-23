@@ -4,8 +4,6 @@
 <EXAMPLE_CMD>
 
 param(
-  [string] [Parameter(Mandatory=$True)] $licenseType,
-<LICENSE_PARAMETERS>
 <DYNAMIC_PARAMETERS>
   [string] [Parameter(Mandatory=$True)] $resourceGroupName,
   [string] $region = "West US",

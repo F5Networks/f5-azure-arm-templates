@@ -23,7 +23,7 @@ while [[ $# -gt 1 ]]; do
             shift 2;;
         --licenseType)
             licenseType=$2
-            shift 2;;<LICENSE_PARAMETERS><DYNAMIC_PARAMETERS>
+            shift 2;;<DYNAMIC_PARAMETERS>
         --)
             shift
             break;;
@@ -38,8 +38,6 @@ for variable in $required_variables
                 read -p "Please enter value for $variable:" $variable
         fi
 done
-
-<LICENSE_CHECK>
 
 echo "Disclaimer: Scripting to Deploy F5 Solution templates into Cloud Environments are provided as examples. They will be treated as best effort for issues that occur, feedback is encouraged."
 sleep 3
@@ -58,4 +56,6 @@ azure config mode arm
 azure group create -n $resourceGroupName -l $region
 
 # Deploy ARM Template, right now cannot specify parameter file and parameters inline via Azure CLI
+template_file="./azuredeploy.json"
+parameter_file="./azuredeploy.parameters.json"
 <DEPLOYMENT_CREATE>

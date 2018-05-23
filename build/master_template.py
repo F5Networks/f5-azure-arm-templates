@@ -15,7 +15,7 @@ parser.add_option("-n", "--template-name", action="store", type="string", dest="
 parser.add_option("-l", "--license-type", action="store", type="string", dest="license_type", help="License Type: byol, payg, bigiq or bigiq-payg")
 parser.add_option("-m", "--stack-type", action="store", type="string", dest="stack_type", default="new-stack", help="Networking Stack Type: new-stack, existing-stack, production-stack or learning-stack")
 parser.add_option("-t", "--template-location", action="store", type="string", dest="template_location", help="Template Location: such as ../experimental/standalone/1nic/payg/")
-parser.add_option("-s", "--script-location", action="store", type="string", dest="script_location", help="Script Location: such as ../experimental/standalone/1nic/")
+parser.add_option("-a", "--artifact-location", action="store", type="string", dest="artifact_location", help="Artifacts Location: such as ../experimental/standalone/1nic/")
 parser.add_option("-v", "--solution-location", action="store", type="string", dest="solution_location", default="experimental", help="Solution location: experimental or supported")
 parser.add_option("-r", "--release-prep", action="store_true", dest="release_prep", default=False, help="Release Prep Flag: If passed will equal True.")
 
@@ -24,9 +24,12 @@ template_name = options.template_name
 license_type = options.license_type
 stack_type = options.stack_type
 template_location = options.template_location
-script_location = options.script_location
+artifact_location = options.artifact_location
 solution_location = options.solution_location
 release_prep = options.release_prep
+
+# Artifact location is same as template_location
+artifact_location = template_location
 
 ## Specify meta file and file to create ##
 metafile = 'files/tmpl_files/base.azuredeploy.json'
@@ -1026,38 +1029,13 @@ with open(created_file_params, 'w') as finished_params:
 
 
 ###### Prepare some information prior to creating Scripts/Readme's ######
-if stack_type in ('production-stack'):
-    all_lic = ['byol', 'payg']
-else:
-    all_lic = ['byol', 'payg', 'big-iq']
-lic_support = {'standalone_1nic': all_lic, 'standalone_2nic': all_lic, 'standalone_3nic': all_lic, 'standalone_n-nic': all_lic, 'failover-lb_1nic': all_lic, 'failover-lb_3nic': all_lic, 'failover-api': all_lic, 'as_ltm_lb': ['payg', 'big-iq'], 'as_ltm_dns': ['payg', 'big-iq'], 'as_waf_lb': ['payg', 'big-iq'], 'as_waf_dns': ['payg', 'big-iq']}
-# Experimental autoscale templates have new licensing options
-if support_type == 'experimental':
-    lic_support['as_ltm_lb'] = ['payg', 'big-iq', 'big-iq+payg']
-    lic_support['as_waf_lb'] = ['payg', 'big-iq', 'big-iq+payg']
-lic_key_count = {'standalone_1nic': 1, 'standalone_2nic': 1, 'standalone_3nic': 1, 'standalone_n-nic': 1, 'failover-lb_1nic': 2, 'failover-lb_3nic': 2, 'failover-api': 2, 'as_ltm_lb': 0, 'as_ltm_dns': 0, 'as_waf_lb': 0, 'as_waf_dns': 0}
 api_access_required = {'standalone_1nic': None, 'standalone_2nic': None, 'standalone_3nic': None, 'standalone_n-nic': None, 'failover-lb_1nic': None, 'failover-lb_3nic': None, 'failover-api': 'required', 'as_ltm_lb': 'required', 'as_ltm_dns': 'required', 'as_waf_lb': 'required', 'as_waf_dns': 'required'}
-template_info = {'template_name': template_name, 'location': script_location, 'lic_support': lic_support, 'lic_key_count': lic_key_count, 'api_access_required': api_access_required}
-
-## Abstract license key parameters for readme_generator/script_generator ##
-license_params = OrderedDict([('numberOfStaticInstances',['big-iq+payg']), ('licenseKey1',['byol']), ('licenseKey2',['byol']), ('licensedBandwidth',['payg',]), ('bigIqAddress',['big-iq']), ('bigIqUsername',['big-iq']), ('bigIqPassword',['big-iq']), ('bigIqLicensePoolName',['big-iq']), ('bigIqLicenseSkuKeyword1',['big-iq']), ('bigIqLicenseUnitOfMeasure',['big-iq'])])
-# licenseKey2 is only used by cluster templates
-if template_name not in ('failover-lb_1nic', 'failover-lb_3nic', 'failover-api'):
-    license_params.pop('licenseKey2')
-# bigiq+payg is only in experimental autoscale
-if template_name in ('as_ltm_lb', 'as_waf_lb') and 'experimental' in support_type:
-    bigiq_payg_list = ['licensedBandwidth', 'bigIqAddress', 'bigIqUsername', 'bigIqPassword', 'bigIqLicensePoolName', 'bigIqLicenseSkuKeyword1', 'bigIqLicenseUnitOfMeasure']
-    [license_params[k].append('big-iq+payg') for k in bigiq_payg_list]
-else:
-    license_params.pop('numberOfStaticInstances')
-# big-iq does not exist for production-stack currently
-if stack_type in ('production-stack'):
-    [license_params.pop(k) for k in ['bigIqAddress', 'bigIqUsername', 'bigIqPassword', 'bigIqLicensePoolName', 'bigIqLicenseSkuKeyword1', 'bigIqLicenseUnitOfMeasure']]
+template_info = {'template_name': template_name, 'location': artifact_location, 'api_access_required': api_access_required}
 
 ######################################## Create/Modify Scripts ###########################################
 # Manually adding templates to create scripts proc for now as a 'check'...
-if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_1nic', 'failover-lb_3nic', 'failover-api', 'as_ltm_lb', 'as_ltm_dns', 'as_waf_lb', 'as_waf_dns') and script_location:
-    s_data = {'template_info': template_info, 'license_params': license_params, 'default_payg_bw': default_payg_bw}
+if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_1nic', 'failover-lb_3nic', 'failover-api', 'as_ltm_lb', 'as_ltm_dns', 'as_waf_lb', 'as_waf_dns') and artifact_location:
+    s_data = {'template_info': template_info}
     bash_script = script_generator.script_creation(data, s_data, 'bash')
     ps_script = script_generator.script_creation(data, s_data, 'powershell')
 ######################################## END Create/Modify Scripts ########################################
@@ -1066,13 +1044,13 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
     readme_text = {'deploy_links': {}, 'ps_script': {}, 'bash_script': {}}
     ## Deploy Buttons ##
     readme_text['deploy_links']['version_tag'] = f5_networks_tag
-    readme_text['deploy_links']['lic_support'] = template_info['lic_support']
+    readme_text['deploy_links']['license_type'] = license_type
     ## Example Scripts - These are set above, just adding to README ##
     readme_text['bash_script'] = bash_script
     readme_text['ps_script'] = ps_script
 
     #### Call function to create/update README ####
-    i_data = {'template_info': template_info, 'license_params': license_params, 'readme_text': readme_text, 'template_location': created_file, 'files': {}}
+    i_data = {'template_info': template_info, 'readme_text': readme_text, 'template_location': created_file, 'files': {}}
     folder_loc = 'files/readme_files/'
     i_data['files']['doc_text_file'] = folder_loc + 'template_text.yaml'
     i_data['files']['misc_readme_file'] = folder_loc + 'misc.README.txt'

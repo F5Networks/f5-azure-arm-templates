@@ -123,34 +123,11 @@ class ReadmeGen(object):
     def md_param_array(self):
         """ Create README example parameters: | adminUsername | Yes | Description | """
         template_name = self.i_data['template_info']['template_name']
-        license_params = self.i_data['license_params']
-        lic_type = self.i_data['readme_text']['deploy_links']['lic_support'][template_name]
         param_array = ""
-        license_flag = True
         for p in self.data['parameters']:
             mandatory = 'Yes'
             # Specify optional parameters for README, need to pull in all license specific options
-            if p in license_params:
-                if license_flag:
-                    license_flag = False
-                    for k, v in license_params.iteritems():
-                        # Check if value is list
-                        if isinstance(v, list):
-                            sep = ' or '
-                            lic_type_text = sep.join(v)
-                        else:
-                            lic_type_text = v
-                        only = ' only:'
-                        if 'big-iq' in lic_type_text:
-                            only = ' licensing only:'
-                        mandatory = lic_type_text + only
-                        # Skip licenseKey parameters if BYOL not in the list
-                        if all(x in ['payg', 'big-iq', 'big-iq+payg'] for x in lic_type) and 'licenseKey' in k:
-                            continue
-                        else:
-                            param_array += "| " + k + " | " + mandatory + " | " + self.get_custom_text('parameter_list', k) + " |\n"
-            else:
-                param_array += "| " + p + " | " + mandatory + " | " + self.data['parameters'][p]['metadata']['description'] + " |\n"
+            param_array += "| " + p + " | " + mandatory + " | " + self.data['parameters'][p]['metadata']['description'] + " |\n"
         return param_array
 
     def stack_type_check(self):
@@ -187,8 +164,7 @@ class ReadmeGen(object):
     def create_deploy_links(self):
         """ Create deploy to Azure buttons/links """
         t_loc = self.i_data['template_location']
-        template_name = self.i_data['template_info']['template_name']
-        lic_type = self.i_data['readme_text']['deploy_links']['lic_support'][template_name]
+        lic_type = self.i_data['readme_text']['deploy_links']['license_type']
         v_tag = self.i_data['readme_text']['deploy_links']['version_tag']
         deploy_links = ''
         base_url = 'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2F' + v_tag
@@ -196,15 +172,12 @@ class ReadmeGen(object):
             lic_list = lic_type
         else:
             lic_list = [lic_type]
+        # should be 1:1 pairing, leave in loop for now, will just loop once
         for lic in lic_list:
             deploy_links += '''- **<LIC_TYPE>**<LIC_TEXT>\n\n  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](<DEPLOY_LINK_URL>)\n\n'''
             t_loc = t_loc.replace('/', '%2F').replace('..', '')
-            # Convert current license specified with list of licenses that should be used
-            t_loc = t_loc.replace('bigiq-payg', 'LICENSE').replace('bigiq', 'LICENSE').replace('payg', 'LICENSE').replace('byol', 'LICENSE')
-            t_loc = t_loc.replace('LICENSE', lic)
-            t_loc = t_loc.replace('big-iq+payg', 'bigiq-payg').replace('big-iq', 'bigiq')
             url = base_url + t_loc
-            deploy_links = deploy_links.replace('<DEPLOY_LINK_URL>', url).replace('<LIC_TYPE>', lic)
+            deploy_links = deploy_links.replace('<DEPLOY_LINK_URL>', url).replace('<LIC_TYPE>', lic.upper())
             deploy_links = deploy_links.replace('<LIC_TEXT>', self.get_custom_text('license_text', lic))
         return deploy_links
 

@@ -84,7 +84,7 @@ You have three options for deploying this solution:
 
 ### Azure deploy buttons
 
-Use the appropriate button, depending on what type of BIG-IP licensing required:
+Use the appropriate button below to deploy:
 
 <DEPLOY_LINKS>
 ### Template parameters
@@ -114,7 +114,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 
 The following is an example configuration diagram for this solution deployment. <EXAMPLE_TEXT>
 
-![Configuration Example](images/azure-example-diagram.png)
+![Configuration Example](../images/azure-example-diagram.png)
 
 <POST_CONFIG_TXT>
 
