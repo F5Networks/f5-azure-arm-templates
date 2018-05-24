@@ -3,14 +3,8 @@ import sys
 import os
 import json
 
-def build_deploy_cmd(base_deploy, deploy_cmd_params):
-    """ Deployment Command for the Script """
-    deploy_cmd = base_deploy + deploy_cmd_params
-    # Return full deployment create command
-    return deploy_cmd
-
 def script_param_array(data, i_data):
-    """ Create Dynamic Parameter Array - (parameter, dfl value, mandatory flag, skip flag, parameter type) """
+    """ Create Dynamic Parameter Array - (parameter, default value, mandatory flag, skip flag, parameter type) """
     param_array = []
     for parameter in data['parameters']:
         mandatory = True
@@ -47,7 +41,6 @@ def script_creation(data, i_data, language):
         script_loc = script_location + 'Deploy_via_PS.ps1'
         base_ex = '## Example Command: .\Deploy_via_PS.ps1'
         base_deploy = '$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose '
-        ## Specify any additional example command script parameters ##
         addtl_ex_param = ['resourceGroupName']
     elif language == 'bash':
         script_dash = ' --'
@@ -55,7 +48,6 @@ def script_creation(data, i_data, language):
         script_loc = script_location + 'deploy_via_bash.sh'
         base_ex = '## Example Command: ./deploy_via_bash.sh'
         base_deploy = 'azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p '
-        ## Specify any additional example command script parameters ##
         addtl_ex_param = ['resourceGroupName', 'azureLoginUser', 'azureLoginPassword']
     else:
         return 'Only supporting powershell and bash for now!'
@@ -92,7 +84,7 @@ def script_creation(data, i_data, language):
             else:
                 parameters += '\n  [string]' + mandatory_cmd +  ' $' + parameter[0] + param_value
         elif language == 'bash':
-            parameters += '\n        --' + parameter[0] + ')\n            ' + parameter[0] + '=$2\n            shift 2;;'
+            parameters += '        --' + parameter[0] + ')\n            ' + parameter[0] + '=$2\n            shift 2;;\n'
             ## Handle bash quoting for integers and dict object type in template create command ##
             if isinstance(parameter[1], int) or isinstance(parameter[1], dict):
                 deploy_cmd_params += '\\"' + parameter[0] + '\\":{\\"value\\":$' + parameter[0] + '},'
@@ -107,10 +99,13 @@ def script_creation(data, i_data, language):
 
     ######## Add any additional script items ########
     if language == 'bash':
+        # Strip final char if needed
         if deploy_cmd_params[-1:] == ',':
             deploy_cmd_params = deploy_cmd_params[:-1]
+        if parameters[-1:] == '\n':
+            parameters = parameters[:-1]
         deploy_cmd_params = '"{' + deploy_cmd_params + '}"'
-        ## Add any additional mandatory parameters ##
+        # Add any additional mandatory parameters
         for required_param in ['resourceGroupName']:
             required_parameters += required_param + ' '
     ## Handle adding additional example command script parameters ##
@@ -121,7 +116,7 @@ def script_creation(data, i_data, language):
     with open(meta_script, 'r') as script:
         script_str = script.read()
     script_str = script_str.replace('<EXAMPLE_CMD>', base_ex)
-    script_str = script_str.replace('<DEPLOYMENT_CREATE>', build_deploy_cmd(base_deploy, deploy_cmd_params))
+    script_str = script_str.replace('<DEPLOYMENT_CREATE>', base_deploy + deploy_cmd_params)
     script_str = script_str.replace('<PWD_CMDS>', pwd_cmds)
     script_str = script_str.replace('<DICT_CMDS>', dict_cmds)
     script_str = script_str.replace('<DYNAMIC_PARAMETERS>', parameters)

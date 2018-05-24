@@ -122,7 +122,6 @@ class ReadmeGen(object):
 
     def md_param_array(self):
         """ Create README example parameters: | adminUsername | Yes | Description | """
-        template_name = self.i_data['template_info']['template_name']
         param_array = ""
         for p in self.data['parameters']:
             mandatory = 'Yes'
