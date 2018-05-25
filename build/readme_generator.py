@@ -51,8 +51,8 @@ class ReadmeGen(object):
                 if 'licenseType' in exclude:
                     if self.license_type_check() in exclude['licenseType']:
                         return None
-            if 'template_name' in yaml_value:
-                yvalue = yaml_value['template_name']
+            if 'templateName' in yaml_value:
+                yvalue = yaml_value['templateName']
                 if template_name in yvalue:
                     yvalue_tmpl = yvalue[template_name]
                     if isinstance(yvalue_tmpl, dict) and support_type in yvalue_tmpl:

@@ -233,7 +233,7 @@ stack_type_text:
   learning-stack: "This solution deploys into a new networking stack, which is created along with the solution.  This is a *learning stack*, which means that in addition to creating a new networking stack it also creates all of the appropriate configuration for an example web service."
 sp_access_text:
   default: "The service principal account must have read permissions to the following objects and it is *recommended* to apply the built-in **Reader** role to the account being used. If applying a custom role, it must have at least *read* permissions to the following resources:\n\n- Microsoft.Compute/*\n- Microsoft.Network/*\n- Microsoft.Storage/*"
-  template_name:
+  templateName:
     failover-api: "The service principal account must have read/write permissions to the following objects and it is *recommended* to apply the built-in **Contributor** role to the account being used. If applying a custom role, it must have *read/write* permissions to the following resources:\n\n- Microsoft.Network/*\n- Microsoft.Storage/*"
 license_text:
   byol: ' (bring your own license): This allows you to use an existing BIG-IP license.'
@@ -252,7 +252,7 @@ parameter_list:
   adminPasswordOrKey: "Password or SSH public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key-based authentication, this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**."
   additionalNicLocation:
     default: "This parameter specifies where the additional NICs go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. **Note**: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique."
-    template_name:
+    templateName:
       failover-api: "This parameter specifies where the additional NICs go, use the default value of **OPTIONAL** if **0** was selected for the parameter **numberOfAdditionalNics**.  Otherwise this value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. **Note**: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique."
   allowUsageAnalytics: "This deployment can send anonymous statistics to F5 to help us determine how to improve our solutions. If you select **No** statistics are not sent."
   appInsights: "Enter the name of your existing Application Insights environment that will be used to receive custom BIG-IP metrics you can use for Scale Set rules and device visibility. If the Application Insights environment is in a different Resource Group than this deployment, specify it as **app_insights_name;app_insights_rg**).  If you do not have an Application Insights environment, leave the default (CREATE_NEW) and the template will create one. Note: By default, the new Application Insights environment will be created in **East US**, if necessary you can specify a different region as **CREATE_NEW:app_insights_region**)."
@@ -290,7 +290,7 @@ parameter_list:
   externalIpSelfAddressRangeStart: "The static private IP address you want to assign to the external self IP (primary) of the first BIG-IP VE. The next contiguous address will be used for the second BIG-IP device."
   externalIpAddressRangeStart:
     default: "The static private IP address want to assign to the first external Azure public IP (for self IP). An additional private IP address will be assigned for each public IP address you specified in **numberOfExternalIps**.  For example, entering 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 (self IP), 10.100.1.51 and 10.100.1.52 being configured as static private IP addresses for external virtual servers."
-    template_name:
+    templateName:
       failover-api: 'The static private IP address (secondary) you would like to assign to the first shared Azure public IP. An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses for external virtual servers.'
       failover-lb_3nic: 'The static private IP address (secondary) you would like to assign to the first shared Azure public IP. An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses for external virtual servers.'
   internalSubnetName: "Name of the existing internal subnet. **Important**: The subnet you provide for the internal NIC **must** be unique."
@@ -302,7 +302,7 @@ parameter_list:
   instanceType: "Azure instance size of the Virtual Machine."
   imageName:
     default: "F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as **Best** instead of **Good**."
-    template_name:
+    templateName:
       as_waf_lb: "F5 SKU (image) you want to deploy. **Best** is the only option because BIG-IP ASM is required. Note: The disk size of the VM will be determined based on the option you select."
       as_waf_dns: "F5 SKU (image) you want to deploy. **Best** is the only option because BIG-IP ASM is required. Note: The disk size of the VM will be determined based on the option you select."
   licenseKey1: "The license token for the F5 BIG-IP VE (BYOL)."
@@ -317,7 +317,7 @@ parameter_list:
   notificationEmail: "If you want email notifications on scale events, specify an email address, otherwise leave the parameter as **OPTIONAL**. Note: You can specify multiple emails by separating them with a semi-colon, such as *email@domain.com;email2@domain.com*."
   numberOfAdditionalNics:
     default: "By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a configurable number of additional NICs to the BIG-IP using this parameter."
-    template_name:
+    templateName:
       failover-api: 'By default this solution deploys the BIG-IP(s) in a 3 NIC configuration, however additional NICs can be added to the BIG-IP(s) using this parameter.  **Note**: The default value is 0, additional NICs will only be created if 1 or higher is specified.'
   numberOfInstances: "The number of BIG-IP VEs that will be deployed in front of your application(s)."
   numberOfStaticInstances: "The number of static BYOL BIG-IP VEs that will be deployed in this solution."
