@@ -38,7 +38,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 ## Prerequisites
 
 - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details.
-- If you are deploying the BYOL template, you must have a valid BIG-IP license token.
+- Since you are deploying the BYOL template, you must have a valid BIG-IP license token.
 
 ## Important configuration notes
 

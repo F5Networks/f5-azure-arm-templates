@@ -45,8 +45,11 @@ class ReadmeGen(object):
         if isinstance(yaml_value, dict):
             if 'exclude' in yaml_value:
                 exclude = yaml_value['exclude']
-                if 'stack_type' in exclude:
-                    if self.stack_type_check() in exclude['stack_type']:
+                if 'stackType' in exclude:
+                    if self.stack_type_check() in exclude['stackType']:
+                        return None
+                if 'licenseType' in exclude:
+                    if self.license_type_check() in exclude['licenseType']:
                         return None
             if 'template_name' in yaml_value:
                 yvalue = yaml_value['template_name']
@@ -128,6 +131,21 @@ class ReadmeGen(object):
             # Specify optional parameters for README, need to pull in all license specific options
             param_array += "| " + p + " | " + mandatory + " | " + self.data['parameters'][p]['metadata']['description'] + " |\n"
         return param_array
+
+    def license_type_check(self):
+        """ Determine what license type the template is """
+        lic_type = self.i_data['readme_text']['deploy_links']['license_type']
+        if 'bigiq-payg' in lic_type:
+            ret = 'bigiq-payg'
+        elif 'payg' in lic_type:
+            ret = 'payg'
+        elif 'bigiq' in lic_type:
+            ret = 'bigiq'
+        elif 'byol' in lic_type:
+            ret = 'byol'
+        else:
+            ret = 'unknown_type'
+        return ret
 
     def stack_type_check(self):
         """ Determine what stack type the template is """

@@ -30,7 +30,6 @@ This template differs from the *existing stack* template in that this template d
 ## Prerequisites
 
 - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details.
-- If you are deploying the BYOL template, you must have a valid BIG-IP license token.
 
 ## Important configuration notes
 

@@ -30,7 +30,6 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 ## Prerequisites
 
 - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details.
-- If you are deploying the BYOL template, you must have a valid BIG-IP license token.
 - This template requires a service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details, including required permissions.
 - This solution uses calls to the Azure REST API to read and update Azure resources such as storage accounts, network interfaces, and route tables.  For the solution to function correctly, you must ensure that the BIG-IP(s) can connect to the Azure REST API on port 443.
 - This solution uses calls to the Azure REST API to read and update Azure resources, this has specifically been tested in Azure Commercial Cloud.  Additional cloud environments such as Azure Goverment, Azure Germany and Azure China cloud have not yet been tested.

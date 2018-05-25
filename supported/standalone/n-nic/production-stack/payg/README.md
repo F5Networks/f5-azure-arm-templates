@@ -30,7 +30,7 @@ This template differs from the *existing stack* template in that this template d
 ## Prerequisites
 
 - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details.
-- If you are deploying the BYOL template, you must have a valid BIG-IP license token.
+- Because this template allows you to deploy a variable number of NICs, be sure to pick an Azure Virtual Machine instance size that can support the number of NICs you choose, otherwise the deployment will fail.  See the [Azure Instance Size link](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#size-tables) to determine the correct instance size to correspond with the number of NICs required. NOTE: This solution deploys three NICs plus a variable number of NICs as specified in the parameter **numberOfAdditionalNics**
 
 ## Important configuration notes
 

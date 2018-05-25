@@ -7,6 +7,8 @@ templates:
     title: 'Single NIC'
     intro: "This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard Cloud design where the  BIG-IP VE instance is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.\n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
     config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.'
+    prereq_list:
+      - byol_note
     config_note_list:
       - bigiq_note
     extra_text:
@@ -15,6 +17,8 @@ templates:
     title: '2 NIC'
     intro: "This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3-NIC template, just without the internal NIC for connecting directly to the backend webservers.\n\nThe BIG-IP VE has the Local Traffic Manager (LTM) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
     config_ex_text: 'In this scenario, one NIC is for management and one NIC is for external traffic.  This is a more traditional BIG-IP deployment model where data-plane and management traffic is separate. The IP addresses in this example may be different in your implementation.'
+    prereq_list:
+      - byol_note
     config_note_list:
       - post_config
       - bigiq_note
@@ -25,6 +29,8 @@ templates:
     title: '3 NIC'
     intro: "This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard on-premise-like cloud design where the BIG-IP VE instance is running with a management, front-end application traffic (Virtual Server) and back-end application interface.\n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
     config_ex_text: 'In this scenario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
+    prereq_list:
+      - byol_note
     config_note_list:
       - post_config
       - bigiq_note
@@ -35,7 +41,8 @@ templates:
     title: 'N NIC (variable number of additional NICs)'
     intro: "This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. This template can optionally also add additional NIC(s) to the BIG-IP to be used as needed. Traffic flows from the BIG-IP VE to the application servers. This is the standard on-premise-like cloud design where the  BIG-IP VE instance is running with a management, front-end application traffic (Virtual Server) and back-end application interface.\n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
     config_ex_text: 'In this scenario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  Additional NICs are added to a customer provided VNET/Subnet.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
-    pre_req_list:
+    prereq_list:
+      - byol_note
       - nic_sizing
     config_note_list:
       - post_config
@@ -48,6 +55,8 @@ templates:
     title: 'ConfigSync Cluster (Active/Active): Single NIC'
     intro: "This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE cluster (Active/Active) in Microsoft Azure. Traffic flows from an ALB to the BIG-IP VE which then processes the traffic to application servers. This is the standard cloud design where the BIG-IP VE instance is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.\n\nThe BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
     config_ex_text: 'In this scenario, all access to the BIG-IP VE cluster (Active/Active) is through an ALB. The IP addresses in this example may be different in your implementation.'
+    prereq_list:
+      - byol_note
     config_note_list:
       - bigiq_note
     extra_text:
@@ -56,6 +65,8 @@ templates:
     title: 'ConfigSync Cluster (Active/Active): 3 NIC'
     intro: "This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE cluster (Active/Active) in Microsoft Azure. It also allows you to choose to deploy the HA cluster with or without network failover enabled. With network failover disabled, the cluster is created in a limited *Active/Active* configuration and traffic groups are not available; consequently, you cannot use connection, persistence, or session mirroring.\n\nWhen network failover is enabled, the cluster is configured in a traditional *Active/Standby* mode. Alternately, you can configure multiple traffic groups in the traditional *Active/Active* mode to allow each device to process traffic for the traffic group to which it is associated. In both of these network failover modes, Azure load balancer probes determine which BIG-IP VE device will receive application traffic. Mirroring and failover are available in both scenarios.\n\nThis template also configures an optional internal Azure Load Balancer (ILB) for forwarding traffic to the internal interfaces of the BIG-IP VE devices. The ILB will be pre-configured with either a per-protocol or all-protocol load balancing rule, based on the **internalLoadBalancer** parameter value.\n\nWhen using all-protocol load balancing, you can configure the next hop on Azure User Defined Routes (UDRs) to point to the private IP address of the ILB.  Deploy an IP forwarding virtual server on BIG-IP VE to accept this traffic and forward it to the destination.\n\nWhen using per-protocol load balancing, deploy a network virtual server on BIG-IP VE with a destination address that matches the secondary private IP addresses of the ILB load balancing rule's backend pool members.  Note: The all-protocol ILB is currently only available in preview; you must sign up through Microsoft to enable this functionality before deploying the template.\n\nThe BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management.\n\nFor diagrams of alternate deployment topologies, see [cluster 3 NIC alternate topologies](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/supported/cluster/3nic/alternate-deployment-topologies.md)."
     config_ex_text: 'In this scenario, all access to the BIG-IP VE cluster (Active/Active) is through an ALB. For diagrams of alternate deployment topologies, see [cluster 3 NIC alternate topologies](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/supported/cluster/3nic/alternate-deployment-topologies.md).'
+    prereq_list:
+      - byol_note
     config_note_list:
       - post_config
       - bigiq_note
@@ -67,6 +78,7 @@ templates:
     intro: "This solution uses an ARM template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled (the template now supports [multiple traffic groups](#traffic-group-configuration) which enables active/active deployments). Each pair of BIG-IP VEs is deployed in an Azure Availability Set, and can therefore be spread across different update and fault domains. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.\n\nTraffic flows from the client through BIG-IP VE to the application servers. This is the standard 'on-premise-like' cloud design where the  BIG-IP VE instance is running with a management interface, a front-end application traffic (external) interface, and back-end application (internal) interface. This template is a result of Azure now supporting multiple public-to-private IP address mappings per NIC.\n\nThis template supports creating up to 20 additional public/private IP address configurations for the external 'application' NIC to be used for passing traffic to BIG-IP virtual servers.\n\nThe template also supports updating the next hop of Azure User-Defined Routes (UDRs) to use the active BIG-IP VEs internal self IP address.\n\nThe BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
     config_ex_text: 'In this scenario, each BIG-IP has one NIC for management, one NIC for external traffic and one NIC for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
     prereq_list:
+      - byol_note
       - service_principal
       - udr_tags
       - api_required
@@ -94,6 +106,7 @@ templates:
         experimental: "This solution uses an experimental ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. Be sure to see [Scaling Thresholds](#scaling-thresholds) for information on scaling options.\n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management.\n\nYou have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment."
     config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
     prereq_list:
+      - byol_note
       - service_principal
       - api_required
       - cloud_env_support
@@ -113,6 +126,7 @@ templates:
     intro: "This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. By virtue of a DNS request made by the client to the DNS provider, traffic will flow to the current BIG-IP VE (cluster) members directly which will then process traffic to the application servers, which allows you to deploy without using an Azure Load Balancer (ALB). The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. Be sure to see [Scaling Thresholds](#scaling-thresholds) for information on scaling options.\n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management.\n\nYou have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment."
     config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
     prereq_list:
+      - byol_note
       - service_principal
       - api_required
       - cloud_env_support
@@ -136,6 +150,7 @@ templates:
         experimental: "This solution uses an experimental ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. Be sure to see [Scaling Thresholds](#scaling-thresholds) for information on scaling options.\n\nIn this solution, the BIG-IP VEs have the [LTM](https://f5.com/products/big-ip/local-traffic-manager-ltm) and [ASM](https://f5.com/products/big-ip/application-security-manager-asm) modules enabled to provide advanced traffic management and web application security functionality.\n\nYou have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment.\n\nIf you have a BIG-IQ device, you have the additional option of BIG-IQ + PAYG (pay as you go/hourly). In this scenario, the solution launches at least one BIG-IP VE with a BYOL (bring your own license) license, but then uses PAYG BIG-IP VEs when auto scale events occur.  The template relies on an existing BIG-IQ device with a pool of 1-4 BYOL licenses.  But instead of scaling BYOL BIG-IP VE instances, up to 8 hourly BIG-IP VE LTM instances automatically instantiate to seamlessly handle the load (based on values you enter in the template). When traffic or CPU utilization decreases, the hourly BIG-IP VEs are automatically removed."
     config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
     prereq_list:
+      - byol_note
       - service_principal
       - api_required
       - cloud_env_support
@@ -156,6 +171,7 @@ templates:
     intro: "This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. By virtue of a DNS request made by the client to the DNS provider (currently only BIG-IP DNS (formerly BIG-IP GTM) is supported), traffic will flow to the current BIG-IP VE (cluster) members directly which will then process traffic to the application servers, which allows you to deploy without using an Azure Load Balancer (ALB). The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. Be sure to see [Scaling Thresholds](#scaling-thresholds) for information on scaling options.\n\nIn this solution, the BIG-IP VEs have the [LTM](https://f5.com/products/big-ip/local-traffic-manager-ltm) and [ASM](https://f5.com/products/big-ip/application-security-manager-asm) modules enabled to provide advanced traffic management and web application security functionality.\n\nYou have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment."
     config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
     prereq_list:
+      - byol_note
       - service_principal
       - api_required
       - cloud_env_support
@@ -174,6 +190,13 @@ templates:
 
 ######################### Additional documentation items #########################
 note_text:
+  byol_note: 
+    default: 'Since you are deploying the BYOL template, you must have a valid BIG-IP license token.'
+    exclude:
+      licenseType:
+        - payg
+        - bigiq
+        - bigiq-payg
   service_principal: 'This template requires a service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details, including required permissions.'
   post_config: 'This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.'
   master_election: 'This template includes a master election feature, which ensures that if the existing master BIG-IP VE is unavailable, a new master is selected from the BIG-IP VEs in the cluster.'
@@ -191,7 +214,7 @@ note_text:
   bigiq_note:
     default: 'You have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) with a pool of BIG-IP licenses in order to license BIG-IP VEs using BYOL licenses. **Note:** The templates now support BIG-IQ licensing using an [ELA](https://www.f5.com/pdf/licensing/big-ip-virtual-edition-enterprise-licensing-agreement-overview.pdf)/subscription pool, which enables self-licensing of BIG-IP virtual editions (VEs). **Important:** This solution supports the two most recent versions of BIG-IQ (see the [Version Matrix](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md) for specific versions), and your BIG-IQ system must have at least 2 NICs.'
     exclude:
-      stack_type:
+      stackType:
         - production-stack
   api_required: 'This solution uses calls to the Azure REST API to read and update Azure resources such as storage accounts, network interfaces, and route tables.  For the solution to function correctly, you must ensure that the BIG-IP(s) can connect to the Azure REST API on port 443.'
   cloud_env_support: 'This solution uses calls to the Azure REST API to read and update Azure resources, this has specifically been tested in Azure Commercial Cloud.  Additional cloud environments such as Azure Goverment, Azure Germany and Azure China cloud have not yet been tested.'
