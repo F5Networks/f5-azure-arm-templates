@@ -45,8 +45,8 @@ route_add_cmd = ""
 ## Static Variable Assignment ##
 content_version = '5.1.0.0'
 f5_networks_tag = 'develop'
-f5_cloud_libs_tag = 'v4.1.1'
-f5_cloud_libs_azure_tag = 'v2.1.0'
+f5_cloud_libs_tag = 'develop'
+f5_cloud_libs_azure_tag = 'develop'
 f5_cloud_iapps_tag = 'v2.0.3'
 f5_cloud_workers_tag = 'v1.0.0'
 # Set BIG-IP versions to allow
@@ -73,7 +73,7 @@ elif template_name in ('as_waf_lb', 'as_waf_dns'):
     additional_tar_list = "tar xfz /config/cloud/f5-cloud-libs-azure.tar.gz -C /config/cloud/azure/node_modules/@f5devcentral\n"
 
 #### Empty hashed file list when testing new code ####
-#hashed_file_list = ""
+hashed_file_list = ""
 ######################################################
 install_cloud_libs = install_cloud_libs.replace('<HASHED_FILE_LIST>', hashed_file_list)
 install_cloud_libs = install_cloud_libs.replace('<TAR_LIST>', additional_tar_list)
