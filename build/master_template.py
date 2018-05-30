@@ -17,6 +17,7 @@ parser.add_option("-m", "--stack-type", action="store", type="string", dest="sta
 parser.add_option("-t", "--template-location", action="store", type="string", dest="template_location", help="Template Location: such as ../experimental/standalone/1nic/payg/")
 parser.add_option("-a", "--artifact-location", action="store", type="string", dest="artifact_location", help="Artifacts Location: such as ../experimental/standalone/1nic/")
 parser.add_option("-v", "--solution-location", action="store", type="string", dest="solution_location", default="experimental", help="Solution location: experimental or supported")
+parser.add_option("-e", "--environment", action="store", type="string", dest="environment", default="azure", help="Environment: azure or azurestack")
 parser.add_option("-r", "--release-prep", action="store_true", dest="release_prep", default=False, help="Release Prep Flag: If passed will equal True.")
 
 (options, args) = parser.parse_args()
@@ -26,6 +27,7 @@ stack_type = options.stack_type
 template_location = options.template_location
 artifact_location = options.artifact_location
 solution_location = options.solution_location
+environment = options.environment
 release_prep = options.release_prep
 
 # Artifact location is same as template_location
@@ -221,7 +223,8 @@ if license_type == 'bigiq' or license_type == 'bigiq-payg':
         data['parameters']['numberOfStaticInstances'] = {"type": "int", "allowedValues": [1, 2, 3, 4], "metadata": {"description": ""}}
 data['parameters']['ntpServer'] = {"type": "string", "defaultValue": "0.pool.ntp.org", "metadata": {"description": ""}}
 data['parameters']['timeZone'] = {"type": "string", "defaultValue": "UTC", "metadata": {"description": ""}}
-data['parameters']['customImage'] = {"type": "string", "defaultValue": "OPTIONAL", "metadata": {"description": ""}}
+if environment == 'azure':
+    data['parameters']['customImage'] = {"type": "string", "defaultValue": "OPTIONAL", "metadata": {"description": ""}}
 data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": "*", "metadata": {"description": ""}}
 data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values, "metadata": {"description": ""}}
 data['parameters']['allowUsageAnalytics'] = {"type": "string", "defaultValue": "Yes", "allowedValues": ["Yes", "No"], "metadata": {"description": ""}}
@@ -353,12 +356,25 @@ data['variables']['installCloudLibs'] = install_cloud_libs
 data['variables']['skuToUse'] = sku_to_use
 data['variables']['offerToUse'] = offer_to_use
 data['variables']['bigIpNicPortValue'] = nic_port_map
-data['variables']['storageProfileArray'] = {"platformImage": {"imageReference": {"offer": "[variables('offerToUse')]", "publisher": "f5-networks", "sku": "[variables('skuToUse')]", "version": "[parameters('bigIpVersion')]"}, "osDisk": {"createOption": "FromImage"}}, "customImage": {"imageReference": {"id": "[if(variables('createNewCustomImage'), resourceId('Microsoft.Compute/images', variables('newCustomImageName')), variables('customImage'))]"}}}
+if environment == 'azurestack':
+    data['variables']['computeApiVersion'] = "2015-06-15"
+    data['variables']['networkApiVersion'] = "2015-06-15"
+    data['variables']['storageApiVersion'] = "2015-06-15"
+else:
+    data['variables']['computeApiVersion'] = "2017-12-01"
+    data['variables']['networkApiVersion'] = "2017-11-01"
+    data['variables']['storageApiVersion'] = "2017-10-01"
+    data['variables']['storageProfileArray'] = {"platformImage": {"imageReference": {"offer": "[variables('offerToUse')]", "publisher": "f5-networks", "sku": "[variables('skuToUse')]", "version": "[parameters('bigIpVersion')]"}, "osDisk": {"createOption": "FromImage"}}, "customImage": {"imageReference": {"id": "[if(variables('createNewCustomImage'), resourceId('Microsoft.Compute/images', variables('newCustomImageName')), variables('customImage'))]"}}}
 data['variables']['premiumInstanceArray'] = premium_instance_type_list
 ## Add additional default variables
 # CLI Tools *may* take \n and send up in deployment as \\n, which fails
 data['variables']['adminPasswordOrKey'] = "[replace(parameters('adminPasswordOrKey'),'\\n', '\n')]"
 data['variables']['linuxConfiguration'] = { "disablePasswordAuthentication": True, "ssh": { "publicKeys": [{"path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]", "keyData": "[variables('adminPasswordOrKey')]"}]}}
+if environment == 'azure':
+    data['variables']['customImage'] = "[replace(parameters('customImage'), 'OPTIONAL', '')]"
+    data['variables']['useCustomImage'] = "[not(empty(variables('customImage')))]"
+    data['variables']['createNewCustomImage'] = "[contains(variables('customImage'), 'https://')]"
+    data['variables']['newCustomImageName'] = "[concat(variables('dnsLabel'), 'image')]"
 ## Configure usage analytics variables
 data['variables']['deploymentId'] = "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('dnsLabel'))]"
 metrics_cmd = "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:<TMPL_NAME>,templateVersion:<TMPL_VER>,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:<LIC_TYPE>,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
@@ -770,7 +786,10 @@ if template_name == 'failover-lb_1nic':
 
 ######## Availability Set Resource(s) ######
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-api', 'failover-lb_1nic', 'failover-lb_3nic'):
-    avset = { "apiVersion": compute_api_version, "location": location, "name": "[variables('availabilitySetName')]", "tags": tags, "properties": { "PlatformUpdateDomainCount": 2, "PlatformFaultDomainCount": 2 }, "sku": { "name": "Aligned" }, "type": "Microsoft.Compute/availabilitySets" }
+    avset = { "apiVersion": compute_api_version, "location": location, "name": "[variables('availabilitySetName')]", "tags": tags, "properties": { "PlatformUpdateDomainCount": 2, "PlatformFaultDomainCount": 2 }, "type": "Microsoft.Compute/availabilitySets" }
+    # Only required for managed disks
+    if environment == 'azure':
+        avset['sku'] = { "name": "Aligned" }
     if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic'):
         if stack_type in ('existing-stack', 'production-stack'):
             avset['condition'] = "[equals(toUpper(parameters('avSetChoice')), 'CREATE_NEW')]"
@@ -780,11 +799,14 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
 resources_list += [{ "type": "Microsoft.Storage/storageAccounts", "apiVersion": storage_api_version, "kind": "Storage", "location": location, "name": "[variables('newDataStorageAccountName')]", "tags": tags, "sku": { "name": "[variables('dataStorageAccountType')]", "tier": "Standard" } }]
 
 ###### Compute/image Resource(s) ######
-resources_list += [{"type": "Microsoft.Compute/images", "apiVersion": compute_api_version, "name": "[variables('newCustomImageName')]", "condition": "[and(variables('useCustomImage'), variables('createNewCustomImage'))]", "location": location, "tags": tags, "properties": {"storageProfile": {"osDisk": {"blobUri": "[variables('customImage')]", "osState": "Generalized", "osType": "Linux", "storageAccountType": "[if(contains(variables('premiumInstanceArray'), parameters('instanceType')), 'Premium_LRS', 'Standard_LRS')]"}}}}]
+if environment == 'azure':
+    resources_list += [{"type": "Microsoft.Compute/images", "apiVersion": compute_api_version, "name": "[variables('newCustomImageName')]", "condition": "[and(variables('useCustomImage'), variables('createNewCustomImage'))]", "location": location, "tags": tags, "properties": {"storageProfile": {"osDisk": {"blobUri": "[variables('customImage')]", "osState": "Generalized", "osType": "Linux", "storageAccountType": "[if(contains(variables('premiumInstanceArray'), parameters('instanceType')), 'Premium_LRS', 'Standard_LRS')]"}}}}]
 
 ###### Compute/VM Resource(s) ######
-depends_on = "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", "[variables('newCustomImageName')]"
-depends_on = list(depends_on)
+depends_on = ["[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]"]
+if environment == 'azure':
+    depends_on.append("[variables('newCustomImageName')]")
+
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic'):
     depends_on.append("[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'))]")
 if template_name == 'standalone_1nic':
@@ -813,7 +835,13 @@ if template_name in ('failover-api'):
     depends_on.append("addtlniccopy1")
 
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic'):
-    resources_list += [{"apiVersion": compute_api_version, "type": "Microsoft.Compute/virtualMachines", "dependsOn": depends_on, "location": location, "name": "[variables('instanceName')]", "tags": tags, "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]", "properties": { "diagnosticsProfile": { "bootDiagnostics": { "enabled": True, "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]" } }, "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "networkProfile": { "networkInterfaces":  nic_reference }, "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]" }, "osProfile": { "computerName": "[variables('instanceName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[variables('adminPasswordOrKey')]", "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]" }, "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]" }}]
+    plan = "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]"
+    storageProfile = "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
+    # No managed disk support for Azure Stack yet
+    if environment == 'azurestack':
+        plan = "[variables('imagePlan')]"
+        storageProfile = {"imageReference": {"offer": "[variables('offerToUse')]", "publisher": "f5-networks", "sku": "[variables('skuToUse')]", "version": "[parameters('bigIpVersion')]"}, "osDisk": {"name": "osdisk","vhd": {"uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'osdisks/', variables('instanceName'), '.vhd')]"},"caching": "ReadWrite","createOption": "FromImage"}}
+    resources_list += [{"apiVersion": compute_api_version, "type": "Microsoft.Compute/virtualMachines", "dependsOn": depends_on, "location": location, "name": "[variables('instanceName')]", "tags": tags, "plan": plan, "properties": { "diagnosticsProfile": { "bootDiagnostics": { "enabled": True, "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]" } }, "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "networkProfile": { "networkInterfaces":  nic_reference }, "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]" }, "osProfile": { "computerName": "[variables('instanceName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[variables('adminPasswordOrKey')]", "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]" }, "storageProfile": storageProfile }}]
 if template_name == 'failover-lb_1nic':
     resources_list += [{ "apiVersion": compute_api_version, "type": "Microsoft.Compute/virtualMachines", "name": "[concat(variables('deviceNamePrefix'),copyindex())]", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), copyindex())]", "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]" ], "copy": { "count": "[parameters('numberOfInstances')]", "name": "devicecopy" }, "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]", "properties": { "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]" }, "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "osProfile": { "computerName": "[concat(variables('deviceNamePrefix'),copyindex())]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[variables('adminPasswordOrKey')]", "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]" }, "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]", "networkProfile": { "networkInterfaces": nic_reference }, "diagnosticsProfile": { "bootDiagnostics": { "enabled": True, "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]" } } } }]
 if template_name in ('failover-api', 'failover-lb_3nic'):

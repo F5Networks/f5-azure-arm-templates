@@ -82,7 +82,7 @@ def parameter_initialize(data):
     data['parameters']['managedRoutes'] = "OPTIONAL"
     data['parameters']['ntpServer'] = "MANDATORY"
     data['parameters']['timeZone'] = "MANDATORY"
-    data['parameters']['customImage'] = "MANDATORY"
+    data['parameters']['customImage'] = "OPTIONAL"
     data['parameters']['restrictedSrcAddress'] = "MANDATORY"
     data['parameters']['tagValues'] = "MANDATORY"
     data['parameters']['allowUsageAnalytics'] = "MANDATORY"
@@ -93,9 +93,9 @@ def variable_initialize(data):
     """ Set default variables, as well as all optional ones in a specific order """
     data['variables']['bigIpNicPortMap'] = { "1": { "Port": "[parameters('bigIpVersion')]" }, "2": { "Port": "443" }, "3": { "Port": "443" }, "4": { "Port": "443" }, "5": { "Port": "443" }, "6": { "Port": "443" } }
     data['variables']['bigIpVersionPortMap'] = "MANDATORY"
-    data['variables']['computeApiVersion'] = "2017-12-01"
-    data['variables']['networkApiVersion'] = "2017-11-01"
-    data['variables']['storageApiVersion'] = "2017-10-01"
+    data['variables']['computeApiVersion'] = "MANDATORY"
+    data['variables']['networkApiVersion'] = "MANDATORY"
+    data['variables']['storageApiVersion'] = "MANDATORY"
     data['variables']['appInsightsApiVersion'] = "OPTIONAL"
     data['variables']['appInsightsComponentsApiVersion'] = "OPTIONAL"
     data['variables']['location'] = "[resourceGroup().location]"
@@ -253,11 +253,11 @@ def variable_initialize(data):
     data['variables']['webVmSubnetPrivateAddress'] = "OPTIONAL"
     data['variables']['webVmVsAddr'] = "OPTIONAL"
     data['variables']['webVmVsPort'] = "OPTIONAL"
-    data['variables']['customImage'] = "[replace(parameters('customImage'), 'OPTIONAL', '')]"
-    data['variables']['useCustomImage'] = "[not(empty(variables('customImage')))]"
-    data['variables']['createNewCustomImage'] = "[contains(variables('customImage'), 'https://')]"
-    data['variables']['newCustomImageName'] = "[concat(variables('dnsLabel'), 'image')]"
-    data['variables']['storageProfileArray'] = "MANDATORY"
+    data['variables']['customImage'] = "OPTIONAL"
+    data['variables']['useCustomImage'] = "OPTIONAL"
+    data['variables']['createNewCustomImage'] = "OPTIONAL"
+    data['variables']['newCustomImageName'] = "OPTIONAL"
+    data['variables']['storageProfileArray'] = "OPTIONAL"
     data['variables']['premiumInstanceArray'] = "MANDATORY"
     data['variables']['customConfig'] = "### START (INPUT) CUSTOM CONFIGURATION HERE\n"
     data['variables']['installCustomConfig'] = "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
@@ -270,7 +270,7 @@ def template_check(data, resource):
         if data[resource][var] == "OPTIONAL":
             data[resource].pop(var)
         elif data[resource][var] == "MANDATORY":
-            raise Exception('Mandatory parameter was not filled in, exiting...')
+            raise Exception('Mandatory parameter/variable: ' + var + ' was not filled in, exiting...')
     return data
 
 def param_descr_update(data, template_name):

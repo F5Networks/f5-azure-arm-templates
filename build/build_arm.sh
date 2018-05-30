@@ -57,6 +57,26 @@ done
 
 ############################### End Supported ###############################
 
+############################### Azure Stack Supported ###############################
+## BIGIP ARM Templates - Standalone (1nic)
+template_list="standalone/1nic"
+for tmpl in $template_list; do
+    loc=$tmpl
+    if [[ $loc == *"standalone"* ]]; then
+        tmpl="standalone_"`basename $loc`
+    fi
+    stack_list="new-stack existing-stack production-stack"
+    for stack_type in $stack_list; do
+        python -B '.\master_template.py' --template-name $tmpl --license-type byol --stack-type $stack_type --environment azurestack --template-location "../environments/azure-stack/supported/$loc/$stack_type/byol/" $release_prep
+        # Don't build BIG-IQ template if stack type is production-stack
+        if [[ $stack_type != *"production-stack"* ]]; then
+            python -B '.\master_template.py' --template-name $tmpl --license-type bigiq --stack-type $stack_type --environment azurestack --template-location "../environments/azure-stack/supported/$loc/$stack_type/bigiq/" $release_prep
+        fi
+    done
+done
+
+############################### End Azure Stack Supported ###############################
+
 ############################### Experimental ###############################
 ## BIGIP ARM Templates - Standalone (1nic, 2nic, 3nic), Failover via-lb (1nic, 3nic), Failover via-api (n-nic)
 template_list="standalone/1nic standalone/2nic standalone/3nic standalone/n-nic failover/same-net/via-lb/1nic failover/same-net/via-lb/3nic failover/same-net/via-api/n-nic"
