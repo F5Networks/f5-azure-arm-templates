@@ -299,7 +299,7 @@ parameter_list:
   internalLoadBalancerType: "Specify a the type of internal Azure load balancer to deploy. Note: As of the initial release of this template, the all-protocol Azure load balancer is in public preview. Please ensure that this feature is enabled before selecting **All-protocol**."
   internalLoadBalancerProbePort: "Specify a TCP port for the internal load balancer to monitor. If you specified DO_NOT_USE for internal load balancer type, this setting has no effect."
   instanceName: "Name of the Virtual Machine."
-  instanceType: "Azure instance size of the Virtual Machine."
+  instanceType: "Instance size of the Virtual Machine."
   imageName:
     default: "F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as **Best** instead of **Good**."
     templateName:

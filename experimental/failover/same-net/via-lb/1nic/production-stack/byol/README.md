@@ -106,7 +106,7 @@ Use the appropriate button below to deploy:
 | authenticationType | Yes | Type of authentication to use on the Virtual Machine, password based authentication or key based authentication. |
 | adminPasswordOrKey | Yes | Password or SSH public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key-based authentication, this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**. |
 | uniqueLabel | Yes | Unique Name for the deployment to be used when creating resources. |
-| instanceType | Yes | Azure instance size of the Virtual Machine. |
+| instanceType | Yes | Instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as **Best** instead of **Good**. |
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
 | licenseKey1 | Yes | The license token for the F5 BIG-IP VE (BYOL). |

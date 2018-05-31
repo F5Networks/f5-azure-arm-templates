@@ -123,7 +123,7 @@ Use the appropriate button below to deploy:
 | authenticationType | Yes | Type of authentication to use on the Virtual Machine, password based authentication or key based authentication. |
 | adminPasswordOrKey | Yes | Password or SSH public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key-based authentication, this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**. |
 | dnsLabel | Yes | Unique DNS Name for the Public IP address used to access the Virtual Machine. |
-| instanceType | Yes | Azure instance size of the Virtual Machine. |
+| instanceType | Yes | Instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (image) you want to deploy. **Best** is the only option because BIG-IP ASM is required. Note: The disk size of the VM will be determined based on the option you select. |
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
 | numberOfStaticInstances | Yes | The number of static BYOL BIG-IP VEs that will be deployed in this solution. |

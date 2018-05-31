@@ -89,7 +89,7 @@
             ], 
             "defaultValue": "Standard_DS3_v2", 
             "metadata": {
-                "description": "Azure instance size of the Virtual Machine."
+                "description": "Instance size of the Virtual Machine."
             }, 
             "type": "string"
         }, 
