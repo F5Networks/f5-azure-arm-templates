@@ -67,10 +67,10 @@ for tmpl in $template_list; do
     fi
     stack_list="new-stack existing-stack production-stack"
     for stack_type in $stack_list; do
-        python -B '.\master_template.py' --template-name $tmpl --license-type byol --stack-type $stack_type --environment azurestack --template-location "../environments/azure-stack/supported/$loc/$stack_type/byol/" $release_prep
+        python -B '.\master_template.py' --template-name $tmpl --license-type byol --stack-type $stack_type --environment azurestack --template-location "./environments/azure-stack/supported/$loc/$stack_type/byol/" $release_prep
         # Don't build BIG-IQ template if stack type is production-stack
         if [[ $stack_type != *"production-stack"* ]]; then
-            python -B '.\master_template.py' --template-name $tmpl --license-type bigiq --stack-type $stack_type --environment azurestack --template-location "../environments/azure-stack/supported/$loc/$stack_type/bigiq/" $release_prep
+            python -B '.\master_template.py' --template-name $tmpl --license-type bigiq --stack-type $stack_type --environment azurestack --template-location "./environments/azure-stack/supported/$loc/$stack_type/bigiq/" $release_prep
         fi
     done
 done
