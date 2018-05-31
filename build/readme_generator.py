@@ -29,8 +29,9 @@ class ReadmeGen(object):
         return "".join(tag_text)
 
     def get_custom_text(self, parent_key, child_key=None, template_name=None):
-        """ Pull in custom text from the YAML file """
+        """ Pull in custom text from the YAML file"""
         yaml_dict = self.loaded_files['doc_text_file']
+        ret = ''
         try:
             if child_key is not None:
                 yaml_value = yaml_dict[parent_key][child_key]
@@ -43,6 +44,7 @@ class ReadmeGen(object):
         except KeyError:
             support_type = None
         if isinstance(yaml_value, dict):
+            # consume logic in yaml file, if exists
             if 'exclude' in yaml_value:
                 exclude = yaml_value['exclude']
                 if 'stackType' in exclude:
@@ -51,19 +53,24 @@ class ReadmeGen(object):
                 if 'licenseType' in exclude:
                     if self.license_type_check() in exclude['licenseType']:
                         return None
+                if 'environment' in exclude:
+                    if self.env_type_check() in exclude['environment']:
+                        return None
             if 'templateName' in yaml_value:
                 yvalue = yaml_value['templateName']
                 if template_name in yvalue:
                     yvalue_tmpl = yvalue[template_name]
                     if isinstance(yvalue_tmpl, dict) and support_type in yvalue_tmpl:
-                        yaml_value = yvalue_tmpl[support_type]
+                        ret = yvalue_tmpl[support_type]
                     else:
-                        yaml_value = yvalue_tmpl
+                        ret = yvalue_tmpl
                 else:
-                    yaml_value = yaml_value['default']
+                    ret = yaml_value['default']
             else:
-                yaml_value = yaml_value['default']
-        return yaml_value
+                ret = yaml_value['default']
+        else:
+            ret = yaml_value
+        return ret
 
     def get_tmpl_text(self, p_key, s_key, t_key):
         """ Pull in custom template text for each solution from the YAML file """
@@ -133,34 +140,45 @@ class ReadmeGen(object):
         return param_array
 
     def license_type_check(self):
-        """ Determine what license type the template is """
-        lic_type = self.i_data['readme_text']['deploy_links']['license_type']
-        if 'bigiq-payg' in lic_type:
+        """ Determine the license type of the template """
+        v = self.i_data['readme_text']['deploy_links']['license_type'].lower()
+        if 'bigiq-payg' in v:
             ret = 'bigiq-payg'
-        elif 'payg' in lic_type:
+        elif 'payg' in v:
             ret = 'payg'
-        elif 'bigiq' in lic_type:
+        elif 'bigiq' in v:
             ret = 'bigiq'
-        elif 'byol' in lic_type:
+        elif 'byol' in v:
             ret = 'byol'
         else:
-            ret = 'unknown_type'
+            ret = 'unknown type'
         return ret
 
     def stack_type_check(self):
-        """ Determine what stack type the template is """
-        t_loc = self.i_data['template_location']
-        if 'new-stack' in t_loc:
-            stack_type = 'new-stack'
-        elif 'existing-stack' in t_loc:
-            stack_type = 'existing-stack'
-        elif 'production-stack' in t_loc:
-            stack_type = 'production-stack'
-        elif 'learning-stack' in t_loc:
-            stack_type = 'learning-stack'
+        """ Determine the stack type of the template """
+        v = self.i_data['template_location'].lower()
+        if 'new-stack' in v:
+            ret = 'new-stack'
+        elif 'existing-stack' in v:
+            ret = 'existing-stack'
+        elif 'production-stack' in v:
+            ret = 'production-stack'
+        elif 'learning-stack' in v:
+            ret = 'learning-stack'
         else:
-            stack_type = 'unknown_stack'
-        return stack_type
+            ret = 'unknown type'
+        return ret
+
+    def env_type_check(self):
+        """ Determine the environment of the template """
+        v = self.i_data['environment'].lower()
+        if 'azurestack' in v:
+            ret = 'azureStack'
+        elif 'azure' in v:
+            ret = 'azureCloud'
+        else:
+            ret = 'unknown type'
+        return ret
 
     def sp_access_required(self, text):
         """ Determine what Service Principal Access is needed, map in what is needed """

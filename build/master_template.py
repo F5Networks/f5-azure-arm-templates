@@ -1078,7 +1078,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
     readme_text['ps_script'] = ps_script
 
     #### Call function to create/update README ####
-    i_data = {'template_info': template_info, 'readme_text': readme_text, 'template_location': created_file, 'files': {}}
+    i_data = {'template_info': template_info, 'readme_text': readme_text, 'template_location': created_file, 'environment': environment, 'files': {}}
     folder_loc = 'files/readme_files/'
     i_data['files']['doc_text_file'] = folder_loc + 'template_text.yaml'
     i_data['files']['misc_readme_file'] = folder_loc + 'misc.README.txt'

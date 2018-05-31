@@ -8,6 +8,8 @@ templates:
     intro: "This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard Cloud design where the  BIG-IP VE instance is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.\n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
     config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.'
     prereq_list:
+      - as_images
+      - as_extension
       - byol_note
     config_note_list:
       - bigiq_note
@@ -190,6 +192,16 @@ templates:
 
 ######################### Additional documentation items #########################
 note_text:
+  as_images:
+    default: 'This template requires the BIG-IP VE image(s) to be available in your Azure Stack environment.  The images can be added from the Azure marketplace, see the instuctions [here](http://clouddocs.f5.com/cloud/public/v1/azure/Azure_stack.html).'
+    exclude:
+      environment:
+        - azureCloud
+  as_extension:
+    default: 'This template requires the *Custom Script for Linux 2.0* extension.  The custom script extension can be added from the Azure marketplace, see the Azure documentation [here](https://docs.microsoft.com/en-us/azure/azure-stack/asdk/asdk-marketplace-item) for more information.'
+    exclude:
+      environment:
+        - azureCloud
   byol_note: 
     default: 'Since you are deploying the BYOL template, you must have a valid BIG-IP license token.'
     exclude:
