@@ -189,6 +189,11 @@ with open(metafile, 'r') as base:
 with open(metafile_params, 'r') as base_params:
     data_params = json.load(base_params, object_pairs_hook=OrderedDict)
 
+###### Prepare some metadata about the template artifact ######
+api_access_required = {'standalone_1nic': None, 'standalone_2nic': None, 'standalone_3nic': None, 'standalone_n-nic': None, 'failover-lb_1nic': None, 'failover-lb_3nic': None, 'failover-api': 'required', 'as_ltm_lb': 'required', 'as_ltm_dns': 'required', 'as_waf_lb': 'required', 'as_waf_dns': 'required'}
+template_info = {'template_name': template_name, 'location': artifact_location, 'api_access_required': api_access_required}
+i_data = {'template_info': template_info, 'readme_text': {}, 'template_location': created_file, 'environment': environment, 'files': {}}
+
 ######################################## Create/Modify ARM Objects ########################################
 data['contentVersion'] = content_version
 data_params['contentVersion'] = content_version
@@ -223,8 +228,7 @@ if license_type == 'bigiq' or license_type == 'bigiq-payg':
         data['parameters']['numberOfStaticInstances'] = {"type": "int", "allowedValues": [1, 2, 3, 4], "metadata": {"description": ""}}
 data['parameters']['ntpServer'] = {"type": "string", "defaultValue": "0.pool.ntp.org", "metadata": {"description": ""}}
 data['parameters']['timeZone'] = {"type": "string", "defaultValue": "UTC", "metadata": {"description": ""}}
-if environment == 'azure':
-    data['parameters']['customImage'] = {"type": "string", "defaultValue": "OPTIONAL", "metadata": {"description": ""}}
+data['parameters']['customImage'] = {"type": "string", "defaultValue": "OPTIONAL", "metadata": {"description": ""}}
 data['parameters']['restrictedSrcAddress'] = {"type": "string", "defaultValue": "*", "metadata": {"description": ""}}
 data['parameters']['tagValues'] = {"type": "object", "defaultValue": tag_values, "metadata": {"description": ""}}
 data['parameters']['allowUsageAnalytics'] = {"type": "string", "defaultValue": "Yes", "allowedValues": ["Yes", "No"], "metadata": {"description": ""}}
@@ -330,7 +334,7 @@ if template_name in ('as_ltm_lb', 'as_ltm_dns', 'as_waf_lb', 'as_waf_dns', 'fail
 ## Remove unecessary parameters and do a check for missing mandatory variables
 master_helper.template_check(data, 'parameters')
 ## Fill in descriptions from YAML doc file in files/readme_files
-master_helper.param_descr_update(data['parameters'], template_name)
+master_helper.param_descr_update(data['parameters'], i_data)
 # Some modifications once parameters have been defined
 for parameter in data['parameters']:
     # Sort azuredeploy.json parameter values alphabetically
@@ -356,25 +360,29 @@ data['variables']['installCloudLibs'] = install_cloud_libs
 data['variables']['skuToUse'] = sku_to_use
 data['variables']['offerToUse'] = offer_to_use
 data['variables']['bigIpNicPortValue'] = nic_port_map
-if environment == 'azurestack':
-    data['variables']['computeApiVersion'] = "2015-06-15"
-    data['variables']['networkApiVersion'] = "2015-06-15"
-    data['variables']['storageApiVersion'] = "2015-06-15"
-else:
+if environment == 'azure':
     data['variables']['computeApiVersion'] = "2017-12-01"
     data['variables']['networkApiVersion'] = "2017-11-01"
     data['variables']['storageApiVersion'] = "2017-10-01"
-    data['variables']['storageProfileArray'] = {"platformImage": {"imageReference": {"offer": "[variables('offerToUse')]", "publisher": "f5-networks", "sku": "[variables('skuToUse')]", "version": "[parameters('bigIpVersion')]"}, "osDisk": {"createOption": "FromImage"}}, "customImage": {"imageReference": {"id": "[if(variables('createNewCustomImage'), resourceId('Microsoft.Compute/images', variables('newCustomImageName')), variables('customImage'))]"}}}
-data['variables']['premiumInstanceArray'] = premium_instance_type_list
-## Add additional default variables
-# CLI Tools *may* take \n and send up in deployment as \\n, which fails
-data['variables']['adminPasswordOrKey'] = "[replace(parameters('adminPasswordOrKey'),'\\n', '\n')]"
-data['variables']['linuxConfiguration'] = { "disablePasswordAuthentication": True, "ssh": { "publicKeys": [{"path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]", "keyData": "[variables('adminPasswordOrKey')]"}]}}
-if environment == 'azure':
+    # Managed disk - custom image
     data['variables']['customImage'] = "[replace(parameters('customImage'), 'OPTIONAL', '')]"
     data['variables']['useCustomImage'] = "[not(empty(variables('customImage')))]"
     data['variables']['createNewCustomImage'] = "[contains(variables('customImage'), 'https://')]"
     data['variables']['newCustomImageName'] = "[concat(variables('dnsLabel'), 'image')]"
+    data['variables']['storageProfileArray'] = {"platformImage": {"imageReference": "[variables('imageReference')]", "osDisk": {"createOption": "FromImage"}}, "customImage": {"imageReference": {"id": "[if(variables('createNewCustomImage'), resourceId('Microsoft.Compute/images', variables('newCustomImageName')), variables('customImage'))]"}}}
+    data['variables']['premiumInstanceArray'] = premium_instance_type_list
+elif environment == 'azurestack':
+    data['variables']['computeApiVersion'] = "2015-06-15"
+    data['variables']['networkApiVersion'] = "2015-06-15"
+    data['variables']['storageApiVersion'] = "2015-06-15"
+    # Non-managed disk - custom image
+    data['variables']['customImage'] = "[replace(parameters('customImage'), 'OPTIONAL', '')]"
+    data['variables']['useCustomImage'] = "[not(empty(variables('customImage')))]"
+    data['variables']['customImageReference'] = {"uri": "[variables('customImage')]"}
+## Add additional default variables
+# CLI Tools *may* take \n and send up in deployment as \\n, which fails
+data['variables']['adminPasswordOrKey'] = "[replace(parameters('adminPasswordOrKey'),'\\n', '\n')]"
+data['variables']['linuxConfiguration'] = { "disablePasswordAuthentication": True, "ssh": { "publicKeys": [{"path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]", "keyData": "[variables('adminPasswordOrKey')]"}]}}
 ## Configure usage analytics variables
 data['variables']['deploymentId'] = "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('dnsLabel'))]"
 metrics_cmd = "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:<TMPL_NAME>,templateVersion:<TMPL_VER>,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:<LIC_TYPE>,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
@@ -839,8 +847,7 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
     storageProfile = "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
     # No managed disk support for Azure Stack yet
     if environment == 'azurestack':
-        plan = "[variables('imagePlan')]"
-        storageProfile = {"imageReference": {"offer": "[variables('offerToUse')]", "publisher": "f5-networks", "sku": "[variables('skuToUse')]", "version": "[parameters('bigIpVersion')]"}, "osDisk": {"name": "osdisk","vhd": {"uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'osdisks/', variables('instanceName'), '.vhd')]"},"caching": "ReadWrite","createOption": "FromImage"}}
+        storageProfile = {"imageReference": "[if(variables('useCustomImage'), json('null'), variables('imageReference'))]", "osDisk": {"image": "[if(variables('useCustomImage'), variables('customImageReference'), json('null'))]", "caching": "ReadWrite", "createOption": "FromImage", "name": "osdisk", "osType": "Linux", "vhd": {"uri": "[if(variables('useCustomImage'), concat(variables('customImage'), '-', variables('instanceName'), '.vhd'), concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'osdisks/', variables('instanceName'), '.vhd'))]"}}}
     resources_list += [{"apiVersion": compute_api_version, "type": "Microsoft.Compute/virtualMachines", "dependsOn": depends_on, "location": location, "name": "[variables('instanceName')]", "tags": tags, "plan": plan, "properties": { "diagnosticsProfile": { "bootDiagnostics": { "enabled": True, "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]" } }, "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "networkProfile": { "networkInterfaces":  nic_reference }, "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]" }, "osProfile": { "computerName": "[variables('instanceName')]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[variables('adminPasswordOrKey')]", "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]" }, "storageProfile": storageProfile }}]
 if template_name == 'failover-lb_1nic':
     resources_list += [{ "apiVersion": compute_api_version, "type": "Microsoft.Compute/virtualMachines", "name": "[concat(variables('deviceNamePrefix'),copyindex())]", "location": location, "tags": tags, "dependsOn": [ "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), copyindex())]", "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]" ], "copy": { "count": "[parameters('numberOfInstances')]", "name": "devicecopy" }, "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]", "properties": { "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]" }, "hardwareProfile": { "vmSize": "[parameters('instanceType')]" }, "osProfile": { "computerName": "[concat(variables('deviceNamePrefix'),copyindex())]", "adminUsername": "[parameters('adminUsername')]", "adminPassword": "[variables('adminPasswordOrKey')]", "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]" }, "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]", "networkProfile": { "networkInterfaces": nic_reference }, "diagnosticsProfile": { "bootDiagnostics": { "enabled": True, "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]" } } } }]
@@ -1055,11 +1062,6 @@ with open(created_file, 'w') as finished:
 with open(created_file_params, 'w') as finished_params:
     json.dump(data_params, finished_params, indent=4, sort_keys=False, ensure_ascii=False)
 
-
-###### Prepare some information prior to creating Scripts/Readme's ######
-api_access_required = {'standalone_1nic': None, 'standalone_2nic': None, 'standalone_3nic': None, 'standalone_n-nic': None, 'failover-lb_1nic': None, 'failover-lb_3nic': None, 'failover-api': 'required', 'as_ltm_lb': 'required', 'as_ltm_dns': 'required', 'as_waf_lb': 'required', 'as_waf_dns': 'required'}
-template_info = {'template_name': template_name, 'location': artifact_location, 'api_access_required': api_access_required}
-
 ######################################## Create/Modify Scripts ###########################################
 # Manually adding templates to create scripts proc for now as a 'check'...
 if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 'standalone_n-nic', 'failover-lb_1nic', 'failover-lb_3nic', 'failover-api', 'as_ltm_lb', 'as_ltm_dns', 'as_waf_lb', 'as_waf_dns') and artifact_location:
@@ -1076,9 +1078,9 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
     ## Example Scripts - These are set above, just adding to README ##
     readme_text['bash_script'] = bash_script
     readme_text['ps_script'] = ps_script
+    i_data['readme_text'] = readme_text
 
     #### Call function to create/update README ####
-    i_data = {'template_info': template_info, 'readme_text': readme_text, 'template_location': created_file, 'environment': environment, 'files': {}}
     folder_loc = 'files/readme_files/'
     i_data['files']['doc_text_file'] = folder_loc + 'template_text.yaml'
     i_data['files']['misc_readme_file'] = folder_loc + 'misc.README.txt'

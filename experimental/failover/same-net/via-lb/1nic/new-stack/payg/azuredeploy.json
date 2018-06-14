@@ -270,6 +270,12 @@
             "product": "[variables('offerToUse')]", 
             "publisher": "f5-networks"
         }, 
+        "imageReference": {
+            "offer": "[variables('offerToUse')]", 
+            "publisher": "f5-networks", 
+            "sku": "[variables('skuToUse')]", 
+            "version": "[parameters('bigIpVersion')]"
+        }, 
         "bigIpNicPortValue": "[variables('bigIpNicPortMap')['1'].Port]", 
         "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]", 
         "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
@@ -317,12 +323,7 @@
                 }
             }, 
             "platformImage": {
-                "imageReference": {
-                    "offer": "[variables('offerToUse')]", 
-                    "publisher": "f5-networks", 
-                    "sku": "[variables('skuToUse')]", 
-                    "version": "[parameters('bigIpVersion')]"
-                }, 
+                "imageReference": "[variables('imageReference')]", 
                 "osDisk": {
                     "createOption": "FromImage"
                 }

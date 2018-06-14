@@ -4,9 +4,9 @@ import yaml
 
 class ReadmeGen(object):
     """ Primary class for the readme generator """
-    def __init__(self):
-        self.data = {}
-        self.i_data = {}
+    def __init__(self, data={}, i_data={}):
+        self.data = data
+        self.i_data = i_data
         self.loaded_files = {}
 
     def open_files(self, files):
@@ -28,7 +28,7 @@ class ReadmeGen(object):
         tag_text = re.findall(reg_ex, text, re.DOTALL)
         return "".join(tag_text)
 
-    def get_custom_text(self, parent_key, child_key=None, template_name=None):
+    def get_custom_text(self, parent_key, child_key=None):
         """ Pull in custom text from the YAML file"""
         yaml_dict = self.loaded_files['doc_text_file']
         ret = ''
@@ -44,7 +44,8 @@ class ReadmeGen(object):
         except KeyError:
             support_type = None
         if isinstance(yaml_value, dict):
-            # consume logic in yaml file, if exists
+            ## consume logic in yaml file, if exists
+            # Check for exclusion
             if 'exclude' in yaml_value:
                 exclude = yaml_value['exclude']
                 if 'stackType' in exclude:
@@ -56,7 +57,9 @@ class ReadmeGen(object):
                 if 'environment' in exclude:
                     if self.env_type_check() in exclude['environment']:
                         return None
+            # Check if more specific value exists
             if 'templateName' in yaml_value:
+                template_name = self.i_data['template_info']['template_name']
                 yvalue = yaml_value['templateName']
                 if template_name in yvalue:
                     yvalue_tmpl = yvalue[template_name]
@@ -66,6 +69,13 @@ class ReadmeGen(object):
                         ret = yvalue_tmpl
                 else:
                     ret = yaml_value['default']
+            elif 'environment' in yaml_value:
+                yvalue = yaml_value['environment']
+                environment = self.env_type_check()
+                if environment in yvalue:
+                    ret = yvalue[environment]
+                else:
+                    ret = yaml_value['default']  
             else:
                 ret = yaml_value['default']
         else:
@@ -185,7 +195,7 @@ class ReadmeGen(object):
         template_name = self.i_data['template_info']['template_name']
         api_access_required = self.i_data['template_info']['api_access_required'][template_name]
         if api_access_required == 'required':
-            text = text.replace('<SP_REQUIRED_ACCESS>', self.get_custom_text('sp_access_text', None, template_name))
+            text = text.replace('<SP_REQUIRED_ACCESS>', self.get_custom_text('sp_access_text', None))
         return text
 
     def md_version_map(self):

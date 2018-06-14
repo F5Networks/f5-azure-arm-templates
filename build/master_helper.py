@@ -119,6 +119,7 @@ def variable_initialize(data):
     data['variables']['offerToUse'] = "MANDATORY"
     data['variables']['staticSkuToUse'] = "OPTIONAL"
     data['variables']['imagePlan'] = {"name": "[variables('skuToUse')]", "product": "[variables('offerToUse')]", "publisher": "f5-networks"}
+    data['variables']['imageReference'] = {"offer": "[variables('offerToUse')]", "publisher": "f5-networks", "sku": "[variables('skuToUse')]", "version": "[parameters('bigIpVersion')]"}
     data['variables']['staticOfferToUse'] = "OPTIONAL"
     data['variables']['bigIpNicPortValue'] = "MANDATORY"
     data['variables']['bigIpMgmtPort'] = "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]"
@@ -255,10 +256,11 @@ def variable_initialize(data):
     data['variables']['webVmVsPort'] = "OPTIONAL"
     data['variables']['customImage'] = "OPTIONAL"
     data['variables']['useCustomImage'] = "OPTIONAL"
+    data['variables']['customImageReference'] = "OPTIONAL"
     data['variables']['createNewCustomImage'] = "OPTIONAL"
     data['variables']['newCustomImageName'] = "OPTIONAL"
     data['variables']['storageProfileArray'] = "OPTIONAL"
-    data['variables']['premiumInstanceArray'] = "MANDATORY"
+    data['variables']['premiumInstanceArray'] = "OPTIONAL"
     data['variables']['customConfig'] = "### START (INPUT) CUSTOM CONFIGURATION HERE\n"
     data['variables']['installCustomConfig'] = "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
 
@@ -273,17 +275,17 @@ def template_check(data, resource):
             raise Exception('Mandatory parameter/variable: ' + var + ' was not filled in, exiting...')
     return data
 
-def param_descr_update(data, template_name):
+def param_descr_update(data, i_data):
     """ Fill in parameter descriptions from the YAML doc file """
     yaml_doc_loc = {'doc_text_file': 'files/readme_files/template_text.yaml'}
-    rG = readme_generator.ReadmeGen()
+    rG = readme_generator.ReadmeGen(None, i_data)
     rG.open_files(yaml_doc_loc)
     for param in data:
         if data[param]['metadata']['description'] != "":
             # If parameter description is filled in then don't replace
             continue
         else:
-            data[param]['metadata']['description'] = rG.get_custom_text('parameter_list', param, template_name)
+            data[param]['metadata']['description'] = rG.get_custom_text('parameter_list', param)
     return data
 
 def pub_ip_strip(data, resource, tmpl_type):
