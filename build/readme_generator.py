@@ -226,10 +226,9 @@ class ReadmeGen(object):
             deploy_links = deploy_links.replace('<LIC_TEXT>', self.get_custom_text('license_text', lic))
         return deploy_links
 
-    def create(self, data, i_data):
+    def create(self):
         """ Main proc to create readme """
-        self.data = data
-        self.i_data = i_data
+        i_data = self.i_data
         # Open Files
         self.open_files(i_data['files'])
         ####### Text Values for README templates #######

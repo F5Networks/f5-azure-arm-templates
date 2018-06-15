@@ -1085,6 +1085,6 @@ if template_name in ('standalone_1nic', 'standalone_2nic', 'standalone_3nic', 's
     i_data['files']['doc_text_file'] = folder_loc + 'template_text.yaml'
     i_data['files']['misc_readme_file'] = folder_loc + 'misc.README.txt'
     i_data['files']['base_readme'] = folder_loc + 'base.README.md'
-    rG = readme_generator.ReadmeGen()
-    rG.create(data, i_data)
+    rG = readme_generator.ReadmeGen(data, i_data)
+    rG.create()
 ######################################## END Create/Modify README's ########################################
