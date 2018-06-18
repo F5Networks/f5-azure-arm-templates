@@ -28,12 +28,14 @@ class ReadmeGen(object):
         tag_text = re.findall(reg_ex, text, re.DOTALL)
         return "".join(tag_text)
 
-    def get_custom_text(self, parent_key, child_key=None):
-        """ Pull in custom text from the YAML file"""
+    def get_custom_text(self, parent_key, child_key=None, t_key=None):
+        """ Pull in custom text from the YAML file, enhanced logic """
         yaml_dict = self.loaded_files['doc_text_file']
         ret = ''
         try:
-            if child_key is not None:
+            if t_key is not None:
+                yaml_value = yaml_dict[parent_key][child_key][t_key]
+            elif child_key is not None:
                 yaml_value = yaml_dict[parent_key][child_key]
             else:
                 yaml_value = yaml_dict[parent_key]
@@ -76,6 +78,12 @@ class ReadmeGen(object):
                     ret = yvalue[environment]
                 else:
                     ret = yaml_value['default']  
+            elif 'supportType' in yaml_value:
+                yvalue = yaml_value['supportType']
+                if support_type in yvalue:
+                    ret = yvalue[support_type]
+                else:
+                    ret = yaml_value['default']
             else:
                 ret = yaml_value['default']
         else:
@@ -83,7 +91,7 @@ class ReadmeGen(object):
         return ret
 
     def get_tmpl_text(self, p_key, s_key, t_key):
-        """ Pull in custom template text for each solution from the YAML file """
+        """ Pull in custom template text for each solution from the YAML file, prefer get_custom_text """
         ydict = self.loaded_files['doc_text_file']
         yvalue = ydict[p_key][s_key]
         sp_type = self.i_data['support_type']
@@ -242,7 +250,7 @@ class ReadmeGen(object):
             self.i_data['support_type'] = 'experimental'
             help_text = self.get_custom_text('help_text', 'experimental')
         title_text = self.get_tmpl_text('templates', template_name, 'title')
-        intro_text = self.get_tmpl_text('templates', template_name, 'intro')
+        intro_text = self.get_custom_text('templates', template_name, 'intro')
         example_text = self.get_tmpl_text('templates', template_name, 'config_ex_text')
         extra_prereq = self.get_tmpl_text('templates', template_name, 'prereq_list')
         extra_config_note = self.get_tmpl_text('templates', template_name, 'config_note_list')
