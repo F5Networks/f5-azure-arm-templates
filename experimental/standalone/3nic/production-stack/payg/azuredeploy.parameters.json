@@ -1,0 +1,87 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
+    "contentVersion": "5.2.0.0", 
+    "parameters": {
+        "adminUsername": {
+            "value": "azureuser"
+        }, 
+        "authenticationType": {
+            "value": "password"
+        }, 
+        "adminPasswordOrKey": {
+            "value": ""
+        }, 
+        "uniqueLabel": {
+            "value": ""
+        }, 
+        "instanceName": {
+            "value": "f5vm01"
+        }, 
+        "instanceType": {
+            "value": "Standard_DS3_v2"
+        }, 
+        "imageName": {
+            "value": "Best"
+        }, 
+        "bigIpVersion": {
+            "value": "13.1.0200"
+        }, 
+        "licensedBandwidth": {
+            "value": "200m"
+        }, 
+        "numberOfExternalIps": {
+            "value": 1
+        }, 
+        "vnetName": {
+            "value": ""
+        }, 
+        "vnetResourceGroupName": {
+            "value": ""
+        }, 
+        "mgmtSubnetName": {
+            "value": ""
+        }, 
+        "mgmtIpAddress": {
+            "value": ""
+        }, 
+        "externalSubnetName": {
+            "value": ""
+        }, 
+        "externalIpAddressRangeStart": {
+            "value": ""
+        }, 
+        "internalSubnetName": {
+            "value": ""
+        }, 
+        "internalIpAddress": {
+            "value": ""
+        }, 
+        "avSetChoice": {
+            "value": "CREATE_NEW"
+        }, 
+        "ntpServer": {
+            "value": "0.pool.ntp.org"
+        }, 
+        "timeZone": {
+            "value": "UTC"
+        }, 
+        "customImage": {
+            "value": "OPTIONAL"
+        }, 
+        "restrictedSrcAddress": {
+            "value": "*"
+        }, 
+        "tagValues": {
+            "value": {
+                "application": "APP", 
+                "cost": "COST", 
+                "environment": "ENV", 
+                "group": "GROUP", 
+                "owner": "OWNER"
+            }
+        }, 
+        "allowUsageAnalytics": {
+            "value": "Yes"
+        }
+    }
+}
