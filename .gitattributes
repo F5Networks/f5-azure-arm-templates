@@ -1,3 +1,8 @@
-# Set the default behavior, in case people don't have core.autocrlf set.
-* text=auto
+# Set the default behavior to unix line endings
+* text eol=lf
 
+# Denote all files that are binary and should not be modified
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.tar.gz binary

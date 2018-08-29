@@ -9,7 +9,7 @@ test:
         - docker-executor
     stage: test
     only:
-        - /^build_hash*/
+        - /^master*/
         - triggers
     script:
         - python -B -m unittest discover -s build/test/lib -p "*Tests*.py"
@@ -19,12 +19,12 @@ package:
         - docker-executor
     stage: package
     only:
-        - /^build_hash*/
+        - /^master*/
         - triggers
     script:
-        - cd supported
-        - for f in `find . -name 'azuredeploy.json'`; do echo "Template File $f Hash - `openssl dgst -r -sha512 $f | cut -d ' ' -f 1`" >> supportedTemplateHashes; done
+        - cd build
+        - bash ./create_hashes.sh
     artifacts:
-        name: f5-arm-build-$CI_BUILD_REF
+        name: f5-build-$CI_BUILD_REF
         paths:
-            - supported/
+            - build/

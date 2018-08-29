@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "5.2.0.0", 
+    "contentVersion": "5.3.0.0", 
     "parameters": {
         "numberOfInstances": {
             "value": 2
@@ -24,7 +24,7 @@
             "value": "Best"
         }, 
         "bigIpVersion": {
-            "value": "13.1.0200"
+            "value": "13.1.100000"
         }, 
         "licensedBandwidth": {
             "value": "200m"
