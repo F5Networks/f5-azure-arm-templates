@@ -6,6 +6,11 @@ The following table contains all of the tagged releases of the F5 ARM templates 
 
 | Release Tag | Template Family | BIG-IP Versions | BIG-IQ Versions | PAYG License Bundles and Throughput | BYOL/BIG-IQ Image options (v13.1.1 and later) |
 | --- | --- | --- | --- | --- | --- |
+| [v5.3.2.0](https://github.com/F5Networks/f5-azure-arm-templates/releases/tag/v5.3.2.0) | Standalone | BIG-IP v13.1.100000, 12.1.303000 | BIG-IQ v5.4, v6.0.1 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps | AllOneBootLocation, AllTwoBootLocations, LTMOneBootLocation, LTMTwoBootLocations |
+|  | Cluster (Failover-API) | BIG-IP v13.1.100000, 12.1.303000 | BIG-IQ v5.4, v6.0.1 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps | AllOneBootLocation, AllTwoBootLocations, LTMOneBootLocation, LTMTwoBootLocations |
+|  | Cluster (Failover-LB) | BIG-IP v13.1.100000, 12.1.303000 | BIG-IQ v5.4, v6.0.1 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps | AllOneBootLocation, AllTwoBootLocations, LTMOneBootLocation, LTMTwoBootLocations |
+|  | Auto Scale WAF | BIG-IP v13.1.100000, 12.1.303000 | BIG-IQ v5.4, v6.0.1 | *Best*: 1Gbps, 200Mbps, 25Mbps |AllOneBootLocation, AllTwoBootLocations |
+|  | Auto Scale LTM | BIG-IP v13.1.100000, 12.1.303000 | BIG-IQ v5.4, v6.0.1 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps | AllOneBootLocation, AllTwoBootLocations, LTMOneBootLocation, LTMTwoBootLocations |
 | [v5.3.1.0](https://github.com/F5Networks/f5-azure-arm-templates/releases/tag/v5.3.1.0) | Standalone | BIG-IP v13.1.100000, 12.1.303000 | BIG-IQ v5.4, v6.0.1 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps | AllOneBootLocation, AllTwoBootLocations, LTMOneBootLocation, LTMTwoBootLocations |
 |  | Cluster (Failover-API) | BIG-IP v13.1.100000, 12.1.303000 | BIG-IQ v5.4, v6.0.1 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps | AllOneBootLocation, AllTwoBootLocations, LTMOneBootLocation, LTMTwoBootLocations |
 |  | Cluster (Failover-LB) | BIG-IP v13.1.100000, 12.1.303000 | BIG-IQ v5.4, v6.0.1 | *Good/Better/Best*: 1Gbps, 200Mbps, 25Mbps | AllOneBootLocation, AllTwoBootLocations, LTMOneBootLocation, LTMTwoBootLocations |
