@@ -17,7 +17,7 @@
 
 ## Introduction
 
-This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. By virtue of a DNS request made by the client to the DNS provider (currently only BIG-IP DNS (formerly BIG-IP GTM) is supported), traffic will flow to the current BIG-IP VE (cluster) members directly which will then process traffic to the application servers, which allows you to deploy without using an Azure Load Balancer (ALB). The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. Be sure to see [Scaling Thresholds](#scaling-thresholds) for information on scaling options.
+This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. By virtue of a DNS request made by the client to the DNS provider (currently only BIG-IP DNS (formerly BIG-IP GTM) is supported), traffic will flow to the current BIG-IP VE (cluster) members directly which will then process traffic to the application servers, which allows you to deploy without using an Azure Load Balancer (ALB). The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. 
 
 In this solution, the BIG-IP VEs have the [LTM](https://f5.com/products/big-ip/local-traffic-manager-ltm) and [ASM](https://f5.com/products/big-ip/application-security-manager-asm) modules enabled to provide advanced traffic management and web application security functionality.
 
@@ -51,7 +51,6 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
 - After deploying the template, we recommend going to [this section](#backup-big-ip-configuration-for-cluster-recovery) to create and store a backup of your BIG-IP configuration.
 - **Important**: After the template successfully deploys, you must log into one of the BIG-IP VEs to modify the Application Security Synchronization settings.  Log in to the BIG-IP VE, and then click **Security > Options > Synchronization > Application Security Synchronization**.  From the **Device Group** list, select **Sync**, and then click **Save**. This ensures any changes to the ASM security policy are synchronized to other devices in the cluster.
-- For important information on choosing a metric on which to base autoscaling events and the thresholds used by the template, see [Scaling Thresholds](#scaling-thresholds).
 
 ## Security
 
@@ -102,7 +101,7 @@ Use the appropriate button below to deploy:
 
 - **PAYG**: This allows you to use pay-as-you-go hourly billing.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv5.3.2.0%2Fexperimental%2Fautoscale%2Fwaf%2Fvia-dns%2F1nic%2Fnew-stack%2Fpayg%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv5.4.0.0%2Fexperimental%2Fautoscale%2Fwaf%2Fvia-dns%2F1nic%2Fnew-stack%2Fpayg%2Fazuredeploy.json)
 
 ### Template parameters
 
@@ -110,12 +109,13 @@ Use the appropriate button below to deploy:
 | --- | --- | --- |
 | vmScaleSetMinCount | Yes | The minimum (and default) number of BIG-IP VEs that will be deployed into the VM Scale Set. |
 | vmScaleSetMaxCount | Yes | The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set. |
-| autoScaleMetric | Yes | Select the metric on which auto scale events should be triggered. The following parameters determine individual settings for the scaling rules based on the metric you choose. Note: Custom BIG-IP metrics (for use by additional autoscale rules or for device visibility) are sent to Application Insights regardless of the metric you select. |
 | appInsights | Yes | Enter the name of your existing Application Insights environment that will be used to receive custom BIG-IP metrics you can use for Scale Set rules and device visibility. If the Application Insights environment is in a different Resource Group than this deployment, specify it as **app_insights_name;app_insights_rg**).  If you do not have an Application Insights environment, leave the default (CREATE_NEW) and the template will create one. Note: By default, the new Application Insights environment will be created in **East US**, if necessary you can specify a different region as **CREATE_NEW:app_insights_region**). |
-| calculatedBandwidth | Yes | Specify the amount of bandwidth (in Mbps) that should be used to base the throughput percentage calculation on for scale events. For PAYG, we recommend this matches the parameter **licensedBandwidth**, or at minimum is a lower value. See [Scaling Thresholds](#scaling-thresholds) for more information. |
-| scaleOutThreshold | Yes | The percentage the metric should be above to trigger a Scale Out event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'. See [Scaling Thresholds](#scaling-thresholds) for more information. |
-| scaleInThreshold | Yes | The percentage the metric should be below to trigger a Scale In event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'.  See [Scaling Thresholds](#scaling-thresholds) for more information. |
-| scaleTimeWindow | Yes | The time window required to trigger a scale event (in and out). This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). |
+| scaleOutCpuThreshold | Yes | The percentage of CPU utilization that should trigger a scale out event. |
+| scaleInCpuThreshold | Yes | The percentage of CPU utilization that should trigger a scale in event. |
+| scaleOutThroughputThreshold | Yes | The amount of throughput (**bytes**) that should trigger a scale out event. Note: The default value is equal to 20 MB |
+| scaleInThroughputThreshold | Yes | The amount of throughput (**bytes**) that should trigger a scale in event. Note: The default value is equal to 10 MB |
+| scaleOutTimeWindow | Yes | The time window required to trigger a scale out event. This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). **Note:** Allowed values are 1-60 (minutes). |
+| scaleInTimeWindow | Yes | The time window required to trigger a scale in event. This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). **Note:** Allowed values are 1-60 (minutes). |
 | adminUsername | Yes | User name for the Virtual Machine. |
 | authenticationType | Yes | Type of authentication to use on the Virtual Machine, password based authentication or key based authentication. |
 | adminPasswordOrKey | Yes | Password or SSH public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key-based authentication, this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**. |
@@ -131,7 +131,7 @@ Use the appropriate button below to deploy:
 | applicationServiceFqdn | Yes | If you are deploying in front of an Azure App Service, the FQDN of the public application. |
 | applicationPort | Yes | If you are deploying an HTTP application, the port on which your service listens for unencrypted traffic. This field is not required when deploying HTTPS only. |
 | applicationSecurePort | Yes | If you are deploying an HTTPS application, the port on which your service listens for encrypted traffic. This field is not required when deploying HTTP only. |
-| sslCert | Yes | The SSL certificate .pfx file corresponding to public facing virtual server. |
+| sslCert | Yes | The SSL certificate .pfx file corresponding to the virtual server. |
 | sslPswd | Yes | The SSL certificate .pfx password corresponding to the certificate you entered. |
 | applicationType | Yes | Is your application running on a Linux OS or a Windows OS? |
 | blockingLevel | Yes | Select how aggressive you want the blocking level of this WAF.  Remember that the more aggressive the blocking level, the more potential there is for false-positives the WAF might detect. Select **Custom** to specify your own security policy. |
@@ -162,7 +162,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### PowerShell Script Example
 
 ```powershell
-## Example Command: .\Deploy_via_PS.ps1 -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -autoScaleMetric F5_TMM_Traffic -appInsights CREATE_NEW -calculatedBandwidth 200m -scaleOutThreshold 90 -scaleInThreshold 10 -scaleTimeWindow 10 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceType Standard_DS2_v2 -imageName Best -bigIpVersion 13.1.100000 -licensedBandwidth 200m -vnetAddressPrefix 10.0 -solutionDeploymentName <value> -applicationProtocols http-https -applicationAddress <value> -applicationServiceFqdn NOT_SPECIFIED -applicationPort 80 -applicationSecurePort 443 -sslCert NOT_SPECIFIED -sslPswd NOT_SPECIFIED -applicationType Linux -blockingLevel medium -customPolicy NOT_SPECIFIED -dnsMemberIpType private -dnsMemberPort 80 -dnsProviderHost <value> -dnsProviderPort 443 -dnsProviderUser <value> -dnsProviderPassword <value> -dnsProviderPool autoscale_pool -dnsProviderDataCenter azure_datacenter -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -notificationEmail OPTIONAL -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -appInsights CREATE_NEW -scaleOutCpuThreshold 80 -scaleInCpuThreshold 20 -scaleOutThroughputThreshold 20000000 -scaleInThroughputThreshold 10000000 -scaleOutTimeWindow 10 -scaleInTimeWindow 10 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceType Standard_DS2_v2 -imageName Best -bigIpVersion 13.1.100000 -licensedBandwidth 200m -vnetAddressPrefix 10.0 -solutionDeploymentName <value> -applicationProtocols http-https -applicationAddress <value> -applicationServiceFqdn NOT_SPECIFIED -applicationPort 80 -applicationSecurePort 443 -sslCert NOT_SPECIFIED -sslPswd NOT_SPECIFIED -applicationType Linux -blockingLevel medium -customPolicy NOT_SPECIFIED -dnsMemberIpType private -dnsMemberPort 80 -dnsProviderHost <value> -dnsProviderPort 443 -dnsProviderUser <value> -dnsProviderPassword <value> -dnsProviderPool autoscale_pool -dnsProviderDataCenter azure_datacenter -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -notificationEmail OPTIONAL -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
 ```
 
 =======
@@ -170,18 +170,8 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### Azure CLI (1.0) Script Example
 
 ```bash
-## Example Command: ./deploy_via_bash.sh --vmScaleSetMinCount 2 --vmScaleSetMaxCount 4 --autoScaleMetric F5_TMM_Traffic --appInsights CREATE_NEW --calculatedBandwidth 200m --scaleOutThreshold 90 --scaleInThreshold 10 --scaleTimeWindow 10 --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceType Standard_DS2_v2 --imageName Best --bigIpVersion 13.1.100000 --licensedBandwidth 200m --vnetAddressPrefix 10.0 --solutionDeploymentName <value> --applicationProtocols http-https --applicationAddress <value> --applicationServiceFqdn NOT_SPECIFIED --applicationPort 80 --applicationSecurePort 443 --sslCert NOT_SPECIFIED --sslPswd NOT_SPECIFIED --applicationType Linux --blockingLevel medium --customPolicy NOT_SPECIFIED --dnsMemberIpType private --dnsMemberPort 80 --dnsProviderHost <value> --dnsProviderPort 443 --dnsProviderUser <value> --dnsProviderPassword <value> --dnsProviderPool autoscale_pool --dnsProviderDataCenter azure_datacenter --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --notificationEmail OPTIONAL --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --vmScaleSetMinCount 2 --vmScaleSetMaxCount 4 --appInsights CREATE_NEW --scaleOutCpuThreshold 80 --scaleInCpuThreshold 20 --scaleOutThroughputThreshold 20000000 --scaleInThroughputThreshold 10000000 --scaleOutTimeWindow 10 --scaleInTimeWindow 10 --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceType Standard_DS2_v2 --imageName Best --bigIpVersion 13.1.100000 --licensedBandwidth 200m --vnetAddressPrefix 10.0 --solutionDeploymentName <value> --applicationProtocols http-https --applicationAddress <value> --applicationServiceFqdn NOT_SPECIFIED --applicationPort 80 --applicationSecurePort 443 --sslCert NOT_SPECIFIED --sslPswd NOT_SPECIFIED --applicationType Linux --blockingLevel medium --customPolicy NOT_SPECIFIED --dnsMemberIpType private --dnsMemberPort 80 --dnsProviderHost <value> --dnsProviderPort 443 --dnsProviderUser <value> --dnsProviderPassword <value> --dnsProviderPool autoscale_pool --dnsProviderDataCenter azure_datacenter --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --notificationEmail OPTIONAL --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 ```
-
-## Scaling Thresholds
-
- You have three choices on which metric to use for auto scale events, each based on a percentage of the metric which you set in the ARM template:
-
-- **F5_TMM_CPU** - Choosing this option means scaling events are triggered based on the utilization of the BIG-IP VE CPU, specifically the F5 TMM (Traffic Management Microkernel) CPU.
-- **F5_TMM_Traffic** - Choosing this option means that scaling events are triggered based on traffic going through the BIG-IP VE TMM.  These thresholds are based on an aggregate of traffic both in and out, and are based on a percentage of the value you chose in the Calculated Bandwidth option (see below).
-- **Host_Throughput** - Choosing this option means scaling events are based on a metric being gathered by Azure on the host itself, specifically Network_Out. This is based on a percentage of the value you chose in the Calculated Bandwidth option (see below).
-
-Both F5_TMM_Traffic and Host_Throughput are based on a percentage of the value you choose from the **Calculated Bandwidth** list.  For PAYG deployments, this value should match (or could be lower than) the **Licensed Bandwidth** value you are using.  For example, if you plan to use 200Mbps BIG-IP VEs, you should select 200m from the Calculated Bandwidth list.  The system then uses this value together with the percentages you enter in **Scale Out Threshold** and **Scale In Threshold** to determine when scaling events occur for these two metrics.  If you are using the BIG-IQ with a pool of BIG-IP BYOL licenses, there is no Licensed Bandwidth field, so you must specify the bandwidth level in the Calculated Bandwidth field in order for scaling to function properly.
 
 ## Configuration Example
 
@@ -269,17 +259,11 @@ Once you launch your BIG-IP instance using the ARM template, you can use the Ser
 
 In Microsoft Azure, you have three options for tagging objects that the Service Discovery iApp uses. Note that you select public or private IP addresses within the iApp.
 
-- *Tag a VM resource*
+- *Tag a VM resource*<br> The BIG-IP VE will discover the primary public or private IP addresses for the primary NIC configured for the tagged VM.
 
-The BIG-IP VE will discover the primary public or private IP addresses for the primary NIC configured for the tagged VM.
+- *Tag a NIC resource*<br> The BIG-IP VE will discover the primary public or private IP addresses for the tagged NIC.  Use this option if you want to use the secondary NIC of a VM in the pool.
 
-- *Tag a NIC resource*
-
-The BIG-IP VE will discover the primary public or private IP addresses for the tagged NIC.  Use this option if you want to use the secondary NIC of a VM in the pool.
-
-- *Tag a Virtual Machine Scale Set resource*
-
-The BIG-IP VE will discover the primary private IP address for the primary NIC configured for each Scale Set instance.  Note you must select Private IP addresses in the iApp template if you are tagging a Scale Set.
+- *Tag a Virtual Machine Scale Set resource*<br> The BIG-IP VE will discover the primary private IP address for the primary NIC configured for each Scale Set instance.  Note you must select Private IP addresses in the iApp template if you are tagging a Scale Set.
 
 The iApp first looks for NIC resources with the tags you specify.  If it finds NICs with the proper tags, it does not look for VM resources. If it does not find NIC resources, it looks for VM resources with the proper tags. In either case, it then looks for Scale Set resources with the proper tags.
 
@@ -363,7 +347,7 @@ Warning: F5 does not support the template if you change anything other than the 
 
 ### Changing the BIG-IP Configuration utility (GUI) port
 
-Depending on the deployment requirements, the default management port for the BIG-IP may need to be changed. To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.
+Depending on the deployment requirements, the default management port for the BIG-IP may need to be changed. To change the Management port, see [Changing the Configuration utility port](https://clouddocs.f5.com/cloud/public/v1/azure/Azure_singleNIC.html#azureconfigport) for instructions.
 
 ***Important***: The default port provisioned is dependent on 1) which BIG-IP version you choose to deploy as well as 2) how many interfaces (NICs) are configured on that BIG-IP. BIG-IP v13.x and later in a single-NIC configuration uses port 8443. All prior BIG-IP versions default to 443 on the MGMT interface.
 

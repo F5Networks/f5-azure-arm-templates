@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json", 
-    "contentVersion": "5.3.2.0", 
+    "contentVersion": "5.4.0.0", 
     "parameters": {
         "vmScaleSetMinCount": {
             "allowedValues": [
@@ -33,18 +33,6 @@
             }, 
             "type": "int"
         }, 
-        "autoScaleMetric": {
-            "allowedValues": [
-                "F5_TMM_CPU", 
-                "F5_TMM_Traffic", 
-                "Host_Throughput"
-            ], 
-            "defaultValue": "F5_TMM_Traffic", 
-            "metadata": {
-                "description": "Select the metric on which auto scale events should be triggered. The following parameters determine individual settings for the scaling rules based on the metric you choose. Note: Custom BIG-IP metrics (for use by additional autoscale rules or for device visibility) are sent to Application Insights regardless of the metric you select."
-            }, 
-            "type": "string"
-        }, 
         "appInsights": {
             "defaultValue": "CREATE_NEW", 
             "metadata": {
@@ -52,68 +40,54 @@
             }, 
             "type": "string"
         }, 
-        "calculatedBandwidth": {
-            "allowedValues": [
-                "10m", 
-                "25m", 
-                "100m", 
-                "200m", 
-                "1g"
-            ], 
-            "defaultValue": "200m", 
+        "scaleOutCpuThreshold": {
+            "defaultValue": 80, 
+            "maxValue": 100, 
             "metadata": {
-                "description": "Specify the amount of bandwidth (in Mbps) that should be used to base the throughput percentage calculation on for scale events. For PAYG, we recommend this matches the parameter **licensedBandwidth**, or at minimum is a lower value. See [Scaling Thresholds](#scaling-thresholds) for more information."
+                "description": "The percentage of CPU utilization that should trigger a scale out event."
             }, 
-            "type": "string"
+            "minValue": 1, 
+            "type": "int"
         }, 
-        "scaleOutThreshold": {
-            "allowedValues": [
-                50, 
-                55, 
-                60, 
-                65, 
-                70, 
-                75, 
-                80, 
-                85, 
-                90, 
-                95
-            ], 
-            "defaultValue": 90, 
+        "scaleInCpuThreshold": {
+            "defaultValue": 20, 
+            "maxValue": 100, 
             "metadata": {
-                "description": "The percentage the metric should be above to trigger a Scale Out event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'. See [Scaling Thresholds](#scaling-thresholds) for more information."
+                "description": "The percentage of CPU utilization that should trigger a scale in event."
+            }, 
+            "minValue": 1, 
+            "type": "int"
+        }, 
+        "scaleOutThroughputThreshold": {
+            "defaultValue": 20000000, 
+            "metadata": {
+                "description": "The amount of throughput (**bytes**) that should trigger a scale out event. Note: The default value is equal to 20 MB"
             }, 
             "type": "int"
         }, 
-        "scaleInThreshold": {
-            "allowedValues": [
-                5, 
-                10, 
-                15, 
-                20, 
-                25, 
-                30, 
-                35, 
-                40, 
-                45
-            ], 
-            "defaultValue": 10, 
+        "scaleInThroughputThreshold": {
+            "defaultValue": 10000000, 
             "metadata": {
-                "description": "The percentage the metric should be below to trigger a Scale In event.  Note: For network utilization metrics this is factored as a percentage of the parameter 'calculatedBandwidth'.  See [Scaling Thresholds](#scaling-thresholds) for more information."
+                "description": "The amount of throughput (**bytes**) that should trigger a scale in event. Note: The default value is equal to 10 MB"
             }, 
             "type": "int"
         }, 
-        "scaleTimeWindow": {
-            "allowedValues": [
-                5, 
-                10, 
-                15, 
-                30
-            ], 
+        "scaleOutTimeWindow": {
             "defaultValue": 10, 
+            "maxValue": 60, 
             "metadata": {
-                "description": "The time window required to trigger a scale event (in and out). This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping)."
+                "description": "The time window required to trigger a scale out event. This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). **Note:** Allowed values are 1-60 (minutes)."
             }, 
+            "minValue": 1, 
+            "type": "int"
+        }, 
+        "scaleInTimeWindow": {
+            "defaultValue": 10, 
+            "maxValue": 60, 
+            "metadata": {
+                "description": "The time window required to trigger a scale in event. This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). **Note:** Allowed values are 1-60 (minutes)."
+            }, 
+            "minValue": 1, 
             "type": "int"
         }, 
         "adminUsername": {
@@ -308,7 +282,7 @@
         "sslCert": {
             "defaultValue": "NOT_SPECIFIED", 
             "metadata": {
-                "description": "The SSL certificate .pfx file corresponding to public facing virtual server."
+                "description": "The SSL certificate .pfx file corresponding to the virtual server."
             }, 
             "type": "string"
         }, 
@@ -544,13 +518,13 @@
         "subscriptionID": "[subscription().subscriptionId]", 
         "resourceGroupName": "[resourceGroup().name]", 
         "singleQuote": "'", 
-        "f5CloudLibsTag": "v4.3.3", 
-        "f5CloudLibsAzureTag": "v2.3.1", 
-        "f5NetworksTag": "v5.3.2.0", 
+        "f5CloudLibsTag": "v4.4.0", 
+        "f5CloudLibsAzureTag": "v2.4.0", 
+        "f5NetworksTag": "v5.4.0.0", 
         "f5CloudIappsTag": "v2.1.1", 
         "f5NetworksSolutionScripts": "[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/', variables('f5NetworksTag'), '/supported/autoscale/waf/deploy_scripts/')]", 
-        "verifyHash": "[concat(variables('singleQuote'), 'cli script /Common/verifyHash {\nproc script::run {} {\n        if {[catch {\n            set hashes(f5-cloud-libs.tar.gz) 5305444c02e5fdc826b168bcbef354dfbb088a7be3c0e3982c84d1e81bb62b9de5d1423ce88ba8a1b380d4f42fb6d31bb186506a0ce3abdf32030add602bdbc2\n            set hashes(f5-cloud-libs-aws.tar.gz) 01ad00f2210375e3b770151a55a28198187e74cf57aedb83da7579de821933828e7fe129a05adcb27b0d036bc185393adda5619a4c1a30a7b5d9c79d21b1f6d2\n            set hashes(f5-cloud-libs-azure.tar.gz) a159490b3cd3f51e51ea10b3138daa6543e2a90987dc9ab8f29e1b7c851ba22159b53d27bcd9d0afb36b7eb2ff7aa6cb537c44eb5bf4dc645b48cb3960ed7eeb\n            set hashes(f5-cloud-libs-gce.tar.gz) 67e9fef439851ad4f9fbaf3f3574dadb2fceea0b13a77ccde41bcf31c42f87d6c37c64d50d685fc9a90acedc8c80abee9114b9a232809f36746bdc8e1de1b22a\n            set hashes(f5-cloud-libs-openstack.tar.gz) 5c83fe6a93a6fceb5a2e8437b5ed8cc9faf4c1621bfc9e6a0779f6c2137b45eab8ae0e7ed745c8cf821b9371245ca29749ca0b7e5663949d77496b8728f4b0f9\n            set hashes(asm-policy-linux.tar.gz) 63b5c2a51ca09c43bd89af3773bbab87c71a6e7f6ad9410b229b4e0a1c483d46f1a9fff39d9944041b02ee9260724027414de592e99f4c2475415323e18a72e0\n            set hashes(f5.http.v1.2.0rc4.tmpl) 47c19a83ebfc7bd1e9e9c35f3424945ef8694aa437eedd17b6a387788d4db1396fefe445199b497064d76967b0d50238154190ca0bd73941298fc257df4dc034\n            set hashes(f5.http.v1.2.0rc6.tmpl) 811b14bffaab5ed0365f0106bb5ce5e4ec22385655ea3ac04de2a39bd9944f51e3714619dae7ca43662c956b5212228858f0592672a2579d4a87769186e2cbfe\n            set hashes(f5.http.v1.2.0rc7.tmpl) 21f413342e9a7a281a0f0e1301e745aa86af21a697d2e6fdc21dd279734936631e92f34bf1c2d2504c201f56ccd75c5c13baa2fe7653213689ec3c9e27dff77d\n            set hashes(f5.aws_advanced_ha.v1.3.0rc1.tmpl) 9e55149c010c1d395abdae3c3d2cb83ec13d31ed39424695e88680cf3ed5a013d626b326711d3d40ef2df46b72d414b4cb8e4f445ea0738dcbd25c4c843ac39d\n            set hashes(f5.aws_advanced_ha.v1.4.0rc1.tmpl) de068455257412a949f1eadccaee8506347e04fd69bfb645001b76f200127668e4a06be2bbb94e10fefc215cfc3665b07945e6d733cbe1a4fa1b88e881590396\n            set hashes(f5.aws_advanced_ha.v1.4.0rc2.tmpl) 6ab0bffc426df7d31913f9a474b1a07860435e366b07d77b32064acfb2952c1f207beaed77013a15e44d80d74f3253e7cf9fbbe12a90ec7128de6facd097d68f\n            set hashes(f5.aws_advanced_ha.v1.4.0rc3.tmpl) 2f2339b4bc3a23c9cfd42aae2a6de39ba0658366f25985de2ea53410a745f0f18eedc491b20f4a8dba8db48970096e2efdca7b8efffa1a83a78e5aadf218b134\n            set hashes(asm-policy.tar.gz) 2d39ec60d006d05d8a1567a1d8aae722419e8b062ad77d6d9a31652971e5e67bc4043d81671ba2a8b12dd229ea46d205144f75374ed4cae58cefa8f9ab6533e6\n            set hashes(deploy_waf.sh) 1a3a3c6274ab08a7dc2cb73aedc8d2b2a23cd9e0eb06a2e1534b3632f250f1d897056f219d5b35d3eed1207026e89989f754840fd92969c515ae4d829214fb74\n            set hashes(f5.policy_creator.tmpl) 06539e08d115efafe55aa507ecb4e443e83bdb1f5825a9514954ef6ca56d240ed00c7b5d67bd8f67b815ee9dd46451984701d058c89dae2434c89715d375a620\n            set hashes(f5.service_discovery.tmpl) 592f94c6bfcf543f97632b8ac42b773e30390db77f150291815c45d7f62c30b5ade515ae7257f3bedc0329084499fdf18a6d9a93c90cade23542116edefd6849\n            set hashes(f5.cloud_logger.v1.0.0.tmpl) a26d5c470e70b821621476bcfd0579dbc0964f6a54158bc6314fa1e2f63b23bf3f3eb43ade5081131c24e08579db2e1e574beb3f8d9789d28acb4f312fad8c3e\n\n            set file_path [lindex $tmsh::argv 1]\n            set file_name [file tail $file_path]\n\n            if {![info exists hashes($file_name)]} {\n                tmsh::log err \"No hash found for $file_name\"\n                exit 1\n            }\n\n            set expected_hash $hashes($file_name)\n            set computed_hash [lindex [exec /usr/bin/openssl dgst -r -sha512 $file_path] 0]\n            if { $expected_hash eq $computed_hash } {\n                exit 0\n            }\n            tmsh::log err \"Hash does not match for $file_path\"\n            exit 1\n        }]} {\n            tmsh::log err {Unexpected error in verifyHash}\n            exit 1\n        }\n    }\n    script-signature gEOwLQhonlA9+I+Is7RfT+XUHVwffStj/X1f+FUbj1tsYJoWgMPV/CiR/21l7fwhvwfkM6qWMZu6MkG/fy/fSrtlhy4XkUfErm5zSLQ02gpCOyitAObHsFpvcIHvVLXLJaYQrGcClcIjFh+CsY8iBnWEtGyv/SbYDFg/sIFJImfnw4NAtTM6w/xrIdY/13gz0LFkHP5weEYhV/CiWN3qoCMkEXqfZ/zW0tLnoEYO5tJhPydFbxpuijzJU54Tb8C1gOa7qAr8R2NtOs1XMwyeB5bvx3RFdxQ3v6wvhaVeLoQ9bx449aoGDjv8pDimsUUSrhmNde1iB4vd9evs919NRQ==\n    signing-key /Common/f5-irule\n}', variables('singleQuote'))]", 
-        "installCloudLibs": "[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit 1\nfi\necho loaded verifyHash\n\nconfig_loc=\"/config/cloud/\"\nhashed_file_list=\"${config_loc}f5-cloud-libs.tar.gz f5.service_discovery.tmpl f5.cloud_logger.v1.0.0.tmpl ${config_loc}f5-cloud-libs-azure.tar.gz deploy_waf.sh f5.http.v1.2.0rc7.tmpl f5.policy_creator.tmpl asm-policy.tar.gz\"\nfor file in $hashed_file_list; do\necho \"verifying $file\"\n/usr/bin/tmsh run cli script verifyHash $file\nif [ $? != 0 ]; then\necho \"$file is not valid\"\nexit 1\nfi\necho \"verified $file\"\ndone\necho \"expanding $hashed_file_list\"\ntar xfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud/azure/node_modules/@f5devcentral\ntar xfz /config/cloud/f5-cloud-libs-azure.tar.gz -C /config/cloud/azure/node_modules/@f5devcentral\ntouch /config/cloud/cloudLibsReady', variables('singleQuote'))]", 
+        "verifyHash": "[concat(variables('singleQuote'), 'cli script /Common/verifyHash {\nproc script::run {} {\n        if {[catch {\n            set hashes(f5-cloud-libs.tar.gz) aa6104de7c667e0a8e2d0b6efcac48a55b37e8e98c1c1fbf7c04ae34b11283e5a74758db4744cc8a6d59480049b1b5d6caaaa804f5dbe6ab8158d1b9b527a303\n            set hashes(f5-cloud-libs-aws.tar.gz) 01ad00f2210375e3b770151a55a28198187e74cf57aedb83da7579de821933828e7fe129a05adcb27b0d036bc185393adda5619a4c1a30a7b5d9c79d21b1f6d2\n            set hashes(f5-cloud-libs-azure.tar.gz) 9fb24b60be2d4ac4ba99f4b4f9ca5c0b0adbc074ecd8778e167f5c560f43024d18a81dfce3b8b10c6b89f5f1e13daf0151b4dc9f2754700ca528db6df6357987\n            set hashes(f5-cloud-libs-gce.tar.gz) 67e9fef439851ad4f9fbaf3f3574dadb2fceea0b13a77ccde41bcf31c42f87d6c37c64d50d685fc9a90acedc8c80abee9114b9a232809f36746bdc8e1de1b22a\n            set hashes(f5-cloud-libs-openstack.tar.gz) 5c83fe6a93a6fceb5a2e8437b5ed8cc9faf4c1621bfc9e6a0779f6c2137b45eab8ae0e7ed745c8cf821b9371245ca29749ca0b7e5663949d77496b8728f4b0f9\n            set hashes(asm-policy-linux.tar.gz) 63b5c2a51ca09c43bd89af3773bbab87c71a6e7f6ad9410b229b4e0a1c483d46f1a9fff39d9944041b02ee9260724027414de592e99f4c2475415323e18a72e0\n            set hashes(f5.http.v1.2.0rc4.tmpl) 47c19a83ebfc7bd1e9e9c35f3424945ef8694aa437eedd17b6a387788d4db1396fefe445199b497064d76967b0d50238154190ca0bd73941298fc257df4dc034\n            set hashes(f5.http.v1.2.0rc6.tmpl) 811b14bffaab5ed0365f0106bb5ce5e4ec22385655ea3ac04de2a39bd9944f51e3714619dae7ca43662c956b5212228858f0592672a2579d4a87769186e2cbfe\n            set hashes(f5.http.v1.2.0rc7.tmpl) 21f413342e9a7a281a0f0e1301e745aa86af21a697d2e6fdc21dd279734936631e92f34bf1c2d2504c201f56ccd75c5c13baa2fe7653213689ec3c9e27dff77d\n            set hashes(f5.aws_advanced_ha.v1.3.0rc1.tmpl) 9e55149c010c1d395abdae3c3d2cb83ec13d31ed39424695e88680cf3ed5a013d626b326711d3d40ef2df46b72d414b4cb8e4f445ea0738dcbd25c4c843ac39d\n            set hashes(f5.aws_advanced_ha.v1.4.0rc1.tmpl) de068455257412a949f1eadccaee8506347e04fd69bfb645001b76f200127668e4a06be2bbb94e10fefc215cfc3665b07945e6d733cbe1a4fa1b88e881590396\n            set hashes(f5.aws_advanced_ha.v1.4.0rc2.tmpl) 6ab0bffc426df7d31913f9a474b1a07860435e366b07d77b32064acfb2952c1f207beaed77013a15e44d80d74f3253e7cf9fbbe12a90ec7128de6facd097d68f\n            set hashes(f5.aws_advanced_ha.v1.4.0rc3.tmpl) 2f2339b4bc3a23c9cfd42aae2a6de39ba0658366f25985de2ea53410a745f0f18eedc491b20f4a8dba8db48970096e2efdca7b8efffa1a83a78e5aadf218b134\n            set hashes(asm-policy.tar.gz) 2d39ec60d006d05d8a1567a1d8aae722419e8b062ad77d6d9a31652971e5e67bc4043d81671ba2a8b12dd229ea46d205144f75374ed4cae58cefa8f9ab6533e6\n            set hashes(deploy_waf.sh) 1a3a3c6274ab08a7dc2cb73aedc8d2b2a23cd9e0eb06a2e1534b3632f250f1d897056f219d5b35d3eed1207026e89989f754840fd92969c515ae4d829214fb74\n            set hashes(f5.policy_creator.tmpl) 06539e08d115efafe55aa507ecb4e443e83bdb1f5825a9514954ef6ca56d240ed00c7b5d67bd8f67b815ee9dd46451984701d058c89dae2434c89715d375a620\n            set hashes(f5.service_discovery.tmpl) 592f94c6bfcf543f97632b8ac42b773e30390db77f150291815c45d7f62c30b5ade515ae7257f3bedc0329084499fdf18a6d9a93c90cade23542116edefd6849\n            set hashes(f5.cloud_logger.v1.0.0.tmpl) a26d5c470e70b821621476bcfd0579dbc0964f6a54158bc6314fa1e2f63b23bf3f3eb43ade5081131c24e08579db2e1e574beb3f8d9789d28acb4f312fad8c3e\n\n            set file_path [lindex $tmsh::argv 1]\n            set file_name [file tail $file_path]\n\n            if {![info exists hashes($file_name)]} {\n                tmsh::log err \"No hash found for $file_name\"\n                exit 1\n            }\n\n            set expected_hash $hashes($file_name)\n            set computed_hash [lindex [exec /usr/bin/openssl dgst -r -sha512 $file_path] 0]\n            if { $expected_hash eq $computed_hash } {\n                exit 0\n            }\n            tmsh::log err \"Hash does not match for $file_path\"\n            exit 1\n        }]} {\n            tmsh::log err {Unexpected error in verifyHash}\n            exit 1\n        }\n    }\n    script-signature gOaJO9x/NzW36zQ/hnggr4ioXh56RJ3orUWPNxVHBVUeme20jG8mRGgvVyEo8C5jcOLtduYzVnWR8mNjau6b9ePWwNxsw0sru05upi5U3vBZCTWsEIpCeQLF8+OJ+zjtilVmdMVi5yn6kBFGJOKflXG0JjQpCELbI1akn1k0EairuXzqpOsETjzeDogu+ThhQq7V0+lm7gie2RsgY9d5oy7q/fOpmiaIuelprtyCcGdFAXR6/N2nJX6jHOvEm522VG4il56I1RluF2n9DCp4/gbmY3DGXK1UZaMxI4Yec6ffte8v1k+4tI5TeLniTWii6I4b81VeLi0ZZKLJhalyKQ==\n    signing-key /Common/f5-irule\n}', variables('singleQuote'))]", 
+        "installCloudLibs": "[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit 1\nfi\necho loaded verifyHash\n\nconfig_loc=\"/config/cloud/\"\nhashed_file_list=\"${config_loc}f5-cloud-libs.tar.gz f5.service_discovery.tmpl f5.cloud_logger.v1.0.0.tmpl ${config_loc}f5-cloud-libs-azure.tar.gz deploy_waf.sh f5.http.v1.2.0rc7.tmpl f5.policy_creator.tmpl asm-policy.tar.gz\"\nfor file in $hashed_file_list; do\necho \"verifying $file\"\n/usr/bin/tmsh run cli script verifyHash $file\nif [ $? != 0 ]; then\necho \"$file is not valid\"\nexit 1\nfi\necho \"verified $file\"\ndone\necho \"expanding $hashed_file_list\"\ntar xfz /config/cloud/f5-cloud-libs.tar.gz --warning=no-unknown-keyword -C /config/cloud/azure/node_modules/@f5devcentral\ntar xfz /config/cloud/f5-cloud-libs-azure.tar.gz --warning=no-unknown-keyword -C /config/cloud/azure/node_modules/@f5devcentral\ntouch /config/cloud/cloudLibsReady', variables('singleQuote'))]", 
         "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
         "imageNameToLower": "[toLower(parameters('imageName'))]", 
         "skuToUse": "[concat('f5-bigip-virtual-edition-', parameters('licensedBandwidth'), '-', variables('imageNameToLower'),'-hourly')]", 
@@ -587,37 +561,22 @@
         "vmssId": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', variables('vmssName'))]", 
         "appInsightsName": "[replace(split(parameters('appInsights'), ':')[0], 'CREATE_NEW', concat(deployment().name, '-appinsights'))]", 
         "appInsightsNameArray": "[split(concat(variables('appInsightsName'), ';', variables('resourceGroupName')) , ';')]", 
-        "10m": 10485760, 
-        "25m": 26214400, 
-        "100m": 104857600, 
-        "200m": 209715200, 
-        "1g": 1073741824, 
-        "scaleOutCalc": "[mul(variables(parameters('calculatedBandwidth')), parameters('scaleOutThreshold'))]", 
-        "scaleInCalc": "[mul(variables(parameters('calculatedBandwidth')), parameters('scaleInThreshold'))]", 
-        "scaleOutNetworkBits": "[div(variables('scaleOutCalc'), 100)]", 
-        "scaleInNetworkBits": "[div(variables('scaleInCalc'), 100)]", 
-        "scaleOutNetworkBytes": "[div(variables('scaleOutNetworkBits'), 8)]", 
-        "scaleInNetworkBytes": "[div(variables('scaleInNetworkBits'), 8)]", 
-        "timeWindow": "[concat('PT', parameters('scaleTimeWindow'), 'M')]", 
-        "autoScaleMetric": "[parameters('autoScaleMetric')]", 
+        "scaleOutTimeWindow": "[concat('PT', parameters('scaleOutTimeWindow'), 'M')]", 
+        "scaleInTimeWindow": "[concat('PT', parameters('scaleInTimeWindow'), 'M')]", 
+        "cpuMetricName": "F5_TMM_CPU", 
+        "throughputMetricName": "F5_TMM_TRAFFIC", 
         "scaleMetricMap": {
             "F5_TMM_CPU": {
                 "metricName": "customMetrics/F5_TMM_CPU", 
                 "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", 
-                "thresholdIn": "[parameters('scaleInThreshold')]", 
-                "thresholdOut": "[parameters('scaleOutThreshold')]"
+                "thresholdIn": "[parameters('scaleInCpuThreshold')]", 
+                "thresholdOut": "[parameters('scaleOutCpuThreshold')]"
             }, 
             "F5_TMM_Traffic": {
                 "metricName": "customMetrics/F5_TMM_TRAFFIC", 
                 "metricResourceUri": "[resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0])]", 
-                "thresholdIn": "[variables('scaleInNetworkBytes')]", 
-                "thresholdOut": "[variables('scaleOutNetworkBytes')]"
-            }, 
-            "Host_Throughput": {
-                "metricName": "Network Out", 
-                "metricResourceUri": "[variables('vmssId')]", 
-                "thresholdIn": "[variables('scaleInNetworkBytes')]", 
-                "thresholdOut": "[variables('scaleOutNetworkBytes')]"
+                "thresholdIn": "[parameters('scaleInThroughputThreshold')]", 
+                "thresholdOut": "[parameters('scaleOutThroughputThreshold')]"
             }
         }, 
         "customEmailBaseArray": [
@@ -642,7 +601,13 @@
             }, 
             "Yes": {
                 "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]", 
-                "metricsCmd": "[concat(' --usageAnalytics \\\" --metrics customerId:${custId},deploymentId:${deployId},templateName:as_waf_dns-existing-stack-supported-payg,templateVersion:5.3.2.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:payg,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure\\\"')]"
+                "metricsCmd": "[concat(' --usageAnalytics \\\" --metrics customerId:${custId},deploymentId:${deployId},templateName:as_waf_dns-existing-stack-supported-payg,templateVersion:5.4.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:payg,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure\\\"')]"
+            }
+        }, 
+        "publicIpAddressConfiguration": {
+            "name": "publicIp01", 
+            "properties": {
+                "idleTimeoutInMinutes": 15
             }
         }, 
         "customImage": "[replace(parameters('customImage'), 'OPTIONAL', '')]", 
@@ -840,12 +805,7 @@
                                         {
                                             "name": "ipconfig1", 
                                             "properties": {
-                                                "publicIpAddressConfiguration": {
-                                                    "name": "publicIp01", 
-                                                    "properties": {
-                                                        "idleTimeoutInMinutes": 15
-                                                    }
-                                                }, 
+                                                "publicIpAddressConfiguration": "[variables('publicIpAddressConfiguration')]", 
                                                 "subnet": {
                                                     "id": "[variables('mgmtSubnetId')]"
                                                 }
@@ -909,15 +869,15 @@
                         "rules": [
                             {
                                 "metricTrigger": {
-                                    "metricName": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricName]", 
+                                    "metricName": "[variables('scaleMetricMap')[variables('cpuMetricName')].metricName]", 
                                     "metricNamespace": "", 
-                                    "metricResourceUri": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricResourceUri]", 
+                                    "metricResourceUri": "[variables('scaleMetricMap')[variables('cpuMetricName')].metricResourceUri]", 
                                     "operator": "GreaterThan", 
                                     "statistic": "Average", 
-                                    "threshold": "[variables('scaleMetricMap')[variables('autoScaleMetric')].thresholdOut]", 
+                                    "threshold": "[variables('scaleMetricMap')[variables('cpuMetricName')].thresholdOut]", 
                                     "timeAggregation": "Average", 
                                     "timeGrain": "PT1M", 
-                                    "timeWindow": "[variables('timeWindow')]"
+                                    "timeWindow": "[variables('scaleOutTimeWindow')]"
                                 }, 
                                 "scaleAction": {
                                     "cooldown": "PT1M", 
@@ -928,15 +888,53 @@
                             }, 
                             {
                                 "metricTrigger": {
-                                    "metricName": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricName]", 
+                                    "metricName": "[variables('scaleMetricMap')[variables('cpuMetricName')].metricName]", 
                                     "metricNamespace": "", 
-                                    "metricResourceUri": "[variables('scaleMetricMap')[variables('autoScaleMetric')].metricResourceUri]", 
+                                    "metricResourceUri": "[variables('scaleMetricMap')[variables('cpuMetricName')].metricResourceUri]", 
                                     "operator": "LessThan", 
                                     "statistic": "Average", 
-                                    "threshold": "[variables('scaleMetricMap')[variables('autoScaleMetric')].thresholdIn]", 
+                                    "threshold": "[variables('scaleMetricMap')[variables('cpuMetricName')].thresholdIn]", 
                                     "timeAggregation": "Average", 
                                     "timeGrain": "PT1M", 
-                                    "timeWindow": "[variables('timeWindow')]"
+                                    "timeWindow": "[variables('scaleInTimeWindow')]"
+                                }, 
+                                "scaleAction": {
+                                    "cooldown": "PT1M", 
+                                    "direction": "Decrease", 
+                                    "type": "ChangeCount", 
+                                    "value": "1"
+                                }
+                            }, 
+                            {
+                                "metricTrigger": {
+                                    "metricName": "[variables('scaleMetricMap')[variables('throughputMetricName')].metricName]", 
+                                    "metricNamespace": "", 
+                                    "metricResourceUri": "[variables('scaleMetricMap')[variables('throughputMetricName')].metricResourceUri]", 
+                                    "operator": "GreaterThan", 
+                                    "statistic": "Average", 
+                                    "threshold": "[variables('scaleMetricMap')[variables('throughputMetricName')].thresholdOut]", 
+                                    "timeAggregation": "Average", 
+                                    "timeGrain": "PT1M", 
+                                    "timeWindow": "[variables('scaleOutTimeWindow')]"
+                                }, 
+                                "scaleAction": {
+                                    "cooldown": "PT1M", 
+                                    "direction": "Increase", 
+                                    "type": "ChangeCount", 
+                                    "value": "1"
+                                }
+                            }, 
+                            {
+                                "metricTrigger": {
+                                    "metricName": "[variables('scaleMetricMap')[variables('throughputMetricName')].metricName]", 
+                                    "metricNamespace": "", 
+                                    "metricResourceUri": "[variables('scaleMetricMap')[variables('throughputMetricName')].metricResourceUri]", 
+                                    "operator": "LessThan", 
+                                    "statistic": "Average", 
+                                    "threshold": "[variables('scaleMetricMap')[variables('throughputMetricName')].thresholdIn]", 
+                                    "timeAggregation": "Average", 
+                                    "timeGrain": "PT1M", 
+                                    "timeWindow": "[variables('scaleInTimeWindow')]"
                                 }, 
                                 "scaleAction": {
                                     "cooldown": "PT1M", 

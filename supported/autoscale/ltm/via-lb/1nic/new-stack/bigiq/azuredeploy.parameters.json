@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "5.3.2.0", 
+    "contentVersion": "5.4.0.0", 
     "parameters": {
         "vmScaleSetMinCount": {
             "value": 2
@@ -8,22 +8,25 @@
         "vmScaleSetMaxCount": {
             "value": 4
         }, 
-        "autoScaleMetric": {
-            "value": "F5_TMM_Traffic"
-        }, 
         "appInsights": {
             "value": "CREATE_NEW"
         }, 
-        "calculatedBandwidth": {
-            "value": "200m"
+        "scaleOutCpuThreshold": {
+            "value": 80
         }, 
-        "scaleOutThreshold": {
-            "value": 90
+        "scaleInCpuThreshold": {
+            "value": 20
         }, 
-        "scaleInThreshold": {
+        "scaleOutThroughputThreshold": {
+            "value": 20000000
+        }, 
+        "scaleInThroughputThreshold": {
+            "value": 10000000
+        }, 
+        "scaleOutTimeWindow": {
             "value": 10
         }, 
-        "scaleTimeWindow": {
+        "scaleInTimeWindow": {
             "value": 10
         }, 
         "adminUsername": {
@@ -79,6 +82,9 @@
         }, 
         "notificationEmail": {
             "value": "OPTIONAL"
+        }, 
+        "enableMgmtPublicIp": {
+            "value": "No"
         }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"
