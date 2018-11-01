@@ -1,28 +1,28 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "5.3.0.0", 
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "5.3.0.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
-        }, 
+        },
         "authenticationType": {
             "value": "password"
-        }, 
+        },
         "adminPasswordOrKey": {
             "value": ""
-        }, 
+        },
         "dnsLabel": {
             "value": ""
-        }, 
+        },
         "instanceName": {
             "value": "f5vm01"
-        }, 
+        },
         "instanceType": {
             "value": "Standard_DS2_v2"
-        }, 
+        },
         "bigIqVersion": {
-            "value": "latest"
-        }, 
+            "value": "6.0.100813"
+        },
         "bigIqLicenseKey1": {
             "value": ""
         },
@@ -31,52 +31,52 @@
         },
         "regPoolKeys": {
             "defaultValue": "Do_Not_Create"
-        }, 
+        },
         "numberOfExternalIps": {
             "value": 1
-        }, 
+        },
         "vnetName": {
             "value": ""
-        }, 
+        },
         "vnetResourceGroupName": {
             "value": ""
-        }, 
+        },
         "mgmtSubnetName": {
             "value": ""
-        }, 
+        },
         "mgmtIpAddress": {
             "value": ""
-        }, 
+        },
         "externalSubnetName": {
             "value": ""
-        }, 
+        },
         "externalIpAddressRangeStart": {
             "value": ""
-        }, 
+        },
         "avSetChoice": {
             "value": "CREATE_NEW"
-        }, 
+        },
         "ntpServer": {
             "value": "0.pool.ntp.org"
-        }, 
+        },
         "timeZone": {
             "value": "UTC"
-        }, 
+        },
         "customImage": {
             "value": "OPTIONAL"
-        }, 
+        },
         "restrictedSrcAddress": {
             "value": "*"
-        }, 
+        },
         "tagValues": {
             "value": {
-                "application": "APP", 
-                "cost": "COST", 
-                "environment": "ENV", 
-                "group": "GROUP", 
+                "application": "APP",
+                "cost": "COST",
+                "environment": "ENV",
+                "group": "GROUP",
                 "owner": "OWNER"
             }
-        }, 
+        },
         "allowUsageAnalytics": {
             "value": "Yes"
         }

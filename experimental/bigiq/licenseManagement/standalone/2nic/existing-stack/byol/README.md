@@ -21,7 +21,7 @@ This is an *existing stack* template, meaning the networking infrastructure MUST
 
 In a 2-NIC implementation, one interface is for public management and license requests from the Internet, and the second interface is connected into the internal or none public network were license requests can occur internally. 
 
-You can choose one or both of these types of license pools on your BIG-IQ device for licensing your BIG-IP VE devices:
+You can choose one or both of these types of license pools on your BIG-IQ devices for licensing your BIG-IP VE devices:
   - A License (Purchase) Pool, which can either be a registration key with a particular number of licenses, or an [ELA](https://www.f5.com/pdf/licensing/big-ip-virtual-edition-enterprise-licensing-agreement-overview.pdf)/subscription pool, which enables self-licensing of BIG-IP virtual editions (VEs), 
   - A Registration Key Pool, which is a pool of single standalone BIG-IP VE registration keys for one or more BIG-IP services. This enables the ability to revoke and reassign a license to BIG-IP VE systems without having to contact F5 to allow the license to be moved.
 
@@ -37,7 +37,6 @@ The following are prerequisites and notes for the F5 2-NIC ARM Template:
     - Management subnet: he subnet for the management network requires a route and access to the Internet for the initial configuration to download the BIG-IP cloud library.
     - Internal subnet.
 - **Important**: When you configure the admin password for the BIG-IQ VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details.
-- Since you are deploying the BYOL template, you must have a valid BIG-IQ license token.
 
 ## Important configuration notes
   - This template creates Azure Security Groups as a part of the deployment. For the internal Security Group, this includes ports for accessing BIG-IQ on port 443 and port 22.
@@ -66,7 +65,6 @@ The following is a map that shows the available options for the template paramet
 
 | Azure BIG-IQ Image Version | BIG-IQ Version |
 | --- | --- |
-| 6.0.0001674 | BIG-IQ 6.0.0 |
 | 6.0.100813 | BIG-IQ 6.0.1 |
 
 ## Supported instance types and hypervisors

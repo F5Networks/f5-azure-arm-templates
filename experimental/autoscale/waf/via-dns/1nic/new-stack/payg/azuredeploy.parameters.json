@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "5.4.0.0", 
+    "contentVersion": "5.5.0.0", 
     "parameters": {
         "vmScaleSetMinCount": {
             "value": 2
@@ -45,13 +45,10 @@
             "value": "Standard_DS2_v2"
         }, 
         "imageName": {
-            "value": "Best"
+            "value": "Best1Gbps"
         }, 
         "bigIpVersion": {
             "value": "13.1.100000"
-        }, 
-        "licensedBandwidth": {
-            "value": "200m"
         }, 
         "vnetAddressPrefix": {
             "value": "10.0"
