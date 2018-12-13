@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "5.5.1.0", 
+    "contentVersion": "6.0.0.0", 
     "parameters": {
         "vmScaleSetMinCount": {
             "value": 2
@@ -77,17 +77,11 @@
         "mgmtSubnetName": {
             "value": ""
         }, 
-        "solutionDeploymentName": {
-            "value": ""
-        }, 
         "applicationProtocols": {
             "value": "http-https"
         }, 
         "applicationAddress": {
             "value": ""
-        }, 
-        "applicationServiceFqdn": {
-            "value": "NOT_SPECIFIED"
         }, 
         "applicationPort": {
             "value": "80"

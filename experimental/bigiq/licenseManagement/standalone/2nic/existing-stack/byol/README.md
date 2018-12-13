@@ -15,7 +15,7 @@
 
 ## Introduction
 
-This solution uses an experimental CloudFormation Template to launch a 2-NIC deployment of a [BIG-IQ](https://f5.com/products/big-iq-centralized-management) License Manager VE in an Microsoft Azure, using a BYOL (bring your own license) BIG-IQ License Manager License.  
+This solution uses an experimental ARM Template to launch a 2-NIC deployment of a [BIG-IQ](https://f5.com/products/big-iq-centralized-management) License Manager VE in an Microsoft Azure, using a BYOL (bring your own license) BIG-IQ License Manager License.  
 
 This is an *existing stack* template, meaning the networking infrastructure MUST be available prior to deploying. See the Template Parameters Section for required networking objects.
 
@@ -46,7 +46,7 @@ The following are prerequisites and notes for the F5 2-NIC ARM Template:
   - This template can send non-identifiable statistical information to F5 Networks to help us improve our templates.  See [Sending statistical information to F5](#sending-statistical-information-to-f5).
   - F5 has created a matrix that contains all of the tagged releases of the F5 ARM Templates for Microsoft Azure ARM, and the corresponding BIG-IQ versions, license types and throughput levels available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigiq-version-matrix.md.
   - These ARM templates incorporate an existing Virtual Network (VNet). 
-  - F5 Azure ARM templates now capture all deployment logs to the BIG-IQ VE in **/var/log/cloud/aws**. Depending on which template you are using, this includes deployment logs (stdout/stderr), Cloud Libs execution logs, recurring solution logs (metrics, failover, and so on), and more.
+  - F5 Azure ARM templates now capture all deployment logs to the BIG-IQ VE in **/var/log/cloud/azure**. Depending on which template you are using, this includes deployment logs (stdout/stderr), Cloud Libs execution logs, recurring solution logs (metrics, failover, and so on), and more.
 
 ## Security
 
@@ -81,15 +81,7 @@ We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.c
 
 ## Installation
 
-You have three options for deploying this solution:
-
-- Using the Azure deploy buttons
-- Using [PowerShell](#powershell-script-example)
-- Using [CLI Tools](#azure-cli-10-script-example)
-
-### Azure deploy buttons
-
-Use the appropriate button below to deploy:
+Use the button below to deploy this template:
 
 - **BYOL** (bring your own license): This allows you to use an existing BIG-IQ license.
 
@@ -127,26 +119,8 @@ Use the appropriate button below to deploy:
 ### More documentation
 For more information on BIG-IQ VE, see https://support.f5.com/kb/en-us/products/big-iq-centralized-mgmt/manuals/product/big-iq-centralized-management-device-6-0-1.html and https://support.f5.com/kb/en-us/products/big-iq-centralized-mgmt/manuals/product/big-iq-centralized-management-and-amazon-web-services-setup-6-0-0.html  
 
-For more information on F5 solutions for Azure, including manual configuration instructions for many of our AWS templates, see our Cloud Docs site: http://clouddocs.f5.com/cloud/public/v1/.
+For more information on F5 solutions for Azure, including manual configuration instructions for many of our templates, see our Cloud Docs site: http://clouddocs.f5.com/cloud/public/v1/.
 
-
-### Programmatic deployments
-
-As an alternative to deploying through the Azure Portal (GUI) each solution provides example scripts to deploy the ARM template.  The example commands can be found below along with the name of the script file, which exists in the current directory.
-
-#### PowerShell Script Example
-
-```powershell
-## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType <value> -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -instanceType <value> -bigIpVersion <value> -bigIqLicenseKey1 <value> -licensePoolKeys <value> -regPoolKeys <value> -numberOfInternalIps 1 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddress <value> -internalSubnetName <value> -internalIpAddressRangeStart <value> -restrictedSrcAddress <value> -restrictedSrcAddressApp <value> -avSetChoice CREATE_NEW -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
-```
-
-=======
-
-#### Azure CLI (1.0) Script Example
-
-```bash
-## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType <value> --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_DS2_v2 --bigIqVersion <value> --bigIqLicenseKey1 <value> --licensePoolKeys <value> --regPoolKeys <value>--numberOfInternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --mgmtIpAddress <value> --internalSubnetName <value> --internalIpAddressRangeStart <value> --restrictedSrcAddress <value> --restrictedSrcAddressApp <value> --avSetChoice CREATE_NEW --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
-```
 
 ### Sending statistical information to F5
 

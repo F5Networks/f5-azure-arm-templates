@@ -42,6 +42,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 
 ## Important configuration notes
 
+- All supported versions of F5 ARM templates now include Application Services 3 Extension (AS3) v3.5.1 (LTS version) on the BIG-IP VE.  AS3 uses a declarative configuration model, meaning you send a declaration file using a single Rest API call. See the [AS3 documentation](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.5.1/) for details on how to use AS3 on your BIG-IP VE(s). 
 - There are new options for BIG-IP license bundles, including Per App VE LTM, Advanced WAF, and Per App VE Advanced WAF. See the [the version matrix](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md) for details and applicable templates.
 - You have the option of using a password or SSH public key for authentication.  If you choose to use an SSH public key and want access to the BIG-IP web-based Configuration utility, you must first SSH into the BIG-IP VE using the SSH key you provided in the template.  You can then create a user account with admin-level permissions on the BIG-IP VE to allow access if necessary.
 - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
@@ -55,7 +56,8 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - Supported F5 ARM templates do not reconfigure existing Azure resources, such as network security groups.  Depending on your configuration, you may need to configure these resources to allow the BIG-IP VE(s) to receive traffic for your application.  Similarly, templates that deploy Azure load balancer(s) do not configure load balancing rules or probes on those resources to forward external traffic to the BIG-IP(s).  You must create these resources after the deployment has succeeded.
 - See the **[Configuration Example](#configuration-example)** section for a configuration diagram and description for this solution.
 - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
-- **NEW:**  Beginning with release 5.3.0.0, the BIG-IP image names have changed (previous options were Good, Better, and Best).  Now you choose a BIG-IP VE image based on whether you need [LTM](https://www.f5.com/products/big-ip-services/local-traffic-manager) only (name starts with **LTM**) or All modules (image name starts with **All**) available (including [WAF](https://www.f5.com/products/security/advanced-waf), [AFM](https://www.f5.com/products/security/advanced-firewall-manager), etc.), and if you need 1 or 2 boot locations.  Use 2 boot locations if you expect to upgrade the BIG-IP VE in the future. If you do not need room to upgrade (if you intend to create a new instance when a new version of BIG-IP VE is released), use an image with 1 boot location.  See this [Matrix](https://clouddocs.f5.com/cloud/public/v1/matrix.html#microsoft-azure) for recommended Azure instance types.
+- **NEW:**  Beginning with release 5.3.0.0, the BIG-IP image names have changed (previous options were Good, Better, and Best).  Now you choose a BIG-IP VE image based on whether you need [LTM](https://www.f5.com/products/big-ip-services/local-traffic-manager) only (name starts with **LTM**) or All modules (image name starts with **All**) available (including [WAF](https://www.f5.com/products/security/advanced-waf), [AFM](https://www.f5.com/products/security/advanced-firewall-manager), etc.), and if you need 1 or 2 boot locations.  Use 2 boot locations if you expect to upgrade the BIG-IP VE in the future. If you do not need room to upgrade (if you intend to create a new instance when a new version of BIG-IP VE is released), use an image with 1 boot location.  See this [Matrix](https://clouddocs.f5.com/cloud/public/v1/matrix.html#microsoft-azure) for recommended Azure instance types. See the Supported BIG-IP Versions table for the available options for different BIG-IP versions.
+- When failover occurs, UDRs will be updated across multiple Azure subscriptions.
 
 ## Security
 
@@ -72,11 +74,11 @@ Additionally, F5 provides checksums for all of our supported templates. For inst
 
 The following is a map that shows the available options for the template parameter **bigIpVersion** as it corresponds to the BIG-IP version itself. Only the latest version of BIG-IP VE is posted in the Azure Marketplace. For older versions, see downloads.f5.com.
 
-| Azure BIG-IP Image Version | BIG-IP Version |
-| --- | --- |
-| 13.1.100000 | 13.1.1 Build 0.0.4 |
-| 12.1.303000 | 12.1.3.3 Build 0.0.1 |
-| latest | This will select the latest BIG-IP version available |
+| Azure BIG-IP Image Version | BIG-IP Version | Important: Boot location options note |
+| --- | --- | --- |
+| 13.1.100000 | 13.1.1 Build 0.0.4 | Both One and Two Boot Location options are available |
+| 12.1.303000 | 12.1.3.3 Build 0.0.1 | Only Two Boot Location options exist. Even if you select a One Boot Location in the template, Two Boot Locations are created |
+| latest | This will select the latest BIG-IP version available | Only Two Boot Location options exist. Even if you select a One Boot Location in the template, Two Boot Locations are created |
 
 ## Supported instance types and hypervisors
 
@@ -106,7 +108,7 @@ Use the appropriate button below to deploy:
 
 - **BYOL** (bring your own license): This allows you to use an existing BIG-IP license.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv5.5.1.0%2Fexperimental%2Ffailover%2Fsame-net%2Fvia-lb%2F3nic%2Fnew-stack%2Fbyol%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv6.0.0.0%2Fexperimental%2Ffailover%2Fsame-net%2Fvia-lb%2F3nic%2Fnew-stack%2Fbyol%2Fazuredeploy.json)
 
 ### Template parameters
 

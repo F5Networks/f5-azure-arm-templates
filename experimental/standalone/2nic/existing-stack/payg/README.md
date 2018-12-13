@@ -31,6 +31,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 
 ## Important configuration notes
 
+- All supported versions of F5 ARM templates now include Application Services 3 Extension (AS3) v3.5.1 (LTS version) on the BIG-IP VE.  AS3 uses a declarative configuration model, meaning you send a declaration file using a single Rest API call. See the [AS3 documentation](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.5.1/) for details on how to use AS3 on your BIG-IP VE(s). 
 - There are new options for BIG-IP license bundles, including Per App VE LTM, Advanced WAF, and Per App VE Advanced WAF. See the [the version matrix](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md) for details and applicable templates.
 - You have the option of using a password or SSH public key for authentication.  If you choose to use an SSH public key and want access to the BIG-IP web-based Configuration utility, you must first SSH into the BIG-IP VE using the SSH key you provided in the template.  You can then create a user account with admin-level permissions on the BIG-IP VE to allow access if necessary.
 - See the important note about [optionally changing the BIG-IP Management port](#changing-the-big-ip-configuration-utility-gui-port).
@@ -94,7 +95,7 @@ Use the appropriate button below to deploy:
 
 - **PAYG**: This allows you to use pay-as-you-go hourly billing.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv5.5.1.0%2Fexperimental%2Fstandalone%2F2nic%2Fexisting-stack%2Fpayg%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv6.0.0.0%2Fexperimental%2Fstandalone%2F2nic%2Fexisting-stack%2Fpayg%2Fazuredeploy.json)
 
 ### Template parameters
 
