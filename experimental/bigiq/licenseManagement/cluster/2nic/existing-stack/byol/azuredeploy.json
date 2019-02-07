@@ -15,6 +15,13 @@
             }, 
             "type": "securestring"
         }, 
+        "vmRoleName": {
+            "defaultValue": "Contributor",
+            "metadata": {
+                "description": "Name of the Azure Active Directory Role to assign to the Managed Identity attached to the Virtual Machines."
+            }, 
+            "type": "string"
+        },
         "masterKey": {
             "metadata": {
                 "description": "Specify BIG-IQ master Key."
@@ -699,6 +706,9 @@
             ], 
             "location": "[variables('location')]", 
             "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '0')]", 
+            "identity": { 
+                "type": "SystemAssigned"
+            }, 
             "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]", 
             "properties": {
                 "availabilitySet": {
@@ -738,6 +748,9 @@
             ], 
             "location": "[variables('location')]", 
             "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '1')]", 
+            "identity": { 
+                "type": "SystemAssigned"
+            }, 
             "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]", 
             "properties": {
                 "availabilitySet": {
@@ -819,6 +832,32 @@
             }, 
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
             "type": "Microsoft.Compute/virtualMachines/extensions"
+        },
+        {
+            "apiVersion": "2017-09-01",
+             "type": "Microsoft.Authorization/roleAssignments",
+             "name": "[guid(concat(resourceGroup().id, variables('instanceName'), 0))]",
+             "properties": {
+                    "roleDefinitionId": "[variables(parameters('vmRoleName'))]",
+                    "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines', concat(variables('dnsLabel'), '-', variables('instanceName'), '0')), '2017-12-01', 'Full').identity.principalId]",
+                    "scope": "[resourceGroup().id]"
+              },
+              "dependsOn": [
+                    "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '0')]"
+                ]
+        }, 
+        {
+            "apiVersion": "2017-09-01",
+             "type": "Microsoft.Authorization/roleAssignments",
+             "name": "[guid(concat(resourceGroup().id, variables('instanceName'), 1))]",
+             "properties": {
+                    "roleDefinitionId": "[variables(parameters('vmRoleName'))]",
+                    "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines', concat(variables('dnsLabel'), '-', variables('instanceName'), '1')), '2017-12-01', 'Full').identity.principalId]",
+                    "scope": "[resourceGroup().id]"
+              },
+              "dependsOn": [
+                    "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '1')]"
+                ]
         }
     ], 
     "outputs": {

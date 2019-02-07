@@ -8,6 +8,9 @@
         "adminPassword": {
             "value": ""
         }, 
+        "vmRoleName": {
+            "value": "Reader"
+        },
         "dnsLabel": {
             "value": ""
         }, 
@@ -15,29 +18,23 @@
             "value": "f5vm01"
         }, 
         "instanceType": {
-            "value": "Standard_DS3_v2"
+            "value": "Standard_D2s_v3"
         }, 
-        "imageName": {
-            "value": "AllTwoBootLocations"
-        }, 
-        "bigIpVersion": {
-            "value": "13.1.100000"
-        }, 
-        "licenseKey1": {
+        "bigIqLicenseKey1": {
             "value": ""
         }, 
-        "licenseKey2": {
+        "bigIqLicenseKey2": {
             "value": ""
-        }, 
-        "numberOfAdditionalNics": {
-            "value": 0
-        }, 
-        "additionalNicLocation": {
-            "value": "OPTIONAL"
-        }, 
-        "numberOfExternalIps": {
-            "value": 1
-        }, 
+        },
+        "masterKey": {
+            "value": ""
+        },
+        "licensePoolKeys": {
+            "value": ""
+        },
+        "regPoolKeys": {
+            "value": ""
+        },
         "vnetName": {
             "value": ""
         }, 
@@ -50,23 +47,14 @@
         "mgmtIpAddressRangeStart": {
             "value": ""
         }, 
-        "externalSubnetName": {
-            "value": ""
-        }, 
-        "externalIpSelfAddressRangeStart": {
-            "value": ""
-        }, 
-        "externalIpAddressRangeStart": {
-            "value": ""
-        }, 
         "internalSubnetName": {
             "value": ""
-        }, 
+        },
+        "internalIpSelfAddressRangeStart": {
+            "value": ""
+        },
         "internalIpAddressRangeStart": {
             "value": ""
-        }, 
-        "managedRoutes": {
-            "value": "NOT_SPECIFIED"
         }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"

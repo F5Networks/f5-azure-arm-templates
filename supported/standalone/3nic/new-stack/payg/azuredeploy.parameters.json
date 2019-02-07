@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "6.0.1.0", 
+    "contentVersion": "6.0.2.0", 
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -31,6 +31,9 @@
         }, 
         "vnetAddressPrefix": {
             "value": "10.0"
+        }, 
+        "declarationUrl": {
+            "value": "NOT_SPECIFIED"
         }, 
         "ntpServer": {
             "value": "0.pool.ntp.org"
