@@ -100,7 +100,7 @@ Use the appropriate button below to deploy:
 
 - **PAYG**: This allows you to use pay-as-you-go hourly billing.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv6.0.2.0%2Fexperimental%2Fautoscale%2Fltm%2Fvia-lb%2F1nic%2Fnew-stack%2Fpayg%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv6.0.3.0%2Fexperimental%2Fautoscale%2Fltm%2Fvia-lb%2F1nic%2Fnew-stack%2Fpayg%2Fazuredeploy.json)
 
 ### Template parameters
 
@@ -398,7 +398,7 @@ You have a choice when it comes to filing issues:
 
 ## Copyright
 
-Copyright 2014-2018 F5 Networks Inc.
+Copyright 2014-2019 F5 Networks Inc.
 
 ## License
 

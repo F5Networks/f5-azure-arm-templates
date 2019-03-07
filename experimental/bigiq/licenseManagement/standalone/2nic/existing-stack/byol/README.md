@@ -37,6 +37,7 @@ The following are prerequisites and notes for the F5 2-NIC ARM Template:
     - Management subnet: he subnet for the management network requires a route and access to the Internet for the initial configuration to download the BIG-IP cloud library.
     - Internal subnet.
 - **Important**: When you configure the admin password for the BIG-IQ VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details.
+- The master-key (the passphrase used to establish trust between a future HA pair) for this deployment.
 
 ## Important configuration notes
   - This template creates Azure Security Groups as a part of the deployment. For the internal Security Group, this includes ports for accessing BIG-IQ on port 443 and port 22.
@@ -92,8 +93,8 @@ Use the button below to deploy this template:
 | Parameter | Required | Description |
 | --- | --- | --- |
 | adminUsername | Yes | User name for the Virtual Machine. |
-| authenticationType | Yes | Type of authentication to use on the Virtual Machine, password based authentication or key based authentication. |
-| adminPasswordOrKey | Yes | Password or SSH public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key-based authentication, this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**. |
+| adminPassword | Yes | Password to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. |
+| masterKey | Yes |  The passphrase used to establish trust between (future) HA pair |
 | dnsLabel | Yes | Unique DNS Name for the Public IP address used to access the Virtual Machine. |
 | instanceName | Yes | Name of the Virtual Machine. |
 | instanceType | Yes | Instance size of the Virtual Machine. |
@@ -169,7 +170,7 @@ You have a choice when it comes to filing issues:
 
 ## Copyright
 
-Copyright 2014-2018 F5 Networks Inc.
+Copyright2014-2019 F5 Networks Inc.
 
 ## License
 

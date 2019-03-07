@@ -8,8 +8,8 @@
         "adminPassword": {
             "value": ""
         }, 
-        "vmRoleName": {
-            "value": "Reader"
+        "masterKey": {
+            "value": ""
         },
         "dnsLabel": {
             "value": ""
@@ -26,9 +26,6 @@
         "bigIqLicenseKey2": {
             "value": ""
         },
-        "masterKey": {
-            "value": ""
-        },
         "licensePoolKeys": {
             "value": ""
         },
@@ -40,7 +37,10 @@
         }, 
         "vnetResourceGroupName": {
             "value": ""
-        }, 
+        },
+        "userAssignedIdentityName": {
+            "value": ""
+        },
         "mgmtSubnetName": {
             "value": ""
         }, 
