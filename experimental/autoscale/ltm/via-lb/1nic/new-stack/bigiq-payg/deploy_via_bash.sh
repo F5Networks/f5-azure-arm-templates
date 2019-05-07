@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-## Example Command: ./deploy_via_bash.sh --vmScaleSetMinCount 2 --vmScaleSetMaxCount 4 --appInsights CREATE_NEW --scaleOutCpuThreshold 80 --scaleInCpuThreshold 20 --scaleOutThroughputThreshold 20000000 --scaleInThroughputThreshold 10000000 --scaleOutTimeWindow 10 --scaleInTimeWindow 10 --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceType Standard_DS2_v2 --imageName Best1Gbps --bigIpVersion 13.1.100000 --numberOfStaticInstances <value> --bigIqAddress <value> --bigIqUsername <value> --bigIqPassword <value> --bigIqLicensePoolName <value> --bigIqLicenseSkuKeyword1 OPTIONAL --bigIqLicenseUnitOfMeasure OPTIONAL --vnetAddressPrefix 10.0 --declarationUrl NOT_SPECIFIED --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --notificationEmail OPTIONAL --enableMgmtPublicIp No --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --staticImageName AllTwoBootLocations --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceType Standard_DS2_v2 --imageName Best1Gbps --staticImageName AllTwoBootLocations --bigIqAddress <value> --bigIqUsername <value> --bigIqPassword <value> --bigIqLicensePoolName <value> --bigIqLicenseSkuKeyword1 OPTIONAL --bigIqLicenseUnitOfMeasure OPTIONAL --numberOfStaticInstances <value> --bigIpVersion 14.1.003000 --vnetAddressPrefix 10.0 --vmScaleSetMinCount 2 --vmScaleSetMaxCount 4 --appInsights CREATE_NEW --scaleOutCpuThreshold 80 --scaleInCpuThreshold 20 --scaleOutThroughputThreshold 20000000 --scaleInThroughputThreshold 10000000 --scaleOutTimeWindow 10 --scaleInTimeWindow 10 --notificationEmail OPTIONAL --enableMgmtPublicIp No --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 # Assign Script Parameters and Define Variables
 # Specify static items below, change these as needed or make them parameters
@@ -12,6 +12,54 @@ tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWN
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
 while [[ $# -gt 1 ]]; do
     case "$1" in
+        --adminUsername)
+            adminUsername=$2
+            shift 2;;
+        --authenticationType)
+            authenticationType=$2
+            shift 2;;
+        --adminPasswordOrKey)
+            adminPasswordOrKey=$2
+            shift 2;;
+        --dnsLabel)
+            dnsLabel=$2
+            shift 2;;
+        --instanceType)
+            instanceType=$2
+            shift 2;;
+        --imageName)
+            imageName=$2
+            shift 2;;
+        --staticImageName)
+            staticImageName=$2
+            shift 2;;
+        --bigIqAddress)
+            bigIqAddress=$2
+            shift 2;;
+        --bigIqUsername)
+            bigIqUsername=$2
+            shift 2;;
+        --bigIqPassword)
+            bigIqPassword=$2
+            shift 2;;
+        --bigIqLicensePoolName)
+            bigIqLicensePoolName=$2
+            shift 2;;
+        --bigIqLicenseSkuKeyword1)
+            bigIqLicenseSkuKeyword1=$2
+            shift 2;;
+        --bigIqLicenseUnitOfMeasure)
+            bigIqLicenseUnitOfMeasure=$2
+            shift 2;;
+        --numberOfStaticInstances)
+            numberOfStaticInstances=$2
+            shift 2;;
+        --bigIpVersion)
+            bigIpVersion=$2
+            shift 2;;
+        --vnetAddressPrefix)
+            vnetAddressPrefix=$2
+            shift 2;;
         --vmScaleSetMinCount)
             vmScaleSetMinCount=$2
             shift 2;;
@@ -39,53 +87,11 @@ while [[ $# -gt 1 ]]; do
         --scaleInTimeWindow)
             scaleInTimeWindow=$2
             shift 2;;
-        --adminUsername)
-            adminUsername=$2
+        --notificationEmail)
+            notificationEmail=$2
             shift 2;;
-        --authenticationType)
-            authenticationType=$2
-            shift 2;;
-        --adminPasswordOrKey)
-            adminPasswordOrKey=$2
-            shift 2;;
-        --dnsLabel)
-            dnsLabel=$2
-            shift 2;;
-        --instanceType)
-            instanceType=$2
-            shift 2;;
-        --imageName)
-            imageName=$2
-            shift 2;;
-        --bigIpVersion)
-            bigIpVersion=$2
-            shift 2;;
-        --numberOfStaticInstances)
-            numberOfStaticInstances=$2
-            shift 2;;
-        --bigIqAddress)
-            bigIqAddress=$2
-            shift 2;;
-        --bigIqUsername)
-            bigIqUsername=$2
-            shift 2;;
-        --bigIqPassword)
-            bigIqPassword=$2
-            shift 2;;
-        --bigIqLicensePoolName)
-            bigIqLicensePoolName=$2
-            shift 2;;
-        --bigIqLicenseSkuKeyword1)
-            bigIqLicenseSkuKeyword1=$2
-            shift 2;;
-        --bigIqLicenseUnitOfMeasure)
-            bigIqLicenseUnitOfMeasure=$2
-            shift 2;;
-        --vnetAddressPrefix)
-            vnetAddressPrefix=$2
-            shift 2;;
-        --declarationUrl)
-            declarationUrl=$2
+        --enableMgmtPublicIp)
+            enableMgmtPublicIp=$2
             shift 2;;
         --tenantId)
             tenantId=$2
@@ -96,11 +102,8 @@ while [[ $# -gt 1 ]]; do
         --servicePrincipalSecret)
             servicePrincipalSecret=$2
             shift 2;;
-        --notificationEmail)
-            notificationEmail=$2
-            shift 2;;
-        --enableMgmtPublicIp)
-            enableMgmtPublicIp=$2
+        --declarationUrl)
+            declarationUrl=$2
             shift 2;;
         --ntpServer)
             ntpServer=$2
@@ -119,9 +122,6 @@ while [[ $# -gt 1 ]]; do
             shift 2;;
         --allowUsageAnalytics)
             allowUsageAnalytics=$2
-            shift 2;;
-        --staticImageName)
-            staticImageName=$2
             shift 2;;
         --resourceGroupName)
             resourceGroupName=$2
@@ -142,7 +142,7 @@ while [[ $# -gt 1 ]]; do
 done
 
 #If a required parameter is not passed, the script will prompt for it below
-required_variables="vmScaleSetMinCount vmScaleSetMaxCount appInsights scaleOutCpuThreshold scaleInCpuThreshold scaleOutThroughputThreshold scaleInThroughputThreshold scaleOutTimeWindow scaleInTimeWindow adminUsername authenticationType adminPasswordOrKey dnsLabel instanceType imageName bigIpVersion numberOfStaticInstances bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName bigIqLicenseSkuKeyword1 bigIqLicenseUnitOfMeasure vnetAddressPrefix declarationUrl tenantId clientId servicePrincipalSecret notificationEmail enableMgmtPublicIp ntpServer timeZone customImage allowUsageAnalytics staticImageName resourceGroupName "
+required_variables="adminUsername authenticationType adminPasswordOrKey dnsLabel instanceType imageName staticImageName bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName bigIqLicenseSkuKeyword1 bigIqLicenseUnitOfMeasure numberOfStaticInstances bigIpVersion vnetAddressPrefix vmScaleSetMinCount vmScaleSetMaxCount appInsights scaleOutCpuThreshold scaleInCpuThreshold scaleOutThroughputThreshold scaleInThroughputThreshold scaleOutTimeWindow scaleInTimeWindow notificationEmail enableMgmtPublicIp tenantId clientId servicePrincipalSecret declarationUrl ntpServer timeZone customImage allowUsageAnalytics resourceGroupName "
 for variable in $required_variables
         do
         if [ -z ${!variable} ] ; then
@@ -169,4 +169,4 @@ azure group create -n $resourceGroupName -l $region
 # Deploy ARM Template, right now cannot specify parameter file and parameters inline via Azure CLI
 template_file="./azuredeploy.json"
 parameter_file="./azuredeploy.parameters.json"
-azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetMinCount\":{\"value\":$vmScaleSetMinCount},\"vmScaleSetMaxCount\":{\"value\":$vmScaleSetMaxCount},\"appInsights\":{\"value\":\"$appInsights\"},\"scaleOutCpuThreshold\":{\"value\":$scaleOutCpuThreshold},\"scaleInCpuThreshold\":{\"value\":$scaleInCpuThreshold},\"scaleOutThroughputThreshold\":{\"value\":$scaleOutThroughputThreshold},\"scaleInThroughputThreshold\":{\"value\":$scaleInThroughputThreshold},\"scaleOutTimeWindow\":{\"value\":$scaleOutTimeWindow},\"scaleInTimeWindow\":{\"value\":$scaleInTimeWindow},\"adminUsername\":{\"value\":\"$adminUsername\"},\"authenticationType\":{\"value\":\"$authenticationType\"},\"adminPasswordOrKey\":{\"value\":\"$adminPasswordOrKey\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfStaticInstances\":{\"value\":\"$numberOfStaticInstances\"},\"bigIqAddress\":{\"value\":\"$bigIqAddress\"},\"bigIqUsername\":{\"value\":\"$bigIqUsername\"},\"bigIqPassword\":{\"value\":\"$bigIqPassword\"},\"bigIqLicensePoolName\":{\"value\":\"$bigIqLicensePoolName\"},\"bigIqLicenseSkuKeyword1\":{\"value\":\"$bigIqLicenseSkuKeyword1\"},\"bigIqLicenseUnitOfMeasure\":{\"value\":\"$bigIqLicenseUnitOfMeasure\"},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"declarationUrl\":{\"value\":\"$declarationUrl\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"notificationEmail\":{\"value\":\"$notificationEmail\"},\"enableMgmtPublicIp\":{\"value\":\"$enableMgmtPublicIp\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"customImage\":{\"value\":\"$customImage\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"},\"staticImageName\":{\"value\":\"$staticImageName\"}}"
+azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"authenticationType\":{\"value\":\"$authenticationType\"},\"adminPasswordOrKey\":{\"value\":\"$adminPasswordOrKey\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"staticImageName\":{\"value\":\"$staticImageName\"},\"bigIqAddress\":{\"value\":\"$bigIqAddress\"},\"bigIqUsername\":{\"value\":\"$bigIqUsername\"},\"bigIqPassword\":{\"value\":\"$bigIqPassword\"},\"bigIqLicensePoolName\":{\"value\":\"$bigIqLicensePoolName\"},\"bigIqLicenseSkuKeyword1\":{\"value\":\"$bigIqLicenseSkuKeyword1\"},\"bigIqLicenseUnitOfMeasure\":{\"value\":\"$bigIqLicenseUnitOfMeasure\"},\"numberOfStaticInstances\":{\"value\":\"$numberOfStaticInstances\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"vmScaleSetMinCount\":{\"value\":$vmScaleSetMinCount},\"vmScaleSetMaxCount\":{\"value\":$vmScaleSetMaxCount},\"appInsights\":{\"value\":\"$appInsights\"},\"scaleOutCpuThreshold\":{\"value\":$scaleOutCpuThreshold},\"scaleInCpuThreshold\":{\"value\":$scaleInCpuThreshold},\"scaleOutThroughputThreshold\":{\"value\":$scaleOutThroughputThreshold},\"scaleInThroughputThreshold\":{\"value\":$scaleInThroughputThreshold},\"scaleOutTimeWindow\":{\"value\":$scaleOutTimeWindow},\"scaleInTimeWindow\":{\"value\":$scaleInTimeWindow},\"notificationEmail\":{\"value\":\"$notificationEmail\"},\"enableMgmtPublicIp\":{\"value\":\"$enableMgmtPublicIp\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"declarationUrl\":{\"value\":\"$declarationUrl\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"customImage\":{\"value\":\"$customImage\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"}}"

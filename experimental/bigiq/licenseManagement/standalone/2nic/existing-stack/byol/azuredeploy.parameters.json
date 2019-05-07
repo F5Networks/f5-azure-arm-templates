@@ -1,11 +1,14 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "5.3.0.0",
+    "contentVersion": "6.1.0.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
         },
         "adminPassword": {
+            "value": ""
+        },
+        "masterKey": {
             "value": ""
         },
         "dnsLabel": {
@@ -15,21 +18,21 @@
             "value": "f5vm01"
         },
         "instanceType": {
-            "value": "Standard_DS2_v2"
+            "value": "Standard_D4s_v3"
         },
         "bigIqVersion": {
-            "value": "6.0.100813"
+            "value": "6.1.000000"
         },
         "bigIqLicenseKey1": {
             "value": ""
         },
         "licensePoolKeys": {
-            "defaultValue": "Do_Not_Create"
+            "value": "Do_Not_Create"
         },
         "regPoolKeys": {
-            "defaultValue": "Do_Not_Create"
+            "value": "Do_Not_Create"
         },
-        "numberOfExternalIps": {
+        "numberOfInternalIps": {
             "value": 1
         },
         "vnetName": {
@@ -44,10 +47,10 @@
         "mgmtIpAddress": {
             "value": ""
         },
-        "externalSubnetName": {
+        "internalSubnetName": {
             "value": ""
         },
-        "externalIpAddressRangeStart": {
+        "internalIpAddressRangeStart": {
             "value": ""
         },
         "avSetChoice": {

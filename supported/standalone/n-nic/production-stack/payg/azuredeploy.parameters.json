@@ -1,91 +1,91 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#", 
-    "contentVersion": "6.0.4.0", 
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "6.1.0.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
-        }, 
+        },
         "authenticationType": {
             "value": "password"
-        }, 
+        },
         "adminPasswordOrKey": {
             "value": ""
-        }, 
-        "uniqueLabel": {
-            "value": ""
-        }, 
+        },
         "instanceName": {
             "value": "f5vm01"
-        }, 
+        },
         "instanceType": {
             "value": "Standard_DS3_v2"
-        }, 
+        },
         "imageName": {
             "value": "Best1Gbps"
-        }, 
+        },
         "bigIpVersion": {
-            "value": "13.1.100000"
-        }, 
+            "value": "14.1.003000"
+        },
         "numberOfAdditionalNics": {
             "value": 1
-        }, 
+        },
         "additionalNicLocation": {
             "value": ""
-        }, 
+        },
         "numberOfExternalIps": {
             "value": 1
-        }, 
+        },
         "vnetName": {
             "value": ""
-        }, 
+        },
         "vnetResourceGroupName": {
             "value": ""
-        }, 
+        },
         "mgmtSubnetName": {
             "value": ""
-        }, 
+        },
         "mgmtIpAddress": {
             "value": ""
-        }, 
+        },
         "externalSubnetName": {
             "value": ""
-        }, 
+        },
         "externalIpAddressRangeStart": {
             "value": ""
-        }, 
+        },
         "internalSubnetName": {
             "value": ""
-        }, 
+        },
         "internalIpAddress": {
             "value": ""
-        }, 
+        },
         "avSetChoice": {
             "value": "CREATE_NEW"
-        }, 
+        },
+        "uniqueLabel": {
+            "value": ""
+        },
         "declarationUrl": {
             "value": "NOT_SPECIFIED"
-        }, 
+        },
         "ntpServer": {
             "value": "0.pool.ntp.org"
-        }, 
+        },
         "timeZone": {
             "value": "UTC"
-        }, 
+        },
         "customImage": {
             "value": "OPTIONAL"
-        }, 
+        },
         "restrictedSrcAddress": {
             "value": "*"
-        }, 
+        },
         "tagValues": {
             "value": {
-                "application": "APP", 
-                "cost": "COST", 
-                "environment": "ENV", 
-                "group": "GROUP", 
+                "application": "APP",
+                "cost": "COST",
+                "environment": "ENV",
+                "group": "GROUP",
                 "owner": "OWNER"
             }
-        }, 
+        },
         "allowUsageAnalytics": {
             "value": "Yes"
         }

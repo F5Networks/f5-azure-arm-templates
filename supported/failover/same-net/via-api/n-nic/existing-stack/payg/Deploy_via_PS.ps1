@@ -1,7 +1,7 @@
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some (such as region) can    ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specified below.    ##
-## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -instanceType Standard_DS3_v2 -imageName Best1Gbps -bigIpVersion 13.1.100000 -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -numberOfExternalIps 1 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddressRangeStart <value> -externalSubnetName <value> -externalIpSelfAddressRangeStart <value> -externalIpAddressRangeStart <value> -internalSubnetName <value> -internalIpAddressRangeStart <value> -declarationUrl NOT_SPECIFIED -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -managedRoutes NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -instanceType Standard_DS3_v2 -imageName Best1Gbps -bigIpVersion 14.1.003000 -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -numberOfExternalIps 1 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddressRangeStart <value> -externalSubnetName <value> -externalIpAddressRangeStart <value> -externalIpSelfAddressRangeStart <value> -internalSubnetName <value> -internalIpAddressRangeStart <value> -managedRoutes NOT_SPECIFIED -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
 
 param(
 
@@ -21,15 +21,15 @@ param(
   [string] [Parameter(Mandatory=$True)] $mgmtSubnetName,
   [string] [Parameter(Mandatory=$True)] $mgmtIpAddressRangeStart,
   [string] [Parameter(Mandatory=$True)] $externalSubnetName,
-  [string] [Parameter(Mandatory=$True)] $externalIpSelfAddressRangeStart,
   [string] [Parameter(Mandatory=$True)] $externalIpAddressRangeStart,
+  [string] [Parameter(Mandatory=$True)] $externalIpSelfAddressRangeStart,
   [string] [Parameter(Mandatory=$True)] $internalSubnetName,
   [string] [Parameter(Mandatory=$True)] $internalIpAddressRangeStart,
-  [string] [Parameter(Mandatory=$True)] $declarationUrl,
+  [string] [Parameter(Mandatory=$True)] $managedRoutes,
   [string] [Parameter(Mandatory=$True)] $tenantId,
   [string] [Parameter(Mandatory=$True)] $clientId,
   [string] [Parameter(Mandatory=$True)] $servicePrincipalSecret,
-  [string] [Parameter(Mandatory=$True)] $managedRoutes,
+  [string] [Parameter(Mandatory=$True)] $declarationUrl,
   [string] [Parameter(Mandatory=$True)] $ntpServer,
   [string] [Parameter(Mandatory=$True)] $timeZone,
   [string] [Parameter(Mandatory=$True)] $customImage,
@@ -65,7 +65,7 @@ $servicePrincipalSecretSecure = ConvertTo-SecureString -String $servicePrincipal
 (ConvertFrom-Json $tagValues).psobject.properties | ForEach -Begin {$tagValues=@{}} -process {$tagValues."$($_.Name)" = $_.Value}
 
 # Create Arm Deployment
-$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -dnsLabel $dnsLabel -instanceName $instanceName -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -numberOfAdditionalNics $numberOfAdditionalNics -additionalNicLocation $additionalNicLocation -numberOfExternalIps $numberOfExternalIps -vnetName $vnetName -vnetResourceGroupName $vnetResourceGroupName -mgmtSubnetName $mgmtSubnetName -mgmtIpAddressRangeStart $mgmtIpAddressRangeStart -externalSubnetName $externalSubnetName -externalIpSelfAddressRangeStart $externalIpSelfAddressRangeStart -externalIpAddressRangeStart $externalIpAddressRangeStart -internalSubnetName $internalSubnetName -internalIpAddressRangeStart $internalIpAddressRangeStart -declarationUrl $declarationUrl -tenantId $tenantId -clientId $clientId -servicePrincipalSecret $servicePrincipalSecretSecure -managedRoutes $managedRoutes -ntpServer $ntpServer -timeZone $timeZone -customImage $customImage -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics 
+$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -dnsLabel $dnsLabel -instanceName $instanceName -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -numberOfAdditionalNics $numberOfAdditionalNics -additionalNicLocation $additionalNicLocation -numberOfExternalIps $numberOfExternalIps -vnetName $vnetName -vnetResourceGroupName $vnetResourceGroupName -mgmtSubnetName $mgmtSubnetName -mgmtIpAddressRangeStart $mgmtIpAddressRangeStart -externalSubnetName $externalSubnetName -externalIpAddressRangeStart $externalIpAddressRangeStart -externalIpSelfAddressRangeStart $externalIpSelfAddressRangeStart -internalSubnetName $internalSubnetName -internalIpAddressRangeStart $internalIpAddressRangeStart -managedRoutes $managedRoutes -tenantId $tenantId -clientId $clientId -servicePrincipalSecret $servicePrincipalSecretSecure -declarationUrl $declarationUrl -ntpServer $ntpServer -timeZone $timeZone -customImage $customImage -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics 
 
 # Print Output of Deployment to Console
 $deployment

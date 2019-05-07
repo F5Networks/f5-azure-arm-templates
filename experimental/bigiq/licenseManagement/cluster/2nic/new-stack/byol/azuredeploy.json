@@ -1,80 +1,130 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json", 
-    "contentVersion": "5.5.0.0", 
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "6.1.0.0",
     "parameters": {
         "adminUsername": {
-            "defaultValue": "azureuser", 
+            "defaultValue": "azureuser",
             "metadata": {
                 "description": "User name for the Virtual Machine."
-            }, 
+            },
             "type": "string"
-        }, 
+        },
         "adminPassword": {
             "metadata": {
                 "description": "Password to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details."
-            }, 
+            },
             "type": "securestring"
-        }, 
+        },
         "vmRoleName": {
             "defaultValue": "Contributor",
             "metadata": {
                 "description": "Name of the Azure Active Directory Role to assign to the Managed Identity attached to the Virtual Machines."
-            }, 
+            },
             "type": "string"
         },
         "masterKey": {
             "metadata": {
                 "description": "Specify BIG-IQ master Key."
-            }, 
+            },
             "type": "securestring"
-        }, 
+        },
         "dnsLabel": {
-            "defaultValue": "", 
             "metadata": {
                 "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine."
-            }, 
+            },
             "type": "string"
-        }, 
+        },
         "instanceName": {
-            "defaultValue": "f5vm01", 
+            "defaultValue": "f5vm01",
             "metadata": {
                 "description": "Name of the Virtual Machine."
-            }, 
+            },
             "type": "string"
-        }, 
+        },
         "instanceType": {
             "allowedValues": [
-                "Standard_D4s_v3",
-                "Standard_D8s_v3"
-            ], 
-            "defaultValue": "Standard_D4s_v3", 
+                "Standard_A3",
+                "Standard_A4",
+                "Standard_A5",
+                "Standard_A6",
+                "Standard_A7",
+                "Standard_D2",
+                "Standard_D3",
+                "Standard_D4",
+                "Standard_D11",
+                "Standard_D12",
+                "Standard_D13",
+                "Standard_D14",
+                "Standard_DS2",
+                "Standard_DS3",
+                "Standard_DS4",
+                "Standard_DS11",
+                "Standard_DS12",
+                "Standard_DS13",
+                "Standard_DS14",
+                "Standard_D2_v2",
+                "Standard_D3_v2",
+                "Standard_D4_v2",
+                "Standard_D5_v2",
+                "Standard_D11_v2",
+                "Standard_D12_v2",
+                "Standard_D13_v2",
+                "Standard_D14_v2",
+                "Standard_D15_v2",
+                "Standard_DS2_v2",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS5_v2",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2",
+                "Standard_DS15_v2",
+                "Standard_F4",
+                "Standard_F8",
+                "Standard_F2S",
+                "Standard_F4S",
+                "Standard_F8S",
+                "Standard_F16S",
+                "Standard_G2",
+                "Standard_G3",
+                "Standard_G4",
+                "Standard_G5",
+                "Standard_GS2",
+                "Standard_GS3",
+                "Standard_GS4",
+                "Standard_GS5"
+            ],
+            "defaultValue": "Standard_D4s_v3",
             "metadata": {
                 "description": "Instance size of the Virtual Machine."
-            }, 
+            },
             "type": "string"
         },
         "bigIqVersion": {
             "allowedValues": [
-                "6.0.101000"
+                "6.1.000000"
             ],
-            "defaultValue": "6.0.101000",
+            "defaultValue": "6.1.000000",
             "metadata": {
                 "description": "F5 BIG-IQ version you want to use."
             },
             "type": "string"
-        }, 
+        },
         "bigIqLicenseKey1": {
-            "defaultValue": "", 
+            "defaultValue": "",
             "metadata": {
-                "description": "The license token for the F5 BIG-IQ VE (BYOL)."
-            }, 
+                "description": "F5 BYOL BIG-IQ License Manager registration key."
+            },
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
-        }, 
+        },
         "bigIqLicenseKey2": {
-            "defaultValue": "", 
+            "defaultValue": "",
             "metadata": {
                 "description": "The license token for the F5 BIG-IQ VE (BYOL). This field is required when deploying two or more devices."
-            }, 
+            },
             "type": "string"
         },
         "licensePoolKeys": {
@@ -89,445 +139,442 @@
         "regPoolKeys": {
             "defaultValue": "Do_Not_Create",
             "metadata": {
-                "description": "Enter a pool name and a list of individual BIG-IQ registration keys in the format of name:key,key,key. Leave Do_Not_Create if you do not want to create a reg key pool on BIG-IQ at this time."
+                "description": "Enter a pool name and a list of individual BIG-IP registration keys in the format of name:key,key,key. Leave Do_Not_Create if you do not want to create a reg key pool on BIG-IQ at this time."
             },
             "maxLength": 255,
             "minLength": 1,
             "type": "string"
         },
         "vnetAddressPrefix": {
-            "defaultValue": "10.0", 
+            "defaultValue": "10.0",
             "metadata": {
                 "description": "The start of the CIDR block the BIG-IQ VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'."
-            }, 
+            },
             "type": "string"
-        },         
+        },
         "ntpServer": {
-            "defaultValue": "0.pool.ntp.org", 
+            "defaultValue": "0.pool.ntp.org",
             "metadata": {
                 "description": "Leave the default NTP server the BIG-IQ uses, or replace the default NTP server with the one you want to use."
-            }, 
+            },
             "type": "string"
-        }, 
+        },
         "timeZone": {
-            "defaultValue": "UTC", 
+            "defaultValue": "UTC",
             "metadata": {
                 "description": "If you would like to change the time zone the BIG-IQ uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list [here](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md)). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."
-            }, 
+            },
             "type": "string"
-        }, 
+        },
         "customImage": {
-            "defaultValue": "OPTIONAL", 
+            "defaultValue": "OPTIONAL",
             "metadata": {
                 "description": "If you would like to deploy using a local BIG-IQ image, provide either the full URL to the VHD in Azure storage **or** the full resource ID to an existing Microsoft.Compute image resource.  **Note**: Unless specifically required, leave the default of **OPTIONAL**."
-            }, 
+            },
             "type": "string"
-        }, 
+        },
         "restrictedSrcAddress": {
-            "defaultValue": "*", 
+            "defaultValue": "*",
             "metadata": {
                 "description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources"
-            }, 
+            },
             "type": "string"
-        }, 
+        },
         "tagValues": {
             "defaultValue": {
-                "application": "APP", 
-                "cost": "COST", 
-                "environment": "ENV", 
-                "group": "GROUP", 
+                "application": "APP",
+                "cost": "COST",
+                "environment": "ENV",
+                "group": "GROUP",
                 "owner": "OWNER"
-            }, 
+            },
             "metadata": {
                 "description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."
-            }, 
+            },
             "type": "object"
-        }, 
+        },
         "allowUsageAnalytics": {
             "allowedValues": [
-                "Yes", 
+                "Yes",
                 "No"
-            ], 
-            "defaultValue": "Yes", 
+            ],
+            "defaultValue": "Yes",
             "metadata": {
                 "description": "This deployment can send anonymous statistics to F5 to help us determine how to improve our solutions. If you select **No** statistics are not sent."
-            }, 
+            },
             "type": "string"
         }
-    }, 
+    },
     "variables": {
-        "computeApiVersion": "2017-12-01", 
-        "networkApiVersion": "2017-11-01", 
-        "storageApiVersion": "2017-10-01", 
-        "location": "[resourceGroup().location]", 
-        "adminPassword": "[replace(parameters('adminPassword'),'\\n', '\n')]", 
-        "subscriptionID": "[subscription().subscriptionId]", 
-        "resourceGroupName": "[resourceGroup().name]",
-        "resourceGroupId": "[concat(resourceGroup().id, '-vip')]", 
-        "singleQuote": "'", 
-        "f5CloudLibsTag": "v4.7.0", 
-        "f5CloudLibsAzureTag": "v2.8.0", 
-        "f5NetworksTag": "v6.0.2.0", 
-        "f5CloudIappsTag": "v2.3.1", 
-        "dnsLabel": "[toLower(parameters('dnsLabel'))]", 
-        "skuToUse": "f5-bigiq-virtual-edition-byol", 
-        "offerToUse": "f5-big-iq",
-        "imagePlan": {
-            "name": "[variables('skuToUse')]", 
-            "product": "[variables('offerToUse')]", 
-            "publisher": "f5-networks"
-        }, 
-        "imageReference": {
-            "offer": "[variables('offerToUse')]", 
-            "publisher": "f5-networks", 
-            "sku": "[variables('skuToUse')]", 
-            "version": "[parameters('bigIqVersion')]"
-        }, 
-        "bigIpMgmtPort": "443", 
-        "instanceName": "[toLower(parameters('instanceName'))]", 
-        "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]", 
-        "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]", 
-        "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-        "vnetAddressPrefix": "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]", 
-        "publicIPAddressType": "Static", 
-        "mgmtPublicIPAddressName": "[concat(variables('dnsLabel'), '-mgmt-pip')]", 
-        "mgmtPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('mgmtPublicIPAddressName'))]", 
-        "mgmtNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-mgmt-nsg'))]", 
-        "mgmtNicName": "[concat(variables('dnsLabel'), '-mgmt')]", 
-        "mgmtSubnetName": "mgmt", 
-        "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]",
-        "mgmtSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.1.0/24')]",
-        "mgmtSubnetPrivateAddress": "[concat(parameters('vnetAddressPrefix'), '.1.4')]",
-        "mgmtSubnetPrivateAddress1": "[concat(parameters('vnetAddressPrefix'), '.1.5')]",
-        "intSelfPublicIpAddressNamePrefix": "[concat(variables('dnsLabel'), '-self-pip')]", 
-        "intSelfPublicIpAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('intSelfPublicIpAddressNamePrefix'))]", 
-        "intpublicIPAddressNamePrefix": "[concat(variables('dnsLabel'), '-int-pip')]", 
-        "intPublicIPAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('intPublicIPAddressNamePrefix'))]", 
-        "intNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-int-nsg'))]", 
-        "intNicName": "[concat(variables('dnsLabel'), '-int')]",
-        "intNicNameVm1": "[concat(variables('intNicName'), '0')]",
-        "intNicNameVm2": "[concat(variables('intNicName'), '1')]", 
-        "intSubnetName": "internal",
-        "intSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.2.0/24')]", 
-        "intSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]",
-        "intSubnetPrivateAddress": "[concat(parameters('vnetAddressPrefix'), '.2.30')]", 
-        "intSubnetPrivateAddress1": "[concat(parameters('vnetAddressPrefix'), '.2.31')]", 
-        "intSubnetPrivateAddress2": "[concat(parameters('vnetAddressPrefix'), '.2.100')]", 
-        "intSubnetPrivateAddress3": "[concat(parameters('vnetAddressPrefix'), '.2.101')]",
-        "numberOfinternalIps": 1, 
-        "selfNicConfigArray": {
-            "0": [
-                {
-                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('mgmtNicName'), '0'))]", 
-                    "properties": {
-                        "primary": true
-                    }
-                }, 
-                {
-                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('intNicName'), '0'))]", 
-                    "properties": {
-                        "primary": false
-                    }
-                } 
-            ], 
-            "1": [
-                {
-                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('mgmtNicName'), '1'))]", 
-                    "properties": {
-                        "primary": true
-                    }
-                }, 
-                {
-                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('intNicName'), '1'))]", 
-                    "properties": {
-                        "primary": false
-                    }
-                }
-            ]
-        }, 
-        "addtlNicConfigArray": {
-            "copy": [
-                {
-                    "count": 5, 
-                    "input": {
-                        "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(toLower(parameters('dnsLabel')), '-addtlnic', copyIndex('values0', 1), '0'))]", 
-                        "properties": {
-                            "primary": false
-                        }
-                    }, 
-                    "name": "values0"
-                }, 
-                {
-                    "count": 5, 
-                    "input": {
-                        "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(toLower(parameters('dnsLabel')), '-addtlnic', copyIndex('values1', 1), '1'))]", 
-                        "properties": {
-                            "primary": false
-                        }
-                    }, 
-                    "name": "values1"
-                }
-            ]
-        }, 
-        "tagValues": "[parameters('tagValues')]",
-        "vipTagValues": {
-            "application": "[parameters('tagValues').application]", 
-            "cost": "[parameters('tagValues').cost]", 
-            "environment": "[parameters('tagValues').environment]", 
-            "group": "[parameters('tagValues').group]", 
-            "owner": "[parameters('tagValues').owner]",
-            "f5_deployment": "[variables('resourceGroupId')]"
-        }, 
-        "newDataStorageAccountName": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data000')]", 
-        "dataStorageAccountType": "Standard_LRS", 
-        "deploymentId": "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('dnsLabel'))]", 
-        "customImage": "[replace(parameters('customImage'), 'OPTIONAL', '')]", 
-        "useCustomImage": "[not(empty(variables('customImage')))]", 
-        "createNewCustomImage": "[contains(variables('customImage'), 'https://')]", 
-        "newCustomImageName": "[concat(variables('dnsLabel'), 'image')]", 
+        "computeApiVersion": "2017-12-01",
+        "networkApiVersion": "2017-11-01",
+        "storageApiVersion": "2017-10-01",
+        "customImage": "[replace(parameters('customImage'), 'OPTIONAL', '')]",
+        "useCustomImage": "[not(empty(variables('customImage')))]",
+        "createNewCustomImage": "[contains(variables('customImage'), 'https://')]",
+        "newCustomImageName": "[concat(variables('dnsLabel'), 'image')]",
         "storageProfileArray": {
             "customImage": {
                 "imageReference": {
                     "id": "[if(variables('createNewCustomImage'), resourceId('Microsoft.Compute/images', variables('newCustomImageName')), variables('customImage'))]"
                 }
-            }, 
+            },
             "platformImage": {
-                "imageReference": "[variables('imageReference')]", 
+                "imageReference": "[variables('imageReference')]",
                 "osDisk": {
                     "createOption": "FromImage"
                 }
             }
-        }, 
+        },
         "premiumInstanceArray": [
-            "Standard_DS2", 
-            "Standard_DS3", 
-            "Standard_DS4", 
-            "Standard_DS11", 
-            "Standard_DS12", 
-            "Standard_DS13", 
-            "Standard_DS14", 
-            "Standard_DS2_v2", 
-            "Standard_DS3_v2", 
-            "Standard_DS4_v2", 
-            "Standard_DS5_v2", 
-            "Standard_DS11_v2", 
-            "Standard_DS12_v2", 
-            "Standard_DS13_v2", 
-            "Standard_DS14_v2", 
-            "Standard_DS15_v2", 
-            "Standard_F2S", 
-            "Standard_F4S", 
-            "Standard_F8S", 
-            "Standard_F16S", 
-            "Standard_GS2", 
-            "Standard_GS3", 
-            "Standard_GS4", 
+            "Standard_DS2",
+            "Standard_DS3",
+            "Standard_DS4",
+            "Standard_DS11",
+            "Standard_DS12",
+            "Standard_DS13",
+            "Standard_DS14",
+            "Standard_DS2_v2",
+            "Standard_DS3_v2",
+            "Standard_DS4_v2",
+            "Standard_DS5_v2",
+            "Standard_DS11_v2",
+            "Standard_DS12_v2",
+            "Standard_DS13_v2",
+            "Standard_DS14_v2",
+            "Standard_DS15_v2",
+            "Standard_F2S",
+            "Standard_F4S",
+            "Standard_F8S",
+            "Standard_F16S",
+            "Standard_GS2",
+            "Standard_GS3",
+            "Standard_GS4",
             "Standard_GS5"
         ],
-        "initScript": "IyEvYmluL2Jhc2gKCiMjIyBDb25maWd1cmUgZGVmYXVsdCB2YWx1ZXMKbG9nX2xldmVsPSJpbmZvIgpoZWxwPWZhbHNlCnNraXBfdmVyaWZ5PWZhbHNlCnNjcmlwdF9kaXI9JChkaXJuYW1lICQwKQoKClRNU0g9L3Vzci9iaW4vdG1zaApDVVJMPS91c3IvYmluL2N1cmwKTk9ERT0vdXNyL2Jpbi9ub2RlCk1LRElSPS9iaW4vbWtkaXIKTU9VTlQ9L2Jpbi9tb3VudApSTURJUj0vYmluL3JtZGlyClVNT1VOVD0vYmluL3Vtb3VudAoKIyMjIEZ1bmN0aW9ucyAtIFRoZXNlIHNob3VsZCBnbyBpbnRvIHNlcGVyYXRlIGZpbGUocykKIyB1c2FnZTogbG9nIG1lc3NhZ2UKZnVuY3Rpb24gbG9nKCkgewogICAgZWNobyAiJChkYXRlICcrJVktJW0tJWRUJUg6JU06JVNaJyk6ICQxIgp9CiMgdXNhZ2U6IGdldF92ZXJzaW9uCmZ1bmN0aW9uIGdldF92ZXJzaW9uKCkgewogICAgcmV0PSQoJFRNU0ggc2hvdyBzeXMgdmVyc2lvbiB8IGdyZXAgLWkgcHJvZHVjdCB8IGF3ayAne3ByaW50ICQyfScpCiAgICBlY2hvICR7cmV0LCx9Cn0KIyB1c2FnZToganNvbmlmeSBrZXk6dmFsdWUsa2V5MTp2YWx1ZTEKZnVuY3Rpb24ganNvbmlmeSgpIHsKICAgIGxpc3Q9JChlY2hvICQxIHwgdHIgJywnICcgJykKICAgIGpzb249J3t9JwogICAgZm9yIGkgaW4gJGxpc3QgOyBkbwogICAgICAgIGt2PSgkKGVjaG8gJGkgfCB0ciAnOicgJyAnKSkKICAgICAgICBqc29uPSQoZWNobyAkanNvbiB8IGpxIC0tYXJnIGsgJHtrdlswXX0gLS1hcmcgdiAke2t2WzFdfSAnLiB8IC5bJGtdPSR2JykKICAgIGRvbmUKICAgIGVjaG8gJGpzb24KfQojIHVzYWdlOiBnZXRfdmFsIGpzb25fb2JqZWN0IGtleQpmdW5jdGlvbiBnZXRfdmFsKCkgewogICAgcmV0PSQoZWNobyAkMSB8IGpxIC4kMiAtcikKICAgIGVjaG8gJHJldAp9CiMgdXNhZ2U6IG1ha2Ugc3VyZSB0aGVyZSBpcyBpbnRlcm5ldCBjb25uZWN0aW9uIHRvIEdpdEh1YgpmdW5jdGlvbiBjaGVja19pbnRlcm5ldF9jb25uZWN0aW9uIHsKICAgIGVjaG8gIi0tLSBDaGVja2luZyBHaXRodWIgc3RhdHVzIC0tLSIKICAgIGNoZWNrcz0wCiAgICBnaXRodWJfcmVzcG9uc2U9ImJhZCIKICAgIHdoaWxlIFsgJGNoZWNrcyAtbHQgMTIwIF0gOyBkbwogICAgICAgIGdpdGh1Yl9yZXNwb25zZT1gY3VybCBodHRwczovL3d3dy5naXRodWJzdGF0dXMuY29tL2FwaS92Mi9zdGF0dXMuanNvbiB8IGpxIC5zdGF0dXMuZGVzY3JpcHRpb24gLS1yYXctb3V0cHV0YAogICAgICAgIGlmIFsgIiRnaXRodWJfcmVzcG9uc2UiID09ICJBbGwgU3lzdGVtcyBPcGVyYXRpb25hbCIgXTsgdGhlbgogICAgICAgICAgICBsb2cgIkdpdEh1YiBpcyByZWFkeSIKICAgICAgICAgICAgYnJlYWsKICAgICAgICBmaQogICAgICAgIGxvZyAiR2l0SHViIG5vdCByZWFkeTogJGNoZWNrcyIKICAgICAgICBsZXQgY2hlY2tzPWNoZWNrcysxCiAgICAgICAgc2xlZXAgNQogICAgZG9uZQogICAgaWYgWyAiJGdpdGh1Yl9yZXNwb25zZSIgPT0gImJhZCIgXTsgdGhlbgogICAgICAgIGxvZyAiTm8gR2l0SHViIGludGVybmV0IGNvbm5lY3Rpb24uIgogICAgICAgIGV4aXQKICAgIGZpCn0KIyB1c2FnZTogbWNwX3J1bm5pbmcKZnVuY3Rpb24gbWNwX3J1bm5pbmcgewogICAgY2hlY2tzPTAKICAgIHdoaWxlIFsgJGNoZWNrcyAtbHQgMTIwIF0gOyBkbwogICAgICAgICRUTVNIIC1hIHNob3cgc3lzIG1jcC1zdGF0ZSBmaWVsZC1mbXQgfCBncmVwIC1xIHJ1bm5pbmcKICAgICAgICBpZiBbICQ/ID09IDAgXTsgdGhlbgogICAgICAgICAgICBsb2cgIk1DUEQgcmVhZHkiCiAgICAgICAgICAgIGJyZWFrCiAgICAgICAgZmkKICAgICAgICBsb2cgIk1DUEQgbm90IHJlYWR5OiAkY2hlY2tzIgogICAgICAgIGxldCBjaGVja3M9Y2hlY2tzKzEKICAgICAgICBzbGVlcCA1CiAgICBkb25lCn0KIyB1c2FnZTogRG93bmxvYWQgZnJvbSBHaXRodWIgdW50aWwgc3VjY2Vzc2Z1bAojCiMgJDE6IG91dHB1dCBmaWxlIG5hbWUKIyAkMjogVVJMCmZ1bmN0aW9uIHNhZmVfZG93bmxvYWQgewogICAgY2hlY2tzPTAKICAgIHdoaWxlIFsgJGNoZWNrcyAtbHQgMTIwIF0gOyBkbwogICAgICAgICRDVVJMIC0tZmFpbCAtLXJldHJ5IDIwIC0tcmV0cnktZGVsYXkgNSAtLXJldHJ5LW1heC10aW1lIDI0MCAtbyAkMSAkMiAmJiBicmVhawogICAgICAgIGxldCBjaGVja3M9Y2hlY2tzKzEKICAgICAgICBzbGVlcCA1CiAgICBkb25lCn0KIyB1c2FnZTogYmFzZV9jb25maWdfYXZhaWxhYmxlIC0gcmVzb2x2ZXMgaXNzdWUgZm91bmQgaW4gNi4wLjAgdmVyc2lvbnMgb2YgYmlnLWlxCmZ1bmN0aW9uIGJhc2VfY29uZmlnX2F2YWlsYWJsZSB7CiAgICBjaGVja3M9MAogICAgd2hpbGUgWyAkY2hlY2tzIC1sdCAxMjAgXSA7IGRvCiAgICAgICAgJFRNU0ggLWEgc2hvdyBzeXMgbWNwLXN0YXRlIGZpZWxkLWZtdCB8IGdyZXAgLXEgcnVubmluZwogICAgICAgIGlmIFsgLWYgL2NvbmZpZy9iaWdpcF9iYXNlLmNvbmYgXTsgdGhlbgogICAgICAgICAgICBsb2cgIkJhc2UgQ29uZmlnIGZpbGUgcHJlc2VudDsgc2F2aW5nIGNvbmZpZyIKICAgICAgICAgICAgdG1zaCBzYXZlIHN5cyBjb25maWcKICAgICAgICAgICAgY2F0IC9jb25maWcvYmlnaXBfYmFzZS5jb25mCiAgICAgICAgICAgIGJyZWFrCiAgICAgICAgZmkKICAgICAgICBsb2cgIkJhc2UgY29uZmlnIGZpbGUgbm90IHlldCBwcmVzZW50OiAkY2hlY2tzIgogICAgICAgIGxldCBjaGVja3M9Y2hlY2tzKzEKICAgICAgICBzbGVlcCA1CiAgICBkb25lCn0KIyB1c2FnZTogZ2V0X25ldF9pbmZvIGV0aDAgbnN8Z3cgaW5jbHVkZV9jaWRyCmZ1bmN0aW9uIGdldF9uZXRfaW5mbygpIHsKICAgIFJFVD0iIgogICAgQ0lEUl9CTE9DSz0iIgogICAgaWYgW1sgJGNsb3VkID09ICJhenVyZSIgXV07IHRoZW4KICAgICAgICBhZGRfaW50PTEKICAgICAgICBJRl9NQUM9JChpZmNvbmZpZyAkMSB8IGdyZXAgLWkgaHdhZGRyIHwgYXdrICd7cHJpbnQgJDV9JyB8IHNlZCAncy86Ly9nJykKICAgICAgICBJRl9JTkZPPSQoY3VybCAtc2YgLS1yZXRyeSAyMCBjdXJsIC1IIE1ldGFkYXRhOnRydWUgImh0dHA6Ly8xNjkuMjU0LjE2OS4yNTQvbWV0YWRhdGEvaW5zdGFuY2UvbmV0d29yay9pbnRlcmZhY2U/YXBpLXZlcnNpb249MjAxNy0wOC0wMSIgfCBqcSAnLltdIHwgc2VsZWN0KC5tYWNBZGRyZXNzPT0iJyR7SUZfTUFDfSciKScpCiAgICAgICAgQ0lEUl9CTE9DSz0kKGVjaG8gJHtJRl9JTkZPfSB8IGpxIC5pcHY0LnN1Ym5ldFswXS5hZGRyZXNzIC0tcmF3LW91dHB1dCkKICAgICAgICBDSURSX0JMT0NLKz0iLyIKICAgICAgICBDSURSX0JMT0NLKz0kKGVjaG8gJHtJRl9JTkZPfSB8IGpxIC5pcHY0LnN1Ym5ldFswXS5wcmVmaXggLS1yYXctb3V0cHV0KQogICAgZWxpZiBbWyAkY2xvdWQgPT0gImF3cyIgXV07IHRoZW4KICAgICAgICBjaWRyX2Jsb2NrX3VyaT0idnBjLWlwdjQtY2lkci1ibG9jayIKICAgICAgICBhZGRfaW50PTIKICAgICAgICAjIElmIGdldHRpbmcgZ2F0ZXdheSwgdXBkYXRlIG5lY2Vzc2FyeSB2YXJzCiAgICAgICAgaWYgW1sgJDIgPT0gImd3IiBdXSA7IHRoZW4gY2lkcl9ibG9ja191cmk9InN1Ym5ldC1pcHY0LWNpZHItYmxvY2siIDsgYWRkX2ludD0xIDsgZmkKICAgICAgICBJRl9NQUM9JChpZmNvbmZpZyAkMSB8IGdyZXAgLWkgaHdhZGRyIHwgYXdrICd7cHJpbnQgdG9sb3dlcigkNSl9JykKICAgICAgICBDSURSX0JMT0NLPSQoY3VybCAtc2YgLS1yZXRyeSAyMCBodHRwOi8vMTY5LjI1NC4xNjkuMjU0L2xhdGVzdC9tZXRhLWRhdGEvbmV0d29yay9pbnRlcmZhY2VzL21hY3MvJHtJRl9NQUN9LyR7Y2lkcl9ibG9ja191cml9KQogICAgZmkKICAgIFJFVD0kKGVjaG8gJHtDSURSX0JMT0NLJS8qfSB8IGF3ayAtRi4gJ3sgcHJpbnRmICIlZC4lZC4lZC4lZCIsICQxLCAkMiwgJDMsICQ0Kycke2FkZF9pbnR9JyB9JykKICAgICMgSW5jbHVkZSBtYXNrIGluIHJlc3BvbnNlIGlmIHJlcXVlc3RlZAogICAgaWYgW1sgLW4gIiQzIiBdXSA7IHRoZW4gZWNobyAke1JFVH0vJHtDSURSX0JMT0NLIyovfSA7IGVsc2UgZWNobyAkUkVUIDsgZmkKfQojIGNyZWF0ZXMgYSBkaXJlY3RvcnkgZm9yIGluLW1lbW9yeSBmaWxlcwojIHVzYWdlOiBjcmVhdGVfdGVtcF9kaXIgbmFtZSBzaXplCmZ1bmN0aW9uIGNyZWF0ZV90ZW1wX2RpcigpIHsKICAgICRNS0RJUiAiJDEiCiAgICAkTU9VTlQgLXQgdG1wZnMgLW8gc2l6ZT0iJDIiLG1vZGU9MTcwMCB0bXBmcyAiJDEiCn0KIyB1c2FnZTogcmVtb3ZlX3RlbXBfZGlyIG5hbWUKZnVuY3Rpb24gcmVtb3ZlX3RlbXBfZGlyKCkgewogICAgJFVNT1VOVCAiJDEiCiAgICAkUk1ESVIgIiQxIgp9CiMgdXNhZ2U6IHdpcGVfdGVtcF9kaXIgbmFtZQpmdW5jdGlvbiB3aXBlX3RlbXBfZGlyKCkgewogICAgRklMRVM9JChscyAtMSAiJDEiKQoKICAgIGZvciBmIGluICRGSUxFUzsgZG8KICAgICAgICBzaHJlZCAtLXJlbW92ZSAiJHsxfS8ke2Z9IgogICAgZG9uZQoKICAgIHJlbW92ZV90ZW1wX2RpciAiJDEiCn0KCnJlYWQgLXIgLWQgJycgVVNBR0UgPDwgRU9NCiAgICBVc2FnZTogJDAKICAgICAgICAtLWhlbHAgICAgICAgICAgICAgICAgICAgICAgUHJpbnQgdXNhZ2UgbWVzc2FnZSBhbmQgZXhpdAogICAgICAgIC0tbG9nLWxldmVsIDxzdHJpbmc+ICAgICAgICBMZXZlbCBvZiBsb2dnaW5nIGRlc2lyZWQ6IGVycm9yLCB3YXJuLCBpbmZvLCBkZWJ1ZwogICAgICAgIC0tY2xvdWQgPHN0cmluZz4gICAgICAgICAgICBDbG91ZCBlbnZpcm9ubWVudCBleGVjdXRlZCBhZ2FpbnN0OiBhd3MKICAgICAgICAtLXNraXAtdmVyaWZ5IDxzdHJpbmc+ICAgICAgU2tpcCB2ZXJpZmljYXRpb24gb2YgZGVwZW5kZW5jaWVzCiAgICAgICAgLS1saWNlbnNlIDxzdHJpbmc+ICAgICAgICAgIExpY2Vuc2UgZm9yIHRoZSBkZXZpY2UKICAgICAgICAtLW50cCA8c3RyaW5nPiAgICAgICAgICAgICAgTlRQIGZvciB0aGUgZGV2aWNlCiAgICAgICAgLS10aW1lem9uZSA8c3RyaW5nPiAgICAgICAgIFRpbWV6b25lIGZvciB0aGUgZGV2aWNlCiAgICAgICAgLS1kYXRhLWludGVyZmFjZSA8c3RyaW5nPiAgIFByaW1hcnkgaW50ZXJmYWNlIHRvIHVzZSBmb3IgZGF0YS1wbGFuZQogICAgICAgIC0tdmxhbiA8c3RyaW5nPiAgICAgICAgICAgICBWTEFOKHMpIHRvIGNyZWF0ZSBvbiB0aGUgZGV2aWNlICg7IGZvciBtdWx0aXBsZSkgJ246ZXh0LG5pYzoxLjEnCiAgICAgICAgLS1zZWxmLWlwIDxzdHJpbmc+ICAgICAgICAgIFNlbGYgSVAocykgdG8gY3JlYXRlIG9uIHRoZSBkZXZpY2UgKDsgZm9yIG11bHRpcGxlKTogJ246ZXh0LGE6eC54LngueCx2OmV4dCxpOmV0aDEnCiAgICAgICAgLS11c2FnZS1hbmFseXRpY3MgPHN0cmluZz4gIFVzYWdlIGFuYWx5dGljcyB0byBzZW5kOiAnY046dmFsLHI6dmFsLGNJOnZhbCxkSTp2YWwsbFQ6dmFsLGJJVjp2YWwsdE46dmFsLHRWOnZhbCxzZW5kOnllcycKICAgICAgICAtLWNyZWF0ZS1saWNlbnNlLXBvb2wgICAgICAgQ3JlYXRlcyBsaWNlbnNlIHBvb2wsIHNlbmQ6IG5hbWU6cmVnX2tleQogICAgICAgIC0tY3JlYXRlLXJlZy1rZXktcG9vbCAgICAgICBDcmVhdGVzIGEgcmVna2V5IHBvb2wsIHNlbmQ6IG5hbWU6cmVnX2tleV9saXN0CiAgICAgICAgLS1mY2wtdGFnICAgICAgICAgICAgICAgICAgIEY1IGNsb3VkIGxpYiB0YWcgdG8gZG93bmxvYWQgZjUtY2xvdWQtbGlicy50YXIuZ3oKICAgICAgICAtLWZjbC1jbG91ZC10YWcgICAgICAgICAgICAgRjUgc3BlY2lmaWVkIGNsb3VkIHRhZyB0byBkb3dubG9hZCBmNS1jbG91ZC1saWJzLTxjbG91ZD4udGFyLmd6CiAgICAgICAgLS1iaWctaXEtcGFzc3dvcmQgICAgICAgICAgIEJpZ2lxIHBhc3N3b3JkLCB1c2VkIHRvIG9uYm9hcmQgYmlnaXEgY2x1c3RlcnMKICAgICAgICAtLWJpZy1pcS1tYXN0ZXIta2V5ICAgICAgICAgQmlnLUlRIG1hc3RlcmtleSB1c2VkIGR1cmluZyBpbml0aXRpYWwgY29uZmlndXJhaXRvbgogICAgICAgIC0tYmlnLWlxLXBhc3N3b3JkLWRhdGEtdXJpICBVUkkgdG8gdGhlIGxvY2F0aW9uIHRoYXQgY29udGFpbnMgQklHLUlRIGFkbWluIHVzZXIgcGFzc3dvcmQKICAgICAgICAtLW1hc3RlciAgICAgICAgICAgICAgICAgICAgSW5kaWNhdGVzIHRoYXQgdGhpcyBpbnN0YW5jZSBpcyBtYXN0ZXIgKHVzZWQgaW4gQklHLUlRIGNsdXN0ZXJpbmcpIHVzZSB3aXRoIC0tYmlnLWlxLWZhaWxvdmVyLXBlZXItaXAgb3B0aW9uCiAgICAgICAgLS1iaWctaXEtZmFpbG92ZXItcGVlci1pcCAgIFRoaXMgaXMgdGhlIHByaXZhdGUgSVAgYWRkcmVzcyBmb3IgdGhlIHNlY29uZGFyeSBCSUctSVEKICAgICAgICAtLXRhZy12YWx1ZSAgICAgICAgICAgICAgICAgVGhlIHRhZyB2YWx1ZSB0byBhZGQgdG8gdGhlIEVsYXN0aWMgdmlydHVhbCBJUCBhZGRyZXNzCiAgICAgICAgLS12aXAtYWxsb2NhdGlvbi1pZCAgICAgICAgIEFsbG9jYXRpb24gSUQgb2YgdGhlIEVsYXN0aWMgdmlydHVhbCBJUCBhZGRyZXNzCiAgICAgICAgLS1wcml2YXRlLWlwICAgICAgICAgICAgICAgIFByaXZhdGUgSVAgYWRkcmVzcyBhc3NvY2lhdGVkIHdpdGggdGhlIEVsYXN0aWMgdmlydHVhbCBJUCBhZGRyZXNzCiAgICAgICAgLS1hc3NvY2lhdGUtZW5pICAgICAgICAgICAgIEVOSSBvZiB0aGUgbmV0d29yayBpbnRlcmZhY2UgdG8gYXNzb2NpYXRlIHRoZSBFbGFzdGljIHZpcnR1YWwgSVAgYWRkcmVzcyB3aXRoIGluIEFXUwogICAgICAgIC0tYXNzb2NpYXRlLWludGYgICAgICAgICAgICBOYW1lIG9mIHRoZSBuZXR3b3JrIGludGVyZmFjZSB0byBhc3NvY2lhdGUgdGhlIHZpcnR1YWwgSVAgYWRkcmVzcyB3aXRoIGluIEF6dXJlCiAgICAgICAgLS1kaXNzb2NpYXRlLWludGYgICAgICAgICAgIE5hbWUgb2YgdGhlIG5ldHdvcmsgaW50ZXJmYWNlIHRvIGRpc3NvY2lhdGUgdGhlIHZpcnR1YWwgSVAgYWRkcmVzcyBmcm9tIGluIEF6dXJlCgoKRU9NCgojIyMgUGFyc2UgY29tbWFuZCBsaW5lIGFyZ3VtZW50cwp3aGlsZSBbWyAkIyAtZ3QgMCBdXSA7IGRvCiAgICBjYXNlICIkMSIgaW4KICAgICAgICAtLWhlbHApCiAgICAgICAgICAgIGhlbHA9dHJ1ZQogICAgICAgICAgICBzaGlmdCA7OwogICAgICAgIC0tbG9nLWxldmVsKQogICAgICAgICAgICBsb2dfbGV2ZWw9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1jbG91ZCkKICAgICAgICAgICAgY2xvdWQ9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1za2lwLXZlcmlmeSkKICAgICAgICAgICAgc2tpcF92ZXJpZnk9dHJ1ZQogICAgICAgICAgICBzaGlmdCA7OwogICAgICAgIC0tbGljZW5zZSkKICAgICAgICAgICAgbGljZW5zZT0iJDIiCiAgICAgICAgICAgIHNoaWZ0IDIgOzsKICAgICAgICAtLW50cCkKICAgICAgICAgICAgbnRwPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgIC0tdGltZXpvbmUpCiAgICAgICAgICAgIHRpbWV6b25lPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgIC0tZGF0YS1pbnRlcmZhY2UpCiAgICAgICAgICAgIGRhdGFfaW50ZXJmYWNlPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgIC0tdXNhZ2UtYW5hbHl0aWNzKQogICAgICAgICAgICB1c2FnZV9hbmFseXRpY3M9IiQyIgogICAgICAgICAgICBzaGlmdCA7OwogICAgICAgIC0tdmxhbikKICAgICAgICAgICAgdmxhbj0iJDIiCiAgICAgICAgICAgIHNoaWZ0IDIgOzsKICAgICAgICAtLXNlbGYtaXApCiAgICAgICAgICAgIHNlbGZfaXA9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1kaXNjb3ZlcnktYWRkcmVzcykKICAgICAgICAgICAgZGlzY292ZXJ5X2FkZHJlc3M9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1jcmVhdGUtbGljZW5zZS1wb29sKQogICAgICAgICAgICBsaWNlbnNlX3Bvb2w9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1jcmVhdGUtcmVnLWtleS1wb29sKQogICAgICAgICAgICByZWdfa2V5X3Bvb2w9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1mY2wtdGFnKQogICAgICAgICAgICBmY2xfdGFnPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgIC0tZmNsLWNsb3VkLXRhZykKICAgICAgICAgICAgZmNsX2Nsb3VkX3RhZz0iJDIiCiAgICAgICAgICAgIHNoaWZ0IDIgOzsKICAgICAgICAtLWJpZy1pcS1wYXNzd29yZCkKICAgICAgICAgICAgYmlnaXFfcGFzc3dvcmQ9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1iaWctaXEtbWFzdGVyLWtleSkKICAgICAgICAgICAgYmlnaXFfbWFzdGVyX2tleT0iJDIiCiAgICAgICAgICAgIHNoaWZ0IDIgOzsgICAgICAgICAgICAgICAgCiAgICAgICAgLS1iaWctaXEtcGFzc3dvcmQtZGF0YS11cmkpCiAgICAgICAgICAgIHBhc3N3b3JkX2RhdGFfdXJpPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgIC0tbWFzdGVyKQogICAgICAgICAgICBtYXN0ZXI9dHJ1ZQogICAgICAgICAgICBzaGlmdCA7OwogICAgICAgIC0tYmlnLWlxLWZhaWxvdmVyLXBlZXItaXApCiAgICAgICAgICAgIGJpZ19pcV9mYWlsb3Zlcl9wZWVyX2lwPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgIC0tdGFnLXZhbHVlKQogICAgICAgICAgICB0YWdfdmFsdWU9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS12aXAtYWxsb2NhdGlvbi1pZCkKICAgICAgICAgICAgdmlwX2FsbG9jYXRpb25faWQ9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1wcml2YXRlLWlwKQogICAgICAgICAgICBwcml2YXRlX2lwPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgIC0tYXNzb2NpYXRlLWVuaSkKICAgICAgICAgICAgYXNzb2NpYXRlX2VuaT0iJDIiCiAgICAgICAgICAgIHNoaWZ0IDIgOzsKICAgICAgICAtLWFzc29jaWF0ZS1pbnRmKQogICAgICAgICAgICBhc3NvY2lhdGVfaW50Zj0iJDIiCiAgICAgICAgICAgIHNoaWZ0IDIgOzsKICAgICAgICAtLWRpc3NvY2lhdGUtaW50ZikKICAgICAgICAgICAgZGlzc29jaWF0ZV9pbnRmPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgICp8LS0pCiAgICAgICAgICAgIHNoaWZ0CiAgICAgICAgICAgIGJyZWFrIDs7CiAgICBlc2FjCmRvbmUKCmlmICRoZWxwIDsgdGhlbgogICAgZWNobyAiJFVTQUdFIgogICAgZXhpdApmaQoKIyBWZXJpZnkgcmVxdWlyZWQgcGFyYW1ldGVycwpyZXF1aXJlZD0oImNsb3VkIikKZm9yIGkgaW4gJHtyZXF1aXJlZFtAXX0gOyBkbwogICAgaWYgWyAteiAkeyFpfSBdIDsgdGhlbgogICAgICAgIGxvZyAiQSByZXF1aXJlZCBwYXJhbWV0ZXIgaXMgbWlzc2luZzogJGkiCiAgICAgICAgZXhpdAogICAgZmkKZG9uZQoKY29uZmlnX3BhcmFtcz0iLS1oZWxwICRoZWxwIC0tbG9nLWxldmVsICRsb2dfbGV2ZWwgLS1jbG91ZCAkY2xvdWQgLS1za2lwLXZlcmlmeSAkc2tpcF92ZXJpZnkgLS1saWNlbnNlICRsaWNlbnNlIC0tbnRwICRudHAgLS10aW1lem9uZSAkdGltZXpvbmUgIC0tZGF0YS1pbnRlcmZhY2UgJGRhdGFfaW50ZXJmYWNlIC0tdXNhZ2UtYW5hbHl0aWNzICR1c2FnZV9hbmFseXRpY3MgLS12bGFuICR2bGFuIC0tc2VsZi1pcCAkc2VsZl9pcCAtLWRpc2NvdmVyeS1hZGRyZXNzICRkaXNjb3ZlcnlfYWRkcmVzcyAtLWNyZWF0ZS1saWNlbnNlLXBvb2wgJGxpY2Vuc2VfcG9vbCAtLWNyZWF0ZS1yZWcta2V5LXBvb2wgJHJlZ19rZXlfcG9vbCAtLWZjbC10YWcgJGZjbF90YWcgLS1mY2wtY2xvdWQtdGFnICRmY2xfY2xvdWRfdGFnICIKCiMgQ2hlY2sgZm9yIGVtcHR5IHZhcnM7IGFkZCB0byBjb25maWdfcGFybXMgaXMgbm90IGVtcHR5CltbICEgLXogIiRtYXN0ZXIiIF1dICYmIGNvbmZpZ19wYXJhbXMrPSIgLS1tYXN0ZXIgJG1hc3RlciAiCltbICEgLXogIiRiaWdpcV9tYXN0ZXJfa2V5IiBdXSAmJiBjb25maWdfcGFyYW1zKz0iIC0tYmlnLWlxLW1hc3Rlci1rZXkgJGJpZ2lxX21hc3Rlcl9rZXkgIgpbWyAhIC16ICIkcGFzc3dvcmRfZGF0YV91cmkiIF1dICYmIGNvbmZpZ19wYXJhbXMrPSIgLS1iaWctaXEtcGFzc3dvcmQtZGF0YS11cmkgJHBhc3N3b3JkX2RhdGFfdXJpICIKW1sgISAteiAiJGJpZ19pcV9mYWlsb3Zlcl9wZWVyX2lwIiBdXSAmJiBjb25maWdfcGFyYW1zKz0iIC0tYmlnLWlxLWZhaWxvdmVyLXBlZXItaXAgJGJpZ19pcV9mYWlsb3Zlcl9wZWVyX2lwICIKZWNobyAiQ29uZmlndXJhdGlvbiBwYXJhbWV0ZXJzOiAke2NvbmZpZ19wYXJhbXMvJGJpZ2lxX21hc3Rlcl9rZXkvT2JmdXNjYXRlZH0iCiMgQ2hlY2sgZm9yICJEbyBOb3QgQ3JlYXRlIiBpbiBjcmVhdGUgcG9vbCBwYXJtZXRlcnMKc2hvcHQgLXMgbm9jYXNlbWF0Y2gKaWYgW1sgJGxpY2Vuc2VfcG9vbCA9PSAiRG9fTm90X0NyZWF0ZSIgXV0gOyB0aGVuCiAgICBsb2cgIlNldHRpbmcgbGljZW5zaW5nIHBvb2wgdG8gbnVsbCBhcyAnRG9fTm90X0NyZWF0ZScgaGFzIGJlZW4gc3BlY2lmaWVkOiAkbGljZW5zaW5nX3Bvb2wiCiAgICBsaWNlbnNlX3Bvb2w9IiIKZmkKaWYgW1sgJHJlZ19rZXlfcG9vbCA9PSAiRG9fTm90X0NyZWF0ZSIgXV0gOyB0aGVuCiAgICBsb2cgIlNldHRpbmcgcmVnIGtleSBwb29sIHRvIG51bGwgYXMgJ0RvX05vdF9DcmVhdGUnIGhhcyBiZWVuIHNwZWNpZmllZDogJGxpY2Vuc2luZ19wb29sIgogICAgcmVnX2tleV9wb29sPSIiCmZpCnNob3B0IC11IG5vY2FzZW1hdGNoCgojIyMgSW5zdGFsbCBkZXBlbmRlbmNpZXMgIyMjCiMjIFRoZXJlIG11c3QgYmUgR2l0SHViIGludGVybmV0IGNvbm5lY3Rpb24KY2hlY2tfaW50ZXJuZXRfY29ubmVjdGlvbgoKYmFzZV91cmw9Imh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9GNU5ldHdvcmtzIgpiYXNlX2Rpcj0iL2NvbmZpZy9jbG91ZCIKYmFzZV9sb2dfZGlyPSIvdmFyL2xvZy9jbG91ZC8ke2Nsb3VkfSIKYmFzZV9kZXBlbmRlbmN5X2Rpcj0iJHtiYXNlX2Rpcn0vJHtjbG91ZH0vbm9kZV9tb2R1bGVzL0BmNWRldmNlbnRyYWwiCgojIyBEb3dubG9hZApkZXBlbmRlbmNpZXM9KCIke2Jhc2VfdXJsfS9mNS1jbG91ZC1saWJzLyR7ZmNsX3RhZ30vZGlzdC9mNS1jbG91ZC1saWJzLnRhci5neiIpCmRlcGVuZGVuY2llcys9KCIke2Jhc2VfdXJsfS9mNS1jbG91ZC1saWJzLSR7Y2xvdWR9LyR7ZmNsX2Nsb3VkX3RhZ30vZGlzdC9mNS1jbG91ZC1saWJzLSR7Y2xvdWR9LnRhci5neiIpCmRlcGVuZGVuY2llcys9KCIke2Jhc2VfdXJsfS9mNS1jbG91ZC1saWJzLyR7ZmNsX3RhZ30vZGlzdC92ZXJpZnlIYXNoIikKCmZvciBpIGluICR7ZGVwZW5kZW5jaWVzW0BdfSA7IGRvCiAgICBsb2cgIkRvd25sb2FkaW5nIGRlcGVuZGVuY3k6ICRpIgogICAgZj0kKGJhc2VuYW1lICRpKQogICAgc2FmZV9kb3dubG9hZCAke2Jhc2VfZGlyfS8kZiAkaQogICAgIyAkQ1VSTCAta3NmIC0tcmV0cnkgMTAgLS1yZXRyeS1kZWxheSA1IC0tcmV0cnktbWF4LXRpbWUgMjQwIC1vICR7YmFzZV9kaXJ9LyRmICRpCmRvbmUKCiMjIFZlcmlmeQojIE1DUCBtdXN0IGJlIHJ1bm5pbmcgZmlyc3QKbWNwX3J1bm5pbmcKYmFzZV9jb25maWdfYXZhaWxhYmxlCgppZiAhICRza2lwX3ZlcmlmeSA7IHRoZW4KICAgIHZlcmlmeV9zY3JpcHQ9IiR7YmFzZV9kaXJ9L3ZlcmlmeUhhc2giCiAgICBpZiAhICRUTVNIIGxvYWQgc3lzIGNvbmZpZyBtZXJnZSBmaWxlICR2ZXJpZnlfc2NyaXB0IDsgdGhlbgogICAgICAgIGxvZyAiQ0xJIHZlcmlmaWNhdGlvbiBzY3JpcHQgaXMgbm90IHZhbGlkOiAkdmVyaWZ5X3NjcmlwdCIKICAgICAgICBleGl0IDEKICAgIGZpCgogICAgZm9yIGkgaW4gJHtkZXBlbmRlbmNpZXNbQF19IDsgZG8KICAgICAgICBmPSQoYmFzZW5hbWUgJGkpCiAgICAgICAgaWYgW1sgJGYgIT0gInZlcmlmeUhhc2giIF1dIDsgdGhlbgogICAgICAgICAgICBsb2cgIlZlcmlmeWluZyBkZXBlbmRlbmN5OiAkZiIKICAgICAgICAgICAgaWYgISAkVE1TSCBydW4gY2xpIHNjcmlwdCB2ZXJpZnlIYXNoICIvY29uZmlnL2Nsb3VkLyRmIiA7IHRoZW4KICAgICAgICAgICAgICAgIGxvZyAiRGVwZW5kZW5jeSBpcyBub3QgdmFsaWQ6ICRmIgogICAgICAgICAgICAgICAgZXhpdCAxCiAgICAgICAgICAgIGZpCiAgICAgICAgZmkKICAgIGRvbmUKZWxzZQogICAgbG9nICJXYXJuaW5nOiBTa2lwcGluZyBkZXBlbmRlbmN5IHZlcmlmaWNhdGlvbiIKZmkKCiMjIEluc3RhbGwKbWtkaXIgLXAgJGJhc2VfZGVwZW5kZW5jeV9kaXIKZm9yIGkgaW4gJHtkZXBlbmRlbmNpZXNbQF19IDsgZG8KICAgIGY9JChiYXNlbmFtZSAkaSkKICAgIGxvZyAiSW5zdGFsbGluZyBkZXBlbmRlbmN5OiAkZiIKICAgIGlmIFtbICRmID09ICoiLnRhciIqIF1dIDsgdGhlbgogICAgICAgIHRhciB4ZnogJHtiYXNlX2Rpcn0vJHtmfSAtQyAkYmFzZV9kZXBlbmRlbmN5X2RpcgogICAgZmkKZG9uZQoKIyMgU2lnbmFsCnRvdWNoICIke2Jhc2VfZGlyfS9jbG91ZExpYnNSZWFkeSIKCiMgQ3JlYXRlIHRtcCBiaWctaXEgcGFzc3dvcmQgZmlsZS4gUmVxdWlyZWQgZm9yIEF6dXJlIGJpZy1pcSBjbHVzdGVyaW5nLgppZiBbIC1uICIkYmlnaXFfcGFzc3dvcmQiIF0gOyB0aGVuCiAgICBlY2hvICdDcmVhdGluZyBiaWdpcSB0ZW1wb3JhcnkgcGFzc3dvcmQgZmlsZS4nCiAgICB0bXBfZmlsZT0nL21udC9jbG91ZFRtcC8uYmlnaXFfcGFzcycKICAgIHRtcF9kaXI9JChkaXJuYW1lICR0bXBfZmlsZSkKICAgIGNyZWF0ZV90ZW1wX2RpciAkdG1wX2RpcgogICAgZWNobyAieyBcIm1hc3RlclBhc3NwaHJhc2VcIjogXCIke2JpZ2lxX21hc3Rlcl9rZXl9XCIsXCJyb290XCI6IFwiJHtiaWdpcV9wYXNzd29yZH1cIixcImFkbWluXCI6IFwiJHtiaWdpcV9wYXNzd29yZH1cIiB9IiA+ICR0bXBfZmlsZQpmaQojIyMgUHJvdmlzaW9uIERldmljZSAjIyMKbWtkaXIgLXAgJGJhc2VfbG9nX2Rpcgpob3N0bmFtZT0iIgppZiBbWyAkY2xvdWQgPT0gImF3cyIgXV07IHRoZW4KICAgIGhvc3RuYW1lPSQoJENVUkwgLXNmIC0tcmV0cnkgMjAgaHR0cDovLzE2OS4yNTQuMTY5LjI1NC9sYXRlc3QvbWV0YS1kYXRhL2hvc3RuYW1lKQplbGlmIFtbICRjbG91ZCA9PSAiYXp1cmUiIF1dOyB0aGVuCiAgICBtZXRhZGF0YT0kKCRDVVJMIC1IIE1ldGFkYXRhOnRydWUgImh0dHA6Ly8xNjkuMjU0LjE2OS4yNTQvbWV0YWRhdGEvaW5zdGFuY2UvY29tcHV0ZT9hcGktdmVyc2lvbj0yMDE3LTEyLTAxIikKICAgIGhvc3RuYW1lPSQoZWNobyAke21ldGFkYXRhfSB8IGpxIC5uYW1lIC0tcmF3LW91dHB1dCkKICAgIGhvc3RuYW1lKz0iLiIKICAgIGhvc3RuYW1lKz0kKGVjaG8gJHttZXRhZGF0YX0gfCBqcSAubG9jYXRpb24gLS1yYXctb3V0cHV0KQogICAgaG9zdG5hbWUrPSIuY2xvdWRhcHAuYXp1cmUuY29tIgpmaQpob3N0PSJsb2NhbGhvc3QiCnNlcGFyYXRvcj0iOyIKCiMgQ291bGQgdXNlIGEgZ2VuZXJpYyAtLW9uYm9hcmR8LS1uZXR3b3JrfGV0YyBmb3Igb3B0aW9uYWwgYXJndW1lbnRzCiMgaW5zdGVhZCwgYXQgbGVhc3QgZm9yIG5vdyBpbXBsZW1lbnQgdGhlIGFkZGl0aW9uYWwgYWJzdHJhY3Rpb24KCiMjIE9uYm9hcmQKb25ib2FyZF9hcmdzPSIiCmlmIFsgLW4gIiRjbG91ZCIgXSA7IHRoZW4gb25ib2FyZF9hcmdzKz0iLS1jbG91ZCAke2Nsb3VkfSAiIDsgZmkKaWYgWyAtbiAiJGxpY2Vuc2UiIF0gOyB0aGVuIG9uYm9hcmRfYXJncys9Ii0tbGljZW5zZSAke2xpY2Vuc2V9ICIgOyBmaQppZiBbIC1uICIkbnRwIiBdIDsgdGhlbiBvbmJvYXJkX2FyZ3MrPSItLW50cCAke250cH0gIiA7IGZpCmlmIFsgLW4gIiR0aW1lem9uZSIgXSA7IHRoZW4gb25ib2FyZF9hcmdzKz0iLS10eiAke3RpbWV6b25lfSAiIDsgZmkKaWYgWyAtbiAiJGxpY2Vuc2VfcG9vbCIgXSA7IHRoZW4KICAgICMgQ2hlY2sgZm9yIG11bGl0aXBsZSBsaWNlbnNlIHBvb2xzCiAgICBPSUZTPSRJRlMKICAgIElGUz0iLCI7CiAgICBsaWNlbnNlQXJyYXk9KCRsaWNlbnNlX3Bvb2wpOwogICAgZm9yIGkgaW4gJHtsaWNlbnNlQXJyYXlbQF19OyBkbwogICAgICAgIGZsYWc9JyAtLWNyZWF0ZS1saWNlbnNlLXBvb2wgJwogICAgICAgIGNhdF9hcmdzPSIke2NhdF9hcmdzfSR7ZmxhZ30kaSIKICAgIGRvbmUKICAgIElGUz0kT0lGUzsKICAgIG9uYm9hcmRfYXJncys9IiR7Y2F0X2FyZ3N9ICIgOyBmaQoKaWYgWyAtbiAiJHJlZ19rZXlfcG9vbCIgXSA7IHRoZW4gb25ib2FyZF9hcmdzKz0iLS1jcmVhdGUtcmVnLWtleS1wb29sICR7cmVnX2tleV9wb29sfSAiIDsgZmkKCmlmIFtbICRjbG91ZCA9PSAiYXdzIiBdXTsgdGhlbgogICAgaWYgWyAtbiAiJGRhdGFfaW50ZXJmYWNlIiBdIDsgdGhlbiBvbmJvYXJkX2FyZ3MrPSItLWRucyAkKGdldF9uZXRfaW5mbyAkZGF0YV9pbnRlcmZhY2UgbnMpICIgOyBmaQplbGlmIFtbICRjbG91ZCA9PSAiYXp1cmUiIF1dOyB0aGVuCiAgICBpZiBbIC1uICIkZGF0YV9pbnRlcmZhY2UiIF0gOyB0aGVuIG9uYm9hcmRfYXJncys9Ii0tZG5zIDE2OC42My4xMjkuMTYgIiA7IGZpCmZpCgppZiBbWyAiJChnZXRfdmVyc2lvbikiID09ICJiaWctaXEiICYmIC1uICIkcGFzc3dvcmRfZGF0YV91cmkiIF1dOyB0aGVuCiAgICBvbmJvYXJkX2FyZ3MrPSItLWJpZy1pcS1wYXNzd29yZC1kYXRhLXVyaSAke3Bhc3N3b3JkX2RhdGFfdXJpfSAiCmVsaWYgW1sgIiQoZ2V0X3ZlcnNpb24pIiA9PSAiYmlnLWlxIiBdXTsgdGhlbgogICAgb25ib2FyZF9hcmdzKz0iLS1zZXQtbWFzdGVyLWtleSAiCmZpCgppZiBbIC1uICIkdXNhZ2VfYW5hbHl0aWNzIiBdIDsgdGhlbgogICAgbz0kKGpzb25pZnkgJHVzYWdlX2FuYWx5dGljcykKICAgICMgT2JmdXNjYXRlIHNlbnNpdGl2ZSBpbmZvcm1hdGlvbgogICAgY0k9JChlY2hvICQoZ2V0X3ZhbCAiJG8iIGNJKSB8IHNoYTUxMnN1bSB8IGN1dCAtZCAiICIgLWYgMSkKICAgIGRJPSQoZWNobyAkKGdldF92YWwgIiRvIiBkSSkgfCBzaGE1MTJzdW0gfCBjdXQgLWQgIiAiIC1mIDEpCiAgICBtZXRyaWNzKz0iY2xvdWROYW1lOiQoZ2V0X3ZhbCAiJG8iIGNOKSxyZWdpb246JChnZXRfdmFsICIkbyIgciksY3VzdG9tZXJJZDoke2NJfSIKICAgIG1ldHJpY3MrPSIsZGVwbG95bWVudElkOiR7ZEl9LGxpY2Vuc2VUeXBlOiQoZ2V0X3ZhbCAiJG8iIGxUKSxiaWdJcFZlcnNpb246JChnZXRfdmFsICIkbyIgYklWKSIKICAgIG1ldHJpY3MrPSIsdGVtcGxhdGVOYW1lOiQoZ2V0X3ZhbCAiJG8iIHROKSx0ZW1wbGF0ZVZlcnNpb246JChnZXRfdmFsICIkbyIgdFYpICIKICAgIHNlbmRfYW5hbHl0aWNzPSQoZ2V0X3ZhbCAiJG8iIHNlbmQpCiAgICBpZiBbWyAiJHtzZW5kX2FuYWx5dGljcywsfSIgPT0gInllcyIgXV0gOyB0aGVuIG9uYm9hcmRfYXJncys9Ii0tbWV0cmljcyAkbWV0cmljcyAiIDsgZmkKZmkKCiROT0RFICIke2Jhc2VfZGVwZW5kZW5jeV9kaXJ9L2Y1LWNsb3VkLWxpYnMvc2NyaXB0cy9vbmJvYXJkLmpzIiAtLWhvc3QgJGhvc3QgLS1sb2ctbGV2ZWwgJGxvZ19sZXZlbCBcCiAgICAtLW91dHB1dCAiJHtiYXNlX2xvZ19kaXJ9L29uYm9hcmQubG9nIiAtLXNpZ25hbCBPTkJPQVJEX0RPTkUgLS1ob3N0bmFtZSAkaG9zdG5hbWUgJG9uYm9hcmRfYXJncyAmPj4gJHtiYXNlX2xvZ19kaXJ9L2luc3RhbGwubG9nCgojIFRPRE86IFJhY2UgY29uZGl0aW9uIGJldHdlZW4gb25ib2FyZC9uZXR3b3JrIC0gVXNpbmcgYXV0aCB0b2tlbiByZXN1bHRzIGluIDQwMyAibm90IGF1dGhvcml6ZWQiCiMgaWYgbmV0d29yayBjYWxsIGltbWVkaWF0ZWx5IGZvbGxvd3Mgb25ib2FyZC4gIFVzZSBmb2xsb3dpbmcgcGxhY2Vob2xkZXIgdW50aWwgZml4ZWQgaW4gZjUtY2xvdWQtbGlicwojIGFkZGluZyAtLXdhaXQtZm9yIHNpZ25hbCBmb3IgbmV0d29yayBjYWxsLgp3YWl0X3RpbWU9MzAKbG9nICJXYWl0aW5nOiAkd2FpdF90aW1lIgpzbGVlcCAkd2FpdF90aW1lCgojIyBOZXR3b3JrCmVjaG8gIkNvbmZpZ3VyaW5nIG5ldHdvcmsuLi4iCm5ldHdvcmtfYXJncz0iIgppZiBbIC1uICIkZGF0YV9pbnRlcmZhY2UiIF0gOyB0aGVuIG5ldHdvcmtfYXJncys9Ii0tZGVmYXVsdC1ndyAkKGdldF9uZXRfaW5mbyAkZGF0YV9pbnRlcmZhY2UgZ3cpICIgOyBmaQppZiBbIC1uICIkdmxhbiIgXSA7IHRoZW4KICAgIGZvciBpIGluICQoZWNobyAkdmxhbiB8IHRyICIkc2VwYXJhdG9yIiAnICcpIDsgZG8KICAgICAgICBvPSQoanNvbmlmeSAkaSkKICAgICAgICBuZXR3b3JrX2FyZ3MrPSItLXZsYW4gbmFtZTokKGdldF92YWwgIiRvIiBuKSxuaWM6JChnZXRfdmFsICIkbyIgbmljKSAiCiAgICBkb25lCmZpCmlmIFsgLW4gIiRzZWxmX2lwIiBdIDsgdGhlbgogICAgZm9yIGkgaW4gJChlY2hvICRzZWxmX2lwIHwgdHIgIiRzZXBhcmF0b3IiICcgJykgOyBkbwogICAgICAgIG89JChqc29uaWZ5ICRpKQogICAgICAgIGd3PSQoZ2V0X25ldF9pbmZvICQoZ2V0X3ZhbCAiJG8iIGkpIGd3IGNpZHIpCiAgICAgICAgbmV0d29ya19hcmdzKz0iLS1zZWxmLWlwIG5hbWU6JChnZXRfdmFsICIkbyIgbiksYWRkcmVzczokKGdldF92YWwgIiRvIiBhKS8ke2d3IyovfSx2bGFuOiQoZ2V0X3ZhbCAiJG8iIHYpICIKICAgIGRvbmUKZmkKaWYgWyAtbiAiJGRpc2NvdmVyeV9hZGRyZXNzIiBdIDsgdGhlbgogICAgbmV0d29ya19hcmdzKz0iLS1kaXNjb3ZlcnktYWRkcmVzcyAke2Rpc2NvdmVyeV9hZGRyZXNzfSIKZmkKJE5PREUgIiR7YmFzZV9kZXBlbmRlbmN5X2Rpcn0vZjUtY2xvdWQtbGlicy9zY3JpcHRzL25ldHdvcmsuanMiIC0taG9zdCAkaG9zdCAtLWxvZy1sZXZlbCAkbG9nX2xldmVsIFwKICAgIC0tb3V0cHV0ICIke2Jhc2VfbG9nX2Rpcn0vbmV0d29yay5sb2ciIC0td2FpdC1mb3IgT05CT0FSRF9ET05FIC0tc2lnbmFsIE5FVFdPUktfRE9ORSAkbmV0d29ya19hcmdzICY+PiAke2Jhc2VfbG9nX2Rpcn0vaW5zdGFsbC5sb2cKCiMjIEFkZCByb3V0ZSB0byBJbnN0YW5jZSBNZXRhZGF0YSBzZXJ2aWNlCiMgQWxsb3cgc3lzdGVtIHRvIHVzZSBJUHY0IGxpbmstbG9jYWwgYWRkcmVzc2VzIGluIG5ldHdvcmsgcm91dGVzCnRtc2ggbW9kaWZ5IHN5cyBkYiBjb25maWcuYWxsb3cucmZjMzkyNyB2YWx1ZSBlbmFibGUKCiMgQWRkIHJvdXRlIHRvIE1ldGFkYXRhIHNlcnZpY2UKZ2F0ZXdheT0kKHRtc2ggbGlzdCBzeXMgbWFuYWdlbWVudC1yb3V0ZSBnYXRld2F5IHwgZ3JlcCBnYXRld2F5IHwgaGVhZCAtbiAxIHwgYXdrICd7cHJpbnQgJDJ9JykKdG1zaCBjcmVhdGUgc3lzIG1hbmFnZW1lbnQtcm91dGUgbWV0YWRhdGEgbmV0d29yayAxNjkuMjU0LjE2OS4yNTQvMzIgZ2F0ZXdheSAkZ2F0ZXdheQoKIyMgQ2x1c3RlcgppZiBbWyAtbiAiJG1hc3RlciIgJiYgLW4gIiRiaWdfaXFfZmFpbG92ZXJfcGVlcl9pcCIgXV0gOyB0aGVuCiAgICBlY2hvICJDb25maWd1cmluZyBjbHVzdGVyLi4uIgogICAgY2x1c3Rlcl9hcmdzPSItLWNsb3VkICRjbG91ZCAtLW1hc3RlciAtLWJpZy1pcS1mYWlsb3Zlci1wZWVyLWlwICRiaWdfaXFfZmFpbG92ZXJfcGVlcl9pcCIKICAgIGlmIFsgLW4gIiRwYXNzd29yZF9kYXRhX3VyaSIgXSA7IHRoZW4KICAgICAgICBjbHVzdGVyX2FyZ3MrPSIgLS1iaWctaXEtcGFzc3dvcmQtZGF0YS11cmkgJHBhc3N3b3JkX2RhdGFfdXJpICIKICAgIGZpCiAgICAkTk9ERSAiJHtiYXNlX2RlcGVuZGVuY3lfZGlyfS9mNS1jbG91ZC1saWJzL3NjcmlwdHMvY2x1c3Rlci5qcyIgLS1ob3N0ICRob3N0IC0tbG9nLWxldmVsICRsb2dfbGV2ZWwgXAogICAgICAgIC0tb3V0cHV0ICIke2Jhc2VfbG9nX2Rpcn0vY2x1c3Rlci5sb2ciIC0tdXNlciBhZG1pbiAkY2x1c3Rlcl9hcmdzICY+PiAke2Jhc2VfbG9nX2Rpcn0vaW5zdGFsbC5sb2cKZmkKCiMgRmFpbG92ZXIKIyBPbmx5IHBlcmZvcm0gZmFpbG92ZXIgZm9yIGNsdXN0ZXIgc29sdXRpb24KaWYgW1sgLW4gIiR0YWdfdmFsdWUiIF1dIDsgdGhlbgogICAgZmFpbG92ZXJfYXJncz0iLS1sb2ctbGV2ZWwgJGxvZ19sZXZlbCAtLWxvZy1maWxlIC92YXIvbG9nL2Nsb3VkLyRjbG91ZC9mYWlsb3Zlci5sb2cgLS10YWcta2V5IGY1X2RlcGxveW1lbnQgIgogICAgZmFpbG92ZXJfYXJncys9Ii0tdGFnLXZhbHVlICR0YWdfdmFsdWUgIgoKICAgIGlmIFtbICRjbG91ZCA9PSAiYXdzIiBdXTsgdGhlbgogICAgICAgIGlmIFsgLW4gIiR2aXBfYWxsb2NhdGlvbl9pZCIgXSA7IHRoZW4KICAgICAgICBmYWlsb3Zlcl9hcmdzKz0iLS12aXAtYWxsb2NhdGlvbi1pZCAkdmlwX2FsbG9jYXRpb25faWQgIgogICAgICAgIGZpCgogICAgICAgIGlmIFsgLW4gIiRwcml2YXRlX2lwIiBdIDsgdGhlbgogICAgICAgICAgICBmYWlsb3Zlcl9hcmdzKz0iLS1wcml2YXRlLWlwICRwcml2YXRlX2lwICIKICAgICAgICBmaQoKICAgICAgICBpZiBbIC1uICIkYXNzb2NpYXRlX2VuaSIgXSA7IHRoZW4KICAgICAgICAgICAgZmFpbG92ZXJfYXJncys9Ii0tYXNzb2NpYXRlLWVuaSAkYXNzb2NpYXRlX2VuaSAiCiAgICAgICAgZmkKCiAgICAgICAgaWYgWyAtbiAiJHBhc3N3b3JkX2RhdGFfdXJpIiBdIDsgdGhlbgogICAgICAgICAgICBmYWlsb3Zlcl9hcmdzKz0iLS1wYXNzd29yZC11cmkgJHBhc3N3b3JkX2RhdGFfdXJpICIKICAgICAgICBmaQogICAgZmkKCiAgICAjIEF6dXJlIG5lZWRzIGV4dHJhIGNhcmVzOiBhZnRlciBjbHVzdGVyaW5nIGlzIGRvbmUsIGJpZ2lxIHRtcCBwYXNzd29yZCBmaWxlIHdpbGwgYmUgZGVsZXRlZCwgd2UgbmVlZCBiaWdpcSBwYXNzd29yZAogICAgIyB0byBwZXJmb3JtIGZhaWxvdmVyCiAgICBpZiBbWyAkY2xvdWQgPT0gImF6dXJlIiBdXTsgdGhlbgogICAgICAgIGlmIFsgLW4gIiRiaWdpcV9wYXNzd29yZCIgXSA7IHRoZW4KICAgICAgICAgICAgIyMgSWYgY3JlYXRlZCwgcmVtb3ZlIGJpZ2lxIHRtcCBwYXNzd29yZCBmaWxlCiAgICAgICAgICAgIHRtcF9maWxlPScvbW50L2Nsb3VkVG1wLy5iaWdpcV9wYXNzJwogICAgICAgICAgICB0bXBfZGlyPSQoZGlybmFtZSAkdG1wX2ZpbGUpCiAgICAgICAgICAgIHdpcGVfdGVtcF9kaXIgJHRtcF9kaXIKICAgICAgICAgICAgZWNobyAnRGVsZXRpbmcgYmlnaXEgdGVtcG9yYXJ5IHBhc3N3b3JkIGZpbGUuJwogICAgICAgICAgICAjIFVzZSBiaWdpcSBwYXNzd29yZCBmb3IgZmFpbG92ZXIgc2NyaXB0CiAgICAgICAgICAgIGZhaWxvdmVyX2FyZ3MrPSItLXBhc3N3b3JkLWRhdGEgJGJpZ2lxX3Bhc3N3b3JkICIKICAgICAgICBmaQogICAgICAgIGlmIFsgLW4gIiRhc3NvY2lhdGVfaW50ZiIgXSA7IHRoZW4KICAgICAgICBmYWlsb3Zlcl9hcmdzKz0iLS1hc3NvY2lhdGUtaW50ZiAkYXNzb2NpYXRlX2ludGYgIgogICAgICAgIGZpCgogICAgICAgIGlmIFsgLW4gIiRkaXNzb2NpYXRlX2ludGYiIF0gOyB0aGVuCiAgICAgICAgICAgIGZhaWxvdmVyX2FyZ3MrPSItLWRpc3NvY2lhdGUtaW50ZiAkZGlzc29jaWF0ZV9pbnRmICIKICAgICAgICBmaQogICAgZmkKCiAgICAjIyBNYWtlIHN1cmUgdGhlIHNlY29uZGFyeSBwcml2YXRlIElQIGFkZHJlc3MgaXMgYSBTZWxmIElQCiAgICB0bXNoIGxpc3QgbmV0IHNlbGYgfCBncmVwICIkcHJpdmF0ZV9pcCIKICAgIGlmIFtbICQ/ICE9IDAgXV07IHRoZW4KICAgICAgICB0bXNoIGNyZWF0ZSBuZXQgc2VsZiBsaWNfbWFuYWdlciB2bGFuIGludGVybmFsIGFsbG93LXNlcnZpY2UgZGVmYXVsdCBhZGRyZXNzICR7cHJpdmF0ZV9pcH0vMzIKICAgIGVsc2UKICAgICAgICBlY2hvICJBcHBlYXJzICRwcml2YXRlX2lwIGlzIGFscmVhZHkgYSBTZWxmIElQIgogICAgZmkKCiAgICAjIyBDcmVhdGUgaUNhbGwgc2NyaXB0IGFuZCBoYW5kbGVyIHRvIGhhbmRsZSBmYWlsb3ZlcgogICAgZmFpbG92ZXJfc2NyaXB0X2xvYz0iL2NvbmZpZy9jbG91ZC8ke2Nsb3VkfS9ub2RlX21vZHVsZXMvQGY1ZGV2Y2VudHJhbC9mNS1jbG91ZC1saWJzLSR7Y2xvdWR9L3NjcmlwdHMvZmFpbG92ZXIuanMiCiAgICBpY2FsbF9oYW5kbGVyX25hbWU9IkZhaWxvdmVySGFuZGxlciIKICAgIGljYWxsX3NjcmlwdF9uYW1lPSJGYWlsb3ZlckNvbGxlY3RvciIKICAgICMjIEZpcnN0IGNoZWNrIGlmIGlDYWxsIGFscmVhZHkgZXhpc3RzCiAgICB0bXNoIGxpc3Qgc3lzIGljYWxsIGhhbmRsZXIgfCBncmVwICRpY2FsbF9oYW5kbGVyX25hbWUKICAgIGlmIFtbICQ/ICE9IDAgXV07IHRoZW4KICAgICAgICB0bXNoIGNyZWF0ZSBzeXMgaWNhbGwgc2NyaXB0ICRpY2FsbF9zY3JpcHRfbmFtZSBkZWZpbml0aW9uIHsgaWYgeyBbY2F0Y2gge3NldCBpc19mYWlsb3Zlcl9ydW5uaW5nIFtleGVjIHBncmVwIC1mICAiJGZhaWxvdmVyX3NjcmlwdF9sb2MiXX1dIH0geyBleGVjIG5vZGUgJGZhaWxvdmVyX3NjcmlwdF9sb2MgJGZhaWxvdmVyX2FyZ3MgfSBlbHNlIHsgcHV0cyAiJGljYWxsX3NjcmlwdF9uYW1lIGlzIGFscmVhZHkgcnVubmluZyB3aXRoIFBJRCAkaXNfZmFpbG92ZXJfcnVubmluZyIgfSB9CiAgICAgICAgdG1zaCBjcmVhdGUgc3lzIGljYWxsIGhhbmRsZXIgcGVyaW9kaWMgL0NvbW1vbi8kaWNhbGxfaGFuZGxlcl9uYW1lIHsgZmlyc3Qtb2NjdXJyZW5jZSBub3cgaW50ZXJ2YWwgNjAgc2NyaXB0IC9Db21tb24vJGljYWxsX3NjcmlwdF9uYW1lIH0KICAgIGVsc2UKICAgICAgICBlY2hvICJBcHBlYXJzIHRoZSAkaWNhbGxfaGFuZGxlcl9uYW1lIGljYWxsIGFscmVhZHkgZXhpc3RzISIKICAgIGZpCmZpCgp0bXNoIHNhdmUgc3lzIGNvbmZpZw==",
+        "location": "[resourceGroup().location]",
+        "adminPassword": "[replace(parameters('adminPassword'),'\\n', '\n')]",
         "Owner": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]",
         "Contributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
         "Reader": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
-        "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n", 
-        "installCustomConfig": "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]"
-    }, 
+        "initScript": "IyEvYmluL2Jhc2gKCiMjIyBDb25maWd1cmUgZGVmYXVsdCB2YWx1ZXMKbG9nX2xldmVsPSJpbmZvIgpoZWxwPWZhbHNlCnNraXBfdmVyaWZ5PWZhbHNlCnNjcmlwdF9kaXI9JChkaXJuYW1lICQwKQoKClRNU0g9L3Vzci9iaW4vdG1zaApDVVJMPS91c3IvYmluL2N1cmwKTk9ERT0vdXNyL2Jpbi9ub2RlCk1LRElSPS9iaW4vbWtkaXIKTU9VTlQ9L2Jpbi9tb3VudApSTURJUj0vYmluL3JtZGlyClVNT1VOVD0vYmluL3Vtb3VudAoKIyMjIEZ1bmN0aW9ucyAtIFRoZXNlIHNob3VsZCBnbyBpbnRvIHNlcGVyYXRlIGZpbGUocykKIyB1c2FnZTogbG9nIG1lc3NhZ2UKZnVuY3Rpb24gbG9nKCkgewogICAgZWNobyAiJChkYXRlICcrJVktJW0tJWRUJUg6JU06JVNaJyk6ICQxIgp9CiMgdXNhZ2U6IGdldF92ZXJzaW9uCmZ1bmN0aW9uIGdldF92ZXJzaW9uKCkgewogICAgcmV0PSQoJFRNU0ggc2hvdyBzeXMgdmVyc2lvbiB8IGdyZXAgLWkgcHJvZHVjdCB8IGF3ayAne3ByaW50ICQyfScpCiAgICBlY2hvICR7cmV0LCx9Cn0KIyB1c2FnZToganNvbmlmeSBrZXk6dmFsdWUsa2V5MTp2YWx1ZTEKZnVuY3Rpb24ganNvbmlmeSgpIHsKICAgIGxpc3Q9JChlY2hvICQxIHwgdHIgJywnICcgJykKICAgIGpzb249J3t9JwogICAgZm9yIGkgaW4gJGxpc3QgOyBkbwogICAgICAgIGt2PSgkKGVjaG8gJGkgfCB0ciAnOicgJyAnKSkKICAgICAgICBqc29uPSQoZWNobyAkanNvbiB8IGpxIC0tYXJnIGsgJHtrdlswXX0gLS1hcmcgdiAke2t2WzFdfSAnLiB8IC5bJGtdPSR2JykKICAgIGRvbmUKICAgIGVjaG8gJGpzb24KfQojIHVzYWdlOiBnZXRfdmFsIGpzb25fb2JqZWN0IGtleQpmdW5jdGlvbiBnZXRfdmFsKCkgewogICAgcmV0PSQoZWNobyAkMSB8IGpxIC4kMiAtcikKICAgIGVjaG8gJHJldAp9CiMgdXNhZ2U6IG1ha2Ugc3VyZSB0aGVyZSBpcyBpbnRlcm5ldCBjb25uZWN0aW9uIHRvIEdpdEh1YgpmdW5jdGlvbiBjaGVja19pbnRlcm5ldF9jb25uZWN0aW9uIHsKICAgIGVjaG8gIi0tLSBDaGVja2luZyBHaXRodWIgc3RhdHVzIC0tLSIKICAgIGNoZWNrcz0wCiAgICBnaXRodWJfcmVzcG9uc2U9ImJhZCIKICAgIHdoaWxlIFsgJGNoZWNrcyAtbHQgMTIwIF0gOyBkbwogICAgICAgIGdpdGh1Yl9yZXNwb25zZT1gY3VybCBodHRwczovL3d3dy5naXRodWJzdGF0dXMuY29tL2FwaS92Mi9zdGF0dXMuanNvbiB8IGpxIC5zdGF0dXMuZGVzY3JpcHRpb24gLS1yYXctb3V0cHV0YAogICAgICAgIGlmIFsgIiRnaXRodWJfcmVzcG9uc2UiID09ICJBbGwgU3lzdGVtcyBPcGVyYXRpb25hbCIgXTsgdGhlbgogICAgICAgICAgICBsb2cgIkdpdEh1YiBpcyByZWFkeSIKICAgICAgICAgICAgYnJlYWsKICAgICAgICBmaQogICAgICAgIGxvZyAiR2l0SHViIG5vdCByZWFkeTogJGNoZWNrcyIKICAgICAgICBsZXQgY2hlY2tzPWNoZWNrcysxCiAgICAgICAgc2xlZXAgNQogICAgZG9uZQogICAgaWYgWyAiJGdpdGh1Yl9yZXNwb25zZSIgPT0gImJhZCIgXTsgdGhlbgogICAgICAgIGxvZyAiTm8gR2l0SHViIGludGVybmV0IGNvbm5lY3Rpb24uIgogICAgICAgIGV4aXQKICAgIGZpCn0KIyB1c2FnZTogbWNwX3J1bm5pbmcKZnVuY3Rpb24gbWNwX3J1bm5pbmcgewogICAgY2hlY2tzPTAKICAgIHdoaWxlIFsgJGNoZWNrcyAtbHQgMTIwIF0gOyBkbwogICAgICAgICRUTVNIIC1hIHNob3cgc3lzIG1jcC1zdGF0ZSBmaWVsZC1mbXQgfCBncmVwIC1xIHJ1bm5pbmcKICAgICAgICBpZiBbICQ/ID09IDAgXTsgdGhlbgogICAgICAgICAgICBsb2cgIk1DUEQgcmVhZHkiCiAgICAgICAgICAgIGJyZWFrCiAgICAgICAgZmkKICAgICAgICBsb2cgIk1DUEQgbm90IHJlYWR5OiAkY2hlY2tzIgogICAgICAgIGxldCBjaGVja3M9Y2hlY2tzKzEKICAgICAgICBzbGVlcCA1CiAgICBkb25lCn0KIyB1c2FnZTogRG93bmxvYWQgZnJvbSBHaXRodWIgdW50aWwgc3VjY2Vzc2Z1bAojCiMgJDE6IG91dHB1dCBmaWxlIG5hbWUKIyAkMjogVVJMCmZ1bmN0aW9uIHNhZmVfZG93bmxvYWQgewogICAgY2hlY2tzPTAKICAgIHdoaWxlIFsgJGNoZWNrcyAtbHQgMTIwIF0gOyBkbwogICAgICAgICRDVVJMIC0tZmFpbCAtLXJldHJ5IDIwIC0tcmV0cnktZGVsYXkgNSAtLXJldHJ5LW1heC10aW1lIDI0MCAtbyAkMSAkMiAmJiBicmVhawogICAgICAgIGxldCBjaGVja3M9Y2hlY2tzKzEKICAgICAgICBzbGVlcCA1CiAgICBkb25lCn0KIyB1c2FnZTogYmFzZV9jb25maWdfYXZhaWxhYmxlIC0gcmVzb2x2ZXMgaXNzdWUgZm91bmQgaW4gNi4wLjAgdmVyc2lvbnMgb2YgYmlnLWlxCmZ1bmN0aW9uIGJhc2VfY29uZmlnX2F2YWlsYWJsZSB7CiAgICBjaGVja3M9MAogICAgd2hpbGUgWyAkY2hlY2tzIC1sdCAxMjAgXSA7IGRvCiAgICAgICAgJFRNU0ggLWEgc2hvdyBzeXMgbWNwLXN0YXRlIGZpZWxkLWZtdCB8IGdyZXAgLXEgcnVubmluZwogICAgICAgIGlmIFsgLWYgL2NvbmZpZy9iaWdpcF9iYXNlLmNvbmYgXTsgdGhlbgogICAgICAgICAgICBsb2cgIkJhc2UgQ29uZmlnIGZpbGUgcHJlc2VudDsgc2F2aW5nIGNvbmZpZyIKICAgICAgICAgICAgdG1zaCBzYXZlIHN5cyBjb25maWcKICAgICAgICAgICAgY2F0IC9jb25maWcvYmlnaXBfYmFzZS5jb25mCiAgICAgICAgICAgIGJyZWFrCiAgICAgICAgZmkKICAgICAgICBsb2cgIkJhc2UgY29uZmlnIGZpbGUgbm90IHlldCBwcmVzZW50OiAkY2hlY2tzIgogICAgICAgIGxldCBjaGVja3M9Y2hlY2tzKzEKICAgICAgICBzbGVlcCA1CiAgICBkb25lCn0KIyB1c2FnZTogZ2V0X25ldF9pbmZvIGV0aDAgbnN8Z3cgaW5jbHVkZV9jaWRyCmZ1bmN0aW9uIGdldF9uZXRfaW5mbygpIHsKICAgIFJFVD0iIgogICAgQ0lEUl9CTE9DSz0iIgogICAgaWYgW1sgJGNsb3VkID09ICJhenVyZSIgXV07IHRoZW4KICAgICAgICBhZGRfaW50PTEKICAgICAgICBJRl9NQUM9JChpZmNvbmZpZyAkMSB8IGdyZXAgLWkgaHdhZGRyIHwgYXdrICd7cHJpbnQgJDV9JyB8IHNlZCAncy86Ly9nJykKICAgICAgICBJRl9JTkZPPSQoY3VybCAtc2YgLS1yZXRyeSAyMCBjdXJsIC1IIE1ldGFkYXRhOnRydWUgImh0dHA6Ly8xNjkuMjU0LjE2OS4yNTQvbWV0YWRhdGEvaW5zdGFuY2UvbmV0d29yay9pbnRlcmZhY2U/YXBpLXZlcnNpb249MjAxNy0wOC0wMSIgfCBqcSAnLltdIHwgc2VsZWN0KC5tYWNBZGRyZXNzPT0iJyR7SUZfTUFDfSciKScpCiAgICAgICAgQ0lEUl9CTE9DSz0kKGVjaG8gJHtJRl9JTkZPfSB8IGpxIC5pcHY0LnN1Ym5ldFswXS5hZGRyZXNzIC0tcmF3LW91dHB1dCkKICAgICAgICBDSURSX0JMT0NLKz0iLyIKICAgICAgICBDSURSX0JMT0NLKz0kKGVjaG8gJHtJRl9JTkZPfSB8IGpxIC5pcHY0LnN1Ym5ldFswXS5wcmVmaXggLS1yYXctb3V0cHV0KQogICAgZWxpZiBbWyAkY2xvdWQgPT0gImF3cyIgXV07IHRoZW4KICAgICAgICBjaWRyX2Jsb2NrX3VyaT0idnBjLWlwdjQtY2lkci1ibG9jayIKICAgICAgICBhZGRfaW50PTIKICAgICAgICAjIElmIGdldHRpbmcgZ2F0ZXdheSwgdXBkYXRlIG5lY2Vzc2FyeSB2YXJzCiAgICAgICAgaWYgW1sgJDIgPT0gImd3IiBdXSA7IHRoZW4gY2lkcl9ibG9ja191cmk9InN1Ym5ldC1pcHY0LWNpZHItYmxvY2siIDsgYWRkX2ludD0xIDsgZmkKICAgICAgICBJRl9NQUM9JChpZmNvbmZpZyAkMSB8IGdyZXAgLWkgaHdhZGRyIHwgYXdrICd7cHJpbnQgdG9sb3dlcigkNSl9JykKICAgICAgICBDSURSX0JMT0NLPSQoY3VybCAtc2YgLS1yZXRyeSAyMCBodHRwOi8vMTY5LjI1NC4xNjkuMjU0L2xhdGVzdC9tZXRhLWRhdGEvbmV0d29yay9pbnRlcmZhY2VzL21hY3MvJHtJRl9NQUN9LyR7Y2lkcl9ibG9ja191cml9KQogICAgZmkKICAgIFJFVD0kKGVjaG8gJHtDSURSX0JMT0NLJS8qfSB8IGF3ayAtRi4gJ3sgcHJpbnRmICIlZC4lZC4lZC4lZCIsICQxLCAkMiwgJDMsICQ0Kycke2FkZF9pbnR9JyB9JykKICAgICMgSW5jbHVkZSBtYXNrIGluIHJlc3BvbnNlIGlmIHJlcXVlc3RlZAogICAgaWYgW1sgLW4gIiQzIiBdXSA7IHRoZW4gZWNobyAke1JFVH0vJHtDSURSX0JMT0NLIyovfSA7IGVsc2UgZWNobyAkUkVUIDsgZmkKfQojIGNyZWF0ZXMgYSBkaXJlY3RvcnkgZm9yIGluLW1lbW9yeSBmaWxlcwojIHVzYWdlOiBjcmVhdGVfdGVtcF9kaXIgbmFtZSBzaXplCmZ1bmN0aW9uIGNyZWF0ZV90ZW1wX2RpcigpIHsKICAgICRNS0RJUiAiJDEiCiAgICAkTU9VTlQgLXQgdG1wZnMgLW8gc2l6ZT0iJDIiLG1vZGU9MTcwMCB0bXBmcyAiJDEiCn0KIyB1c2FnZTogcmVtb3ZlX3RlbXBfZGlyIG5hbWUKZnVuY3Rpb24gcmVtb3ZlX3RlbXBfZGlyKCkgewogICAgJFVNT1VOVCAiJDEiCiAgICAkUk1ESVIgIiQxIgp9CiMgdXNhZ2U6IHdpcGVfdGVtcF9kaXIgbmFtZQpmdW5jdGlvbiB3aXBlX3RlbXBfZGlyKCkgewogICAgRklMRVM9JChscyAtMSAiJDEiKQoKICAgIGZvciBmIGluICRGSUxFUzsgZG8KICAgICAgICBzaHJlZCAtLXJlbW92ZSAiJHsxfS8ke2Z9IgogICAgZG9uZQoKICAgIHJlbW92ZV90ZW1wX2RpciAiJDEiCn0KCnJlYWQgLXIgLWQgJycgVVNBR0UgPDwgRU9NCiAgICBVc2FnZTogJDAKICAgICAgICAtLWhlbHAgICAgICAgICAgICAgICAgICAgICAgUHJpbnQgdXNhZ2UgbWVzc2FnZSBhbmQgZXhpdAogICAgICAgIC0tbG9nLWxldmVsIDxzdHJpbmc+ICAgICAgICBMZXZlbCBvZiBsb2dnaW5nIGRlc2lyZWQ6IGVycm9yLCB3YXJuLCBpbmZvLCBkZWJ1ZwogICAgICAgIC0tY2xvdWQgPHN0cmluZz4gICAgICAgICAgICBDbG91ZCBlbnZpcm9ubWVudCBleGVjdXRlZCBhZ2FpbnN0OiBhd3MKICAgICAgICAtLXNraXAtdmVyaWZ5IDxzdHJpbmc+ICAgICAgU2tpcCB2ZXJpZmljYXRpb24gb2YgZGVwZW5kZW5jaWVzCiAgICAgICAgLS1saWNlbnNlIDxzdHJpbmc+ICAgICAgICAgIExpY2Vuc2UgZm9yIHRoZSBkZXZpY2UKICAgICAgICAtLW50cCA8c3RyaW5nPiAgICAgICAgICAgICAgTlRQIGZvciB0aGUgZGV2aWNlCiAgICAgICAgLS10aW1lem9uZSA8c3RyaW5nPiAgICAgICAgIFRpbWV6b25lIGZvciB0aGUgZGV2aWNlCiAgICAgICAgLS1kYXRhLWludGVyZmFjZSA8c3RyaW5nPiAgIFByaW1hcnkgaW50ZXJmYWNlIHRvIHVzZSBmb3IgZGF0YS1wbGFuZQogICAgICAgIC0tdmxhbiA8c3RyaW5nPiAgICAgICAgICAgICBWTEFOKHMpIHRvIGNyZWF0ZSBvbiB0aGUgZGV2aWNlICg7IGZvciBtdWx0aXBsZSkgJ246ZXh0LG5pYzoxLjEnCiAgICAgICAgLS1zZWxmLWlwIDxzdHJpbmc+ICAgICAgICAgIFNlbGYgSVAocykgdG8gY3JlYXRlIG9uIHRoZSBkZXZpY2UgKDsgZm9yIG11bHRpcGxlKTogJ246ZXh0LGE6eC54LngueCx2OmV4dCxpOmV0aDEnCiAgICAgICAgLS11c2FnZS1hbmFseXRpY3MgPHN0cmluZz4gIFVzYWdlIGFuYWx5dGljcyB0byBzZW5kOiAnY046dmFsLHI6dmFsLGNJOnZhbCxkSTp2YWwsbFQ6dmFsLGJJVjp2YWwsdE46dmFsLHRWOnZhbCxzZW5kOnllcycKICAgICAgICAtLWNyZWF0ZS1saWNlbnNlLXBvb2wgICAgICAgQ3JlYXRlcyBsaWNlbnNlIHBvb2wsIHNlbmQ6IG5hbWU6cmVnX2tleQogICAgICAgIC0tY3JlYXRlLXJlZy1rZXktcG9vbCAgICAgICBDcmVhdGVzIGEgcmVna2V5IHBvb2wsIHNlbmQ6IG5hbWU6cmVnX2tleV9saXN0CiAgICAgICAgLS1mY2wtdGFnICAgICAgICAgICAgICAgICAgIEY1IGNsb3VkIGxpYiB0YWcgdG8gZG93bmxvYWQgZjUtY2xvdWQtbGlicy50YXIuZ3oKICAgICAgICAtLWZjbC1jbG91ZC10YWcgICAgICAgICAgICAgRjUgc3BlY2lmaWVkIGNsb3VkIHRhZyB0byBkb3dubG9hZCBmNS1jbG91ZC1saWJzLTxjbG91ZD4udGFyLmd6CiAgICAgICAgLS1iaWctaXEtcGFzc3dvcmQgICAgICAgICAgIEJpZ2lxIHBhc3N3b3JkLCB1c2VkIHRvIG9uYm9hcmQgYmlnaXEgY2x1c3RlcnMKICAgICAgICAtLWJpZy1pcS1tYXN0ZXIta2V5ICAgICAgICAgQmlnLUlRIG1hc3RlcmtleSB1c2VkIGR1cmluZyBpbml0aXRpYWwgY29uZmlndXJhaXRvbgogICAgICAgIC0tYmlnLWlxLXBhc3N3b3JkLWRhdGEtdXJpICBVUkkgdG8gdGhlIGxvY2F0aW9uIHRoYXQgY29udGFpbnMgQklHLUlRIGFkbWluIHVzZXIgcGFzc3dvcmQKICAgICAgICAtLW1hc3RlciAgICAgICAgICAgICAgICAgICAgSW5kaWNhdGVzIHRoYXQgdGhpcyBpbnN0YW5jZSBpcyBtYXN0ZXIgKHVzZWQgaW4gQklHLUlRIGNsdXN0ZXJpbmcpIHVzZSB3aXRoIC0tYmlnLWlxLWZhaWxvdmVyLXBlZXItaXAgb3B0aW9uCiAgICAgICAgLS1iaWctaXEtZmFpbG92ZXItcGVlci1pcCAgIFRoaXMgaXMgdGhlIHByaXZhdGUgSVAgYWRkcmVzcyBmb3IgdGhlIHNlY29uZGFyeSBCSUctSVEKICAgICAgICAtLXRhZy12YWx1ZSAgICAgICAgICAgICAgICAgVGhlIHRhZyB2YWx1ZSB0byBhZGQgdG8gdGhlIEVsYXN0aWMgdmlydHVhbCBJUCBhZGRyZXNzCiAgICAgICAgLS12aXAtYWxsb2NhdGlvbi1pZCAgICAgICAgIEFsbG9jYXRpb24gSUQgb2YgdGhlIEVsYXN0aWMgdmlydHVhbCBJUCBhZGRyZXNzCiAgICAgICAgLS1wcml2YXRlLWlwICAgICAgICAgICAgICAgIFByaXZhdGUgSVAgYWRkcmVzcyBhc3NvY2lhdGVkIHdpdGggdGhlIEVsYXN0aWMgdmlydHVhbCBJUCBhZGRyZXNzCiAgICAgICAgLS1hc3NvY2lhdGUtZW5pICAgICAgICAgICAgIEVOSSBvZiB0aGUgbmV0d29yayBpbnRlcmZhY2UgdG8gYXNzb2NpYXRlIHRoZSBFbGFzdGljIHZpcnR1YWwgSVAgYWRkcmVzcyB3aXRoIGluIEFXUwogICAgICAgIC0tYXNzb2NpYXRlLWludGYgICAgICAgICAgICBOYW1lIG9mIHRoZSBuZXR3b3JrIGludGVyZmFjZSB0byBhc3NvY2lhdGUgdGhlIHZpcnR1YWwgSVAgYWRkcmVzcyB3aXRoIGluIEF6dXJlCiAgICAgICAgLS1kaXNzb2NpYXRlLWludGYgICAgICAgICAgIE5hbWUgb2YgdGhlIG5ldHdvcmsgaW50ZXJmYWNlIHRvIGRpc3NvY2lhdGUgdGhlIHZpcnR1YWwgSVAgYWRkcmVzcyBmcm9tIGluIEF6dXJlCgoKRU9NCgojIyMgUGFyc2UgY29tbWFuZCBsaW5lIGFyZ3VtZW50cwp3aGlsZSBbWyAkIyAtZ3QgMCBdXSA7IGRvCiAgICBjYXNlICIkMSIgaW4KICAgICAgICAtLWhlbHApCiAgICAgICAgICAgIGhlbHA9dHJ1ZQogICAgICAgICAgICBzaGlmdCA7OwogICAgICAgIC0tbG9nLWxldmVsKQogICAgICAgICAgICBsb2dfbGV2ZWw9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1jbG91ZCkKICAgICAgICAgICAgY2xvdWQ9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1za2lwLXZlcmlmeSkKICAgICAgICAgICAgc2tpcF92ZXJpZnk9dHJ1ZQogICAgICAgICAgICBzaGlmdCA7OwogICAgICAgIC0tbGljZW5zZSkKICAgICAgICAgICAgbGljZW5zZT0iJDIiCiAgICAgICAgICAgIHNoaWZ0IDIgOzsKICAgICAgICAtLW50cCkKICAgICAgICAgICAgbnRwPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgIC0tdGltZXpvbmUpCiAgICAgICAgICAgIHRpbWV6b25lPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgIC0tZGF0YS1pbnRlcmZhY2UpCiAgICAgICAgICAgIGRhdGFfaW50ZXJmYWNlPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgIC0tdXNhZ2UtYW5hbHl0aWNzKQogICAgICAgICAgICB1c2FnZV9hbmFseXRpY3M9IiQyIgogICAgICAgICAgICBzaGlmdCA7OwogICAgICAgIC0tdmxhbikKICAgICAgICAgICAgdmxhbj0iJDIiCiAgICAgICAgICAgIHNoaWZ0IDIgOzsKICAgICAgICAtLXNlbGYtaXApCiAgICAgICAgICAgIHNlbGZfaXA9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1kaXNjb3ZlcnktYWRkcmVzcykKICAgICAgICAgICAgZGlzY292ZXJ5X2FkZHJlc3M9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1jcmVhdGUtbGljZW5zZS1wb29sKQogICAgICAgICAgICBsaWNlbnNlX3Bvb2w9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1jcmVhdGUtcmVnLWtleS1wb29sKQogICAgICAgICAgICByZWdfa2V5X3Bvb2w9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1mY2wtdGFnKQogICAgICAgICAgICBmY2xfdGFnPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgIC0tZmNsLWNsb3VkLXRhZykKICAgICAgICAgICAgZmNsX2Nsb3VkX3RhZz0iJDIiCiAgICAgICAgICAgIHNoaWZ0IDIgOzsKICAgICAgICAtLWJpZy1pcS1wYXNzd29yZCkKICAgICAgICAgICAgYmlnaXFfcGFzc3dvcmQ9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1iaWctaXEtbWFzdGVyLWtleSkKICAgICAgICAgICAgYmlnaXFfbWFzdGVyX2tleT0iJDIiCiAgICAgICAgICAgIHNoaWZ0IDIgOzsgICAgICAgICAgICAgICAgCiAgICAgICAgLS1iaWctaXEtcGFzc3dvcmQtZGF0YS11cmkpCiAgICAgICAgICAgIHBhc3N3b3JkX2RhdGFfdXJpPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgIC0tbWFzdGVyKQogICAgICAgICAgICBtYXN0ZXI9dHJ1ZQogICAgICAgICAgICBzaGlmdCA7OwogICAgICAgIC0tYmlnLWlxLWZhaWxvdmVyLXBlZXItaXApCiAgICAgICAgICAgIGJpZ19pcV9mYWlsb3Zlcl9wZWVyX2lwPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgIC0tdGFnLXZhbHVlKQogICAgICAgICAgICB0YWdfdmFsdWU9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS12aXAtYWxsb2NhdGlvbi1pZCkKICAgICAgICAgICAgdmlwX2FsbG9jYXRpb25faWQ9IiQyIgogICAgICAgICAgICBzaGlmdCAyIDs7CiAgICAgICAgLS1wcml2YXRlLWlwKQogICAgICAgICAgICBwcml2YXRlX2lwPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgIC0tYXNzb2NpYXRlLWVuaSkKICAgICAgICAgICAgYXNzb2NpYXRlX2VuaT0iJDIiCiAgICAgICAgICAgIHNoaWZ0IDIgOzsKICAgICAgICAtLWFzc29jaWF0ZS1pbnRmKQogICAgICAgICAgICBhc3NvY2lhdGVfaW50Zj0iJDIiCiAgICAgICAgICAgIHNoaWZ0IDIgOzsKICAgICAgICAtLWRpc3NvY2lhdGUtaW50ZikKICAgICAgICAgICAgZGlzc29jaWF0ZV9pbnRmPSIkMiIKICAgICAgICAgICAgc2hpZnQgMiA7OwogICAgICAgICp8LS0pCiAgICAgICAgICAgIHNoaWZ0CiAgICAgICAgICAgIGJyZWFrIDs7CiAgICBlc2FjCmRvbmUKCmlmICRoZWxwIDsgdGhlbgogICAgZWNobyAiJFVTQUdFIgogICAgZXhpdApmaQoKIyBWZXJpZnkgcmVxdWlyZWQgcGFyYW1ldGVycwpyZXF1aXJlZD0oImNsb3VkIikKZm9yIGkgaW4gJHtyZXF1aXJlZFtAXX0gOyBkbwogICAgaWYgWyAteiAkeyFpfSBdIDsgdGhlbgogICAgICAgIGxvZyAiQSByZXF1aXJlZCBwYXJhbWV0ZXIgaXMgbWlzc2luZzogJGkiCiAgICAgICAgZXhpdAogICAgZmkKZG9uZQoKY29uZmlnX3BhcmFtcz0iLS1oZWxwICRoZWxwIC0tbG9nLWxldmVsICRsb2dfbGV2ZWwgLS1jbG91ZCAkY2xvdWQgLS1za2lwLXZlcmlmeSAkc2tpcF92ZXJpZnkgLS1saWNlbnNlICRsaWNlbnNlIC0tbnRwICRudHAgLS10aW1lem9uZSAkdGltZXpvbmUgIC0tZGF0YS1pbnRlcmZhY2UgJGRhdGFfaW50ZXJmYWNlIC0tdXNhZ2UtYW5hbHl0aWNzICR1c2FnZV9hbmFseXRpY3MgLS12bGFuICR2bGFuIC0tc2VsZi1pcCAkc2VsZl9pcCAtLWRpc2NvdmVyeS1hZGRyZXNzICRkaXNjb3ZlcnlfYWRkcmVzcyAtLWNyZWF0ZS1saWNlbnNlLXBvb2wgJGxpY2Vuc2VfcG9vbCAtLWNyZWF0ZS1yZWcta2V5LXBvb2wgJHJlZ19rZXlfcG9vbCAtLWZjbC10YWcgJGZjbF90YWcgLS1mY2wtY2xvdWQtdGFnICRmY2xfY2xvdWRfdGFnICIKCiMgQ2hlY2sgZm9yIGVtcHR5IHZhcnM7IGFkZCB0byBjb25maWdfcGFybXMgaXMgbm90IGVtcHR5CltbICEgLXogIiRtYXN0ZXIiIF1dICYmIGNvbmZpZ19wYXJhbXMrPSIgLS1tYXN0ZXIgJG1hc3RlciAiCltbICEgLXogIiRiaWdpcV9tYXN0ZXJfa2V5IiBdXSAmJiBjb25maWdfcGFyYW1zKz0iIC0tYmlnLWlxLW1hc3Rlci1rZXkgJGJpZ2lxX21hc3Rlcl9rZXkgIgpbWyAhIC16ICIkcGFzc3dvcmRfZGF0YV91cmkiIF1dICYmIGNvbmZpZ19wYXJhbXMrPSIgLS1iaWctaXEtcGFzc3dvcmQtZGF0YS11cmkgJHBhc3N3b3JkX2RhdGFfdXJpICIKW1sgISAteiAiJGJpZ19pcV9mYWlsb3Zlcl9wZWVyX2lwIiBdXSAmJiBjb25maWdfcGFyYW1zKz0iIC0tYmlnLWlxLWZhaWxvdmVyLXBlZXItaXAgJGJpZ19pcV9mYWlsb3Zlcl9wZWVyX2lwICIKZWNobyAiQ29uZmlndXJhdGlvbiBwYXJhbWV0ZXJzOiAke2NvbmZpZ19wYXJhbXMvJGJpZ2lxX21hc3Rlcl9rZXkvT2JmdXNjYXRlZH0iCiMgQ2hlY2sgZm9yICJEbyBOb3QgQ3JlYXRlIiBpbiBjcmVhdGUgcG9vbCBwYXJtZXRlcnMKc2hvcHQgLXMgbm9jYXNlbWF0Y2gKaWYgW1sgJGxpY2Vuc2VfcG9vbCA9PSAiRG9fTm90X0NyZWF0ZSIgXV0gOyB0aGVuCiAgICBsb2cgIlNldHRpbmcgbGljZW5zaW5nIHBvb2wgdG8gbnVsbCBhcyAnRG9fTm90X0NyZWF0ZScgaGFzIGJlZW4gc3BlY2lmaWVkOiAkbGljZW5zaW5nX3Bvb2wiCiAgICBsaWNlbnNlX3Bvb2w9IiIKZmkKaWYgW1sgJHJlZ19rZXlfcG9vbCA9PSAiRG9fTm90X0NyZWF0ZSIgXV0gOyB0aGVuCiAgICBsb2cgIlNldHRpbmcgcmVnIGtleSBwb29sIHRvIG51bGwgYXMgJ0RvX05vdF9DcmVhdGUnIGhhcyBiZWVuIHNwZWNpZmllZDogJGxpY2Vuc2luZ19wb29sIgogICAgcmVnX2tleV9wb29sPSIiCmZpCnNob3B0IC11IG5vY2FzZW1hdGNoCgojIyMgSW5zdGFsbCBkZXBlbmRlbmNpZXMgIyMjCiMjIFRoZXJlIG11c3QgYmUgR2l0SHViIGludGVybmV0IGNvbm5lY3Rpb24KY2hlY2tfaW50ZXJuZXRfY29ubmVjdGlvbgoKYmFzZV91cmw9Imh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9GNU5ldHdvcmtzIgpiYXNlX2Rpcj0iL2NvbmZpZy9jbG91ZCIKYmFzZV9sb2dfZGlyPSIvdmFyL2xvZy9jbG91ZC8ke2Nsb3VkfSIKYmFzZV9kZXBlbmRlbmN5X2Rpcj0iJHtiYXNlX2Rpcn0vJHtjbG91ZH0vbm9kZV9tb2R1bGVzL0BmNWRldmNlbnRyYWwiCgojIyBEb3dubG9hZApkZXBlbmRlbmNpZXM9KCIke2Jhc2VfdXJsfS9mNS1jbG91ZC1saWJzLyR7ZmNsX3RhZ30vZGlzdC9mNS1jbG91ZC1saWJzLnRhci5neiIpCmRlcGVuZGVuY2llcys9KCIke2Jhc2VfdXJsfS9mNS1jbG91ZC1saWJzLSR7Y2xvdWR9LyR7ZmNsX2Nsb3VkX3RhZ30vZGlzdC9mNS1jbG91ZC1saWJzLSR7Y2xvdWR9LnRhci5neiIpCmRlcGVuZGVuY2llcys9KCIke2Jhc2VfdXJsfS9mNS1jbG91ZC1saWJzLyR7ZmNsX3RhZ30vZGlzdC92ZXJpZnlIYXNoIikKCmZvciBpIGluICR7ZGVwZW5kZW5jaWVzW0BdfSA7IGRvCiAgICBsb2cgIkRvd25sb2FkaW5nIGRlcGVuZGVuY3k6ICRpIgogICAgZj0kKGJhc2VuYW1lICRpKQogICAgc2FmZV9kb3dubG9hZCAke2Jhc2VfZGlyfS8kZiAkaQogICAgIyAkQ1VSTCAta3NmIC0tcmV0cnkgMTAgLS1yZXRyeS1kZWxheSA1IC0tcmV0cnktbWF4LXRpbWUgMjQwIC1vICR7YmFzZV9kaXJ9LyRmICRpCmRvbmUKCiMjIFZlcmlmeQojIE1DUCBtdXN0IGJlIHJ1bm5pbmcgZmlyc3QKbWNwX3J1bm5pbmcKYmFzZV9jb25maWdfYXZhaWxhYmxlCgppZiAhICRza2lwX3ZlcmlmeSA7IHRoZW4KICAgIHZlcmlmeV9zY3JpcHQ9IiR7YmFzZV9kaXJ9L3ZlcmlmeUhhc2giCiAgICBpZiAhICRUTVNIIGxvYWQgc3lzIGNvbmZpZyBtZXJnZSBmaWxlICR2ZXJpZnlfc2NyaXB0IDsgdGhlbgogICAgICAgIGxvZyAiQ0xJIHZlcmlmaWNhdGlvbiBzY3JpcHQgaXMgbm90IHZhbGlkOiAkdmVyaWZ5X3NjcmlwdCIKICAgICAgICBleGl0IDEKICAgIGZpCgogICAgZm9yIGkgaW4gJHtkZXBlbmRlbmNpZXNbQF19IDsgZG8KICAgICAgICBmPSQoYmFzZW5hbWUgJGkpCiAgICAgICAgaWYgW1sgJGYgIT0gInZlcmlmeUhhc2giIF1dIDsgdGhlbgogICAgICAgICAgICBsb2cgIlZlcmlmeWluZyBkZXBlbmRlbmN5OiAkZiIKICAgICAgICAgICAgaWYgISAkVE1TSCBydW4gY2xpIHNjcmlwdCB2ZXJpZnlIYXNoICIvY29uZmlnL2Nsb3VkLyRmIiA7IHRoZW4KICAgICAgICAgICAgICAgIGxvZyAiRGVwZW5kZW5jeSBpcyBub3QgdmFsaWQ6ICRmIgogICAgICAgICAgICAgICAgZXhpdCAxCiAgICAgICAgICAgIGZpCiAgICAgICAgZmkKICAgIGRvbmUKZWxzZQogICAgbG9nICJXYXJuaW5nOiBTa2lwcGluZyBkZXBlbmRlbmN5IHZlcmlmaWNhdGlvbiIKZmkKCiMjIEluc3RhbGwKbWtkaXIgLXAgJGJhc2VfZGVwZW5kZW5jeV9kaXIKZm9yIGkgaW4gJHtkZXBlbmRlbmNpZXNbQF19IDsgZG8KICAgIGY9JChiYXNlbmFtZSAkaSkKICAgIGxvZyAiSW5zdGFsbGluZyBkZXBlbmRlbmN5OiAkZiIKICAgIGlmIFtbICRmID09ICoiLnRhciIqIF1dIDsgdGhlbgogICAgICAgIHRhciB4ZnogJHtiYXNlX2Rpcn0vJHtmfSAtQyAkYmFzZV9kZXBlbmRlbmN5X2RpcgogICAgZmkKZG9uZQoKIyMgU2lnbmFsCnRvdWNoICIke2Jhc2VfZGlyfS9jbG91ZExpYnNSZWFkeSIKCiMgQ3JlYXRlIHRtcCBiaWctaXEgcGFzc3dvcmQgZmlsZS4gUmVxdWlyZWQgZm9yIEF6dXJlIGJpZy1pcSBjbHVzdGVyaW5nLgppZiBbIC1uICIkYmlnaXFfcGFzc3dvcmQiIF0gOyB0aGVuCiAgICBlY2hvICdDcmVhdGluZyBiaWdpcSB0ZW1wb3JhcnkgcGFzc3dvcmQgZmlsZS4nCiAgICB0bXBfZmlsZT0nL21udC9jbG91ZFRtcC8uYmlnaXFfcGFzcycKICAgIHRtcF9kaXI9JChkaXJuYW1lICR0bXBfZmlsZSkKICAgIGNyZWF0ZV90ZW1wX2RpciAkdG1wX2RpcgogICAgZWNobyAieyBcIm1hc3RlclBhc3NwaHJhc2VcIjogXCIke2JpZ2lxX21hc3Rlcl9rZXl9XCIsXCJyb290XCI6IFwiJHtiaWdpcV9wYXNzd29yZH1cIixcImFkbWluXCI6IFwiJHtiaWdpcV9wYXNzd29yZH1cIiB9IiA+ICR0bXBfZmlsZQpmaQojIyMgUHJvdmlzaW9uIERldmljZSAjIyMKbWtkaXIgLXAgJGJhc2VfbG9nX2Rpcgpob3N0bmFtZT0iIgppZiBbWyAkY2xvdWQgPT0gImF3cyIgXV07IHRoZW4KICAgIGhvc3RuYW1lPSQoJENVUkwgLXNmIC0tcmV0cnkgMjAgaHR0cDovLzE2OS4yNTQuMTY5LjI1NC9sYXRlc3QvbWV0YS1kYXRhL2hvc3RuYW1lKQplbGlmIFtbICRjbG91ZCA9PSAiYXp1cmUiIF1dOyB0aGVuCiAgICBtZXRhZGF0YT0kKCRDVVJMIC1IIE1ldGFkYXRhOnRydWUgImh0dHA6Ly8xNjkuMjU0LjE2OS4yNTQvbWV0YWRhdGEvaW5zdGFuY2UvY29tcHV0ZT9hcGktdmVyc2lvbj0yMDE3LTEyLTAxIikKICAgIGhvc3RuYW1lPSQoZWNobyAke21ldGFkYXRhfSB8IGpxIC5uYW1lIC0tcmF3LW91dHB1dCkKICAgIGhvc3RuYW1lKz0iLiIKICAgIGhvc3RuYW1lKz0kKGVjaG8gJHttZXRhZGF0YX0gfCBqcSAubG9jYXRpb24gLS1yYXctb3V0cHV0KQogICAgaG9zdG5hbWUrPSIuY2xvdWRhcHAuYXp1cmUuY29tIgpmaQpob3N0PSJsb2NhbGhvc3QiCnNlcGFyYXRvcj0iOyIKCiMgQ291bGQgdXNlIGEgZ2VuZXJpYyAtLW9uYm9hcmR8LS1uZXR3b3JrfGV0YyBmb3Igb3B0aW9uYWwgYXJndW1lbnRzCiMgaW5zdGVhZCwgYXQgbGVhc3QgZm9yIG5vdyBpbXBsZW1lbnQgdGhlIGFkZGl0aW9uYWwgYWJzdHJhY3Rpb24KCiMjIE9uYm9hcmQKb25ib2FyZF9hcmdzPSIiCmlmIFsgLW4gIiRjbG91ZCIgXSA7IHRoZW4gb25ib2FyZF9hcmdzKz0iLS1jbG91ZCAke2Nsb3VkfSAiIDsgZmkKaWYgWyAtbiAiJGxpY2Vuc2UiIF0gOyB0aGVuIG9uYm9hcmRfYXJncys9Ii0tbGljZW5zZSAke2xpY2Vuc2V9ICIgOyBmaQppZiBbIC1uICIkbnRwIiBdIDsgdGhlbiBvbmJvYXJkX2FyZ3MrPSItLW50cCAke250cH0gIiA7IGZpCmlmIFsgLW4gIiR0aW1lem9uZSIgXSA7IHRoZW4gb25ib2FyZF9hcmdzKz0iLS10eiAke3RpbWV6b25lfSAiIDsgZmkKaWYgWyAtbiAiJGxpY2Vuc2VfcG9vbCIgXSA7IHRoZW4KICAgICMgQ2hlY2sgZm9yIG11bGl0aXBsZSBsaWNlbnNlIHBvb2xzCiAgICBPSUZTPSRJRlMKICAgIElGUz0iLCI7CiAgICBsaWNlbnNlQXJyYXk9KCRsaWNlbnNlX3Bvb2wpOwogICAgZm9yIGkgaW4gJHtsaWNlbnNlQXJyYXlbQF19OyBkbwogICAgICAgIGZsYWc9JyAtLWNyZWF0ZS1saWNlbnNlLXBvb2wgJwogICAgICAgIGNhdF9hcmdzPSIke2NhdF9hcmdzfSR7ZmxhZ30kaSIKICAgIGRvbmUKICAgIElGUz0kT0lGUzsKICAgIG9uYm9hcmRfYXJncys9IiR7Y2F0X2FyZ3N9ICIgOyBmaQoKaWYgWyAtbiAiJHJlZ19rZXlfcG9vbCIgXSA7IHRoZW4gb25ib2FyZF9hcmdzKz0iLS1jcmVhdGUtcmVnLWtleS1wb29sICR7cmVnX2tleV9wb29sfSAiIDsgZmkKCmlmIFtbICRjbG91ZCA9PSAiYXdzIiBdXTsgdGhlbgogICAgaWYgWyAtbiAiJGRhdGFfaW50ZXJmYWNlIiBdIDsgdGhlbiBvbmJvYXJkX2FyZ3MrPSItLWRucyAkKGdldF9uZXRfaW5mbyAkZGF0YV9pbnRlcmZhY2UgbnMpICIgOyBmaQplbGlmIFtbICRjbG91ZCA9PSAiYXp1cmUiIF1dOyB0aGVuCiAgICBpZiBbIC1uICIkZGF0YV9pbnRlcmZhY2UiIF0gOyB0aGVuIG9uYm9hcmRfYXJncys9Ii0tZG5zIDE2OC42My4xMjkuMTYgIiA7IGZpCmZpCgppZiBbWyAiJChnZXRfdmVyc2lvbikiID09ICJiaWctaXEiICYmIC1uICIkcGFzc3dvcmRfZGF0YV91cmkiIF1dOyB0aGVuCiAgICBvbmJvYXJkX2FyZ3MrPSItLWJpZy1pcS1wYXNzd29yZC1kYXRhLXVyaSAke3Bhc3N3b3JkX2RhdGFfdXJpfSAiCmVsaWYgW1sgIiQoZ2V0X3ZlcnNpb24pIiA9PSAiYmlnLWlxIiBdXTsgdGhlbgogICAgb25ib2FyZF9hcmdzKz0iLS1zZXQtbWFzdGVyLWtleSAiCmZpCgppZiBbIC1uICIkdXNhZ2VfYW5hbHl0aWNzIiBdIDsgdGhlbgogICAgbz0kKGpzb25pZnkgJHVzYWdlX2FuYWx5dGljcykKICAgICMgT2JmdXNjYXRlIHNlbnNpdGl2ZSBpbmZvcm1hdGlvbgogICAgY0k9JChlY2hvICQoZ2V0X3ZhbCAiJG8iIGNJKSB8IHNoYTUxMnN1bSB8IGN1dCAtZCAiICIgLWYgMSkKICAgIGRJPSQoZWNobyAkKGdldF92YWwgIiRvIiBkSSkgfCBzaGE1MTJzdW0gfCBjdXQgLWQgIiAiIC1mIDEpCiAgICBtZXRyaWNzKz0iY2xvdWROYW1lOiQoZ2V0X3ZhbCAiJG8iIGNOKSxyZWdpb246JChnZXRfdmFsICIkbyIgciksY3VzdG9tZXJJZDoke2NJfSIKICAgIG1ldHJpY3MrPSIsZGVwbG95bWVudElkOiR7ZEl9LGxpY2Vuc2VUeXBlOiQoZ2V0X3ZhbCAiJG8iIGxUKSxiaWdJcFZlcnNpb246JChnZXRfdmFsICIkbyIgYklWKSIKICAgIG1ldHJpY3MrPSIsdGVtcGxhdGVOYW1lOiQoZ2V0X3ZhbCAiJG8iIHROKSx0ZW1wbGF0ZVZlcnNpb246JChnZXRfdmFsICIkbyIgdFYpICIKICAgIHNlbmRfYW5hbHl0aWNzPSQoZ2V0X3ZhbCAiJG8iIHNlbmQpCiAgICBpZiBbWyAiJHtzZW5kX2FuYWx5dGljcywsfSIgPT0gInllcyIgXV0gOyB0aGVuIG9uYm9hcmRfYXJncys9Ii0tbWV0cmljcyAkbWV0cmljcyAiIDsgZmkKZmkKCiROT0RFICIke2Jhc2VfZGVwZW5kZW5jeV9kaXJ9L2Y1LWNsb3VkLWxpYnMvc2NyaXB0cy9vbmJvYXJkLmpzIiAtLWhvc3QgJGhvc3QgLS1sb2ctbGV2ZWwgJGxvZ19sZXZlbCBcCiAgICAtLW91dHB1dCAiJHtiYXNlX2xvZ19kaXJ9L29uYm9hcmQubG9nIiAtLXNpZ25hbCBPTkJPQVJEX0RPTkUgLS1ob3N0bmFtZSAkaG9zdG5hbWUgJG9uYm9hcmRfYXJncyAmPj4gJHtiYXNlX2xvZ19kaXJ9L2luc3RhbGwubG9nCgojIFRPRE86IFJhY2UgY29uZGl0aW9uIGJldHdlZW4gb25ib2FyZC9uZXR3b3JrIC0gVXNpbmcgYXV0aCB0b2tlbiByZXN1bHRzIGluIDQwMyAibm90IGF1dGhvcml6ZWQiCiMgaWYgbmV0d29yayBjYWxsIGltbWVkaWF0ZWx5IGZvbGxvd3Mgb25ib2FyZC4gIFVzZSBmb2xsb3dpbmcgcGxhY2Vob2xkZXIgdW50aWwgZml4ZWQgaW4gZjUtY2xvdWQtbGlicwojIGFkZGluZyAtLXdhaXQtZm9yIHNpZ25hbCBmb3IgbmV0d29yayBjYWxsLgp3YWl0X3RpbWU9MzAKbG9nICJXYWl0aW5nOiAkd2FpdF90aW1lIgpzbGVlcCAkd2FpdF90aW1lCgojIyBOZXR3b3JrCmVjaG8gIkNvbmZpZ3VyaW5nIG5ldHdvcmsuLi4iCm5ldHdvcmtfYXJncz0iIgppZiBbIC1uICIkZGF0YV9pbnRlcmZhY2UiIF0gOyB0aGVuIG5ldHdvcmtfYXJncys9Ii0tZGVmYXVsdC1ndyAkKGdldF9uZXRfaW5mbyAkZGF0YV9pbnRlcmZhY2UgZ3cpICIgOyBmaQppZiBbIC1uICIkdmxhbiIgXSA7IHRoZW4KICAgIGZvciBpIGluICQoZWNobyAkdmxhbiB8IHRyICIkc2VwYXJhdG9yIiAnICcpIDsgZG8KICAgICAgICBvPSQoanNvbmlmeSAkaSkKICAgICAgICBuZXR3b3JrX2FyZ3MrPSItLXZsYW4gbmFtZTokKGdldF92YWwgIiRvIiBuKSxuaWM6JChnZXRfdmFsICIkbyIgbmljKSAiCiAgICBkb25lCmZpCmlmIFsgLW4gIiRzZWxmX2lwIiBdIDsgdGhlbgogICAgZm9yIGkgaW4gJChlY2hvICRzZWxmX2lwIHwgdHIgIiRzZXBhcmF0b3IiICcgJykgOyBkbwogICAgICAgIG89JChqc29uaWZ5ICRpKQogICAgICAgIGd3PSQoZ2V0X25ldF9pbmZvICQoZ2V0X3ZhbCAiJG8iIGkpIGd3IGNpZHIpCiAgICAgICAgbmV0d29ya19hcmdzKz0iLS1zZWxmLWlwIG5hbWU6JChnZXRfdmFsICIkbyIgbiksYWRkcmVzczokKGdldF92YWwgIiRvIiBhKS8ke2d3IyovfSx2bGFuOiQoZ2V0X3ZhbCAiJG8iIHYpICIKICAgIGRvbmUKZmkKaWYgWyAtbiAiJGRpc2NvdmVyeV9hZGRyZXNzIiBdIDsgdGhlbgogICAgbmV0d29ya19hcmdzKz0iLS1kaXNjb3ZlcnktYWRkcmVzcyAke2Rpc2NvdmVyeV9hZGRyZXNzfSIKZmkKJE5PREUgIiR7YmFzZV9kZXBlbmRlbmN5X2Rpcn0vZjUtY2xvdWQtbGlicy9zY3JpcHRzL25ldHdvcmsuanMiIC0taG9zdCAkaG9zdCAtLWxvZy1sZXZlbCAkbG9nX2xldmVsIFwKICAgIC0tb3V0cHV0ICIke2Jhc2VfbG9nX2Rpcn0vbmV0d29yay5sb2ciIC0td2FpdC1mb3IgT05CT0FSRF9ET05FIC0tc2lnbmFsIE5FVFdPUktfRE9ORSAkbmV0d29ya19hcmdzICY+PiAke2Jhc2VfbG9nX2Rpcn0vaW5zdGFsbC5sb2cKCiMjIEFkZCByb3V0ZSB0byBJbnN0YW5jZSBNZXRhZGF0YSBzZXJ2aWNlCiMgQWxsb3cgc3lzdGVtIHRvIHVzZSBJUHY0IGxpbmstbG9jYWwgYWRkcmVzc2VzIGluIG5ldHdvcmsgcm91dGVzCnRtc2ggbW9kaWZ5IHN5cyBkYiBjb25maWcuYWxsb3cucmZjMzkyNyB2YWx1ZSBlbmFibGUKCiMgQWRkIHJvdXRlIHRvIE1ldGFkYXRhIHNlcnZpY2UKZ2F0ZXdheT0kKHRtc2ggbGlzdCBzeXMgbWFuYWdlbWVudC1yb3V0ZSBnYXRld2F5IHwgZ3JlcCBnYXRld2F5IHwgaGVhZCAtbiAxIHwgYXdrICd7cHJpbnQgJDJ9JykKdG1zaCBjcmVhdGUgc3lzIG1hbmFnZW1lbnQtcm91dGUgbWV0YWRhdGEgbmV0d29yayAxNjkuMjU0LjE2OS4yNTQvMzIgZ2F0ZXdheSAkZ2F0ZXdheQoKIyMgQ2x1c3RlcgppZiBbWyAtbiAiJG1hc3RlciIgJiYgLW4gIiRiaWdfaXFfZmFpbG92ZXJfcGVlcl9pcCIgXV0gOyB0aGVuCiAgICBlY2hvICJDb25maWd1cmluZyBjbHVzdGVyLi4uIgogICAgY2x1c3Rlcl9hcmdzPSItLWNsb3VkICRjbG91ZCAtLW1hc3RlciAtLWJpZy1pcS1mYWlsb3Zlci1wZWVyLWlwICRiaWdfaXFfZmFpbG92ZXJfcGVlcl9pcCIKICAgIGlmIFsgLW4gIiRwYXNzd29yZF9kYXRhX3VyaSIgXSA7IHRoZW4KICAgICAgICBjbHVzdGVyX2FyZ3MrPSIgLS1iaWctaXEtcGFzc3dvcmQtZGF0YS11cmkgJHBhc3N3b3JkX2RhdGFfdXJpICIKICAgIGZpCiAgICAkTk9ERSAiJHtiYXNlX2RlcGVuZGVuY3lfZGlyfS9mNS1jbG91ZC1saWJzL3NjcmlwdHMvY2x1c3Rlci5qcyIgLS1ob3N0ICRob3N0IC0tbG9nLWxldmVsICRsb2dfbGV2ZWwgXAogICAgICAgIC0tb3V0cHV0ICIke2Jhc2VfbG9nX2Rpcn0vY2x1c3Rlci5sb2ciIC0tdXNlciBhZG1pbiAkY2x1c3Rlcl9hcmdzICY+PiAke2Jhc2VfbG9nX2Rpcn0vaW5zdGFsbC5sb2cKZmkKCiMgRmFpbG92ZXIKIyBPbmx5IHBlcmZvcm0gZmFpbG92ZXIgZm9yIGNsdXN0ZXIgc29sdXRpb24KaWYgW1sgLW4gIiR0YWdfdmFsdWUiIF1dIDsgdGhlbgogICAgZmFpbG92ZXJfYXJncz0iLS1sb2ctbGV2ZWwgJGxvZ19sZXZlbCAtLWxvZy1maWxlIC92YXIvbG9nL2Nsb3VkLyRjbG91ZC9mYWlsb3Zlci5sb2cgLS10YWcta2V5IGY1X2RlcGxveW1lbnQgIgogICAgZmFpbG92ZXJfYXJncys9Ii0tdGFnLXZhbHVlICR0YWdfdmFsdWUgIgoKICAgIGlmIFtbICRjbG91ZCA9PSAiYXdzIiBdXTsgdGhlbgogICAgICAgIGlmIFsgLW4gIiR2aXBfYWxsb2NhdGlvbl9pZCIgXSA7IHRoZW4KICAgICAgICBmYWlsb3Zlcl9hcmdzKz0iLS12aXAtYWxsb2NhdGlvbi1pZCAkdmlwX2FsbG9jYXRpb25faWQgIgogICAgICAgIGZpCgogICAgICAgIGlmIFsgLW4gIiRwcml2YXRlX2lwIiBdIDsgdGhlbgogICAgICAgICAgICBmYWlsb3Zlcl9hcmdzKz0iLS1wcml2YXRlLWlwICRwcml2YXRlX2lwICIKICAgICAgICBmaQoKICAgICAgICBpZiBbIC1uICIkYXNzb2NpYXRlX2VuaSIgXSA7IHRoZW4KICAgICAgICAgICAgZmFpbG92ZXJfYXJncys9Ii0tYXNzb2NpYXRlLWVuaSAkYXNzb2NpYXRlX2VuaSAiCiAgICAgICAgZmkKCiAgICAgICAgaWYgWyAtbiAiJHBhc3N3b3JkX2RhdGFfdXJpIiBdIDsgdGhlbgogICAgICAgICAgICBmYWlsb3Zlcl9hcmdzKz0iLS1wYXNzd29yZC11cmkgJHBhc3N3b3JkX2RhdGFfdXJpICIKICAgICAgICBmaQogICAgZmkKCiAgICAjIEF6dXJlIG5lZWRzIGV4dHJhIGNhcmVzOiBhZnRlciBjbHVzdGVyaW5nIGlzIGRvbmUsIGJpZ2lxIHRtcCBwYXNzd29yZCBmaWxlIHdpbGwgYmUgZGVsZXRlZCwgd2UgbmVlZCBiaWdpcSBwYXNzd29yZAogICAgIyB0byBwZXJmb3JtIGZhaWxvdmVyCiAgICBpZiBbWyAkY2xvdWQgPT0gImF6dXJlIiBdXTsgdGhlbgogICAgICAgIGlmIFsgLW4gIiRiaWdpcV9wYXNzd29yZCIgXSA7IHRoZW4KICAgICAgICAgICAgIyMgSWYgY3JlYXRlZCwgcmVtb3ZlIGJpZ2lxIHRtcCBwYXNzd29yZCBmaWxlCiAgICAgICAgICAgIHRtcF9maWxlPScvbW50L2Nsb3VkVG1wLy5iaWdpcV9wYXNzJwogICAgICAgICAgICB0bXBfZGlyPSQoZGlybmFtZSAkdG1wX2ZpbGUpCiAgICAgICAgICAgIHdpcGVfdGVtcF9kaXIgJHRtcF9kaXIKICAgICAgICAgICAgZWNobyAnRGVsZXRpbmcgYmlnaXEgdGVtcG9yYXJ5IHBhc3N3b3JkIGZpbGUuJwogICAgICAgICAgICAjIFVzZSBiaWdpcSBwYXNzd29yZCBmb3IgZmFpbG92ZXIgc2NyaXB0CiAgICAgICAgICAgIGZhaWxvdmVyX2FyZ3MrPSItLXBhc3N3b3JkLWRhdGEgJGJpZ2lxX3Bhc3N3b3JkICIKICAgICAgICBmaQogICAgICAgIGlmIFsgLW4gIiRhc3NvY2lhdGVfaW50ZiIgXSA7IHRoZW4KICAgICAgICBmYWlsb3Zlcl9hcmdzKz0iLS1hc3NvY2lhdGUtaW50ZiAkYXNzb2NpYXRlX2ludGYgIgogICAgICAgIGZpCgogICAgICAgIGlmIFsgLW4gIiRkaXNzb2NpYXRlX2ludGYiIF0gOyB0aGVuCiAgICAgICAgICAgIGZhaWxvdmVyX2FyZ3MrPSItLWRpc3NvY2lhdGUtaW50ZiAkZGlzc29jaWF0ZV9pbnRmICIKICAgICAgICBmaQogICAgZmkKCiAgICAjIyBNYWtlIHN1cmUgdGhlIHNlY29uZGFyeSBwcml2YXRlIElQIGFkZHJlc3MgaXMgYSBTZWxmIElQCiAgICB0bXNoIGxpc3QgbmV0IHNlbGYgfCBncmVwICIkcHJpdmF0ZV9pcCIKICAgIGlmIFtbICQ/ICE9IDAgXV07IHRoZW4KICAgICAgICB0bXNoIGNyZWF0ZSBuZXQgc2VsZiBsaWNfbWFuYWdlciB2bGFuIGludGVybmFsIGFsbG93LXNlcnZpY2UgZGVmYXVsdCBhZGRyZXNzICR7cHJpdmF0ZV9pcH0vMzIKICAgIGVsc2UKICAgICAgICBlY2hvICJBcHBlYXJzICRwcml2YXRlX2lwIGlzIGFscmVhZHkgYSBTZWxmIElQIgogICAgZmkKCiAgICAjIyBDcmVhdGUgaUNhbGwgc2NyaXB0IGFuZCBoYW5kbGVyIHRvIGhhbmRsZSBmYWlsb3ZlcgogICAgZmFpbG92ZXJfc2NyaXB0X2xvYz0iL2NvbmZpZy9jbG91ZC8ke2Nsb3VkfS9ub2RlX21vZHVsZXMvQGY1ZGV2Y2VudHJhbC9mNS1jbG91ZC1saWJzLSR7Y2xvdWR9L3NjcmlwdHMvZmFpbG92ZXIuanMiCiAgICBpY2FsbF9oYW5kbGVyX25hbWU9IkZhaWxvdmVySGFuZGxlciIKICAgIGljYWxsX3NjcmlwdF9uYW1lPSJGYWlsb3ZlckNvbGxlY3RvciIKICAgICMjIEZpcnN0IGNoZWNrIGlmIGlDYWxsIGFscmVhZHkgZXhpc3RzCiAgICB0bXNoIGxpc3Qgc3lzIGljYWxsIGhhbmRsZXIgfCBncmVwICRpY2FsbF9oYW5kbGVyX25hbWUKICAgIGlmIFtbICQ/ICE9IDAgXV07IHRoZW4KICAgICAgICB0bXNoIGNyZWF0ZSBzeXMgaWNhbGwgc2NyaXB0ICRpY2FsbF9zY3JpcHRfbmFtZSBkZWZpbml0aW9uIHsgaWYgeyBbY2F0Y2gge3NldCBpc19mYWlsb3Zlcl9ydW5uaW5nIFtleGVjIHBncmVwIC1mICAiJGZhaWxvdmVyX3NjcmlwdF9sb2MiXX1dIH0geyBleGVjIG5vZGUgJGZhaWxvdmVyX3NjcmlwdF9sb2MgJGZhaWxvdmVyX2FyZ3MgfSBlbHNlIHsgcHV0cyAiJGljYWxsX3NjcmlwdF9uYW1lIGlzIGFscmVhZHkgcnVubmluZyB3aXRoIFBJRCAkaXNfZmFpbG92ZXJfcnVubmluZyIgfSB9CiAgICAgICAgdG1zaCBjcmVhdGUgc3lzIGljYWxsIGhhbmRsZXIgcGVyaW9kaWMgL0NvbW1vbi8kaWNhbGxfaGFuZGxlcl9uYW1lIHsgZmlyc3Qtb2NjdXJyZW5jZSBub3cgaW50ZXJ2YWwgNjAgc2NyaXB0IC9Db21tb24vJGljYWxsX3NjcmlwdF9uYW1lIH0KICAgIGVsc2UKICAgICAgICBlY2hvICJBcHBlYXJzIHRoZSAkaWNhbGxfaGFuZGxlcl9uYW1lIGljYWxsIGFscmVhZHkgZXhpc3RzISIKICAgIGZpCmZpCgp0bXNoIHNhdmUgc3lzIGNvbmZpZw==",
+        "subscriptionID": "[subscription().subscriptionId]",
+        "resourceGroupName": "[resourceGroup().name]",
+        "resourceGroupId": "[concat(resourceGroup().id, '-vip')]",
+        "singleQuote": "'",
+        "f5CloudLibsTag": "v4.8.2",
+        "f5CloudLibsAzureTag": "v2.8.0",
+        "f5CloudIappsTag": "v2.3.2",
+        "dnsLabel": "[toLower(parameters('dnsLabel'))]",
+        "skuToUse": "f5-bigiq-virtual-edition-byol",
+        "offerToUse": "f5-big-iq",
+        "imagePlan": {
+            "name": "[variables('skuToUse')]",
+            "product": "[variables('offerToUse')]",
+            "publisher": "f5-networks"
+        },
+        "imageReference": {
+            "offer": "[variables('offerToUse')]",
+            "publisher": "f5-networks",
+            "sku": "[variables('skuToUse')]",
+            "version": "[parameters('bigIqVersion')]"
+        },
+        "bigIpMgmtPort": "443",
+        "instanceName": "[toLower(parameters('instanceName'))]",
+        "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]",
+        "mgmtSubnetName": "mgmt",
+        "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+        "vnetAddressPrefix": "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]",
+        "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]",
+        "publicIPAddressType": "Static",
+        "mgmtPublicIPAddressName": "[concat(variables('dnsLabel'), '-mgmt-pip')]",
+        "mgmtPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('mgmtPublicIPAddressName'))]",
+        "mgmtNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-mgmt-nsg'))]",
+        "mgmtNicName": "[concat(variables('dnsLabel'), '-mgmt')]",
+        "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]",
+        "intNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-int-nsg'))]",
+        "intNicName": "[concat(variables('dnsLabel'), '-int')]",
+        "intSubnetName": "internal",
+        "intSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]",
+        "tagValues": "[parameters('tagValues')]",
+        "vipTagValues": {
+            "application": "[parameters('tagValues').application]",
+            "cost": "[parameters('tagValues').cost]",
+            "environment": "[parameters('tagValues').environment]",
+            "group": "[parameters('tagValues').group]",
+            "owner": "[parameters('tagValues').owner]",
+            "f5_deployment": "[variables('resourceGroupId')]"
+        },
+        "newDataStorageAccountName": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data000')]",
+        "dataStorageAccountType": "Standard_LRS",
+        "deploymentId": "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('dnsLabel'))]",
+        "mgmtSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.1.0/24')]",
+        "mgmtSubnetPrivateAddress": "[concat(parameters('vnetAddressPrefix'), '.1.4')]",
+        "mgmtSubnetPrivateAddress1": "[concat(parameters('vnetAddressPrefix'), '.1.5')]",
+        "intSelfPublicIpAddressNamePrefix": "[concat(variables('dnsLabel'), '-self-pip')]",
+        "intSelfPublicIpAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('intSelfPublicIpAddressNamePrefix'))]",
+        "intpublicIPAddressNamePrefix": "[concat(variables('dnsLabel'), '-int-pip')]",
+        "intPublicIPAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('intPublicIPAddressNamePrefix'))]",
+        "intNicNameVm1": "[concat(variables('intNicName'), '0')]",
+        "intNicNameVm2": "[concat(variables('intNicName'), '1')]",
+        "intSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.2.0/24')]",
+        "intSubnetPrivateAddress": "[concat(parameters('vnetAddressPrefix'), '.2.30')]",
+        "intSubnetPrivateAddress1": "[concat(parameters('vnetAddressPrefix'), '.2.31')]",
+        "intSubnetPrivateAddress2": "[concat(parameters('vnetAddressPrefix'), '.2.100')]",
+        "intSubnetPrivateAddress3": "[concat(parameters('vnetAddressPrefix'), '.2.101')]",
+        "numberOfinternalIps": 1,
+        "selfNicConfigArray": {
+            "0": [
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('mgmtNicName'), '0'))]",
+                    "properties": {
+                        "primary": true
+                    }
+                },
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('intNicName'), '0'))]",
+                    "properties": {
+                        "primary": false
+                    }
+                }
+            ],
+            "1": [
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('mgmtNicName'), '1'))]",
+                    "properties": {
+                        "primary": true
+                    }
+                },
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('intNicName'), '1'))]",
+                    "properties": {
+                        "primary": false
+                    }
+                }
+            ]
+        },
+        "addtlNicConfigArray": {
+            "copy": [
+                {
+                    "count": 5,
+                    "input": {
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(toLower(parameters('dnsLabel')), '-addtlnic', copyIndex('values0', 1), '0'))]",
+                        "properties": {
+                            "primary": false
+                        }
+                    },
+                    "name": "values0"
+                },
+                {
+                    "count": 5,
+                    "input": {
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(toLower(parameters('dnsLabel')), '-addtlnic', copyIndex('values1', 1), '1'))]",
+                        "properties": {
+                            "primary": false
+                        }
+                    },
+                    "name": "values1"
+                }
+            ]
+        }
+    },
     "resources": [
         {
-            "apiVersion": "[variables('networkApiVersion')]", 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('mgmtPublicIPAddressName'), 0)]", 
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[concat(variables('mgmtPublicIPAddressName'), '0')]",
             "properties": {
                 "dnsSettings": {
                     "domainNameLabel": "[concat(variables('dnsLabel'), '-0')]"
-                }, 
-                "idleTimeoutInMinutes": 30, 
+                },
+                "idleTimeoutInMinutes": 30,
                 "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
-            "type": "Microsoft.Network/publicIPAddresses"
-        }, 
-        {
-            "apiVersion": "[variables('networkApiVersion')]", 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('mgmtPublicIPAddressName'), 1)]", 
-            "properties": {
-                "dnsSettings": {
-                    "domainNameLabel": "[concat(variables('dnsLabel'), '-1')]"
-                }, 
-                "idleTimeoutInMinutes": 30, 
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
-            "type": "Microsoft.Network/publicIPAddresses"
-        }, 
-        {
-            "apiVersion": "[variables('networkApiVersion')]", 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('intSelfPublicIpAddressNamePrefix'), '0')]", 
-            "properties": {
-                "idleTimeoutInMinutes": 30, 
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
-            "type": "Microsoft.Network/publicIPAddresses"
-        }, 
-        {
-            "apiVersion": "[variables('networkApiVersion')]", 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('intSelfPublicIpAddressNamePrefix'), '1')]", 
-            "properties": {
-                "idleTimeoutInMinutes": 30, 
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
-            "type": "Microsoft.Network/publicIPAddresses"
-        }, 
-        {
-            "apiVersion": "[variables('networkApiVersion')]", 
-            "condition": "[not(equals(variables('numberOfInternalIps'),0))]", 
-            "copy": {
-                "count": "[if(not(equals(variables('numberOfInternalIps'), 0)), variables('numberOfInternalIps'), 1)]", 
-                "name": "intpipcopy"
-            }, 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('intPublicIPAddressNamePrefix'), copyIndex())]", 
-            "properties": {
-                "dnsSettings": {
-                    "domainNameLabel": "[concat(variables('dnsLabel'), copyIndex(0))]"
-                }, 
-                "idleTimeoutInMinutes": 30, 
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
-            }, 
-            "tags": "[variables('vipTagValues')]", 
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "type": "Microsoft.Network/publicIPAddresses"
         },
         {
-            "apiVersion": "[variables('networkApiVersion')]", 
-            "location": "[variables('location')]", 
-            "name": "[variables('virtualNetworkName')]", 
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[concat(variables('mgmtPublicIPAddressName'), '1')]",
+            "properties": {
+                "dnsSettings": {
+                    "domainNameLabel": "[concat(variables('dnsLabel'), '-1')]"
+                },
+                "idleTimeoutInMinutes": 30,
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/publicIPAddresses"
+        },
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[concat(variables('intSelfPublicIpAddressNamePrefix'), '0')]",
+            "properties": {
+                "idleTimeoutInMinutes": 30,
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/publicIPAddresses"
+        },
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[concat(variables('intSelfPublicIpAddressNamePrefix'), '1')]",
+            "properties": {
+                "idleTimeoutInMinutes": 30,
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/publicIPAddresses"
+        },
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "condition": "[not(equals(variables('numberOfInternalIps'),0))]",
+            "copy": {
+                "count": "[if(not(equals(variables('numberOfInternalIps'), 0)), variables('numberOfInternalIps'), 1)]",
+                "name": "intpipcopy"
+            },
+            "location": "[variables('location')]",
+            "name": "[concat(variables('intPublicIPAddressNamePrefix'), copyIndex())]",
+            "properties": {
+                "dnsSettings": {
+                    "domainNameLabel": "[concat(variables('dnsLabel'), copyIndex(0))]"
+                },
+                "idleTimeoutInMinutes": 30,
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+            },
+            "tags": "[variables('vipTagValues')]",
+            "type": "Microsoft.Network/publicIPAddresses"
+        },
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[variables('virtualNetworkName')]",
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
                         "[variables('vnetAddressPrefix')]"
                     ]
-                }, 
+                },
                 "subnets": [
                     {
-                        "name": "[variables('mgmtSubnetName')]", 
+                        "name": "[variables('mgmtSubnetName')]",
                         "properties": {
                             "addressPrefix": "[variables('mgmtSubnetPrefix')]"
                         }
-                    }, 
+                    },
                     {
-                        "name": "[variables('intSubnetName')]", 
+                        "name": "[variables('intSubnetName')]",
                         "properties": {
                             "addressPrefix": "[variables('intSubnetPrefix')]"
                         }
                     }
                 ]
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "type": "Microsoft.Network/virtualNetworks"
-        }, 
+        },
         {
-            "apiVersion": "[variables('networkApiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]",
             "dependsOn": [
                 "[variables('vnetId')]",
-                "[variables('mgmtNsgID')]", 
+                "[variables('mgmtNsgID')]",
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtPublicIPAddressName'), '0')]"
-            ], 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('mgmtNicName'), '0')]", 
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('mgmtNicName'), '0')]",
             "properties": {
                 "ipConfigurations": [
                     {
-                        "name": "[concat(variables('dnsLabel'), '-mgmt-ipconfig')]", 
+                        "name": "[concat(variables('dnsLabel'), '-mgmt-ipconfig')]",
                         "properties": {
                             "PublicIpAddress": {
                                 "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('mgmtPublicIPAddressName'), '0'))]"
-                            }, 
-                            "privateIPAddress": "[variables('mgmtSubnetPrivateAddress')]", 
-                            "privateIPAllocationMethod": "Static", 
+                            },
+                            "privateIPAddress": "[variables('mgmtSubnetPrivateAddress')]",
+                            "privateIPAllocationMethod": "Static",
                             "subnet": {
                                 "id": "[variables('mgmtSubnetId')]"
                             }
                         }
                     }
-                ], 
+                ],
                 "networkSecurityGroup": {
                     "id": "[variables('mgmtNsgId')]"
                 }
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "type": "Microsoft.Network/networkInterfaces"
-        }, 
+        },
         {
-            "apiVersion": "[variables('networkApiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]",
             "dependsOn": [
                 "[variables('vnetId')]",
-                "[variables('mgmtNsgID')]", 
+                "[variables('mgmtNsgID')]",
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtPublicIPAddressName'), '1')]"
-            ], 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('mgmtNicName'), '1')]", 
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('mgmtNicName'), '1')]",
             "properties": {
                 "ipConfigurations": [
                     {
-                        "name": "[concat(variables('dnsLabel'), '-mgmt-ipconfig')]", 
+                        "name": "[concat(variables('dnsLabel'), '-mgmt-ipconfig')]",
                         "properties": {
                             "PublicIpAddress": {
                                 "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('mgmtPublicIPAddressName'), '1'))]"
-                            }, 
-                            "privateIPAddress": "[variables('mgmtSubnetPrivateAddress1')]", 
-                            "privateIPAllocationMethod": "Static", 
+                            },
+                            "privateIPAddress": "[variables('mgmtSubnetPrivateAddress')]",
+                            "privateIPAllocationMethod": "Static",
                             "subnet": {
                                 "id": "[variables('mgmtSubnetId')]"
                             }
                         }
                     }
-                ], 
+                ],
                 "networkSecurityGroup": {
                     "id": "[variables('mgmtNsgId')]"
                 }
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "type": "Microsoft.Network/networkInterfaces"
-        }, 
+        },
         {
-            "apiVersion": "[variables('networkApiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]",
             "dependsOn": [
                 "[variables('vnetId')]",
-                "[variables('intNsgID')]", 
-                "intpipcopy", 
+                "[variables('intNsgID')]",
+                "intpipcopy",
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('intSelfPublicIpAddressNamePrefix'), '0')]"
-            ], 
-            "location": "[variables('location')]", 
-            "name": "[variables('intNicNameVm1')]", 
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('intNicName'), '0')]",
             "properties": {
                 "ipConfigurations": [
                     {
-                        "name": "[concat(variables('instanceName'), '-self-ipconfig')]", 
+                        "name": "[concat(variables('instanceName'), '-self-ipconfig')]",
                         "properties": {
                             "PublicIpAddress": {
                                 "Id": "[concat(variables('intSelfPublicIpAddressIdPrefix'), '0')]"
-                            }, 
-                            "primary": true, 
-                            "privateIPAddress": "[variables('intSubnetPrivateAddress')]", 
-                            "privateIPAllocationMethod": "Static", 
+                            },
+                            "primary": true,
+                            "privateIPAddress": "[variables('intSubnetPrivateAddress')]",
+                            "privateIPAllocationMethod": "Static",
                             "subnet": {
                                 "id": "[variables('intSubnetId')]"
                             }
                         }
                     },
                     {
-                        "name": "[concat(variables('resourceGroupName'), '-int-ipconfig', '0')]", 
+                        "name": "[concat(variables('resourceGroupName'), '-int-ipconfig', '0')]",
                         "properties": {
                             "PublicIpAddress": {
                                 "Id": "[concat(variables('intPublicIPAddressIdPrefix'), '0')]"
                             },
-                            "primary": false, 
-                            "privateIPAddress": "[variables('intSubnetPrivateAddress2')]", 
-                            "privateIPAllocationMethod": "Static", 
+                            "primary": false,
+                            "privateIPAddress": "[variables('intSubnetPrivateAddress2')]",
+                            "privateIPAllocationMethod": "Static",
                             "subnet": {
                                 "id": "[variables('intSubnetId')]"
                             }
@@ -537,324 +584,309 @@
                 "networkSecurityGroup": {
                     "id": "[concat(variables('intNsgId'))]"
                 }
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "type": "Microsoft.Network/networkInterfaces"
         },
         {
-            "apiVersion": "[variables('networkApiVersion')]", 
+            "apiVersion": "[variables('networkApiVersion')]",
             "dependsOn": [
                 "[variables('vnetId')]",
-                "[variables('intNsgID')]", 
-                "intpipcopy", 
+                "[variables('intNsgID')]",
+                "intpipcopy",
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('intSelfPublicIpAddressNamePrefix'), '1')]"
-            ], 
-            "location": "[variables('location')]", 
-            "name": "[variables('intNicNameVm2')]", 
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('intNicName'), '1')]",
             "properties": {
                 "ipConfigurations": [
                     {
-                        "name": "[concat(variables('instanceName'), '-self-ipconfig')]", 
+                        "name": "[concat(variables('instanceName'), '-self-ipconfig')]",
                         "properties": {
                             "PublicIpAddress": {
                                 "Id": "[concat(variables('intSelfPublicIpAddressIdPrefix'), '1')]"
-                            }, 
-                            "primary": true, 
-                            "privateIPAddress": "[variables('intSubnetPrivateAddress1')]", 
-                            "privateIPAllocationMethod": "Static", 
+                            },
+                            "primary": true,
+                            "privateIPAddress": "[variables('intSubnetPrivateAddress1')]",
+                            "privateIPAllocationMethod": "Static",
                             "subnet": {
                                 "id": "[variables('intSubnetId')]"
                             }
                         }
                     },
                     {
-                        "name": "[concat(variables('resourceGroupName'), '-int-ipconfig', '0')]", 
+                        "name": "[concat(variables('resourceGroupName'), '-int-ipconfig', '1')]",
                         "properties": {
-                            "primary": false, 
-                            "privateIPAddress": "[variables('intSubnetPrivateAddress3')]", 
-                            "privateIPAllocationMethod": "Static", 
+                            "PublicIpAddress": {
+                                "Id": "[concat(variables('intPublicIPAddressIdPrefix'), '1')]"
+                            },
+                            "primary": false,
+                            "privateIPAddress": "[variables('intSubnetPrivateAddress3')]",
+                            "privateIPAllocationMethod": "Static",
                             "subnet": {
                                 "id": "[variables('intSubnetId')]"
                             }
                         }
                     }
-                ], 
+                ],
                 "networkSecurityGroup": {
                     "id": "[concat(variables('intNsgId'))]"
                 }
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "type": "Microsoft.Network/networkInterfaces"
-        }, 
+        },
         {
-            "apiVersion": "[variables('networkApiVersion')]", 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('dnsLabel'), '-mgmt-nsg')]", 
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[concat(variables('dnsLabel'), '-mgmt-nsg')]",
             "properties": {
                 "securityRules": [
                     {
-                        "name": "mgmt_allow_https", 
+                        "name": "mgmt_allow_https",
                         "properties": {
-                            "access": "Allow", 
-                            "description": "", 
-                            "destinationAddressPrefix": "*", 
-                            "destinationPortRange": "[variables('bigIpMgmtPort')]", 
-                            "direction": "Inbound", 
-                            "priority": 101, 
-                            "protocol": "Tcp", 
-                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", 
+                            "access": "Allow",
+                            "description": "",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[variables('bigIpMgmtPort')]",
+                            "direction": "Inbound",
+                            "priority": 101,
+                            "protocol": "Tcp",
+                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
                             "sourcePortRange": "*"
                         }
-                    }, 
+                    },
                     {
-                        "name": "ssh_allow_22", 
+                        "name": "ssh_allow_22",
                         "properties": {
-                            "access": "Allow", 
-                            "description": "", 
-                            "destinationAddressPrefix": "*", 
-                            "destinationPortRange": "22", 
-                            "direction": "Inbound", 
-                            "priority": 102, 
-                            "protocol": "Tcp", 
-                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]", 
+                            "access": "Allow",
+                            "description": "",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "22",
+                            "direction": "Inbound",
+                            "priority": 102,
+                            "protocol": "Tcp",
+                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
                             "sourcePortRange": "*"
                         }
                     }
                 ]
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "type": "Microsoft.Network/networkSecurityGroups"
-        }, 
+        },
         {
-            "apiVersion": "[variables('networkApiVersion')]", 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('dnsLabel'), '-int-nsg')]", 
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[concat(variables('dnsLabel'), '-int-nsg')]",
             "properties": {
                 "securityRules": []
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "type": "Microsoft.Network/networkSecurityGroups"
-        }, 
+        },
         {
-            "apiVersion": "[variables('computeApiVersion')]", 
-            "location": "[variables('location')]", 
-            "name": "[variables('availabilitySetName')]", 
+            "apiVersion": "[variables('computeApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[variables('availabilitySetName')]",
             "properties": {
-                "PlatformFaultDomainCount": 2, 
+                "PlatformFaultDomainCount": 2,
                 "PlatformUpdateDomainCount": 2
-            }, 
+            },
             "sku": {
                 "name": "Aligned"
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "type": "Microsoft.Compute/availabilitySets"
-        }, 
+        },
         {
-            "apiVersion": "[variables('storageApiVersion')]", 
-            "kind": "Storage", 
-            "location": "[variables('location')]", 
-            "name": "[variables('newDataStorageAccountName')]", 
+            "apiVersion": "[variables('storageApiVersion')]",
+            "kind": "Storage",
+            "location": "[variables('location')]",
+            "name": "[variables('newDataStorageAccountName')]",
             "properties": {
                 "supportsHttpsTrafficOnly": true
-            }, 
+            },
             "sku": {
-                "name": "[variables('dataStorageAccountType')]", 
+                "name": "[variables('dataStorageAccountType')]",
                 "tier": "Standard"
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "type": "Microsoft.Storage/storageAccounts"
-        }, 
+        },
         {
-            "apiVersion": "[variables('computeApiVersion')]", 
-            "condition": "[and(variables('useCustomImage'), variables('createNewCustomImage'))]", 
-            "location": "[variables('location')]", 
-            "name": "[variables('newCustomImageName')]", 
+            "apiVersion": "[variables('computeApiVersion')]",
+            "condition": "[and(variables('useCustomImage'), variables('createNewCustomImage'))]",
+            "location": "[variables('location')]",
+            "name": "[variables('newCustomImageName')]",
             "properties": {
                 "storageProfile": {
                     "osDisk": {
-                        "blobUri": "[variables('customImage')]", 
-                        "osState": "Generalized", 
-                        "osType": "Linux", 
+                        "blobUri": "[variables('customImage')]",
+                        "osState": "Generalized",
+                        "osType": "Linux",
                         "storageAccountType": "[if(contains(variables('premiumInstanceArray'), parameters('instanceType')), 'Premium_LRS', 'Standard_LRS')]"
                     }
                 }
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "type": "Microsoft.Compute/images"
-        }, 
+        },
         {
-            "apiVersion": "[variables('computeApiVersion')]", 
+            "apiVersion": "[variables('computeApiVersion')]",
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", 
-                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
-                "[variables('newCustomImageName')]", 
-                "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), '0')]", 
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]",
+                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]",
+                "[variables('newCustomImageName')]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), '0')]",
                 "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '0')]"
-            ], 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '0')]", 
-            "identity": { 
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '0')]",
+            "identity": {
                 "type": "SystemAssigned"
-            }, 
-            "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]", 
+            },
+            "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]",
             "properties": {
                 "availabilitySet": {
                     "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
-                }, 
+                },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
-                        "enabled": true, 
+                        "enabled": true,
                         "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
                     }
-                }, 
+                },
                 "hardwareProfile": {
                     "vmSize": "[parameters('instanceType')]"
-                }, 
+                },
                 "networkProfile": {
                     "networkInterfaces": "[concat(take(variables('selfNicConfigArray')['0'], 3), take(variables('addtlNicConfigArray')['values0'], 0))]"
-                }, 
+                },
                 "osProfile": {
-                    "adminPassword": "[variables('adminPassword')]", 
-                    "adminUsername": "[parameters('adminUsername')]", 
-                    "computerName": "[variables('instanceName')]", 
+                    "adminPassword": "[variables('adminPassword')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "computerName": "[variables('instanceName')]",
                     "linuxConfiguration": "[json('null')]"
-                }, 
+                },
                 "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "type": "Microsoft.Compute/virtualMachines"
-        }, 
+        },
         {
-            "apiVersion": "[variables('computeApiVersion')]", 
+            "apiVersion": "[variables('computeApiVersion')]",
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]", 
-                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]", 
-                "[variables('newCustomImageName')]", 
-                "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), '1')]", 
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]",
+                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]",
+                "[variables('newCustomImageName')]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), '1')]",
                 "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '1')]"
-            ], 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '1')]", 
-            "identity": { 
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '1')]",
+            "identity": {
                 "type": "SystemAssigned"
-            }, 
-            "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]", 
+            },
+            "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]",
             "properties": {
                 "availabilitySet": {
                     "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
-                }, 
+                },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
-                        "enabled": true, 
+                        "enabled": true,
                         "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
                     }
-                }, 
+                },
                 "hardwareProfile": {
                     "vmSize": "[parameters('instanceType')]"
-                }, 
+                },
                 "networkProfile": {
                     "networkInterfaces": "[concat(take(variables('selfNicConfigArray')['1'], 3), take(variables('addtlNicConfigArray')['values1'], 0))]"
-                }, 
+                },
                 "osProfile": {
-                    "adminPassword": "[variables('adminPassword')]", 
-                    "adminUsername": "[parameters('adminUsername')]", 
-                    "computerName": "[variables('instanceName')]", 
+                    "adminPassword": "[variables('adminPassword')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "computerName": "[variables('instanceName')]",
                     "linuxConfiguration": "[json('null')]"
-                }, 
+                },
                 "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "type": "Microsoft.Compute/virtualMachines"
-        }, 
+        },
         {
-            "apiVersion": "[variables('computeApiVersion')]", 
+            "apiVersion": "[variables('computeApiVersion')]",
             "dependsOn": [
                 "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '0')]"
-            ], 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '0/start')]", 
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '0/start')]",
             "properties": {
-                "autoUpgradeMinorVersion": "true", 
+                "autoUpgradeMinorVersion": "true",
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir -p /var/log/cloud/azure; mkdir -p /config/cloud; echo ', variables('initScript'), ' | /usr/bin/base64 -d > /config/cloud/init.sh; chmod +x /config/cloud/init.sh;', ' /config/cloud/init.sh --cloud azure --log-level silly --data-interface eth1 --license ', parameters('bigIqLicenseKey1'), ' --ntp ', parameters('ntpServer'), ' --timezone ', parameters('timeZone'), ' --big-iq-password-data-uri file:///mnt/cloudTmp/.bigiq_pass --big-iq-password ', variables('adminPassword'), ' --big-iq-master-key ', parameters('masterKey'), ' --fcl-tag ', variables('f5CloudLibsTag'), ' --fcl-cloud-tag ', variables('f5CloudLibsAzureTag'), ' --tag-value ', variables('resourceGroupId'), ' --skip-verify ', ' --private-ip ', variables('intSubnetPrivateAddress2'), ' --associate-intf ', variables('intNicNameVm1'), ' --dissociate-intf ', variables('intNicNameVm2'), ' --vlan ', variables('singleQuote'), 'n:internal,nic:1.1', variables('singleQuote'), ' --self-ip ', variables('singleQuote'), 'n:internal_self,a:', variables('intSubnetPrivateAddress'), ',v:internal,i:eth1', variables('singleQuote'), ' --discovery-address ', variables('intSubnetPrivateAddress'), ' --usage-analytics ', variables('singleQuote'), 'send:', parameters('allowUsageAnalytics'), ',r:', variables('location'), ',cI:', variables('subscriptionID'), ',dI:', variables('deploymentId'), ',cN:azure,lT:byol,bIV:6.0.0,tN:f5-existing-stack-byol-2nic-bigiq,tV:4.3.0', variables('singleQuote'), ' &>> /var/log/cloud/azure/install.log &')]"
-                }, 
-                "publisher": "Microsoft.Azure.Extensions", 
+                    "commandToExecute": "[concat('mkdir -p /var/log/cloud/azure; mkdir -p /config/cloud; echo ', variables('initScript'), ' | /usr/bin/base64 -d > /config/cloud/init.sh; chmod +x /config/cloud/init.sh;', ' /config/cloud/init.sh --cloud azure --log-level silly --data-interface eth1 --license ', parameters('bigIqLicenseKey1'), ' --ntp ', parameters('ntpServer'), ' --timezone ', parameters('timeZone'), ' --big-iq-password-data-uri file:///mnt/cloudTmp/.bigiq_pass --big-iq-password ', variables('adminPassword'), ' --big-iq-master-key ', parameters('masterKey'), ' --fcl-tag ', variables('f5CloudLibsTag'), ' --fcl-cloud-tag ', variables('f5CloudLibsAzureTag'), ' --tag-value ', variables('resourceGroupId'), ' --private-ip ', variables('intSubnetPrivateAddress2'), ' --associate-intf ', concat(variables('intNicName'), '0'), ' --dissociate-intf ', concat(variables('intNicName'), '1'), ' --vlan ', variables('singleQuote'), 'n:internal,nic:1.1', variables('singleQuote'), ' --self-ip ', variables('singleQuote'), 'n:internal_self,a:', variables('intSubnetPrivateAddress'), ',v:internal,i:eth1', variables('singleQuote'), ' --discovery-address ', variables('intSubnetPrivateAddress'), ' --usage-analytics ', variables('singleQuote'), 'send:', parameters('allowUsageAnalytics'), ',r:', variables('location'), ',cI:', variables('subscriptionID'), ',dI:', variables('deploymentId'), ',cN:azure,lT:byol,bIV:',parameters('bigIqVersion'),',tN:f5-existing-stack-byol-2nic-bigiq,tV:','6.1.0.0', variables('singleQuote'), ' &>> /var/log/cloud/azure/install.log &')]"
+                },
+                "publisher": "Microsoft.Azure.Extensions",
                 "settings": {
                     "fileUris": [
-                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]", 
-                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-service-discovery/f5.service_discovery.tmpl')]", 
-                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-cloud-logger/f5.cloud_logger.v1.0.0.tmpl')]", 
+                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]",
+                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-service-discovery/f5.service_discovery.tmpl')]",
+                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-cloud-logger/f5.cloud_logger.v1.0.0.tmpl')]",
                         "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs-azure/', variables('f5CloudLibsAzureTag'), '/dist/f5-cloud-libs-azure.tar.gz')]"
                     ]
-                }, 
-                "type": "CustomScript", 
+                },
+                "type": "CustomScript",
                 "typeHandlerVersion": "2.0"
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
-            "type": "Microsoft.Compute/virtualMachines/extensions"
-        }, 
-        {
-            "apiVersion": "[variables('computeApiVersion')]", 
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '1')]"
-            ], 
-            "location": "[variables('location')]", 
-            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '1/start')]", 
-            "properties": {
-                "autoUpgradeMinorVersion": "true", 
-                "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir -p /var/log/cloud/azure; mkdir -p /config/cloud; echo ', variables('initScript'), ' | /usr/bin/base64 -d > /config/cloud/init.sh; chmod +x /config/cloud/init.sh;', ' /config/cloud/init.sh --cloud azure --log-level silly --data-interface eth1 --license ', parameters('bigIqLicenseKey2'), ' --ntp ', parameters('ntpServer'), ' --timezone ', parameters('timeZone'), ' --create-license-pool ', parameters('licensePoolKeys'), ' --create-reg-key-pool ', parameters('regPoolKeys'), ' --big-iq-password-data-uri file:///mnt/cloudTmp/.bigiq_pass --big-iq-password ', variables('adminPassword'), ' --big-iq-master-key ', parameters('masterKey'), ' --master --big-iq-failover-peer-ip ', variables('intSubnetPrivateAddress'), ' --fcl-tag ', variables('f5CloudLibsTag'), ' --fcl-cloud-tag ', variables('f5CloudLibsAzureTag'), ' --tag-value ', variables('resourceGroupId'), ' --skip-verify ', ' --private-ip ', variables('intSubnetPrivateAddress3'), ' --associate-intf ', variables('intNicNameVm2'), ' --dissociate-intf ', variables('intNicNameVm1'), ' --vlan ', variables('singleQuote'), 'n:internal,nic:1.1', variables('singleQuote'), ' --self-ip ', variables('singleQuote'), 'n:internal_self,a:', variables('intSubnetPrivateAddress1'), ',v:internal,i:eth1', variables('singleQuote'), ' --discovery-address ', variables('intSubnetPrivateAddress1'), ' --usage-analytics ', variables('singleQuote'), 'send:', parameters('allowUsageAnalytics'), ',r:', variables('location'), ',cI:', variables('subscriptionID'), ',dI:', variables('deploymentId'), ',cN:azure,lT:byol,bIV:6.0.0,tN:f5-existing-stack-byol-2nic-bigiq,tV:4.3.0', variables('singleQuote'), ' &>> /var/log/cloud/azure/install.log &')]"
-                }, 
-                "publisher": "Microsoft.Azure.Extensions", 
-                "settings": {
-                    "fileUris": [
-                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]", 
-                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-service-discovery/f5.service_discovery.tmpl')]", 
-                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-cloud-logger/f5.cloud_logger.v1.0.0.tmpl')]", 
-                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs-azure/', variables('f5CloudLibsAzureTag'), '/dist/f5-cloud-libs-azure.tar.gz')]"
-                    ]
-                }, 
-                "type": "CustomScript", 
-                "typeHandlerVersion": "2.0"
-            }, 
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]", 
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "type": "Microsoft.Compute/virtualMachines/extensions"
         },
         {
-            "apiVersion": "2017-09-01",
-             "type": "Microsoft.Authorization/roleAssignments",
-             "name": "[guid(concat(resourceGroup().id, variables('instanceName'), 0))]",
-             "properties": {
-                    "roleDefinitionId": "[variables(parameters('vmRoleName'))]",
-                    "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines', concat(variables('dnsLabel'), '-', variables('instanceName'), '0')), '2017-12-01', 'Full').identity.principalId]",
-                    "scope": "[resourceGroup().id]"
-              },
-              "dependsOn": [
-                    "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '0')]"
-                ]
-        }, 
-        {
-            "apiVersion": "2017-09-01",
-             "type": "Microsoft.Authorization/roleAssignments",
-             "name": "[guid(concat(resourceGroup().id, variables('instanceName'), 1))]",
-             "properties": {
-                    "roleDefinitionId": "[variables(parameters('vmRoleName'))]",
-                    "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines', concat(variables('dnsLabel'), '-', variables('instanceName'), '1')), '2017-12-01', 'Full').identity.principalId]",
-                    "scope": "[resourceGroup().id]"
-              },
-              "dependsOn": [
-                    "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '1')]"
-                ]
+            "apiVersion": "[variables('computeApiVersion')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '1')]"
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '0/start')]",
+            "properties": {
+                "autoUpgradeMinorVersion": "true",
+                "protectedSettings": {
+                    "commandToExecute": "[concat('mkdir -p /var/log/cloud/azure; mkdir -p /config/cloud; echo ', variables('initScript'), ' | /usr/bin/base64 -d > /config/cloud/init.sh; chmod +x /config/cloud/init.sh;', ' /config/cloud/init.sh --cloud azure --log-level silly --data-interface eth1 --license ', parameters('bigIqLicenseKey2'), ' --ntp ', parameters('ntpServer'), ' --timezone ', parameters('timeZone'), ' --create-license-pool ', parameters('licensePoolKeys'), ' --create-reg-key-pool ', parameters('regPoolKeys'), ' --big-iq-password-data-uri file:///mnt/cloudTmp/.bigiq_pass --big-iq-password ', variables('adminPassword'), ' --big-iq-master-key ', parameters('masterKey'), ' --master --big-iq-failover-peer-ip ', variables('intSubnetPrivateAddress'), ' --fcl-tag ', variables('f5CloudLibsTag'), ' --fcl-cloud-tag ', variables('f5CloudLibsAzureTag'), ' --tag-value ', variables('resourceGroupId'), ' --private-ip ', variables('intSubnetPrivateAddress3'), ' --associate-intf ', concat(variables('intNicName'), '1'), ' --dissociate-intf ', concat(variables('intNicName'), '0'), ' --vlan ', variables('singleQuote'), 'n:internal,nic:1.1', variables('singleQuote'), ' --self-ip ', variables('singleQuote'), 'n:internal_self,a:', variables('intSubnetPrivateAddress1'), ',v:internal,i:eth1', variables('singleQuote'), ' --discovery-address ', variables('intSubnetPrivateAddress1'), ' --usage-analytics ', variables('singleQuote'), 'send:', parameters('allowUsageAnalytics'), ',r:', variables('location'), ',cI:', variables('subscriptionID'), ',dI:', variables('deploymentId'), ',cN:azure,lT:byol,bIV:',parameters('bigIqVersion'),',tN:f5-existing-stack-byol-2nic-bigiq,tV:','6.1.0.0', variables('singleQuote'), ' &>> /var/log/cloud/azure/install.log &')]"
+                },
+                "publisher": "Microsoft.Azure.Extensions",
+                "settings": {
+                    "fileUris": [
+                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]",
+                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-service-discovery/f5.service_discovery.tmpl')]",
+                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-cloud-logger/f5.cloud_logger.v1.0.0.tmpl')]",
+                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs-azure/', variables('f5CloudLibsAzureTag'), '/dist/f5-cloud-libs-azure.tar.gz')]"
+                    ]
+                },
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Compute/virtualMachines/extensions"
         }
-    ], 
+    ],
     "outputs": {
-        "GUI-URL": {
-            "type": "string", 
+        "GUI-URL-0": {
+            "type": "string",
             "value": "[concat('https://',reference(concat(variables('mgmtPublicIPAddressId'), '0')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]"
-        }, 
-        "SSH-URL": {
-            "type": "string", 
+        },
+        "SSH-URL-0": {
+            "type": "string",
             "value": "[concat(reference(concat(variables('mgmtPublicIPAddressId'), '0')).dnsSettings.fqdn,' ',22)]"
+        },
+        "GUI-URL-1": {
+            "type": "string",
+            "value": "[concat('https://',reference(concat(variables('mgmtPublicIPAddressId'), '1')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]"
+        },
+        "SSH-URL-1": {
+            "type": "string",
+            "value": "[concat(reference(concat(variables('mgmtPublicIPAddressId'), '1')).dnsSettings.fqdn,' ',22)]"
         }
     }
 }

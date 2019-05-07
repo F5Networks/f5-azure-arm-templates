@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_DS2_v2 --bigIqVersion latest --bigIqLicenseKey1 <value> --licensePoolKeys <value> --regPoolKeys <value> --numberOfExternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --mgmtIpAddress <value> --externalSubnetName <value> --externalIpAddressRangeStart <value> --avSetChoice CREATE_NEW --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --adminPassword <value> --masterKey <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D4s_v3 --bigIqVersion 6.1.000000 --bigIqLicenseKey1 <value> --licensePoolKeys Do_Not_Create --regPoolKeys Do_Not_Create --numberOfInternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --mgmtIpAddress <value> --internalSubnetName <value> --internalIpAddressRangeStart <value> --avSetChoice CREATE_NEW --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 # Assign Script Parameters and Define Variables
 # Specify static items below, change these as needed or make them parameters
@@ -15,11 +15,11 @@ while [[ $# -gt 1 ]]; do
         --adminUsername)
             adminUsername=$2
             shift 2;;
-        --authenticationType)
-            authenticationType=$2
+        --adminPassword)
+            adminPassword=$2
             shift 2;;
-        --adminPasswordOrKey)
-            adminPasswordOrKey=$2
+        --masterKey)
+            masterKey=$2
             shift 2;;
         --dnsLabel)
             dnsLabel=$2
@@ -30,14 +30,11 @@ while [[ $# -gt 1 ]]; do
         --instanceType)
             instanceType=$2
             shift 2;;
-        --imageName)
-            imageName=$2
-            shift 2;;
         --bigIqVersion)
-            bigIpVersion=$2
+            bigIqVersion=$2
             shift 2;;
         --bigIqLicenseKey1)
-            licenseKey1=$2
+            bigIqLicenseKey1=$2
             shift 2;;
         --licensePoolKeys)
             licensePoolKeys=$2
@@ -45,8 +42,8 @@ while [[ $# -gt 1 ]]; do
         --regPoolKeys)
             regPoolKeys=$2
             shift 2;;
-        --numberOfExternalIps)
-            numberOfExternalIps=$2
+        --numberOfInternalIps)
+            numberOfInternalIps=$2
             shift 2;;
         --vnetName)
             vnetName=$2
@@ -61,10 +58,10 @@ while [[ $# -gt 1 ]]; do
             mgmtIpAddress=$2
             shift 2;;
         --internalSubnetName)
-            externalSubnetName=$2
+            internalSubnetName=$2
             shift 2;;
         --internalIpAddressRangeStart)
-            externalIpAddressRangeStart=$2
+            internalIpAddressRangeStart=$2
             shift 2;;
         --avSetChoice)
             avSetChoice=$2
@@ -79,9 +76,6 @@ while [[ $# -gt 1 ]]; do
             customImage=$2
             shift 2;;
         --restrictedSrcAddress)
-            restrictedSrcAddress=$2
-            shift 2;;
-        --restrictedSrcAddressApp)
             restrictedSrcAddress=$2
             shift 2;;
         --tagValues)
@@ -109,7 +103,7 @@ while [[ $# -gt 1 ]]; do
 done
 
 #If a required parameter is not passed, the script will prompt for it below
-required_variables="adminUsername authenticationType adminPasswordOrKey dnsLabel instanceName instanceType imageName bigIpVersion bigIqLicenseKey1 licensePoolKeys regPoolKeys numberOfExternalIps vnetName vnetResourceGroupName mgmtSubnetName mgmtIpAddress internalSubnetName internalIpAddressRangeStart avSetChoice ntpServer timeZone customImage allowUsageAnalytics resourceGroupName "
+required_variables="adminUsername adminPassword masterKey dnsLabel instanceName instanceType bigIqVersion bigIqLicenseKey1 licensePoolKeys regPoolKeys numberOfInternalIps vnetName vnetResourceGroupName mgmtSubnetName mgmtIpAddress internalSubnetName internalIpAddressRangeStart avSetChoice ntpServer timeZone customImage allowUsageAnalytics resourceGroupName "
 for variable in $required_variables
         do
         if [ -z ${!variable} ] ; then
@@ -136,4 +130,4 @@ azure group create -n $resourceGroupName -l $region
 # Deploy ARM Template, right now cannot specify parameter file and parameters inline via Azure CLI
 template_file="./azuredeploy.json"
 parameter_file="./azuredeploy.parameters.json"
-azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"authenticationType\":{\"value\":\"$authenticationType\"},\"adminPasswordOrKey\":{\"value\":\"$adminPasswordOrKey\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIqVersion\":{\"value\":\"$biqIqVersion\"},\"bigIqLicenseKey1\":{\"value\":\"$bigIqLicenseKey1\"},\"licensePoolKeys\":{\"value\":\"$licensePoolKeys\"},\"regPoolKeys\":{\"value\":\"$regPoolKeys\"},\"numberOfInternalIps\":{\"value\":$numberOfInternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddress\":{\"value\":\"$mgmtIpAddress\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddressRangeStart\":{\"value\":\"$internalIpAddressRangeStart\"},\"avSetChoice\":{\"value\":\"$avSetChoice\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"customImage\":{\"value\":\"$customImage\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"restrictedSrcAddressApp\":{\"value\":\"$restrictedSrcAddressApp\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"}}"
+azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"masterKey\":{\"value\":\"$masterKey\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"bigIqVersion\":{\"value\":\"$bigIqVersion\"},\"bigIqLicenseKey1\":{\"value\":\"$bigIqLicenseKey1\"},\"licensePoolKeys\":{\"value\":\"$licensePoolKeys\"},\"regPoolKeys\":{\"value\":\"$regPoolKeys\"},\"numberOfInternalIps\":{\"value\":$numberOfInternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddress\":{\"value\":\"$mgmtIpAddress\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddressRangeStart\":{\"value\":\"$internalIpAddressRangeStart\"},\"avSetChoice\":{\"value\":\"$avSetChoice\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"customImage\":{\"value\":\"$customImage\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"}}"

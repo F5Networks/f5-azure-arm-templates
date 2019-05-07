@@ -1,7 +1,7 @@
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some (such as region) can    ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specified below.    ##
-## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -instanceType Standard_DS3_v2 -imageName AllTwoBootLocations -bigIpVersion 13.1.100000 -bigIqAddress <value> -bigIqUsername <value> -bigIqPassword <value> -bigIqLicensePoolName <value> -bigIqLicenseSkuKeyword1 OPTIONAL -bigIqLicenseUnitOfMeasure OPTIONAL -numberOfExternalIps 1 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddressRangeStart <value> -externalSubnetName <value> -externalIpSelfAddressRangeStart <value> -externalIpAddressRangeStart <value> -internalSubnetName <value> -internalIpAddressRangeStart <value> -enableNetworkFailover Yes -internalLoadBalancerType Per-protocol -internalLoadBalancerProbePort 3456 -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -instanceType Standard_DS3_v2 -imageName AllTwoBootLocations -bigIqAddress <value> -bigIqUsername <value> -bigIqPassword <value> -bigIqLicensePoolName <value> -bigIqLicenseSkuKeyword1 OPTIONAL -bigIqLicenseUnitOfMeasure OPTIONAL -bigIpVersion 14.1.003000 -numberOfExternalIps 1 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddressRangeStart <value> -externalSubnetName <value> -externalIpAddressRangeStart <value> -externalIpSelfAddressRangeStart <value> -internalSubnetName <value> -internalIpAddressRangeStart <value> -enableNetworkFailover Yes -internalLoadBalancerType Per-protocol -internalLoadBalancerProbePort 3456 -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
 
 param(
 
@@ -12,21 +12,21 @@ param(
   [string] [Parameter(Mandatory=$True)] $instanceName,
   [string] [Parameter(Mandatory=$True)] $instanceType,
   [string] [Parameter(Mandatory=$True)] $imageName,
-  [string] [Parameter(Mandatory=$True)] $bigIpVersion,
   [string] [Parameter(Mandatory=$True)] $bigIqAddress,
   [string] [Parameter(Mandatory=$True)] $bigIqUsername,
   [string] [Parameter(Mandatory=$True)] $bigIqPassword,
   [string] [Parameter(Mandatory=$True)] $bigIqLicensePoolName,
   [string] [Parameter(Mandatory=$True)] $bigIqLicenseSkuKeyword1,
   [string] [Parameter(Mandatory=$True)] $bigIqLicenseUnitOfMeasure,
+  [string] [Parameter(Mandatory=$True)] $bigIpVersion,
   [string] [Parameter(Mandatory=$True)] $numberOfExternalIps,
   [string] [Parameter(Mandatory=$True)] $vnetName,
   [string] [Parameter(Mandatory=$True)] $vnetResourceGroupName,
   [string] [Parameter(Mandatory=$True)] $mgmtSubnetName,
   [string] [Parameter(Mandatory=$True)] $mgmtIpAddressRangeStart,
   [string] [Parameter(Mandatory=$True)] $externalSubnetName,
-  [string] [Parameter(Mandatory=$True)] $externalIpSelfAddressRangeStart,
   [string] [Parameter(Mandatory=$True)] $externalIpAddressRangeStart,
+  [string] [Parameter(Mandatory=$True)] $externalIpSelfAddressRangeStart,
   [string] [Parameter(Mandatory=$True)] $internalSubnetName,
   [string] [Parameter(Mandatory=$True)] $internalIpAddressRangeStart,
   [string] [Parameter(Mandatory=$True)] $enableNetworkFailover,
@@ -68,7 +68,7 @@ $bigIqPasswordSecure = ConvertTo-SecureString -String $bigIqPassword -AsPlainTex
 (ConvertFrom-Json $tagValues).psobject.properties | ForEach -Begin {$tagValues=@{}} -process {$tagValues."$($_.Name)" = $_.Value}
 
 # Create Arm Deployment
-$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -dnsLabel $dnsLabel -instanceName $instanceName -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -bigIqAddress $bigIqAddress -bigIqUsername $bigIqUsername -bigIqPassword $bigIqPasswordSecure -bigIqLicensePoolName $bigIqLicensePoolName -bigIqLicenseSkuKeyword1 $bigIqLicenseSkuKeyword1 -bigIqLicenseUnitOfMeasure $bigIqLicenseUnitOfMeasure -numberOfExternalIps $numberOfExternalIps -vnetName $vnetName -vnetResourceGroupName $vnetResourceGroupName -mgmtSubnetName $mgmtSubnetName -mgmtIpAddressRangeStart $mgmtIpAddressRangeStart -externalSubnetName $externalSubnetName -externalIpSelfAddressRangeStart $externalIpSelfAddressRangeStart -externalIpAddressRangeStart $externalIpAddressRangeStart -internalSubnetName $internalSubnetName -internalIpAddressRangeStart $internalIpAddressRangeStart -enableNetworkFailover $enableNetworkFailover -internalLoadBalancerType $internalLoadBalancerType -internalLoadBalancerProbePort $internalLoadBalancerProbePort -declarationUrl $declarationUrl -ntpServer $ntpServer -timeZone $timeZone -customImage $customImage -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics 
+$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -dnsLabel $dnsLabel -instanceName $instanceName -instanceType $instanceType -imageName $imageName -bigIqAddress $bigIqAddress -bigIqUsername $bigIqUsername -bigIqPassword $bigIqPasswordSecure -bigIqLicensePoolName $bigIqLicensePoolName -bigIqLicenseSkuKeyword1 $bigIqLicenseSkuKeyword1 -bigIqLicenseUnitOfMeasure $bigIqLicenseUnitOfMeasure -bigIpVersion $bigIpVersion -numberOfExternalIps $numberOfExternalIps -vnetName $vnetName -vnetResourceGroupName $vnetResourceGroupName -mgmtSubnetName $mgmtSubnetName -mgmtIpAddressRangeStart $mgmtIpAddressRangeStart -externalSubnetName $externalSubnetName -externalIpAddressRangeStart $externalIpAddressRangeStart -externalIpSelfAddressRangeStart $externalIpSelfAddressRangeStart -internalSubnetName $internalSubnetName -internalIpAddressRangeStart $internalIpAddressRangeStart -enableNetworkFailover $enableNetworkFailover -internalLoadBalancerType $internalLoadBalancerType -internalLoadBalancerProbePort $internalLoadBalancerProbePort -declarationUrl $declarationUrl -ntpServer $ntpServer -timeZone $timeZone -customImage $customImage -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics 
 
 # Print Output of Deployment to Console
 $deployment

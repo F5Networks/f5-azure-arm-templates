@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-## Example Command: ./deploy_via_bash.sh --vmScaleSetMinCount 2 --vmScaleSetMaxCount 4 --appInsights CREATE_NEW --scaleOutCpuThreshold 80 --scaleInCpuThreshold 20 --scaleOutThroughputThreshold 20000000 --scaleInThroughputThreshold 10000000 --scaleOutTimeWindow 10 --scaleInTimeWindow 10 --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceType Standard_DS2_v2 --imageName AllTwoBootLocations --bigIpVersion 13.1.100000 --bigIqAddress <value> --bigIqUsername <value> --bigIqPassword <value> --bigIqLicensePoolName <value> --bigIqLicenseSkuKeyword1 OPTIONAL --bigIqLicenseUnitOfMeasure OPTIONAL --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --applicationProtocols http-https --applicationAddress <value> --applicationPort 80 --applicationSecurePort 443 --declarationUrl NOT_SPECIFIED --sslCert NOT_SPECIFIED --sslPswd NOT_SPECIFIED --applicationType Linux --blockingLevel medium --customPolicy NOT_SPECIFIED --dnsMemberIpType private --dnsMemberPort 80 --dnsProviderHost <value> --dnsProviderPort 443 --dnsProviderUser <value> --dnsProviderPassword <value> --dnsProviderPool autoscale_pool --dnsProviderDataCenter azure_datacenter --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --notificationEmail OPTIONAL --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceType Standard_DS2_v2 --imageName AllTwoBootLocations --bigIqAddress <value> --bigIqUsername <value> --bigIqPassword <value> --bigIqLicensePoolName <value> --bigIqLicenseSkuKeyword1 OPTIONAL --bigIqLicenseUnitOfMeasure OPTIONAL --bigIpVersion 14.1.003000 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --vmScaleSetMinCount 2 --vmScaleSetMaxCount 4 --appInsights CREATE_NEW --scaleOutCpuThreshold 80 --scaleInCpuThreshold 20 --scaleOutThroughputThreshold 20000000 --scaleInThroughputThreshold 10000000 --scaleOutTimeWindow 10 --scaleInTimeWindow 10 --notificationEmail OPTIONAL --applicationProtocols http-https --applicationAddress <value> --applicationPort 80 --applicationSecurePort 443 --sslCert NOT_SPECIFIED --sslPswd NOT_SPECIFIED --applicationType Linux --blockingLevel medium --customPolicy NOT_SPECIFIED --dnsMemberIpType private --dnsMemberPort 80 --dnsProviderHost <value> --dnsProviderPort 443 --dnsProviderUser <value> --dnsProviderPassword <value> --dnsProviderPool autoscale_pool --dnsProviderDataCenter azure_datacenter --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 # Assign Script Parameters and Define Variables
 # Specify static items below, change these as needed or make them parameters
@@ -12,6 +12,54 @@ tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWN
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
 while [[ $# -gt 1 ]]; do
     case "$1" in
+        --adminUsername)
+            adminUsername=$2
+            shift 2;;
+        --authenticationType)
+            authenticationType=$2
+            shift 2;;
+        --adminPasswordOrKey)
+            adminPasswordOrKey=$2
+            shift 2;;
+        --dnsLabel)
+            dnsLabel=$2
+            shift 2;;
+        --instanceType)
+            instanceType=$2
+            shift 2;;
+        --imageName)
+            imageName=$2
+            shift 2;;
+        --bigIqAddress)
+            bigIqAddress=$2
+            shift 2;;
+        --bigIqUsername)
+            bigIqUsername=$2
+            shift 2;;
+        --bigIqPassword)
+            bigIqPassword=$2
+            shift 2;;
+        --bigIqLicensePoolName)
+            bigIqLicensePoolName=$2
+            shift 2;;
+        --bigIqLicenseSkuKeyword1)
+            bigIqLicenseSkuKeyword1=$2
+            shift 2;;
+        --bigIqLicenseUnitOfMeasure)
+            bigIqLicenseUnitOfMeasure=$2
+            shift 2;;
+        --bigIpVersion)
+            bigIpVersion=$2
+            shift 2;;
+        --vnetName)
+            vnetName=$2
+            shift 2;;
+        --vnetResourceGroupName)
+            vnetResourceGroupName=$2
+            shift 2;;
+        --mgmtSubnetName)
+            mgmtSubnetName=$2
+            shift 2;;
         --vmScaleSetMinCount)
             vmScaleSetMinCount=$2
             shift 2;;
@@ -39,53 +87,8 @@ while [[ $# -gt 1 ]]; do
         --scaleInTimeWindow)
             scaleInTimeWindow=$2
             shift 2;;
-        --adminUsername)
-            adminUsername=$2
-            shift 2;;
-        --authenticationType)
-            authenticationType=$2
-            shift 2;;
-        --adminPasswordOrKey)
-            adminPasswordOrKey=$2
-            shift 2;;
-        --dnsLabel)
-            dnsLabel=$2
-            shift 2;;
-        --instanceType)
-            instanceType=$2
-            shift 2;;
-        --imageName)
-            imageName=$2
-            shift 2;;
-        --bigIpVersion)
-            bigIpVersion=$2
-            shift 2;;
-        --bigIqAddress)
-            bigIqAddress=$2
-            shift 2;;
-        --bigIqUsername)
-            bigIqUsername=$2
-            shift 2;;
-        --bigIqPassword)
-            bigIqPassword=$2
-            shift 2;;
-        --bigIqLicensePoolName)
-            bigIqLicensePoolName=$2
-            shift 2;;
-        --bigIqLicenseSkuKeyword1)
-            bigIqLicenseSkuKeyword1=$2
-            shift 2;;
-        --bigIqLicenseUnitOfMeasure)
-            bigIqLicenseUnitOfMeasure=$2
-            shift 2;;
-        --vnetName)
-            vnetName=$2
-            shift 2;;
-        --vnetResourceGroupName)
-            vnetResourceGroupName=$2
-            shift 2;;
-        --mgmtSubnetName)
-            mgmtSubnetName=$2
+        --notificationEmail)
+            notificationEmail=$2
             shift 2;;
         --applicationProtocols)
             applicationProtocols=$2
@@ -98,9 +101,6 @@ while [[ $# -gt 1 ]]; do
             shift 2;;
         --applicationSecurePort)
             applicationSecurePort=$2
-            shift 2;;
-        --declarationUrl)
-            declarationUrl=$2
             shift 2;;
         --sslCert)
             sslCert=$2
@@ -150,8 +150,8 @@ while [[ $# -gt 1 ]]; do
         --servicePrincipalSecret)
             servicePrincipalSecret=$2
             shift 2;;
-        --notificationEmail)
-            notificationEmail=$2
+        --declarationUrl)
+            declarationUrl=$2
             shift 2;;
         --ntpServer)
             ntpServer=$2
@@ -190,7 +190,7 @@ while [[ $# -gt 1 ]]; do
 done
 
 #If a required parameter is not passed, the script will prompt for it below
-required_variables="vmScaleSetMinCount vmScaleSetMaxCount appInsights scaleOutCpuThreshold scaleInCpuThreshold scaleOutThroughputThreshold scaleInThroughputThreshold scaleOutTimeWindow scaleInTimeWindow adminUsername authenticationType adminPasswordOrKey dnsLabel instanceType imageName bigIpVersion bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName bigIqLicenseSkuKeyword1 bigIqLicenseUnitOfMeasure vnetName vnetResourceGroupName mgmtSubnetName applicationProtocols applicationAddress applicationPort applicationSecurePort declarationUrl sslCert sslPswd applicationType blockingLevel customPolicy dnsMemberIpType dnsMemberPort dnsProviderHost dnsProviderPort dnsProviderUser dnsProviderPassword dnsProviderPool dnsProviderDataCenter tenantId clientId servicePrincipalSecret notificationEmail ntpServer timeZone customImage allowUsageAnalytics resourceGroupName "
+required_variables="adminUsername authenticationType adminPasswordOrKey dnsLabel instanceType imageName bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName bigIqLicenseSkuKeyword1 bigIqLicenseUnitOfMeasure bigIpVersion vnetName vnetResourceGroupName mgmtSubnetName vmScaleSetMinCount vmScaleSetMaxCount appInsights scaleOutCpuThreshold scaleInCpuThreshold scaleOutThroughputThreshold scaleInThroughputThreshold scaleOutTimeWindow scaleInTimeWindow notificationEmail applicationProtocols applicationAddress applicationPort applicationSecurePort sslCert sslPswd applicationType blockingLevel customPolicy dnsMemberIpType dnsMemberPort dnsProviderHost dnsProviderPort dnsProviderUser dnsProviderPassword dnsProviderPool dnsProviderDataCenter tenantId clientId servicePrincipalSecret declarationUrl ntpServer timeZone customImage allowUsageAnalytics resourceGroupName "
 for variable in $required_variables
         do
         if [ -z ${!variable} ] ; then
@@ -217,4 +217,4 @@ azure group create -n $resourceGroupName -l $region
 # Deploy ARM Template, right now cannot specify parameter file and parameters inline via Azure CLI
 template_file="./azuredeploy.json"
 parameter_file="./azuredeploy.parameters.json"
-azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"vmScaleSetMinCount\":{\"value\":$vmScaleSetMinCount},\"vmScaleSetMaxCount\":{\"value\":$vmScaleSetMaxCount},\"appInsights\":{\"value\":\"$appInsights\"},\"scaleOutCpuThreshold\":{\"value\":$scaleOutCpuThreshold},\"scaleInCpuThreshold\":{\"value\":$scaleInCpuThreshold},\"scaleOutThroughputThreshold\":{\"value\":$scaleOutThroughputThreshold},\"scaleInThroughputThreshold\":{\"value\":$scaleInThroughputThreshold},\"scaleOutTimeWindow\":{\"value\":$scaleOutTimeWindow},\"scaleInTimeWindow\":{\"value\":$scaleInTimeWindow},\"adminUsername\":{\"value\":\"$adminUsername\"},\"authenticationType\":{\"value\":\"$authenticationType\"},\"adminPasswordOrKey\":{\"value\":\"$adminPasswordOrKey\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"bigIqAddress\":{\"value\":\"$bigIqAddress\"},\"bigIqUsername\":{\"value\":\"$bigIqUsername\"},\"bigIqPassword\":{\"value\":\"$bigIqPassword\"},\"bigIqLicensePoolName\":{\"value\":\"$bigIqLicensePoolName\"},\"bigIqLicenseSkuKeyword1\":{\"value\":\"$bigIqLicenseSkuKeyword1\"},\"bigIqLicenseUnitOfMeasure\":{\"value\":\"$bigIqLicenseUnitOfMeasure\"},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"applicationProtocols\":{\"value\":\"$applicationProtocols\"},\"applicationAddress\":{\"value\":\"$applicationAddress\"},\"applicationPort\":{\"value\":\"$applicationPort\"},\"applicationSecurePort\":{\"value\":\"$applicationSecurePort\"},\"declarationUrl\":{\"value\":\"$declarationUrl\"},\"sslCert\":{\"value\":\"$sslCert\"},\"sslPswd\":{\"value\":\"$sslPswd\"},\"applicationType\":{\"value\":\"$applicationType\"},\"blockingLevel\":{\"value\":\"$blockingLevel\"},\"customPolicy\":{\"value\":\"$customPolicy\"},\"dnsMemberIpType\":{\"value\":\"$dnsMemberIpType\"},\"dnsMemberPort\":{\"value\":\"$dnsMemberPort\"},\"dnsProviderHost\":{\"value\":\"$dnsProviderHost\"},\"dnsProviderPort\":{\"value\":\"$dnsProviderPort\"},\"dnsProviderUser\":{\"value\":\"$dnsProviderUser\"},\"dnsProviderPassword\":{\"value\":\"$dnsProviderPassword\"},\"dnsProviderPool\":{\"value\":\"$dnsProviderPool\"},\"dnsProviderDataCenter\":{\"value\":\"$dnsProviderDataCenter\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"notificationEmail\":{\"value\":\"$notificationEmail\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"customImage\":{\"value\":\"$customImage\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"}}"
+azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"authenticationType\":{\"value\":\"$authenticationType\"},\"adminPasswordOrKey\":{\"value\":\"$adminPasswordOrKey\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIqAddress\":{\"value\":\"$bigIqAddress\"},\"bigIqUsername\":{\"value\":\"$bigIqUsername\"},\"bigIqPassword\":{\"value\":\"$bigIqPassword\"},\"bigIqLicensePoolName\":{\"value\":\"$bigIqLicensePoolName\"},\"bigIqLicenseSkuKeyword1\":{\"value\":\"$bigIqLicenseSkuKeyword1\"},\"bigIqLicenseUnitOfMeasure\":{\"value\":\"$bigIqLicenseUnitOfMeasure\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"vmScaleSetMinCount\":{\"value\":$vmScaleSetMinCount},\"vmScaleSetMaxCount\":{\"value\":$vmScaleSetMaxCount},\"appInsights\":{\"value\":\"$appInsights\"},\"scaleOutCpuThreshold\":{\"value\":$scaleOutCpuThreshold},\"scaleInCpuThreshold\":{\"value\":$scaleInCpuThreshold},\"scaleOutThroughputThreshold\":{\"value\":$scaleOutThroughputThreshold},\"scaleInThroughputThreshold\":{\"value\":$scaleInThroughputThreshold},\"scaleOutTimeWindow\":{\"value\":$scaleOutTimeWindow},\"scaleInTimeWindow\":{\"value\":$scaleInTimeWindow},\"notificationEmail\":{\"value\":\"$notificationEmail\"},\"applicationProtocols\":{\"value\":\"$applicationProtocols\"},\"applicationAddress\":{\"value\":\"$applicationAddress\"},\"applicationPort\":{\"value\":\"$applicationPort\"},\"applicationSecurePort\":{\"value\":\"$applicationSecurePort\"},\"sslCert\":{\"value\":\"$sslCert\"},\"sslPswd\":{\"value\":\"$sslPswd\"},\"applicationType\":{\"value\":\"$applicationType\"},\"blockingLevel\":{\"value\":\"$blockingLevel\"},\"customPolicy\":{\"value\":\"$customPolicy\"},\"dnsMemberIpType\":{\"value\":\"$dnsMemberIpType\"},\"dnsMemberPort\":{\"value\":\"$dnsMemberPort\"},\"dnsProviderHost\":{\"value\":\"$dnsProviderHost\"},\"dnsProviderPort\":{\"value\":\"$dnsProviderPort\"},\"dnsProviderUser\":{\"value\":\"$dnsProviderUser\"},\"dnsProviderPassword\":{\"value\":\"$dnsProviderPassword\"},\"dnsProviderPool\":{\"value\":\"$dnsProviderPool\"},\"dnsProviderDataCenter\":{\"value\":\"$dnsProviderDataCenter\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"declarationUrl\":{\"value\":\"$declarationUrl\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"customImage\":{\"value\":\"$customImage\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"}}"
