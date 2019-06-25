@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_DS3_v2 --imageName AllTwoBootLocations --bigIqAddress <value> --bigIqUsername <value> --bigIqPassword <value> --bigIqLicensePoolName <value> --bigIqLicenseSkuKeyword1 OPTIONAL --bigIqLicenseUnitOfMeasure OPTIONAL --bigIpVersion 14.1.003000 --numberOfAdditionalNics 0 --additionalNicLocation OPTIONAL --numberOfExternalIps 1 --vnetAddressPrefix 10.0 --managedRoutes NOT_SPECIFIED --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --instanceType Standard_DS3_v2 --imageName AllTwoBootLocations --bigIqAddress <value> --bigIqUsername <value> --bigIqPassword <value> --bigIqLicensePoolName <value> --bigIqLicenseSkuKeyword1 OPTIONAL --bigIqLicenseUnitOfMeasure OPTIONAL --bigIpVersion 14.1.003000 --bigIpModules ltm:nominal --vnetAddressPrefix 10.0 --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --numberOfAdditionalNics 0 --additionalNicLocation OPTIONAL --managedRoutes NOT_SPECIFIED --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 # Assign Script Parameters and Define Variables
 # Specify static items below, change these as needed or make them parameters
@@ -26,6 +26,9 @@ while [[ $# -gt 1 ]]; do
             shift 2;;
         --instanceName)
             instanceName=$2
+            shift 2;;
+        --numberOfExternalIps)
+            numberOfExternalIps=$2
             shift 2;;
         --instanceType)
             instanceType=$2
@@ -54,29 +57,11 @@ while [[ $# -gt 1 ]]; do
         --bigIpVersion)
             bigIpVersion=$2
             shift 2;;
-        --numberOfAdditionalNics)
-            numberOfAdditionalNics=$2
-            shift 2;;
-        --additionalNicLocation)
-            additionalNicLocation=$2
-            shift 2;;
-        --numberOfExternalIps)
-            numberOfExternalIps=$2
+        --bigIpModules)
+            bigIpModules=$2
             shift 2;;
         --vnetAddressPrefix)
             vnetAddressPrefix=$2
-            shift 2;;
-        --managedRoutes)
-            managedRoutes=$2
-            shift 2;;
-        --tenantId)
-            tenantId=$2
-            shift 2;;
-        --clientId)
-            clientId=$2
-            shift 2;;
-        --servicePrincipalSecret)
-            servicePrincipalSecret=$2
             shift 2;;
         --declarationUrl)
             declarationUrl=$2
@@ -99,6 +84,24 @@ while [[ $# -gt 1 ]]; do
         --allowUsageAnalytics)
             allowUsageAnalytics=$2
             shift 2;;
+        --numberOfAdditionalNics)
+            numberOfAdditionalNics=$2
+            shift 2;;
+        --additionalNicLocation)
+            additionalNicLocation=$2
+            shift 2;;
+        --managedRoutes)
+            managedRoutes=$2
+            shift 2;;
+        --tenantId)
+            tenantId=$2
+            shift 2;;
+        --clientId)
+            clientId=$2
+            shift 2;;
+        --servicePrincipalSecret)
+            servicePrincipalSecret=$2
+            shift 2;;
         --resourceGroupName)
             resourceGroupName=$2
             shift 2;;
@@ -118,7 +121,7 @@ while [[ $# -gt 1 ]]; do
 done
 
 #If a required parameter is not passed, the script will prompt for it below
-required_variables="adminUsername authenticationType adminPasswordOrKey dnsLabel instanceName instanceType imageName bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName bigIqLicenseSkuKeyword1 bigIqLicenseUnitOfMeasure bigIpVersion numberOfAdditionalNics additionalNicLocation numberOfExternalIps vnetAddressPrefix managedRoutes tenantId clientId servicePrincipalSecret declarationUrl ntpServer timeZone customImage allowUsageAnalytics resourceGroupName "
+required_variables="adminUsername authenticationType adminPasswordOrKey dnsLabel instanceName numberOfExternalIps instanceType imageName bigIqAddress bigIqUsername bigIqPassword bigIqLicensePoolName bigIqLicenseSkuKeyword1 bigIqLicenseUnitOfMeasure bigIpVersion bigIpModules vnetAddressPrefix declarationUrl ntpServer timeZone customImage allowUsageAnalytics numberOfAdditionalNics additionalNicLocation managedRoutes tenantId clientId servicePrincipalSecret resourceGroupName "
 for variable in $required_variables
         do
         if [ -z ${!variable} ] ; then
@@ -145,4 +148,4 @@ azure group create -n $resourceGroupName -l $region
 # Deploy ARM Template, right now cannot specify parameter file and parameters inline via Azure CLI
 template_file="./azuredeploy.json"
 parameter_file="./azuredeploy.parameters.json"
-azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"authenticationType\":{\"value\":\"$authenticationType\"},\"adminPasswordOrKey\":{\"value\":\"$adminPasswordOrKey\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIqAddress\":{\"value\":\"$bigIqAddress\"},\"bigIqUsername\":{\"value\":\"$bigIqUsername\"},\"bigIqPassword\":{\"value\":\"$bigIqPassword\"},\"bigIqLicensePoolName\":{\"value\":\"$bigIqLicensePoolName\"},\"bigIqLicenseSkuKeyword1\":{\"value\":\"$bigIqLicenseSkuKeyword1\"},\"bigIqLicenseUnitOfMeasure\":{\"value\":\"$bigIqLicenseUnitOfMeasure\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"numberOfAdditionalNics\":{\"value\":$numberOfAdditionalNics},\"additionalNicLocation\":{\"value\":\"$additionalNicLocation\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"managedRoutes\":{\"value\":\"$managedRoutes\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"},\"declarationUrl\":{\"value\":\"$declarationUrl\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"customImage\":{\"value\":\"$customImage\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"}}"
+azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"authenticationType\":{\"value\":\"$authenticationType\"},\"adminPasswordOrKey\":{\"value\":\"$adminPasswordOrKey\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIqAddress\":{\"value\":\"$bigIqAddress\"},\"bigIqUsername\":{\"value\":\"$bigIqUsername\"},\"bigIqPassword\":{\"value\":\"$bigIqPassword\"},\"bigIqLicensePoolName\":{\"value\":\"$bigIqLicensePoolName\"},\"bigIqLicenseSkuKeyword1\":{\"value\":\"$bigIqLicenseSkuKeyword1\"},\"bigIqLicenseUnitOfMeasure\":{\"value\":\"$bigIqLicenseUnitOfMeasure\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"bigIpModules\":{\"value\":\"$bigIpModules\"},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"declarationUrl\":{\"value\":\"$declarationUrl\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"customImage\":{\"value\":\"$customImage\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"},\"numberOfAdditionalNics\":{\"value\":$numberOfAdditionalNics},\"additionalNicLocation\":{\"value\":\"$additionalNicLocation\"},\"managedRoutes\":{\"value\":\"$managedRoutes\"},\"tenantId\":{\"value\":\"$tenantId\"},\"clientId\":{\"value\":\"$clientId\"},\"servicePrincipalSecret\":{\"value\":\"$servicePrincipalSecret\"}}"

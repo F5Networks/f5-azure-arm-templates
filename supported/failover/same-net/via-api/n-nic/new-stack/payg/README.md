@@ -42,7 +42,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 
 ## Important configuration notes
 
-> **_CRITICAL:_**  As of F5 ARM template GitHub release 6.1.0.0, BIG-IP version 12.1 is no longer supported, and Microsoft Azure has removed Azure BIG-IP image version 12.1.30300 (BIG-IP version 12.1.3.3 Build 0.0.4) from the Marketplace. While this change won't affect most users, if you have deployed templates as part of an automated process that updates Azure resources, see https://github.com/F5Networks/f5-azure-arm-templates/blob/master/bigip-12-note.md.  
+> **_CRITICAL:_**  As of Release 6.1.0.0, BIG-IP version 12.1 is no longer supported. If you require BIG-IP version 12.1, you can use a previously released ARM template.  To find a previously released template, from the **Branch** drop-down, click the **Tags** tab, and then select a tag of **v6.0.4.0** or earlier.
 
 - All F5 ARM templates include Application Services 3 Extension (AS3) v3.5.1 (LTS version) on the BIG-IP VE.  As of release 4.1.2, all supported templates give the option of including the URL of an AS3 declaration, which you can use to specify the BIG-IP configuration you want on your newly created BIG-IP VE(s).  In templates such as autoscale, where an F5-recommended configuration is deployed by default, specifying an AS3 declaration URL will override the default configuration with your declaration.   See the [AS3 documentation](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.5.1/) for details on how to use AS3.   
 - There are new options for BIG-IP license bundles, including Per App VE LTM, Advanced WAF, and Per App VE Advanced WAF. See the [the version matrix](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md) for details and applicable templates.
@@ -66,6 +66,10 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - See the [Update Secret](#updating-encrypted-files) section for details on how to update the service principal located in ***/config/cloud/.azCredentials** if it changes during the lifetime of the deployment.
 - This template may deploy additional NICs using the parameter **numberOfAdditionalNics**, if doing so it will preconfigure the BIG-IP VLAN(s) and place the interfaces into the corresponding VLAN based on the subnet name(s) provided in the parameter **additionalNicLocation**.  Be aware that after the template deploys, the BIG-IP self IP address(es) need to be created that correspond to the Azure IP Config object for that NIC.  You must also set the IP Config object to a **static** address instead of **dynamic** to ensure it does not change on reboot.
 - Adding additional NIC's post-deployment is possible, it requires creating an additional NIC, powering off the VM and adding the network interface to the VM. See Microsoft documentation for more details on adding a NIC to an existing VM. **Important**: For failover to occur, each set of additional NIC's created must be named exactly the same except for the last character, such as **additionalnic0** and **additionalnic1**.
+- Previous tagged releases can be used to reference functionality that has been changed or removed. 
+- If you are using a failover via-API template and performing an in-place upgrade of BIG-IP v13.1.1 or later, you must follow the instructions in [Post-Deployment Configuration Steps](#post-deployment-configuration-steps)
+- All templates now deploy Standard SKU Azure Public IP Addresses.
+- All templates deploy Azure Virtual Machines and Virtual Machine Scale Sets into Availability Zones in supported regions; Availability Sets are still created in unsupported regions. Virtual Machine Scale Sets are distributed across zones 1, 2, and 3; failover Virtual Machines across zones 1 and 2. Standalone Virtual Machines are placed in zone 1 by default; however, you may select zone 1, 2, or 3 using the new zoneChoice parameter.
 
 ## Security
 
@@ -116,7 +120,7 @@ Use the appropriate button below to deploy:
 
 - **PAYG**: This allows you to use pay-as-you-go hourly billing.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv6.1.0.0%2Fsupported%2Ffailover%2Fsame-net%2Fvia-api%2Fn-nic%2Fnew-stack%2Fpayg%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.0.0.0%2Fsupported%2Ffailover%2Fsame-net%2Fvia-api%2Fn-nic%2Fnew-stack%2Fpayg%2Fazuredeploy.json)
 
 ### Template parameters
 
@@ -127,17 +131,12 @@ Use the appropriate button below to deploy:
 | adminPasswordOrKey | Yes | Password or SSH public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key-based authentication, this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**. |
 | dnsLabel | Yes | Unique DNS Name for the Public IP address used to access the Virtual Machine. |
 | instanceName | Yes | Name of the Virtual Machine. |
+| numberOfExternalIps | Yes | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
 | instanceType | Yes | Instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as **Best** instead of **Good**. |
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
-| numberOfAdditionalNics | Yes | By default this solution deploys the BIG-IP(s) in a 3 NIC configuration, however additional NICs can be added to the BIG-IP(s) using this parameter.  **Note**: The default value is 0, additional NICs will only be created if 1 or higher is specified. |
-| additionalNicLocation | Yes | This parameter specifies where the additional NICs go, use the default value of **OPTIONAL** if **0** was selected for the parameter **numberOfAdditionalNics**.  Otherwise this value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. **Note**: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique. |
-| numberOfExternalIps | Yes | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
+| bigIpModules | Yes | Comma separated list of modules and levels to provision, for example, 'ltm:nominal,asm:nominal |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
-| managedRoutes | Yes | A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24. Specifying a comma-delimited list of managedRoutes and creating f5_ha and f5_tg tags on the Azure Route Table defines the UDRs to be updated. To have the UDRs managed by BIG-IP, you will need to create an Azure tag with key **f5_ha** and value **self_2nic**, or the name of a different self IP address configured on the BIG-IP VE. All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with 'f5_ha:' will use the corresponding self IP address on the active BIG-IP VE as the next hop for those routes. You must also associate the route table with a traffic group by creating an Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group configured on the BIG-IP VE. |
-| tenantId | Yes | Your Azure service principal application tenant ID. |
-| clientId | Yes | Your Azure service principal application client ID. |
-| servicePrincipalSecret | Yes | Your Azure service principal application secret. |
 | declarationUrl | Yes | URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.5.1/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration. |
 | ntpServer | Yes | Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use. |
 | timeZone | Yes | If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list [here](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md)). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |
@@ -145,6 +144,12 @@ Use the appropriate button below to deploy:
 | restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources |
 | tagValues | Yes | Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key. |
 | allowUsageAnalytics | Yes | This deployment can send anonymous statistics to F5 to help us determine how to improve our solutions. If you select **No** statistics are not sent. |
+| numberOfAdditionalNics | Yes | By default this solution deploys the BIG-IP(s) in a 3 NIC configuration, however additional NICs can be added to the BIG-IP(s) using this parameter.  **Note**: The default value is 0, additional NICs will only be created if 1 or higher is specified. |
+| additionalNicLocation | Yes | This parameter specifies where the additional NICs go, use the default value of **OPTIONAL** if **0** was selected for the parameter **numberOfAdditionalNics**.  Otherwise this value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. **Note**: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique. |
+| managedRoutes | Yes | A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24. Specifying a comma-delimited list of managedRoutes and creating f5_ha and f5_tg tags on the Azure Route Table defines the UDRs to be updated. To have the UDRs managed by BIG-IP, you will need to create an Azure tag with key **f5_ha** and value **self_2nic**, or the name of a different self IP address configured on the BIG-IP VE. All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with 'f5_ha:' will use the corresponding self IP address on the active BIG-IP VE as the next hop for those routes. You must also associate the route table with a traffic group by creating an Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group configured on the BIG-IP VE. |
+| tenantId | Yes | Your Azure service principal application tenant ID. |
+| clientId | Yes | Your Azure service principal application client ID. |
+| servicePrincipalSecret | Yes | Your Azure service principal application secret. |
 
 ### Programmatic deployments
 
@@ -153,7 +158,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### PowerShell Script Example
 
 ```powershell
-## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -instanceType Standard_DS3_v2 -imageName Best1Gbps -bigIpVersion 14.1.003000 -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -numberOfExternalIps 1 -vnetAddressPrefix 10.0 -managedRoutes NOT_SPECIFIED -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -instanceType Standard_DS3_v2 -imageName Best1Gbps -bigIpVersion 14.1.003000 -bigIpModules ltm:nominal -vnetAddressPrefix 10.0 -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -managedRoutes NOT_SPECIFIED -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -resourceGroupName <value>
 ```
 
 =======
@@ -161,8 +166,50 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### Azure CLI (1.0) Script Example
 
 ```bash
-## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_DS3_v2 --imageName Best1Gbps --bigIpVersion 14.1.003000 --numberOfAdditionalNics 0 --additionalNicLocation OPTIONAL --numberOfExternalIps 1 --vnetAddressPrefix 10.0 --managedRoutes NOT_SPECIFIED --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --instanceType Standard_DS3_v2 --imageName Best1Gbps --bigIpVersion 14.1.003000 --bigIpModules ltm:nominal --vnetAddressPrefix 10.0 --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --numberOfAdditionalNics 0 --additionalNicLocation OPTIONAL --managedRoutes NOT_SPECIFIED --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 ```
+
+## Post-Deployment Configuration Steps
+
+When performing an in-place upgrade of BIG-IP software v13.1.1 or later, you must complete the following steps to ensure that all the components required for failover are copied to the volume where the new version of BIG-IP is installed.  To ensure traffic processing is not interrupted, F5 highly recommends upgrading the standby device, verifying failover functionality, and then upgrading the previously active device. 
+
+From the volume to be upgraded on the standby device, you must edit **cs.dat** to allow inclusion of all files in **/config/cloud** in UCS backup.  
+
+1. Remount the /usr directory as writable:  
+  ``mount -o remount,rw /usr``
+
+2. Back up the cs.dat file:  
+ ``cp /usr/libdata/configsync/cs.dat /usr/libdata/configsync/cs.dat.bak``
+
+3. Edit the cs.dat file:  
+``vi /usr/libdata/configsync/cs.dat``
+
+4. In cs.dat, find the entry similar to the one below (the number between save and ignore may differ):  
+**save.10100.ignore = (/config/cloud/*)**
+
+5. Change **ignore** to **file** in the save key, and remove the parentheses from the value:  
+``save.10100.file = /config/cloud/*``
+
+6. Save the cs.dat file and exit the editor.
+
+7. Remount the **/usr** directory as read-only:  
+``mount -o remount,ro /usr``
+
+8. Create a [UCS archive](https://support.f5.com/csp/article/K13132) in the BIG-IP UI (accept defaults):
+**System > Archives > Create > myUCS** 
+
+9. Download myUCS.ucs locally.
+
+10. Install new ISO and reboot into upgraded volume.
+
+11. Boot into the newly upgraded volume.  
+
+12. After verifying failover functionality, repeat steps 1-11 on the now-standby BIG-IP device.
+
+13. Following the upgrade, all the necessary files should be present and failover should work normally.  To manually restore the UCS archive you created previously, use the following steps:
+    - From the upgraded volume, upload UCS file: **System > Archives > Upload > myUCS.uss**
+    - Restore the previously created UCS archive: **System > Archives > myUCS.ucs > Restore**
+
 
 ## Configuration Example
 

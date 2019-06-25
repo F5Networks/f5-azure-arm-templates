@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_DS2_v2 --imageName AllTwoBootLocations --bigIpVersion 14.1.003000 --licenseKey1 <value> --numberOfExternalIps 1 --vnetAddressPrefix 10.0 --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --instanceType Standard_DS2_v2 --imageName AllTwoBootLocations --bigIpVersion 14.1.003000 --bigIpModules ltm:nominal --licenseKey1 <value> --vnetAddressPrefix 10.0 --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 # Assign Script Parameters and Define Variables
 # Specify static items below, change these as needed or make them parameters
@@ -27,6 +27,9 @@ while [[ $# -gt 1 ]]; do
         --instanceName)
             instanceName=$2
             shift 2;;
+        --numberOfExternalIps)
+            numberOfExternalIps=$2
+            shift 2;;
         --instanceType)
             instanceType=$2
             shift 2;;
@@ -36,11 +39,11 @@ while [[ $# -gt 1 ]]; do
         --bigIpVersion)
             bigIpVersion=$2
             shift 2;;
+        --bigIpModules)
+            bigIpModules=$2
+            shift 2;;
         --licenseKey1)
             licenseKey1=$2
-            shift 2;;
-        --numberOfExternalIps)
-            numberOfExternalIps=$2
             shift 2;;
         --vnetAddressPrefix)
             vnetAddressPrefix=$2
@@ -85,7 +88,7 @@ while [[ $# -gt 1 ]]; do
 done
 
 #If a required parameter is not passed, the script will prompt for it below
-required_variables="adminUsername authenticationType adminPasswordOrKey dnsLabel instanceName instanceType imageName bigIpVersion licenseKey1 numberOfExternalIps vnetAddressPrefix declarationUrl ntpServer timeZone customImage allowUsageAnalytics resourceGroupName "
+required_variables="adminUsername authenticationType adminPasswordOrKey dnsLabel instanceName numberOfExternalIps instanceType imageName bigIpVersion bigIpModules licenseKey1 vnetAddressPrefix declarationUrl ntpServer timeZone customImage allowUsageAnalytics resourceGroupName "
 for variable in $required_variables
         do
         if [ -z ${!variable} ] ; then
@@ -112,4 +115,4 @@ azure group create -n $resourceGroupName -l $region
 # Deploy ARM Template, right now cannot specify parameter file and parameters inline via Azure CLI
 template_file="./azuredeploy.json"
 parameter_file="./azuredeploy.parameters.json"
-azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"authenticationType\":{\"value\":\"$authenticationType\"},\"adminPasswordOrKey\":{\"value\":\"$adminPasswordOrKey\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"licenseKey1\":{\"value\":\"$licenseKey1\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"declarationUrl\":{\"value\":\"$declarationUrl\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"customImage\":{\"value\":\"$customImage\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"}}"
+azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"authenticationType\":{\"value\":\"$authenticationType\"},\"adminPasswordOrKey\":{\"value\":\"$adminPasswordOrKey\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"bigIpModules\":{\"value\":\"$bigIpModules\"},\"licenseKey1\":{\"value\":\"$licenseKey1\"},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"declarationUrl\":{\"value\":\"$declarationUrl\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"customImage\":{\"value\":\"$customImage\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"}}"

@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "6.1.0.0",
+    "contentVersion": "7.0.0.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -38,6 +38,9 @@
         "bigIpVersion": {
             "value": "14.1.003000"
         },
+        "bigIpModules": {
+            "value": "ltm:nominal"
+        },
         "vnetName": {
             "value": ""
         },
@@ -52,9 +55,6 @@
         },
         "uniqueLabel": {
             "value": ""
-        },
-        "numberOfInstances": {
-            "value": 2
         },
         "declarationUrl": {
             "value": "NOT_SPECIFIED"
@@ -82,6 +82,9 @@
         },
         "allowUsageAnalytics": {
             "value": "Yes"
+        },
+        "numberOfInstances": {
+            "value": 2
         }
     }
 }

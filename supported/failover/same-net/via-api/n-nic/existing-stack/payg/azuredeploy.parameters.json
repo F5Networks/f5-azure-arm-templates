@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "6.1.0.0",
+    "contentVersion": "7.0.0.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -17,6 +17,9 @@
         "instanceName": {
             "value": "f5vm01"
         },
+        "numberOfExternalIps": {
+            "value": 1
+        },
         "instanceType": {
             "value": "Standard_DS3_v2"
         },
@@ -26,14 +29,8 @@
         "bigIpVersion": {
             "value": "14.1.003000"
         },
-        "numberOfAdditionalNics": {
-            "value": 0
-        },
-        "additionalNicLocation": {
-            "value": "OPTIONAL"
-        },
-        "numberOfExternalIps": {
-            "value": 1
+        "bigIpModules": {
+            "value": "ltm:nominal"
         },
         "vnetName": {
             "value": ""
@@ -62,17 +59,8 @@
         "internalIpAddressRangeStart": {
             "value": ""
         },
-        "managedRoutes": {
-            "value": "NOT_SPECIFIED"
-        },
-        "tenantId": {
-            "value": ""
-        },
-        "clientId": {
-            "value": ""
-        },
-        "servicePrincipalSecret": {
-            "value": ""
+        "provisionPublicIP": {
+            "value": "Yes"
         },
         "declarationUrl": {
             "value": "NOT_SPECIFIED"
@@ -100,6 +88,24 @@
         },
         "allowUsageAnalytics": {
             "value": "Yes"
+        },
+        "numberOfAdditionalNics": {
+            "value": 0
+        },
+        "additionalNicLocation": {
+            "value": "OPTIONAL"
+        },
+        "managedRoutes": {
+            "value": "NOT_SPECIFIED"
+        },
+        "tenantId": {
+            "value": ""
+        },
+        "clientId": {
+            "value": ""
+        },
+        "servicePrincipalSecret": {
+            "value": ""
         }
     }
 }

@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "6.1.0.0",
+    "contentVersion": "7.0.0.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -16,6 +16,18 @@
         },
         "instanceName": {
             "value": "f5vm01"
+        },
+        "numberOfExternalIps": {
+            "value": 1
+        },
+        "enableNetworkFailover": {
+            "value": "Yes"
+        },
+        "internalLoadBalancerType": {
+            "value": "Per-protocol"
+        },
+        "internalLoadBalancerProbePort": {
+            "value": "3456"
         },
         "instanceType": {
             "value": "Standard_DS3_v2"
@@ -44,20 +56,11 @@
         "bigIpVersion": {
             "value": "14.1.003000"
         },
-        "numberOfExternalIps": {
-            "value": 1
+        "bigIpModules": {
+            "value": "ltm:nominal"
         },
         "vnetAddressPrefix": {
             "value": "10.0"
-        },
-        "enableNetworkFailover": {
-            "value": "Yes"
-        },
-        "internalLoadBalancerType": {
-            "value": "Per-protocol"
-        },
-        "internalLoadBalancerProbePort": {
-            "value": "3456"
         },
         "declarationUrl": {
             "value": "NOT_SPECIFIED"

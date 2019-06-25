@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "6.1.0.0",
+    "contentVersion": "7.0.0.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -23,8 +23,38 @@
         "bigIpVersion": {
             "value": "14.1.003000"
         },
+        "bigIpModules": {
+            "value": "asm:nominal"
+        },
         "vnetAddressPrefix": {
             "value": "10.0"
+        },
+        "declarationUrl": {
+            "value": "NOT_SPECIFIED"
+        },
+        "ntpServer": {
+            "value": "0.pool.ntp.org"
+        },
+        "timeZone": {
+            "value": "UTC"
+        },
+        "customImage": {
+            "value": "OPTIONAL"
+        },
+        "restrictedSrcAddress": {
+            "value": "*"
+        },
+        "tagValues": {
+            "value": {
+                "application": "APP",
+                "cost": "COST",
+                "environment": "ENV",
+                "group": "GROUP",
+                "owner": "OWNER"
+            }
+        },
+        "allowUsageAnalytics": {
+            "value": "Yes"
         },
         "vmScaleSetMinCount": {
             "value": 2
@@ -56,7 +86,7 @@
         "notificationEmail": {
             "value": "OPTIONAL"
         },
-        "enableMgmtPublicIp": {
+        "provisionPublicIP": {
             "value": "No"
         },
         "applicationProtocols": {
@@ -94,33 +124,6 @@
         },
         "servicePrincipalSecret": {
             "value": ""
-        },
-        "declarationUrl": {
-            "value": "NOT_SPECIFIED"
-        },
-        "ntpServer": {
-            "value": "0.pool.ntp.org"
-        },
-        "timeZone": {
-            "value": "UTC"
-        },
-        "customImage": {
-            "value": "OPTIONAL"
-        },
-        "restrictedSrcAddress": {
-            "value": "*"
-        },
-        "tagValues": {
-            "value": {
-                "application": "APP",
-                "cost": "COST",
-                "environment": "ENV",
-                "group": "GROUP",
-                "owner": "OWNER"
-            }
-        },
-        "allowUsageAnalytics": {
-            "value": "Yes"
         }
     }
 }

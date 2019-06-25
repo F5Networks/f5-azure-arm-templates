@@ -1,7 +1,7 @@
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some (such as region) can    ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specified below.    ##
-## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -instanceType Standard_DS3_v2 -imageName AllTwoBootLocations -bigIpVersion 14.1.003000 -licenseKey1 <value> -licenseKey2 <value> -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -numberOfExternalIps 1 -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddressRangeStart <value> -externalSubnetName <value> -externalIpAddressRangeStart <value> -externalIpSelfAddressRangeStart <value> -internalSubnetName <value> -internalIpAddressRangeStart <value> -managedRoutes NOT_SPECIFIED -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -instanceType Standard_DS3_v2 -imageName AllTwoBootLocations -bigIpVersion 14.1.003000 -bigIpModules ltm:nominal -licenseKey1 <value> -licenseKey2 <value> -vnetName <value> -vnetResourceGroupName <value> -mgmtSubnetName <value> -mgmtIpAddressRangeStart <value> -externalSubnetName <value> -externalIpAddressRangeStart <value> -externalIpSelfAddressRangeStart <value> -internalSubnetName <value> -internalIpAddressRangeStart <value> -provisionPublicIP Yes -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -managedRoutes NOT_SPECIFIED -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -resourceGroupName <value>
 
 param(
 
@@ -10,14 +10,13 @@ param(
   [string] [Parameter(Mandatory=$True)] $adminPasswordOrKey,
   [string] [Parameter(Mandatory=$True)] $dnsLabel,
   [string] [Parameter(Mandatory=$True)] $instanceName,
+  [string] [Parameter(Mandatory=$True)] $numberOfExternalIps,
   [string] [Parameter(Mandatory=$True)] $instanceType,
   [string] [Parameter(Mandatory=$True)] $imageName,
   [string] [Parameter(Mandatory=$True)] $bigIpVersion,
+  [string] [Parameter(Mandatory=$True)] $bigIpModules,
   [string] [Parameter(Mandatory=$True)] $licenseKey1,
   [string] [Parameter(Mandatory=$True)] $licenseKey2,
-  [string] [Parameter(Mandatory=$True)] $numberOfAdditionalNics,
-  [string] [Parameter(Mandatory=$True)] $additionalNicLocation,
-  [string] [Parameter(Mandatory=$True)] $numberOfExternalIps,
   [string] [Parameter(Mandatory=$True)] $vnetName,
   [string] [Parameter(Mandatory=$True)] $vnetResourceGroupName,
   [string] [Parameter(Mandatory=$True)] $mgmtSubnetName,
@@ -27,10 +26,7 @@ param(
   [string] [Parameter(Mandatory=$True)] $externalIpSelfAddressRangeStart,
   [string] [Parameter(Mandatory=$True)] $internalSubnetName,
   [string] [Parameter(Mandatory=$True)] $internalIpAddressRangeStart,
-  [string] [Parameter(Mandatory=$True)] $managedRoutes,
-  [string] [Parameter(Mandatory=$True)] $tenantId,
-  [string] [Parameter(Mandatory=$True)] $clientId,
-  [string] [Parameter(Mandatory=$True)] $servicePrincipalSecret,
+  [string] [Parameter(Mandatory=$True)] $provisionPublicIP,
   [string] [Parameter(Mandatory=$True)] $declarationUrl,
   [string] [Parameter(Mandatory=$True)] $ntpServer,
   [string] [Parameter(Mandatory=$True)] $timeZone,
@@ -38,6 +34,12 @@ param(
   [string] $restrictedSrcAddress = "*",
   $tagValues = '{"application": "APP", "cost": "COST", "environment": "ENV", "group": "GROUP", "owner": "OWNER"}',
   [string] [Parameter(Mandatory=$True)] $allowUsageAnalytics,
+  [string] [Parameter(Mandatory=$True)] $numberOfAdditionalNics,
+  [string] [Parameter(Mandatory=$True)] $additionalNicLocation,
+  [string] [Parameter(Mandatory=$True)] $managedRoutes,
+  [string] [Parameter(Mandatory=$True)] $tenantId,
+  [string] [Parameter(Mandatory=$True)] $clientId,
+  [string] [Parameter(Mandatory=$True)] $servicePrincipalSecret,
   [string] [Parameter(Mandatory=$True)] $resourceGroupName,
   [string] $region = "West US",
   [string] $templateFilePath = "azuredeploy.json",
@@ -67,7 +69,7 @@ $servicePrincipalSecretSecure = ConvertTo-SecureString -String $servicePrincipal
 (ConvertFrom-Json $tagValues).psobject.properties | ForEach -Begin {$tagValues=@{}} -process {$tagValues."$($_.Name)" = $_.Value}
 
 # Create Arm Deployment
-$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -dnsLabel $dnsLabel -instanceName $instanceName -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -licenseKey1 $licenseKey1 -licenseKey2 $licenseKey2 -numberOfAdditionalNics $numberOfAdditionalNics -additionalNicLocation $additionalNicLocation -numberOfExternalIps $numberOfExternalIps -vnetName $vnetName -vnetResourceGroupName $vnetResourceGroupName -mgmtSubnetName $mgmtSubnetName -mgmtIpAddressRangeStart $mgmtIpAddressRangeStart -externalSubnetName $externalSubnetName -externalIpAddressRangeStart $externalIpAddressRangeStart -externalIpSelfAddressRangeStart $externalIpSelfAddressRangeStart -internalSubnetName $internalSubnetName -internalIpAddressRangeStart $internalIpAddressRangeStart -managedRoutes $managedRoutes -tenantId $tenantId -clientId $clientId -servicePrincipalSecret $servicePrincipalSecretSecure -declarationUrl $declarationUrl -ntpServer $ntpServer -timeZone $timeZone -customImage $customImage -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics 
+$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -dnsLabel $dnsLabel -instanceName $instanceName -numberOfExternalIps $numberOfExternalIps -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -bigIpModules $bigIpModules -licenseKey1 $licenseKey1 -licenseKey2 $licenseKey2 -vnetName $vnetName -vnetResourceGroupName $vnetResourceGroupName -mgmtSubnetName $mgmtSubnetName -mgmtIpAddressRangeStart $mgmtIpAddressRangeStart -externalSubnetName $externalSubnetName -externalIpAddressRangeStart $externalIpAddressRangeStart -externalIpSelfAddressRangeStart $externalIpSelfAddressRangeStart -internalSubnetName $internalSubnetName -internalIpAddressRangeStart $internalIpAddressRangeStart -provisionPublicIP $provisionPublicIP -declarationUrl $declarationUrl -ntpServer $ntpServer -timeZone $timeZone -customImage $customImage -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics -numberOfAdditionalNics $numberOfAdditionalNics -additionalNicLocation $additionalNicLocation -managedRoutes $managedRoutes -tenantId $tenantId -clientId $clientId -servicePrincipalSecret $servicePrincipalSecretSecure 
 
 # Print Output of Deployment to Console
 $deployment
