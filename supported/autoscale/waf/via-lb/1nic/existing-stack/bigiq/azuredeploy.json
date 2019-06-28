@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
-    "contentVersion": "7.0.0.0",
+    "contentVersion": "7.0.0.1",
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser",
@@ -540,7 +540,7 @@
         "singleQuote": "'",
         "f5CloudLibsTag": "v4.9.1",
         "f5CloudLibsAzureTag": "v2.9.1",
-        "f5NetworksTag": "v7.0.0.0",
+        "f5NetworksTag": "v7.0.0.1",
         "f5CloudIappsLoggerTag": "v1.0.0",
         "f5CloudIappsSdTag": "v2.3.2",
         "f5AS3Build": "f5-appsvcs-3.5.1-5.noarch.rpm",
@@ -670,7 +670,7 @@
             },
             "Yes": {
                 "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]",
-                "metricsCmd": "[concat(' --usageAnalytics \\\" --metrics customerId:${custId},deploymentId:${deployId},templateName:as_waf_via-lb-existing-stack-supported-bigiq,templateVersion:7.0.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:bigiq,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure\\\"')]"
+                "metricsCmd": "[concat(' --usageAnalytics \\\" --metrics customerId:${custId},deploymentId:${deployId},templateName:as_waf_via-lb-existing-stack-supported-bigiq,templateVersion:7.0.0.1,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:bigiq,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure\\\"')]"
             }
         },
         "osProfiles": {

@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
-    "contentVersion": "7.0.0.0",
+    "contentVersion": "7.0.0.1",
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser",
@@ -338,7 +338,7 @@
         "singleQuote": "'",
         "f5CloudLibsTag": "v4.9.1",
         "f5CloudLibsAzureTag": "v2.9.1",
-        "f5NetworksTag": "v7.0.0.0",
+        "f5NetworksTag": "v7.0.0.1",
         "f5CloudIappsLoggerTag": "v1.0.0",
         "f5CloudIappsSdTag": "v2.3.2",
         "f5AS3Build": "f5-appsvcs-3.5.1-5.noarch.rpm",
@@ -378,7 +378,6 @@
         "mgmtSubnetPrivateAddressPrefix": "[concat(variables('mgmtSubnetPrivateAddressPrefixArray')[0], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[1], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[2], '.')]",
         "mgmtSubnetPrivateAddressSuffix": "[int(variables('mgmtSubnetPrivateAddressPrefixArray')[3])]",
         "mgmtSubnetPrivateAddressSuffix1": "[add(variables('mgmtSubnetPrivateAddressSuffix'), 1)]",
-        "externalLoadBalancerAddress": "[concat(variables('mgmtSubnetPrivateAddress'), add(variables('mgmtSubnetPrivateAddressSuffix1'), 1))]",
         "provisionPublicIP": "[parameters('provisionPublicIP')]",
         "paygImageMap": {
             "advancedwaf1gbps": {
@@ -469,7 +468,7 @@
             },
             "Yes": {
                 "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]",
-                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:failover_1nic-existing-stack-supported-payg,templateVersion:7.0.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:payg,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
+                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:failover_1nic-existing-stack-supported-payg,templateVersion:7.0.0.1,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:payg,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
             }
         },
         "osProfiles": {
@@ -841,11 +840,11 @@
     "outputs": {
         "GUI-URL": {
             "type": "string",
-            "value": "[if(equals(parameters('provisionPublicIP'),'No'), concat('https://', variables('externalLoadBalancerAddress'), ':8443'), concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':8443'))]"
+            "value": "[concat('https://',reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,':8443')]"
         },
         "SSH-URL": {
             "type": "string",
-            "value": "[if(equals(parameters('provisionPublicIP'),'No'), concat(variables('externalLoadBalancerAddress'), ' ', 8022), concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',8022))]"
+            "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn,' ',8022)]"
         }
     }
 }

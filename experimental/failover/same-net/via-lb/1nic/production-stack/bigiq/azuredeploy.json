@@ -378,7 +378,7 @@
         "singleQuote": "'",
         "f5CloudLibsTag": "v4.9.0",
         "f5CloudLibsAzureTag": "v2.9.0",
-        "f5NetworksTag": "v7.0.0.0",
+        "f5NetworksTag": "v7.0.0.1",
         "f5CloudIappsLoggerTag": "v1.0.0",
         "f5CloudIappsSdTag": "v2.3.2",
         "f5AS3Build": "f5-appsvcs-3.5.1-5.noarch.rpm",
