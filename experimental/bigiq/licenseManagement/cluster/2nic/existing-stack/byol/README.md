@@ -77,6 +77,7 @@ The following is a map that shows the available options for the template paramet
 | --- | --- |
 | 6.1.000000 | BIG-IQ 6.1.0 |
 
+
 ## Supported instance types and hypervisors
 
 - For a list of recommended Azure instance types for the BIG-IQ VE, see https://support.f5.com/kb/en-us/products/big-iq-centralized-mgmt/manuals/product/bigiq-ve-supported-hypervisors-matrix.html.
@@ -103,7 +104,7 @@ Use the appropriate button below to deploy:
 
 - **BYOL** (bring your own license): This allows you to use an existing BIG-IP license.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.0.0.1%2Fexperimental%2Fbigiq%2FlicenseManagement%2Fcluster%2F2nic%2Fexisting-stack%2Fbyol%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.0.0.2%2Fexperimental%2Fbigiq%2FlicenseManagement%2Fcluster%2F2nic%2Fexisting-stack%2Fbyol%2Fazuredeploy.json)
 
 ### Template parameters
 
@@ -156,7 +157,8 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 
 ## Configuration Example
 
-The following is an example configuration diagram for this solution deployment. 
+The following is an example configuration diagram for this solution deployment.
+
 
 ![Configuration Example](../images/azure-example-diagram.png)
 
@@ -166,6 +168,7 @@ The following is an example configuration diagram for this solution deployment.
 
 ## Creating a managed user identity
 Use one of the following procedures to create a managed user identity.
+
 
 ### Creating a managed user identity from the Azure Portal
 Use the following procedure if you want to create the managed user identity from the Azure Portal.
@@ -189,13 +192,13 @@ The BIG-IQ system now has access to move Azure IP configurations to the active d
 ### Creating a managed user identity from the Azure CLI
 Use the following procedure if you want to create the managed user identity from the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest).
 
-- To create a managed identity, use the following command syntax from the Azure CLI:   
-```az identity create -n <identity_name> -g <deployment_resource_group>```  
-- To get the object ID of the identity (the object ID is the "value" property (GUID) of the returned JSON object), use the following command syntax from the Azure CLI:   
+- To create a managed identity, use the following command syntax from the Azure CLI:
+```az identity create -n <identity_name> -g <deployment_resource_group>```
+- To get the object ID of the identity (the object ID is the "value" property (GUID) of the returned JSON object), use the following command syntax from the Azure CLI:
 ```az identity show -g <deployment_resource_group> --name <identity_name> --output json```
-- To create a role assignment for the identity on the existing stack resource group, use the following command syntax from the Azure CLI:  
+- To create a role assignment for the identity on the existing stack resource group, use the following command syntax from the Azure CLI:
     ```az role assignment create --resource-group <existing_stack_resource_group> <identity_object_ID> --roleName "Contributor"```
-            
+
 
 ### Sending statistical information to F5
 
@@ -231,6 +234,8 @@ Note the hashed script-signature may be different in your template.
     "verifyHash": "[concat(variables('singleQuote'), 'cli script /Common/verifyHash {\nproc script::run {} {\n        if {[catch {\n            set file_path [lindex $tmsh::argv 1]\n            set expected_hash ', variables('expectedHash'), '\n            set computed_hash [lindex [exec /usr/bin/openssl dgst -r -sha512 $file_path] 0]\n            if { $expected_hash eq $computed_hash } {\n                exit 0\n            }\n            tmsh::log err {Hash does not match}\n            exit 1\n        }]} {\n            tmsh::log err {Unexpected error in verifyHash}\n            exit 1\n        }\n    }\n    script-signature fc3P5jEvm5pd4qgKzkpOFr9bNGzZFjo9pK0diwqe/LgXwpLlNbpuqoFG6kMSRnzlpL54nrnVKREf6EsBwFoz6WbfDMD3QYZ4k3zkY7aiLzOdOcJh2wECZM5z1Yve/9Vjhmpp4zXo4varPVUkHBYzzr8FPQiR6E7Nv5xOJM2ocUv7E6/2nRfJs42J70bWmGL2ZEmk0xd6gt4tRdksU3LOXhsipuEZbPxJGOPMUZL7o5xNqzU3PvnqZrLFk37bOYMTrZxte51jP/gr3+TIsWNfQEX47nxUcSGN2HYY2Fu+aHDZtdnkYgn5WogQdUAjVVBXYlB38JpX1PFHt1AMrtSIFg==\n}', variables('singleQuote'))]",
     "installCloudLibs": "[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit\nfi\necho loaded verifyHash\necho verifying f5-cloud-libs.targ.gz\n/usr/bin/tmsh run cli script verifyHash /config/cloud/f5-cloud-libs.tar.gz\nif [ $? != 0 ]; then\necho f5-cloud-libs.tar.gz is not valid\nexit\nfi\necho verified f5-cloud-libs.tar.gz\necho expanding f5-cloud-libs.tar.gz\ntar xvfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud\ntouch /config/cloud/cloudLibsReady', variables('singleQuote'))]",
 ```
+
+
 
 ## Filing Issues
 

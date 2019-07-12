@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "7.0.0.1",
+    "contentVersion": "7.0.0.2",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -85,6 +85,9 @@
         },
         "notificationEmail": {
             "value": "OPTIONAL"
+        },
+        "provisionPublicIP": {
+            "value": "Yes"
         },
         "applicationProtocols": {
             "value": "http-https"

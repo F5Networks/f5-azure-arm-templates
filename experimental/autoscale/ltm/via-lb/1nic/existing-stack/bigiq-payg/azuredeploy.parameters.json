@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "7.0.0.1",
+    "contentVersion": "7.0.0.2",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -117,7 +117,7 @@
             "value": "OPTIONAL"
         },
         "provisionPublicIP": {
-            "value": "No"
+            "value": "Yes"
         },
         "tenantId": {
             "value": ""
