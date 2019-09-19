@@ -331,7 +331,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 
 The following is a simple configuration diagram for this single NIC deployment. In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.
 
-![Single NIC configuration example](images/azure-1nic-sm.png)
+![Single NIC configuration example](images/azure-3nic-sm.png)
 
 ### Changing the BIG-IP Configuration utility (GUI) port
 The Management port shown in the example diagram is **443**, however you can alternatively use **8443** in your configuration if you need to use port 443 for application traffic.  To change the Management port, see [Changing the Configuration utility port](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-msft-azure-12-0-0/2.html#GUID-3E6920CD-A8CD-456C-AC40-33469DA6922E) for instructions.<br>

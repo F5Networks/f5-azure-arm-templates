@@ -237,7 +237,7 @@ Note: If you deployed the WAF from the Azure Marketplace, violations and status 
 
 8. In the browser address bar, remove /xui from the address and paste the remediation steps information, for example:
 
-   https://10.10.10.10:8443/dms/policy/win_open_proxy_request.php?id=&support_id=4854296639235424357
+   https://example.com:8443/dms/policy/win_open_proxy_request.php?id=&support_id=4854296639235424357
 
    The BIG-IP Configuration utility displays the details of the message.
 
@@ -361,4 +361,4 @@ under the License.
 ### Contributor License Agreement
 
 Individuals or business entities who contribute to this project must have
-completed and submitted the [F5 Contributor License Agreement](http://f5-openstack-docs.readthedocs.io/en/latest/cla_landing.html).
+completed and submitted the F5 Contributor License Agreement.

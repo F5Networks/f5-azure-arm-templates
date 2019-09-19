@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
-    "contentVersion": "7.0.0.2",
+    "contentVersion": "7.0.1.0",
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser",
@@ -116,11 +116,11 @@
         },
         "bigIpVersion": {
             "allowedValues": [
-                "14.1.003000",
-                "13.1.100000",
+                "14.1.200000",
+                "13.1.300000",
                 "latest"
             ],
-            "defaultValue": "14.1.003000",
+            "defaultValue": "14.1.200000",
             "metadata": {
                 "description": "F5 BIG-IP version you want to use."
             },
@@ -276,10 +276,10 @@
             }
         },
         "bigIpVersionPortMap": {
-            "14.1.003000": {
+            "14.1.200000": {
                 "Port": 8443
             },
-            "13.1.100000": {
+            "13.1.300000": {
                 "Port": 8443
             },
             "443": {
@@ -353,7 +353,7 @@
         "singleQuote": "'",
         "f5CloudLibsTag": "v4.9.2",
         "f5CloudLibsAzureTag": "v2.9.1",
-        "f5NetworksTag": "v7.0.0.2",
+        "f5NetworksTag": "v7.0.1.0",
         "f5CloudIappsLoggerTag": "v1.0.0",
         "f5CloudIappsSdTag": "v2.3.2",
         "f5AS3Build": "f5-appsvcs-3.5.1-5.noarch.rpm",
@@ -395,13 +395,13 @@
         "mgmtSubnetRef": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/', parameters('vnetResourceGroupName'), '/providers/Microsoft.Network/virtualNetworks/', parameters('vnetName'), '/subnets/', parameters('mgmtSubnetName'))]",
         "imageNameSub": "[variables('imageNameArray')[parameters('bigIpVersion')][parameters('imageName')]]",
         "imageNameArray": {
-            "14.1.003000": {
+            "14.1.200000": {
                 "AllOneBootLocation": "big-all-1slot",
                 "AllTwoBootLocations": "big-all-2slot",
                 "LTMOneBootLocation": "big-ltm-1slot",
                 "LTMTwoBootLocations": "big-ltm-2slot"
             },
-            "13.1.100000": {
+            "13.1.300000": {
                 "AllOneBootLocation": "big-all-1slot",
                 "AllTwoBootLocations": "big-all-2slot",
                 "LTMOneBootLocation": "big-ltm-1slot",
@@ -441,7 +441,7 @@
             },
             "Yes": {
                 "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]",
-                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:standalone_1nic-existing-stack-supported-byol,templateVersion:7.0.0.2,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:byol,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
+                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:standalone_1nic-existing-stack-supported-byol,templateVersion:7.0.1.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:byol,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
             }
         },
         "osProfiles": {

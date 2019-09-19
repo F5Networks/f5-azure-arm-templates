@@ -116,18 +116,15 @@ sleep 3
 
 # Login to Azure, for simplicity in this example using username and password supplied as script arguments --azureLoginUser and --azureLoginPassword
 # Perform Check to see if already logged in
-azure account show > /dev/null 2>&1
+az account show > /dev/null 2>&1
 if [[ $? != 0 ]] ; then
-        azure login -u $azureLoginUser -p $azureLoginPassword
+        az login -u $azureLoginUser -p $azureLoginPassword
 fi
 
-# Switch to ARM mode
-azure config mode arm
-
 # Create ARM Group
-azure group create -n $resourceGroupName -l $region
+az group create -n $resourceGroupName -l $region
 
 # Deploy ARM Template, right now cannot specify parameter file and parameters inline via Azure CLI
 template_file="./azuredeploy.json"
 parameter_file="./azuredeploy.parameters.json"
-azure group deployment create -f $template_file -g $resourceGroupName -n $resourceGroupName -p "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"masterKey\":{\"value\":\"$masterKey\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"bigIqVersion\":{\"value\":\"$bigIqVersion\"},\"bigIqLicenseKey1\":{\"value\":\"$bigIqLicenseKey1\"},\"licensePoolKeys\":{\"value\":\"$licensePoolKeys\"},\"regPoolKeys\":{\"value\":\"$regPoolKeys\"},\"numberOfInternalIps\":{\"value\":$numberOfInternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddress\":{\"value\":\"$mgmtIpAddress\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddressRangeStart\":{\"value\":\"$internalIpAddressRangeStart\"},\"avSetChoice\":{\"value\":\"$avSetChoice\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"customImage\":{\"value\":\"$customImage\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"}}"
+az group deployment create --verbose --no-wait --template-file $template_file -g $resourceGroupName -n $resourceGroupName --parameters "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"adminPassword\":{\"value\":\"$adminPassword\"},\"masterKey\":{\"value\":\"$masterKey\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"instanceType\":{\"value\":\"$instanceType\"},\"bigIqVersion\":{\"value\":\"$bigIqVersion\"},\"bigIqLicenseKey1\":{\"value\":\"$bigIqLicenseKey1\"},\"licensePoolKeys\":{\"value\":\"$licensePoolKeys\"},\"regPoolKeys\":{\"value\":\"$regPoolKeys\"},\"numberOfInternalIps\":{\"value\":$numberOfInternalIps},\"vnetName\":{\"value\":\"$vnetName\"},\"vnetResourceGroupName\":{\"value\":\"$vnetResourceGroupName\"},\"mgmtSubnetName\":{\"value\":\"$mgmtSubnetName\"},\"mgmtIpAddress\":{\"value\":\"$mgmtIpAddress\"},\"internalSubnetName\":{\"value\":\"$internalSubnetName\"},\"internalIpAddressRangeStart\":{\"value\":\"$internalIpAddressRangeStart\"},\"avSetChoice\":{\"value\":\"$avSetChoice\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"customImage\":{\"value\":\"$customImage\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"}}"

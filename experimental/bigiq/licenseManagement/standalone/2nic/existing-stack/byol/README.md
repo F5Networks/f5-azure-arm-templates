@@ -48,7 +48,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - This solution uses SKU with BIG-IQ v6.0.1 or later.
 - After deploying the template, if you need to change your BIG-IQ VE password, there are a number of special characters that you should avoid using for F5 product user accounts.  See https://support.f5.com/csp/article/K2873 for details.
 - This template can send non-identifiable statistical information to F5 Networks to help us improve our templates.  See [Sending statistical information to F5](#sending-statistical-information-to-f5).
-- F5 has created a matrix that contains all of the tagged releases of the F5 ARM Templates for Microsoft Azure ARM, and the corresponding BIG-IQ versions, license types and throughput levels available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigiq-version-matrix.md.
+- F5 has created a matrix that contains all of the tagged releases of the F5 ARM Templates for Microsoft Azure ARM, and the corresponding BIG-IQ versions, license types and throughput levels available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md.
 - These ARM templates incorporate an existing Virtual Network (VNet).
 - F5 Azure ARM templates now capture all deployment logs to the BIG-IQ VE in /var/log/cloud/azure. Depending on which template you are using, this includes deployment logs (stdout/stderr), Cloud Libs execution logs, recurring solution logs (metrics, failover, and so on), and more.
 
@@ -98,7 +98,7 @@ Use the appropriate button below to deploy:
 
 - **BYOL** (bring your own license): This allows you to use an existing BIG-IP license.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.0.0.2%2Fexperimental%2Fbigiq%2FlicenseManagement%2Fstandalone%2F2nic%2Fexisting-stack%2Fbyol%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.0.1.0%2Fexperimental%2Fbigiq%2FlicenseManagement%2Fstandalone%2F2nic%2Fexisting-stack%2Fbyol%2Fazuredeploy.json)
 
 ### Template parameters
 
@@ -146,13 +146,6 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 ```bash
 ## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --adminPassword <value> --masterKey <value> --dnsLabel <value> --instanceName f5vm01 --instanceType Standard_D4s_v3 --bigIqVersion 6.1.000000 --bigIqLicenseKey1 <value> --licensePoolKeys Do_Not_Create --regPoolKeys Do_Not_Create --numberOfInternalIps 1 --vnetName <value> --vnetResourceGroupName <value> --mgmtSubnetName <value> --mgmtIpAddress <value> --internalSubnetName <value> --internalIpAddressRangeStart <value> --avSetChoice CREATE_NEW --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 ```
-
-## Configuration Example
-
-The following is an example configuration diagram for this solution deployment.
-
-
-![Configuration Example](../images/azure-example-diagram.png)
 
 ## Documentation
 - For more information on BIG-IQ VE, see https://support.f5.com/kb/en-us/products/big-iq-centralized-mgmt/manuals/product/big-iq-centralized-management-device-6-0-1.html and https://support.f5.com/kb/en-us/products/big-iq-centralized-mgmt/manuals/product/big-iq-centralized-management-and-amazon-web-services-setup-6-0-0.html

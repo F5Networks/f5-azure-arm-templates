@@ -26,8 +26,8 @@ You need to provide a list of parameters when deploying the script (you will be 
 | -l | Application Secure Port | The encrypted port clients use to access your application. | 443 | | 
 | -t | Application Type | The OS type of the application server(s). | linux, windows | | 
 | -e | Blocking Level | The blocking level of the ASM security policy. | high, medium, low, off, custom | |  
-| -i | Custom Security Policy | The URL of a custom ASM security policy to apply to the deployment. | https://f5.com/my_policy.xml, NOT_SPECIFIED | Enter a URL here when Custom Security Policy is **custom**; otherwise, use **NOT_SPECIFIED**. |
-| -c | SSL Archive File  | The URL of a .pfx archive that is accessible to this WAF device https://f5.com/my_archive.pfx, NOT_SPECIFIED | Enter a URL here when Application Protocols is **http-https**, **https**, or **https-offload**; otherwise, use **NOT_SPECIFIED** |
+| -i | Custom Security Policy | The URL of a custom ASM security policy to apply to the deployment. | https://example.com/my_policy.xml, NOT_SPECIFIED | Enter a URL here when Custom Security Policy is **custom**; otherwise, use **NOT_SPECIFIED**. |
+| -c | SSL Archive File  | The URL of a .pfx archive that is accessible to this WAF device https://example.com/my_archive.pfx, NOT_SPECIFIED | Enter a URL here when Application Protocols is **http-https**, **https**, or **https-offload**; otherwise, use **NOT_SPECIFIED** |
 | -a | SSL Archive Password | The password for the specified .pfx archive. | Ih3@rtF5! | | 
 | -r | Application Service FQDN |  The FQDN of your application, if not the same as pool_member. | myapp.example.com, NOT_SPECIFIED | When the application is an Azure App Service or App Service Environment, enter the FQDN that clients use to access the application; otherwise, use **NOT_SPECIFIED**. |
 | -u | WAF Username | The user name for the account create at provisioning time. | azureuser | |  
