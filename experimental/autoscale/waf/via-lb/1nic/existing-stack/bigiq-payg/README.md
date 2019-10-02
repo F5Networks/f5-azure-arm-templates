@@ -112,7 +112,7 @@ Use the appropriate button below to deploy:
 
 - **BIGIQ-PAYG**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s), as well as use PAYG instances.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.0.1.0%2Fexperimental%2Fautoscale%2Fwaf%2Fvia-lb%2F1nic%2Fexisting-stack%2Fbigiq-payg%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.0.2.0%2Fexperimental%2Fautoscale%2Fwaf%2Fvia-lb%2F1nic%2Fexisting-stack%2Fbigiq-payg%2Fazuredeploy.json)
 
 ### Template parameters
 
