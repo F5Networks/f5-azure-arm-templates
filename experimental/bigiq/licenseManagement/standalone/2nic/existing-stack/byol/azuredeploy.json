@@ -292,7 +292,7 @@
         "resourceGroupName": "[resourceGroup().name]",
         "resourceGroupId": "[concat(resourceGroup().id, '-vip')]",
         "singleQuote": "'",
-        "f5CloudLibsTag": "v4.9.2",
+        "f5CloudLibsTag": "v4.10.3",
         "f5CloudLibsAzureTag": "v2.9.1",
         "f5CloudIappsTag": "v2.3.2",
         "dnsLabel": "[toLower(parameters('dnsLabel'))]",
