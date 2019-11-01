@@ -29,6 +29,9 @@ To see a list of all of our supported Azure ARM templates, see the **[Azure Supp
 Note that many of the solutions now include the *provisionPublicIP* option.  This means that the templates deploy without creating or attaching any public IP addresses to the BIG-IP VEs, see the individual README files for more information.
 Standalone and HA production stack templates have been deprecated.
 
+### Known Issues
+All known issues are on GitHub for better tracking and visibility. See issues with a label of **Known Issues** at https://github.com/f5networks/f5-azure-arm-templates/issues.
+
 
 
 ---
