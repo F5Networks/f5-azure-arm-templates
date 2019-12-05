@@ -106,7 +106,7 @@ Use the appropriate button below to deploy:
 
 - **BIGIQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s).
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.0.3.0%2Fsupported%2Fstandalone%2Fn-nic%2Fnew-stack%2Fbigiq%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.1.0.0%2Fsupported%2Fstandalone%2Fn-nic%2Fnew-stack%2Fbigiq%2Fazuredeploy.json)
 
 ### Template parameters
 

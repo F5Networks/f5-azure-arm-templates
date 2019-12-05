@@ -1,7 +1,7 @@
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some (such as region) can    ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specified below.    ##
-## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceType Standard_DS2_v2 -imageName Best1Gbps -bigIpVersion 15.0.100000 -bigIpModules ltm:nominal -vnetAddressPrefix 10.0 -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -appInsights CREATE_NEW -scaleOutCpuThreshold 80 -scaleInCpuThreshold 20 -scaleOutThroughputThreshold 20000000 -scaleInThroughputThreshold 10000000 -scaleOutTimeWindow 10 -scaleInTimeWindow 10 -notificationEmail OPTIONAL -provisionPublicIP Yes -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceType Standard_DS2_v2 -imageName Best1Gbps -bigIpVersion 15.0.100000 -bigIpModules ltm:nominal -vnetAddressPrefix 10.0 -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -vmScaleSetMinCount 2 -vmScaleSetMaxCount 4 -appInsights CREATE_NEW -scaleOutCpuThreshold 80 -scaleInCpuThreshold 20 -scaleOutThroughputThreshold 20000000 -scaleInThroughputThreshold 10000000 -scaleOutTimeWindow 10 -scaleInTimeWindow 10 -notificationEmail OPTIONAL -useAvailabilityZones Yes -autoscaleTimeout 10 -provisionPublicIP Yes -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -resourceGroupName <value>
 
 param(
 
@@ -31,6 +31,8 @@ param(
   [string] [Parameter(Mandatory=$True)] $scaleOutTimeWindow,
   [string] [Parameter(Mandatory=$True)] $scaleInTimeWindow,
   [string] [Parameter(Mandatory=$True)] $notificationEmail,
+  [string] [Parameter(Mandatory=$True)] $useAvailabilityZones,
+  [string] [Parameter(Mandatory=$True)] $autoscaleTimeout,
   [string] [Parameter(Mandatory=$True)] $provisionPublicIP,
   [string] [Parameter(Mandatory=$True)] $tenantId,
   [string] [Parameter(Mandatory=$True)] $clientId,
@@ -64,7 +66,7 @@ $servicePrincipalSecretSecure = ConvertTo-SecureString -String $servicePrincipal
 (ConvertFrom-Json $tagValues).psobject.properties | ForEach -Begin {$tagValues=@{}} -process {$tagValues."$($_.Name)" = $_.Value}
 
 # Create Arm Deployment
-$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -dnsLabel $dnsLabel -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -bigIpModules $bigIpModules -vnetAddressPrefix $vnetAddressPrefix -declarationUrl $declarationUrl -ntpServer $ntpServer -timeZone $timeZone -customImage $customImage -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics -vmScaleSetMinCount $vmScaleSetMinCount -vmScaleSetMaxCount $vmScaleSetMaxCount -appInsights $appInsights -scaleOutCpuThreshold $scaleOutCpuThreshold -scaleInCpuThreshold $scaleInCpuThreshold -scaleOutThroughputThreshold $scaleOutThroughputThreshold -scaleInThroughputThreshold $scaleInThroughputThreshold -scaleOutTimeWindow $scaleOutTimeWindow -scaleInTimeWindow $scaleInTimeWindow -notificationEmail $notificationEmail -provisionPublicIP $provisionPublicIP -tenantId $tenantId -clientId $clientId -servicePrincipalSecret $servicePrincipalSecretSecure 
+$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -dnsLabel $dnsLabel -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -bigIpModules $bigIpModules -vnetAddressPrefix $vnetAddressPrefix -declarationUrl $declarationUrl -ntpServer $ntpServer -timeZone $timeZone -customImage $customImage -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics -vmScaleSetMinCount $vmScaleSetMinCount -vmScaleSetMaxCount $vmScaleSetMaxCount -appInsights $appInsights -scaleOutCpuThreshold $scaleOutCpuThreshold -scaleInCpuThreshold $scaleInCpuThreshold -scaleOutThroughputThreshold $scaleOutThroughputThreshold -scaleInThroughputThreshold $scaleInThroughputThreshold -scaleOutTimeWindow $scaleOutTimeWindow -scaleInTimeWindow $scaleInTimeWindow -notificationEmail $notificationEmail -useAvailabilityZones $useAvailabilityZones -autoscaleTimeout $autoscaleTimeout -provisionPublicIP $provisionPublicIP -tenantId $tenantId -clientId $clientId -servicePrincipalSecret $servicePrincipalSecretSecure 
 
 # Print Output of Deployment to Console
 $deployment

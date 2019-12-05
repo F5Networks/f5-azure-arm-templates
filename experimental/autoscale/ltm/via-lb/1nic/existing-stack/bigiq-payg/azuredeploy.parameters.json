@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "7.0.3.0",
+    "contentVersion": "7.1.0.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -115,6 +115,21 @@
         },
         "notificationEmail": {
             "value": "OPTIONAL"
+        },
+        "mgmtNsgName": {
+            "value": "OPTIONAL"
+        },
+        "externalLoadBalancerName": {
+            "value": "OPTIONAL"
+        },
+        "internalLoadBalancerName": {
+            "value": "OPTIONAL"
+        },
+        "useAvailabilityZones": {
+            "value": "Yes"
+        },
+        "autoscaleTimeout": {
+            "value": 10
         },
         "provisionPublicIP": {
             "value": "Yes"

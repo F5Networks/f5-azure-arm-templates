@@ -33,7 +33,6 @@ Standalone and HA production stack templates have been deprecated.
 All known issues are on GitHub for better tracking and visibility. See issues with a label of **Known Issues** at https://github.com/f5networks/f5-azure-arm-templates/issues.
 
 
-
 ---
 
 
