@@ -1,7 +1,7 @@
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some (such as region) can    ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specified below.    ##
-## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -enableNetworkFailover Yes -internalLoadBalancerType Per-protocol -internalLoadBalancerProbePort 3456 -instanceType Standard_DS3_v2 -imageName Best1Gbps -bigIpVersion 15.0.100000 -bigIpModules ltm:nominal -vnetAddressPrefix 10.0 -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -enableNetworkFailover Yes -provisionInternalLoadBalancer Yes -internalLoadBalancerProbePort 3456 -instanceType Standard_DS3_v2 -imageName Best1Gbps -bigIpVersion 15.0.100000 -bigIpModules ltm:nominal -vnetAddressPrefix 10.0 -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
 
 param(
 
@@ -12,7 +12,7 @@ param(
   [string] [Parameter(Mandatory=$True)] $instanceName,
   [string] [Parameter(Mandatory=$True)] $numberOfExternalIps,
   [string] [Parameter(Mandatory=$True)] $enableNetworkFailover,
-  [string] [Parameter(Mandatory=$True)] $internalLoadBalancerType,
+  [string] [Parameter(Mandatory=$True)] $provisionInternalLoadBalancer,
   [string] [Parameter(Mandatory=$True)] $internalLoadBalancerProbePort,
   [string] [Parameter(Mandatory=$True)] $instanceType,
   [string] [Parameter(Mandatory=$True)] $imageName,
@@ -54,7 +54,7 @@ $adminPasswordOrKeySecure = ConvertTo-SecureString -String $adminPasswordOrKey -
 (ConvertFrom-Json $tagValues).psobject.properties | ForEach -Begin {$tagValues=@{}} -process {$tagValues."$($_.Name)" = $_.Value}
 
 # Create Arm Deployment
-$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -dnsLabel $dnsLabel -instanceName $instanceName -numberOfExternalIps $numberOfExternalIps -enableNetworkFailover $enableNetworkFailover -internalLoadBalancerType $internalLoadBalancerType -internalLoadBalancerProbePort $internalLoadBalancerProbePort -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -bigIpModules $bigIpModules -vnetAddressPrefix $vnetAddressPrefix -declarationUrl $declarationUrl -ntpServer $ntpServer -timeZone $timeZone -customImage $customImage -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics 
+$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -dnsLabel $dnsLabel -instanceName $instanceName -numberOfExternalIps $numberOfExternalIps -enableNetworkFailover $enableNetworkFailover -provisionInternalLoadBalancer $provisionInternalLoadBalancer -internalLoadBalancerProbePort $internalLoadBalancerProbePort -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -bigIpModules $bigIpModules -vnetAddressPrefix $vnetAddressPrefix -declarationUrl $declarationUrl -ntpServer $ntpServer -timeZone $timeZone -customImage $customImage -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics 
 
 # Print Output of Deployment to Console
 $deployment

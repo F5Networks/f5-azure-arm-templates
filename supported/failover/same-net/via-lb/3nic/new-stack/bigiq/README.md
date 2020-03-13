@@ -63,7 +63,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - **NEW:**  BIG-IP version 15.X.X and higher now supports Azure's [Accelerated Networking](https://docs.microsoft.com/en-us/azure/virtual-network/create-vm-accelerated-networking-cli) on multi-NIC BIG-IPs. This feature is enabled by default. Read about requirements and how to check if Accelerated Networking is enabled [here](https://clouddocs.f5.com/cloud/public/v1/azure/Azure_accelNet.html).
 - Previous tagged releases can be used to reference functionality that has been changed or removed.
 - All templates now deploy Standard SKU Azure Public IP Addresses.
-- If you choose "No" in response to the provisionPublicIP parameter, the choice for "numberOfExternalIps" is not honored and no public IP addresses are created.
+- The provisionInternalLoadBalancer parameter controls the creation of an internal Azure load balancer targeting the internal BIG-IP network interfaces.  Selecting Yes deploys an internal load balancer with the HA Ports feature (all-protocol load balancing rule) enabled. NOTE: In order to download required libraries, the BIG-IP internal interfaces are not configured in the load balancer backend pool by default. You must update the load balancer configuration after deployment completes.
 - All templates deploy Azure Virtual Machines and Virtual Machine Scale Sets into Availability Zones in supported regions; Availability Sets are still created in unsupported regions. Virtual Machine Scale Sets are distributed across zones 1, 2, and 3; failover Virtual Machines across zones 1 and 2. Standalone Virtual Machines are placed in zone 1 by default; however, you may select zone 1, 2, or 3 using the new zoneChoice parameter.
 
 ## Security
@@ -115,7 +115,7 @@ Use the appropriate button below to deploy:
 
 - **BIGIQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s).
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.3.0.0%2Fsupported%2Ffailover%2Fsame-net%2Fvia-lb%2F3nic%2Fnew-stack%2Fbigiq%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.4.0.0%2Fsupported%2Ffailover%2Fsame-net%2Fvia-lb%2F3nic%2Fnew-stack%2Fbigiq%2Fazuredeploy.json)
 
 ### Template parameters
 
@@ -128,8 +128,8 @@ Use the appropriate button below to deploy:
 | instanceName | Yes | Name of the Virtual Machine. |
 | numberOfExternalIps | Yes | The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers. |
 | enableNetworkFailover | Yes | Enabling failover creates a traditional active/standby deployment with traffic groups and mirroring. When failover is disabled, all devices are active; use traffic group none. |
-| internalLoadBalancerType | Yes | Specify a the type of internal Azure load balancer to deploy. Note: As of the initial release of this template, the all-protocol Azure load balancer is in public preview. Please ensure that this feature is enabled before selecting **All-protocol**. |
-| internalLoadBalancerProbePort | Yes | Specify a TCP port for the internal load balancer to monitor. If you specified DO_NOT_USE for internal load balancer type, this setting has no effect. |
+| provisionInternalLoadBalancer | Yes | Specify Yes to deploy an Azure internal load balancer with HA Ports enabled. Internal BIG-IP network interfaces will be added to the load balancer backend pool. |
+| internalLoadBalancerProbePort | Yes | Specify a TCP port for the internal load balancer to monitor. If you specified No for provision internal load balancer, this setting has no effect. |
 | instanceType | Yes | Instance size of the Virtual Machine. |
 | imageName | Yes | F5 SKU (image) you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****. |
 | bigIqAddress | Yes | The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP.  Note: The BIG-IP will make a REST call to the BIG-IQ (already existing) to let it know a BIG-IP needs to be licensed. It will then license the BIG-IP using the provided BIG-IQ credentials and license pool. |
@@ -156,7 +156,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### PowerShell Script Example
 
 ```powershell
-## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -enableNetworkFailover Yes -internalLoadBalancerType Per-protocol -internalLoadBalancerProbePort 3456 -instanceType Standard_DS3_v2 -imageName AllTwoBootLocations -bigIqAddress <value> -bigIqUsername <value> -bigIqPassword <value> -bigIqLicensePoolName <value> -bigIqLicenseSkuKeyword1 OPTIONAL -bigIqLicenseUnitOfMeasure OPTIONAL -bigIpVersion 15.0.100000 -bigIpModules ltm:nominal -vnetAddressPrefix 10.0 -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -enableNetworkFailover Yes -provisionInternalLoadBalancer Yes -internalLoadBalancerProbePort 3456 -instanceType Standard_DS3_v2 -imageName AllTwoBootLocations -bigIqAddress <value> -bigIqUsername <value> -bigIqPassword <value> -bigIqLicensePoolName <value> -bigIqLicenseSkuKeyword1 OPTIONAL -bigIqLicenseUnitOfMeasure OPTIONAL -bigIpVersion 15.0.100000 -bigIpModules ltm:nominal -vnetAddressPrefix 10.0 -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -resourceGroupName <value>
 ```
 
 =======
@@ -164,7 +164,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### Azure CLI (1.0) Script Example
 
 ```bash
-## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --enableNetworkFailover Yes --internalLoadBalancerType Per-protocol --internalLoadBalancerProbePort 3456 --instanceType Standard_DS3_v2 --imageName AllTwoBootLocations --bigIqAddress <value> --bigIqUsername <value> --bigIqPassword <value> --bigIqLicensePoolName <value> --bigIqLicenseSkuKeyword1 OPTIONAL --bigIqLicenseUnitOfMeasure OPTIONAL --bigIpVersion 15.0.100000 --bigIpModules ltm:nominal --vnetAddressPrefix 10.0 --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --enableNetworkFailover Yes --provisionInternalLoadBalancer Yes --internalLoadBalancerProbePort 3456 --instanceType Standard_DS3_v2 --imageName AllTwoBootLocations --bigIqAddress <value> --bigIqUsername <value> --bigIqPassword <value> --bigIqLicensePoolName <value> --bigIqLicenseSkuKeyword1 OPTIONAL --bigIqLicenseUnitOfMeasure OPTIONAL --bigIpVersion 15.0.100000 --bigIpModules ltm:nominal --vnetAddressPrefix 10.0 --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 ```
 
 

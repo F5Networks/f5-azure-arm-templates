@@ -1,7 +1,7 @@
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some (such as region) can    ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specified below.    ##
-## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -instanceType Standard_DS3_v2 -imageName AllTwoBootLocations -bigIpVersion 15.0.100000 -bigIpModules ltm:nominal -licenseKey1 <value> -licenseKey2 <value> -vnetAddressPrefix 10.0 -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -managedRoutes NOT_SPECIFIED -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -instanceType Standard_DS3_v2 -imageName AllTwoBootLocations -bigIpVersion 15.0.100000 -bigIpModules ltm:nominal -licenseKey1 <value> -licenseKey2 <value> -vnetAddressPrefix 10.0 -routeTableName defaultRouteTable -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -managedRoutes NOT_SPECIFIED -resourceGroupName <value>
 
 param(
 
@@ -18,6 +18,7 @@ param(
   [string] [Parameter(Mandatory=$True)] $licenseKey1,
   [string] [Parameter(Mandatory=$True)] $licenseKey2,
   [string] [Parameter(Mandatory=$True)] $vnetAddressPrefix,
+  [string] [Parameter(Mandatory=$True)] $routeTableName,
   [string] [Parameter(Mandatory=$True)] $declarationUrl,
   [string] [Parameter(Mandatory=$True)] $ntpServer,
   [string] [Parameter(Mandatory=$True)] $timeZone,
@@ -28,9 +29,6 @@ param(
   [string] [Parameter(Mandatory=$True)] $numberOfAdditionalNics,
   [string] [Parameter(Mandatory=$True)] $additionalNicLocation,
   [string] [Parameter(Mandatory=$True)] $managedRoutes,
-  [string] [Parameter(Mandatory=$True)] $tenantId,
-  [string] [Parameter(Mandatory=$True)] $clientId,
-  [string] [Parameter(Mandatory=$True)] $servicePrincipalSecret,
   [string] [Parameter(Mandatory=$True)] $resourceGroupName,
   [string] $region = "West US",
   [string] $templateFilePath = "azuredeploy.json",
@@ -55,12 +53,11 @@ try {
 New-AzureRmResourceGroup -Name $resourceGroupName -Location "$region"
 
 $adminPasswordOrKeySecure = ConvertTo-SecureString -String $adminPasswordOrKey -AsPlainText -Force
-$servicePrincipalSecretSecure = ConvertTo-SecureString -String $servicePrincipalSecret -AsPlainText -Force
 
 (ConvertFrom-Json $tagValues).psobject.properties | ForEach -Begin {$tagValues=@{}} -process {$tagValues."$($_.Name)" = $_.Value}
 
 # Create Arm Deployment
-$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -dnsLabel $dnsLabel -instanceName $instanceName -numberOfExternalIps $numberOfExternalIps -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -bigIpModules $bigIpModules -licenseKey1 $licenseKey1 -licenseKey2 $licenseKey2 -vnetAddressPrefix $vnetAddressPrefix -declarationUrl $declarationUrl -ntpServer $ntpServer -timeZone $timeZone -customImage $customImage -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics -numberOfAdditionalNics $numberOfAdditionalNics -additionalNicLocation $additionalNicLocation -managedRoutes $managedRoutes -tenantId $tenantId -clientId $clientId -servicePrincipalSecret $servicePrincipalSecretSecure 
+$deployment = New-AzureRmResourceGroupDeployment -Name $resourceGroupName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath -Verbose -adminUsername $adminUsername -authenticationType $authenticationType -adminPasswordOrKey $adminPasswordOrKeySecure -dnsLabel $dnsLabel -instanceName $instanceName -numberOfExternalIps $numberOfExternalIps -instanceType $instanceType -imageName $imageName -bigIpVersion $bigIpVersion -bigIpModules $bigIpModules -licenseKey1 $licenseKey1 -licenseKey2 $licenseKey2 -vnetAddressPrefix $vnetAddressPrefix -routeTableName $routeTableName -declarationUrl $declarationUrl -ntpServer $ntpServer -timeZone $timeZone -customImage $customImage -restrictedSrcAddress $restrictedSrcAddress -tagValues $tagValues -allowUsageAnalytics $allowUsageAnalytics -numberOfAdditionalNics $numberOfAdditionalNics -additionalNicLocation $additionalNicLocation -managedRoutes $managedRoutes 
 
 # Print Output of Deployment to Console
 $deployment

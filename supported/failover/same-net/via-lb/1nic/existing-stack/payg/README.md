@@ -99,7 +99,7 @@ Use the appropriate button below to deploy:
 
 - **PAYG**: This allows you to use pay-as-you-go hourly billing.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.3.0.0%2Fsupported%2Ffailover%2Fsame-net%2Fvia-lb%2F1nic%2Fexisting-stack%2Fpayg%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.4.0.0%2Fsupported%2Ffailover%2Fsame-net%2Fvia-lb%2F1nic%2Fexisting-stack%2Fpayg%2Fazuredeploy.json)
 
 ### Template parameters
 
@@ -117,7 +117,7 @@ Use the appropriate button below to deploy:
 | vnetResourceGroupName | Yes | The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed. |
 | mgmtSubnetName | Yes | Name of the existing mgmt subnet - with external access to the Internet. **Important**: The subnet you provide for the mgmt NIC **must** be unique. |
 | mgmtIpAddressRangeStart | Yes | The static private IP address you want to assign to the management self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device. |
-| provisionPublicIP | Yes | Provision Public IP addresses for BIG-IP Network Interfaces. By default it is set to provision public IPs |
+| provisionPublicIP | Yes | Provision Public IP addresses for BIG-IP Management traffic. These addresses will be configured directly on the Azure network interfaces. |
 | declarationUrl | Yes | URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.5.1/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration. |
 | ntpServer | Yes | Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use. |
 | timeZone | Yes | If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list [here](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md)). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |

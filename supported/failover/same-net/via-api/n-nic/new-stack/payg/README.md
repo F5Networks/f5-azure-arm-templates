@@ -34,6 +34,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 ## Prerequisites
 
 - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details.
+- This solution requires roleAssignment creation and therefore, end-user must have sufficient permissions to create roleAssignments
 - This template requires a service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details, including required permissions.
 - To indicate that the next hop of a user-defined route (UDR) should be updated during failover, you must configure each UDR's parent route table resource with an Azure tag with the key name **f5_ha** and the value of **self_2nic** (this is the default self IP name created by the template; if necessary, this can be the name of a different self IP address onfigured on the the BIG-IP VE).  You must also create an Azure tag with the key **f5_tg** and value of **traffic-group-1** (or the name of a different traffic group you have configured on the BIG-IP VE).  For details, see [Customizing the Next Hop of Azure User-Defined Routes](#customizing-the-next-hop-of-azure-user-defined-routes).
 - When failover occurs, UDRs will be updated across multiple Azure subscriptions.
@@ -122,7 +123,7 @@ Use the appropriate button below to deploy:
 
 - **PAYG**: This allows you to use pay-as-you-go hourly billing.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.3.0.0%2Fsupported%2Ffailover%2Fsame-net%2Fvia-api%2Fn-nic%2Fnew-stack%2Fpayg%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.4.0.0%2Fsupported%2Ffailover%2Fsame-net%2Fvia-api%2Fn-nic%2Fnew-stack%2Fpayg%2Fazuredeploy.json)
 
 ### Template parameters
 
@@ -139,6 +140,7 @@ Use the appropriate button below to deploy:
 | bigIpVersion | Yes | F5 BIG-IP version you want to use. |
 | bigIpModules | Yes | Comma separated list of modules and levels to provision, for example, ltm:nominal,asm:nominal |
 | vnetAddressPrefix | Yes | The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'. |
+| routeTableName | Yes | route table name |
 | declarationUrl | Yes | URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.5.1/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration. |
 | ntpServer | Yes | Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use. |
 | timeZone | Yes | If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list [here](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md)). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |
@@ -149,9 +151,6 @@ Use the appropriate button below to deploy:
 | numberOfAdditionalNics | Yes | By default this solution deploys the BIG-IP(s) in a 3 NIC configuration, however additional NICs can be added to the BIG-IP(s) using this parameter.  **Note**: The default value is 0, additional NICs will only be created if 1 or higher is specified. |
 | additionalNicLocation | Yes | This parameter specifies where the additional NICs go, use the default value of **OPTIONAL** if **0** was selected for the parameter **numberOfAdditionalNics**.  Otherwise this value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. **Note**: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique. |
 | managedRoutes | Yes | A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24. Specifying a comma-delimited list of managedRoutes and creating f5_ha and f5_tg tags on the Azure Route Table defines the UDRs to be updated. To have the UDRs managed by BIG-IP, you will need to create an Azure tag with key **f5_ha** and value **self_2nic**, or the name of a different self IP address configured on the BIG-IP VE. All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with 'f5_ha:' will use the corresponding self IP address on the active BIG-IP VE as the next hop for those routes. You must also associate the route table with a traffic group by creating an Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group configured on the BIG-IP VE. |
-| tenantId | Yes | Your Azure service principal application tenant ID. |
-| clientId | Yes | Your Azure service principal application client ID. |
-| servicePrincipalSecret | Yes | Your Azure service principal application secret. |
 
 ### Programmatic deployments
 
@@ -160,7 +159,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### PowerShell Script Example
 
 ```powershell
-## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -instanceType Standard_DS3_v2 -imageName Best1Gbps -bigIpVersion 15.0.100000 -bigIpModules ltm:nominal -vnetAddressPrefix 10.0 -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -managedRoutes NOT_SPECIFIED -tenantId <value> -clientId <value> -servicePrincipalSecret <value> -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -instanceType Standard_DS3_v2 -imageName Best1Gbps -bigIpVersion 15.0.100000 -bigIpModules ltm:nominal -vnetAddressPrefix 10.0 -routeTableName defaultRouteTable -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -managedRoutes NOT_SPECIFIED -resourceGroupName <value>
 ```
 
 =======
@@ -168,7 +167,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### Azure CLI (1.0) Script Example
 
 ```bash
-## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --instanceType Standard_DS3_v2 --imageName Best1Gbps --bigIpVersion 15.0.100000 --bigIpModules ltm:nominal --vnetAddressPrefix 10.0 --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --numberOfAdditionalNics 0 --additionalNicLocation OPTIONAL --managedRoutes NOT_SPECIFIED --tenantId <value> --clientId <value> --servicePrincipalSecret <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --instanceType Standard_DS3_v2 --imageName Best1Gbps --bigIpVersion 15.0.100000 --bigIpModules ltm:nominal --vnetAddressPrefix 10.0 --routeTableName defaultRouteTable --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --numberOfAdditionalNics 0 --additionalNicLocation OPTIONAL --managedRoutes NOT_SPECIFIED --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 ```
 
 ## Post-Deployment Configuration Steps
