@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "7.4.0.0",
+    "contentVersion": "7.4.1.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -42,7 +42,7 @@
             "value": ""
         },
         "mgmtIpAddress": {
-            "value": ""
+            "value": "USE_DHCP"
         },
         "avSetChoice": {
             "value": "CREATE_NEW"
@@ -78,6 +78,9 @@
             }
         },
         "allowUsageAnalytics": {
+            "value": "Yes"
+        },
+        "allowPhoneHome": {
             "value": "Yes"
         }
     }

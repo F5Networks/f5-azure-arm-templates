@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --instanceType Standard_DS3_v2 --imageName Best1Gbps --bigIpVersion 15.0.100000 --bigIpModules ltm:nominal --vnetAddressPrefix 10.0 --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --numberOfAdditionalNics 1 --additionalNicLocation <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --instanceType Standard_DS3_v2 --imageName Best1Gbps --bigIpVersion 15.0.100000 --bigIpModules ltm:nominal --vnetAddressPrefix 10.0 --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --allowPhoneHome Yes --numberOfAdditionalNics 1 --additionalNicLocation <value> --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 # Assign Script Parameters and Define Variables
 # Specify static items below, change these as needed or make them parameters
@@ -66,6 +66,9 @@ while [[ $# -gt 1 ]]; do
         --allowUsageAnalytics)
             allowUsageAnalytics=$2
             shift 2;;
+        --allowPhoneHome)
+            allowPhoneHome=$2
+            shift 2;;
         --numberOfAdditionalNics)
             numberOfAdditionalNics=$2
             shift 2;;
@@ -91,7 +94,7 @@ while [[ $# -gt 1 ]]; do
 done
 
 #If a required parameter is not passed, the script will prompt for it below
-required_variables="adminUsername authenticationType adminPasswordOrKey dnsLabel instanceName numberOfExternalIps instanceType imageName bigIpVersion bigIpModules vnetAddressPrefix declarationUrl ntpServer timeZone customImage allowUsageAnalytics numberOfAdditionalNics additionalNicLocation resourceGroupName "
+required_variables="adminUsername authenticationType adminPasswordOrKey dnsLabel instanceName numberOfExternalIps instanceType imageName bigIpVersion bigIpModules vnetAddressPrefix declarationUrl ntpServer timeZone customImage allowUsageAnalytics allowPhoneHome numberOfAdditionalNics additionalNicLocation resourceGroupName "
 for variable in $required_variables
         do
         if [ -z ${!variable} ] ; then
@@ -115,4 +118,4 @@ az group create -n $resourceGroupName -l $region
 # Deploy ARM Template, right now cannot specify parameter file and parameters inline via Azure CLI
 template_file="./azuredeploy.json"
 parameter_file="./azuredeploy.parameters.json"
-az group deployment create --verbose --no-wait --template-file $template_file -g $resourceGroupName -n $resourceGroupName --parameters "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"authenticationType\":{\"value\":\"$authenticationType\"},\"adminPasswordOrKey\":{\"value\":\"$adminPasswordOrKey\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"bigIpModules\":{\"value\":\"$bigIpModules\"},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"declarationUrl\":{\"value\":\"$declarationUrl\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"customImage\":{\"value\":\"$customImage\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"},\"numberOfAdditionalNics\":{\"value\":$numberOfAdditionalNics},\"additionalNicLocation\":{\"value\":\"$additionalNicLocation\"}}"
+az group deployment create --verbose --no-wait --template-file $template_file -g $resourceGroupName -n $resourceGroupName --parameters "{\"adminUsername\":{\"value\":\"$adminUsername\"},\"authenticationType\":{\"value\":\"$authenticationType\"},\"adminPasswordOrKey\":{\"value\":\"$adminPasswordOrKey\"},\"dnsLabel\":{\"value\":\"$dnsLabel\"},\"instanceName\":{\"value\":\"$instanceName\"},\"numberOfExternalIps\":{\"value\":$numberOfExternalIps},\"instanceType\":{\"value\":\"$instanceType\"},\"imageName\":{\"value\":\"$imageName\"},\"bigIpVersion\":{\"value\":\"$bigIpVersion\"},\"bigIpModules\":{\"value\":\"$bigIpModules\"},\"vnetAddressPrefix\":{\"value\":\"$vnetAddressPrefix\"},\"declarationUrl\":{\"value\":\"$declarationUrl\"},\"ntpServer\":{\"value\":\"$ntpServer\"},\"timeZone\":{\"value\":\"$timeZone\"},\"customImage\":{\"value\":\"$customImage\"},\"restrictedSrcAddress\":{\"value\":\"$restrictedSrcAddress\"},\"tagValues\":{\"value\":$tagValues},\"allowUsageAnalytics\":{\"value\":\"$allowUsageAnalytics\"},\"allowPhoneHome\":{\"value\":\"$allowPhoneHome\"},\"numberOfAdditionalNics\":{\"value\":$numberOfAdditionalNics},\"additionalNicLocation\":{\"value\":\"$additionalNicLocation\"}}"
