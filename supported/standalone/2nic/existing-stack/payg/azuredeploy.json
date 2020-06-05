@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
-    "contentVersion": "7.4.1.0",
+    "contentVersion": "8.0.0.0",
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser",
@@ -136,14 +136,17 @@
                 "Best25Mbps",
                 "Best200Mbps",
                 "Best1Gbps",
+                "Best5Gbps",
                 "Best10Gbps",
                 "Better25Mbps",
                 "Better200Mbps",
                 "Better1Gbps",
+                "Better5Gbps",
                 "Better10Gbps",
                 "Good25Mbps",
                 "Good200Mbps",
                 "Good1Gbps",
+                "Good5Gbps",
                 "Good10Gbps",
                 "AdvancedWaf25Mbps",
                 "AdvancedWaf200Mbps",
@@ -160,12 +163,7 @@
             "type": "string"
         },
         "bigIpVersion": {
-            "allowedValues": [
-                "15.0.100000",
-                "14.1.200000",
-                "latest"
-            ],
-            "defaultValue": "15.0.100000",
+            "defaultValue": "15.1.002000",
             "metadata": {
                 "description": "F5 BIG-IP version you want to use."
             },
@@ -197,9 +195,9 @@
             "type": "string"
         },
         "mgmtIpAddress": {
-            "defaultValue": "USE_DHCP",
+            "defaultValue": "DYNAMIC",
             "metadata": {
-                "description": "MGMT subnet IP Address to use for the BIG-IP management IP address. Leave the default USE_DHCP to use a dynamically assigned IP address."
+                "description": "MGMT subnet IP Address to use for the BIG-IP management IP address. Leave the default DYNAMIC to use a dynamically assigned IP address."
             },
             "type": "string"
         },
@@ -210,8 +208,9 @@
             "type": "string"
         },
         "externalIpAddressRangeStart": {
+            "defaultValue": "DYNAMIC",
             "metadata": {
-                "description": "The static private IP address you want to assign to the first external Azure public IP (for self IP). An additional private IP address will be assigned for each public IP address you specified in **numberOfExternalIps**.  For example, entering 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 (self IP), 10.100.1.51 and 10.100.1.52 being configured as static private IP addresses for external virtual servers."
+                "description": "The static private IP address you want to assign to the first external Azure public IP (for self IP). An additional private IP address will be assigned for each public IP address you specified in **numberOfExternalIps**.  For example, entering 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 (self IP), 10.100.1.51 and 10.100.1.52 being configured as static private IP addresses for external virtual servers. Leave the default DYNAMIC to use a dynamically assigned IP address."
             },
             "type": "string"
         },
@@ -266,6 +265,13 @@
             },
             "type": "string"
         },
+        "customImageUrn": {
+            "defaultValue": "OPTIONAL",
+            "metadata": {
+                "description": "If you would like to deploy using a specific image in Azure marketplace, specify the URN of the image. **Note**: Unless specifically required, leave the default of **OPTIONAL**. Example value: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:15.1.002000. You can find the URNs of F5 marketplace images in the README for this template or by running the command: az vm image list --output yaml --publisher f5-networks --all"
+            },
+            "type": "string"
+        },
         "customImage": {
             "defaultValue": "OPTIONAL",
             "metadata": {
@@ -317,46 +323,12 @@
         }
     },
     "variables": {
-        "bigIpNicPortMap": {
-            "1": {
-                "Port": "[parameters('bigIpVersion')]"
-            },
-            "2": {
-                "Port": "443"
-            },
-            "3": {
-                "Port": "443"
-            },
-            "4": {
-                "Port": "443"
-            },
-            "5": {
-                "Port": "443"
-            },
-            "6": {
-                "Port": "443"
-            }
-        },
-        "bigIpVersionPortMap": {
-            "15.0.100000": {
-                "Port": 8443
-            },
-            "14.1.200000": {
-                "Port": 8443
-            },
-            "443": {
-                "Port": 443
-            },
-            "latest": {
-                "Port": 8443
-            }
-        },
         "computeApiVersion": "2017-12-01",
         "networkApiVersion": "2018-07-01",
         "storageApiVersion": "2017-10-01",
         "customImage": "[replace(parameters('customImage'), 'OPTIONAL', '')]",
         "useCustomImage": "[not(empty(variables('customImage')))]",
-        "isAcceleratedNetworkingSupported": "[if(not(contains(parameters('bigIpVersion'),  '14.1.200000')), bool('true'), bool('false'))]",
+        "isAcceleratedNetworkingSupported": "[if(greaterOrEquals(variables('bigIpMajorVersionInt'), 15), bool('true'), bool('false'))]",
         "createNewCustomImage": "[contains(variables('customImage'), 'https://')]",
         "newCustomImageName": "[concat(variables('dnsLabel'), 'image')]",
         "storageProfileArray": {
@@ -414,19 +386,23 @@
         "subscriptionID": "[subscription().subscriptionId]",
         "resourceGroupName": "[resourceGroup().name]",
         "singleQuote": "'",
-        "f5CloudLibsTag": "v4.18.0",
+        "f5CloudLibsTag": "v4.20.0",
         "f5CloudLibsAzureTag": "v2.13.0",
-        "f5NetworksTag": "v7.4.1.0",
+        "f5NetworksTag": "v8.0.0.0",
         "f5CloudIappsLoggerTag": "v1.0.0",
         "f5CloudIappsSdTag": "v2.3.2",
         "f5AS3Build": "f5-appsvcs-3.18.0-4.noarch.rpm",
         "f5AS3Tag": "v3.18.0",
-        "verifyHash": "[concat(variables('singleQuote'), 'cli script /Common/verifyHash {\nproc script::run {} {\n        if {[catch {\n            set hashes(f5-cloud-libs.tar.gz) 3204d687e98ff534b8a698e0341cf77baaa9999a96541fec996c06b84a3b6d122eb9f4744f891e196325c47ac6cc904e9113cf22ebf6634f38153bc6872dbc54\n            set hashes(f5-cloud-libs-aws.tar.gz) 2ff4e6269ce74850fc3794045d0a394ecd0b472ba9efa16b34786b38d07088b3a49339b41708973c4bffe55a539471c2f9ec60a009ddd087912c1fca722b48ef\n            set hashes(f5-cloud-libs-azure.tar.gz) 6db2878a2c10d98550eded6b66f0474516c1952d3605217164e3b5261c771419201d94c7cdb07744c9d5db894334f93380963217b670d87d3151bfcdb301c295\n            set hashes(f5-cloud-libs-gce.tar.gz) a5cfaed1fe33da677b3f10dc1a7ca82f5739ff24e45e91b3a8f7b06d6b2e280e5f1eaf5fe2d33009b2cc67c10f2d906aab26f942d591b68fa8a7fddfd54a0efe\n            set hashes(f5-cloud-libs-openstack.tar.gz) 5c83fe6a93a6fceb5a2e8437b5ed8cc9faf4c1621bfc9e6a0779f6c2137b45eab8ae0e7ed745c8cf821b9371245ca29749ca0b7e5663949d77496b8728f4b0f9\n            set hashes(f5-cloud-libs-consul.tar.gz) a32aab397073df92cbbba5067e5823e9b5fafca862a258b60b6b40aa0975c3989d1e110f706177b2ffbe4dde65305a260a5856594ce7ad4ef0c47b694ae4a513\n            set hashes(asm-policy-linux.tar.gz) 63b5c2a51ca09c43bd89af3773bbab87c71a6e7f6ad9410b229b4e0a1c483d46f1a9fff39d9944041b02ee9260724027414de592e99f4c2475415323e18a72e0\n            set hashes(f5.http.v1.2.0rc4.tmpl) 47c19a83ebfc7bd1e9e9c35f3424945ef8694aa437eedd17b6a387788d4db1396fefe445199b497064d76967b0d50238154190ca0bd73941298fc257df4dc034\n            set hashes(f5.http.v1.2.0rc6.tmpl) 811b14bffaab5ed0365f0106bb5ce5e4ec22385655ea3ac04de2a39bd9944f51e3714619dae7ca43662c956b5212228858f0592672a2579d4a87769186e2cbfe\n            set hashes(f5.http.v1.2.0rc7.tmpl) 21f413342e9a7a281a0f0e1301e745aa86af21a697d2e6fdc21dd279734936631e92f34bf1c2d2504c201f56ccd75c5c13baa2fe7653213689ec3c9e27dff77d\n            set hashes(f5.aws_advanced_ha.v1.3.0rc1.tmpl) 9e55149c010c1d395abdae3c3d2cb83ec13d31ed39424695e88680cf3ed5a013d626b326711d3d40ef2df46b72d414b4cb8e4f445ea0738dcbd25c4c843ac39d\n            set hashes(f5.aws_advanced_ha.v1.4.0rc1.tmpl) de068455257412a949f1eadccaee8506347e04fd69bfb645001b76f200127668e4a06be2bbb94e10fefc215cfc3665b07945e6d733cbe1a4fa1b88e881590396\n            set hashes(f5.aws_advanced_ha.v1.4.0rc2.tmpl) 6ab0bffc426df7d31913f9a474b1a07860435e366b07d77b32064acfb2952c1f207beaed77013a15e44d80d74f3253e7cf9fbbe12a90ec7128de6facd097d68f\n            set hashes(f5.aws_advanced_ha.v1.4.0rc3.tmpl) 2f2339b4bc3a23c9cfd42aae2a6de39ba0658366f25985de2ea53410a745f0f18eedc491b20f4a8dba8db48970096e2efdca7b8efffa1a83a78e5aadf218b134\n            set hashes(f5.aws_advanced_ha.v1.4.0rc4.tmpl) 2418ac8b1f1884c5c096cbac6a94d4059aaaf05927a6a4508fd1f25b8cc6077498839fbdda8176d2cf2d274a27e6a1dae2a1e3a0a9991bc65fc74fc0d02ce963\n            set hashes(f5.aws_advanced_ha.v1.4.0rc5.tmpl) 5e582187ae1a6323e095d41eddd41151d6bd38eb83c634410d4527a3d0e246a8fc62685ab0849de2ade62b0275f51264d2deaccbc16b773417f847a4a1ea9bc4\n            set hashes(asm-policy.tar.gz) 2d39ec60d006d05d8a1567a1d8aae722419e8b062ad77d6d9a31652971e5e67bc4043d81671ba2a8b12dd229ea46d205144f75374ed4cae58cefa8f9ab6533e6\n            set hashes(deploy_waf.sh) 1a3a3c6274ab08a7dc2cb73aedc8d2b2a23cd9e0eb06a2e1534b3632f250f1d897056f219d5b35d3eed1207026e89989f754840fd92969c515ae4d829214fb74\n            set hashes(f5.policy_creator.tmpl) 06539e08d115efafe55aa507ecb4e443e83bdb1f5825a9514954ef6ca56d240ed00c7b5d67bd8f67b815ee9dd46451984701d058c89dae2434c89715d375a620\n            set hashes(f5.service_discovery.tmpl) 4811a95372d1dbdbb4f62f8bcc48d4bc919fa492cda012c81e3a2fe63d7966cc36ba8677ed049a814a930473234f300d3f8bced2b0db63176d52ac99640ce81b\n            set hashes(f5.cloud_logger.v1.0.0.tmpl) 64a0ed3b5e32a037ba4e71d460385fe8b5e1aecc27dc0e8514b511863952e419a89f4a2a43326abb543bba9bc34376afa114ceda950d2c3bd08dab735ff5ad20\n            set hashes(f5-appsvcs-3.5.1-5.noarch.rpm) ba71c6e1c52d0c7077cdb25a58709b8fb7c37b34418a8338bbf67668339676d208c1a4fef4e5470c152aac84020b4ccb8074ce387de24be339711256c0fa78c8\n            set hashes(f5-appsvcs-3.18.0-4.noarch.rpm) e72ee8005a27070ac399ab097e8aa507a72aae4721d7491589cfeb821db3ef86cbc979e796ab319ec727bb51400ccda813c4b9eb4a6b3d1220a396b582f8f400\n            set hashes(f5-cloud-failover-1.1.0-0.noarch.rpm) 15a440c299f9e4af86a3d0f5b0d75b0054385b95e47c3ef116d2e0bfb0041a26dcbf549028e2a26d2c718ec61446bd657be38fbbcd9db781efe5414c174ac68c\n\n            set file_path [lindex $tmsh::argv 1]\n            set file_name [file tail $file_path]\n\n            if {![info exists hashes($file_name)]} {\n                tmsh::log err \"No hash found for $file_name\"\n                exit 1\n            }\n\n            set expected_hash $hashes($file_name)\n            set computed_hash [lindex [exec /usr/bin/openssl dgst -r -sha512 $file_path] 0]\n            if { $expected_hash eq $computed_hash } {\n                exit 0\n            }\n            tmsh::log err \"Hash does not match for $file_path\"\n            exit 1\n        }]} {\n            tmsh::log err {Unexpected error in verifyHash}\n            exit 1\n        }\n    }\n    script-signature GaAiifN3sgNZzehZ10aVF38Yv7kX+S7gFdQNwB4bBYjT6XU7dpYPsTR7ZqZDHnT6Kb5yLpGzn8daiFaIy+lXYCbais3cPCsbjwjuhatkYKRN7F++RjUXsorbqJMd7aHZzu3St5yinwJcgM1F+3thY+yyFrvxv8cRyqqpMJrMUP6tpJgxjzDd+OFYHRm8PaVBVuQWoLwxbzz0ykOmxjTKAvh72JimP6871NZkWzLgzuqVT2mY9jrBvkN1OuywTm+QQgW4q+oPjLNr5ANfBHQPv/+5ZZbsmmb1EAyvRJKTPUf3xBSoxmPw9GjOSLrMH5qGZolw/Yqefn76PMQ8xM8diA==\n    signing-key /Common/f5-irule\n}', variables('singleQuote'))]",
+        "verifyHash": "[concat(variables('singleQuote'), 'cli script /Common/verifyHash {\nproc script::run {} {\n        if {[catch {\n            set hashes(f5-cloud-libs.tar.gz) a80af438a499418bcfc282784b8787f073bdeb99d8c26c6bc166cd04f0c3190a823bb7e3dcf3305d8d4e9be3e16121af59917da2ba15d4dc39948c4a57809c04\n            set hashes(f5-cloud-libs-aws.tar.gz) 6f2eb0782da68fa1882d48a349f53051138197da39e4591d7ce1df134e31d0e4267894f9aa69b80edad35649b2fadc8aed501889c71e5ffa4fe43715c63402a2\n            set hashes(f5-cloud-libs-azure.tar.gz) 6db2878a2c10d98550eded6b66f0474516c1952d3605217164e3b5261c771419201d94c7cdb07744c9d5db894334f93380963217b670d87d3151bfcdb301c295\n            set hashes(f5-cloud-libs-gce.tar.gz) a5cfaed1fe33da677b3f10dc1a7ca82f5739ff24e45e91b3a8f7b06d6b2e280e5f1eaf5fe2d33009b2cc67c10f2d906aab26f942d591b68fa8a7fddfd54a0efe\n            set hashes(f5-cloud-libs-openstack.tar.gz) 5c83fe6a93a6fceb5a2e8437b5ed8cc9faf4c1621bfc9e6a0779f6c2137b45eab8ae0e7ed745c8cf821b9371245ca29749ca0b7e5663949d77496b8728f4b0f9\n            set hashes(f5-cloud-libs-consul.tar.gz) a32aab397073df92cbbba5067e5823e9b5fafca862a258b60b6b40aa0975c3989d1e110f706177b2ffbe4dde65305a260a5856594ce7ad4ef0c47b694ae4a513\n            set hashes(asm-policy-linux.tar.gz) 63b5c2a51ca09c43bd89af3773bbab87c71a6e7f6ad9410b229b4e0a1c483d46f1a9fff39d9944041b02ee9260724027414de592e99f4c2475415323e18a72e0\n            set hashes(f5.http.v1.2.0rc4.tmpl) 47c19a83ebfc7bd1e9e9c35f3424945ef8694aa437eedd17b6a387788d4db1396fefe445199b497064d76967b0d50238154190ca0bd73941298fc257df4dc034\n            set hashes(f5.http.v1.2.0rc6.tmpl) 811b14bffaab5ed0365f0106bb5ce5e4ec22385655ea3ac04de2a39bd9944f51e3714619dae7ca43662c956b5212228858f0592672a2579d4a87769186e2cbfe\n            set hashes(f5.http.v1.2.0rc7.tmpl) 21f413342e9a7a281a0f0e1301e745aa86af21a697d2e6fdc21dd279734936631e92f34bf1c2d2504c201f56ccd75c5c13baa2fe7653213689ec3c9e27dff77d\n            set hashes(f5.aws_advanced_ha.v1.3.0rc1.tmpl) 9e55149c010c1d395abdae3c3d2cb83ec13d31ed39424695e88680cf3ed5a013d626b326711d3d40ef2df46b72d414b4cb8e4f445ea0738dcbd25c4c843ac39d\n            set hashes(f5.aws_advanced_ha.v1.4.0rc1.tmpl) de068455257412a949f1eadccaee8506347e04fd69bfb645001b76f200127668e4a06be2bbb94e10fefc215cfc3665b07945e6d733cbe1a4fa1b88e881590396\n            set hashes(f5.aws_advanced_ha.v1.4.0rc2.tmpl) 6ab0bffc426df7d31913f9a474b1a07860435e366b07d77b32064acfb2952c1f207beaed77013a15e44d80d74f3253e7cf9fbbe12a90ec7128de6facd097d68f\n            set hashes(f5.aws_advanced_ha.v1.4.0rc3.tmpl) 2f2339b4bc3a23c9cfd42aae2a6de39ba0658366f25985de2ea53410a745f0f18eedc491b20f4a8dba8db48970096e2efdca7b8efffa1a83a78e5aadf218b134\n            set hashes(f5.aws_advanced_ha.v1.4.0rc4.tmpl) 2418ac8b1f1884c5c096cbac6a94d4059aaaf05927a6a4508fd1f25b8cc6077498839fbdda8176d2cf2d274a27e6a1dae2a1e3a0a9991bc65fc74fc0d02ce963\n            set hashes(f5.aws_advanced_ha.v1.4.0rc5.tmpl) 5e582187ae1a6323e095d41eddd41151d6bd38eb83c634410d4527a3d0e246a8fc62685ab0849de2ade62b0275f51264d2deaccbc16b773417f847a4a1ea9bc4\n            set hashes(asm-policy.tar.gz) 2d39ec60d006d05d8a1567a1d8aae722419e8b062ad77d6d9a31652971e5e67bc4043d81671ba2a8b12dd229ea46d205144f75374ed4cae58cefa8f9ab6533e6\n            set hashes(deploy_waf.sh) 1a3a3c6274ab08a7dc2cb73aedc8d2b2a23cd9e0eb06a2e1534b3632f250f1d897056f219d5b35d3eed1207026e89989f754840fd92969c515ae4d829214fb74\n            set hashes(f5.policy_creator.tmpl) 06539e08d115efafe55aa507ecb4e443e83bdb1f5825a9514954ef6ca56d240ed00c7b5d67bd8f67b815ee9dd46451984701d058c89dae2434c89715d375a620\n            set hashes(f5.service_discovery.tmpl) 4811a95372d1dbdbb4f62f8bcc48d4bc919fa492cda012c81e3a2fe63d7966cc36ba8677ed049a814a930473234f300d3f8bced2b0db63176d52ac99640ce81b\n            set hashes(f5.cloud_logger.v1.0.0.tmpl) 64a0ed3b5e32a037ba4e71d460385fe8b5e1aecc27dc0e8514b511863952e419a89f4a2a43326abb543bba9bc34376afa114ceda950d2c3bd08dab735ff5ad20\n            set hashes(f5-appsvcs-3.5.1-5.noarch.rpm) ba71c6e1c52d0c7077cdb25a58709b8fb7c37b34418a8338bbf67668339676d208c1a4fef4e5470c152aac84020b4ccb8074ce387de24be339711256c0fa78c8\n            set hashes(f5-appsvcs-3.18.0-4.noarch.rpm) e72ee8005a27070ac399ab097e8aa507a72aae4721d7491589cfeb821db3ef86cbc979e796ab319ec727bb51400ccda813c4b9eb4a6b3d1220a396b582f8f400\n            set hashes(f5-cloud-failover-1.1.0-0.noarch.rpm) 15a440c299f9e4af86a3d0f5b0d75b0054385b95e47c3ef116d2e0bfb0041a26dcbf549028e2a26d2c718ec61446bd657be38fbbcd9db781efe5414c174ac68c\n            set hashes(f5-cloud-failover-1.3.0-0.noarch.rpm) 19681eb33d9f910c913f8180199485eb653b4b5ebeaae0b90a6ce8341d7a22fed8d21815b5ba148c468852d20cc26fad4c4242e50ecc184f1f8770dacced6f6a\n\n            set file_path [lindex $tmsh::argv 1]\n            set file_name [file tail $file_path]\n\n            if {![info exists hashes($file_name)]} {\n                tmsh::log err \"No hash found for $file_name\"\n                exit 1\n            }\n\n            set expected_hash $hashes($file_name)\n            set computed_hash [lindex [exec /usr/bin/openssl dgst -r -sha512 $file_path] 0]\n            if { $expected_hash eq $computed_hash } {\n                exit 0\n            }\n            tmsh::log err \"Hash does not match for $file_path\"\n            exit 1\n        }]} {\n            tmsh::log err {Unexpected error in verifyHash}\n            exit 1\n        }\n    }\n    script-signature nGD/x6E96VjHsUQ4d38dLegUNDaFSMHAkKVj7p90INfb1WSIl+IafqN3JQ4aF1WPBO7U1a4K5Z9xPfdiKZ9tw6tyYT3RXuZ3j3fvDjl7JKa72eCb4NcNAfiE83OXktxXq5/2b0LfrNW6o7ZvSheoxzd3l6yIlpYjrkgvCVzKmxGkf+8JHwF3PZ3+98LNaLQaIrf2x67iNQuHoGDNl3k8oV1tTqoYok2kVpoh7rkoAwQawn8pD/+uy83+fRwfpCRJF/5uYsGGayfV9hTYxqu2f7m3dDvabwO8iRAc7PuuJM3TP3afNg9bHePoVWbD1FKsacuntApZY9SxZQ93FUXK7A==\n    signing-key /Common/f5-irule\n}', variables('singleQuote'))]",
         "installCloudLibs": "[concat(variables('singleQuote'), '#!/bin/bash\necho about to execute\nchecks=0\nwhile [ $checks -lt 120 ]; do echo checking mcpd\n/usr/bin/tmsh -a show sys mcp-state field-fmt | grep -q running\nif [ $? == 0 ]; then\necho mcpd ready\nbreak\nfi\necho mcpd not ready yet\nlet checks=checks+1\nsleep 1\ndone\necho loading verifyHash script\n/usr/bin/tmsh load sys config merge file /config/verifyHash\nif [ $? != 0 ]; then\necho cannot validate signature of /config/verifyHash\nexit 1\nfi\necho loaded verifyHash\n\nconfig_loc=\"/config/cloud/\"\nhashed_file_list=\"${config_loc}f5-cloud-libs.tar.gz f5-appsvcs-3.18.0-4.noarch.rpm f5.service_discovery.tmpl f5.cloud_logger.v1.0.0.tmpl\"\nfor file in $hashed_file_list; do\necho \"verifying $file\"\n/usr/bin/tmsh run cli script verifyHash $file\nif [ $? != 0 ]; then\necho \"$file is not valid\"\nexit 1\nfi\necho \"verified $file\"\ndone\necho \"expanding $hashed_file_list\"\ntar xfz /config/cloud/f5-cloud-libs.tar.gz --warning=no-unknown-keyword -C /config/cloud/azure/node_modules/@f5devcentral\ntouch /config/cloud/cloudLibsReady', variables('singleQuote'))]",
         "dnsLabel": "[toLower(parameters('dnsLabel'))]",
         "imageNameToLower": "[toLower(parameters('imageName'))]",
-        "skuToUse": "[variables('paygImageMap')[variables('imageNameToLower')]['sku']]",
-        "offerToUse": "[variables('paygImageMap')[variables('imageNameToLower')]['offer']]",
+        "customImageUrnArray": "[if(not(equals(parameters('customImageUrn'), 'OPTIONAL')), split(parameters('customImageUrn'), ':'), createArray('OPTIONAL'))]",
+        "skuToUse": "[if(equals(length(variables('customImageUrnArray')), 4), variables('customImageUrnArray')[2], variables('paygImageMap')[variables('imageNameToLower')]['sku'])]",
+        "offerToUse": "[if(equals(length(variables('customImageUrnArray')), 4), variables('customImageUrnArray')[1], variables('paygImageMap')[variables('imageNameToLower')]['offer'])]",
+        "versionToUse": "[if(equals(length(variables('customImageUrnArray')), 4), variables('customImageUrnArray')[3], parameters('bigIpVersion'))]",
+        "bigIpMajorVersion": "[if(equals(parameters('bigIpVersion'), 'latest'), '15', split(variables('versionToUse'), '.')[0])]",
+        "bigIpMajorVersionInt": "[int(variables('bigipMajorVersion'))]",
         "imagePlan": {
             "name": "[variables('skuToUse')]",
             "product": "[variables('offerToUse')]",
@@ -436,10 +412,9 @@
             "offer": "[variables('offerToUse')]",
             "publisher": "f5-networks",
             "sku": "[variables('skuToUse')]",
-            "version": "[parameters('bigIpVersion')]"
+            "version": "[variables('versionToUse')]"
         },
-        "bigIpNicPortValue": "[variables('bigIpNicPortMap')['2'].Port]",
-        "bigIpMgmtPort": "[variables('bigIpVersionPortMap')[variables('bigIpNicPortValue')].Port]",
+        "bigIpMgmtPort": "443",
         "instanceName": "[toLower(parameters('instanceName'))]",
         "virtualNetworkName": "[parameters('vnetName')]",
         "mgmtSubnetName": "[parameters('mgmtSubnetName')]",
@@ -458,6 +433,7 @@
         "extpublicIPAddressNamePrefix": "[concat(variables('dnsLabel'), '-ext-pip')]",
         "extPublicIPAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('extPublicIPAddressNamePrefix'))]",
         "extNicName": "[concat(variables('dnsLabel'), '-ext')]",
+        "extNicID": "[resourceId('Microsoft.Network/NetworkInterfaces', variables('extNicName'))]",
         "extSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('extsubnetName'))]",
         "routeCmd": "route",
         "newAvailabilitySetName": "[concat(variables('dnsLabel'), '-avset')]",
@@ -470,7 +446,7 @@
         "availabilitySetId": {
             "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
         },
-        "extSubnetPrivateAddressPrefixArray": "[split(parameters('externalIpAddressRangeStart'), '.')]",
+        "extSubnetPrivateAddressPrefixArray": "[if(equals(parameters('externalIpAddressRangeStart'), 'DYNAMIC'), createArray('0','0','0','0'), split(parameters('externalIpAddressRangeStart'), '.'))]",
         "extSubnetPrivateAddressSuffix0": "[add(variables('extSubnetPrivateAddressSuffixInt'), 1)]",
         "extSubnetPrivateAddressSuffix1": "[add(variables('extSubnetPrivateAddressSuffixInt'), 2)]",
         "extSubnetRef": "[concat('/subscriptions/', variables('subscriptionID'), '/resourceGroups/', parameters('vnetResourceGroupName'), '/providers/Microsoft.Network/virtualNetworks/', parameters('vnetName'), '/subnets/', parameters('externalSubnetName'))]",
@@ -492,6 +468,10 @@
                 "offer": "f5-big-ip-best",
                 "sku": "f5-bigip-virtual-edition-1g-best-hourly"
             },
+            "best5gbps": {
+                "offer": "f5-big-ip-best",
+                "sku": "f5-bigip-virtual-edition-5g-best-hourly"
+            },
             "best10gbps": {
                 "offer": "f5-big-ip-best",
                 "sku": "f5-bigip-virtual-edition-10g-best-hourly"
@@ -508,6 +488,10 @@
                 "offer": "f5-big-ip-better",
                 "sku": "f5-bigip-virtual-edition-1g-better-hourly"
             },
+            "better5gbps": {
+                "offer": "f5-big-ip-better",
+                "sku": "f5-bigip-virtual-edition-5g-better-hourly"
+            },
             "better10gbps": {
                 "offer": "f5-big-ip-better",
                 "sku": "f5-bigip-virtual-edition-10g-better-hourly"
@@ -523,6 +507,10 @@
             "good1gbps": {
                 "offer": "f5-big-ip-good",
                 "sku": "f5-bigip-virtual-edition-1g-good-hourly"
+            },
+            "good5gbps": {
+                "offer": "f5-big-ip-good",
+                "sku": "f5-bigip-virtual-edition-5g-good-hourly"
             },
             "good10gbps": {
                 "offer": "f5-big-ip-good",
@@ -572,7 +560,7 @@
             },
             "Yes": {
                 "hashCmd": "[concat('custId=`echo \"', variables('subscriptionId'), '\"|sha512sum|cut -d \" \" -f 1`; deployId=`echo \"', variables('deploymentId'), '\"|sha512sum|cut -d \" \" -f 1`')]",
-                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:standalone_2nic-existing-stack-supported-payg,templateVersion:7.4.1.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:payg,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
+                "metricsCmd": "[concat(' --metrics customerId:${custId},deploymentId:${deployId},templateName:standalone_2nic-existing-stack-supported-payg,templateVersion:8.0.0.0,region:', variables('location'), ',bigIpVersion:', parameters('bigIpVersion') ,',licenseType:payg,cloudLibsVersion:', variables('f5CloudLibsTag'), ',cloudName:azure')]"
             }
         },
         "allowPhoneHome": "[if(equals(parameters('allowPhoneHome'), 'Yes'), 'enabled', 'disabled')]",
@@ -661,8 +649,8 @@
                         "name": "[concat(variables('instanceName'), '-ipconfig1')]",
                         "properties": {
                             "PublicIpAddress": "[if(equals(parameters('provisionPublicIP'),'No'), json('null'), json(concat('{\"Id\": \"', variables('mgmtPublicIPAddressId'), '\"}')))]",
-                            "privateIPAddress": "[if(equals(parameters('mgmtIpAddress'), 'USE_DHCP'), json('null'), variables('mgmtSubnetPrivateAddress'))]",
-                            "privateIPAllocationMethod": "[if(equals(parameters('mgmtIpAddress'), 'USE_DHCP'), 'Dynamic', 'Static')]",
+                            "privateIPAddress": "[if(equals(parameters('mgmtIpAddress'), 'DYNAMIC'), json('null'), variables('mgmtSubnetPrivateAddress'))]",
+                            "privateIPAllocationMethod": "[if(equals(parameters('mgmtIpAddress'), 'DYNAMIC'), 'Dynamic', 'Static')]",
                             "subnet": {
                                 "id": "[variables('mgmtSubnetId')]"
                             }
@@ -694,8 +682,8 @@
                             "properties": {
                                 "PublicIpAddress": "[if(equals(parameters('provisionPublicIP'),'No'), json('null'), json(concat('{\"Id\": \"', if(equals(copyIndex('ipConfigurations', 1), 1), concat(variables('extSelfPublicIpAddressIdPrefix'), '0'), concat(variables('extPublicIPAddressIdPrefix'), sub(copyIndex('ipConfigurations', 1), 2))), '\"}')))]",
                                 "primary": "[if(equals(copyIndex('ipConfigurations', 1), 1), 'True', 'False')]",
-                                "privateIPAddress": "[if(equals(copyIndex('ipConfigurations', 1), 1), variables('extSubnetPrivateAddress'), concat(variables('extSubnetPrivateAddressPrefix'), add(variables('extSubnetPrivateAddressSuffixInt'), sub(copyIndex('ipConfigurations', 1), 1))))]",
-                                "privateIPAllocationMethod": "Static",
+                                "privateIPAddress": "[if(equals(parameters('externalIpAddressRangeStart'), 'DYNAMIC'), json('null'), if(equals(copyIndex('ipConfigurations', 1), 1), variables('extSubnetPrivateAddress'), concat(variables('extSubnetPrivateAddressPrefix'), add(variables('extSubnetPrivateAddressSuffixInt'), sub(copyIndex('ipConfigurations', 1), 1)))))]",
+                                "privateIPAllocationMethod": "[if(equals(parameters('externalIpAddressRangeStart'), 'DYNAMIC'), 'Dynamic', 'Static')]",
                                 "subnet": {
                                     "id": "[variables('extSubnetId')]"
                                 }
@@ -820,7 +808,7 @@
             ],
             "location": "[variables('location')]",
             "name": "[variables('instanceName')]",
-            "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]",
+            "plan": "[variables('imagePlan')]",
             "properties": {
                 "availabilitySet": "[if(not(variables('zonesAvailable')), variables('availabilitySetId'), json('null'))]",
                 "diagnosticsProfile": {
@@ -864,7 +852,7 @@
             "name": "[concat(variables('instanceName'),'/start')]",
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; cd /var/log/cloud/azure && cat stdout stderr > install.log; }; CLOUD_LIB_DIR=/config/cloud/azure/node_modules/@f5devcentral; mkdir -p $CLOUD_LIB_DIR && cp f5-cloud-libs*.tar.gz* /config/cloud; mkdir -p /var/config/rest/downloads && cp ', variables('f5AS3Build'), ' /var/config/rest/downloads; mkdir -p /var/log/cloud/azure; /usr/bin/install -m 400 /dev/null /config/cloud/.passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' > /config/verifyHash; echo -e ', variables('installCloudLibs'), ' > /config/installCloudLibs.sh; echo -e ', variables('appScript'), ' | /usr/bin/base64 -d > /config/cloud/deploy_app.sh; chmod +x /config/cloud/deploy_app.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; unset IFS; bash /config/installCloudLibs.sh; source $CLOUD_LIB_DIR/f5-cloud-libs/scripts/util.sh; encrypt_secret ', variables('singleQuote'), variables('adminPasswordOrKey'), variables('singleQuote'), ' \"/config/cloud/.passwd\" true; $CLOUD_LIB_DIR/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file /config/cloud/.passwd --password-encrypted; ', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, '; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/onboard.js --no-reboot --output /var/log/cloud/azure/onboard.log --signal ONBOARD_DONE --log-level info --cloud azure --install-ilx-package file:///var/config/rest/downloads/', variables('f5AS3Build'), ' --host ', reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress, ' --ssl-port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --hostname ', concat(variables('instanceName'), '.', variables('location'), '.cloudapp.azure.com'),  ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --modules ', parameters('bigIpModules'), ' --db tmm.maxremoteloglength:2048', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, '; tmsh modify sys software update auto-phonehome ', variables('allowPhoneHome'), '; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/network.js --output /var/log/cloud/azure/network.log --wait-for ONBOARD_DONE --host ', reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress, ' --port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --default-gw ', concat(take(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, add(lastIndexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.'), 1)), add(int(take(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], indexOf(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], '/'))), 1)), ' --vlan name:external,nic:1.1 --self-ip name:self_2nic,address:', variables('extSubnetPrivateAddress'), skip(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, indexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '/')), ',vlan:external --log-level info', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; tmsh load sys application template f5.cloud_logger.v1.0.0.tmpl; ', variables('routeCmd'), '; echo -e ', variables('routeCmd'), ' >> /config/startup; bash /config/cloud/deploy_app.sh ', variables('commandArgs'), ' ; bash /config/customConfig.sh; $(cp_logs); else $(cp_logs); exit 1; fi', '; if grep -i \"PUT failed\" /var/log/waagent.log -q; then echo \"Killing waagent exthandler, daemon should restart it\"; pkill -f \"python -u /usr/sbin/waagent -run-exthandlers\"; fi')]"
+                    "commandToExecute": "[concat('function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; cd /var/log/cloud/azure && cat stdout stderr > install.log; }; CLOUD_LIB_DIR=/config/cloud/azure/node_modules/@f5devcentral; mkdir -p $CLOUD_LIB_DIR && cp f5-cloud-libs*.tar.gz* /config/cloud; mkdir -p /var/config/rest/downloads && cp ', variables('f5AS3Build'), ' /var/config/rest/downloads; mkdir -p /var/log/cloud/azure; /usr/bin/install -m 400 /dev/null /config/cloud/.passwd; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; IFS=', variables('singleQuote'), '%', variables('singleQuote'), '; echo -e ', variables('verifyHash'), ' > /config/verifyHash; echo -e ', variables('installCloudLibs'), ' > /config/installCloudLibs.sh; echo -e ', variables('appScript'), ' | /usr/bin/base64 -d > /config/cloud/deploy_app.sh; chmod +x /config/cloud/deploy_app.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; unset IFS; bash /config/installCloudLibs.sh; source $CLOUD_LIB_DIR/f5-cloud-libs/scripts/util.sh; encrypt_secret ', variables('singleQuote'), variables('adminPasswordOrKey'), variables('singleQuote'), ' \"/config/cloud/.passwd\" true; $CLOUD_LIB_DIR/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file /config/cloud/.passwd --password-encrypted; ', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, '; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/onboard.js --no-reboot --output /var/log/cloud/azure/onboard.log --signal ONBOARD_DONE --log-level info --cloud azure --install-ilx-package file:///var/config/rest/downloads/', variables('f5AS3Build'), ' --host ', reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress, ' --ssl-port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --hostname ', concat(variables('instanceName'), '.', variables('location'), '.cloudapp.azure.com'),  ' --ntp ', parameters('ntpServer'), ' --tz ', parameters('timeZone'), ' --modules ', parameters('bigIpModules'), ' --db tmm.maxremoteloglength:2048', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd, '; tmsh modify sys software update auto-phonehome ', variables('allowPhoneHome'), '; /usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/network.js --output /var/log/cloud/azure/network.log --wait-for ONBOARD_DONE --host ', reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress, ' --port ', variables('bigIpMgmtPort'), ' -u svc_user --password-url file:///config/cloud/.passwd --password-encrypted --default-gw ', concat(take(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, add(lastIndexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.'), 1)), add(int(take(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], indexOf(split(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '.')[3], '/'))), 1)), ' --vlan name:external,nic:1.1 --self-ip name:self_2nic,address:', reference(variables('extNicId')).ipConfigurations[0].properties.privateIPAddress, skip(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, indexOf(reference(variables('extSubnetRef'), variables('networkApiVersion')).addressPrefix, '/')), ',vlan:external --log-level info', '; if [[ $? == 0 ]]; then tmsh load sys application template f5.service_discovery.tmpl; tmsh load sys application template f5.cloud_logger.v1.0.0.tmpl; ', variables('routeCmd'), '; echo -e ', variables('routeCmd'), ' >> /config/startup; bash /config/cloud/deploy_app.sh ', variables('commandArgs'), ' ; bash /config/customConfig.sh; $(cp_logs); else $(cp_logs); exit 1; fi', '; if grep -i \"PUT failed\" /var/log/waagent.log -q; then echo \"Killing waagent exthandler, daemon should restart it\"; pkill -f \"python -u /usr/sbin/waagent -run-exthandlers\"; fi')]"
                 },
                 "publisher": "Microsoft.Azure.Extensions",
                 "settings": {

@@ -33,7 +33,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 ## Prerequisites
 
 - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details.
-- Before deploying this template,  you must create a managed identity to allow BIG-IQ to migrate IP configurations to the network interface of the active device on failover.  You must also create a **Contributor** role assignment for this identity with a scope that includes the resource group where the existing stack virtual network is configured. When deploying the template, use the identity name from these examples for the **userAssignedIdentityName** input parameter.
+- Before deploying this template, you must create a managed identity to allow BIG-IQ to migrate IP configurations to the network interface of the active device on failover.  You must also create a **Contributor** role assignment for this identity with a scope that includes the resource group where the existing stack virtual network is configured. When deploying the template, use the identity name from these examples for the **userAssignedIdentityName** input parameter.
 
 Click one of the following links for guidance on creating the managed identity:
 	- [Azure Portal](#creating-a-managed-user-identity-from-the-azure-portal)
@@ -73,10 +73,6 @@ Additionally, F5 provides checksums for all of our supported templates. For inst
 
 The following is a map that shows the available options for the template parameter **bigIqVersion** as it corresponds to the BIG-IQ version itself. Only the latest version of BIG-IQ VE is posted in the Azure Marketplace. For older versions, see downloads.f5.com.
 
-| Azure BIG-IQ Image Version | BIG-IQ Version |
-| --- | --- |
-| 6.1.000000 | BIG-IQ 6.1.0 |
-
 
 ## Supported instance types and hypervisors
 
@@ -104,7 +100,7 @@ Use the appropriate button below to deploy:
 
 - **BYOL** (bring your own license): This allows you to use an existing BIG-IP license.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.4.1.0%2Fexperimental%2Fbigiq%2FlicenseManagement%2Fcluster%2F2nic%2Fexisting-stack%2Fbyol%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv8.0.0.0%2Fexperimental%2Fbigiq%2FlicenseManagement%2Fcluster%2F2nic%2Fexisting-stack%2Fbyol%2Fazuredeploy.json)
 
 ### Template parameters
 

@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "7.4.1.0",
+    "contentVersion": "8.0.0.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -27,7 +27,7 @@
             "value": "AllTwoBootLocations"
         },
         "bigIpVersion": {
-            "value": "15.0.100000"
+            "value": "15.1.002000"
         },
         "bigIpModules": {
             "value": "ltm:nominal"
@@ -48,22 +48,22 @@
             "value": ""
         },
         "mgmtIpAddressRangeStart": {
-            "value": "USE_DHCP"
+            "value": "DYNAMIC"
         },
         "externalSubnetName": {
             "value": ""
         },
         "externalIpAddressRangeStart": {
-            "value": ""
+            "value": "DYNAMIC"
         },
         "externalIpSelfAddressRangeStart": {
-            "value": ""
+            "value": "DYNAMIC"
         },
         "internalSubnetName": {
             "value": ""
         },
         "internalIpAddressRangeStart": {
-            "value": ""
+            "value": "DYNAMIC"
         },
         "provisionPublicIP": {
             "value": "Yes"
@@ -76,6 +76,9 @@
         },
         "timeZone": {
             "value": "UTC"
+        },
+        "customImageUrn": {
+            "value": "OPTIONAL"
         },
         "customImage": {
             "value": "OPTIONAL"
@@ -104,7 +107,7 @@
         "additionalNicLocation": {
             "value": "OPTIONAL"
         },
-        "managedRoutes": {
+        "userAssignedManagedIdentity": {
             "value": "NOT_SPECIFIED"
         }
     }

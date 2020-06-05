@@ -34,8 +34,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 ## Prerequisites
 
 - **Important**: When you configure the admin password for the BIG-IP VE in the template, you cannot use the character **#**.  Additionally, there are a number of other special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details.
-- This solution requires roleAssignment creation and therefore, end-user must have sufficient permissions to create roleAssignments
-- As of version 7.4.0.0, Azure ha via-api templates now make use of the Cloud Failover Extension. In order to successfully implement CFE in Azure, you need a system-assigned identity with sufficient access. This template will automatically create and assign the identity to the BIG-IP virtual machines; the user creating the deployment **must** have permission to create a role assignment in Azure IAM. More information about the Managed Service Identity requirement is [here](https://clouddocs.f5.com/products/extensions/f5-cloud-failover/latest/userguide/azure.html#create-and-assign-a-managed-service-identity-msi). Read more about Cloud Failover Extension on [CloudDocs](https://clouddocs.f5.com/products/extensions/f5-cloud-failover/latest/).
+- As of version 7.4.0.0, Azure ha via-api templates now make use of the Cloud Failover Extension. In order to successfully implement CFE in Azure, you need a managed identity with sufficient access. By default, this template will automatically create and assign a role the system-assigned managed identity to the BIG-IP virtual machines; the user creating the deployment **must** have permission to create a role assignment in Azure IAM. **NEW**: The solution now also supports specifying the name of a pre-existing user-assigned managed identity; when specified, the system-assigned managed identities and roleAssignments are **not** created. The user-assigned managed identity must be granted the Contributor role to both the deployment resource group and the existing virtual network resource group prior to deployment. See the Azure documentation for more information: [Assign access to an Azure managed identity](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/howto-assign-access-portal). Read more about Cloud Failover Extension on [CloudDocs](https://clouddocs.f5.com/products/extensions/f5-cloud-failover/latest/).
 - To indicate that the next hop of a user-defined route (UDR) should be updated during failover, you must configure each UDR's parent route table resource with an Azure tag with the key name **f5_ha** and the value of **self_2nic** (this is the default self IP name created by the template; if necessary, this can be the name of a different self IP address onfigured on the the BIG-IP VE).  You must also create an Azure tag with the key **f5_tg** and value of **traffic-group-1** (or the name of a different traffic group you have configured on the BIG-IP VE).  For details, see [Customizing the Next Hop of Azure User-Defined Routes](#customizing-the-next-hop-of-azure-user-defined-routes).
 - When failover occurs, UDRs will be updated across multiple Azure subscriptions.
 - This solution uses calls to the Azure REST API to read and update Azure resources such as storage accounts, network interfaces, and route tables.  For the solution to function correctly, you must ensure that the BIG-IP(s) can connect to the Azure REST API on port 443.
@@ -46,6 +45,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 
 > **_CRITICAL:_**  As of Release 6.1.0.0, BIG-IP version 12.1 is no longer supported. If you require BIG-IP version 12.1, you can use a previously released ARM template.  To find a previously released template, from the **Branch** drop-down, click the **Tags** tab, and then select a tag of **v6.0.4.0** or earlier.
 
+- F5 Azure ARM templates that create a new virtual network stack have been moved to the experimental folder.  You can find new-stack templates here: [Experimental Templates](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental)
 - All F5 ARM templates include Application Services 3 Extension (AS3) v3.18.0 on the BIG-IP VE.  As of release 4.1.2, all supported templates give the option of including the URL of an AS3 declaration, which you can use to specify the BIG-IP configuration you want on your newly created BIG-IP VE(s).  In templates such as autoscale, where an F5-recommended configuration is deployed by default, specifying an AS3 declaration URL will override the default configuration with your declaration.   See the [AS3 documentation](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/) for details on how to use AS3.   
 - There are new options for BIG-IP license bundles, including Per App VE LTM, Advanced WAF, and Per App VE Advanced WAF. See the [the version matrix](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md) for details and applicable templates.
 - You have the option of using a password or SSH public key for authentication.  If you choose to use an SSH public key and want access to the BIG-IP web-based Configuration utility, you must first SSH into the BIG-IP VE using the SSH key you provided in the template.  You can then create a user account with admin-level permissions on the BIG-IP VE to allow access if necessary.
@@ -60,6 +60,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - F5 ARM templates now capture all deployment logs to the BIG-IP VE in **/var/log/cloud/azure**.  Depending on which template you are using, this includes deployment logs (stdout/stderr), f5-cloud-libs execution logs, recurring solution logs (failover, metrics, and so on), and more.
 - Supported F5 ARM templates do not reconfigure existing Azure resources, such as network security groups.  Depending on your configuration, you may need to configure these resources to allow the BIG-IP VE(s) to receive traffic for your application.  Similarly, templates that deploy Azure load balancer(s) do not configure load balancing rules or probes on those resources to forward external traffic to the BIG-IP(s).  You must create these resources after the deployment has succeeded.
 - See the **[Configuration Example](#configuration-example)** section for a configuration diagram and description for this solution.
+- All Azure ARM templates now allow you to deploy any public or private offer image from Azure marketplace. Specifying the offer URN in the customImageUrn parameter overrides the choices for bigIpVersion and imageName parameters. See the F5 Azure offer list here for a list of current offers: [Azure offer list](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-offer-list.yaml). NOTE: Not all versions of BIG-IP are supported with all templates. Check the supported versions matrix on each template README for a list of supported versions for that template.
 - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
 - This template now supports associating Azure NIC IP configurations with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.
 - Persistence and connection mirroring are now supported in this template.  It also supports mirroring of APM sessions.
@@ -94,9 +95,9 @@ The following is a map that shows the available options for the template paramet
 
 | Azure BIG-IP Image Version | BIG-IP Version | Important: Boot location options note |
 | --- | --- | --- |
-| 15.0.100000 | 15.0.1 Build 0.0.1 | Both One and Two Boot Location options are available |
-| 14.1.200000 | 14.1.2 Build 0.0.1 | Both One and Two Boot Location options are available |
-| latest | This will select the latest BIG-IP version available | Only Two Boot Location options exist. Even if you select a One Boot Location in the template, Two Boot Locations are created |
+| 15.1.002000 | 15.1.0 Build 0.0.1 | Both One and Two Boot Location options are available |
+
+
 
 ## Supported instance types and hypervisors
 
@@ -126,7 +127,7 @@ Use the appropriate button below to deploy:
 
 - **BIGIQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s).
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv7.4.1.0%2Fexperimental%2Ffailover%2Fsame-net%2Fvia-api%2Fn-nic%2Flearning-stack%2Fbigiq%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv8.0.0.0%2Fexperimental%2Ffailover%2Fsame-net%2Fvia-api%2Fn-nic%2Flearning-stack%2Fbigiq%2Fazuredeploy.json)
 
 ### Template parameters
 
@@ -153,6 +154,7 @@ Use the appropriate button below to deploy:
 | declarationUrl | Yes | URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.18.0/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration. |
 | ntpServer | Yes | Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use. |
 | timeZone | Yes | If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list [here](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md)). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore. |
+| customImageUrn | Yes | If you would like to deploy using a specific image in Azure marketplace, specify the URN of the image. **Note**: Unless specifically required, leave the default of **OPTIONAL**. Example value: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:15.1.002000. You can find the URNs of F5 marketplace images in the README for this template or by running the command: az vm image list --output yaml --publisher f5-networks --all |
 | customImage | Yes | If you would like to deploy using a local BIG-IP image, provide either the full URL to the VHD in Azure storage **or** the full resource ID to an existing Microsoft.Compute image resource.  **Note**: Unless specifically required, leave the default of **OPTIONAL**. |
 | restrictedSrcAddress | Yes | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources |
 | tagValues | Yes | Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key. |
@@ -160,7 +162,7 @@ Use the appropriate button below to deploy:
 | allowPhoneHome | Yes | This deployment can provide F5 with high-level device use information to optimize development resources. If you select **No** the information is not sent. |
 | numberOfAdditionalNics | Yes | By default this solution deploys the BIG-IP(s) in a 3 NIC configuration, however additional NICs can be added to the BIG-IP(s) using this parameter.  **Note**: The default value is 0, additional NICs will only be created if 1 or higher is specified. |
 | additionalNicLocation | Yes | This parameter specifies where the additional NICs go, use the default value of **OPTIONAL** if **0** was selected for the parameter **numberOfAdditionalNics**.  Otherwise this value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. **Note**: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique. |
-| managedRoutes | Yes | A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24. Specifying a comma-delimited list of managedRoutes and creating f5_ha and f5_tg tags on the Azure Route Table defines the UDRs to be updated. To have the UDRs managed by BIG-IP, you will need to create an Azure tag with key **f5_ha** and value **self_2nic**, or the name of a different self IP address configured on the BIG-IP VE. All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with 'f5_ha:' will use the corresponding self IP address on the active BIG-IP VE as the next hop for those routes. You must also associate the route table with a traffic group by creating an Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group configured on the BIG-IP VE. |
+| userAssignedManagedIdentity | Yes | The name of the pre-existing user-assigned managed identity in the resource group where the template will be deployed, if applicable.  This identity will be configured on the virtual machine resources and must have the Contributor role assigned on both the deployment and virtual network resource groups.  Leaving the default of **NOT_SPECIFIED** triggers the creation of a system-assigned managed identity. |
 
 ### Programmatic deployments
 
@@ -169,7 +171,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### PowerShell Script Example
 
 ```powershell
-## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -instanceType Standard_DS3_v2 -imageName AllTwoBootLocations -bigIqAddress <value> -bigIqUsername <value> -bigIqPassword <value> -bigIqLicensePoolName <value> -bigIqLicenseSkuKeyword1 OPTIONAL -bigIqLicenseUnitOfMeasure OPTIONAL -bigIpVersion 15.0.100000 -bigIpModules ltm:nominal -vnetAddressPrefix 10.0 -routeTableName defaultRouteTable -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImage OPTIONAL -allowUsageAnalytics Yes -allowPhoneHome Yes -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -managedRoutes NOT_SPECIFIED -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -instanceType Standard_DS3_v2 -imageName AllTwoBootLocations -bigIqAddress <value> -bigIqUsername <value> -bigIqPassword <value> -bigIqLicensePoolName <value> -bigIqLicenseSkuKeyword1 OPTIONAL -bigIqLicenseUnitOfMeasure OPTIONAL -bigIpVersion 15.1.002000 -bigIpModules ltm:nominal -vnetAddressPrefix 10.0 -routeTableName defaultRouteTable -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImageUrn OPTIONAL -customImage OPTIONAL -allowUsageAnalytics Yes -allowPhoneHome Yes -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -userAssignedManagedIdentity NOT_SPECIFIED -resourceGroupName <value>
 ```
 
 =======
@@ -177,7 +179,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### Azure CLI (1.0) Script Example
 
 ```bash
-## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --instanceType Standard_DS3_v2 --imageName AllTwoBootLocations --bigIqAddress <value> --bigIqUsername <value> --bigIqPassword <value> --bigIqLicensePoolName <value> --bigIqLicenseSkuKeyword1 OPTIONAL --bigIqLicenseUnitOfMeasure OPTIONAL --bigIpVersion 15.0.100000 --bigIpModules ltm:nominal --vnetAddressPrefix 10.0 --routeTableName defaultRouteTable --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImage OPTIONAL --allowUsageAnalytics Yes --allowPhoneHome Yes --numberOfAdditionalNics 0 --additionalNicLocation OPTIONAL --managedRoutes NOT_SPECIFIED --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --instanceType Standard_DS3_v2 --imageName AllTwoBootLocations --bigIqAddress <value> --bigIqUsername <value> --bigIqPassword <value> --bigIqLicensePoolName <value> --bigIqLicenseSkuKeyword1 OPTIONAL --bigIqLicenseUnitOfMeasure OPTIONAL --bigIpVersion 15.1.002000 --bigIpModules ltm:nominal --vnetAddressPrefix 10.0 --routeTableName defaultRouteTable --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImageUrn OPTIONAL --customImage OPTIONAL --allowUsageAnalytics Yes --allowPhoneHome Yes --numberOfAdditionalNics 0 --additionalNicLocation OPTIONAL --userAssignedManagedIdentity NOT_SPECIFIED --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 ```
 
 ## Post-Deployment Configuration Steps
@@ -250,53 +252,95 @@ The deployment template supports creation of 1-20 external public IP addresses f
 
 When you create virtual servers on the BIG-IP VE for these new additional addresses, the BIG-IP virtual server destination IP address should match the Azure Private IP Address of the IP configuration that corresponds to the Public IP address of your application. See the BIG-IP documentation for specific instructions on creating virtual servers.
 
-### Configuring additional routes
 
-If you want to configure additional routes to use the active BIG-IP VE as the next hop virtual appliance, you must edit the **/config/cloud/managedRoutes** file on each BIG-IP VE device.
+### Enabling Route Failover
 
-The managedRoutes file is a comma-separated list of route destinations. For example, if you entered **192.168.0.0/24,192.168.1.0/24** in the **managedRoutes** parameter of the ARM template deployment, and want to set the active BIG-IP VE device as the next hop for the routes 192.168.2.0/24 and 0.0.0.0/0, log in via SSH to each device and manually edit the **/config/cloud/managedRoutes** file to: **192.168.0.0/24,192.168.1.0/24, 192.168.2.0/24,0.0.0.0/0**
+This solution supports associating specific sets of self IP addresses with Azure Route Tables using the F5 Cloud Failover Extension.  However, because each environment's managed routes will be different, route failover is configured at deployment time, but disabled by default.  To enable route failover, you must POST an updated CFE declaration to the CFE endpoint (/mgmt/shared/cloud-failover/declare) on one of the BIG-IP devices.
 
+The Cloud Failover Extension documentation describes route failover configuration here: https://clouddocs.f5.com/products/extensions/f5-cloud-failover/latest/userguide/configuration.html#failover-routes
 
-### Customizing the Next Hop of Azure User-Defined Routes
+Below is an example of a declaration that enables route failover. The "resourceGroupName" value is a placeholder; replace that value with the name of the Azure resource group where the template was deployed. To verify that you are using the correct values, you can send a GET request to the CFE endpoint at /mgmt/shared/cloud-failover/declare:
 
-This template supports associating specific sets of self IP addresses with Azure Route Tables.  Each route table that references routes that use the active BIG-IP VE as the next hop must be configured in Azure with both **f5_ha** and **f5_tg** tags.  The **f5_ha** tag value specifies the set of self IP addresses to which traffic will be forwarded, while the **f5_tg** tag associates the route table with a traffic group on the BIG-IP VE cluster. For example, if you want the routes specified in the **managedRoutes** parameter to use the default internal self IP address in **traffic-group-1** as the virtual appliance next hop, configure these Azure tags on the route table:
+# Initial declaration response (GET):
+```json
+{
+    "class": "Cloud_Failover",
+    "environment": "azure",
+    "externalStorage": {
+        "scopingTags": {
+            "f5_cloud_failover_label": "resourceGroupName"
+        }
+    },
+    "failoverAddresses": {
+        "scopingTags": {
+            "f5_cloud_failover_label": "resourceGroupName"
+        }
+    },
+    "failoverRoutes": {
+        "enabled": false,
+        "scopingTags": {
+            "f5_cloud_failover_label": "resourceGroupName"
+        },
+        "scopingAddressRanges": [
+            {
+                "range": "192.168.0.0/32"
+            }
+        ],
+        "defaultNextHopAddresses": {
+            "discoveryType": "static",
+            "items": [
+                "192.168.0.4",
+                "192.168.0.5"
+            ]
+        }
+    }
+}
+```
 
-  - Key: "f5_ha", value: "self_2nic"
-  - Key: "f5_tg", value: "traffic-group-1"
+Replace the scopingAddressRanges array with a list of range objects that includes one range object per user-defined route that this deployment will manage.  Replace the defaultNextHopAddresses.items array with a list of the BIG-IP self IP addresses configured on the devices in this deployment:
 
-If you have the same route destinations (a wildcard destination of 0.0.0.0/0, for example) in multiple route tables, with each destination targeting a different interface of the BIG-IP VEs, we recommend creating a new set of self IP addresses and their corresponding IP configurations in Azure, and then tagging the route table appropriately.  
+# Example declaration enabling route failover (POST):
+```json
+{
+    "class": "Cloud_Failover",
+    "environment": "azure",
+    "externalStorage": {
+        "scopingTags": {
+            "f5_cloud_failover_label": "resourceGroupName"
+        }
+    },
+    "failoverAddresses": {
+        "scopingTags": {
+            "f5_cloud_failover_label": "resourceGroupName"
+        }
+    },
+    "failoverRoutes": {
+        "enabled": true,
+        "scopingTags": {
+            "f5_cloud_failover_label": "resourceGroupName"
+        },
+        "scopingAddressRanges": [
+            {
+                "range": "192.168.3.0/24"
+            }
+        ],
+        "defaultNextHopAddresses": {
+            "discoveryType": "static",
+            "items": [
+                "192.168.2.4",
+                "192.168.2.5"
+            ]
+        }
+    }
+}
+```
 
-To find the self IP address from the BIG-IP VE Configuration utility, on the Main tab, click **Network > Self IPs**.
-
-Use the following examples steps to create a secondary set of self IP addresses and corresponding Azure IP configurations, and add the required Azure tags to the route table resource:
-
-  - Add: Azure IP configuration (internal NIC0)
-    - Type: Secondary
-    - Private IP address allocation: Static
-    - Private IP address: 10.1.3.50 
-
-  - Add: BIG-IP VE self IP address (BIG-IP VE0)
-    - Name: internal_2_self
-    - IP Address: 10.1.3.50
-    - VLAN: external
-    - Traffic Group: traffic-group-local-only
-
-  - Add: Azure IP configuration (internal NIC1)
-    - Type: Secondary
-    - Private IP address allocation: Static
-    - Private IP address: 10.1.3.51 
-
-  - Add: BIG-IP VE self IP address (BIG-IP VE1)
-    - Name: internal_2_self
-    - IP Address: 10.1.3.51
-    - VLAN: external
-    - Traffic Group: traffic-group-local-only
+Next, use the following examples steps to add the required Azure tags to the route table resource:
 
   - Azure route table: myRouteTable
-    - Add tag with key: "f5_ha", value: "internal_2_self"
-    - Add tag with key: "f5_tg", value: "traffic-group-1"
+    - Add tag with key: "f5_cloud_failover_label", value: "resourceGroupName"
 
-In this case, on failover, the routes in **myRouteTable** with destinations matching the **managedRoutes** template parameter are updated to use either 10.1.3.50 or 10.1.3.51 (depending on which BIG-IP VE device is active for traffic-group-1) as the next hop virtual appliance.
+In this case, on failover, the routes in the Azure route table ***myRouteTable*** tagged with ***f5_cloud_failover_label: resourceGroupName*** and including user-defined routes matching the **scopingAddressRanges** array are updated to use either 192.168.2.4 or 192.168.2.5(depending on which BIG-IP VE device is active for traffic-group-1) as the next hop virtual appliance.
 ## Documentation
 
 For more information on F5 solutions for Azure, including manual configuration procedures for some deployment scenarios, see the Azure section of [Public Cloud Docs](http://clouddocs.f5.com/cloud/public/v1/).
