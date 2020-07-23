@@ -6,7 +6,6 @@
 # Assign Script Parameters and Define Variables
 # Specify static items below, change these as needed or make them parameters
 region="westus"
-restrictedSrcAddress="*"
 tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
@@ -95,6 +94,9 @@ while [[ $# -gt 1 ]]; do
             shift 2;;
         --azureLoginPassword)
             azureLoginPassword=$2
+            shift 2;;
+        --restrictedSrcAddress)
+            restrictedSrcAddress=$2
             shift 2;;
         --)
             shift

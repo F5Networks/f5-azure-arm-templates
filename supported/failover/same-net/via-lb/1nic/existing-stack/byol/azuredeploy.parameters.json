@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "8.0.0.0",
+    "contentVersion": "8.1.0.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -21,7 +21,7 @@
             "value": "AllTwoBootLocations"
         },
         "bigIpVersion": {
-            "value": "15.1.002000"
+            "value": "15.1.004000"
         },
         "bigIpModules": {
             "value": "ltm:nominal"
@@ -63,7 +63,7 @@
             "value": "OPTIONAL"
         },
         "restrictedSrcAddress": {
-            "value": "*"
+            "value": ""
         },
         "tagValues": {
             "value": {

@@ -4,9 +4,6 @@
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
 [![Issues](https://img.shields.io/github/issues/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/issues)
 
-## CVE-2020-5902
-**Warning:** due to [CVE-2020-5902](https://support.f5.com/csp/article/K52145254), do not use templates unless using customImage or customImageUrn parameter. Updated images are pending publication to Marketplace. Please see [CVE-2020-5902](https://support.f5.com/csp/article/K52145254) and Cloud Provider for latest updates.
-
 ## Introduction
 
 Welcome to the GitHub repository for F5's ARM templates for Azure deployments.  All of the templates in this repository have been developed by F5 Networks engineers. Across all branches in this repository, there are two directories: *f5_supported* and *experimental*

@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
-    "contentVersion": "8.0.0.0",
+    "contentVersion": "8.1.0.0",
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser",
@@ -165,7 +165,6 @@
             "type": "string"
         },
         "restrictedSrcAddress": {
-            "defaultValue": "*",
             "metadata": {
                 "description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources"
             },
@@ -252,9 +251,9 @@
         "resourceGroupName": "[resourceGroup().name]",
         "resourceGroupId": "[concat(resourceGroup().id, '-vip')]",
         "singleQuote": "'",
-        "f5CloudLibsTag": "v4.20.0",
-        "f5CloudLibsAzureTag": "v2.13.0",
-        "f5CloudIappsTag": "v2.3.2",
+        "f5CloudLibsTag": "v4.21.0",
+        "f5CloudLibsAzureTag": "v2.14.0",
+        "f5CloudIappsTag": "",
         "dnsLabel": "[toLower(parameters('dnsLabel'))]",
         "skuToUse": "f5-bigiq-virtual-edition-byol",
         "offerToUse": "f5-big-iq",
@@ -798,14 +797,12 @@
             "properties": {
                 "autoUpgradeMinorVersion": "true",
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir -p /var/log/cloud/azure; mkdir -p /config/cloud; echo ', variables('initScript'), ' | /usr/bin/base64 -d > /config/cloud/init.sh; chmod +x /config/cloud/init.sh;', ' /config/cloud/init.sh --cloud azure --log-level silly --data-interface eth1 --license ', parameters('bigIqLicenseKey1'), ' --ntp ', parameters('ntpServer'), ' --timezone ', parameters('timeZone'), ' --big-iq-password-data-uri file:///mnt/cloudTmp/.bigiq_pass --big-iq-password ', variables('adminPassword'), ' --big-iq-master-key ', parameters('masterKey'), ' --fcl-tag ', variables('f5CloudLibsTag'), ' --fcl-cloud-tag ', variables('f5CloudLibsAzureTag'), ' --tag-value ', variables('resourceGroupId'), ' --private-ip ', variables('intSubnetPrivateAddress2'), ' --associate-intf ', concat(variables('intNicName'), '0'), ' --dissociate-intf ', concat(variables('intNicName'), '1'), ' --vlan ', variables('singleQuote'), 'n:internal,nic:1.1', variables('singleQuote'), ' --self-ip ', variables('singleQuote'), 'n:internal_self,a:', variables('intSubnetPrivateAddress'), ',v:internal,i:eth1', variables('singleQuote'), ' --discovery-address ', variables('intSubnetPrivateAddress'), ' --usage-analytics ', variables('singleQuote'), 'send:', parameters('allowUsageAnalytics'), ',r:', variables('location'), ',cI:', variables('subscriptionID'), ',dI:', variables('deploymentId'), ',cN:azure,lT:byol,bIV:',parameters('bigIqVersion'),',tN:f5-existing-stack-byol-2nic-bigiq,tV:','8.0.0.0', variables('singleQuote'), ' &>> /var/log/cloud/azure/install.log &')]"
+                    "commandToExecute": "[concat('mkdir -p /var/log/cloud/azure; mkdir -p /config/cloud; echo ', variables('initScript'), ' | /usr/bin/base64 -d > /config/cloud/init.sh; chmod +x /config/cloud/init.sh;', ' /config/cloud/init.sh --cloud azure --log-level silly --data-interface eth1 --license ', parameters('bigIqLicenseKey1'), ' --ntp ', parameters('ntpServer'), ' --timezone ', parameters('timeZone'), ' --big-iq-password-data-uri file:///mnt/cloudTmp/.bigiq_pass --big-iq-password ', variables('adminPassword'), ' --big-iq-master-key ', parameters('masterKey'), ' --fcl-tag ', variables('f5CloudLibsTag'), ' --fcl-cloud-tag ', variables('f5CloudLibsAzureTag'), ' --tag-value ', variables('resourceGroupId'), ' --private-ip ', variables('intSubnetPrivateAddress2'), ' --associate-intf ', concat(variables('intNicName'), '0'), ' --dissociate-intf ', concat(variables('intNicName'), '1'), ' --vlan ', variables('singleQuote'), 'n:internal,nic:1.1', variables('singleQuote'), ' --self-ip ', variables('singleQuote'), 'n:internal_self,a:', variables('intSubnetPrivateAddress'), ',v:internal,i:eth1', variables('singleQuote'), ' --discovery-address ', variables('intSubnetPrivateAddress'), ' --usage-analytics ', variables('singleQuote'), 'send:', parameters('allowUsageAnalytics'), ',r:', variables('location'), ',cI:', variables('subscriptionID'), ',dI:', variables('deploymentId'), ',cN:azure,lT:byol,bIV:',parameters('bigIqVersion'),',tN:f5-existing-stack-byol-2nic-bigiq,tV:','8.1.0.0', variables('singleQuote'), ' &>> /var/log/cloud/azure/install.log &')]"
                 },
                 "publisher": "Microsoft.Azure.Extensions",
                 "settings": {
                     "fileUris": [
                         "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]",
-                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-service-discovery/f5.service_discovery.tmpl')]",
-                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-cloud-logger/f5.cloud_logger.v1.0.0.tmpl')]",
                         "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs-azure/', variables('f5CloudLibsAzureTag'), '/dist/f5-cloud-libs-azure.tar.gz')]"
                     ]
                 },
@@ -825,14 +822,12 @@
             "properties": {
                 "autoUpgradeMinorVersion": "true",
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir -p /var/log/cloud/azure; mkdir -p /config/cloud; echo ', variables('initScript'), ' | /usr/bin/base64 -d > /config/cloud/init.sh; chmod +x /config/cloud/init.sh;', ' /config/cloud/init.sh --cloud azure --log-level silly --data-interface eth1 --license ', parameters('bigIqLicenseKey2'), ' --ntp ', parameters('ntpServer'), ' --timezone ', parameters('timeZone'), ' --create-license-pool ', parameters('licensePoolKeys'), ' --create-reg-key-pool ', parameters('regPoolKeys'), ' --big-iq-password-data-uri file:///mnt/cloudTmp/.bigiq_pass --big-iq-password ', variables('adminPassword'), ' --big-iq-master-key ', parameters('masterKey'), ' --master --big-iq-failover-peer-ip ', variables('intSubnetPrivateAddress'), ' --fcl-tag ', variables('f5CloudLibsTag'), ' --fcl-cloud-tag ', variables('f5CloudLibsAzureTag'), ' --tag-value ', variables('resourceGroupId'), ' --private-ip ', variables('intSubnetPrivateAddress3'), ' --associate-intf ', concat(variables('intNicName'), '1'), ' --dissociate-intf ', concat(variables('intNicName'), '0'), ' --vlan ', variables('singleQuote'), 'n:internal,nic:1.1', variables('singleQuote'), ' --self-ip ', variables('singleQuote'), 'n:internal_self,a:', variables('intSubnetPrivateAddress1'), ',v:internal,i:eth1', variables('singleQuote'), ' --discovery-address ', variables('intSubnetPrivateAddress1'), ' --usage-analytics ', variables('singleQuote'), 'send:', parameters('allowUsageAnalytics'), ',r:', variables('location'), ',cI:', variables('subscriptionID'), ',dI:', variables('deploymentId'), ',cN:azure,lT:byol,bIV:',parameters('bigIqVersion'),',tN:f5-existing-stack-byol-2nic-bigiq,tV:','8.0.0.0', variables('singleQuote'), ' &>> /var/log/cloud/azure/install.log &')]"
+                    "commandToExecute": "[concat('mkdir -p /var/log/cloud/azure; mkdir -p /config/cloud; echo ', variables('initScript'), ' | /usr/bin/base64 -d > /config/cloud/init.sh; chmod +x /config/cloud/init.sh;', ' /config/cloud/init.sh --cloud azure --log-level silly --data-interface eth1 --license ', parameters('bigIqLicenseKey2'), ' --ntp ', parameters('ntpServer'), ' --timezone ', parameters('timeZone'), ' --create-license-pool ', parameters('licensePoolKeys'), ' --create-reg-key-pool ', parameters('regPoolKeys'), ' --big-iq-password-data-uri file:///mnt/cloudTmp/.bigiq_pass --big-iq-password ', variables('adminPassword'), ' --big-iq-master-key ', parameters('masterKey'), ' --primary --big-iq-failover-peer-ip ', variables('intSubnetPrivateAddress'), ' --fcl-tag ', variables('f5CloudLibsTag'), ' --fcl-cloud-tag ', variables('f5CloudLibsAzureTag'), ' --tag-value ', variables('resourceGroupId'), ' --private-ip ', variables('intSubnetPrivateAddress3'), ' --associate-intf ', concat(variables('intNicName'), '1'), ' --dissociate-intf ', concat(variables('intNicName'), '0'), ' --vlan ', variables('singleQuote'), 'n:internal,nic:1.1', variables('singleQuote'), ' --self-ip ', variables('singleQuote'), 'n:internal_self,a:', variables('intSubnetPrivateAddress1'), ',v:internal,i:eth1', variables('singleQuote'), ' --discovery-address ', variables('intSubnetPrivateAddress1'), ' --usage-analytics ', variables('singleQuote'), 'send:', parameters('allowUsageAnalytics'), ',r:', variables('location'), ',cI:', variables('subscriptionID'), ',dI:', variables('deploymentId'), ',cN:azure,lT:byol,bIV:',parameters('bigIqVersion'),',tN:f5-existing-stack-byol-2nic-bigiq,tV:','8.1.0.0', variables('singleQuote'), ' &>> /var/log/cloud/azure/install.log &')]"
                 },
                 "publisher": "Microsoft.Azure.Extensions",
                 "settings": {
                     "fileUris": [
                         "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]",
-                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-service-discovery/f5.service_discovery.tmpl')]",
-                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-iapps/', variables('f5CloudIappsTag'), '/f5-cloud-logger/f5.cloud_logger.v1.0.0.tmpl')]",
                         "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs-azure/', variables('f5CloudLibsAzureTag'), '/dist/f5-cloud-libs-azure.tar.gz')]"
                     ]
                 },

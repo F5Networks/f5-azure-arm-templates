@@ -1,12 +1,11 @@
 #!/bin/bash
 
 ## Bash Script to deploy an F5 ARM template into Azure, using azure cli 1.0 ##
-## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --enableNetworkFailover Yes --provisionInternalLoadBalancer Yes --internalLoadBalancerProbePort 3456 --instanceType Standard_DS3_v2 --imageName Best1Gbps --bigIpVersion 15.1.002000 --bigIpModules ltm:nominal --vnetAddressPrefix 10.0 --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImageUrn OPTIONAL --customImage OPTIONAL --allowUsageAnalytics Yes --allowPhoneHome Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --enableNetworkFailover Yes --provisionInternalLoadBalancer Yes --internalLoadBalancerProbePort 3456 --instanceType Standard_DS3_v2 --imageName Best1Gbps --bigIpVersion 15.1.004000 --bigIpModules ltm:nominal --vnetAddressPrefix 10.0 --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImageUrn OPTIONAL --customImage OPTIONAL --allowUsageAnalytics Yes --allowPhoneHome Yes --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 
 # Assign Script Parameters and Define Variables
 # Specify static items below, change these as needed or make them parameters
 region="westus"
-restrictedSrcAddress="*"
 tagValues='{"application":"APP","environment":"ENV","group":"GROUP","owner":"OWNER","cost":"COST"}'
 
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
@@ -92,6 +91,9 @@ while [[ $# -gt 1 ]]; do
             shift 2;;
         --azureLoginPassword)
             azureLoginPassword=$2
+            shift 2;;
+        --restrictedSrcAddress)
+            restrictedSrcAddress=$2
             shift 2;;
         --)
             shift

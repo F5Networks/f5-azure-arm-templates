@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
-    "contentVersion": "8.0.0.0",
+    "contentVersion": "8.1.0.0",
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser",
@@ -158,7 +158,6 @@
             "type": "string"
         },
         "restrictedSrcAddress": {
-            "defaultValue": "*",
             "metadata": {
                 "description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources"
             },
@@ -243,9 +242,9 @@
         "resourceGroupName": "[resourceGroup().name]",
         "resourceGroupId": "[concat(resourceGroup().id, '-vip')]",
         "singleQuote": "'",
-        "f5CloudLibsTag": "v4.20.0",
-        "f5CloudLibsAzureTag": "v2.13.0",
-        "f5CloudIappsTag": "v2.3.2",
+        "f5CloudLibsTag": "v4.21.0",
+        "f5CloudLibsAzureTag": "v2.14.0",
+        "f5CloudIappsTag": "",
         "dnsLabel": "[toLower(parameters('dnsLabel'))]",
         "skuToUse": "f5-bigiq-virtual-edition-byol",
         "offerToUse": "f5-big-iq",

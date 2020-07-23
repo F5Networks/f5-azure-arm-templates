@@ -21,7 +21,7 @@ param(
   [string] [Parameter(Mandatory=$True)] $ntpServer,
   [string] [Parameter(Mandatory=$True)] $timeZone,
   [string] [Parameter(Mandatory=$True)] $customImage,
-  [string] $restrictedSrcAddress = "*",
+  [string] $restrictedSrcAddress = "None",
   $tagValues = '{"application": "APP", "cost": "COST", "environment": "ENV", "group": "GROUP", "owner": "OWNER"}',
   [string] [Parameter(Mandatory=$True)] $allowUsageAnalytics,
   [string] [Parameter(Mandatory=$True)] $resourceGroupName,
