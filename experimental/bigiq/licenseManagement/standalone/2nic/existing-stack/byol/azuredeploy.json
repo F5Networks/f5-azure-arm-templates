@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
-    "contentVersion": "8.1.0.0",
+    "contentVersion": "8.1.1.0",
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser",
@@ -242,8 +242,8 @@
         "resourceGroupName": "[resourceGroup().name]",
         "resourceGroupId": "[concat(resourceGroup().id, '-vip')]",
         "singleQuote": "'",
-        "f5CloudLibsTag": "v4.21.0",
-        "f5CloudLibsAzureTag": "v2.14.0",
+        "f5CloudLibsTag": "v4.22.0",
+        "f5CloudLibsAzureTag": "v2.15.0",
         "f5CloudIappsTag": "",
         "dnsLabel": "[toLower(parameters('dnsLabel'))]",
         "skuToUse": "f5-bigiq-virtual-edition-byol",
