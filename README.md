@@ -6,13 +6,13 @@
 
 ## Introduction
 
-Welcome to the GitHub repository for F5's ARM templates for Azure deployments.  All of the templates in this repository have been developed by F5 Networks engineers. Across all branches in this repository, there are two directories: *f5_supported* and *experimental*
+Welcome to the GitHub repository for F5's ARM templates for Azure deployments. All of the templates in this repository have been developed by F5 Networks engineers. This repository contains two main directories: *supported* and *examples*
 
-  - **supported**<br>
+- **supported**<br>
   The supported directory contains Azure ARM templates that have been created and fully tested by F5 Networks. These templates are fully supported by F5, meaning you can get assistance if necessary from F5 Technical Support via your typical methods.
 
-  - **experimental**<br>
-  The experimental directory also contains ARM templates that have been created by F5 Networks. However, these templates have not completed full testing and are subject to change. F5 Networks does not offer technical support for templates in the experimental directory, so use these templates with caution.
+- **examples**<br>
+  PREVIEW: The example templates in this directory are intended to provide reference deployments of F5 BIG-IP Virtual Editions. Due to the heavy customization requirements of external cloud resources and BIG-IP configurations in these solutions, F5 does not provide technical support for deploying, customizing, or troubleshooting the templates themselves. However, the various underlying products and components used (for example: F5 BIG-IP Virtual Edition, Automation Toolchain extensions, and Cloud Failover Extension (CFE)) in the solutions located here are F5-supported. 
 
 ## Template information
 
@@ -39,7 +39,7 @@ All known issues are on GitHub for better tracking and visibility. See issues wi
 
 ### Copyright
 
-Copyright 2014-2019 F5 Networks Inc.
+Copyright 2014-2020 F5 Networks Inc.
 
 ### License
 

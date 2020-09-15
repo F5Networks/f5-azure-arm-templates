@@ -1,0 +1,52 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "9.0.0.0",
+	"parameters": {
+		"builtInRoleType": {
+			"value": "Reader"
+		},
+		"customRoleActions": {
+			"value": [
+				"Microsoft.Resources/subscriptions/resourceGroups/read",
+				"Microsoft.Resources/subscriptions/resourceGroups/list"
+			]
+		},
+		"customRoleAssignableScopes": {
+			"value": [
+				"XXXX-NEED-VALID-ID-HERE"
+			]
+		},
+		"customRoleDescription": {
+			"value": "custom reader"
+		},
+		"customRoleName": {
+			"value": "reader"
+		},
+		"customRoleNotActions": {
+			"value": [
+				"Microsoft.Resources/subscriptions/resourceGroups/write"
+			]
+		},
+		"keyVaultName": {
+			"value": "key-vault"
+		},
+		"secretName": {
+			"value": "linux-admin"
+		},
+		"secretValue": {
+			"value": "StrongPassword212+"
+		},
+		"tagValues": {
+			"value": {
+				"application": "APP",
+				"cost": "COST",
+				"environment": "ENV",
+				"group": "GROUP",
+				"owner": "OWNER"
+			}
+		},
+		"userAssignedIdentityName": {
+			"value": "user-assigned-identity"
+		}
+	}
+}

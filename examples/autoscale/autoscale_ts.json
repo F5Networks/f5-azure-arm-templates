@@ -1,0 +1,31 @@
+{
+    "Azure_Consumer": {
+        "appInsightsResourceName": "dd-app-*",
+        "class": "Telemetry_Consumer",
+        "maxBatchIntervalMs": 5000,
+        "maxBatchSize": 250,
+        "trace": true,
+        "type": "Azure_Application_Insights",
+        "useManagedIdentity": true
+    },
+    "Bigip_Poller": {
+        "actions": [
+            {
+                "includeData": {},
+                "locations": {
+                    "system": {
+                        "cpu": true,
+                        "networkInterfaces": {
+                            "1.0": {
+                                "counters.bitsIn": true
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "class": "Telemetry_System_Poller",
+        "interval": 60
+    },
+    "class": "Telemetry"
+}

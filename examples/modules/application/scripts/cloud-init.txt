@@ -1,0 +1,11 @@
+#cloud-config
+
+package_update: true
+package_upgrade: true
+
+runcmd:
+  - apt-get update -y
+  - apt-get -y install docker.io
+  - docker run --name f5demo -p 80:80 -p 443:443 -d f5devcentral/f5-demo-app:1.0.1
+
+final_message: "The system is finally up, after $UPTIME seconds"

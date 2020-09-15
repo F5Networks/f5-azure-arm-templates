@@ -1,0 +1,73 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "9.0.0.0",
+	"parameters": {
+		"templateBaseUrl": {
+			"defaultValue": "https://cdn.f5.com/product/cloudsolutions/",
+			"metadata": {
+				"description": "URL where templates are stored."
+			},
+			"type": "string"
+		},
+		"artifactLocation": {
+			"defaultValue": "f5-azure-arm-templates/examples/",
+			"metadata": {
+				"description": "Location where modules folder is stored."
+			},
+			"type": "string"
+		}
+	},
+	"variables": {
+		"deploymentApiVersion": "2019-05-01"
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "[variables('deploymentApiVersion')]",
+			"name": "accessTemplate",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('templateBaseUrl'), parameters('artifactLocation'), 'modules/access/access.json')]",
+					"contentVersion": "9.0.0.0"
+				},
+				"parameters": {
+					"builtInRoleType": { "value": "Reader"	},
+					"customRoleName": {	"value": "custom-reader"    },
+					"customRoleDescription": { "value": "this is a custom role defition for reader" },
+					"customRoleActions": { "value": [ "Microsoft.Resources/subscriptions/resourceGroups/read", "Microsoft.Resources/subscriptions/resourceGroups/list"]	},
+					"customRoleNotActions": { "value": [ "Microsoft.Resources/subscriptions/resourceGroups/write"]	},
+					"customRoleAssignableScopes": { "value": [ "[subscription().subscriptionId]"]	},
+					"keyVaultName": { "value": "test-kv" },
+					"keyVaultPermissionsSecrets": { "value": [ "get", "list" ]	},
+					"keyVaultPermissionsKeys": { "value": [ "get", "list" ]	},
+					"secretName": { "value": "linux-admin" },
+					"secretValue": { "value": "StrongPassword212+" },
+					"tagValues": { "value": { "application": "APP", "cost": "COST", "environment": "ENV", "group": "GROUP", "owner": "OWNER" } }
+				}
+			}
+		}
+	],
+	"outputs": {
+		"builtInRoleType": {
+			"type": "string",
+			"value": "[reference('accessTemplate').outputs.builtInRoleType.value]"
+		},
+		"customRoleDefinitionId": {
+			"type": "string",
+			"value": "[reference('accessTemplate').outputs.customRoleDefinitionId.value]"
+		},
+		"userAssignedIdentityName": {
+			"type": "string",
+			"value": "[reference('accessTemplate').outputs.userAssignedIdentityName.value]"
+		},
+		"keyVaultName": {
+			"type": "string",
+			"value": "[reference('accessTemplate').outputs.keyVaultName.value]"
+		},
+		"secretName": {
+			"type": "string",
+			"value": "[reference('accessTemplate').outputs.secretName.value]"
+		}
+	}
+}

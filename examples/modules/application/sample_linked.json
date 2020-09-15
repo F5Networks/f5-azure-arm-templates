@@ -1,0 +1,78 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "9.0.0.0",
+	"parameters": {
+		"artifactLocation": {
+			"defaultValue": "f5-azure-arm-templates/examples/",
+			"metadata": {
+				"description": "Location where modules folder is stored."
+			},
+			"type": "string"
+		},
+		"templateBaseUrl": {
+			"defaultValue": "https://cdn.f5.com/product/cloudsolutions/",
+			"metadata": {
+				"description": "URL where templates are stored."
+			},
+			"type": "string"
+		}
+	},
+	"variables": {
+		"deploymentApiVersion": "2019-05-01"
+	},
+	"resources": [
+		{
+			"apiVersion": "[variables('deploymentApiVersion')]",
+			"name": "appTemplate",
+			"properties": {
+				"mode": "Incremental",
+				"parameters": {
+					"adminPassword": {
+						"value": "Default"
+					},
+					"adminUsername": {
+						"value": "Default"
+					},
+					"cloudInitDeliveryLocation": {
+						"value": "Default"
+					},
+					"initScriptDeliveryLocation": {
+						"value": "Default"
+					},
+					"initScriptParameters": {
+						"value": "Default"
+					},
+					"instanceName": {
+						"value": "Default"
+					},
+					"instanceType": {
+						"value": "Default"
+					},
+					"subnetId": {
+						"value": "Default"
+					},
+					"tagValues": {
+						"value": {
+							"application": "APP",
+							"cost": "COST",
+							"environment": "ENV",
+							"group": "GROUP",
+							"owner": "OWNER"
+						}
+					}
+				},
+				"templateLink": {
+					"contentVersion": "9.0.0.0",
+					"uri": "[concat(parameters('templateBaseUrl'), parameters('artifactLocation'), 'modules/application/application.json')]"
+				}
+			},
+			"type": "Microsoft.Resources/deployments"
+		}
+	],
+	"outputs": {
+		"appIp": {
+			"type": "string",
+			"value": "[reference('appTemplate').outputs.AppIp.value]"
+		}
+	}
+}

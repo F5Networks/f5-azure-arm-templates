@@ -1,0 +1,201 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+	"contentVersion": "9.0.0.0",
+	"parameters": {
+		"adminUsername": {
+			"metadata": {
+				"description": "Admin username used for accessing VM"
+			},
+			"type": "string"
+		},
+		"sshKey": {
+			"metadata": {
+				"description": "Supply ssh public key you wish to use to connect to the virtual machine."
+			},
+			"type": "string"
+		},
+		"instanceName": {
+			"defaultValue": "vm01",
+			"metadata": {
+				"description": "VM instance name"
+			},
+			"type": "string"
+		},
+		"instanceType": {
+			"allowedValues": [
+				"Standard_D2s_v3"
+			],
+			"defaultValue": "Standard_D2s_v3",
+			"metadata": {
+				"description": "Instance size of the Virtual Machine."
+			},
+			"type": "string"
+		},
+		"subnetId": {
+			"metadata": {
+				"description": "Existing subnet resource ID which will be used for getting vm/app private address"
+			},
+			"type": "string"
+		},
+		"nsgId": {
+			"defaultValue": "",
+			"metadata": {
+				"description": "Existing subnet NSG ID which will be applied to app VM network interface."
+			},
+			"type": "string"
+		},
+		"appContainer": {
+			"defaultValue": "f5devcentral/f5-demo-app:1.0.1",
+			"metadata": {
+				"description": "Docker container to use when deploying the example application."
+			},
+			"type": "string"
+		},
+		"cloudInitDeliveryLocation": {
+			"defaultValue": "",
+			"metadata": {
+				"description": "URI to cloud init file used for customizing VM"
+			},
+			"type": "string"
+		},
+		"tagValues": {
+			"defaultValue": {
+				"application": "APP",
+				"cost": "COST",
+				"environment": "ENV",
+				"group": "GROUP",
+				"owner": "OWNER"
+			},
+			"metadata": {
+				"description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."
+			},
+			"type": "object"
+		}
+	},
+	"variables": {
+		"apiVersion": "2015-06-15",
+		"cloudInit": "[concat('#include\n',parameters('cloudInitDeliveryLocation'))]",
+		"nicName": "[concat(variables('vmName'), '-nic')]",
+		"networkSecurityGroup": {
+			"id": "[parameters('nsgId')]"
+		},
+		"publicIPAddressType": "Static",
+		"storageAccountType": "Standard_LRS",
+		"storageName": "[concat(uniqueString(resourceGroup().name, resourceGroup().id, deployment().name), 'data000')]",
+		"subscriptionID": "[subscription().subscriptionId]",
+		"vmName": "[concat(resourceGroup().name, '-app')]"
+	},
+	"resources": [
+		{
+			"apiVersion": "[variables('apiVersion')]",
+			"location": "[resourceGroup().location]",
+			"name": "[variables('storageName')]",
+			"properties": {
+				"accountType": "[variables('storageAccountType')]"
+			},
+			"tags": "[if(empty(parameters('tagValues')), json('null'), parameters('tagValues'))]",
+			"type": "Microsoft.Storage/storageAccounts"
+		},
+		{
+			"apiVersion": "[variables('apiVersion')]",
+			"location": "[resourceGroup().location]",
+			"name": "[variables('nicName')]",
+			"properties": {
+				"ipConfigurations": [
+					{
+						"name": "[concat(variables('vmName'), '-ipconfig1')]",
+						"properties": {
+							"privateIPAllocationMethod": "Dynamic",
+							"subnet": {
+								"id": "[parameters('subnetId')]"
+							}
+						}
+					}
+				],
+				"networkSecurityGroup": "[if(empty(parameters('nsgId')), json('null'), variables('networkSecurityGroup'))]"
+			},
+			"tags": "[if(empty(parameters('tagValues')), json('null'), parameters('tagValues'))]",
+			"type": "Microsoft.Network/networkInterfaces"
+		},
+		{
+			"apiVersion": "[variables('apiVersion')]",
+			"dependsOn": [
+				"[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]",
+				"[concat('Microsoft.Storage/storageAccounts/', variables('storageName'))]"
+			],
+			"location": "[resourceGroup().location]",
+			"name": "[variables('vmName')]",
+			"properties": {
+				"hardwareProfile": {
+					"vmSize": "[parameters('instanceType')]"
+				},
+				"networkProfile": {
+					"networkInterfaces": [
+						{
+							"id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+						}
+					]
+				},
+				"osProfile": {
+					"adminUsername": "[parameters('adminUsername')]",
+					"linuxConfiguration": {
+						"disablePasswordAuthentication": true,
+						"ssh": {
+							"publicKeys": [
+								{
+									"keyData": "[parameters('sshKey')]",
+									"path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]"
+								}
+							]
+						}
+					},
+					"computerName": "[variables('vmName')]",
+					"customData": "[base64(variables('cloudInit'))]"
+				},
+				"storageProfile": {
+					"dataDisks": [],
+					"imageReference": {
+						"offer": "0001-com-ubuntu-server-focal",
+						"publisher": "Canonical",
+						"sku": "20_04-lts",
+						"version": "latest"
+					},
+					"osDisk": {
+						"caching": "ReadWrite",
+						"createOption": "fromImage",
+						"name": "[concat(variables('vmName'), '-osdisk')]",
+						"vhd": {
+							"uri": "[concat(concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageName')), '2015-06-15').primaryEndpoints['blob'], 'vhds/'), variables('storageName'), '.vhd')]"
+						}
+					}
+				}
+			},
+			"tags": "[if(empty(parameters('tagValues')), json('null'), parameters('tagValues'))]",
+			"type": "Microsoft.Compute/virtualMachines"
+		},
+		{
+			"apiVersion": "[variables('apiVersion')]",
+			"condition": "[not(empty(parameters('appContainer')))]",
+			"dependsOn": [
+				"[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+			],
+			"location": "[resourceGroup().location]",
+			"name": "[concat(variables('vmName'),'/vmInit')]",
+			"properties": {
+				"publisher": "Microsoft.Azure.Extensions",
+				"settings": {
+					"commandToExecute": "[concat('apt-get update -y; apt-get -y install docker.io; docker run --name f5demo -p 80:80 -p 443:443 -d ', parameters('appContainer'), '')]"
+				},
+				"type": "CustomScript",
+				"typeHandlerVersion": "2.0"
+			},
+			"type": "Microsoft.Compute/virtualMachines/extensions"
+		}
+	],
+	"outputs": {
+		"appIp": {
+			"type": "string",
+			"value": "[reference(resourceId('Microsoft.Network/networkInterfaces', variables('nicName')),'2016-09-01').ipConfigurations[0].properties.privateIPAddress]"
+		}
+	}
+}

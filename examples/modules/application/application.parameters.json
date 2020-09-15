@@ -1,0 +1,51 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "9.0.0.0",
+	"parameters": {
+		"adminPassword": {
+			"value": "StrongPassword212+"
+		},
+		"adminUsername": {
+			"value": "my-admin"
+		},
+		"appPrivateAddress": {
+			"value": "10.0.0.2"
+		},
+		"cloudInitDeliveryLocation": {
+			"value": ""
+		},
+		"dnsLabel": {
+			"value": "test.dns.value"
+		},
+		"initScriptDeliveryLocation": {
+			"value": ""
+		},
+		"initScriptParameters": {
+			"value": ""
+		},
+		"instanceName": {
+			"value": "test-instance"
+		},
+		"instanceType": {
+			"value": "Standard_D2s_v3"
+		},
+		"subnetName": {
+			"value": "test-subnet"
+		},
+		"tagValues": {
+			"value": {
+				"application": "APP",
+				"cost": "COST",
+				"environment": "ENV",
+				"group": "GROUP",
+				"owner": "OWNER"
+			}
+		},
+		"vnetName": {
+			"value": "test-vnet"
+		},
+		"vnetResourceGroupName": {
+			"value": "test-resource-group"
+		}
+	}
+}

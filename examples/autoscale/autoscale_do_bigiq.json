@@ -1,0 +1,48 @@
+{
+    "Common": {
+        "class": "Tenant",
+        "dbvars": {
+            "class": "DbVariables",
+            "provision.extramb": 500,
+            "restjavad.useextramb": true
+        },
+        "hostname": "{{ HOST_NAME }}",
+        "myDns": {
+            "class": "DNS",
+            "nameServers": [
+                "8.8.8.8"
+            ]
+        },
+        "myLicense": {
+            "bigIpPassword": "{{ BIGIP_PASSWORD }}",
+            "bigIpUsername": "admin",
+            "bigIqHost": "10.0.1.200",
+            "bigIqPassword": "{{ BIGIQ_PASSWORD }}",
+            "bigIqUsername": "admin",
+            "class": "License",
+            "licensePool": "myPool",
+            "licenseType": "licensePool",
+            "reachable": false,
+            "skuKeyword1": "key1",
+            "skuKeyword2": "key2",
+            "tenant": "myTenant",
+            "unitOfMeasure": "hourly"
+        },
+        "myNtp": {
+            "class": "NTP",
+            "servers": [
+                "0.pool.ntp.org"
+            ],
+            "timezone": "UTC"
+        },
+        "myProvisioning": {
+            "asm": "nominal",
+            "class": "Provision",
+            "ltm": "nominal"
+        }
+    },
+    "async": true,
+    "class": "Device",
+    "label": "my BIG-IP declaration for declarative onboarding",
+    "schemaVersion": "1.0.0"
+}
