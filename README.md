@@ -3,16 +3,30 @@
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 [![Releases](https://img.shields.io/github/release/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/releases)
 [![Issues](https://img.shields.io/github/issues/f5networks/f5-azure-arm-templates.svg)](https://github.com/f5networks/f5-azure-arm-templates/issues)
+  
+
+## F5 Azure ARM Templates 1.0
+
+| :eyes:    | ***Notice***: These legacy templates have been deprecated and are being replaced by our next-generation templates available in the [Cloud Templates 2.0 GitHub repo](https://github.com/F5Networks/f5-azure-arm-templates-v2). We recommend you adopt the next-generation templates as soon as is feasible. |
+|---------------|:------------------------|  
 
 ## Introduction
 
-Welcome to the GitHub repository for F5's ARM templates for Azure deployments. All of the templates in this repository have been developed by F5 Networks engineers. This repository contains two main directories: *supported* and *examples*
+Welcome to the GitHub repository for F5's ARM templates for Azure deployments. All of the templates in this repository have been developed by F5 Networks engineers. This repository contains one main directory: *supported*.
 
 - **supported**<br>
-  The supported directory contains Azure ARM templates that have been created and fully tested by F5 Networks. These templates are fully supported by F5, meaning you can get assistance if necessary from F5 Technical Support via your typical methods.
+  The supported directory contains our legacy Azure ARM templates that have been created and fully tested by F5 Networks. These legacy cloud solution templates (CST1) are fully supported by F5, meaning you can get assistance if necessary from F5 Technical Support via your typical methods. These legacy templates have been deprecated and are being replaced by our next-generation cloud solution templates (CST2) available at https://github.com/F5Networks/f5-azure-arm-templates-v2. We recommend you adopt the next-generation templates as soon as is feasible.
 
-- **examples**<br>
-  PREVIEW: The example templates in this directory are intended to provide reference deployments of F5 BIG-IP Virtual Editions. Due to the heavy customization requirements of external cloud resources and BIG-IP configurations in these solutions, F5 does not provide technical support for deploying, customizing, or troubleshooting the templates themselves. However, the various underlying products and components used (for example: F5 BIG-IP Virtual Edition, Automation Toolchain extensions, and Cloud Failover Extension (CFE)) in the solutions located here are F5-supported. 
+  The planned End of Support (EoS) for legacy cloud temlates is 12/31/21.
+  
+  - Deprecation does NOT mean we are removing nor disabling legacy templates.
+  - Customers are free to continue using legacy cloud templates subject to the EoS timeline.
+  - Deprecated legacy cloud templates are officially in sustaining/maintenance mode.
+  - Package updates and critical bug fixes will be considered for deprecated cloud templates.
+  - No additional legacy cloud verification testing will take place on new versions of TMOS (16.0+).
+  - No new features nor legacy cloud templates will be developed.
+  - The Experimental legacy CST1 templates will be removed over time as additional CST2 use cases are delivered.
+
 
 ## Template information
 
@@ -21,7 +35,7 @@ For additional information, including how the templates are generated, and assis
 
 ### Matrix for tagged releases
 
-F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughput levels available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/v7.0.0.0/azure-bigip-version-matrix.md
+F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughput levels available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md
 
 ## List of F5 ARM templates for Azure deployments
 
