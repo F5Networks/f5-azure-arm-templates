@@ -22,7 +22,6 @@ F5 Networks has created templates grouped into the following categories.
   
     Failover templates include same-net, where instances in the cluster are deployed on the same subnet (L3), and across-net where instances in cluster are deployed across L3 subnets.  
 
-
   - **Autoscale** <br> These templates deploy a group of BIG-IP VEs that scale in and out based on thresholds you configure in the template. The BIG-IP VEs are all Active and are primarily used to scale out an individual L7 service on a single wildcard virtual (although you can add additional services using ports).  <br>  
   This type of deployment relies on upstream service to distribute traffic like DNS/GSLB or a platform's built-in load balancer.<br>  
   Lifecycle: These solutions often leverage some built-in functionality (like auto-backup to cloud persistent storage) and cloud native services (such as a template's Rolling Upgrade).

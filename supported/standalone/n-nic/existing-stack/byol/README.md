@@ -71,14 +71,16 @@ In the *variables* section:
 
 Additionally, F5 provides checksums for all of our supported templates. For instructions and the checksums to compare against, see [checksums-for-f5-supported-cft-and-arm-templates-on-github](https://devcentral.f5.com/codeshare/checksums-for-f5-supported-cft-and-arm-templates-on-github-1014).
 
-## Supported BIG-IP versions
+## Tested BIG-IP versions
 
-The following is a map that shows the available options for the template parameter **bigIpVersion** as it corresponds to the BIG-IP version itself. Only the latest version of BIG-IP VE is posted in the Azure Marketplace. For older versions, see downloads.f5.com.
+The following table lists the versions of BIG-IP that have been tested and validated against F5 Azure ARM solution templates.
 
-| Azure BIG-IP Image Version | BIG-IP Version | Important: Boot location options note |
-| --- | --- | --- |
-| 15.1.004000 | 15.1.0 Build 0.0.1 | Both One and Two Boot Location options are available |
-
+| Azure BIG-IP Image Version | BIG-IP Version | Build | Solution | Status | Notes |
+| --- | --- | --- | --- | --- | --- |
+| 15.1.004000 | 15.1.0 | 0.0.4 | Standalone, Failover, Autoscale | Validated | |
+| 14.1.206000 | 14.1.2 | 0.0.6 | Standalone, Failover, Autoscale | Validated | |
+| 13.1.304000 | 13.1.3 | 0.0.4 | Standalone, Failover, Autoscale | Not Validated | F5 CFE requires BIG-IP 14.1 or later |
+| 12.1.502000 | 12.1.5 | 0.0.2 | Standalone, Failover, Autoscale | Not Validated | F5 CFE requires BIG-IP 14.1 or later |
 
 
 ## Supported instance types and hypervisors
@@ -109,7 +111,7 @@ Use the appropriate button below to deploy:
 
 - **BYOL** (bring your own license): This allows you to use an existing BIG-IP license.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv9.0.0.0%2Fsupported%2Fstandalone%2Fn-nic%2Fexisting-stack%2Fbyol%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv9.1.0.0%2Fsupported%2Fstandalone%2Fn-nic%2Fexisting-stack%2Fbyol%2Fazuredeploy.json)
 
 ### Template parameters
 
