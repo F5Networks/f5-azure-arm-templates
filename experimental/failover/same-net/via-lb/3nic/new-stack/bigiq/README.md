@@ -63,7 +63,6 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
 - The templates now support BIG-IQ licensing using an [ELA](https://www.f5.com/pdf/licensing/big-ip-virtual-edition-enterprise-licensing-agreement-overview.pdf)/subscription pool, which enables self-licensing of BIG-IP virtual editions (VEs).
 - **NEW:**  Beginning with release 5.3.0.0, the BIG-IP image names have changed (previous options were Good, Better, and Best).  Now you choose a BIG-IP VE image based on whether you need [LTM](https://www.f5.com/products/big-ip-services/local-traffic-manager) only (name starts with **LTM**) or All modules (image name starts with **All**) available (including [WAF](https://www.f5.com/products/security/advanced-waf), [AFM](https://www.f5.com/products/security/advanced-firewall-manager), etc.), and if you need 1 or 2 boot locations.  Use 2 boot locations if you expect to upgrade the BIG-IP VE in the future. If you do not need room to upgrade (if you intend to create a new instance when a new version of BIG-IP VE is released), use an image with 1 boot location.  See this [Matrix](https://clouddocs.f5.com/cloud/public/v1/matrix.html#microsoft-azure) for recommended Azure instance types. See the Supported BIG-IP Versions table for the available options for different BIG-IP versions.
-- **NEW:**  BIG-IP version 15.X.X and higher now supports Azure's [Accelerated Networking](https://docs.microsoft.com/en-us/azure/virtual-network/create-vm-accelerated-networking-cli) on multi-NIC BIG-IPs. This feature is enabled by default. Read about requirements and how to check if Accelerated Networking is enabled [here](https://clouddocs.f5.com/cloud/public/v1/azure/Azure_accelNet.html).
 - Previous tagged releases can be used to reference functionality that has been changed or removed.
 - All templates now deploy Standard SKU Azure Public IP Addresses.
 - The provisionInternalLoadBalancer parameter controls the creation of an internal Azure load balancer targeting the internal BIG-IP network interfaces.  Selecting Yes deploys an internal load balancer with the HA Ports feature (all-protocol load balancing rule) enabled. NOTE: In order to download required libraries, the BIG-IP internal interfaces are not configured in the load balancer backend pool by default. You must update the load balancer configuration after deployment completes.
@@ -120,7 +119,7 @@ Use the appropriate button below to deploy:
 
 - **BIGIQ**: This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s).
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv9.1.0.0%2Fexperimental%2Ffailover%2Fsame-net%2Fvia-lb%2F3nic%2Fnew-stack%2Fbigiq%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv9.2.0.0%2Fexperimental%2Ffailover%2Fsame-net%2Fvia-lb%2F3nic%2Fnew-stack%2Fbigiq%2Fazuredeploy.json)
 
 ### Template parameters
 

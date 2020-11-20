@@ -52,7 +52,6 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - All Azure ARM templates now allow you to deploy any public or private offer image from Azure marketplace. Specifying the offer URN in the customImageUrn parameter overrides the choices for bigIpVersion and imageName parameters. See the F5 Azure offer list here for a list of current offers: [Azure offer list](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-offer-list.yaml). NOTE: Not all versions of BIG-IP are supported with all templates. Check the supported versions matrix on each template README for a list of supported versions for that template.
 - This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
 - This template may deploy additional NICs using the parameter **numberOfAdditionalNics**, if doing so it will preconfigure the BIG-IP VLAN(s) and place the interfaces into the corresponding VLAN based on the subnet name(s) provided in the parameter **additionalNicLocation**.  Be aware that after the template deploys, the BIG-IP self IP address(es) need to be created that correspond to the Azure IP Config object for that NIC.  You must also set the IP Config object to a **static** address instead of **dynamic** to ensure it does not change on reboot.
-- **NEW:**  BIG-IP version 15.X.X and higher now supports Azure's [Accelerated Networking](https://docs.microsoft.com/en-us/azure/virtual-network/create-vm-accelerated-networking-cli) on multi-NIC BIG-IPs. This feature is enabled by default. Read about requirements and how to check if Accelerated Networking is enabled [here](https://clouddocs.f5.com/cloud/public/v1/azure/Azure_accelNet.html).
 - Previous tagged releases can be used to reference functionality that has been changed or removed.
 - All templates now deploy Standard SKU Azure Public IP Addresses.
 - If you choose "No" in response to the provisionPublicIP parameter, the choice for "numberOfExternalIps" is not honored and no public IP addresses are created.
@@ -109,7 +108,7 @@ Use the appropriate button below to deploy:
 
 - **PAYG**: This allows you to use pay-as-you-go hourly billing.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv9.1.0.0%2Fsupported%2Fstandalone%2Fn-nic%2Fexisting-stack%2Fpayg%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv9.2.0.0%2Fsupported%2Fstandalone%2Fn-nic%2Fexisting-stack%2Fpayg%2Fazuredeploy.json)
 
 ### Template parameters
 

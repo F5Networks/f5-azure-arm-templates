@@ -17,7 +17,7 @@ Welcome to the GitHub repository for F5's ARM templates for Azure deployments. A
 - **supported**<br>
   The supported directory contains our legacy Azure ARM templates that have been created and fully tested by F5 Networks. These legacy cloud solution templates (CST1) are fully supported by F5, meaning you can get assistance if necessary from F5 Technical Support via your typical methods. These legacy templates have been deprecated and are being replaced by our next-generation cloud solution templates (CST2) available at https://github.com/F5Networks/f5-azure-arm-templates-v2. We recommend you adopt the next-generation templates as soon as is feasible.
 
-  The planned End of Support (EoS) for legacy cloud temlates is 12/31/21.
+  The planned End of Support (EoS) for legacy cloud templates is 12/31/21.
   
   - Deprecation does NOT mean we are removing nor disabling legacy templates.
   - Customers are free to continue using legacy cloud templates subject to the EoS timeline.

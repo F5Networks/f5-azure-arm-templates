@@ -68,7 +68,6 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - When configuring the template, you have the option of selecting 0 (zero) public IP addresses.  If you select 0 public IP addresses, the BIG-IP systems **will not** create any additional IP configurations on the Azure network interfaces; however, failover of UDR next hop is still supported.  If you create IP configurations post-deployment and would like them to failover, see the [Post-Deployment Configuration section](#post-deployment-configuration) for details.
 - This template may deploy additional NICs using the parameter **numberOfAdditionalNics**, if doing so it will preconfigure the BIG-IP VLAN(s) and place the interfaces into the corresponding VLAN based on the subnet name(s) provided in the parameter **additionalNicLocation**.  Be aware that after the template deploys, the BIG-IP self IP address(es) need to be created that correspond to the Azure IP Config object for that NIC.  You must also set the IP Config object to a **static** address instead of **dynamic** to ensure it does not change on reboot.
 - Adding additional NIC's post-deployment is possible, it requires creating an additional NIC, powering off the VM and adding the network interface to the VM. See Microsoft documentation for more details on adding a NIC to an existing VM. **Important**: For failover to occur, each set of additional NIC's created must be named exactly the same except for the last character, such as **additionalnic0** and **additionalnic1**.
-- **NEW:**  BIG-IP version 15.X.X and higher now supports Azure's [Accelerated Networking](https://docs.microsoft.com/en-us/azure/virtual-network/create-vm-accelerated-networking-cli) on multi-NIC BIG-IPs. This feature is enabled by default. Read about requirements and how to check if Accelerated Networking is enabled [here](https://clouddocs.f5.com/cloud/public/v1/azure/Azure_accelNet.html).
 - Previous tagged releases can be used to reference functionality that has been changed or removed.
 - If you are using a failover via-API template and performing an in-place upgrade of BIG-IP v13.1.1 or later, you must follow the instructions in [Post-Deployment Configuration Steps](#post-deployment-configuration-steps)
 - All templates now deploy Standard SKU Azure Public IP Addresses.
@@ -128,7 +127,7 @@ Use the appropriate button below to deploy:
 
 - **PAYG**: This allows you to use pay-as-you-go hourly billing.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv9.1.0.0%2Fexperimental%2Ffailover%2Fsame-net%2Fvia-api%2Fn-nic%2Fnew-stack%2Fpayg%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv9.2.0.0%2Fexperimental%2Ffailover%2Fsame-net%2Fvia-api%2Fn-nic%2Fnew-stack%2Fpayg%2Fazuredeploy.json)
 
 ### Template parameters
 
