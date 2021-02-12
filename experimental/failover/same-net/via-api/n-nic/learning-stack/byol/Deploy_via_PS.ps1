@@ -1,7 +1,7 @@
 ## Script parameters being asked for below match to parameters in the azuredeploy.json file, otherwise pointing to the ##
 ## azuredeploy.parameters.json file for values to use.  Some options below are mandatory, some (such as region) can    ##
 ## be supplied inline when running this script but if they aren't then the default will be used as specified below.    ##
-## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -instanceType Standard_DS3_v2 -imageName AllTwoBootLocations -bigIpVersion 15.1.200000 -bigIpModules ltm:nominal -licenseKey1 <value> -licenseKey2 <value> -vnetAddressPrefix 10.0 -routeTableName defaultRouteTable -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImageUrn OPTIONAL -customImage OPTIONAL -allowUsageAnalytics Yes -allowPhoneHome Yes -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -userAssignedManagedIdentity NOT_SPECIFIED -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -instanceType Standard_DS3_v2 -imageName AllTwoBootLocations -bigIpVersion 15.1.201000 -bigIpModules ltm:nominal -licenseKey1 <value> -licenseKey2 <value> -vnetAddressPrefix 10.0 -routeTableName defaultRouteTable -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImageUrn OPTIONAL -customImage OPTIONAL -allowUsageAnalytics Yes -allowPhoneHome Yes -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -userAssignedManagedIdentity NOT_SPECIFIED -resourceGroupName <value>
 
 param(
 

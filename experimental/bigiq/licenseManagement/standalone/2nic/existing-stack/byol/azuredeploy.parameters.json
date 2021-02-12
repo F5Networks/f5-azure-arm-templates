@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "9.3.0.0",
+    "contentVersion": "9.4.0.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"

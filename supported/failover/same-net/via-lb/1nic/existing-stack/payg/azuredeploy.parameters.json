@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "9.3.0.0",
+    "contentVersion": "9.4.0.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -21,7 +21,7 @@
             "value": "Best1Gbps"
         },
         "bigIpVersion": {
-            "value": "15.1.200000"
+            "value": "15.1.201000"
         },
         "bigIpModules": {
             "value": "ltm:nominal"
