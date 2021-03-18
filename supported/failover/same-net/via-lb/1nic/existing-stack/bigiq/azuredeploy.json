@@ -283,7 +283,7 @@
     "variables": {
         "computeApiVersion": "2017-12-01",
         "networkApiVersion": "2018-07-01",
-        "storageApiVersion": "2017-10-01",
+        "storageApiVersion": "2019-06-01",
         "customImage": "[replace(parameters('customImage'), 'OPTIONAL', '')]",
         "useCustomImage": "[not(empty(variables('customImage')))]",
         "createNewCustomImage": "[contains(variables('customImage'), 'https://')]",
