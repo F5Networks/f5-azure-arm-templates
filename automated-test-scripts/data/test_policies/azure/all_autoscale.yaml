@@ -1,0 +1,13 @@
+# Azure autoscale tests
+azure-autoscale-test:
+    test-url: "file://automated-test-scripts/f5-azure-arm-templates/supported/autoscale/daily_test.yaml"
+    run: "all"
+    parameters-files:
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/waf/via-lb/1nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/waf/via-lb/1nic/existing-stack/payg/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/waf/via-dns/1nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/waf/via-dns/1nic/existing-stack/payg/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-lb/1nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-lb/1nic/existing-stack/payg/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-dns/1nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-dns/1nic/existing-stack/payg/prepub_parameters.yaml"

@@ -1,0 +1,59 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "3.2.0.0",
+    "parameters": {
+        "adminUsername": {
+            "value": "azureuser"
+        },
+        "adminPassword": {
+            "value": "GEN_UNIQUE"
+        },
+        "dnsLabel": {
+            "value": "REQUIRED"
+        },
+        "dnsLabelPrefix": {
+            "value": "REQUIRED"
+        },
+        "instanceName": {
+            "value": "f5vm01"
+        },
+        "instanceType": {
+            "value": "Standard_D3_v2"
+        },
+        "imageName": {
+            "value": "Good"
+        },
+        "bigIpVersion": {
+            "value": "13.0.021"
+        },
+        "licenseKey1": {
+            "value": "REQUIRED"
+        },
+        "numberOfExternalIps": {
+            "value": 1
+        },
+        "vnetAddressPrefix": {
+            "value": "10.0"
+        },
+
+"webServer": {
+    "value": "Both"
+},
+"vsPort": {
+    "value": "80"
+},
+
+        "restrictedSrcAddress": {
+            "value": "*"
+        },
+        "tagValues": {
+            "value": {
+                "application": "APP",
+                "cost": "COST",
+                "environment": "ENV",
+                "group": "GROUP",
+                "owner": "OWNER"
+            }
+        }
+    }
+}

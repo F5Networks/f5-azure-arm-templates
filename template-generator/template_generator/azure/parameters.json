@@ -1,0 +1,858 @@
+{% import 'constants.json'  as constants with context %}
+{% block parameters %}
+    "adminUsername": {
+            "defaultValue": "azureuser",
+            "metadata": {
+                "description": "User name for the Virtual Machine."
+            },
+            "type": "string"
+        },
+        "authenticationType": {
+            "allowedValues": [
+                "password",
+                "sshPublicKey"
+            ],
+            "defaultValue": "password",
+            "metadata": {
+                "description": "Type of authentication to use on the Virtual Machine, password based authentication or key based authentication."
+            },
+            "type": "string"
+        },
+        "adminPasswordOrKey": {
+            "metadata": {
+                "description": "Password or SSH public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key-based authentication, this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**."
+            },
+            "type": "securestring"
+        },
+{%- block dns_label %}
+        "dnsLabel": {
+            "metadata": {
+                "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine."
+            },
+            "type": "string"
+        },
+{%- endblock -%}
+{%- block instance_name -%}
+{%- if type == 'standalone' or type == 'failover' and  nics in ('3', 'n')  -%}
+        "instanceName": {
+            "defaultValue": "f5vm01",
+            "metadata": {
+                "description": "Name of the Virtual Machine."
+            },
+            "type": "string"
+        },
+{%- endif -%}
+{%- endblock -%}
+{%- block extermal_ips -%}
+{%- if type in ('standalone','failover') and  nics in ('2', '3', 'n') -%}
+        "numberOfExternalIps": {
+            "allowedValues": [
+             {{ constants.number_of_external_ips }}
+            ],
+            "defaultValue": 1,
+            "metadata": {
+                "description": "The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers."
+            },
+            "type": "int"
+        },
+{%- endif -%}
+{%- endblock -%}
+{%- block enable_network_failover -%}
+{%- if type == 'failover' and lb_method == 'via-lb' and nics == '3' -%}
+        "enableNetworkFailover": {
+            "allowedValues": [
+                "No",
+                "Yes"
+            ],
+            "defaultValue": "Yes",
+            "metadata": {
+                "description": "Enabling failover creates a traditional active/standby deployment with traffic groups and mirroring. When failover is disabled, all devices are active; use traffic group none."
+            },
+            "type": "string"
+        },
+        "provisionInternalLoadBalancer": {
+            "allowedValues": [
+                "Yes",
+                "No"
+            ],
+            "defaultValue": "Yes",
+            "metadata": {
+                "description": "Specify Yes to deploy an Azure internal load balancer with HA Ports enabled. Internal BIG-IP network interfaces will be added to the load balancer backend pool."
+            },
+            "type": "string"
+        },
+        "internalLoadBalancerProbePort": {
+            "defaultValue": "3456",
+            "metadata": {
+                "description": "Specify a TCP port for the internal load balancer to monitor. If you specified No for provision internal load balancer, this setting has no effect."
+            },
+            "type": "string"
+        },
+{%- endif -%}
+{%- endblock -%}
+        "instanceType": {
+            "allowedValues": [
+                {{ constants.instance_type_list }}
+            ],
+            "defaultValue": {{ constants.default_instance_type }},
+            "metadata": {
+                "description": "Instance size of the Virtual Machine."
+            },
+            "type": "string"
+        },
+        "imageName": {
+            {{ constants.image_name_values }},
+            "metadata": {
+                "description":
+                   {%- if license_type in ('byol', 'bigiq') -%}
+                    "F5 SKU (image) you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****."
+                  {%- else -%}
+                    "F5 SKU (image) you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: 10Gbps SKUs are supported only with BIGIP VE v15 or later. If intending to provision multiple modules, ensure the appropriate value is selected, such as **Best** instead of **Good**."
+                  {%- endif %}
+            },
+            "type": "string"
+        },
+
+{% if license_type == 'bigiq-payg' %}
+        "staticImageName": {
+            {{ constants.static_image_name }},
+            "metadata": {
+                "description":
+                {%- if license_type == 'bigiq-payg' -%}
+                    "F5 SKU (image) for static BIG-IQ licensed BIG-IP's you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****."
+                {%- else -%}
+                    "F5 SKU (image) for static BIG-IQ licensed BIG-IP's you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****."
+                {%- endif %}
+            },
+            "type": "string"
+        },
+{% endif %}
+{% if license_type == 'bigiq' or license_type == 'bigiq-payg' %}
+    "bigIqAddress": {
+            "metadata": {
+                "description": "The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP.  Note: The BIG-IP will make a REST call to the BIG-IQ (already existing) to let it know a BIG-IP needs to be licensed. It will then license the BIG-IP using the provided BIG-IQ credentials and license pool."
+            },
+            "type": "string"
+        },
+        "bigIqUsername": {
+            "metadata": {
+                "description": "The BIG-IQ username to use during BIG-IP licensing via BIG-IQ."
+            },
+            "type": "string"
+        },
+        "bigIqPassword": {
+            "metadata": {
+                "description": "The BIG-IQ password to use during BIG-IP licensing via BIG-IQ."
+            },
+            "type": "securestring"
+        },
+        "bigIqLicensePoolName": {
+            "metadata": {
+                "description": "The BIG-IQ license pool to use during BIG-IP licensing via BIG-IQ."
+            },
+            "type": "string"
+        },
+        "bigIqLicenseSkuKeyword1": {
+            "defaultValue": "OPTIONAL",
+            "metadata": {
+                "description": "The BIG-IQ license filter (based on SKU keyword) you want to use for licensing the BIG-IPs from the BIG-IQ, for example **F5-BIG-MSP-LTM-25M**, **F5-BIG-MSP-BR-200M**, **F5-BIG-MSP-BT-1G** or **F5-BIG-MSP-ASM-1G**. ***Important***: This is only required when licensing with an ELA/subscription (utility) pool on the BIG-IQ, if not using this pool type leave the default of **OPTIONAL**."
+            },
+            "type": "string"
+        },
+        "bigIqLicenseUnitOfMeasure": {
+            "defaultValue": "OPTIONAL",
+            "metadata": {
+                "description": "The BIG-IQ license unit of measure to use during BIG-IP licensing via BIG-IQ, for example **yearly**, **monthly**, **daily** or **hourly**. ***Important***: This is only required when licensing with an ELA/subscription (utility) pool on the BIG-IQ, if not using this pool type leave the default of **OPTIONAL**."
+            },
+            "type": "string"
+        },
+{% endif %}
+{% if license_type == 'bigiq-payg' %}
+        "numberOfStaticInstances": {
+            "allowedValues": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "metadata": {
+                "description": "The number of static BYOL BIG-IP VEs that will be deployed in this solution."
+            },
+            "type": "int"
+        },
+{% endif %}
+        "bigIpVersion": {
+            "defaultValue": "15.1.201000",
+            "metadata": {
+                "description": "F5 BIG-IP version you want to use."
+            },
+            "type": "string"
+        },
+{% if (solution =='waf') and (type == 'autoscale') %}
+       "bigIpModules": {
+            "defaultValue": "asm:nominal",
+            "metadata": {
+                "description": "Comma separated list of modules and levels to provision, for example, ltm:nominal,asm:nominal"
+            },
+            "type": "string"
+        },
+{%- else -%}
+        "bigIpModules": {
+            "defaultValue": "ltm:nominal",
+            "metadata": {
+                "description": "Comma separated list of modules and levels to provision, for example, ltm:nominal,asm:nominal"
+            },
+            "type": "string"
+        },
+{% endif %}
+{% if license_type == 'byol' %}
+        "licenseKey1": {
+            "defaultValue": "",
+            "metadata": {
+                "description": "The license token for the F5 BIG-IP VE (BYOL)."
+            },
+            "type": "string"
+        },
+  {% if type =='failover' %}
+        "licenseKey2": {
+            "defaultValue": "",
+            "metadata": {
+                "description": "The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices."
+            },
+            "type": "string"
+        },
+  {% endif %}
+{% endif %}
+{%- block existing_vnet -%}
+{%- if stack == 'existing-stack' -%}
+        "vnetName": {
+            "metadata": {
+                "description": "The name of the existing virtual network to which you want to connect the BIG-IP VEs."
+            },
+            "type": "string"
+        },
+        "vnetResourceGroupName": {
+            "metadata": {
+                "description": "The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed."
+            },
+            "type": "string"
+        },
+        "mgmtSubnetName": {
+            "metadata": {
+                "description": "Name of the existing mgmt subnet - with external access to the Internet. **Important**: The subnet you provide for the mgmt NIC **must** be unique."
+            },
+            "type": "string"
+        },
+{%- endif -%}
+{%- endblock -%}
+{%- block new_stack_vnet -%}
+{%- if stack in ('new-stack', 'learning-stack') -%}
+        "vnetAddressPrefix": {
+            "defaultValue": "10.0",
+            "metadata": {
+                "description": "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'."
+            },
+            "type": "string"
+        },
+{%- if type == 'failover' and nics == 'n' -%}
+        "routeTableName": {
+          "type": "string",
+          "defaultValue": "defaultRouteTable",
+          "metadata": {
+            "description": "route table name"
+          }
+        },
+{%- endif -%}
+{%- endif -%}
+{%- endblock -%}
+
+{%- block management_interface -%}
+{%- if stack in ('existing-stack') %}
+    {% if type == 'failover' -%}
+           "mgmtIpAddressRangeStart": {
+            "defaultValue": "DYNAMIC",
+            "metadata": {
+                "description": "The static private IP address you want to assign to the management self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device. Leave the default DYNAMIC to use a dynamically assigned IP address."
+            },
+            "type": "string"
+           },
+    {%- elif type =='autoscale' %}
+{#- Auto Scale(VM Scale Set) solutions get the IP address dynamically always -#}
+    {%- else %}
+            "mgmtIpAddress": {
+                "defaultValue": "DYNAMIC",
+                "metadata": {
+                   "description": "MGMT subnet IP Address to use for the BIG-IP management IP address. Leave the default DYNAMIC to use a dynamically assigned IP address."
+                 },
+                 "type": "string"
+            },
+    {%- endif %}
+{%- endif %}
+{%- endblock %}
+
+{%- block external_interface %}
+{%- if stack in ('existing-stack') %}
+  {% if (type == 'standalone' and nics in ('2', '3', 'n')) or (type == 'failover' and nics in ('3', 'n')) %}
+            "externalSubnetName": {
+            "metadata": {
+                "description": "Name of the existing external subnet - with external access to Internet. **Important**: The subnet you provide for the external NIC **must** be unique."
+            },
+            "type": "string"
+            },
+            "externalIpAddressRangeStart": {
+            "defaultValue": "DYNAMIC",
+            "metadata": {
+                "description":
+            {%- if (type == 'failover' and nics == 'n') -%}
+                "The static private IP address (secondary) you would like to assign to the first shared Azure public IP. An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses for external virtual servers. Leave the default DYNAMIC to use a dynamically assigned IP address."
+            {%- elif (type == 'failover' and nics == '3') -%}
+                "The static private IP address (secondary) you would like to assign to the BIG-IP VE(s). The next contiguous address will be used for the second BIG-IP.  For example, inputting 10.100.1.50 here would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses. Leave the default DYNAMIC to use a dynamically assigned IP address."
+            {%-  else -%}
+                "The static private IP address you want to assign to the first external Azure public IP (for self IP). An additional private IP address will be assigned for each public IP address you specified in **numberOfExternalIps**.  For example, entering 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 (self IP), 10.100.1.51 and 10.100.1.52 being configured as static private IP addresses for external virtual servers. Leave the default DYNAMIC to use a dynamically assigned IP address."
+            {%  endif %}
+            },
+            "type": "string"
+        },
+  {%- endif %}
+  {%- if (type  == 'failover' and nics in ('3', 'n')) %}
+           "externalIpSelfAddressRangeStart": {
+            "defaultValue": "DYNAMIC",
+            "metadata": {
+                "description": "The static private IP address you want to assign to the external self IP (primary) of the first BIG-IP VE. The next contiguous address will be used for the second BIG-IP device. Leave the default DYNAMIC to use a dynamically assigned IP address."
+            },
+            "type": "string"
+           },
+  {%  endif %}
+{%- endif %}
+
+{%- endblock %}
+{%- block internal_interface %}
+{%- if stack in ('existing-stack') %}
+  {%- if type in ('standalone','failover') and nics in ('3', 'n') %}
+            "internalSubnetName": {
+            "metadata": {
+                "description": "Name of the existing internal subnet. **Important**: The subnet you provide for the internal NIC **must** be unique."
+            },
+            "type": "string"
+            },
+  {%- endif %}
+  {%- if type == 'failover' and nics in ('3', 'n') %}
+           "internalIpAddressRangeStart": {
+                "defaultValue": "DYNAMIC",
+                "metadata": {
+                    "description": "The static private IP address you would like to assign to the internal self IP of the first BIG-IP VE. The next contiguous address will be used for the second BIG-IP device. Leave the default DYNAMIC to use a dynamically assigned IP address."
+                },
+                "type": "string"
+            },
+  {%- endif %}
+  {%- if type =='standalone' and nics in ('3', 'n') %}
+           "internalIpAddress": {
+            "defaultValue": "DYNAMIC",
+            "metadata": {
+                "description": "Internal subnet IP address you want to use for the BIG-IP internal self IP address. Leave the default DYNAMIC to use a dynamically assigned IP address."
+            },
+            "type": "string"
+           },
+  {%- endif %}
+{%- endif %}
+
+{%- endblock %}
+{%- block avSet %}
+{%- if stack == 'existing-stack' and type =='standalone' %}
+           "avSetChoice": {
+            "defaultValue": "CREATE_NEW",
+            "metadata": {
+                "description": "If you want the VM placed in a new Azure Availability Set, leave the default value of **CREATE_NEW**, otherwise specify the name of the existing Availability Set you want to use. Note: If you are using an existing AV Set, this deployment must be in the same Azure Resource Group as the AV Set."
+            },
+            "type": "string"
+           },
+           "zoneChoice": {
+            "defaultValue": "1",
+            "metadata": {
+                "description": "If you want the VM placed in an Azure Availability Zone, and the Azure region you are deploying to supports it, specify the number of the existing Availability Zone you want to use."
+            },
+            "allowedValues": [
+                "1",
+                "2",
+                "3"
+            ],
+            "type": "string"
+        },
+{%- endif %}
+{%- endblock %}
+{%- block unic_label %}
+{%- if stack == 'existing-stack' and (type == 'standalone' or type == 'failover') %}
+        "provisionPublicIP": {
+            "allowedValues": [
+                "Yes",
+                "No"
+            ],
+            "defaultValue": "Yes",
+            "metadata": {
+                "description": "Provision Public IP addresses for BIG-IP Management traffic. These addresses will be configured directly on the Azure network interfaces."
+            },
+            "type": "string"
+        },
+{%- endif %}
+{%- if stack == 'existing-stack' and type == 'failover' and lb_method == 'via-lb' and nics == '3' %}
+        "provisionPublicIPApp": {
+            "allowedValues": [
+                "Yes",
+                "No"
+            ],
+            "defaultValue": "Yes",
+            "metadata": {
+                "description": "Provision Public IP addresses for BIG-IP Data Plane traffic. These addresses will be configured on the external Azure load balancer front end. If you choose No, the numberOfExternalIps input is ignored."
+            },
+            "type": "string"
+        },
+{%- endif %}
+{%- endblock %}
+        "declarationUrl": {
+              "defaultValue": "NOT_SPECIFIED",
+              "metadata": {
+              "description": "URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.25.0/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration."
+          },
+          "type": "string"
+        },
+        "ntpServer": {
+            "defaultValue": "0.pool.ntp.org",
+            "metadata": {
+                "description": "Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use."
+            },
+            "type": "string"
+        },
+        "timeZone": {
+            "defaultValue": "UTC",
+            "metadata": {
+                "description": "If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list [here](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md)). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."
+            },
+            "type": "string"
+        },
+        "customImageUrn": {
+            "defaultValue": "OPTIONAL",
+            "metadata": {
+                "description": "If you would like to deploy using a specific image in Azure marketplace, specify the URN of the image. **Note**: Unless specifically required, leave the default of **OPTIONAL**. Example value: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:15.1.201000. You can find the URNs of F5 marketplace images in the README for this template or by running the command: az vm image list --output yaml --publisher f5-networks --all"
+            },
+            "type": "string"
+        },
+        "customImage": {
+            "defaultValue": "OPTIONAL",
+            "metadata": {
+                "description":
+                {% if environment == 'azurestack' -%}
+                    "If you would like to deploy using a local BIG-IP image, provide the full URL to the VHD in Azure Stack storage. **Note**: Unless specifically required, leave the default of **OPTIONAL**."
+                {%-else -%}
+                    "If you would like to deploy using a local BIG-IP image, provide either the full URL to the VHD in Azure storage **or** the full resource ID to an existing Microsoft.Compute image resource.  **Note**: Unless specifically required, leave the default of **OPTIONAL**."
+                {% endif %}
+            },
+            "type": "string"
+        },
+        "restrictedSrcAddress": {
+            "metadata": {
+                "description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources"
+            },
+            "type": "string"
+        },
+        "tagValues": {
+            "defaultValue": {
+                "application": "APP",
+                "cost": "COST",
+                "environment": "ENV",
+                "group": "GROUP",
+                "owner": "OWNER"
+            },
+            "metadata": {
+                "description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."
+            },
+            "type": "object"
+        },
+        "allowUsageAnalytics": {
+            "allowedValues": [
+                "Yes",
+                "No"
+            ],
+            "defaultValue": "Yes",
+            "metadata": {
+                "description": "This deployment can send anonymous template statistics to F5 to help us determine how to improve our solutions. If you select **No** statistics are not sent."
+            },
+            "type": "string"
+        },
+        "allowPhoneHome": {
+            "allowedValues": [
+                "Yes",
+                "No"
+            ],
+            "defaultValue": "Yes",
+            "metadata": {
+                "description": "This deployment can provide F5 with high-level device use information to optimize development resources. If you select **No** the information is not sent."
+            },
+            "type": "string"
+        }
+{% if (type == 'standalone' and nics == 'n') or (type == 'failover' and lb_method == 'api') %}
+        ,"numberOfAdditionalNics": {
+            {{ constants.number_of_additional_nics }}
+            "metadata": {
+                "description":
+                {% if type == 'failover' and nics == 'n' %}
+                    "By default this solution deploys the BIG-IP(s) in a 3 NIC configuration, however additional NICs can be added to the BIG-IP(s) using this parameter.  **Note**: The default value is 0, additional NICs will only be created if 1 or higher is specified."
+                {% else%}
+                    "By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a configurable number of additional NICs to the BIG-IP using this parameter."
+                {% endif %}
+            },
+            "type": "int"
+        },
+        "additionalNicLocation": {
+            {% if type == 'failover' and nics == 'n' %}
+                "defaultValue": "OPTIONAL",
+            {% endif %}
+            "metadata": {
+            "description":
+            {%- if type == 'failover'%}
+                "This parameter specifies where the additional NICs go, use the default value of **OPTIONAL** if **0** was selected for the parameter **numberOfAdditionalNics**.  Otherwise this value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. **Note**: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique."
+            {%- else -%}
+                "This parameter specifies where the additional NICs go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. **Note**: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique."
+            {% endif %}
+            },
+            "type": "string"
+        }
+  {% endif %}
+  {%- if type == 'failover' -%}
+    {%- if nics == '1' -%}
+        ,"numberOfInstances": {
+            "allowedValues": [
+                2
+            ],
+            "defaultValue": 2,
+            "metadata": {
+                "description": "The number of BIG-IP VEs that will be deployed in front of your application(s)."
+            },
+            "type": "int"
+        }
+    {%- endif -%}
+    {%- if lb_method == 'api' %}
+         ,"userAssignedManagedIdentity": {
+            "defaultValue": "NOT_SPECIFIED",
+            "metadata": {
+                "description": "The name of the pre-existing user-assigned managed identity in the resource group where the template will be deployed, if applicable.  This identity will be configured on the virtual machine resources and must have the Contributor role assigned on both the deployment and virtual network resource groups.  Leaving the default of **NOT_SPECIFIED** triggers the creation of a system-assigned managed identity."
+            },
+            "type": "string"
+        },
+        "roleNameGuid": {
+            "type": "string",
+            "defaultValue": "[newGuid()]",
+            "metadata": {
+              "description": "A new GUID used to identify the role assignment. Keep the field as is. No need to enter any value here as newGuid() is generating a random "
+             }
+        }
+    {%- endif %}
+  {%- endif %}
+
+{%- if type == 'autoscale' %}
+  {%- if solution in ('ltm', 'waf') and lb_method in ('via-lb', 'dns') %}
+      ,"vmScaleSetMinCount": {
+            "allowedValues": [
+            {{constants.vm_scale_set_min_count}}
+            ],
+            "defaultValue": 2,
+            "metadata": {
+                "description": "The minimum (and default) number of BIG-IP VEs that will be deployed into the VM Scale Set."
+            },
+            "type": "int"
+        },
+        "vmScaleSetMaxCount": {
+            "allowedValues": [
+            {{constants.vm_scale_set_max_count}}
+            ],
+            "defaultValue": 4,
+            "metadata": {
+                "description": "The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set."
+            },
+            "type": "int"
+        },
+        "appInsights": {
+            "defaultValue": "CREATE_NEW",
+            "metadata": {
+                "description": "Enter the name of your existing Application Insights environment that will be used to receive custom BIG-IP metrics you can use for Scale Set rules and device visibility. If the Application Insights environment is in a different Resource Group than this deployment, specify it as **app_insights_name;app_insights_rg**).  If you do not have an Application Insights environment, leave the default (CREATE_NEW) and the template will create one. Note: By default, the new Application Insights environment will be created in **East US**, if necessary you can specify a different region as **CREATE_NEW:app_insights_region**)."
+            },
+            "type": "string"
+        },
+        "scaleOutCpuThreshold": {
+            "defaultValue": 80,
+            "maxValue": 100,
+            "metadata": {
+                "description": "The percentage of CPU utilization that should trigger a scale out event."
+            },
+            "minValue": 1,
+            "type": "int"
+        },
+        "scaleInCpuThreshold": {
+            "defaultValue": 20,
+            "maxValue": 100,
+            "metadata": {
+                "description": "The percentage of CPU utilization that should trigger a scale in event."
+            },
+            "minValue": 1,
+            "type": "int"
+        },
+        "scaleOutThroughputThreshold": {
+            "defaultValue": 20000000,
+            "metadata": {
+                "description": "The amount of throughput (**bytes**) that should trigger a scale out event. Note: The default value is equal to 20 MB"
+            },
+            "type": "int"
+        },
+        "scaleInThroughputThreshold": {
+            "defaultValue": 10000000,
+            "metadata": {
+                "description": "The amount of throughput (**bytes**) that should trigger a scale in event. Note: The default value is equal to 10 MB"
+            },
+            "type": "int"
+        },
+        "scaleOutTimeWindow": {
+            "defaultValue": 10,
+            "maxValue": 60,
+            "metadata": {
+                "description": "The time window required to trigger a scale out event. This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). **Note:** Allowed values are 1-60 (minutes)."
+            },
+            "minValue": 1,
+            "type": "int"
+        },
+        "scaleInTimeWindow": {
+            "defaultValue": 10,
+            "maxValue": 60,
+            "metadata": {
+                "description": "The time window required to trigger a scale in event. This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). **Note:** Allowed values are 1-60 (minutes)."
+            },
+            "minValue": 1,
+            "type": "int"
+        },
+        "notificationEmail": {
+            "defaultValue": "OPTIONAL",
+            "metadata": {
+                "description": "If you want email notifications on scale events, specify an email address, otherwise leave the parameter as **OPTIONAL**. Note: You can specify multiple emails by separating them with a semi-colon, such as *email@domain.com;email2@domain.com*."
+            },
+            "type": "string"
+        },
+{%- if lb_method == 'via-lb' and stack == 'existing-stack' %}
+        "mgmtNsgName": {
+          "defaultValue": "OPTIONAL",
+          "metadata": {
+            "description": "If you would like to deploy using an existing Azure Network Security Group, provide the NSG name here.  **Note**: Unless specifically required, leave the default of **OPTIONAL**."
+          },
+          "type": "string"
+        },
+        "externalLoadBalancerName": {
+            "defaultValue": "OPTIONAL",
+            "metadata": {
+              "description": "If you would like to deploy using an existing Azure Load Balancer (Standard SKU) with a backend pool called loadBalancerBackEnd, provide the ALB name here.  **Note**: Unless specifically required, leave the default of **OPTIONAL**."
+            },
+            "type": "string"
+        },
+        "internalLoadBalancerName": {
+            "defaultValue": "OPTIONAL",
+            "metadata": {
+              "description": "If you would like to add instances to an existing internal Azure Load Balancer (Standard SKU) with a backend pool called loadBalancerBackEnd, provide the internal ALB name here.  **Note**: Unless specifically required, leave the default of **OPTIONAL**."
+            },
+            "type": "string"
+         },
+{%- endif %}
+        "useAvailabilityZones": {
+            "allowedValues": [
+              "Yes",
+              "No"
+            ],
+            "defaultValue": "Yes",
+            "metadata": {
+              "description": "This deployment can deploy resources into Azure Availability Zones (if the region supports it).  If that is not desired the input should be set 'No'."
+            },
+            "type": "string"
+        },
+        "autoscaleTimeout": {
+          "defaultValue": 10,
+          "maxValue": 10,
+          "metadata": {
+            "description": "The timeout value after which autoscale script execution will terminated"
+          },
+          "minValue": 3,
+          "type": "int"
+        }
+  {%- endif %}
+  {%- if solution in ('ltm', 'waf') %}
+        ,"provisionPublicIP": {
+            "allowedValues": [
+                "No",
+                "Yes"
+            ],
+            "defaultValue": "Yes",
+            "metadata": {
+                "description": "Enabling management public IP(s) allows for direct public access to each BIG-IP VE that is created."
+            },
+            "type": "string"
+        }
+  {% endif %}
+  {% if solution  == 'waf' and lb_method in ('via-lb', 'dns') %}
+      {# WAF-like templates need the 'Best' Image, still prompt as a parameter so they are aware of what they are paying for with payg #}
+    ,"applicationProtocols": {
+            "allowedValues": [
+                "http",
+                "https",
+                "http-https",
+                "https-offload"
+            ],
+            "defaultValue": "http-https",
+            "metadata": {
+                "description": "The protocol(s) used by your application."
+            },
+            "type": "string"
+        },
+        "applicationAddress": {
+            "metadata": {
+                "description": "The public IP address or DNS FQDN of the application that this WAF will protect."
+            },
+            "type": "string"
+        },
+        "applicationPort": {
+            "defaultValue": "80",
+            "metadata": {
+                "description": "If you are deploying an HTTP application, the port on which your service listens for unencrypted traffic. This field is not required when deploying HTTPS only."
+            },
+            "type": "string"
+        },
+        "applicationSecurePort": {
+            "defaultValue": "443",
+            "metadata": {
+                "description": "If you are deploying an HTTPS application, the port on which your service listens for encrypted traffic. This field is not required when deploying HTTP only."
+            },
+            "type": "string"
+        },
+        "sslCert": {
+            "defaultValue": "NOT_SPECIFIED",
+            "metadata": {
+                "description": "The SSL certificate .pfx file corresponding to the virtual server."
+            },
+            "type": "string"
+        },
+        "sslPswd": {
+            "defaultValue": "NOT_SPECIFIED",
+            "metadata": {
+                "description": "The SSL certificate .pfx password corresponding to the certificate you entered."
+            },
+            "type": "securestring"
+        },
+        "applicationType": {
+            "allowedValues": [
+                "Windows",
+                "Linux"
+            ],
+            "defaultValue": "Linux",
+            "metadata": {
+                "description": "Is your application running on a Linux OS or a Windows OS?"
+            },
+            "type": "string"
+        },
+        "blockingLevel": {
+            "allowedValues": [
+                "low",
+                "medium",
+                "high",
+                "off",
+                "custom"
+            ],
+            "defaultValue": "medium",
+            "metadata": {
+                "description": "Select how aggressive you want the blocking level of this WAF.  Remember that the more aggressive the blocking level, the more potential there is for false-positives the WAF might detect. Select **Custom** to specify your own security policy."
+            },
+            "type": "string"
+        },
+        "customPolicy": {
+            "defaultValue": "NOT_SPECIFIED",
+            "metadata": {
+                "description": "Specify the publicly available URL of a custom ASM security policy in XML format. This policy will be applied in place of the standard High/Medium/Low policy."
+            },
+            "type": "string"
+        }
+
+  {% endif %}
+  {% if solution in ('ltm', 'waf') and lb_method == 'dns' %}
+        ,"dnsMemberIpType": {
+            "allowedValues": [
+                "private",
+                "public"
+            ],
+            "defaultValue": "private",
+            "metadata": {
+                "description": "The IP type to add as the record when updating the DNS provider."
+            },
+            "type": "string"
+        },
+        "dnsMemberPort": {
+            "defaultValue": "80",
+            "metadata": {
+                "description": "The port for the DNS member to use for monitoring the members status."
+            },
+            "type": "string"
+        },
+        "dnsProviderHost": {
+            "metadata": {
+                "description": "The management IP address (or hostname) for the DNS provider to use when updating DNS."
+            },
+            "type": "string"
+        },
+        "dnsProviderPort": {
+            "defaultValue": "443",
+            "metadata": {
+                "description": "The management port for the DNS provider to use when updating DNS."
+            },
+            "type": "string"
+        },
+        "dnsProviderUser": {
+            "metadata": {
+                "description": "The management username for the DNS provider to use when updating DNS."
+            },
+            "type": "string"
+        },
+        "dnsProviderPassword": {
+            "metadata": {
+                "description": "The management password for the DNS provider to use when updating DNS."
+            },
+            "type": "securestring"
+        },
+        "dnsProviderPool": {
+            "defaultValue": "autoscale_pool",
+            "metadata": {
+                "description": "The GSLB pool on the BIG-IP DNS system to populate."
+            },
+            "type": "string"
+        },
+        "dnsProviderDataCenter": {
+            "defaultValue": "azure_datacenter",
+            "metadata": {
+                "description": "The GSLB datacenter on the BIG-IP DNS system to use when creating GSLB server(s). Note: If the datacenter provided does not exist the template will create one with the value given."
+            },
+            "type": "string"
+        }
+  {% endif %}
+{% endif %}
+{# Add service principal parameters to necessary solutions #}
+{% if (type == 'autoscale' and solution in ('ltm', 'waf') and lb_method in ('via-lb', 'dns')) %}
+        ,"tenantId": {
+            "metadata": {
+                "description": "Your Azure service principal application tenant ID."
+            },
+            "type": "string"
+        },
+        "clientId": {
+            "metadata": {
+                "description": "Your Azure service principal application client ID."
+            },
+            "type": "string"
+        },
+        "servicePrincipalSecret": {
+            "metadata": {
+                "description": "Your Azure service principal application secret."
+            },
+            "type": "securestring"
+        }
+{% endif %}
+{% endblock %}

@@ -1,0 +1,19 @@
+---
+name: BIG-IQ license revoke <LICENSE POOLS>
+onStart:
+- ./bigiq_license_revoke.sh
+onFail:
+- ../sleep/5_minutes.sh
+params:
+- tag: LICENSE HOSTS
+  values:
+  - 10.146.1.99 10.146.1.102 52.7.25.126 52.52.243.250
+  - 10.146.1.99
+  - 10.146.1.102
+  - 52.7.25.126
+  - 52.52.243.250
+- tag: LICENSE POOLS
+  values:
+  - production clpv2
+  - production
+  - clpv2

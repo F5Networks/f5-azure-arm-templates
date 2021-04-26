@@ -1,0 +1,480 @@
+# YAML Document that includes the custom text for each solution readme
+## NOTE: YAML single quotes in single quoted strings are escaped by including an extra quote, so NIC's becomes NIC''s
+
+######################### Define each template here #########################
+templates:
+  standalone_1nic:
+    title: 'Single NIC: <STACK__TYPE> with <LICENSE__TYPE> Licensing'
+    intro:
+      default: "This solution uses a Google Deployment Manager Template to launch a single NIC deployment a BIG-IP VE in an Google Virtual Private Cloud, using <LICENSE__TYPE> licensing.\n\nThis is an *existing stack* template, meaning the networking infrastructure MUST be available prior to deploying. See the Template Parameters Section for required networking objects. If you would like to run a *full stack* which creates and configures the BIG-IP, the Google Cloud infrastructure, as well as a backend webserver, see the templates located in the *learning-stacks* folder in the **experimental** directory.\n\nTraffic flows from the BIG-IP VE to the application servers.  This is the standard Cloud design where the compute instance of\nF5 is running with a single interface, which processes both management and data plane traffic.  This is a traditional model in the cloud where the deployment is considered one-armed.\nThe BIG-IP VE has the [Local Traffic Manager](https://f5.com/products/big-ip/local-traffic-manager-ltm) (LTM) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management"
+      stackType:
+        learning-stack: "This solution uses a Google Deployment Manager Template to launch a single NIC deployment a BIG-IP VE in an Google Virtual Private Cloud. Traffic flows from the BIG-IP VE to the application servers.  This is the standard Cloud design where the compute instance of.\nF5 is running with a single interface, which processes both management and data plane traffic.  This is a traditional model in the cloud where the deployment is considered one-armed.\nThe BIG-IP VE has the [Local Traffic Manager](https://f5.com/products/big-ip/local-traffic-manager-ltm) (LTM) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management.\nThis template deploys as a **learning stack** Google Deployment Manager template incorporated into an existing network. That means it creates and configures the BIG-IP, the Google Cloud infrastructure, as well as a backend webserver."
+    config_ex_text: "## Configuration Example <a name=\"config\"></a>\n\nThe following is a simple configuration diagram for this single NIC deployment. In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.\n\n![Single NIC configuration example](../images/google_setup.png)"
+    config_ex_link: "- [Configuration Example](#config)"
+    prereq_list:
+      - byol_note
+      - ssh_key_pair
+      - install_google_sdk
+      - standalone_prereq_general_list
+      - standalone_prereq_1nic_list
+      - standalone_prereq_1nic_waf_list
+    config_note_list:
+      - image_note
+      - static_ip
+    extra_text:
+      - <POST_CONFIG_TXT>
+      - <VS_CREATION>
+    docs: "### Documentation\nThe ***BIG-IP Virtual Edition and Google Cloud Platform: Setup*** guide (https://clouddocs.f5.com/cloud/public/v1/google/Google_singleNIC.html) details how to create the configuration manually without using the template.  This document also describes the configuration in more detail."
+    additional_security_notes:
+      default: "- In the */config/installCloudLibs.sh* section **\"tmsh load sys config merge file /config/verifyHash\"**"
+      exclude:
+        stackType:
+          - existing-stack
+    support_notes:
+      default: "Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K44842449). You can modify the template itself if necessary, but if you modify any of the code outside of the lines ### START CUSTOM TMSH CONFIGURATION and ### END CUSTOM TMSH CONFIGURATION the template is no longer supported by F5."
+      stackType:
+        learning-stack: "While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory."
+  standalone_2nic:
+    title: '2 NIC: <STACK__TYPE> with <LICENSE__TYPE> Licensing'
+    intro:
+      default: "This solution uses a Google Deployment Manager Template to launch a 2 NIC deployment a BIG-IP VE in an Google Virtual Private Cloud, using <LICENSE__TYPE> licensing.\n\nThis is an *existing stack* template, meaning the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#edit-the-yaml-file) for required networking objects.\n\nIn a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. Traffic flows from the BIG-IP VE to the application servers.\nThe BIG-IP VE has the [Local Traffic Manager](https://f5.com/products/big-ip/local-traffic-manager-ltm) (LTM) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management"
+    prereq_list:
+      - byol_note
+      - ssh_key_pair
+      - install_google_sdk
+      - standalone_prereq_general_list
+      - standalone_prereq_2nic_list
+    config_note_list:
+      - multi_interface_note
+      - image_note_2nics
+      - image_note
+      - static_ip
+    extra_text:
+      - <POST_CONFIG_TXT>
+      - <VS_CREATION>
+    support_notes:
+      default: "Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K44842449). You can modify the template itself if necessary, but if you modify any of the code outside of the lines ### START CUSTOM TMSH CONFIGURATION and ### END CUSTOM TMSH CONFIGURATION the template is no longer supported by F5."
+      stackType:
+        learning-stack: "While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory."
+  standalone_3nic:
+    title: '3 NIC: <STACK__TYPE> with <LICENSE__TYPE> Licensing'
+    intro:
+      default: "This solution uses a Google Deployment Manager Template to launch a 3 NIC deployment a BIG-IP VE in an Google Virtual Private Cloud, using <LICENSE__TYPE> licensing.\n\nThis is an *existing stack* template, meaning the networking infrastructure MUST be available prior to deploying. See the Template Parameters Section for required networking objects.\n\nTraffic flows from the BIG-IP VE to the application servers. This is the standard \"on-premise like\" cloud design where the compute instance of F5 is running with a management, front-end application traffic (virtual server), and a back-end application interface.\nThe BIG-IP VE has the [Local Traffic Manager](https://f5.com/products/big-ip/local-traffic-manager-ltm) (LTM) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management"
+    prereq_list:
+      - byol_note
+      - install_google_sdk
+      - standalone_prereq_general_list
+      - standalone_prereq_3nic_list
+      - required_machine_type_3nic
+      - required_bigip_instance
+    config_note_list:
+      - multi_interface_note
+      - image_note
+      - image_note_3nics
+      - static_ip
+    extra_text:
+      - <POST_CONFIG_TXT>
+      - <VS_CREATION>
+    support_notes:
+      default: "Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K44842449). You can modify the template itself if necessary, but if you modify any of the code outside of the lines ### START CUSTOM TMSH CONFIGURATION and ### END CUSTOM TMSH CONFIGURATION the template is no longer supported by F5."
+      stackType:
+        learning-stack: "While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory."
+  failover-lb_3nic:
+    title: '(frontend via GLB)- HA Cluster (Active/Standby): <STACK__TYPE> with <LICENSE__TYPE> Licensing'
+    intro: "This solution uses a Google Deployment Manager (GDM) Template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled in a Google Virtual Private Cloud, using <LICENSE__TYPE> (utility) licensing.\nGoogle load balancers monitor BIG-IP's to determine which unit is active. Traffic is sent to active BIG-IP which flows from the BIG-IP VE(s) to the application servers. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.\n**Networking Stack Type:** This template deploys into an existing networking stack; so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects."
+    config_ex_text: "## Configuration Example <a name=\"config\"></a>\n\nThe following is a simple configuration diagram for this deployment.\n\n![Configuration example](../images/google-cluster-via-lb.png)"
+    config_ex_link: "- [Configuration Example](#config)"
+    prereq_list:
+      - byol_note
+      - ssh_key_pair
+      - failover_prereq_3nic_list
+      - required_machine_type_3nic
+      - required_bigip_instance
+    config_note_list:
+      - multi_interface_note
+      - failover_config_note_general
+      - cluster_credentials_note
+      - internal_lb
+    traffic_group_config: "### Traffic Group Configuration\n\nThis template supports associating GCP resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  Use the following guidance to configure multiple traffic groups.\n\n1. From the BIG-IP VE management Configuration utility, click **Device Management > Traffic Groups > Create**, and then complete the following.\n- *Name*: **traffic-group-2**\n- *Failover Order*: Select the preferred order of the devices for this traffic group; F5 recommends setting the current standby device as the preferred device for this second traffic group, so that each traffic group has a different preferred device (device will become active after creating the traffic group).\n- Click **Create Traffic Group**.\n2. Ensure the BIG-IP **Virtual Address** corresponding with the created virtual servers is in the desired traffic group.\n- Note: GCP resources are mapped to a specific traffic group by the Virtual Address configuration of the BIG-IP.\n- Note: You can find the Virtual Address list by browsing to Local Traffic->Virtual Servers->Virtual Address List."
+    create_virtual_servers: "## Creating virtual servers on the BIG-IP VE\n\nIn order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the IP address to use, which should match (or be within the CIDR range defined) of either a 1) GCP alias IP or a 2) GCP forwarding rule IP configured on the active BIG-IP VE instance. If you need additional virtual servers for your applications/servers, you can add more GCP resources, and corresponding virtual servers on the BIG-IP system. See [gcp-vpc-alias-ips](https://cloud.google.com/vpc/docs/alias-ip) for information on alias IP ranges. See [gcp-forwarding-rules](https://cloud.google.com/load-balancing/docs/forwarding-rules) for more information on forwarding rules.\n\nIn this template, each IP address is associated with a GCP object attached to the external network interface of the BIG-IP VE. Because this IP will be moved to the active BIG-IP device, you need to create a single virtual server in **traffic-group-1** that corresponds to the IP address of that object.\n1. Once your BIG-IP VE has launched, open the BIG-IP VE Configuration utility.\n2. On the Main tab, click **Local Traffic > Virtual Servers** and then click the **Create** button.\n3. In the **Name** field, give the Virtual Server a unique name.\n4. In the **Destination/Mask** field, type the IP address of the object to be associated with your application (for example: 10.0.1.10/32 or 80.80.80.80/32).\n5. In the **Service Port** field, type the appropriate port.\n6. Configure the rest of the virtual server as appropriate.\n7. Click the **Finished** button.\n8. Repeat as necessary.\n\nWhen you have completed the virtual server configuration, you may modify the virtual addresses to use an alternative Traffic Group using the following guidance.\n1. On the Main tab, click **Local Traffic > Virtual Servers**.\n2. On the Menu bar, click the **Virtual Address List** tab.\n3. Click the address of one of the virtual servers you just created.\n4. From the **Traffic Group** list, select **traffic-group-2** (or the additional traffic group you created previously).\n5. Click **Update**.\n6. Repeat for each virtual server."
+    extra_text:
+      - <POST_CONFIG_TXT>
+      - <VS_CREATION>: <VS_CREATION_FAILOVER_LB_3NIC>
+    docs: "### Documentation\nThe ***BIG-IP Virtual Edition and Google Cloud Platform: Setup*** [guide](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-google-cloud-platform-13-0-0.html) details how to create the configuration manually without using the template.  This document also describes the configuration in more detail."
+    support_notes:
+      default: "Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K44842449). You can modify the template itself if necessary, but if you modify any of the code outside of the lines ### START CUSTOM TMSH CONFIGURATION and ### END CUSTOM TMSH CONFIGURATION the template is no longer supported by F5."
+      stackType:
+        learning-stack: "While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory."
+  failover-api_3nic:
+    title: 'HA Cluster (Active/Standby): <STACK__TYPE> with <LICENSE__TYPE> Licensing'
+    intro:
+      default: "This solution uses a Google Deployment Manager (GDM) Template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled (the template also supports [multiple traffic groups](#traffic-group-configuration)) in a Google Virtual Private Cloud, using <LICENSE__TYPE> (utility) licensing.\nTraffic flows from the BIG-IP VE(s) to the application servers. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.\n **Networking Stack Type:** This template deploys into an existing networking stack; so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects."
+      stackType:
+        prod-stack: "This solution uses a Google Deployment Manager (GDM) Template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled (the template also supports [multiple traffic groups](#traffic-group-configuration)) in a Google Virtual Private Cloud, using <LICENSE__TYPE> (utility) licensing.\nThis is a *production stack* template, meaning it deploys without creating or attaching any public IP addresses to the BIG-IP VEs (note that outbound Internet access for the BIG-IP is still required). This can be useful, or possibly required, where dictated by security policy or in deployments where accessing resources does not require a public IP address on the BIG-IP VE, such as users connecting to internal applications using a VPN.  See the *existing stack* directory if you do not need this production stack template.\nTraffic flows from the BIG-IP VE(s) to the application servers. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic."
+    config_ex_link: "- [Configuration Example](#config)"
+    config_ex_text: "## Configuration Example <a name=\"config\"></a>\n\nThe following is a simple configuration diagram for this deployment.\n\n![Configuration example](../images/google_setup.png)"
+    prereq_list:
+      - byol_note
+      - install_google_sdk
+      - ssh_key_pair
+      - failover_prereq_3nic_viapi_list
+      - required_machine_type_3nic
+      - required_bigip_instance
+      - prod_mgmt_interface
+    config_note_list:
+      - cfe_config_note
+      - multi_interface_note
+      - failover_config_note_general
+      - cluster_credentials_note
+      - via_api_config_note
+    extra_text:
+      - <POST_CONFIG_TXT>: <POST_CONFIG_FAILOVER_TXT>
+      - <VS_CREATION>: <VS_CREATION_FAILOVER_API>
+      - <SELF_IP_ROUTE_TABLES>
+      - <TG_CONFIG_TEXT>
+      - <SECRET_UPDATE_TXT>
+    docs: "### Documentation\nThe ***BIG-IP Virtual Edition and Google Cloud Platform: Setup*** [guide](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-google-cloud-platform-13-0-0.html) details how to create the configuration manually without using the template.  This document also describes the configuration in more detail."
+    traffic_group_config:
+      default: "### Traffic Group Configuration\n\nThis template supports associating GCP resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  Use the following guidance to configure multiple traffic groups.\n\n1. From the BIG-IP VE management Configuration utility, click **Device Management > Traffic Groups > Create**, and then complete the following.\n- *Name*: **traffic-group-2**\n- *Failover Order*: Select the preferred order of the devices for this traffic group; F5 recommends setting the current standby device as the preferred device for this second traffic group, so that each traffic group has a different preferred device (device will become active after creating the traffic group).\n- Click **Create Traffic Group**.\n2. Ensure the BIG-IP **Virtual Address** corresponding with the created virtual servers is in the desired traffic group.\n- Note: GCP resources are mapped to a specific traffic group by the Virtual Address configuration of the BIG-IP.\n- Note: You can find the Virtual Address list by browsing to Local Traffic->Virtual Servers->Virtual Address List."
+      stackType:
+        prod-stack: "### Traffic Group Configuration\nThis template supports associating GCP Instance NIC alias IP resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  Use the following guidance to configure multiple traffic groups.\n\n1. From the BIG-IP VE management Configuration utility, click **Device Management > Traffic Groups > Create**, and then complete the following.\n   - *Name*: **traffic-group-2**\n   - *Failover Order*: Select the preferred order of the devices for this traffic group; F5 recommends setting the current standby device as the preferred device for this second traffic group, so that each traffic group has a different preferred device (device will become active after creating the traffic group).\n   - Click **Create Traffic Group**.\n2. Ensure the BIG-IP **Virtual Address** corresponding with the created virtual servers is in the desired traffic group.\n   - Note: NIC Alias IPs are mapped to a specific traffic group by the Virtual Address configuration of the BIG-IP.\n   - Note: You can find the Virtual Address list by browsing to Local Traffic->Virtual Servers->Virtual Address List."
+    create_virtual_servers:
+      default: "## Creating virtual servers on the BIG-IP VE\n\nIn order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the IP address to use, which should match (or be within the CIDR range defined) of either a 1) GCP alias IP or a 2) GCP forwarding rule IP configured on the active BIG-IP VE instance. If you need additional virtual servers for your applications/servers, you can add more GCP resources, and corresponding virtual servers on the BIG-IP system. See [gcp-vpc-alias-ips](https://cloud.google.com/vpc/docs/alias-ip) for information on alias IP ranges. See [gcp-forwarding-rules](https://cloud.google.com/load-balancing/docs/forwarding-rules) for more information on forwarding rules.\n\nIn this template, each IP address is associated with a GCP object attached to the external network interface of the BIG-IP VE. Because this IP will be moved to the active BIG-IP device, you need to create a single virtual server in **traffic-group-1** that corresponds to the IP address of that object.\n1. Once your BIG-IP VE has launched, open the BIG-IP VE Configuration utility.\n2. On the Main tab, click **Local Traffic > Virtual Servers** and then click the **Create** button.\n3. In the **Name** field, give the Virtual Server a unique name.\n4. In the **Destination/Mask** field, type the IP address of the object to be associated with your application (for example: 10.0.1.10/32 or 80.80.80.80/32).\n5. In the **Service Port** field, type the appropriate port.\n6. Configure the rest of the virtual server as appropriate.\n7. Click the **Finished** button.\n8. Repeat as necessary.\n\nWhen you have completed the virtual server configuration, you may modify the virtual addresses to use an alternative Traffic Group using the following guidance.\n1. On the Main tab, click **Local Traffic > Virtual Servers**.\n2. On the Menu bar, click the **Virtual Address List** tab.\n3. Click the address of one of the virtual servers you just created.\n4. From the **Traffic Group** list, select **traffic-group-2** (or the additional traffic group you created previously).\n5. Click **Update**.\n6. Repeat for each virtual server."
+      stackType:
+        prod-stack: "## Creating virtual servers on the BIG-IP VE\n\nIn order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the IP address to use, which should match (or be within the CIDR range defined) a GCP alias IP configured on the active BIG-IP VE. If you need additional virtual servers for your applications/servers, you can add more alias IP ranges, and corresponding virtual servers on the BIG-IP system. See [gcp-vpc-alias-ips](https://cloud.google.com/vpc/docs/alias-ip) for information on alias IP ranges.\nIn this template, each IP address is associated with an alias IP range attached to the external network interface of the BIG-IP VE. Because this alias IP will be moved to the active BIG-IP device, you need to create a single virtual server in **traffic-group-1** that corresponds to the IP address of that alias IP.\n1. Once your BIG-IP VE has launched, open the BIG-IP VE Configuration utility.\n2. On the Main tab, click **Local Traffic > Virtual Servers** and then click the **Create** button.\n3. In the **Name** field, give the Virtual Server a unique name.\n4. In the **Destination/Mask** field, type the IP address of the alias IP to be associated with your application (for example: 10.0.1.10/32).\n5. In the **Service Port** field, type the appropriate port.\n6. Configure the rest of the virtual server as appropriate.\n7. Click the **Finished** button.\n8. Repeat as necessary.\n\nWhen you have completed the virtual server configuration, you may modify the virtual addresses to use an alternative Traffic Group using the following guidance.\n1. On the Main tab, click **Local Traffic > Virtual Servers**.\n2. On the Menu bar, click the **Virtual Address List** tab.\n3. Click the address of one of the virtual servers you just created.\n4. From the **Traffic Group** list, select **traffic-group-2** (or the additional traffic group you created previously).\n5. Click **Update**.\n6. Repeat for each virtual server."
+    support_notes:
+      default: "Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K44842449). You can modify the template itself if necessary, but if you modify any of the code outside of the lines ### START CUSTOM TMSH CONFIGURATION and ### END CUSTOM TMSH CONFIGURATION the template is no longer supported by F5."
+      stackType:
+        learning-stack: "While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory."
+  failover-api_2nic:
+    title: 'HA Cluster (Active/Standby): <STACK__TYPE> with <LICENSE__TYPE> Licensing'
+    intro:
+      default: "This solution uses a Google Deployment Manager (GDM) Template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled (the template also supports [multiple traffic groups](#traffic-group-configuration)) in a Google Virtual Private Cloud, using <LICENSE__TYPE> (utility) licensing.\nTraffic flows from the BIG-IP VE(s) to the application servers. Each BIG-IP VE has 2 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.\n **Networking Stack Type:** This template deploys into an existing networking stack; so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects."
+      stackType:
+        prod-stack: "This solution uses a Google Deployment Manager (GDM) Template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled (the template also supports [multiple traffic groups](#traffic-group-configuration)) in a Google Virtual Private Cloud, using <LICENSE__TYPE> (utility) licensing.\nThis is a *production stack* template, meaning it deploys without creating or attaching any public IP addresses to the BIG-IP VEs (note that outbound Internet access for the BIG-IP is still required). This can be useful, or possibly required, where dictated by security policy or in deployments where accessing resources does not require a public IP address on the BIG-IP VE, such as users connecting to internal applications using a VPN.  See the *existing stack* directory if you do not need this production stack template.\nTraffic flows from the BIG-IP VE(s) to the application servers. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic."
+    config_ex_link: "- [Configuration Example](#config)"
+    config_ex_text: "## Configuration Example <a name=\"config\"></a>\n\nThe following is a simple configuration diagram for this deployment.\n\n![Configuration example](../images/google_setup.png)"
+    prereq_list:
+      - byol_note
+      - install_google_sdk
+      - ssh_key_pair
+      - failover_prereq_2nic_viapi_list
+      - required_machine_type_2nic
+      - required_bigip_instance
+      - prod_mgmt_interface
+    config_note_list:
+      - cfe_config_note
+      - multi_interface_note
+      - failover_config_note_general
+      - cluster_credentials_note
+      - via_api_config_note
+    extra_text:
+      - <POST_CONFIG_TXT>: <POST_CONFIG_FAILOVER_TXT>
+      - <VS_CREATION>: <VS_CREATION_FAILOVER_API>
+      - <SELF_IP_ROUTE_TABLES>
+      - <TG_CONFIG_TEXT>
+      - <SECRET_UPDATE_TXT>
+    docs: "### Documentation\nThe ***BIG-IP Virtual Edition and Google Cloud Platform: Setup*** [guide](https://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-ve-setup-google-cloud-platform-13-0-0.html) details how to create the configuration manually without using the template.  This document also describes the configuration in more detail."
+    traffic_group_config:
+      default: "### Traffic Group Configuration\n\nThis template supports associating GCP resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  Use the following guidance to configure multiple traffic groups.\n\n1. From the BIG-IP VE management Configuration utility, click **Device Management > Traffic Groups > Create**, and then complete the following.\n- *Name*: **traffic-group-2**\n- *Failover Order*: Select the preferred order of the devices for this traffic group; F5 recommends setting the current standby device as the preferred device for this second traffic group, so that each traffic group has a different preferred device (device will become active after creating the traffic group).\n- Click **Create Traffic Group**.\n2. Ensure the BIG-IP **Virtual Address** corresponding with the created virtual servers is in the desired traffic group.\n- Note: GCP resources are mapped to a specific traffic group by the Virtual Address configuration of the BIG-IP.\n- Note: You can find the Virtual Address list by browsing to Local Traffic->Virtual Servers->Virtual Address List."
+      stackType:
+        prod-stack: "### Traffic Group Configuration\nThis template supports associating GCP Instance NIC alias IP resources with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  Use the following guidance to configure multiple traffic groups.\n\n1. From the BIG-IP VE management Configuration utility, click **Device Management > Traffic Groups > Create**, and then complete the following.\n   - *Name*: **traffic-group-2**\n   - *Failover Order*: Select the preferred order of the devices for this traffic group; F5 recommends setting the current standby device as the preferred device for this second traffic group, so that each traffic group has a different preferred device (device will become active after creating the traffic group).\n   - Click **Create Traffic Group**.\n2. Ensure the BIG-IP **Virtual Address** corresponding with the created virtual servers is in the desired traffic group.\n   - Note: NIC Alias IPs are mapped to a specific traffic group by the Virtual Address configuration of the BIG-IP.\n   - Note: You can find the Virtual Address list by browsing to Local Traffic->Virtual Servers->Virtual Address List."
+    create_virtual_servers:
+      default: "## Creating virtual servers on the BIG-IP VE\n\nIn order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the IP address to use, which should match (or be within the CIDR range defined) of either a 1) GCP alias IP or a 2) GCP forwarding rule IP configured on the active BIG-IP VE instance. If you need additional virtual servers for your applications/servers, you can add more GCP resources, and corresponding virtual servers on the BIG-IP system. See [gcp-vpc-alias-ips](https://cloud.google.com/vpc/docs/alias-ip) for information on alias IP ranges. See [gcp-forwarding-rules](https://cloud.google.com/load-balancing/docs/forwarding-rules) for more information on forwarding rules.\n\nIn this template, each IP address is associated with a GCP object attached to the external network interface of the BIG-IP VE. Because this IP will be moved to the active BIG-IP device, you need to create a single virtual server in **traffic-group-1** that corresponds to the IP address of that object.\n1. Once your BIG-IP VE has launched, open the BIG-IP VE Configuration utility.\n2. On the Main tab, click **Local Traffic > Virtual Servers** and then click the **Create** button.\n3. In the **Name** field, give the Virtual Server a unique name.\n4. In the **Destination/Mask** field, type the IP address of the object to be associated with your application (for example: 10.0.1.10/32 or 80.80.80.80/32).\n5. In the **Service Port** field, type the appropriate port.\n6. Configure the rest of the virtual server as appropriate.\n7. Click the **Finished** button.\n8. Repeat as necessary.\n\nWhen you have completed the virtual server configuration, you may modify the virtual addresses to use an alternative Traffic Group using the following guidance.\n1. On the Main tab, click **Local Traffic > Virtual Servers**.\n2. On the Menu bar, click the **Virtual Address List** tab.\n3. Click the address of one of the virtual servers you just created.\n4. From the **Traffic Group** list, select **traffic-group-2** (or the additional traffic group you created previously).\n5. Click **Update**.\n6. Repeat for each virtual server."
+      stackType:
+        prod-stack: "## Creating virtual servers on the BIG-IP VE\n\nIn order to pass traffic from your clients to the servers through the BIG-IP system, you must create a virtual server on the BIG-IP VE. To create a BIG-IP virtual server you need to know the IP address to use, which should match (or be within the CIDR range defined) a GCP alias IP configured on the active BIG-IP VE. If you need additional virtual servers for your applications/servers, you can add more alias IP ranges, and corresponding virtual servers on the BIG-IP system. See [gcp-vpc-alias-ips](https://cloud.google.com/vpc/docs/alias-ip) for information on alias IP ranges.\nIn this template, each IP address is associated with an alias IP range attached to the external network interface of the BIG-IP VE. Because this alias IP will be moved to the active BIG-IP device, you need to create a single virtual server in **traffic-group-1** that corresponds to the IP address of that alias IP.\n1. Once your BIG-IP VE has launched, open the BIG-IP VE Configuration utility.\n2. On the Main tab, click **Local Traffic > Virtual Servers** and then click the **Create** button.\n3. In the **Name** field, give the Virtual Server a unique name.\n4. In the **Destination/Mask** field, type the IP address of the alias IP to be associated with your application (for example: 10.0.1.10/32).\n5. In the **Service Port** field, type the appropriate port.\n6. Configure the rest of the virtual server as appropriate.\n7. Click the **Finished** button.\n8. Repeat as necessary.\n\nWhen you have completed the virtual server configuration, you may modify the virtual addresses to use an alternative Traffic Group using the following guidance.\n1. On the Main tab, click **Local Traffic > Virtual Servers**.\n2. On the Menu bar, click the **Virtual Address List** tab.\n3. Click the address of one of the virtual servers you just created.\n4. From the **Traffic Group** list, select **traffic-group-2** (or the additional traffic group you created previously).\n5. Click **Update**.\n6. Repeat for each virtual server."
+    support_notes:
+      default: "Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K44842449). You can modify the template itself if necessary, but if you modify any of the code outside of the lines ### START CUSTOM TMSH CONFIGURATION and ### END CUSTOM TMSH CONFIGURATION the template is no longer supported by F5."
+      stackType:
+        learning-stack: "While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory."
+  autoscale_waf_lb:
+    title: 'Auto Scale BIG-IP WAF (LTM + ASM) - Frontend via Layer 4 LB (TCP)'
+    intro:
+      default: "This solution uses a GDM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Google Instance Group that is configured for auto scaling. Traffic flows from the Google load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. Scaling events are triggered based on the utilization of the BIG-IP VE CPU (you configure the thresholds in the template), specifically the F5 TMM (Traffic Management Microkernel) CPU.\n In this solution, the BIG-IP VEs have the [LTM](https://f5.com/products/big-ip/local-traffic-manager-ltm) and [ASM](https://f5.com/products/big-ip/application-security-manager-asm) modules enabled to provide advanced traffic management and web application security functionality.\n **Networking Stack Type:** This template deploys into an existing networking stack; so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects."
+    prereq_list:
+      - install_google_sdk
+      - ssh_key_pair
+      - standalone_prereq_1nic_list
+      - standalone_prereq_general_list
+      - api_required
+      - rest_api_general_info
+    config_note_list:
+      - image_note
+      - shared_info_ack
+      - gdm_reconfigure_note
+      - gdm_deployments_logs_note
+      - master_election_feature_note
+      - backup_note
+      - security_sync_note
+      - autoscale_tresholds_note
+    extra_text:
+      - <POST_CONFIG_TXT>
+      - <VS_CREATION>
+    additional_security_notes:
+      default: "- In the *installCloudLibs* variable: **tmsh load sys config merge file /config/verifyHash**.\n- In the *installCloudLibs* variable: ensure this includes **tmsh run cli script verifyHash /config/cloud/f5-cloud-libs.tar.gz**."
+    support_notes: "While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory."
+    supported_bigip_versions:
+      default: "## Supported BIG-IP versions\nThe following is a map that shows the available options for the template parameter **bigIpVersion** as it corresponds to the BIG-IP version itself. Only the latest version of BIG-IP VE is posted in the GCE Marketplace. For older versions, see downloads.f5.com.\n| Google BIG-IP Image Version | BIG-IP Version |\n| --- | --- |\n| 15.1.00000 | 15.1.0 Build 0.0.6 |"
+    backup_and_recovery: "### Backup BIG-IP configuration for cluster recovery\n\nThe template now automatically saves a BIG-IP back up UCS file (into the **backup** container of the storage account ending in **data000**) every night at 12am, and saves 7 days of back up UCS files.  If you make manual changes to the configuration, we recommend immediately making a backup of your BIG-IP configuration manually and storing the resulting UCS file in the backup container to ensure the master election process functions properly.  Note: If it is necessary to recover from this UCS backup, the system picks the backup file with the latest timestamp.\n\nTo manually save the BIG-IP configuration to a UCS file:\n1. Backup your BIG-IP configuration (ideally the cluster primary) by creating a [UCS](https://support.f5.com/csp/article/K13132) archive.  Use the following syntax to save the backup UCS file:\n  - From the CLI command: ```# tmsh save /sys ucs /var/tmp/original.ucs```\n  - From the Configuration utility: **System > Archives > Create**\n2. Upload the UCS into the **backup** container of the storage account ending in **data000**."
+######################### Additional documentation items #########################
+note_text:
+  autoscale_tresholds_note: "Scaling Thresholds: \n   - The scaling process gets triggered based on CPU usage \n   - The control CPU usage value is defined using a float number in a range of 0 to 1 ( i.e. 0.8 )"
+  security_sync_note: "Important: After the template successfully deploys, you must log into one of the BIG-IP VEs to modify the Application Security Synchronization settings.  Log in to the BIG-IP VE, and then click **Security > Options > Synchronization > Application Security Synchronization**.  From the **Device Group** list, select **Sync**, and then click **Save**. This ensures any changes to the ASM security policy are synchronized to other devices in the cluster."
+  backup_note: "After deploying the template, we recommend going to [this section](#backup-big-ip-configuration-for-cluster-recovery) to create and store a backup of your BIG-IP configuration."
+  master_election_feature_note: "This template includes a master election feature, which ensures that if the existing master BIG-IP VE is unavailable, a new master is selected from the BIG-IP VEs in the cluster."
+  gdm_reconfigure_note: "F5 GDM templates do not reconfigure existing GCE resources, such as network security groups.  Depending on your configuration, you may need to configure these resources to allow the BIG-IP VE(s) to receive traffic for your application."
+  gdm_deployments_logs_note: "F5 GDM templates now capture all deployment logs to the BIG-IP VE in **/var/log/cloud/google**.  Depending on which template you are using, this includes deployment logs (stdout/stderr), f5-cloud-libs execution logs, recurring solution logs (failover, metrics, and so on), and more."
+  shared_info_ack:
+    default: "This template can send non-identifiable statistical information to F5 Networks to help us improve our templates.  See [Sending statistical information to F5](#sending-statistical-information-to-f5)."
+  standalone_prereq_general_list:
+    default: "This solution uses the SSH key to enable access to the BIG-IP system. If you want access to the BIG-IP web-based Configuration utility, you must first SSH into the BIG-IP VE (using an SSH key provided via project-wide metadata).  You can then create a user account with admin-level permissions on the BIG-IP VE to allow access if necessary."
+  standalone_prereq_1nic_list:
+    default: "A Virtual Private Cloud (VPC) network with one subnet.  The subnet requires a route and access to the Internet for the initial configuration to download the BIG-IP cloud library.\n- You must use a BIG-IP instance that has at least 2 vCPU and 4 GB memory. For each additional vCPU, add at least 2 GB of memory. Note: Because of this requirement, the *n1-highcpu* instance types are not supported."
+  standalone_prereq_1nic_waf_list:
+    default: "An Google Firewall rule with the following inbound rules:\n  - Port 22 for SSH access to the BIG-IP VE\n  - Port 8443 (or other port) for accessing the BIG-IP web-based Configuration utility\n  - A port for accessing your applications via the BIG-IP virtual server"
+  standalone_prereq_2nic_list:
+    default: "Two Virtual Private Cloud (VPC) networks with at least one subnet in each. The subnet for the management network and external traffic (network1/subnet1) requires a route and access to the Internet for the initial configuration to download the BIG-IP cloud library.\n- You must use a BIG-IP instance that has at least 2 vCPU and 4 GB memory. For each additional vCPU, add at least 2 GB of memory. Note: Because of this requirement, the *n1-highcpu* instance types are not supported."
+  standalone_prereq_3nic_list:
+    default: "Three Virtual Private Cloud (VPC) networks with at least one subnet in each. The subnet for the management network and external traffic (network1/subnet1) requires a route and access to the Internet for the initial configuration to download the BIG-IP cloud library."
+  failover_prereq_3nic_list:
+    default: "Three Virtual Private Cloud (VPC) networks with at least one subnet in each. The subnet for the management network requires a route and access to the Internet for the initial configuration to download the BIG-IP cloud library.\n- This solution uses the SSH key to enable access to the BIG-IP system. If you want access to the BIG-IP web-based Configuration utility, you must first SSH into the BIG-IP VE (using an SSH key provided via project-wide metadata).  You can then create a user account with admin-level permissions on the BIG-IP VE to allow access if necessary.\n- This solution requires read/write access to Google Compute Engine and Google Cloud Storage."
+  failover_prereq_3nic_viapi_list:
+      default: "Three Virtual Private Cloud (VPC) networks with at least one subnet in each. The subnet for the management network requires a route and access to the Internet for the initial configuration to download the BIG-IP cloud library.\n- A Google Firewall rule with the following inbound rules:\n    - Port 22 for SSH access to the BIG-IP VE\n    - Port 443 (or alternate port) for accessing the BIG-IP web-based Configuration utility\n    - A port for accessing your applications via the BIG-IP virtual server\n- This solution uses the SSH key to enable access to the BIG-IP system. If you want access to the BIG-IP web-based Configuration utility, you must first SSH into the BIG-IP VE (using an SSH key provided via project-wide metadata).  You can then create a user account with admin-level permissions on the BIG-IP VE to allow access if necessary.\n- This solution requires read/write access to Google Compute Engine and Google Cloud Storage."
+  failover_prereq_2nic_list:
+    default: "Two Virtual Private Cloud (VPC) networks with at least one subnet in each. The subnet for the management network requires a route and access to the Internet for the initial configuration to download the BIG-IP cloud library.\n- This solution uses the SSH key to enable access to the BIG-IP system. If you want access to the BIG-IP web-based Configuration utility, you must first SSH into the BIG-IP VE (using an SSH key provided via project-wide metadata).  You can then create a user account with admin-level permissions on the BIG-IP VE to allow access if necessary.\n- This solution requires read/write access to Google Compute Engine and Google Cloud Storage."
+  failover_prereq_2nic_viapi_list:
+    default: "Two Virtual Private Cloud (VPC) networks with at least one subnet in each. The subnet for the management network requires a route and access to the Internet for the initial configuration to download the BIG-IP cloud library.\n- A Google Firewall rule with the following inbound rules:\n    - Port 22 for SSH access to the BIG-IP VE\n    - Port 443 (or alternate port) for accessing the BIG-IP web-based Configuration utility\n    - A port for accessing your applications via the BIG-IP virtual server\n- This solution uses the SSH key to enable access to the BIG-IP system. If you want access to the BIG-IP web-based Configuration utility, you must first SSH into the BIG-IP VE (using an SSH key provided via project-wide metadata).  You can then create a user account with admin-level permissions on the BIG-IP VE to allow access if necessary.\n- This solution requires read/write access to Google Compute Engine and Google Cloud Storage."
+  required_bigip_instance: "You must use a BIG-IP instance that has at least 4 vCPU and 8 GB memory. For each additional vCPU, add at least 2 GB of memory."
+  required_machine_type_3nic: "**Important**: For this 3 NIC template, you MUST use a machine type of at least **n1-standard-4**.  See this [link](https://cloud.google.com/vpc/docs/create-use-multiple-interfaces#max-interfaces) for more information about required vCPUs and interfaces.  Note: Because of this requirement, the *n1-highcpu* instance types are not supported."
+  required_machine_type_2nic: "**Important**: For this 2 NIC template, you MUST use a machine type of at least **n1-standard-8**.  See this [link](https://cloud.google.com/vpc/docs/create-use-multiple-interfaces#max-interfaces) for more information about required vCPUs and interfaces.  Note: Because of this requirement, the *n1-highcpu* instance types are not supported."
+  byol_note:
+    default: 'An F5 Networks BYOL license (Bring Your Own License) available.'
+    exclude:
+      licenseType:
+        - payg
+  failover_config_note_general:
+    default: "In order to pass traffic from your clients to the servers, after launching the template, you must create virtual server(s) on the BIG-IP VE.  See [Creating a virtual server](#creating-virtual-servers-on-the-big-ip-ve).\n- This template creates target instances for each BIG-IP VE as well as a user specified number of forwarding rules.  For more information on creating or modifying these rules see the google [documentation](https://cloud.google.com/load-balancing/docs/forwarding-rules)."
+    stackType:
+      prod-stack: "Beginning with release 1.5.0, the BIG-IP image names have changed (previous options were Good, Better, and Best).  Now you choose a BIG-IP VE image based on whether you need [LTM](https://www.f5.com/products/big-ip-services/local-traffic-manager) only or All modules available (including [WAF](https://www.f5.com/products/security/advanced-waf), [AFM](https://www.f5.com/products/security/advanced-firewall-manager), etc.), and if you need 1 or 2 boot locations.  Use 2 boot locations if you expect to upgrade the BIG-IP VE in the future. If you do not need room to upgrade (if you intend to create a new instance when a new version of BIG-IP VE is released), use an image with 1 boot location.\n- In order to pass traffic from your clients to the servers, after launching the template, you must create virtual server(s) on the BIG-IP VE.  See [Creating a virtual server](#creating-virtual-servers-on-the-big-ip-ve).\n- This template supports associating GCP alias IPs with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions."
+  cfe_config_note:
+    default: "All supported versions of F5 Google Deployment Failover templates now include F5 Cloud Failover Extension (CFE) on the BIG-IP VE. The F5 Cloud Failover Extension (CFE) is an iControl LX extension that provides L3 failover functionality in cloud environments, effectively replacing Gratuitous ARP (GARP). Cloud Failover Extension uses a declarative model, meaning you provide a JSON declaration using a single REST API call. The declaration represents the configuration that Cloud Failover Extension is responsible for creating on a BIG-IP system. This template constructs and posts declaration to CFE required to handle IP failover. If you you wish to configure route failover CFE feature, you will need to do 2 additional steps. 1) Add description to appropriate route using, for example, f5_cloud_failover_labels={\"f5_cloud_failover_label\":\"mydeployment\"}. Were \"mydeployment\" is the name of your deployment. 2) Post modified declaration with correct affected CIDR blocks. Note: You can use GET method to url https://yourBigIP/mgmt/shared/cloud-failover/declare to retrieve existing CFE declaration. See the [CFE documentation](https://clouddocs.f5.com/products/extensions/f5-cloud-failover/latest/) for details on how to use CFE."
+  cluster_credentials_note:
+    default: "In order to form a cluster of devices, a secure trust must be established between BIG-IP systems. To establish this trust, we generate and store credentials as credentials/primary in a Google storage bucket. Upon completion of a successful deployment, these credentials, as well as the corresponding local service account user, are deleted by the f5-cloud-libs cluster provider. If for some reason these credentials are not deleted, you may remove them at any time following deployment."
+  via_api_config_note:
+    default: "This template supports associating IP's with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.\n- Note: If you are unable to delete the GDM deployment with an error similar to ```The target_instance resource <resource> is already being used by forwarding rule <resource git>```, try again to delete the deployment.  If it continues to fail delete any forwarding rules created by the deployment and try again."
+    exclude:
+      stackType:
+        - production-stack
+  prod_mgmt_interface:
+    default: "**Important**: For this production stack template, the management and external interfaces must be able to communicate with the internet.  This may be done using a [NAT gateway](https://cloud.google.com/solutions/connecting-securely#natgateway).  Note: This stack type means the BIG-IP VE(s) do not have any public IP's attached to the interfaces which requires alternate means to talk to external services, including GCP API's."
+    exclude:
+      stackType:
+        - existing-stack
+  multi_interface_note:
+    default: '**Important**: This solution configures the second interface of the instance as the MGMT interface.  This allows the first interface to be used by Google Cloud resources such as forwarding rules and load balancers for application traffic.  To connect to the MGMT interface (nic1) get the IP address from the instance properties and use your management tool of choice.  Note: The Google Cloud console and gcloud SSH connection options target nic0 and will not connect to the instance correctly.'
+  ssh_key_pair: "Key pair for SSH access to BIG-IP VE (you can create or import this in Google Cloud)"
+  install_google_sdk: "You must have installed the [Google Cloud SDK](https://cloud.google.com/sdk/downloads)"
+  internal_lb: "This template optionally creates a single internal load balancer (TCP) forwarding rule which can contain up to 5 application ports. For more information on creating additional rules see the google [documentation](https://cloud.google.com/load-balancing/docs/internal/setting-up-internal)."
+  static_ip:
+    default: "This template supports accepting static addresses as a parameter to be used during instance creation.  During a lifecycle event, you can explicitly reserve the static address prior to deleting the instance and creating a new one using the same address.  The documentation describing how to do that in more detail is [here](https://cloud.google.com/compute/docs/ip-addresses/reserve-static-internal-ip-address)."
+    exclude:
+      stackType:
+        - learning-stack
+  post_config: 'This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.'
+  master_election: 'This template includes a master election feature, which ensures that if the existing master BIG-IP VE is unavailable, a new master is selected from the BIG-IP VEs in the cluster.'
+  config_backup: 'After deploying the template, if you make manual changes to the BIG-IP configuration, you should visit [this section](#backup-big-ip-configuration-for-cluster-recovery).'
+  nic_sizing: 'Because this template allows you to deploy a variable number of NICs, be sure to pick an Azure Virtual Machine instance size that can support the number of NICs you choose, otherwise the deployment will fail.  See the [Azure Instance Size link](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#size-tables) to determine the correct instance size to correspond with the number of NICs required. NOTE: This solution deploys three NICs plus a variable number of NICs as specified in the parameter **numberOfAdditionalNics**'
+  addtl_nic_config: 'This template may deploy additional NICs using the parameter **numberOfAdditionalNics**, if doing so it will preconfigure the BIG-IP VLAN(s) and place the interfaces into the corresponding VLAN based on the subnet name(s) provided in the parameter **additionalNicLocation**.  Be aware that after the template deploys, the BIG-IP self IP address(es) need to be created that correspond to the Azure IP Config object for that NIC.  You must also set the IP Config object to a **static** address instead of **dynamic** to ensure it does not change on reboot.'
+  persist_msg: 'Persistence and connection mirroring are now supported in this template.  It also supports mirroring of APM sessions.'
+  udr_tags: 'To indicate that the next hop of a user-defined route (UDR) should be updated during failover, you must configure each UDR''s parent route table resource with an Azure tag with the key name **f5_ha** and the value of **self_2nic** (this is the default self IP name created by the template; if necessary, this can be the name of a different self IP address onfigured on the the BIG-IP VE).  You must also create an Azure tag with the key **f5_tg** and value of **traffic-group-1** (or the name of a different traffic group you have configured on the BIG-IP VE).  For details, see [Customizing the Next Hop of Azure User-Defined Routes](#customizing-the-next-hop-of-azure-user-defined-routes).'
+  udr_update: 'When failover occurs, UDRs will be updated across multiple Azure subscriptions.'
+  asm_sync: '**Important**: After the template successfully deploys, you must log into one of the BIG-IP VEs to modify the Application Security Synchronization settings.  Log in to the BIG-IP VE, and then click **Security > Options > Synchronization > Application Security Synchronization**.  From the **Device Group** list, select **Sync**, and then click **Save**. This ensures any changes to the ASM security policy are synchronized to other devices in the cluster.'
+  tg_config: 'This template now supports associating Azure NIC IP configurations with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.'
+  failover_log: 'The BIG-IP VE failover log can be found at **/var/log/cloud/azure/failover.log**.'
+  known_issues: 'When you deploy this failover template, you may receive an error due to existing error logs in failover.log (*Long running operation failed with error: An error occurred*).  This is a known issue and comes from the Microsoft Azure API when it takes longer than expected to send/retrieve requests.  The processes will complete despite these error messages.'
+  ha_addtl_nic: 'Adding additional NIC''s post-deployment is possible, it requires creating an additional NIC, powering off the VM and adding the network interface to the VM. See Microsoft documentation for more details on adding a NIC to an existing VM. **Important**: For failover to occur, each set of additional NIC''s created must be named exactly the same except for the last character, such as **additionalnic0** and **additionalnic1**.'
+  ha_failover: 'When configuring the template, you have the option of selecting 0 (zero) public IP addresses.  If you select 0 public IP addresses, the BIG-IP systems **will not** create any additional IP configurations on the Azure network interfaces; however, failover of UDR next hop is still supported.  If you create IP configurations post-deployment and would like them to failover, see the [Post-Deployment Configuration section](#post-deployment-configuration) for details.'
+  api_required: '**Important**: This solution uses calls to the GCE REST API to read and update GCE resources such as storage accounts, network interfaces, and route tables.  For the solution to function correctly, you must ensure that the BIG-IP(s) can connect to the GCE REST API on port 443.'
+  rest_api_general_info: " This solution uses calls to the GCE REST API to read and update GCE resources, this has specifically been tested in GCE Commercial Cloud."
+  dns_provider_required: 'This solution uses a DNS provider instead of an Azure load Balancer for distribution of traffic.  The DNS provider **must** already exist prior to deployment. Currently ***only BIG-IP DNS is supported***.'
+  image_note:
+     default: 'Beginning with release 1.5.0, the BIG-IP image names have changed (previous options were Good, Better, and Best).  Now you choose a BIG-IP VE image based on whether you need [LTM](https://www.f5.com/products/big-ip-services/local-traffic-manager) only or All modules available (including [WAF](https://www.f5.com/products/security/advanced-waf), [AFM](https://www.f5.com/products/security/advanced-firewall-manager), etc.), and if you need 1 or 2 boot locations.  Use 2 boot locations if you expect to upgrade the BIG-IP VE in the future. If you do not need room to upgrade (if you intend to create a new instance when a new version of BIG-IP VE is released), use an image with 1 boot location.'
+     exclude:
+      licenseType:
+        - payg
+  image_note_2nics:
+    default: 'Beginning with release 2.0.0, interface NIC1 is used for management traffic. This will allow the use of specific Google services which require NIC0 be used, such as port forwarding, lb services, etc. Specifically, public/external application traffic now traverses NIC0, and management traffic traverses NIC1.'
+  image_note_3nics:
+    default: 'Beginning with release 2.0.0, interface NIC1 is used for management traffic. This will allow the use of specific Google services which require NIC0 be used, such as port forwarding, lb services, etc. Specifically, public/external application traffic now traverses NIC0, and management traffic traverses NIC1.'
+  master_key_note:
+    default: "The master-key (the passphrase used to establish trust between a future HA pair) for this deployment."
+  managed_identity_note:
+    default: "Before deploying this template,  you must create a managed identity to allow BIG-IQ to migrate IP configurations to the network interface of the active device on failover.  You must also create a **Contributor** role assignment for this identity with a scope that includes the resource group where the existing stack virtual network is configured. When deploying the template, use the identity name from these examples for the **userAssignedIdentityName** input parameter.\n\nClick one of the following links for guidance on creating the managed identity:\n\t- [Azure Portal](#creating-a-managed-user-identity-from-the-azure-portal)\n\t- [Azure CLI](#creating-a-managed-user-identity-from-the-azure-cli)\n"
+  configure_managed_identity_note:
+    default: "## Creating a managed user identity\n
+Use one of the following procedures to create a managed user identity.\n\n
+
+### Creating a managed user identity from the Azure Portal\n
+Use the following procedure if you want to create the managed user identity from the Azure Portal.\n
+
+1.	Click the Azure Resource Group where you want to add the Managed User Identity.\n
+2.	Click **Add**.\n
+3.	Type **User Assigned Managed Identity** in the search bar.\n
+4.	Click **User Assigned Managed Identity** and then click **Create**.\n
+5.	Specify a name for the resource and choose a Resource Group where it will be created, and then click **Create**.\n
+6.	Click the Azure Resource Group containing your existing Azure virtual network.\n
+7.	Click **Access Control (IAM)**.\n
+8.	Click **Role Assignments**.\n
+9.	Click **Add > Role Assignment**.\n
+10.	Under **Role**, select the **Contributor** role.\n
+11.	Under **Assign access to**, select **User assigned managed identity**.\n
+12.	Select the User assigned managed identity you created previously, and click **Save**\n
+13. Repeat steps 6-12 for the Resource Group where you deployed the ARM template\n\n
+
+The BIG-IQ system now has access to move Azure IP configurations to the active device.\n\n
+
+### Creating a managed user identity from the Azure CLI\n
+Use the following procedure if you want to create the managed user identity from the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest).\n\n
+
+  - To create a managed identity, use the following command syntax from the Azure CLI:\n
+  ```az identity create -n <identity_name> -g <deployment_resource_group>```\n
+  - To get the object ID of the identity (the object ID is the \"value\" property (GUID) of the returned JSON object), use the following command syntax from the Azure CLI:\n
+  ```az identity show -g <deployment_resource_group> --name <identity_name> --output json```\n
+  - To create a role assignment for the identity on the existing stack resource group, use the following command syntax from the Azure CLI:\n
+    ```az role assignment create --resource-group <existing_stack_resource_group> <identity_object_ID> --roleName \"Contributor\"```\n"
+  waf_changes:
+    default: 'Release v6.0.0.0 contains the following changes to the AutoScale WAF template: The **solutionDeploymentName** input is no longer required, the template no longer supports Azure App Service/App Service Environment, and the template no longer creates an L7 DoS profile'
+
+help_text:
+  supported: 'Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K40701984).'
+  experimental: 'While this template has been created by F5 Networks, it is in the **experimental** directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.'
+stack_type_text:
+  new-stack: 'This solution deploys into a new networking stack, which is created along with the solution.'
+  existing-stack: 'This template deploys into an existing networking stack; so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.'
+  production-stack: "This template deploys into an existing networking stack, so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.\n\nThis template differs from the *existing stack* template in that this template deploys without creating or attaching any public IP addresses to the BIG-IP VEs (note that outbound Internet access for the BIG-IP is still required).  This can be useful (or possibly required) in deployments where accessing resources does not require a public IP address on the BIG-IP VE, such as users connecting to internal applications using a VPN."
+  learning-stack: "This solution deploys into a new networking stack, which is created along with the solution.  This is a *learning stack*, which means that in addition to creating a new networking stack it also creates all of the appropriate configuration for an example web service."
+license_text:
+  byol: ' (bring your own license): This allows you to use an existing BIG-IP license.'
+  payg: ': This allows you to use pay-as-you-go hourly billing.'
+  bigiq: ': This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s).'
+  bigiq-payg: ': This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s), as well as use PAYG instances.'
+license_map:
+  15.1.000000:
+    build: '15.1.0.4 Build 0.0.6'
+    bootLocations: 'Both One and Two Boot Location options are available'
+  13.1.100000:
+    build: '13.1.1 Build 0.0.4'
+    bootLocations: 'Both One and Two Boot Location options are available'
+  12.1.303000:
+    build: '12.1.3.3 Build 0.0.1'
+    bootLocations: 'Only Two Boot Location options exist. Even if you select a One Boot Location in the template, Two Boot Locations are created'
+  latest:
+    build: 'This will select the latest BIG-IP version available'
+    bootLocations: 'Only Two Boot Location options exist. Even if you select a One Boot Location in the template, Two Boot Locations are created'
+  6.0.101000:
+    build: 'BIG-IQ 6.0.1'
+  6.1.000000:
+    build: 'BIG-IQ 6.1.0'
+
+# Parameter text used in the template parameters and then subsequently the README's
+parameter_list:
+  adminUsername: "User name for the Virtual Machine."
+  authenticationType: "Type of authentication to use on the Virtual Machine, password based authentication or key based authentication."
+  adminPasswordOrKey: "Password or SSH public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key-based authentication, this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**."
+  additionalNicLocation:
+    default: "This parameter specifies where the additional NICs go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. **Note**: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique."
+    templateName:
+      failover-api: "This parameter specifies where the additional NICs go, use the default value of **OPTIONAL** if **0** was selected for the parameter **numberOfAdditionalNics**.  Otherwise this value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. **Note**: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique."
+  allowUsageAnalytics: "This deployment can send anonymous statistics to F5 to help us determine how to improve our solutions. If you select **No** statistics are not sent."
+  appInsights: "Enter the name of your existing Application Insights environment that will be used to receive custom BIG-IP metrics you can use for Scale Set rules and device visibility. If the Application Insights environment is in a different Resource Group than this deployment, specify it as **app_insights_name;app_insights_rg**).  If you do not have an Application Insights environment, leave the default (CREATE_NEW) and the template will create one. Note: By default, the new Application Insights environment will be created in **East US**, if necessary you can specify a different region as **CREATE_NEW:app_insights_region**)."
+  applicationProtocols: "The protocol(s) used by your application."
+  applicationAddress: "The public IP address or DNS FQDN of the application that this WAF will protect."
+  applicationServiceFqdn: "If you are deploying in front of an Azure App Service, the FQDN of the public application."
+  applicationPort: "If you are deploying an HTTP application, the port on which your service listens for unencrypted traffic. This field is not required when deploying HTTPS only."
+  applicationSecurePort: "If you are deploying an HTTPS application, the port on which your service listens for encrypted traffic. This field is not required when deploying HTTP only."
+  applicationType: "Is your application running on a Linux OS or a Windows OS?"
+  avSetChoice: "If you want the VM placed in a new Azure Availability Set, leave the default value of **CREATE_NEW**, otherwise specify the name of the existing Availability Set you want to use. Note: If you are using an existing AV Set, this deployment must be in the same Azure Resource Group as the AV Set."
+  bigIpVersion: "F5 BIG-IP version you want to use."
+  bigIqAddress: "The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP.  Note: The BIG-IP will make a REST call to the BIG-IQ (already existing) to let it know a BIG-IP needs to be licensed. It will then license the BIG-IP using the provided BIG-IQ credentials and license pool."
+  bigIqUsername: "The BIG-IQ username to use during BIG-IP licensing via BIG-IQ."
+  bigIqPassword: "The BIG-IQ password to use during BIG-IP licensing via BIG-IQ."
+  bigIqLicensePoolName: "The BIG-IQ license pool to use during BIG-IP licensing via BIG-IQ."
+  bigIqLicenseSkuKeyword1: "The BIG-IQ license filter (based on SKU keyword) you want to use for licensing the BIG-IPs from the BIG-IQ, for example **F5-BIG-MSP-LTM-25M**, **F5-BIG-MSP-BR-200M**, **F5-BIG-MSP-BT-1G** or **F5-BIG-MSP-ASM-1G**. ***Important***: This is only required when licensing with an ELA/subscription (utility) pool on the BIG-IQ, if not using this pool type leave the default of **OPTIONAL**."
+  bigIqLicenseUnitOfMeasure: "The BIG-IQ license unit of measure to use during BIG-IP licensing via BIG-IQ, for example **yearly**, **monthly**, **daily** or **hourly**. ***Important***: This is only required when licensing with an ELA/subscription (utility) pool on the BIG-IQ, if not using this pool type leave the default of **OPTIONAL**."
+  blockingLevel: "Select how aggressive you want the blocking level of this WAF.  Remember that the more aggressive the blocking level, the more potential there is for false-positives the WAF might detect. Select **Custom** to specify your own security policy."
+  clientId: "Your Azure service principal application client ID."
+  customImage:
+    default: 'If you would like to deploy using a local BIG-IP image, provide either the full URL to the VHD in Azure storage **or** the full resource ID to an existing Microsoft.Compute image resource.  **Note**: Unless specifically required, leave the default of **OPTIONAL**.'
+    environment:
+      azureStack: 'If you would like to deploy using a local BIG-IP image, provide the full URL to the VHD in Azure Stack storage. **Note**: Unless specifically required, leave the default of **OPTIONAL**.'
+  customPolicy: "Specify the publicly available URL of a custom ASM security policy in XML format. This policy will be applied in place of the standard High/Medium/Low policy."
+  declarationUrl: "URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration."
+  dnsLabel: "Unique DNS Name for the Public IP address used to access the Virtual Machine."
+  dnsMemberIpType: "The IP type to add as the record when updating the DNS provider."
+  dnsMemberPort: "The port for the DNS member to use for monitoring the members status."
+  dnsProviderHost: "The management IP address (or hostname) for the DNS provider to use when updating DNS."
+  dnsProviderPort: "The management port for the DNS provider to use when updating DNS."
+  dnsProviderUser: "The management username for the DNS provider to use when updating DNS."
+  dnsProviderPassword: "The management password for the DNS provider to use when updating DNS."
+  dnsProviderPool: "The GSLB pool on the BIG-IP DNS system to populate."
+  dnsProviderDataCenter: "The GSLB datacenter on the BIG-IP DNS system to use when creating GSLB server(s). Note: If the datacenter provided does not exist the template will create one with the value given."
+  enableNetworkFailover: "Enabling failover creates a traditional active/standby deployment with traffic groups and mirroring. When failover is disabled, all devices are active; use traffic group none."
+  externalSubnetName: "Name of the existing external subnet - with external access to Internet. **Important**: The subnet you provide for the external NIC **must** be unique."
+  externalIpSelfAddressRangeStart: "The static private IP address you want to assign to the external self IP (primary) of the first BIG-IP VE. The next contiguous address will be used for the second BIG-IP device."
+  externalIpAddressRangeStart:
+    default: "The static private IP address you want to assign to the first external Azure public IP (for self IP). An additional private IP address will be assigned for each public IP address you specified in **numberOfExternalIps**.  For example, entering 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 (self IP), 10.100.1.51 and 10.100.1.52 being configured as static private IP addresses for external virtual servers."
+    templateName:
+      failover-api: 'The static private IP address (secondary) you would like to assign to the first shared Azure public IP. An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses for external virtual servers.'
+      failover-lb_3nic: 'The static private IP address (secondary) you would like to assign to the BIG-IP VE(s). The next contiguous address will be used for the second BIG-IP.  For example, inputting 10.100.1.50 here would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses.'
+  internalSubnetName: "Name of the existing internal subnet. **Important**: The subnet you provide for the internal NIC **must** be unique."
+  internalIpAddressRangeStart: "The static private IP address you would like to assign to the internal self IP of the first BIG-IP VE. The next contiguous address will be used for the second BIG-IP device."
+  internalIpAddress: "Internal subnet IP address you want to use for the BIG-IP internal self IP address."
+  provisionInternalLoadBalancer: "Specify Yes to deploy an Azure internal load balancer with HA Ports enabled. Internal BIG-IP network interfaces will be added to the load balancer backend pool."
+  internalLoadBalancerProbePort: "Specify a TCP port for the internal load balancer to monitor. If you specified DO_NOT_USE for internal load balancer type, this setting has no effect."
+  instanceName: "Name of the Virtual Machine."
+  instanceType: "Instance size of the Virtual Machine."
+  imageName:
+    default: "F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as **Best** instead of **Good**."
+    templateName:
+      byol: "F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****."
+      bigiq: "F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****."
+  staticImageName:
+    default: "F5 SKU (image) for static BIG-IQ licensed BIG-IP's you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****."
+    templateName:
+      bigiq-payg: "F5 SKU (image) for static BIG-IQ licensed BIG-IP's you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****."
+  licenseKey1: "The license token for the F5 BIG-IP VE (BYOL)."
+  licenseKey2: "The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices."
+  licensedBandwidth: "The amount of licensed bandwidth (Mbps) you want the PAYG image to use."
+  ntpServer: "Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use."
+  numberOfExternalIps: "The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers."
+  managedRoutes: "A comma-delimited list of route destinations to be managed by this cluster.  For example: 0.0.0.0/0,192.168.1.0/24. Specifying a comma-delimited list of managedRoutes and creating f5_ha and f5_tg tags on the Azure Route Table defines the UDRs to be updated. To have the UDRs managed by BIG-IP, you will need to create an Azure tag with key **f5_ha** and value **self_2nic**, or the name of a different self IP address configured on the BIG-IP VE. All UDRs with destinations matching managedRoutes and configured in Azure Route Tables tagged with 'f5_ha:' will use the corresponding self IP address on the active BIG-IP VE as the next hop for those routes. You must also associate the route table with a traffic group by creating an Azure tag with key **f5_tg** and value **traffic-group-1**, or the name of a different traffic group configured on the BIG-IP VE."
+  mgmtSubnetName: "Name of the existing mgmt subnet - with external access to the Internet. **Important**: The subnet you provide for the mgmt NIC **must** be unique."
+  mgmtIpAddressRangeStart: "The static private IP address you want to assign to the management self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device."
+  mgmtIpAddress: "MGMT subnet IP Address to use for the BIG-IP management IP address."
+  notificationEmail: "If you want email notifications on scale events, specify an email address, otherwise leave the parameter as **OPTIONAL**. Note: You can specify multiple emails by separating them with a semi-colon, such as *email@domain.com;email2@domain.com*."
+  numberOfAdditionalNics:
+    default: "By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a configurable number of additional NICs to the BIG-IP using this parameter."
+    templateName:
+      failover-api: 'By default this solution deploys the BIG-IP(s) in a 3 NIC configuration, however additional NICs can be added to the BIG-IP(s) using this parameter.  **Note**: The default value is 0, additional NICs will only be created if 1 or higher is specified.'
+  numberOfInstances: "The number of BIG-IP VEs that will be deployed in front of your application(s)."
+  numberOfStaticInstances: "The number of static BYOL BIG-IP VEs that will be deployed in this solution."
+  restrictedSrcAddress: 'This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources'
+  scaleOutCpuThreshold: "The percentage of CPU utilization that should trigger a scale out event."
+  scaleInCpuThreshold: "The percentage of CPU utilization that should trigger a scale in event."
+  scaleOutThroughputThreshold: "The amount of throughput (**bytes**) that should trigger a scale out event. Note: The default value is equal to 20 MB"
+  scaleInThroughputThreshold: "The amount of throughput (**bytes**) that should trigger a scale in event. Note: The default value is equal to 10 MB"
+  scaleOutTimeWindow: "The time window required to trigger a scale out event. This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). **Note:** Allowed values are 1-60 (minutes)."
+  scaleInTimeWindow: "The time window required to trigger a scale in event. This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). **Note:** Allowed values are 1-60 (minutes)."
+  servicePrincipalSecret: "Your Azure service principal application secret."
+  solutionDeploymentName: "A unique name for this deployment."
+  sslCert: "The SSL certificate .pfx file corresponding to the virtual server."
+  sslPswd: "The SSL certificate .pfx password corresponding to the certificate you entered."
+  tagValues: "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."
+  tenantId: "Your Azure service principal application tenant ID."
+  timeZone: "If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list [here](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md)). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."
+  uniqueLabel: "Unique Name for the deployment to be used when creating resources."
+  vmScaleSetMinCount: "The minimum (and default) number of BIG-IP VEs that will be deployed into the VM Scale Set."
+  vmScaleSetMaxCount: "The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set."
+  vnetAddressPrefix: "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'."
+  vnetName: "The name of the existing virtual network to which you want to connect the BIG-IP VEs."
+  vnetResourceGroupName: "The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed."

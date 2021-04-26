@@ -1,0 +1,508 @@
+# YAML Document that includes the custom text for each solution readme
+## NOTE: YAML single quotes in single quoted strings are escaped by including an extra quote, so NIC's becomes NIC''s
+
+######################### Define each template here #########################
+templates:
+  standalone_1nic:
+    title: 'Single NIC'
+    intro:
+      default: "This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard Cloud design where the  BIG-IP VE instance is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.\n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
+      environment:
+        azureStack: "This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure Stack. Traffic flows from the BIG-IP VE to the application servers. This is the standard Cloud design where the  BIG-IP VE instance is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.\n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
+    config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through the same IP address and virtual network interface (vNIC).  This interface processes both management and data plane traffic.'
+    prereq_list:
+      - as_images
+      - as_extension
+      - byol_note
+      - bigiq_prereq
+    config_note_list:
+      - bigip_version_note
+      - image_note
+      - bigiq_note
+      - previous_versions
+      - standard_public_ip_sku_note
+      - availability_zone_support_note
+  standalone_2nic:
+    title: '2 NIC'
+    intro: "This solution uses an ARM template to launch a 2-NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure.  In a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP. This is a variation of the 3-NIC template, just without the internal NIC for connecting directly to the backend webservers.\n\nThe BIG-IP VE has the Local Traffic Manager (LTM) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
+    config_ex_text: 'In this scenario, one NIC is for management and one NIC is for external traffic.  This is a more traditional BIG-IP deployment model where data-plane and management traffic is separate. The IP addresses in this example may be different in your implementation.'
+    prereq_list:
+      - byol_note
+      - bigiq_prereq
+    config_note_list:
+      - bigip_version_note
+      - post_config
+      - bigiq_note
+      - image_note
+      - previous_versions
+      - standard_public_ip_sku_note
+      - provision_public_ip_number_of_external_ips
+      - availability_zone_support_note
+  standalone_3nic:
+    title: '3 NIC'
+    intro: "This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. Traffic flows from the BIG-IP VE to the application servers. This is the standard on-premise-like cloud design where the BIG-IP VE instance is running with a management, front-end application traffic (Virtual Server) and back-end application interface.\n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
+    config_ex_text: 'In this scenario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
+    prereq_list:
+      - byol_note
+      - bigiq_prereq
+    config_note_list:
+      - bigip_version_note
+      - post_config
+      - bigiq_note
+      - image_note
+      - previous_versions
+      - standard_public_ip_sku_note
+      - provision_public_ip_number_of_external_ips
+      - availability_zone_support_note
+  standalone_n-nic:
+    title: 'N NIC (variable number of additional NICs)'
+    intro: "This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE in Microsoft Azure. This template can optionally also add additional NIC(s) to the BIG-IP to be used as needed. Traffic flows from the BIG-IP VE to the application servers. This is the standard on-premise-like cloud design where the  BIG-IP VE instance is running with a management, front-end application traffic (Virtual Server) and back-end application interface.\n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
+    config_ex_text: 'In this scenario, one NIC is for management, one NIC is for external traffic and one NIC is for internal traffic.  Additional NICs are added to a customer provided VNET/Subnet.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
+    prereq_list:
+      - byol_note
+      - nic_sizing
+      - bigiq_prereq
+    config_note_list:
+      - bigip_version_note
+      - post_config
+      - addtl_nic_config
+      - bigiq_note
+      - image_note
+      - previous_versions
+      - standard_public_ip_sku_note
+      - provision_public_ip_number_of_external_ips
+      - availability_zone_support_note
+  failover-lb_1nic:
+    title: 'ConfigSync Cluster: Single NIC'
+    intro: "This solution uses an ARM template to launch a single NIC deployment of a cloud-focused BIG-IP VE cluster in Microsoft Azure. Traffic flows from an ALB to the BIG-IP VE which then processes the traffic to application servers. This is the standard cloud design where the BIG-IP VE instance is running with a single interface, where both management and data plane traffic is processed.  This is a traditional model in the cloud where the deployment is considered one-armed.\n\nThe BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
+    config_ex_text: 'In this scenario, all access to the BIG-IP VE cluster is through an ALB. The IP addresses in this example may be different in your implementation.'
+    prereq_list:
+      - byol_note
+      - bigiq_prereq
+    config_note_list:
+      - bigip_version_note
+      - bigiq_note
+      - image_note
+      - previous_versions
+      - standard_public_ip_sku_note
+      - availability_zone_support_note
+  failover-lb_3nic:
+    title: 'ConfigSync Cluster: 3 NIC'
+    intro: "This solution uses an ARM template to launch a three NIC deployment of a cloud-focused BIG-IP VE cluster in Microsoft Azure. It also allows you to choose to deploy the HA cluster with or without network failover enabled.\n\nWhen network failover is enabled, the cluster is configured in a traditional *Active/Standby* mode. Azure load balancer probes determine which BIG-IP VE device will receive application traffic. Mirroring and failover are available.\n\nThis template also configures an optional internal Azure Load Balancer (ILB) for forwarding traffic to the internal interfaces of the BIG-IP VE devices. The ILB will be pre-configured with either a per-protocol or all-protocol load balancing rule, based on the **internalLoadBalancer** parameter value.\n\nWhen using all-protocol load balancing, you can configure the next hop on Azure User Defined Routes (UDRs) to point to the private IP address of the ILB.  Deploy an IP forwarding virtual server on BIG-IP VE to accept this traffic and forward it to the destination.\n\nWhen using per-protocol load balancing, deploy a network virtual server on BIG-IP VE with a destination address that matches the secondary private IP addresses of the ILB load balancing rule's backend pool members.  Note: The all-protocol ILB is currently only available in preview; you must sign up through Microsoft to enable this functionality before deploying the template.\n\nThe BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management.\n\nFor diagrams of alternate deployment topologies, see [alternate topologies](../../alternate-deployment-topologies.md)."
+    config_ex_text: 'In this scenario, all access to the BIG-IP VE cluster is through an ALB. For diagrams of alternate deployment topologies, see [alternate topologies](../../alternate-deployment-topologies.md).'
+    prereq_list:
+      - byol_note
+      - bigiq_prereq
+    config_note_list:
+      - bigip_version_note
+      - post_config
+      - bigiq_note
+      - image_note
+      - previous_versions
+      - standard_public_ip_sku_note
+      - provision_public_ip_number_of_external_ips_via_lb
+      - provison_public_ip_app_note
+      - provision_internal_load_balancer_note
+      - availability_zone_support_note
+  failover-api_n-nic:
+    title: 'HA Cluster (Active/Standby)'
+    intro: "This solution uses an ARM template to launch two BIG-IP VEs in an Active/Standby configuration with network failover enabled (the template now supports [multiple traffic groups](#traffic-group-configuration)). Each pair of BIG-IP VEs is deployed in an Azure Availability Zone when the region offers Availability Zones. Otherwise it is deployed in an Availability Set and can be spread across different update and fault domains. Each BIG-IP VE has 3 network interfaces (NICs), one for management, one for external traffic, and one for internal traffic.\n\nTraffic flows from the client through BIG-IP VE to the application servers. This is the standard 'on-premise-like' cloud design where the  BIG-IP VE instance is running with a management interface, a front-end application traffic (external) interface, and back-end application (internal) interface. This template is a result of Azure now supporting multiple public-to-private IP address mappings per NIC.\n\nThis template supports creating up to 20 additional public/private IP address configurations for the external 'application' NIC to be used for passing traffic to BIG-IP virtual servers.\n\nThe template also supports updating the next hop of Azure User-Defined Routes (UDRs) to use the active BIG-IP VEs internal self IP address.\n\nThe BIG-IP VEs have the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
+    config_ex_text: 'In this scenario, each BIG-IP has one NIC for management, one NIC for external traffic and one NIC for internal traffic.  This is the traditional BIG-IP deployment model where data-plane, management and internal traffic is separate. The IP addresses in this example may be different in your implementation.'
+    prereq_list:
+      - byol_note
+      - cfe_note
+      - udr_tags
+      - udr_update
+      - api_required
+      - cloud_env_support
+      - bigiq_prereq
+    config_note_list:
+      - bigip_version_note
+      - post_config
+      - tg_config
+      - persist_msg
+      - failover_log
+      - known_issues
+      - ha_failover
+      - addtl_nic_config
+      - ha_addtl_nic
+      - bigiq_note
+      - image_note
+      - previous_versions
+      - in_place_upgrade
+      - standard_public_ip_sku_note
+      - provision_public_ip_number_of_external_ips
+      - availability_zone_support_note
+      - standard_alb_sku_note
+      - default_443_lb_rule_note
+      - changingAddressAssigment
+      - enableIpForwarding
+  autoscale_ltm_lb:
+    title: 'AutoScale BIG-IP LTM - VM Scale Set (Frontend via ALB)'
+    intro:
+      default: "This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. \n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management. This template uses BIGIP **private** management address when license is requested via BIGIQ"
+      supportType:
+        experimental: "This solution uses an experimental ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. \n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management."
+    config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
+    prereq_list:
+      - byol_note
+      - service_principal
+      - api_required
+      - cloud_env_support
+      - bigiq_prereq
+    config_note_list:
+      - bigip_version_note
+      - bigiq_payg_note
+      - master_election
+      - post_config
+      - config_backup
+      - bigiq_note
+      - image_note
+      - previous_versions
+      - standard_public_ip_sku_note
+      - availability_zone_support_note
+      - standard_alb_sku_note
+      - default_443_lb_rule_note
+  autoscale_ltm_dns:
+    title: 'AutoScale BIG-IP LTM - VM Scale Set (Frontend via DNS)'
+    intro: "This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. By virtue of a DNS request made by the client to the DNS provider, traffic will flow to the current BIG-IP VE (cluster) members directly which will then process traffic to the application servers, which allows you to deploy without using an Azure Load Balancer (ALB). The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. \n\nThe BIG-IP VE has the [Local Traffic Manager (LTM)](https://f5.com/products/big-ip/local-traffic-manager-ltm) module enabled to provide advanced traffic management functionality. This means you can also configure the BIG-IP VE to enable F5's L4/L7 security features, access control, and intelligent traffic management.\n\nYou have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment. This template uses BIGIP **public** management address when license is requested via BIGIQ. "
+    config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
+    prereq_list:
+      - byol_note
+      - service_principal
+      - api_required
+      - cloud_env_support
+      - dns_provider_required
+      - bigiq_prereq
+    config_note_list:
+      - bigip_version_note
+      - master_election
+      - post_config
+      - config_backup
+      - bigiq_note
+      - image_note
+      - previous_versions
+      - standard_public_ip_sku_note
+      - availability_zone_support_note
+      - default_443_lb_rule_note
+  autoscale_waf_lb:
+    title: 'Auto Scale BIG-IP WAF (LTM + ASM) - VM Scale Set (Frontend via ALB)'
+    intro:
+      default: "This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. \n\nIn this solution, the BIG-IP VEs have the [LTM](https://f5.com/products/big-ip/local-traffic-manager-ltm) and [ASM](https://f5.com/products/big-ip/application-security-manager-asm) modules enabled to provide advanced traffic management and web application security functionality. This template uses BIGIP **private** management address when license is requested via BIGIQ"
+      supportType:
+        experimental: "This solution uses an experimental ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. Traffic flows from the Azure load balancer to the BIG-IP VE (cluster) and then to the application servers. The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. \n\nIn this solution, the BIG-IP VEs have the [LTM](https://f5.com/products/big-ip/local-traffic-manager-ltm) and [ASM](https://f5.com/products/big-ip/application-security-manager-asm) modules enabled to provide advanced traffic management and web application security functionality."
+    config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
+    prereq_list:
+      - byol_note
+      - service_principal
+      - api_required
+      - cloud_env_support
+      - bigiq_prereq
+    config_note_list:
+      - bigip_version_note
+      - waf_changes
+      - bigiq_payg_note
+      - master_election
+      - post_config
+      - config_backup: 'After deploying the template, we recommend going to [this section](#backup-big-ip-configuration-for-cluster-recovery) to create and store a backup of your BIG-IP configuration.'
+      - asm_sync
+      - bigiq_note
+      - image_note
+      - previous_versions
+      - standard_public_ip_sku_note
+      - availability_zone_support_note
+      - standard_alb_sku_note
+  autoscale_waf_dns:
+    title: 'Auto Scale BIG-IP WAF (LTM + ASM) - VM Scale Set (Frontend via DNS)'
+    intro: "This solution uses an ARM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Microsoft Azure VM Scale Set that is configured for auto scaling. By virtue of a DNS request made by the client to the DNS provider (currently only BIG-IP DNS (formerly BIG-IP GTM) is supported), traffic will flow to the current BIG-IP VE (cluster) members directly which will then process traffic to the application servers, which allows you to deploy without using an Azure Load Balancer (ALB). The BIG-IP VE(s) are configured in single-NIC mode. Auto scaling means that as certain thresholds are reached, the number of BIG-IP VE instances automatically increases or decreases accordingly. \n\nIn this solution, the BIG-IP VEs have the [LTM](https://f5.com/products/big-ip/local-traffic-manager-ltm) and [ASM](https://f5.com/products/big-ip/application-security-manager-asm) modules enabled to provide advanced traffic management and web application security functionality.\n\nYou have the option of using a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) to license BIG-IP VEs using BYOL licenses in this auto scale deployment. This template uses BIGIP **public** management address when license is requested via BIGIQ"
+    config_ex_text: 'In this scenario, all access to the BIG-IP VE appliance is through an Azure Load Balancer. The Azure Load Balancer processes both management and data plane traffic into the BIG-IP VEs, which then distribute the traffic to web/application servers according to normal F5 patterns.'
+    prereq_list:
+      - byol_note
+      - service_principal
+      - api_required
+      - cloud_env_support
+      - bigiq_prereq
+    config_note_list:
+      - bigip_version_note
+      - waf_changes
+      - master_election
+      - post_config
+      - config_backup: 'After deploying the template, we recommend going to [this section](#backup-big-ip-configuration-for-cluster-recovery) to create and store a backup of your BIG-IP configuration.'
+      - asm_sync
+      - bigiq_note
+      - image_note
+      - previous_versions
+      - standard_public_ip_sku_note
+      - availability_zone_support_note
+  bigiq_standalone_2nic:
+    title: 'Standalone 2-NIC'
+    intro:
+      supportType:
+        experimental: "This solution uses an experimental ARM Template to launch a 2-NIC deployment of a [BIG-IQ](https://www.f5.com/products/automation-and-orchestration/big-iq) License Manager VE in an Microsoft Azure, using a BYOL (bring your own license) BIG-IQ License Manager License.\n\nIn a 2-NIC implementation, one interface is for public management and license requests from the Internet, and the second interface is connected into the internal or none public network were license requests can occur internally.\n\nYou can choose one or both of these types of license pools on your BIG-IQ devices for licensing your BIG-IP VE devices:\n- A License (Purchase) Pool, which can either be a registration key with a particular number of licenses, or an ELA/subscription pool, which enables self-licensing of BIG-IP virtual editions (VEs).\n- A Registration Key Pool, which is a pool of single standalone BIG-IP VE registration keys for one or more BIG-IP services. This enables the ability to revoke and reassign a license to BIG-IP VE systems without having to contact F5 to allow the license to be moved.\n\nSee the [BIG-IQ documentation](https://support.f5.com/kb/en-us/products/big-iq-centralized-mgmt/manuals/product/big-iq-centralized-management-device-6-0-1/04.html) for more information on these pool types."
+    prereq_list:
+      - bigiq_lm_standalone_note
+      - byol_note
+      - master_key_note
+  bigiq_cluster_2nic:
+    title: 'Cluster 2-NIC'
+    intro:
+      supportType:
+        experimental: "This solution uses an experimental ARM Template to launch and configure two BIG-IQ 2-NIC VEs in a clustered, hot-standby configuration, using BYOL (bring your own license) licensing.\n\nIIn a 2-NIC implementation, one interface is for management and one is for data-plane traffic, each with a unique public/private IP.\n\nYou can choose one or both of these types of license pools on your BIG-IQ devices for licensing your BIG-IP VE devices:\n- A License (Purchase) Pool, which can either be a registration key with a particular number of licenses, or an ELA/subscription pool, which enables self-licensing of BIG-IP virtual editions (VEs).\n- A Registration Key Pool, which is a pool of single standalone BIG-IP VE registration keys for one or more BIG-IP services. This enables the ability to revoke and reassign a license to BIG-IP VE systems without having to contact F5 to allow the license to be moved.\n\nSee the [BIG-IQ documentation](https://support.f5.com/kb/en-us/products/big-iq-centralized-mgmt/manuals/product/big-iq-centralized-management-device-6-0-1/04.html) for more information on these pool types."
+    prereq_list:
+      - managed_identity_note
+      - bigiq_lm_standalone_note
+      - byol_note
+      - master_key_note
+
+######################### Additional documentation items #########################
+note_text:
+  as_images:
+    default: 'This template requires the BIG-IP VE image(s) to be available in your Azure Stack environment.  The images can be added from the Azure marketplace, see the instructions [here](http://clouddocs.f5.com/cloud/public/v1/azure/Azure_stack.html).'
+    exclude:
+      environment:
+        - azureCloud
+  as_extension:
+    default: 'This template requires the *Custom Script for Linux 2.0* extension.  The custom script extension can be added from the Azure marketplace, see the Azure documentation [here](https://docs.microsoft.com/en-us/azure/azure-stack/asdk/asdk-marketplace-item) for more information.'
+    exclude:
+      environment:
+        - azureCloud
+  byol_note:
+    default: 'Since you are deploying the BYOL template, you must have a valid BIG-IP license token.'
+    exclude:
+      licenseType:
+        - payg
+        - bigiq
+        - bigiq-payg
+  service_principal: 'This template requires a service principal.  See the [Service Principal Setup section](#service-principal-authentication) for details, including required permissions.'
+  service_principal_update: 'See the [Update Secret](#updating-encrypted-files) section for details on how to update the service principal located in ***/config/cloud/.azCredentials** if it changes during the lifetime of the deployment.'
+  cfe_note: 'As of version 7.4.0.0, Azure ha via-api templates now make use of the Cloud Failover Extension. In order to successfully implement CFE in Azure, you need a managed identity with sufficient access. By default, this template will automatically create and assign a role the system-assigned managed identity to the BIG-IP virtual machines; the user creating the deployment **must** have permission to create a role assignment in Azure IAM. **NEW**: The solution now also supports specifying the name of a pre-existing user-assigned managed identity; when specified, the system-assigned managed identities and roleAssignments are **not** created. The user-assigned managed identity must be granted the Contributor role to both the deployment resource group and the existing virtual network resource group prior to deployment. See the Azure documentation for more information: [Assign access to an Azure managed identity](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/howto-assign-access-portal). Read more about Cloud Failover Extension on [CloudDocs](https://clouddocs.f5.com/products/extensions/f5-cloud-failover/latest/).'
+  enableIpForwarding: 'Address translation is done by enabling ip forwarding [Azure documentaion](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface#enable-or-disable-ip-forwarding)'
+  changingAddressAssigment: 'Using dynamic assignment for TMM interface is leveraged for initial deployment convenience and a requirement for some environments but not recommended in most production environments.  IP configs can be converted to static post deployment'
+  post_config: 'This template has some optional post-deployment configuration.  See the [Post-Deployment Configuration section](#post-deployment-configuration) for details.'
+  master_election: 'This template includes a master election feature, which ensures that if the existing master BIG-IP VE is unavailable, a new master is selected from the BIG-IP VEs in the cluster.'
+  config_backup: 'After deploying the template, if you make manual changes to the BIG-IP configuration, you should visit [this section](#backup-big-ip-configuration-for-cluster-recovery).'
+  nic_sizing: 'Because this template allows you to deploy a variable number of NICs, be sure to pick an Azure Virtual Machine instance size that can support the number of NICs you choose, otherwise the deployment will fail.  See the [Azure Instance Size link](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#size-tables) to determine the correct instance size to correspond with the number of NICs required. NOTE: This solution deploys three NICs plus a variable number of NICs as specified in the parameter **numberOfAdditionalNics**'
+  addtl_nic_config: 'This template may deploy additional NICs using the parameter **numberOfAdditionalNics**, if doing so it will preconfigure the BIG-IP VLAN(s) and place the interfaces into the corresponding VLAN based on the subnet name(s) provided in the parameter **additionalNicLocation**.  Be aware that after the template deploys, the BIG-IP self IP address(es) need to be created that correspond to the Azure IP Config object for that NIC.  You must also set the IP Config object to a **static** address instead of **dynamic** to ensure it does not change on reboot.'
+  previous_versions: 'Previous tagged releases can be used to reference functionality that has been changed or removed.'
+  in_place_upgrade: 'If you are using a failover via-API template and performing an in-place upgrade of BIG-IP v13.1.1 or later, you must follow the instructions in [Post-Deployment Configuration Steps](#post-deployment-configuration-steps)'
+  standard_public_ip_sku_note: 'All templates now deploy Standard SKU Azure Public IP Addresses.'
+  provision_public_ip_number_of_external_ips: 'If you choose "No" in response to the provisionPublicIP parameter, the choice for "numberOfExternalIps" is not honored and no public IP addresses are created.'
+  provision_public_ip_number_of_external_ips_via_lb:
+    default: 'The provisionPublicIp parameter controls creation of a public IP address on the BIG-IP management interface only. Please select a number between 1-20.'
+    exclude:
+      stackType:
+        - new-stack
+  availability_zone_support_note: 'All templates deploy Azure Virtual Machines and Virtual Machine Scale Sets into Availability Zones in supported regions; Availability Sets are still created in unsupported regions. Virtual Machine Scale Sets are distributed across zones 1, 2, and 3; failover Virtual Machines across zones 1 and 2. Standalone Virtual Machines are placed in zone 1 by default; however, you may select zone 1, 2, or 3 using the new zoneChoice parameter.'
+  standard_alb_sku_note:
+    default: 'All autoscale via-lb and failover via-lb templates now deploy Standard SKU Azure Load Balancers.'
+    exclude:
+      lb_method:
+        - api
+  default_443_lb_rule_note:
+    default: 'The autoscale LTM and failover-lb NIC templates create a default port 443 load balancing rule and probe at deployment time; this rule is necessary to download required cloud libraries to BIG-IP and may be deleted or modified following a successful deployment.'
+    exclude:
+      lb_method:
+        - api
+  persist_msg: 'Persistence and connection mirroring are now supported in this template.  It also supports mirroring of APM sessions.'
+  udr_tags: 'To indicate that the next hop of a user-defined route (UDR) should be updated during failover, you must configure each UDR''s parent route table resource with an Azure tag with the key name **f5_ha** and the value of **self_2nic** (this is the default self IP name created by the template; if necessary, this can be the name of a different self IP address onfigured on the the BIG-IP VE).  You must also create an Azure tag with the key **f5_tg** and value of **traffic-group-1** (or the name of a different traffic group you have configured on the BIG-IP VE).  For details, see [Customizing the Next Hop of Azure User-Defined Routes](#customizing-the-next-hop-of-azure-user-defined-routes).'
+  udr_update: 'When failover occurs, UDRs will be updated across multiple Azure subscriptions.'
+  asm_sync: '**Important**: After the template successfully deploys, you must log into one of the BIG-IP VEs to modify the Application Security Synchronization settings.  Log in to the BIG-IP VE, and then click **Security > Options > Synchronization > Application Security Synchronization**.  From the **Device Group** list, select **Sync**, and then click **Save**. This ensures any changes to the ASM security policy are synchronized to other devices in the cluster.'
+  tg_config: 'This template now supports associating Azure NIC IP configurations with up to two BIG-IP traffic groups, allowing each BIG-IP VE device to process traffic for applications associated with the traffic group for which the device is active.  See [Traffic Group Configuration](#traffic-group-configuration) for instructions.'
+  failover_log: 'The BIG-IP VE failover log can be found at **/var/log/restnoded/restnoded.log**.'
+  known_issues: 'When you deploy this failover template, you may receive an error due to existing error logs in failover.log (*Long running operation failed with error: An error occurred*).  This is a known issue and comes from the Microsoft Azure API when it takes longer than expected to send/retrieve requests.  The processes will complete despite these error messages.'
+  ha_addtl_nic: 'Adding additional NIC''s post-deployment is possible, it requires creating an additional NIC, powering off the VM and adding the network interface to the VM. See Microsoft documentation for more details on adding a NIC to an existing VM. **Important**: For failover to occur, each set of additional NIC''s created must be named exactly the same except for the last character, such as **additionalnic0** and **additionalnic1**.'
+  ha_failover: 'When configuring the template, you have the option of selecting 0 (zero) public IP addresses.  If you select 0 public IP addresses, the BIG-IP systems **will not** create any additional IP configurations on the Azure network interfaces; however, failover of UDR next hop is still supported.  If you create IP configurations post-deployment and would like them to failover, see the [Post-Deployment Configuration section](#post-deployment-configuration) for details.'
+  bigiq_prereq:
+    default: 'You must have a [BIG-IQ device](https://f5.com/products/big-iq-centralized-management) with a pool of BIG-IP BYOL licenses to use this template (see the PAYG and BYOL templates for other options). This solution supports the two most recent versions of BIG-IQ (see the [Version Matrix](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md) for specific versions), and your BIG-IQ system must have at least 2 NICs.'
+    exclude:
+      stackType:
+        - production-stack
+      licenseType:
+        - payg
+        - byol
+  bigiq_note:
+    default: "The templates now support BIG-IQ licensing using an [ELA](https://www.f5.com/pdf/licensing/big-ip-virtual-edition-enterprise-licensing-agreement-overview.pdf)/subscription pool, which enables self-licensing of BIG-IP virtual editions (VEs)."
+    exclude:
+      stackType:
+        - production-stack
+      licenseType:
+        - payg
+        - byol
+  api_required: 'This solution uses calls to the Azure REST API to read and update Azure resources such as storage accounts, network interfaces, and route tables.  For the solution to function correctly, you must ensure that the BIG-IP(s) can connect to the Azure REST API on port 443.'
+  cloud_env_support: 'This solution uses calls to the Azure REST API to read and update Azure resources, this has specifically been tested in Azure Commercial Cloud.  Additional cloud environments such as Azure Government, Azure Germany and Azure China cloud have not yet been tested.'
+  dns_provider_required: 'This solution uses a DNS provider instead of an Azure load Balancer for distribution of traffic.  The DNS provider **must** already exist prior to deployment. Currently ***only BIG-IP DNS is supported***.'
+  image_note:
+     default: '**NEW:**  Beginning with release 5.3.0.0, the BIG-IP image names have changed (previous options were Good, Better, and Best).  Now you choose a BIG-IP VE image based on whether you need [LTM](https://www.f5.com/products/big-ip-services/local-traffic-manager) only (name starts with **LTM**) or All modules (image name starts with **All**) available (including [WAF](https://www.f5.com/products/security/advanced-waf), [AFM](https://www.f5.com/products/security/advanced-firewall-manager), etc.), and if you need 1 or 2 boot locations.  Use 2 boot locations if you expect to upgrade the BIG-IP VE in the future. If you do not need room to upgrade (if you intend to create a new instance when a new version of BIG-IP VE is released), use an image with 1 boot location.  See this [Matrix](https://clouddocs.f5.com/cloud/public/v1/matrix.html#microsoft-azure) for recommended Azure instance types. See the Supported BIG-IP Versions table for the available options for different BIG-IP versions.'
+     exclude:
+      licenseType:
+        - payg
+  bigiq_payg_note:
+    default: '**NOTE:** This solution launches at least one BIG-IP VE with a BYOL (bring your own license) license, but then uses PAYG BIG-IP VEs when auto scale events occur.  The template relies on an existing BIG-IQ device with a pool of 1-4 BYOL licenses (you specify this number in the template).  But instead of scaling BYOL BIG-IP VE instances, up to 8 hourly BIG-IP VE LTM instances automatically instantiate to seamlessly handle the load (based on values you enter in the template). When traffic or CPU utilization decreases, the hourly BIG-IP VEs are automatically removed.'
+    exclude:
+      stackType:
+        - production-stack
+      licenseType:
+        - payg
+        - byol
+        - bigiq
+  bigiq_lm_standalone_note:
+    default: "The following are prerequisites and notes for the F5 2-NIC ARM Template:\n\n- Management subnet: the subnet for the management network requires a route and access to the Internet for the initial configuration to download the BIG-IP cloud library.\n- Internal subnet.\n"
+  master_key_note:
+    default: "The master-key (the passphrase used to establish trust between a future HA pair) for this deployment."
+  managed_identity_note:
+    default: "Before deploying this template, you must create a managed identity to allow BIG-IQ to migrate IP configurations to the network interface of the active device on failover.  You must also create a **Contributor** role assignment for this identity with a scope that includes the resource group where the existing stack virtual network is configured. When deploying the template, use the identity name from these examples for the **userAssignedIdentityName** input parameter.\n\nClick one of the following links for guidance on creating the managed identity:\n\t- [Azure Portal](#creating-a-managed-user-identity-from-the-azure-portal)\n\t- [Azure CLI](#creating-a-managed-user-identity-from-the-azure-cli)\n"
+  waf_changes:
+    default: 'Release v6.0.0.0 contains the following changes to the AutoScale WAF template: The **solutionDeploymentName** input is no longer required, the template no longer supports Azure App Service/App Service Environment, and the template no longer creates an L7 DoS profile'
+  provison_public_ip_app_note:
+    default: 'The provisionPublicIPApp parameter controls the creation of an external Azure load balancer targeting the external BIG-IP network interfaces.  When Yes is selected, a load balancer resource is created and one or more public IP addresses are assigned to its front end configuration.  The number of public IP addresses corresponds to the number specified in the numberOfExternalIps parameter.  When No is selected, the numberOfExternalIps choice is **ignored** and no external load balancer is deployed. When selecting No to provisionPublicIp and Yes to provisionPublicIpApp, an outbound load balancing rule is configured on the external load balancer to provide SNAT for connections to the Internet.  You may remove this rule once the template deployment has succeeded.'
+    exclude:
+      stackType:
+        - new-stack
+  provision_internal_load_balancer_note:
+    default: 'The provisionInternalLoadBalancer parameter controls the creation of an internal Azure load balancer targeting the internal BIG-IP network interfaces.  Selecting Yes deploys an internal load balancer with the HA Ports feature (all-protocol load balancing rule) enabled. NOTE: In order to download required libraries, the BIG-IP internal interfaces are not configured in the load balancer backend pool by default. You must update the load balancer configuration after deployment completes.'
+  bigip_version_note: 'All Azure ARM templates now allow you to deploy any public or private offer image from Azure marketplace. Specifying the offer URN in the customImageUrn parameter overrides the choices for bigIpVersion and imageName parameters. See the F5 Azure offer list here for a list of current offers: [Azure offer list](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-offer-list.yaml). NOTE: Not all versions of BIG-IP are supported with all templates. Check the supported versions matrix on each template README for a list of supported versions for that template.'
+
+help_text:
+  supported: 'Because this template has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K40701984).'
+  experimental: 'While this template has been created by F5 Networks, it is in the **experimental** directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory.'
+stack_type_text:
+  new-stack: 'This solution deploys into a new networking stack, which is created along with the solution.'
+  existing-stack: 'This template deploys into an existing networking stack; so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.'
+  production-stack: "This template deploys into an existing networking stack, so the networking infrastructure MUST be available prior to deploying. See the [Template Parameters Section](#template-parameters) for required networking objects.\n\nThis template differs from the *existing stack* template in that this template deploys without creating or attaching any public IP addresses to the BIG-IP VEs (note that outbound Internet access for the BIG-IP is still required).  This can be useful (or possibly required) in deployments where accessing resources does not require a public IP address on the BIG-IP VE, such as users connecting to internal applications using a VPN."
+  learning-stack: "This solution deploys into a new networking stack, which is created along with the solution.  This is a *learning stack*, which means that in addition to creating a new networking stack it also creates all of the appropriate configuration for an example web service."
+sp_access_text:
+  default: "The service principal account must have read permissions to the following objects and it is *recommended* to apply the built-in **Reader** role to the account being used. If applying a custom role, it must have at least *read* permissions to the following resources:\n\n- Microsoft.Compute/*\n- Microsoft.Network/*\n- Microsoft.Storage/*"
+  templateName:
+    failover-api_n-nic: "The service principal account must have read/write permissions to the following objects and it is *recommended* to apply the built-in **Contributor** role to the account being used. If applying a custom role, it must have *read/write* permissions to the following resources:\n\n- Microsoft.Network/*\n- Microsoft.Storage/*"
+license_text:
+  byol: ' (bring your own license): This allows you to use an existing BIG-IP license.'
+  payg: ': This allows you to use pay-as-you-go hourly billing.'
+  bigiq: ': This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s).'
+  bigiq-payg: ': This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s), as well as use PAYG instances.'
+license_map:
+  15.1.201000:
+    build: '15.1.2.1 Build 0.0.10'
+    bootLocations: 'Both One and Two Boot Location options are available'
+  14.1.300000:
+    build: '14.1.3 Build 0.0.8'
+    bootLocations: 'Both One and Two Boot Location options are available'
+  13.1.300000:
+    build: '13.1.3 Build 0.0.1'
+    bootLocations: 'Both One and Two Boot Location options are available'
+  12.1.303000:
+    build: '12.1.3.3 Build 0.0.1'
+    bootLocations: 'Only Two Boot Location options exist. Even if you select a One Boot Location in the template, Two Boot Locations are created'
+  latest:
+    build: 'This will select the latest BIG-IP version available'
+    bootLocations: 'Only Two Boot Location options exist. Even if you select a One Boot Location in the template, Two Boot Locations are created'
+  6.0.101000:
+    build: 'BIG-IQ 6.0.1'
+  6.1.000000:
+    build: 'BIG-IQ 6.1.0'
+
+# Parameter text used in the template parameters and then subsequently the README's
+parameter_list:
+  adminUsername: "User name for the Virtual Machine."
+  authenticationType: "Type of authentication to use on the Virtual Machine, password based authentication or key based authentication."
+  adminPasswordOrKey: "Password or SSH public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key-based authentication, this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**."
+  additionalNicLocation:
+    default: "This parameter specifies where the additional NICs go.  This value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. **Note**: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique."
+    templateName:
+      failover-api_n-nic: "This parameter specifies where the additional NICs go, use the default value of **OPTIONAL** if **0** was selected for the parameter **numberOfAdditionalNics**.  Otherwise this value must be a semi-colon delimited string of subnets, equal to the number of additional NICs being deployed.  For example, for 2 additional NICs you would use: **subnet01;subnet02**. **Note**: Ensure there are no spaces and the correct number of subnets are provided based on the value selected in **numberOfAdditionalNics**. **Important**: The subnet you provide for each additional NIC **must** be unique."
+  allowUsageAnalytics: "This deployment can send anonymous statistics to F5 to help us determine how to improve our solutions. If you select **No** statistics are not sent."
+  allowPhoneHome: "This deployment can provide F5 with high-level device use information to optimize development resources. If you select **No** the information is not sent."
+  appInsights: "Enter the name of your existing Application Insights environment that will be used to receive custom BIG-IP metrics you can use for Scale Set rules and device visibility. If the Application Insights environment is in a different Resource Group than this deployment, specify it as **app_insights_name;app_insights_rg**).  If you do not have an Application Insights environment, leave the default (CREATE_NEW) and the template will create one. Note: By default, the new Application Insights environment will be created in **East US**, if necessary you can specify a different region as **CREATE_NEW:app_insights_region**)."
+  applicationProtocols: "The protocol(s) used by your application."
+  applicationAddress: "The public IP address or DNS FQDN of the application that this WAF will protect."
+  applicationServiceFqdn: "If you are deploying in front of an Azure App Service, the FQDN of the public application."
+  applicationPort: "If you are deploying an HTTP application, the port on which your service listens for unencrypted traffic. This field is not required when deploying HTTPS only."
+  applicationSecurePort: "If you are deploying an HTTPS application, the port on which your service listens for encrypted traffic. This field is not required when deploying HTTP only."
+  applicationType: "Is your application running on a Linux OS or a Windows OS?"
+  avSetChoice: "If you want the VM placed in a new Azure Availability Set, leave the default value of **CREATE_NEW**, otherwise specify the name of the existing Availability Set you want to use. Note: If you are using an existing AV Set, this deployment must be in the same Azure Resource Group as the AV Set."
+  bigIpVersion: "F5 BIG-IP version you want to use. If not using **latest**, this version must match a version number of an image released to Azure marketplace."
+  bigIqAddress: "The IP address (or hostname) for the BIG-IQ to be used when licensing the BIG-IP.  Note: The BIG-IP will make a REST call to the BIG-IQ (already existing) to let it know a BIG-IP needs to be licensed. It will then license the BIG-IP using the provided BIG-IQ credentials and license pool."
+  bigIqUsername: "The BIG-IQ username to use during BIG-IP licensing via BIG-IQ."
+  bigIqPassword: "The BIG-IQ password to use during BIG-IP licensing via BIG-IQ."
+  bigIqLicensePoolName: "The BIG-IQ license pool to use during BIG-IP licensing via BIG-IQ."
+  bigIqLicenseSkuKeyword1: "The BIG-IQ license filter (based on SKU keyword) you want to use for licensing the BIG-IPs from the BIG-IQ, for example **F5-BIG-MSP-LTM-25M**, **F5-BIG-MSP-BR-200M**, **F5-BIG-MSP-BT-1G** or **F5-BIG-MSP-ASM-1G**. ***Important***: This is only required when licensing with an ELA/subscription (utility) pool on the BIG-IQ, if not using this pool type leave the default of **OPTIONAL**."
+  bigIqLicenseUnitOfMeasure: "The BIG-IQ license unit of measure to use during BIG-IP licensing via BIG-IQ, for example **yearly**, **monthly**, **daily** or **hourly**. ***Important***: This is only required when licensing with an ELA/subscription (utility) pool on the BIG-IQ, if not using this pool type leave the default of **OPTIONAL**."
+  blockingLevel: "Select how aggressive you want the blocking level of this WAF.  Remember that the more aggressive the blocking level, the more potential there is for false-positives the WAF might detect. Select **Custom** to specify your own security policy."
+  clientId: "Your Azure service principal application client ID."
+  customImage:
+    default: 'If you would like to deploy using a local BIG-IP image, provide either the full URL to the VHD in Azure storage **or** the full resource ID to an existing Microsoft.Compute image resource.  **Note**: Unless specifically required, leave the default of **OPTIONAL**. If specified, the values of bigIpVersion and customImageUrn are disregarded.'
+    environment:
+      azureStack: 'If you would like to deploy using a local BIG-IP image, provide the full URL to the VHD in Azure Stack storage. **Note**: Unless specifically required, leave the default of **OPTIONAL**.'
+  customPolicy: "Specify the publicly available URL of a custom ASM security policy in XML format. This policy will be applied in place of the standard High/Medium/Low policy."
+  declarationUrl: "URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.25.0/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration."
+  dnsLabel: "Unique DNS Name for the Public IP address used to access the Virtual Machine."
+  dnsMemberIpType: "The IP type to add as the record when updating the DNS provider."
+  dnsMemberPort: "The port for the DNS member to use for monitoring the members status."
+  dnsProviderHost: "The management IP address (or hostname) for the DNS provider to use when updating DNS."
+  dnsProviderPort: "The management port for the DNS provider to use when updating DNS."
+  dnsProviderUser: "The management username for the DNS provider to use when updating DNS."
+  dnsProviderPassword: "The management password for the DNS provider to use when updating DNS."
+  dnsProviderPool: "The GSLB pool on the BIG-IP DNS system to populate."
+  dnsProviderDataCenter: "The GSLB datacenter on the BIG-IP DNS system to use when creating GSLB server(s). Note: If the datacenter provided does not exist the template will create one with the value given."
+  enableNetworkFailover: "Enabling failover creates a traditional active/standby deployment with traffic groups and mirroring. When failover is disabled, all devices are active; use traffic group none."
+  provisionPublicIP: "Enabling management public IP(s) allows for direct public access to each BIG-IP VE that is created."
+  provisionPublicIPApp: "Enabling external application public IP(s) allows for public access via an Azure load balancer to each BIG-IP VE that is created."
+  externalSubnetName: "Name of the existing external subnet - with external access to Internet. **Important**: The subnet you provide for the external NIC **must** be unique."
+  externalIpSelfAddressRangeStart: "The static private IP address you want to assign to the external self IP (primary) of the first BIG-IP VE. The next contiguous address will be used for the second BIG-IP device."
+  externalIpAddressRangeStart:
+    default: "The static private IP address you want to assign to the first external Azure public IP (for self IP). An additional private IP address will be assigned for each public IP address you specified in **numberOfExternalIps**.  For example, entering 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 (self IP), 10.100.1.51 and 10.100.1.52 being configured as static private IP addresses for external virtual servers."
+    templateName:
+      failover-api_n-nic: 'The static private IP address (secondary) you would like to assign to the first shared Azure public IP. An additional private IP address will be assigned for each public IP address you specified in numberOfExternalIps.  For example, inputting 10.100.1.50 here and choosing 2 in numberOfExternalIps would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses for external virtual servers.'
+      failover-lb_3nic: 'The static private IP address (secondary) you would like to assign to the BIG-IP VE(s). The next contiguous address will be used for the second BIG-IP.  For example, inputting 10.100.1.50 here would result in 10.100.1.50 and 10.100.1.51 being configured as static private IP addresses.'
+  internalSubnetName: "Name of the existing internal subnet. **Important**: The subnet you provide for the internal NIC **must** be unique."
+  internalIpAddressRangeStart: "The static private IP address you would like to assign to the internal self IP of the first BIG-IP VE. The next contiguous address will be used for the second BIG-IP device."
+  internalIpAddress: "Internal subnet IP address you want to use for the BIG-IP internal self IP address."
+  provisionInternalLoadBalancer: "Specify Yes to deploy an Azure internal load balancer with HA Ports enabled. Internal BIG-IP network interfaces will be added to the load balancer backend pool."
+  internalLoadBalancerProbePort: "Specify a TCP port for the internal load balancer to monitor. If you specified DO_NOT_USE for internal load balancer type, this setting has no effect."
+  instanceName: "Name of the Virtual Machine."
+  instanceType: "Instance size of the Virtual Machine."
+  imageName:
+    default: "F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as **Best** instead of **Good**."
+    templateName:
+      byol: "F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****."
+      bigiq: "F5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****."
+  staticImageName:
+    default: "F5 SKU (image) for static BIG-IQ licensed BIG-IP's you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****."
+    templateName:
+      bigiq-payg: "F5 SKU (image) for static BIG-IQ licensed BIG-IP's you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****."
+  customImageUrn: "If you would like to deploy using a specific image in Azure marketplace, specify the URN of the image offer. **Note**: Unless specifically required, leave the default of **OPTIONAL**. If a URN is specified, the selections for bigIpVersion and imageName are disregarded. Example value: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:15.1.201000. You can find the URNs of F5 marketplace images in the README for this template or by running the command: az vm image list --output yaml --publisher f5-networks --all"
+  licenseKey1: "The license token for the F5 BIG-IP VE (BYOL)."
+  licenseKey2: "The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices."
+  licensedBandwidth: "The amount of licensed bandwidth (Mbps) you want the PAYG image to use."
+  ntpServer: "Leave the default NTP server the BIG-IP uses, or replace the default NTP server with the one you want to use."
+  numberOfExternalIps: "The number of public/private IP addresses you want to deploy for the application traffic (external) NIC on the BIG-IP VE to be used for virtual servers."
+  mgmtSubnetName: "Name of the existing mgmt subnet - with external access to the Internet. **Important**: The subnet you provide for the mgmt NIC **must** be unique."
+  mgmtIpAddressRangeStart: "The static private IP address you want to assign to the management self IP of the first BIG-IP. The next contiguous address will be used for the second BIG-IP device. Select DYNAMIC to use a dynamically assigned private IP address; in new stack deployments, the vnetAddressPrefix parameter is ignored."
+  mgmtIpAddress: "MGMT subnet IP Address to use for the BIG-IP management IP address. Select DYNAMIC to use a dynamically assigned private IP address; in new stack deployments, the vnetAddressPrefix parameter is ignored."
+  notificationEmail: "If you want email notifications on scale events, specify an email address, otherwise leave the parameter as **OPTIONAL**. Note: You can specify multiple emails by separating them with a semi-colon, such as *email@domain.com;email2@domain.com*."
+  numberOfAdditionalNics:
+    default: "By default this solution deploys the BIG-IP in a 3 NIC configuration, however it will also add a configurable number of additional NICs to the BIG-IP using this parameter."
+    templateName:
+      failover-api_n-nic: 'By default this solution deploys the BIG-IP(s) in a 3 NIC configuration, however additional NICs can be added to the BIG-IP(s) using this parameter.  **Note**: The default value is 0, additional NICs will only be created if 1 or higher is specified.'
+  numberOfInstances: "The number of BIG-IP VEs that will be deployed in front of your application(s)."
+  numberOfStaticInstances: "The number of static BYOL BIG-IP VEs that will be deployed in this solution."
+  restrictedSrcAddress: 'This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources'
+  scaleOutCpuThreshold: "The percentage of CPU utilization that should trigger a scale out event."
+  scaleInCpuThreshold: "The percentage of CPU utilization that should trigger a scale in event."
+  scaleOutThroughputThreshold: "The amount of throughput (**bytes**) that should trigger a scale out event. Note: The default value is equal to 20 MB"
+  scaleInThroughputThreshold: "The amount of throughput (**bytes**) that should trigger a scale in event. Note: The default value is equal to 10 MB"
+  scaleOutTimeWindow: "The time window required to trigger a scale out event. This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). **Note:** Allowed values are 1-60 (minutes)."
+  scaleInTimeWindow: "The time window required to trigger a scale in event. This is used to determine the amount of time needed for a threshold to be breached, as well as to prevent excessive scaling events (flapping). **Note:** Allowed values are 1-60 (minutes)."
+  servicePrincipalSecret: "Your Azure service principal application secret."
+  solutionDeploymentName: "A unique name for this deployment."
+  sslCert: "The SSL certificate .pfx file corresponding to the virtual server."
+  sslPswd: "The SSL certificate .pfx password corresponding to the certificate you entered."
+  tagValues: "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."
+  tenantId: "Your Azure service principal application tenant ID."
+  timeZone: "If you would like to change the time zone the BIG-IP uses, enter the time zone you want to use. This is based on the tz database found in /usr/share/zoneinfo (see the full list [here](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-timezone-list.md)). Example values: UTC, US/Pacific, US/Eastern, Europe/London or Asia/Singapore."
+  uniqueLabel: "Unique Name for the deployment to be used when creating resources."
+  userAssignedManagedIdentity: "The name of the pre-existing user-assigned managed identity in the resource group where the template will be deployed, if applicable.  This identity will be configured on the virtual machine resources and must have the Contributor role assigned on both the deployment and virtual network resource groups.  Leaving the default of **NOT_SPECIFIED** triggers the creation of a system-assigned managed identity."
+  vmScaleSetMinCount: "The minimum (and default) number of BIG-IP VEs that will be deployed into the VM Scale Set."
+  vmScaleSetMaxCount: "The maximum number of BIG-IP VEs that can be deployed into the VM Scale Set."
+  vnetAddressPrefix: "The start of the CIDR block the BIG-IP VEs use when creating the Vnet and subnets.  You MUST type just the first two octets of the /16 virtual network that will be created, for example '10.0', '10.100', 192.168'."
+  vnetName: "The name of the existing virtual network to which you want to connect the BIG-IP VEs."
+  vnetResourceGroupName: "The name of the resource group that contains the Virtual Network where the BIG-IP VE will be placed."

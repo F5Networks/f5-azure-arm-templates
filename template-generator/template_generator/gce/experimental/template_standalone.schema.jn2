@@ -1,0 +1,52 @@
+# Copyright 2019 F5 Networks All rights reserved.
+
+info:
+  title: F5 BIG-IP 1NIC
+  author: F5 Networks
+  description: Creates a BIG-IP with 1 network interface(s).
+  version: 2.1.2
+imports:
+  - path: f5-full-stack-byol-1nic-bigip.py
+required:
+    - availabilityZone1
+    - licenseKey1
+    - imageName
+    - instanceType
+    - manGuiPort
+    - allowUsageAnalytics
+    - declarationUrl
+    - bigIpModules
+properties:
+  availabilityZone1:
+    description: Enter the availability zone where you want to deploy the BIG-IP VE instance, for example 'us-west1-a'.
+    type: string
+  imageName:
+    description: Enter the BIG-IP image name
+    type: string
+  instanceType:
+    description: Instance type assigned to the BIG-IP, for example 'n1-standard-4'.
+    type: string
+  manGuiPort:
+    description: Enter the BIG-IP Management Port, the default is '8443'.
+    type: integer
+    default: 8443
+  bigIpModules:
+    description: Enter a comma-separated list of modules and provisioning level, for example 'ltm:nominal' or 'ltm:nominal,asm:nominal'.
+    type: string
+    default: ltm:nominal
+  allowUsageAnalytics:
+    description: This deployment can send anonymous statistics to F5 to help us determine how to improve our solutions. If you enter **no** statistics are not sent.
+    type: boolean
+    default: yes
+  logLevel:
+    description: Log setting, used to set log level on scripts used during deployment. Acceptable values are - error, warn, info, verbose, debug, silly. The default is 'info'.
+    type: string
+    default: info
+  declarationUrl:
+    description: URL for the AS3 declaration JSON file to be deployed. If left at **default**, the recommended F5 WAF configuration will be applied. Enter **none** to deploy without a service configuration. For example, ' https://cdn.f5.com/product/cloudsolutions/declarations/sample_01.json '
+    type: string
+    default: default
+documentation:
+  - README.md
+examples:
+  - f5-existing-stack-byol-3nic-bigip.yaml

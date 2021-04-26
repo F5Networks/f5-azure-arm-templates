@@ -1,0 +1,43 @@
+{% set version = latest_content_version %}
+{% set copyright = "2019" %}
+{%- set images_list %}
+  {%- if license_type == "payg" -%}
+    # f5-bigip-15-1-2-1-0-0-10-payg-best-10gbps-210115161130   
+    # f5-bigip-15-1-2-1-0-0-10-payg-best-1gbps-210115161130    
+    # f5-bigip-15-1-2-1-0-0-10-payg-best-200mbps-210115161130  
+    # f5-bigip-15-1-2-1-0-0-10-payg-best-25mbps-210115161130   
+    # f5-bigip-15-1-2-1-0-0-10-payg-best-5gbps-210115161130  
+     {%- if type == "autoscale" and solution == "waf" %}
+      # # f5-bigip-15-1-2-1-0-0-10-payg-hp-ltm-16vcpu-210115160742 
+      # f5-bigip-15-1-2-1-0-0-10-payg-awf-plus-200mbps-210115161130
+      # f5-bigip-15-1-2-1-0-0-10-payg-awf-plus-25mbps-210115161130
+      # f5-bigip-15-1-2-1-0-0-10-payg-awf-plus-3gbps-210115161130
+     {%- else %}
+      # f5-bigip-15-1-2-1-0-0-10-payg-better-10gbps-210115161130 
+      # f5-bigip-15-1-2-1-0-0-10-payg-better-1gbps-210115161130  
+      # f5-bigip-15-1-2-1-0-0-10-payg-better-200mbps-210115161130
+      # f5-bigip-15-1-2-1-0-0-10-payg-better-25mbps-210115161130 
+      # f5-bigip-15-1-2-1-0-0-10-payg-better-5gbps-210115161130 
+      # f5-bigip-15-1-2-1-0-0-10-payg-good-10gbps-210115160742   
+      # f5-bigip-15-1-2-1-0-0-10-payg-good-1gbps-210115160742    
+      # f5-bigip-15-1-2-1-0-0-10-payg-good-200mbps-210115160742  
+      # f5-bigip-15-1-2-1-0-0-10-payg-good-25mbps-210115160742   
+      # f5-bigip-15-1-2-1-0-0-10-payg-good-5gbps-210115160742    
+      # f5-bigip-15-1-2-1-0-0-10-payg-hp-ltm-16vcpu-210115160742 
+      # f5-bigip-15-1-2-1-0-0-10-payg-pve-awf-plus-200mbps-10115161026
+      # f5-bigip-15-1-2-1-0-0-10-payg-pve-awf-plus-25mbps-210115161026
+      # f5-bigip-15-1-2-1-0-0-10-payg-pve-ltm-200mbps-210115160621
+      # f5-bigip-15-1-2-1-0-0-10-payg-pve-ltm-25mbps-210115160621
+     {%- endif %}
+   {%- else %}
+    # f5-bigip-15-1-2-1-0-0-10-byol-all-modules-1boot-loc-0115161026
+    # f5-bigip-15-1-2-1-0-0-10-byol-all-modules-2boot-loc-0115161130
+    # f5-bigip-15-1-2-1-0-0-10-byol-ltm-1boot-loc-210115160621 
+    # f5-bigip-15-1-2-1-0-0-10-byol-ltm-2boot-loc-210115160742 
+   {%- endif %}
+{%- endset %}
+{%- set images_list_default %}
+  {%- if license_type == "payg" -%}f5-bigip-15-1-2-1-0-0-10-payg-best-25mbps-210115161130
+   {%- else %}f5-bigip-15-1-2-1-0-0-10-byol-all-modules-2boot-loc-0115161130
+   {%- endif %}
+{%- endset %}

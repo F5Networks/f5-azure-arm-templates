@@ -1,0 +1,49 @@
+{% import 'constants.json'  as constants with context %}
+{% import 'license.json'  as license with context %}
+{#- ##### Compute VM Scale Set(s) ##### -#}
+{%- set addtl_script_args -%}
+  {%- if type == 'autoscale' and solution in ('waf', 'ltm') and lb_method == 'dns' -%}
+    , ' --dnsOptions \\\"--dns gtm --dns-ip-type ', parameters('dnsMemberIpType'), ' --dns-app-port ', parameters('dnsMemberPort'), ' --dns-provider-options host:', parameters('dnsProviderHost'), ',port:', parameters('dnsProviderPort'), ',user:', parameters('dnsProviderUser'), ',passwordUrl:file:///config/cloud/.dnsPasswd,passwordEncrypted:true,serverName:', variables('vmssName'), ',poolName:', parameters('dnsProviderPool'), ',datacenter:', parameters('dnsProviderDataCenter'), '\\\"'
+  {%- endif -%}
+  {%-if  type == 'autoscale' and solution in ('ltm', 'waf')  and lb_method in ('via-lb', 'dns') -%}
+ {#- Add TMM CPU metric option into autoscale templates - pass key into autoscale.sh -#}
+    , ' --appScriptArgs \\\"', variables('commandArgs'), '\\\"', ' --appInsightsKey ', reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsComponentsApiVersion')).InstrumentationKey
+  {%- endif -%}
+{%- endset -%}
+
+{% set addtl_encrypt_calls = "/usr/bin/install -m 400 /dev/null /config/cloud/.dnsPasswd; encrypt_secret ', variables('singleQuote'), parameters('dnsProviderPassword'), variables('singleQuote'), ' \"/config/cloud/.dnsPasswd\";".replace("\"", "\\\"") %}
+{% set addtl_setup = "cp asm-policy.tar.gz *.tmpl /config/cloud; tar xfz /config/cloud/asm-policy.tar.gz -C /config/cloud;" %}
+
+{%if  type == "autoscale" and solution in ('ltm', 'waf')  and lb_method in ('via-lb', 'dns') %}
+    {# Add TMM CPU metric option into autoscale templates - pass key into autoscale.sh #}
+        {%- set post_cmd_to_execute -%}, '; if [[ $? == 0 ]]; then {% if type == 'autoscale' and solution == 'waf' %}tmsh modify cm device-group Sync asm-sync enabled; {% endif %}tmsh list sys application service;{{" "}}
+            {%- if type != 'autoscale' -%}
+            {{ constants.bigiq_pwd_delete }}
+            {%- endif -%}
+        bash /config/customConfig.sh; reboot_signal=\"/tmp/f5-cloud-libs-signals/REBOOT_REQUIRED\"; if [ -f $reboot_signal ]; then echo \"Reboot signaled by cloud libs, rebooting\"; rm -f $reboot_signal; reboot; else echo \"Cloud libs did not signal a reboot\"; fi; $(cp_logs); else $(cp_logs); exit 1; fi'{{ constants.waagent_restart_cmd }}
+        {%- endset -%}
+{% endif %}
+
+{%- set scale_script_call -%}
+/usr/bin/f5-rest-node $CLOUD_LIB_DIR/f5-cloud-libs/scripts/runScript.js --output /var/log/cloud/azure/autoscale.log --log-level info --file $CLOUD_LIB_DIR/f5-cloud-libs-azure/scripts/autoscale.sh --shell /bin/bash --cl-args \"--deploymentType {{solution}} --logLevel info --backupUcs 7 --resourceGroup ', resourceGroup().name, ' --vmssName ', variables('vmssName'), ' --userName svc_user --password /config/cloud/.passwd --azureSecretFile /config/cloud/.azCredentials --managementPort ', variables('bigIpMgmtPort'), ' --ntpServer ', parameters('ntpServer'), ' --autoscaleTimeout ', parameters('autoscaleTimeout'), ' --as3Build ', variables('f5AS3Build'), ' --timeZone ', parameters('timeZone'), ' --bigIpModules ', parameters('bigIpModules'), variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].metricsCmd{{ addtl_script_args }}
+ {%- endset -%}
+
+{%- macro autoscale_command_to_execute(vm) -%}
+    [concat('function cp_logs() { cd /var/lib/waagent/custom-script/download && cp `ls -r | head -1`/std* /var/log/cloud/azure; cd /var/log/cloud/azure && cat stdout stderr > install.log; }; CLOUD_LIB_DIR=/config/cloud/azure/node_modules/@f5devcentral; mkdir -p $CLOUD_LIB_DIR; mkdir -p /var/log/cloud/azure; /usr/bin/setdb provision.extramb 1000; /usr/bin/setdb restjavad.useextramb true; /usr/bin/curl -s -f -u admin: -H \"Content-Type: application/json\" -d ', variables('singleQuote'), '{\"maxMessageBodySize\":134217728} ', variables('singleQuote'), ' -X POST http://localhost:8100/mgmt/shared/server/messaging/settings/8100 | jq .;
+    {%- if solution  == 'waf' -%}
+    {{" "~addtl_setup}}
+    {%- endif -%}
+    {{" "}}echo ', variables('appScript'), ' | /usr/bin/base64 -d > /config/cloud/deploy_app.sh; chmod +x /config/cloud/deploy_app.sh; /usr/bin/install -m 400 /dev/null /config/cloud/.passwd; /usr/bin/install -m 400 /dev/null /config/cloud/.azCredentials; cp f5-cloud-libs*.tar.gz* /config/cloud; mkdir -p /var/config/rest/downloads && cp ', variables('f5AS3Build'), ' /var/config/rest/downloads; /usr/bin/install -b -m 755 /dev/null /config/verifyHash; /usr/bin/install -b -m 755 /dev/null /config/installCloudLibs.sh; echo -e ', variables('verifyHash'), ' >> /config/verifyHash; echo -e ', variables('installCloudLibs'), ' >> /config/installCloudLibs.sh; echo -e ', variables('installCustomConfig'), ' >> /config/customConfig.sh; bash /config/installCloudLibs.sh; source $CLOUD_LIB_DIR/f5-cloud-libs/scripts/util.sh; encrypt_secret ', variables('singleQuote'), '{\"clientId\": \"', parameters('clientId'), '\", \"tenantId\": \"', parameters('tenantId'), '\", \"secret\": \"', parameters('servicePrincipalSecret'), '\", \"subscriptionId\": \"', variables('subscriptionID'), '\", \"storageAccount\": \"', variables('newDataStorageAccountName'), '\", \"storageKey\": \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newDataStorageAccountName')), variables('storageApiVersion')).keys[0].value, '\", \"vmssName\": \"', variables('vmssName'), '\", \"resourceGroupName\": \"', variables('resourceGroupName'), '\", \"loadBalancerName\": \"', variables('externalLoadBalancerName'), '\", \"appInsightsName\": \"', variables('appInsightsName'), '\", \"appInsightsId\": \"', reference(resourceId(variables('appInsightsNameArray')[1], 'Microsoft.Insights/components', variables('appInsightsNameArray')[0]), variables('appInsightsComponentsApiVersion')).AppId, '\", \"location\": \"', variables('location'), '\"}', variables('singleQuote'), ' \"/config/cloud/.azCredentials\" \"\" true; encrypt_secret ', variables('singleQuote'), variables('adminPasswordOrKey'), variables('singleQuote'), ' \"/config/cloud/.passwd\" true; $CLOUD_LIB_DIR/f5-cloud-libs/scripts/createUser.sh --user svc_user --password-file /config/cloud/.passwd --password-encrypted;
+    {%- if license_type == 'bigiq' or license_type == 'bigiq-payg' -%}
+        {{" "~constants.big_iq_pwd_cmd}}
+    {%- endif -%}
+    {%- if lb_method == 'dns' -%}
+        {{" "~addtl_encrypt_calls}}
+    {%- endif -%}
+    {{" "}}', variables('allowUsageAnalytics')[parameters('allowUsageAnalytics')].hashCmd, '; tmsh modify sys software update auto-phonehome ', variables('allowPhoneHome'), '; {{ scale_script_call }}
+    {%- if vm == 1 -%}
+        {{ license.static_license1_command }}
+    {%- else -%}
+        {{ license.license1_command(vm) }}
+  {%- endif -%}, '\" --signal AUTOSCALE_SCRIPT_DONE'{{ post_cmd_to_execute }})]
+{%- endmacro -%}

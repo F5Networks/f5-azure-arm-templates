@@ -1,0 +1,145 @@
+{%- import 'constants.jn2'  as constants with context -%}
+# Copyright {{ constants.copyright }} F5 Networks All rights reserved.
+
+info:
+  title: F5 BIG-IP {{nics}}NIC
+  author: F5 Networks
+  description: Creates a BIG-IP with {{nics}} network interface(s).
+  version: {{ constants.version }}
+imports:
+  - path: f5-{{stack}}-{{net}}{{license_type}}-{{nics}}nic-bigip.py
+required:
+  - region
+  - availabilityZone1
+  - allowUsageAnalytics
+  - mgmtNetwork
+  - mgmtSubnet
+  - restrictedSrcAddress
+  - restrictedSrcAddressApp
+{%- set nics_count = nics | int %}
+{%- for i in range(nics_count-1) %}
+  - network{{i+1}}
+  - subnet{{i+1}}
+{%- endfor %}
+  - provisionPublicIP
+  - imageName
+  - instanceType
+{%- if license_type == "byol"%}
+  - licenseKey1
+{%- endif %}
+  - declarationUrl
+properties:
+  region:
+    description: Enter the Google Region in which you want to deploy BIG-IP, for example 'us-west1'.
+    type: string
+  availabilityZone1:
+    description: Enter the Google availability zone where you want to deploy the BIG-IP VE instance, for example 'us-west1-a'.
+    type: string
+  mgmtNetwork:
+    description: Specify the name of the network to use for management traffic, for example 'my-management-network'.
+    type: string
+{%- if nics == "1"%}
+  mgmtSharedVpc:
+    description: If using a shared VPC, specify the name of the host project to use for management traffic. Leave default value of None when not using shared VPC. **Note** template does not create firewall policy for shared VPC. Create policy on shared VPC within in host project to allow appropriate traffic.
+    type: string
+    default: None
+{%- endif %}
+  mgmtSubnet:
+    description: Specify the name of the subnet to use for management traffic, for example 'my-management-subnetwork'.
+    type: string
+  mgmtSubnetAddress:
+    description: (Optional) Enter the static IP address to use. Note - For dynamic address provisioning use the default value of 'DYNAMIC'. For example, '10.0.1.100'.
+    type: string
+    default: DYNAMIC
+  restrictedSrcAddress:
+    description: This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation separated by a space. For example, '10.0.11.0/24'.
+    type: string
+  restrictedSrcAddressApp:
+    description: This field restricts web application access (ports 80 and 443) to a specific network or address. Enter an IP address or address range in CIDR notation separated by a space. For example, '10.0.11.0/24'.
+    type: string
+{%- set nics_count = nics | int %}
+{%- for i in range(nics_count-1) %}
+  network{{i+1}}:
+    description: Specify the network name for BIG-IP application traffic, for example 'my-application-network'.
+    type: string
+  {%- if i == 0%}
+  network{{i+1}}SharedVpc:
+    description: If using a shared VPC, specify the name of the host project to use for management traffic. Leave default value of None when not using shared VPC. **Note** template does not create firewall policy for shared VPC. Create policy on shared VPC within in host project to allow appropriate traffic.
+    type: string
+    default: None
+  {%- endif %}
+  subnet{{i+1}}:
+    description: Specify the subnet of the network that the BIG-IP should use for application traffic, for example 'my-application-subnetwork'.
+    type: string
+  subnet{{i+1}}Address:
+    description: Enter the Static IP address to use, for example, '10.0.2.100'. Note - For dynamic address provisioning use the default value of 'DYNAMIC'.
+    type: string
+    default: DYNAMIC
+{%- endfor %}
+  provisionPublicIP:
+    description: Provision Public IP addresses for BIG-IP Network Interfaces. By default it is set to provision public IPs.
+    type: [string, boolean]
+    default: 'yes'
+{%- if license_type == "byol"%}
+  imageName:
+    description: Enter the BIG-IP image name.
+    type: string
+{%- else %}
+  imageName:
+    description: Enter the BIG-IP image name.
+    type: string
+{%- endif %}
+  instanceType:
+    description: Instance type assigned to BIG-IP, for example 'n1-standard-4'.
+    type: string
+{%- if nics == "1"%}
+  mgmtGuiPort:
+    description: Enter the BIG-IP Management Port.
+    type: integer
+    default: 8443
+{%- else %}
+  mgmtGuiPort:
+    description: Enter the BIG-IP Management Port, the default is '443'.
+    type: integer
+    default: 443
+{%- endif %}
+  applicationPort:
+    description: List application port(s) separated by a space, for example '443' or '443 444 445'.
+    default: 80 443
+{%- if license_type == "byol"%}
+  licenseKey1:
+    description: Enter the BIG-IP license key. For example, 'CTASW-GVZHE-FYVIM-XMOUP-SJSTBXX'.
+    type: string
+{%- endif %}
+  ntpServer:
+    description: (Optional) List NTP servers separated by a space, for example 'pool.ntp.org'. The default is 'time.google.com'.
+    type: string
+    default: time.google.com
+  timezone:
+    description: (Optional) Enter the Olson timezone string from /usr/share/zoneinfo. The default is 'UTC'. See the TZ column here (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for legal values. For example, 'US/Eastern'.
+    type: string
+    default: UTC
+  bigIpModules:
+    description: Enter a comma-separated list of modules and provisioning level, for example 'ltm:nominal' or 'ltm:nominal,asm:nominal'.
+    type: string
+    default: ltm:nominal
+  allowUsageAnalytics:
+    description: This deployment can send anonymous statistics to F5 to help us determine how to improve our solutions. If you enter **no** statistics are not sent.
+    type: [string, boolean]
+    default: 'yes'
+  allowPhoneHome:
+    description: This deployment can provide F5 with high-level device use information to optimize development resources. If you select **no** the information is not sent.
+    type: [string, boolean]
+    default: 'yes'
+  logLevel:
+    description: (Optional) Log setting, used to set log level on scripts used during deployment. Acceptable values are - error, warn, info, verbose, debug, silly. The default is 'info'.
+    type: string
+    default: info
+  declarationUrl:
+    description: URL for the AS3 declaration JSON file to be deployed. If left at **default**, the recommended F5 WAF configuration will be applied. Enter **none** to deploy without a service configuration. For example, ' https://cdn.f5.com/product/cloudsolutions/declarations/sample_01.json '
+    type: string
+    default: default
+documentation:
+  - README.md
+examples:
+  - f5-{{stack}}-{{license_type}}-{{nics}}nic-bigip.yaml
