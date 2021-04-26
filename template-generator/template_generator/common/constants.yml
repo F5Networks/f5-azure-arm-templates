@@ -1,0 +1,34 @@
+repo_dependencies:
+    f5_cloud_libs:
+        repo_name: 'F5Networks/f5-cloud-libs'
+        version: 'v4.24.0'
+    f5_cloud_libs_azure:
+        repo_name: 'F5Networks/f5-cloud-libs-azure'
+        version: 'v2.16.0'
+    f5_cloud_libs_aws:
+        repo_name: 'F5Networks/f5-cloud-libs-aws'
+        version: 'v2.9.1'
+    f5_cloud_libs_gce:
+        repo_name: 'F5Networks/f5-cloud-libs-gce'
+        version: 'v2.8.0'
+    f5_cloud_iapps:
+        repo_name: 'F5Networks/f5-cloud-iapps'
+        version: 'v2.3.2'
+    f5_appsvcs_extension:
+        repo_name: 'F5Networks/f5-appsvcs-extension'
+        version: 'v3.25.0'
+        builds:
+            lts: 'f5-appsvcs-3.25.0-3.noarch.rpm'
+    f5_cfe_extension:
+        repo_name: 'F5Networks/f5-cloud-failover-extension'
+        version: 'v1.7.1'
+        builds:
+            latest: 'f5-cloud-failover-1.7.1-1.noarch.rpm'
+repo_metadata:
+    azure:
+        version: '9.4.0.0'
+    azureStack:
+        version: '1.3.0.0'
+    gce:
+        version: '3.11.1'
+comment_out_verify: ''

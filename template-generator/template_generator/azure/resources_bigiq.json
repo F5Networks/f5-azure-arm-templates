@@ -1,0 +1,520 @@
+{%- import 'constants.json'  as constants with context -%}
+
+{#- Public IP addresses -#}
+{%- macro get_public_ip_address_name(idx) %}
+{%- if idx < 2 -%}
+"[concat(variables('mgmtPublicIPAddressName'), '{{ idx }}')]",
+{%- else -%}
+"[concat(variables('intSelfPublicIpAddressNamePrefix'), '{{ idx - 2 }}')]",
+{%- endif -%}
+{%- endmacro -%}
+{%- set public_ip_addrs = (0, 1, 2, 3) -%}
+{%- if bigiq_solution == 'standalone' -%}
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[variables('mgmtPublicIPAddressName')]",
+            "properties": {
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('dnsLabel')]"
+                },
+                "idleTimeoutInMinutes": 30,
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/publicIPAddresses"
+        },
+{%- else -%}
+    {%- for idx in public_ip_addrs %}
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[variables('location')]",
+            "name": {{ get_public_ip_address_name(idx) }}
+            "properties": {
+            {%- if idx < 2 %}
+                "dnsSettings": {
+                    "domainNameLabel": "[concat(variables('dnsLabel'), '-{{ idx }}')]"
+                },
+            {% endif %}
+                "idleTimeoutInMinutes": 30,
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/publicIPAddresses"
+        },
+    {%- endfor %}
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "condition": "[not(equals(variables('numberOfInternalIps'),0))]",
+            "copy": {
+                "count": "[if(not(equals(variables('numberOfInternalIps'), 0)), variables('numberOfInternalIps'), 1)]",
+                "name": "intpipcopy"
+            },
+            "location": "[variables('location')]",
+            "name": "[concat(variables('intPublicIPAddressNamePrefix'), copyIndex())]",
+            "properties": {
+                "dnsSettings": {
+                    "domainNameLabel": "[concat(variables('dnsLabel'), copyIndex(0))]"
+                },
+                "idleTimeoutInMinutes": 30,
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+            },
+            "tags": "[variables('vipTagValues')]",
+            "type": "Microsoft.Network/publicIPAddresses"
+        },
+    {%- if stack == 'new-stack' %}
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[variables('virtualNetworkName')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('vnetAddressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('mgmtSubnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('mgmtSubnetPrefix')]"
+                        }
+                    },
+                    {
+                        "name": "[variables('intSubnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('intSubnetPrefix')]"
+                        }
+                    }
+                ]
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/virtualNetworks"
+        },
+    {%- endif %}
+{%- endif -%}
+{#- Network interfaces -#}
+{%- set num_vms = (0, 1) -%}
+{%- macro get_private_ip_addr(vm, type) %}
+{%- if vm == 0 -%}
+    {%- if type == 'self' -%}
+        "[variables('intSubnetPrivateAddress')]",
+    {%- elif type == 'int' -%}
+        "[variables('intSubnetPrivateAddress2')]",
+    {%- endif -%}
+{%- elif vm == 1 -%}
+    {%- if type == 'self' -%}
+        "[variables('intSubnetPrivateAddress1')]",
+    {%- elif type == 'int' -%}
+        "[variables('intSubnetPrivateAddress3')]",
+    {%- endif -%}
+{%- endif -%}
+{%- endmacro -%}
+{%- if bigiq_solution == 'standalone' -%}
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "dependsOn": [
+                "[variables('mgmtPublicIPAddressId')]",
+                "[variables('mgmtNsgID')]"
+            ],
+            "location": "[variables('location')]",
+            "name": "[variables('mgmtNicName')]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "[concat(variables('instanceName'), '-ipconfig1')]",
+                        "properties": {
+                            "PublicIpAddress": {
+                                "Id": "[variables('mgmtPublicIPAddressId')]"
+                            },
+                            "privateIPAddress": "[variables('mgmtSubnetPrivateAddress')]",
+                            "privateIPAllocationMethod": "Static",
+                            "subnet": {
+                                "id": "[variables('mgmtSubnetId')]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[variables('mgmtNsgID')]"
+                }
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/networkInterfaces"
+        },
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "dependsOn": [
+                "[variables('intNsgID')]"
+            ],
+            "location": "[variables('location')]",
+            "name": "[variables('intNicName')]",
+            "properties": {
+                "copy": [
+                    {
+                        "count": "[add(variables('numberOfInternalIps'), 1)]",
+                        "input": {
+                            "name": "[if(equals(copyIndex('ipConfigurations', 1), 1), concat(variables('instanceName'), '-self-ipconfig'), concat(variables('resourceGroupName'), '-int-ipconfig', sub(copyIndex('ipConfigurations', 1), 2)))]",
+                            "properties": {
+                                "primary": "[if(equals(copyIndex('ipConfigurations', 1), 1), 'True', 'False')]",
+                                "privateIPAddress": "[if(equals(copyIndex('ipConfigurations', 1), 1), variables('intSubnetPrivateAddress'), concat(variables('intSubnetPrivateAddressPrefix'), add(variables('intSubnetPrivateAddressSuffixInt'), sub(copyIndex('ipConfigurations', 1), 1))))]",
+                                "privateIPAllocationMethod": "Static",
+                                "subnet": {
+                                    "id": "[variables('intSubnetId')]"
+                                }
+                            }
+                        },
+                        "name": "ipConfigurations"
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[concat(variables('intNsgID'))]"
+                }
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/networkInterfaces"
+        },
+{%- else -%}
+    {%- for vm in num_vms %}
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "dependsOn": [
+                {%- if stack == 'new-stack' -%}
+                "[variables('vnetId')]",
+                {%- endif -%}
+                "[variables('mgmtNsgID')]",
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtPublicIPAddressName'), '{{ vm }}')]"
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('mgmtNicName'), '{{ vm }}')]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "[concat(variables('dnsLabel'), '-mgmt-ipconfig')]",
+                        "properties": {
+                            "PublicIpAddress": {
+                                "Id": "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('mgmtPublicIPAddressName'), '{{ vm }}'))]"
+                            },
+                            "privateIPAddress": "[variables('mgmtSubnetPrivateAddress{{ vm }}')]",
+                            "privateIPAllocationMethod": "Static",
+                            "subnet": {
+                                "id": "[variables('mgmtSubnetId')]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[variables('mgmtNsgId')]"
+                }
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/networkInterfaces"
+        },
+    {%- endfor %}
+    {%- for vm in num_vms %}
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "dependsOn": [
+                {%- if stack == 'new-stack' -%}
+                "[variables('vnetId')]",
+                {%- endif -%}
+                "[variables('intNsgID')]",
+                "intpipcopy",
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('intSelfPublicIpAddressNamePrefix'), '{{ vm }}')]"
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('intNicName'), '{{ vm }}')]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "[concat(variables('instanceName'), '-self-ipconfig')]",
+                        "properties": {
+                            "PublicIpAddress": {
+                                "Id": "[concat(variables('intSelfPublicIpAddressIdPrefix'), '{{ vm }}')]"
+                            },
+                            "primary": true,
+                            "privateIPAddress": {{ get_private_ip_addr(vm, 'self') }}
+                            "privateIPAllocationMethod": "Static",
+                            "subnet": {
+                                "id": "[variables('intSubnetId')]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "[concat(variables('resourceGroupName'), '-int-ipconfig', '{{ vm }}')]",
+                        "properties": {
+                            "PublicIpAddress": {
+                                "Id": "[concat(variables('intPublicIPAddressIdPrefix'), '{{ vm }}')]"
+                            },
+                            "primary": false,
+                            "privateIPAddress": {{ get_private_ip_addr(vm, 'int') }}
+                            "privateIPAllocationMethod": "Static",
+                            "subnet": {
+                                "id": "[variables('intSubnetId')]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[concat(variables('intNsgId'))]"
+                }
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/networkInterfaces"
+        },
+    {%- endfor %}
+{%- endif %}
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[concat(variables('dnsLabel'), '-mgmt-nsg')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "mgmt_allow_https",
+                        "properties": {
+                            "access": "Allow",
+                            "description": "",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[variables('bigIpMgmtPort')]",
+                            "direction": "Inbound",
+                            "priority": 101,
+                            "protocol": "Tcp",
+                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
+                            "sourcePortRange": "*"
+                        }
+                    },
+                    {
+                        "name": "ssh_allow_22",
+                        "properties": {
+                            "access": "Allow",
+                            "description": "",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "22",
+                            "direction": "Inbound",
+                            "priority": 102,
+                            "protocol": "Tcp",
+                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
+                            "sourcePortRange": "*"
+                        }
+                    }
+                ]
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/networkSecurityGroups"
+        },
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[concat(variables('dnsLabel'), '-int-nsg')]",
+            "properties": {
+                "securityRules": []
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/networkSecurityGroups"
+        },
+        {
+            "apiVersion": "[variables('computeApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[variables('availabilitySetName')]",
+            "properties": {
+                "PlatformFaultDomainCount": 2,
+                "PlatformUpdateDomainCount": 2
+            },
+            "sku": {
+                "name": "Aligned"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Compute/availabilitySets"
+        },
+        {
+            "apiVersion": "[variables('storageApiVersion')]",
+            "kind": "Storage",
+            "location": "[variables('location')]",
+            "name": "[variables('newDataStorageAccountName')]",
+            "properties": {
+                "supportsHttpsTrafficOnly": true
+            },
+            "sku": {
+                "name": "[variables('dataStorageAccountType')]",
+                "tier": "Standard"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Storage/storageAccounts"
+        },
+        {
+            "apiVersion": "[variables('computeApiVersion')]",
+            "condition": "[and(variables('useCustomImage'), variables('createNewCustomImage'))]",
+            "location": "[variables('location')]",
+            "name": "[variables('newCustomImageName')]",
+            "properties": {
+                "storageProfile": {
+                    "osDisk": {
+                        "blobUri": "[variables('customImage')]",
+                        "osState": "Generalized",
+                        "osType": "Linux",
+                        "storageAccountType": "[if(contains(variables('premiumInstanceArray'), parameters('instanceType')), 'Premium_LRS', 'Standard_LRS')]"
+                    }
+                }
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Compute/images"
+        },
+{%- if bigiq_solution == 'standalone' -%}
+        {
+            "apiVersion": "[variables('computeApiVersion')]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]",
+                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]",
+                "[variables('newCustomImageName')]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'))]"
+            ],
+            "location": "[variables('location')]",
+            "name": "[variables('instanceName')]",
+            "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]",
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
+                    }
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('instanceType')]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('mgmtNicName'))]",
+                            "properties": {
+                                "primary": true
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('intNicName'))]",
+                            "properties": {
+                                "primary": false
+                            }
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "adminPassword": "[variables('adminPassword')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "computerName": "[variables('instanceName')]",
+                    "linuxConfiguration": "[json('null')]"
+                },
+                "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Compute/virtualMachines"
+        },
+        {
+            "apiVersion": "[variables('computeApiVersion')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('instanceName'))]"
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('instanceName'),'/start')]",
+            "properties": {
+                "protectedSettings": {
+                    "commandToExecute": "[concat('mkdir -p /var/log/cloud/azure; mkdir -p /config/cloud; echo ', variables('initScript'), ' | /usr/bin/base64 -d > /config/cloud/init.sh; chmod +x /config/cloud/init.sh;', ' /config/cloud/init.sh --cloud azure --log-level debug --data-interface eth1 --license ', parameters('bigIqLicenseKey1'), ' --ntp ', parameters('ntpServer'), ' --timezone ', parameters('timeZone'), ' --create-license-pool ', parameters('licensePoolKeys'), ' --create-reg-key-pool ', parameters('regPoolKeys'), ' --big-iq-password-data-uri file:///mnt/cloudTmp/.bigiq_pass --big-iq-password ', variables('adminPassword'), ' --big-iq-master-key ', parameters('masterKey'), ' --fcl-tag ', variables('f5CloudLibsTag'), ' --fcl-cloud-tag ', variables('f5CloudLibsAzureTag'), ' --vlan ', variables('singleQuote'), 'n:internal,nic:1.1', variables('singleQuote'), ' --self-ip ', variables('singleQuote'), 'n:internal_self,a:', variables('intSubnetPrivateAddress'), ',v:internal,i:eth1', variables('singleQuote'), ' --usage-analytics ', variables('singleQuote'), 'send:', parameters('allowUsageAnalytics'), ',r:', variables('location'), ',cI:', variables('subscriptionID'), ',dI:', variables('deploymentId'), ',cN:azure,lT:byol,bIV:6.0.0,tN:f5-existing-stack-byol-2nic-bigiq,tV:4.3.0', variables('singleQuote'), ' &>> /var/log/cloud/azure/install.log &')]"
+                },
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Compute/virtualMachines/extensions"
+        }
+{%- else -%}
+    {%- for vm in num_vms %}
+        {
+            "apiVersion": "[variables('computeApiVersion')]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]",
+                "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]",
+                "[variables('newCustomImageName')]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'), '{{ vm }}')]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '{{ vm }}')]"
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '{{ vm }}')]",
+            "identity": {
+                {%- if stack == 'existing-stack' %}
+                    "type": "userAssigned",
+                    "identityIds": [
+                        "[variables('userAssignedIdentityId')]"
+                    ]
+                {%- else %}
+                    "type": "SystemAssigned"
+                {%- endif %}
+            },
+            "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]",
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
+                    }
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('instanceType')]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": "[concat(take(variables('selfNicConfigArray')['{{ vm }}'], 3), take(variables('addtlNicConfigArray')['values{{ vm }}'], 0))]"
+                },
+                "osProfile": {
+                    "adminPassword": "[variables('adminPassword')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "computerName": "[variables('instanceName')]",
+                    "linuxConfiguration": "[json('null')]"
+                },
+                "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Compute/virtualMachines"
+        },
+    {%- endfor %}
+    {%- macro get_command_to_execute(vm) %}
+    {%- if vm == 0 -%}
+        "[concat('mkdir -p /var/log/cloud/azure; mkdir -p /config/cloud; echo ', variables('initScript'), ' | /usr/bin/base64 -d > /config/cloud/init.sh; chmod +x /config/cloud/init.sh;', ' /config/cloud/init.sh --cloud azure --log-level silly --data-interface eth1 --license ', parameters('bigIqLicenseKey1'), ' --ntp ', parameters('ntpServer'), ' --timezone ', parameters('timeZone'), ' --big-iq-password-data-uri file:///mnt/cloudTmp/.bigiq_pass --big-iq-password ', variables('adminPassword'), ' --big-iq-master-key ', parameters('masterKey'), ' --fcl-tag ', variables('f5CloudLibsTag'), ' --fcl-cloud-tag ', variables('f5CloudLibsAzureTag'), ' --tag-value ', variables('resourceGroupId'), ' --private-ip ', variables('intSubnetPrivateAddress2'), ' --associate-intf ', concat(variables('intNicName'), '0'), ' --dissociate-intf ', concat(variables('intNicName'), '1'), ' --vlan ', variables('singleQuote'), 'n:internal,nic:1.1', variables('singleQuote'), ' --self-ip ', variables('singleQuote'), 'n:internal_self,a:', variables('intSubnetPrivateAddress'), ',v:internal,i:eth1', variables('singleQuote'), ' --discovery-address ', variables('intSubnetPrivateAddress'), ' --usage-analytics ', variables('singleQuote'), 'send:', parameters('allowUsageAnalytics'), ',r:', variables('location'), ',cI:', variables('subscriptionID'), ',dI:', variables('deploymentId'), ',cN:azure,lT:byol,bIV:',parameters('bigIqVersion'),',tN:f5-existing-stack-byol-2nic-bigiq,tV:','{{constants.content_version}}', variables('singleQuote'), ' &>> /var/log/cloud/azure/install.log &')]"
+    {%- else -%}
+        "[concat('mkdir -p /var/log/cloud/azure; mkdir -p /config/cloud; echo ', variables('initScript'), ' | /usr/bin/base64 -d > /config/cloud/init.sh; chmod +x /config/cloud/init.sh;', ' /config/cloud/init.sh --cloud azure --log-level silly --data-interface eth1 --license ', parameters('bigIqLicenseKey2'), ' --ntp ', parameters('ntpServer'), ' --timezone ', parameters('timeZone'), ' --create-license-pool ', parameters('licensePoolKeys'), ' --create-reg-key-pool ', parameters('regPoolKeys'), ' --big-iq-password-data-uri file:///mnt/cloudTmp/.bigiq_pass --big-iq-password ', variables('adminPassword'), ' --big-iq-master-key ', parameters('masterKey'), ' --primary --big-iq-failover-peer-ip ', variables('intSubnetPrivateAddress'), ' --fcl-tag ', variables('f5CloudLibsTag'), ' --fcl-cloud-tag ', variables('f5CloudLibsAzureTag'), ' --tag-value ', variables('resourceGroupId'), ' --private-ip ', variables('intSubnetPrivateAddress3'), ' --associate-intf ', concat(variables('intNicName'), '1'), ' --dissociate-intf ', concat(variables('intNicName'), '0'), ' --vlan ', variables('singleQuote'), 'n:internal,nic:1.1', variables('singleQuote'), ' --self-ip ', variables('singleQuote'), 'n:internal_self,a:', variables('intSubnetPrivateAddress1'), ',v:internal,i:eth1', variables('singleQuote'), ' --discovery-address ', variables('intSubnetPrivateAddress1'), ' --usage-analytics ', variables('singleQuote'), 'send:', parameters('allowUsageAnalytics'), ',r:', variables('location'), ',cI:', variables('subscriptionID'), ',dI:', variables('deploymentId'), ',cN:azure,lT:byol,bIV:',parameters('bigIqVersion'),',tN:f5-existing-stack-byol-2nic-bigiq,tV:','{{constants.content_version}}', variables('singleQuote'), ' &>> /var/log/cloud/azure/install.log &')]"
+    {%- endif -%}
+    {%- endmacro -%}
+    {%- for vm in num_vms %}
+        {
+            "apiVersion": "[variables('computeApiVersion')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '{{ vm }}')]"
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '{{ vm }}/start')]",
+            "properties": {
+                "autoUpgradeMinorVersion": "true",
+                "protectedSettings": {
+                    "commandToExecute": {{ get_command_to_execute(vm) }}
+                },
+                "publisher": "Microsoft.Azure.Extensions",
+                "settings": {
+                    "fileUris": [
+                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/dist/f5-cloud-libs.tar.gz')]",
+                        "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs-azure/', variables('f5CloudLibsAzureTag'), '/dist/f5-cloud-libs-azure.tar.gz')]"
+                    ]
+                },
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Compute/virtualMachines/extensions"
+        }{%- if vm == 0-%},{%- endif -%}
+    {%- endfor %}
+{%- endif -%}

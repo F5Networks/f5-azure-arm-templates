@@ -1,0 +1,23 @@
+{# ####################################### ARM Outputs #########################################}
+{%- set num_vms = (0, 1) -%}
+{%- if bigiq_solution == 'standalone' -%}
+        "GUI-URL": {
+            "type": "string",
+            "value": "[concat('https://', reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ':', 443)]"
+        },
+        "SSH-URL": {
+            "type": "string",
+            "value": "[concat(reference(variables('mgmtPublicIPAddressId')).dnsSettings.fqdn, ' ',22)]"
+        }
+{%- else -%}
+    {%- for vm in num_vms %}
+        "GUI-URL-{{ vm }}": {
+            "type": "string", 
+            "value": "[concat('https://',reference(concat(variables('mgmtPublicIPAddressId'), '{{ vm }}')).dnsSettings.fqdn, ':', variables('bigIpMgmtPort'))]"
+        }, 
+        "SSH-URL-{{ vm }}": {
+            "type": "string", 
+            "value": "[concat(reference(concat(variables('mgmtPublicIPAddressId'), '{{ vm }}')).dnsSettings.fqdn,' ',22)]"
+        }{%- if vm == 0-%},{%- endif -%}
+    {%- endfor %}
+{%- endif %}

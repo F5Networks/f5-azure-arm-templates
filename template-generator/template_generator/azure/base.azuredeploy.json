@@ -1,0 +1,43 @@
+{% import 'constants.json'  as constants with context %}
+{
+{%- block header %}
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "{{ constants.content_version }}",
+{%- endblock %}
+  "parameters": {
+{%- block parameters -%}
+{%- if constants.product == "BIG-IP" -%}
+{%- include "parameters.json" -%}
+{%- else -%}
+{%- include "parameters_bigiq.json" -%}
+{%- endif -%}
+{%- endblock -%}
+  },
+  "variables": {
+{%- block variables -%}
+{%- if constants.product == "BIG-IP" -%}
+{%- include "variables.json" -%}
+{%- else -%}
+{%- include "variables_bigiq.json" -%}
+{%- endif -%}
+{%- endblock -%}
+  },
+  "resources": [
+{%- block resources %}
+{%- if constants.product == "BIG-IP" %}
+{% include "resources.json" %}
+{% else %}
+{% include "resources_bigiq.json" %}
+{%- endif %}
+{%- endblock %}
+  ],
+  "outputs": {
+{%- block outputs %}
+{%- if constants.product == "BIG-IP" %}
+{% include "outputs.json" %}
+{% else %}
+{% include "outputs_bigiq.json" %}
+{%- endif %}
+{%- endblock %}
+  }
+}

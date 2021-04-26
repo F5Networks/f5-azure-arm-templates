@@ -1,0 +1,1859 @@
+{% import 'command_to_execute.json'  as command_to_execute with context %}
+{% import 'autoscale_command_to_execute.json'  as autoscale_command_to_exec with context %}
+
+{#- External interfaces -#}
+{%- if stack in ('new-stack', 'existing-stack', 'learning-stack') %}
+  {%- if type =='standalone' or (type == 'failover' and nics =='1') or (type == 'autoscale' and lb_method == 'via-lb' and solution in ('ltm', 'waf')) %}
+        {% set public_ips_list = [{"name":"mgmtPublicIPAddressName", "sku": True, "dns_label": True}] %}
+  {%- endif %}
+  {%- if type =='autoscale' and solution in ('ltm', 'waf') and  lb_method == 'via-lb' %} {# experimental stack#}
+        {% set public_ips_list = [{"name":"mgmtPublicIPAddressName", "sku": True, "dns_label": True}] %}
+  {%- endif %}
+  {%- if type == 'failover' and nics in ('3', 'n') %}
+        {% set public_ips_list = [{"name":"mgmtPublicIPAddressName", "index": "'0'", "dns_label_sufix": "'-0'", "sku": True, "dns_label": True}, {"name":"mgmtPublicIPAddressName", "index": "'1'", "dns_label_sufix": "'-1'", "sku": True, "dns_label": True}, {"name":"extSelfPublicIpAddressNamePrefix", "sku": True, "index": "'0'", "data_plane": True}, {"name":"extSelfPublicIpAddressNamePrefix", "sku": True, "index": "'1'", "data_plane": True}, {"name":"extPublicIPAddressNamePrefix", "index": "copyIndex()", "dns_label_sufix": "copyIndex(0)", "dns_label": True, "copy_block": True, "sku": True, "data_plane": True}] %}
+  {%- endif %}
+  {%- if type == 'standalone' and nics in ('2', '3', 'n') %}
+         {% set public_ips_list = [{"name":"mgmtPublicIPAddressName", "sku": True, "dns_label": True}, {"name":"extSelfPublicIpAddressNamePrefix", "sku": True, "index": "'0'"}, {"name":"extPublicIPAddressNamePrefix", "sku": True, "index": "copyIndex()", "dns_label_sufix": "copyIndex(0)", "dns_label": True, "copy_block": True}] %}
+
+  {%- endif %}
+{%- endif %}
+
+{%- for public_ip in public_ips_list %}
+       {
+        {%- if stack == 'existing-stack' and (type == 'standalone' or type == 'failover' and nics in ('3, n')) %}
+            {%- if lb_method == 'via-lb' and public_ip.data_plane %}
+                "condition": "[equals(parameters('provisionPublicIPApp'),'Yes')]",
+            {% else %}
+                "condition": "[equals(parameters('provisionPublicIP'),'Yes')]",
+            {%- endif %}
+        {%- endif %}
+            "apiVersion": "[variables('networkApiVersion')]",
+  {%- if public_ip.sku %}
+            "sku": {
+                "name": "Standard"
+            },
+  {%- endif %}
+  {%- if public_ip.copy_block %}
+        {%- if stack == 'existing-stack' %}
+            {%- if lb_method == 'via-lb' and public_ip.data_plane %}
+                "condition": "[equals(parameters('provisionPublicIPApp'),'Yes')]",
+            {% else %}
+                "condition": "[and(equals(parameters('provisionPublicIP'),'Yes'), not(equals(variables('numberOfExternalIps'),0)))]",
+            {%- endif %}
+        {% else %}
+            "condition": "[not(equals(variables('numberOfExternalIps'),0))]",
+        {%- endif %}
+            "copy": {
+                {%- if stack == 'existing-stack' and lb_method == 'via-lb' and nics == '3' %}
+                    "count": "[variables('numberOfExternalIps')]",
+                {% else %}
+                    "count": "[if(not(equals(variables('numberOfExternalIps'), 0)), variables('numberOfExternalIps'), 1)]",
+                {%- endif %}
+                "name": "extpipcopy"
+            },
+  {%- endif %}
+            "location": "[variables('location')]",
+            "name": {% if public_ip.index %} "[concat(variables('{{ public_ip.name }}'), {{ public_ip.index }})]"{% else %}"[variables('{{ public_ip.name }}')]"{% endif %},
+            "properties": {
+  {%- if public_ip.dns_label %}
+                "dnsSettings": {
+                    "domainNameLabel": {%if public_ip.dns_label_sufix %}"[concat(variables('dnsLabel'), {{ public_ip.dns_label_sufix }})]"{% else %}"[variables('dnsLabel')]"{% endif %}
+                },
+  {%- endif %}
+                "idleTimeoutInMinutes": 30,
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/publicIPAddresses"
+        },
+{% endfor %}
+
+{#- ##### Virtual Network Resources(s) ##### -#}
+{%- if stack in ('new-stack', 'learning-stack') %}
+  {%- if (type in ('standalone', 'failover') and nics == '1') or type =='autoscale' %}
+    {% set subnets_list = ['mgmtSubnet'] %}
+  {%- endif %}
+  {%- if type == 'standalone' and nics =='2' %}
+    {% set subnets_list = ['mgmtSubnet', 'extSubnet'] %}
+  {%- endif %}
+  {%- if type in ('standalone', 'failover') and nics in ('3', 'n') %}
+    {% set subnets_list = ['mgmtSubnet', 'extSubnet', 'intSubnet'] %}
+  {%- endif %}
+  {%set subnets%}
+                   [
+  {%- for subnet in subnets_list%}
+
+                   {
+                        "name": "[variables('{{subnet}}Name')]",
+                        "properties": {
+                            "addressPrefix": "[variables('{{subnet}}Prefix')]"
+                        }
+                    }{%if subnets_list[loop.index] %},{% endif %}
+
+  {%- endfor %}
+                   ]
+  {%- endset %}
+
+
+{%- if ( nics == 'n') %}
+    {% set subnets = "\"[concat(take(variables('subnetArray'), 3), take(variables('addtlSubnetArray'), parameters('numberOfAdditionalNics')))]\"" %}
+{%- endif %}
+{%- if type == 'failover' and nics == 'n' -%}
+         {
+                "type": "Microsoft.Network/routeTables",
+                "name": "[parameters('routeTableName')]",
+                "apiVersion": "[variables('networkApiVersion')]",
+                "location": "[variables('location')]",
+                "properties": {
+                   "routes": [
+                   {
+                     "name": "route1",
+                     "properties": {
+                       "addressPrefix": "[variables('extSubnetPrefix')]",
+                       "nextHopType": "VirtualAppliance",
+                       "nextHopIpAddress": "[variables('extSubnetPrivateAddress')]"
+                     }
+                   }
+                ]
+            },
+            "tags": "[variables('cloudFailoverTagValue')]"
+        },
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[variables('virtualNetworkName')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('vnetAddressPrefix')]"
+                    ]
+                },
+                "subnets": {{ subnets }}
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/routeTables/', parameters('routeTableName'))]"
+            ],
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/virtualNetworks"
+        },
+{%- else -%}
+        {
+          "apiVersion": "[variables('networkApiVersion')]",
+          "location": "[variables('location')]",
+          {%- if type =='autoscale'%}
+          "dependsOn": [ "[variables('mgmtNsgID')]" ],
+
+          {%- endif %}
+          "name": "[variables('virtualNetworkName')]",
+          "properties": {
+          "addressSpace": {
+          "addressPrefixes": [
+          "[variables('vnetAddressPrefix')]"
+          ]
+          },
+          "subnets": {{ subnets }}
+          },
+          "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+          "type": "Microsoft.Network/virtualNetworks"
+        },
+{%- endif %}
+{%- endif %}
+
+{% if nics in ('3', 'n') -%}
+{% set nic_names = ['mgmt', 'ext', 'int'] %}
+{%- elif nics == '2' -%}
+{% set nic_names = ['mgmt', 'ext'] %}
+{%- elif nics == '1' or type =='autoscale' -%}
+{% set nic_names = ['mgmt'] %}
+{%- endif %}
+{%- set depends_on_mgmt %}
+     {% if stack not in ('existing-stack') %}
+                "[variables('vnetId')]",
+     {% endif %}
+     {% if not (type == 'failover' and nics in ('3', 'n')) %}
+          "[variables('mgmtPublicIPAddressId')]",
+     {% endif %}
+        "[variables('mgmtNsgID')]"
+{%- endset %}
+{%- set depends_on_ext -%}
+    "[variables('extNsgID')]",
+    "extpipcopy"
+    {% if stack == 'new-stack' %}
+        ,"[variables('vnetId')]"
+    {% endif %}
+{%- endset -%}
+{%- macro depends_on_data(int_name) %}
+    {% if nics == '3' and type != 'standalone' %}
+         "[variables('{{ int_name }}LbId')]",
+    {% endif %}
+    {% if stack not in ('existing-stack') %}
+        "[variables('vnetId')]",
+    {% endif %}
+    {% if stack in ('existing-stack', 'new-stack', 'learning-stack') or type == 'standalone' %}
+        "extpipcopy",
+    {% endif %}
+    "[variables('extNsgID')]"
+{%- endmacro %}
+{% macro depends_on_data_pub(vm) %}
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('extSelfPublicIpAddressNamePrefix'), '{{ vm }}')]"
+{% endmacro%}
+{# management #}
+{% if type in ('standalone', 'failover') %}
+    {% if type == 'standalone' or (type == 'failover' and nics == '1')%}
+        {% set vms = [0, ] %}
+    {% else %}
+        {% set vms = [0, 1] %}
+    {% endif %}
+    {% for vm in vms %}
+    {
+            "apiVersion": "[variables('networkApiVersion')]",
+            {% if type == 'failover' and nics == '1' %}
+                "copy": {
+                    "count": "[parameters('numberOfInstances')]",
+                    "name": "niccopy"
+                },
+            {% endif %}
+            "dependsOn": [
+                {{ depends_on_mgmt }}
+                {% if type == 'failover' and lb_method == 'via-lb' %}
+                    ,"[concat('Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'))]"
+                    {% if nics == '1' %}
+                        ,"[concat('Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'),'/inboundNatRules/guimgt',copyindex())]",
+                        "[concat('Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'),'/inboundNatRules/sshmgt',copyindex())]"
+                    {% endif %}
+                {% endif %}
+                {% if type == 'failover' and nics in ('n', '3') %}
+                    ,"[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtPublicIPAddressName'), '{{ vm }}')]"
+                {% endif %}
+            ],
+            "location": "[variables('location')]",
+
+            "name": {% if type == 'standalone' %}"[variables('mgmtNicName')]"{% else %}{% if nics == '1' %}"[concat(variables('mgmtNicName'),copyindex())]"{%else%}"[concat(variables('mgmtNicName'), '{{ vm }}')]"{% endif %}{% endif %},
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": {% if type == 'standalone' %}"[concat(variables('instanceName'), '-ipconfig1')]"{% else %}{% if nics == '1' %}"ipconfig1"{% else %}"[concat(variables('dnsLabel'), '-mgmt-ipconfig')]"{% endif %}{% endif %},
+                        "properties": {
+                            {% if type == 'failover' and nics == '1' %}
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[concat(variables('extLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
+                                }
+                            ],
+                            "loadBalancerInboundNatRules": [
+                                {
+                                    "id": "[concat(variables('extLbId'), '/inboundNatRules/', 'guimgt',copyIndex())]"
+                                },
+                                {
+                                    "id": "[concat(variables('extLbId'), '/inboundNatRules/', 'sshmgt',copyIndex())]"
+                                }
+                            ],
+                            {% elif type == 'failover' and nics == '3' %}
+                                {% if stack == 'existing-stack' %}
+                                    "loadBalancerBackendAddressPools": "[if(and(equals(parameters('provisionPublicIP'), 'No'), equals(parameters('provisionPublicIPApp'), 'Yes')), take(variables('backEndMgmtAddressPoolArray'), 1), take(variables('backEndMgmtAddressPoolArray'), 0))]",
+                                {% else %}
+                                    "loadBalancerBackendAddressPools": [
+                                        {
+                                            "id": "[concat(variables('extLbId'), '/backendAddressPools/', 'loadBalancerMgmtBackEnd')]"
+                                        }
+                                    ],
+                                {% endif %}
+                            {% endif %}
+                            {% if type == 'standalone' or nics != '1' %}
+                            "PublicIpAddress":
+                                      {% if stack == 'existing-stack'%}
+                                        {% if type == 'failover' %}
+                                          "[if(equals(parameters('provisionPublicIP'),'No'), json('null'), json(concat('{\"Id\": \"', variables('mgmtPublicIPAddressId'), '{{vm}}', '\"}')))]"
+                                        {% elif type == 'standalone' %}
+                                          "[if(equals(parameters('provisionPublicIP'),'No'), json('null'), json(concat('{\"Id\": \"', variables('mgmtPublicIPAddressId'), '\"}')))]"
+                                        {% endif %}
+                                      {% elif type == 'standalone' %}
+                                          { "Id" : "[variables('mgmtPublicIPAddressId')]" }
+                                      {% else %}
+                                          { "Id" : "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('mgmtPublicIPAddressName'), {{ vm }}))]" }
+                                      {% endif %},
+
+                            {% endif %}
+                            {% if stack == 'existing-stack'%}
+                                "privateIPAddress":{% if type == 'failover' and nics =='1' %}"[if(equals(parameters('mgmtIpAddressRangeStart'), 'DYNAMIC'), json('null'), concat(variables('mgmtSubnetPrivateAddress{% if vm == 1 %}{{vm}}{% endif %}'),add(variables('mgmtSubnetPrivateAddressSuffix'), copyindex())))]"{% else %}"[if(equals(parameters('{% if type == 'standalone' %}mgmtIpAddress{% else %}mgmtIpAddressRangeStart{% endif %}'), 'DYNAMIC'), json('null'), variables('mgmtSubnetPrivateAddress{% if vm == 1 %}{{vm}}{% endif %}'))]"{% endif %},
+                                "privateIPAllocationMethod": "[if(equals(parameters('{% if type == 'standalone' %}mgmtIpAddress{% else %}mgmtIpAddressRangeStart{% endif %}'), 'DYNAMIC'), 'Dynamic', 'Static')]",
+                            {% else %}
+                                "privateIPAddress":{% if type == 'failover' and nics =='1' %}"[concat(variables('mgmtSubnetPrivateAddress{% if vm == 1 %}{{vm}}{% endif %}'),add(variables('mgmtSubnetPrivateAddressSuffix'), copyindex()))]"{% else %}"[variables('mgmtSubnetPrivateAddress{% if vm == 1 %}{{vm}}{% endif %}')]"{% endif %},
+                                "privateIPAllocationMethod": "Static",
+                            {% endif %}
+                            "subnet": {
+                                "id": "[variables('mgmtSubnetId')]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[variables('mgmtNsgID')]"
+                }
+            },
+{%- if type =='failover' and lb_method == 'api' %}
+            "tags": "[union(variables('cloudFailoverTagValue'), json(concat('{\"f5_cloud_failover_nic_map\": \"', variables('mgmtNicName'), '\"}')))]",
+{%- else -%}
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+{%- endif -%}
+            "type": "Microsoft.Network/networkInterfaces"
+        },
+    {% endfor %}
+    {% if nics in ('2', '3', 'n') %}
+    {# external #}
+    {% for vm in vms %}
+    {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "dependsOn": [
+                {{ depends_on_data('ext') }}
+                {% if stack in ('existing-stack', 'new-stack', 'learning-stack') or type == 'standalone' %}
+                ,{{ depends_on_data_pub(vm)}}
+                {% endif %}
+            ],
+            "location": "[variables('location')]",
+            "name": {% if type == 'standalone' %}"[variables('extNicName')]"{% else%}"[concat(variables('extNicName'), '{{vm}}')]"{% endif %},
+            "properties": {
+             {% if vm == 0 and (type == 'standalone' or type =='failover' and nics =='n') %}
+                {% if type == 'standalone' %}
+                    {% set postfix = ", 1), 1" %}
+                    {% set postfix1 = ", 1), 2" %}
+                    {% if stack in ('new-stack', 'learning-stack') %}
+                        {% set postfix1_private_ip = ", 1), 2" %}
+                        {% set sufix = 1 %}
+                    {% else %}
+                        {% set postfix1_private_ip = ", 1), 1" %}
+                        {% set sufix = "add(variables('extSubnetPrivateAddressSuffixInt')" %}
+                    {% endif %}
+                {% else %}
+                    {% set postfix = "), 0"%}
+                    {% set postfix1 = "), 1"%}
+                    {% set postfix1_private_ip = "), 1" %}
+                    {% set sufix = "add(variables('extSubnetPrivateAddressSuffixInt')" %}
+
+                {% endif %}
+                "copy": [
+                    {
+                        "count": "[add(variables('numberOfExternalIps'), 1)]",
+                        "input": {
+                            "name": "[if(equals(copyIndex('ipConfigurations'{{ postfix }}), concat(variables('instanceName'), '-self-ipconfig'), concat(variables('resourceGroupName'), '-ext-ipconfig', sub(copyIndex('ipConfigurations'{{ postfix1 }})))]",
+                            "properties": {
+                                "PublicIpAddress":
+                                    {% if type in ('standalone', 'failover') and stack == 'existing-stack' %}
+                                        "[if(equals(parameters('provisionPublicIP'),'No'), json('null'), json(concat('{\"Id\": \"', if(equals(copyIndex('ipConfigurations'{{ postfix }}), concat(variables('extSelfPublicIpAddressIdPrefix'), '0'), concat(variables('extPublicIPAddressIdPrefix'), sub(copyIndex('ipConfigurations'{{postfix1}}))), '\"}')))]",
+                                    {% else %}
+                                        { "Id": "[if(equals(copyIndex('ipConfigurations'{{ postfix }}), concat(variables('extSelfPublicIpAddressIdPrefix'), '0'), concat(variables('extPublicIPAddressIdPrefix'), sub(copyIndex('ipConfigurations'{{postfix1}})))]" },
+                                    {% endif %}
+                                "primary": "[if(equals(copyIndex('ipConfigurations'{{ postfix }}), 'True', 'False')]",
+                                {% if stack == 'existing-stack' %}
+                                "privateIPAddress": "[if(equals(parameters('externalIp{% if type == 'failover' %}Self{% endif %}AddressRangeStart'), 'DYNAMIC'), json('null'), if(equals(copyIndex('ipConfigurations'{{ postfix }}), variables('extSubnetPrivateAddress'), concat(variables('extSubnetPrivateAddressPrefix'), {{ sufix }}, sub(copyIndex('ipConfigurations'{{postfix1_private_ip}}))){% if sufix != 1%}){% endif %})]",
+                                "privateIPAllocationMethod": "[if(equals(parameters('externalIp{% if type == 'failover' %}Self{% endif %}AddressRangeStart'), 'DYNAMIC'), 'Dynamic', 'Static')]",
+                                {% else %}
+                                "privateIPAddress": "[if(equals(copyIndex('ipConfigurations'{{ postfix }}), variables('extSubnetPrivateAddress'), concat(variables('extSubnetPrivateAddressPrefix'), {{ sufix }}, sub(copyIndex('ipConfigurations'{{postfix1_private_ip}}))){% if sufix != 1%}){% endif %}]",
+                                "privateIPAllocationMethod": "Static",
+                                {% endif %}
+                                "subnet": {
+                                    "id": "[variables('extSubnetId')]"
+                                }
+                            }
+                        },
+                        "name": "ipConfigurations"
+                    }
+                ],
+             {% elif vm == 1 and nics == 'n' or nics =='3'%} {# vm == 1 means it's failover #}
+                "ipConfigurations": [
+                        {
+                            "name": "[concat(variables('instanceName'), '-self-ipconfig')]",
+                            "properties": {
+                                "PublicIpAddress":
+                                 {% if stack == 'existing-stack' %}
+                                    {% if type == 'failover' and lb_method == 'via-lb' %}
+                                    "[if(equals(parameters('provisionPublicIPApp'),'No'), json('null'), json(concat('{\"Id\": \"', concat(variables('extSelfPublicIpAddressIdPrefix'), '{{ vm }}'), '\"}')))]"
+                                    {% else %}
+                                    "[if(equals(parameters('provisionPublicIP'),'No'), json('null'), json(concat('{\"Id\": \"', concat(variables('extSelfPublicIpAddressIdPrefix'), '{{ vm }}'), '\"}')))]"
+                                    {% endif %}
+                                    ,
+                                 {% else %}
+                                    {"Id": "[concat(variables('extSelfPublicIpAddressIdPrefix'), '{{ vm }}')]" },
+                                {% endif %}
+                                "primary": true,
+                                {% if stack == 'existing-stack' %}
+                                "privateIPAddress": "[if(equals(parameters('externalIp{% if type == 'failover' %}Self{% endif %}AddressRangeStart'), 'DYNAMIC'), json('null'), variables('extSubnetPrivateAddress{% if nics == 'n' or vm ==1 %}{{vm}}{%endif%}'))]",
+                                "privateIPAllocationMethod": "[if(equals(parameters('externalIp{% if type == 'failover' %}Self{% endif %}AddressRangeStart'), 'DYNAMIC'), 'Dynamic', 'Static')]",
+                                {% else %}
+                                "privateIPAddress": "[variables('extSubnetPrivateAddress{% if nics == 'n' or vm ==1 %}{{vm}}{%endif%}')]",
+                                "privateIPAllocationMethod": "Static",
+                                {% endif %}
+                                "subnet": {
+                                    "id": "[variables('extSubnetId')]"
+                                }
+                            }
+                        }
+                    {% if nics == '3' %}
+                      ,{
+                          "name": "[concat(variables('resourceGroupName'), '-ext-ipconfig{{vm}}')]",
+                            "properties": {
+                                {% if stack == 'existing-stack' and type == 'failover' and lb_method == 'via-lb' %}
+                                "loadBalancerBackendAddressPools": "[if(equals(parameters('provisionPublicIPApp'), 'No'), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 1))]",
+                                {% else %}
+                                "loadBalancerBackendAddressPools": "[if(equals(variables('numberOfExternalIps'), 0), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 1))]",
+                                {% endif %}
+                                "primary": false,
+                                {% if stack == 'existing-stack' %}
+                                "privateIPAddress": "[if(equals(parameters('externalIp{% if type == 'failover' %}Self{% endif %}AddressRangeStart'), 'DYNAMIC'), json('null'), concat(variables('extSubnetPrivateAddressPrefix'), variables('extSubnetPrivateAddressSuffix{{vm}}')))]",
+                                "privateIPAllocationMethod": "[if(equals(parameters('externalIp{% if type == 'failover' %}Self{% endif %}AddressRangeStart'), 'DYNAMIC'), 'Dynamic', 'Static')]",
+                                {% else %}
+                                "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), 1{{vm}})]",
+                                "privateIPAllocationMethod": "Static",
+                                {% endif %}
+                                "subnet": {
+                                    "id": "[variables('extSubnetId')]"
+                                }
+                            }
+                    }
+                    {% endif %}
+                    ],
+           {% endif %}
+                "networkSecurityGroup": {
+                    "id": "[concat(variables('extNsgID'))]"
+                }
+            },
+{%- if type =='failover' and lb_method == 'api' %}
+            "tags": "[union(variables('cloudFailoverTagValue'), json(concat('{\"f5_cloud_failover_nic_map\": \"', variables('extNicName'), '\"}')))]",
+{%- else -%}
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+{%- endif -%}
+            "type": "Microsoft.Network/networkInterfaces"
+        },
+    {% endfor %}
+
+    {# internal #}
+    {% if nics in ('3', 'n') %}
+    {% for vm in vms %}
+    {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "dependsOn": [
+                {{ depends_on_data('int') }}
+             {% if type == 'failover' and nics =='3'%}
+                ,{{ depends_on_data_pub(vm)}}
+             {% endif %}
+            ],
+            "location": "[variables('location')]",
+            "name": {% if type == 'standalone'%}"[variables('intNicName')]"{% else %}"[concat(variables('intNicName'), '{{ vm }}')]"{% endif %},
+            "properties": {
+                {% if type == 'failover' %}
+                    "enableIPForwarding": true,
+                    "primary": true,
+                {% endif %}
+                "ipConfigurations": [
+                    {
+                        "name": {% if type == 'standalone'%}"[concat(variables('instanceName'), '-ipconfig1')]"{% else %}"[concat(variables('dnsLabel'), '-int-ipconfig')]"{% endif %},
+                        "properties": {
+                            {% if type == 'failover' and nics == '3' %}
+                                "primary": true,
+                            {% endif %}
+                            {% if stack == 'existing-stack' %}
+                            "privateIPAddress": "[if(equals(parameters('internalIpAddress{% if type == 'failover' %}RangeStart{% endif %}'), 'DYNAMIC'), json('null'), variables('intSubnetPrivateAddress{% if type == 'failover' and vm == 1%}{{ vm }}{% endif %}'))]",
+                            "privateIPAllocationMethod": "[if(equals(parameters('internalIpAddress{% if type == 'failover' %}RangeStart{% endif %}'), 'DYNAMIC'), 'Dynamic', 'Static')]",
+                            {% else %}
+                            "privateIPAddress": "[variables('intSubnetPrivateAddress{% if type == 'failover' and vm == 1%}{{ vm }}{% endif %}')]",
+                            "privateIPAllocationMethod": "Static",
+                            {% endif %}
+                            "subnet": {
+                                "id": "[variables('intSubnetId')]"
+                            }
+                        }
+                    }
+                    {% if type == 'failover' and nics == '3' %}
+                    ,
+                    {
+                        "name": "[concat(variables('dnsLabel'), '-int-ipconfig-secondary')]",
+                        "properties": {
+                            {% if stack == 'existing-stack' %}
+                            "loadBalancerBackendAddressPools": "[take(variables('backEndAddressPoolArray'), 0)]",
+                            {% else %}
+                            "loadBalancerBackendAddressPools": "[if(equals(parameters('provisionInternalLoadBalancer'), 'No'), take(variables('backEndAddressPoolArray'), 0), skip(variables('backEndAddressPoolArray'), 1))]",
+                            {% endif %}
+                            {% if stack == 'existing-stack' %}
+                            "privateIPAddress": "[if(equals(parameters('internalIpAddress{% if type == 'failover' %}RangeStart{% endif %}'), 'DYNAMIC'), json('null'), variables('intSubnetPrivateAddress{{ vm + 2 }}'))]",
+                            "privateIPAllocationMethod": "[if(equals(parameters('internalIpAddress{% if type == 'failover' %}RangeStart{% endif %}'), 'DYNAMIC'), 'Dynamic', 'Static')]",
+                            {% else %}
+                            "privateIPAddress": "[variables('intSubnetPrivateAddress{{ vm + 2 }}')]",
+                            "privateIPAllocationMethod": "Static",
+                            {% endif %}
+                            "subnet": {
+                                "id": "[variables('intSubnetId')]"
+                            }
+                        }
+                    }
+                    {% endif %}
+                ]
+            },
+{%- if type =='failover' and lb_method == 'api' %}
+            "tags": "[union(variables('cloudFailoverTagValue'), json(concat('{\"f5_cloud_failover_nic_map\": \"', variables('intNicName'), '\"}')))]",
+{%- else -%}
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+{%- endif -%}
+            "type": "Microsoft.Network/networkInterfaces"
+        },
+    {% endfor %}
+        {# addl #}
+    {% if nics == 'n' %}
+        {% for vm in vms %}
+        {
+                "apiVersion": "[variables('networkApiVersion')]",
+                "condition": "[greaterOrEquals(parameters('numberOfAdditionalNics'), 1)]",
+                "copy": {
+                    "count": {% if type == 'standalone' %}"[parameters('numberOfAdditionalNics')]"{% else %}
+                             "[if(greaterOrEquals(parameters('numberOfAdditionalNics'), 1), parameters('numberOfAdditionalNics'), 1)]"{% endif %},
+                    "name": "addtlniccopy{% if type == 'failover' %}{{vm}}{%endif%}"
+                },
+                "dependsOn": [
+                    {{ depends_on_mgmt }}
+                    {% if type == 'standalone' %}
+                        ,"[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'))]",
+                        "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]",
+                        "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'))]"
+                    {% endif %}
+                ],
+                "location": "[variables('location')]",
+                "name": {% if type == 'standalone' %}"[concat(variables('instanceName'), '-addtlNic', copyIndex(1))]"{% else %}"[concat(variables('addtlNicName'), copyIndex(1), '{{ vm }}')]"{% endif %},
+                "properties": {
+                    "ipConfigurations": [
+                        {
+                            "name": "ipconfig",
+                            "properties": {
+                                "privateIPAllocationMethod": "Dynamic",
+                                "subnet": {
+                                    "id": "[concat(variables('vnetId'), '/subnets/', variables('addtlNicRefSplit')[copyIndex()])]"
+                                }
+                            }
+                        }
+                    ]
+                },
+{%- if type =='failover' and lb_method == 'api' %}
+                "tags": "[union(variables('cloudFailoverTagValue'), json(concat('{\"f5_cloud_failover_nic_map\": \"', concat(variables('addtlNicName'), copyIndex(1)), '\"}')))]",
+{%- else -%}
+                "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+{%- endif -%}
+                "type": "Microsoft.Network/networkInterfaces"
+            },
+        {% endfor %}
+        {% endif %}
+    {% endif %}
+{% endif %}
+{% endif %}
+{#-  Add learning-stack stack NIC(s) -#}
+{%- if stack == 'learning-stack' %}
+    {
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "[variables('networkApiVersion')]",
+        "dependsOn": [
+            {{ depends_on_mgmt }}
+        ],
+        "location": "[variables('location')]",
+        "name": "[concat(variables('webVmName'), '-nic')]",
+        "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+        "properties": {
+            "ipConfigurations": [
+                {
+                    "name": "[concat(variables('webVmName'), '-nic', '-ipconfig1')]",
+                    "properties": {
+                        "privateIPAddress": "[variables('webVmSubnetPrivateAddress')]",
+                        "privateIPAllocationMethod": "Static",
+                        "PublicIpAddress": null,
+                        "subnet": {
+                            "id": "[variables('intSubnetId')]"
+                         }
+                     }
+               }
+           ]
+       }
+   },
+{%- endif %}
+{#- ##### Network Security Group Resource(s) ##### -#}
+{%- if type in ('standalone', 'failover')  and nics in ('2', '3', 'n') %}
+ {% set rules_num = (0, 1)%}
+{%- else %}
+ {% set rules_num = (0, )%}
+{%- endif %}
+{%- for i in rules_num %}
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[variables('location')]",
+  {%- if i == 0 %}
+    {%- if type == 'autoscale' and stack == 'existing-stack' and lb_method == 'via-lb' %}
+            "name": "[variables('mgmtNsgName')]",
+    {%- else %}
+            "name": "[concat(variables('dnsLabel'), '-mgmt-nsg')]",
+    {%-  endif %}
+  {%- endif %}
+  {%- if i == 1 %}
+            "name": "[concat(variables('dnsLabel'), '-ext-nsg')]",
+  {%- endif %}
+  {%- if type =='autoscale' and stack == 'existing-stack' and lb_method == 'via-lb' %}
+            "condition": "[not(variables('useExistingNsg'))]",
+  {%- endif %}
+            "properties": {
+                "securityRules": [
+  {%- if i ==1 and stack == 'learning-stack' %}
+                    {
+                       "name": "allow_example_app",
+                        "properties": {
+                            "access": "Allow",
+                            "description": "",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[variables('webVmVsPort')]",
+                            "direction": "Inbound",
+                            "priority": 101,
+                            "protocol": "Tcp",
+                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
+                            "sourcePortRange": "*"
+                        }
+                    }
+  {%- endif %}
+  {%- if i == 0 %}
+                    {
+                        "name": "mgmt_allow_https",
+                        "properties": {
+                            "access": "Allow",
+                            "description": "",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[variables('bigIpMgmtPort')]",
+                            "direction": "Inbound",
+                            "priority": 101,
+                            "protocol": "Tcp",
+                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
+                            "sourcePortRange": "*"
+                        }
+                    },
+                    {
+                        "name": "ssh_allow_22",
+                        "properties": {
+                            "access": "Allow",
+                            "description": "",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "22",
+                            "direction": "Inbound",
+                            "priority": 102,
+                            "protocol": "Tcp",
+                            "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
+                            "sourcePortRange": "*"
+                        }
+                    }
+    {%- if type == 'autoscale' and solution == 'waf'  and lb_method in ('via-lb', 'dns') %}
+                    ,
+                    {
+                        "name": "app_allow_http",
+                        "properties": {
+                            "access": "Allow",
+                            "description": "",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[variables('httpBackendPort')]",
+                            "direction": "Inbound",
+                            "priority": 110,
+                            "protocol": "Tcp",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*"
+                        }
+                    },
+                    {
+                        "name": "app_allow_https",
+                        "properties": {
+                            "access": "Allow",
+                            "description": "",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "[variables('httpsBackendPort')]",
+                            "direction": "Inbound",
+                            "priority": 111,
+                            "protocol": "Tcp",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*"
+                        }
+                    }
+    {%- endif %}
+    {%- if type == 'autoscale' and stack == 'existing-stack'%}
+                    ,{
+                        "name": "allow_loadBalancer_traffic",
+                        "properties": {
+                            "access": "Allow",
+                            "description": "",
+                            "destinationAddressPrefix": "AzureLoadBalancer",
+                            "destinationPortRange": "*",
+                            "direction": "Outbound",
+                            "priority": 110,
+                            "protocol": "Tcp",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*"
+                        }
+                    }
+                    ,{
+                        "name": "disallow_inbound_traffic",
+                        "properties": {
+                            "access": "[if(equals(parameters('provisionPublicIP'), 'No'), 'Deny', 'Allow')]",
+                            "description": "",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "*",
+                            "direction": "Inbound",
+                            "priority": 113,
+                            "protocol": "Tcp",
+                            "sourceAddressPrefix": "Internet",
+                            "sourcePortRange": "*"
+                        }
+                    }
+    {%- endif %}
+  {%- endif %}
+                ]
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/networkSecurityGroups"
+        },
+{%- endfor %}
+
+{#- ##### Load Balancer Resource(s) #### -#}
+{% if type == 'autoscale' and solution  == 'waf' and lb_method in ('via-lb', 'dns') or license_type == 'bigiq-payg' and solution == 'waf' %}
+    {% set frontend_port = "\"[parameters('applicationPort')]\"" %}
+    {% set frontend_port_https = "\"[parameters('applicationSecurePort')]\"" %}
+    {% set backend_port = "\"[variables('httpBackendPort')]\"" %}
+    {% set backend_port_https = "\"[variables('httpsBackendPort')]\"" %}
+
+{# Outbound connections for standard sku LB does not work without an LB rule, so add to LTM templates #}
+{% elif type == 'autoscale' and solution  == 'ltm' and lb_method in ('via-lb', 'dns') or license_type == 'bigiq-payg' and solution == 'ltm' %}
+    {% set frontend_port = 80 %}
+    {% set frontend_port_https = 443 %}
+    {% set backend_port = 80 %}
+    {% set backend_port_https = 443 %}
+
+{% endif %}
+{% if type == 'autoscale' and solution in ('ltm', 'waf') and lb_method  == 'via-lb' %}
+    {% if license_type == 'bigiq-payg'%}
+        {% set scale_ports = { 'ssh_start': 50010, 'ssh_end': 50100, 'https_start': 50110, 'https_end': 50200 } %}
+    {% else%}
+        {% set scale_ports = { 'ssh_start': 50001, 'ssh_end': 50100, 'https_start': 50101, 'https_end': 50200 } %}
+    {% endif %}
+{% endif %}
+
+{#- external LB -#}
+{% if type == 'failover' and lb_method == 'via-lb' and nics in ('1', '3') or type == 'autoscale' and lb_method in ('via-lb') or license_type == 'bigiq-payg' -%}
+            {
+            "apiVersion": "[variables('networkApiVersion')]",
+  {% if type == 'failover' and nics == '3' -%}
+    {% if stack == 'existing-stack' %}
+            "condition": "[equals(parameters('provisionPublicIPApp'),'Yes')]",
+    {% else %}
+            "condition": "[not(equals(variables('numberOfExternalIps'),0))]",
+    {% endif %}
+  {%- endif %}
+  {%- if type == 'autoscale' and lb_method == 'via-lb' and stack == 'existing-stack'%}
+            "condition": "[not(variables('useExistingLoadBalancer'))]",
+  {%- endif %}
+            "dependsOn": [
+  {% if type == 'autoscale' and solution in ('ltm', 'waf') and lb_method  == 'via-lb' %}
+                 "[concat('Microsoft.Network/publicIPAddresses/', variables('mgmtPublicIPAddressName'))]"
+  {%- endif -%}
+  {% if type == 'failover' and nics =='1' %}
+                "[variables('mgmtPublicIPAddressId')]"
+  {%- endif %}
+  {% if type == 'failover' and nics =='3' -%}
+                "extpipcopy"
+  {%- endif %}
+
+            ],
+            "location": "[variables('location')]",
+            "name": "[variables('externalLoadBalancerName')]",
+            "properties": {
+                {% if stack == 'existing-stack' and nics == '3' %}
+                "outboundRules": "[if(equals(parameters('provisionPublicIP'),'Yes'), json('null'), variables('outboundRuleConfigArray'))]",
+                {% endif %}
+                "backendAddressPools": [
+                    {% if nics == '3' -%}
+                        {
+                            "name": "loadBalancerBackEnd"
+                        },
+                        {
+                            "name": "loadBalancerMgmtBackEnd"
+                        }
+                    {%- else -%}
+                        {
+                            "name": "loadBalancerBackEnd"
+                        }
+                    {%- endif %}
+                ],
+
+  {% if nics == '3' -%}
+                "copy": [
+                    {
+                        {% if stack == 'existing-stack' %}
+                        "count": "[variables('numberOfExternalIps')]",
+                        {% else %}
+                        "count": "[if(not(equals(variables('numberOfExternalIps'), 0)), variables('numberOfExternalIps'), 1)]",
+                        {% endif %}
+                        "input": {
+                            "name": "[concat('loadBalancerFrontEnd', copyIndex('frontendIPConfigurations', 1))]",
+                            "properties": {
+                                "publicIPAddress": {
+                                    "id": "[concat(variables('extPublicIPAddressIdPrefix'), sub(copyIndex('frontendIPConfigurations', 1), 1))]"
+                                }
+                            }
+                        },
+                        "name": "frontendIPConfigurations"
+                    }
+                ]
+  {%- endif %}
+  {% if nics == '1' -%}
+                "frontendIPConfigurations": [
+                    {
+                        "name": "loadBalancerFrontEnd",
+                        "properties": {
+    {% if stack == 'existing-stack' and type in ('failover') -%}
+                            "publicIPAddress": "[json(concat('{ \"id\": \"', variables('mgmtPublicIPAddressId'), '\" }'))]"
+
+    {%- else -%}
+                            "publicIPAddress": {
+                                "id": "[variables('mgmtPublicIPAddressId')]"
+                            }
+    {%- endif %}
+                        }
+                    }
+                ]
+  {%- endif %}
+
+  {% if (type == 'autoscale' and solution in ('ltm', 'waf') and lb_method  == 'via-lb') or (type == 'failover' and (stack == "new-stack" or nics == "1")) or license_type == 'bigiq-payg' %}
+        {% if (type == 'autoscale' and solution in ('ltm', 'waf') and lb_method  == 'via-lb') or license_type == 'bigiq-payg' %}
+                    ,"inboundNatPools": [
+                    {
+                        "name": "sshnatpool",
+                        "properties": {
+                            "backendPort": 22,
+                            "frontendIPConfiguration": {
+                                "id": "[variables('frontEndIPConfigID')]"
+                            },
+                            "frontendPortRangeEnd": {{ scale_ports.ssh_end }},
+                            "frontendPortRangeStart": {{ scale_ports.ssh_start }},
+                            "protocol": "Tcp"
+                        }
+                    },
+                    {
+                        "name": "mgmtnatpool",
+                        "properties": {
+                            "backendPort": "[variables('bigIpMgmtPort')]",
+                            "frontendIPConfiguration": {
+                                "id": "[variables('frontEndIPConfigID')]"
+                            },
+                            "frontendPortRangeEnd": {{ scale_ports.https_end }},
+                            "frontendPortRangeStart": {{ scale_ports.https_start }},
+                            "protocol": "Tcp"
+                        }
+                    }{% if license_type == 'bigiq-payg' %},
+                    {
+                        "name": "sshnatpool-static",
+                        "properties": {
+                            "backendPort": 22,
+                            "frontendIPConfiguration": {
+                                "id": "[variables('frontEndIPConfigID')]"
+                            },
+                            "frontendPortRangeEnd": 50009,
+                            "frontendPortRangeStart": 50001,
+                            "protocol": "Tcp"
+                        }
+                    },
+                    {
+                        "name": "mgmtnatpool-static",
+                        "properties": {
+                            "backendPort": "[variables('bigIpMgmtPort')]",
+                            "frontendIPConfiguration": {
+                                "id": "[variables('frontEndIPConfigID')]"
+                            },
+                            "frontendPortRangeEnd": 50109,
+                            "frontendPortRangeStart": 50101,
+                            "protocol": "Tcp"
+                        }
+                    }{% endif %}
+                ]
+                {% endif %}
+                ,"loadBalancingRules": {% if solution == 'waf' or license_type == 'bigiq-payg' %}
+                [
+                    {
+                        "Name": "app-http",
+                        "properties": {
+                            "backendAddressPool": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+                            },
+                            "backendPort": {{ backend_port }},
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
+                            },
+                            "frontendPort": {{ frontend_port }},
+                            "idleTimeoutInMinutes": 15,
+                            "probe": {
+                                "id": "[variables('lbTcpProbeIdHttp')]"
+                            },
+                            "protocol": "Tcp"
+                        }
+                    },
+                    {
+                        "Name": "app-https",
+                        "properties": {
+                            "backendAddressPool": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+                            },
+                            "backendPort": {{ backend_port_https }},
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
+                            },
+                            "frontendPort": {{ frontend_port_https }},
+                            "idleTimeoutInMinutes": 15,
+                            "probe": {
+                                "id": "[variables('lbTcpProbeIdHttps')]"
+                            },
+                            "protocol": "Tcp"
+                        }
+                    }
+                ]
+                {%- else -%}
+                    [
+                        {
+                            "Name": "external-access",
+                            "properties": {
+                                "backendAddressPool": {
+                                    {# Need to point to the mgmt pool for 3 NIC #}
+                                    {% if nics == '3' -%}
+                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerMgmtBackEnd')]"
+                                    {%- else -%}
+                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+                                    {%- endif %}
+                                },
+                                "backendPort": 443,
+                                "frontendIPConfiguration": {
+                                    {% if nics == '3' -%}
+                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd1')]"
+                                    {%- else -%}
+                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('externalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
+                                    {%- endif %}
+                                },
+                                "frontendPort": 443,
+                                "idleTimeoutInMinutes": 15,
+                                "probe": {
+                                    "id": "[concat(variables('extLbId'),'/probes/httpsProbe')]"
+                                },
+                                "protocol": "Tcp"
+                            }
+                        }
+                    ]
+                {%- endif %}
+                ,
+                "probes": {% if solution == 'waf' or license_type == 'bigiq-payg' %}[
+                    {
+                        "name": "[variables('lbTcpProbeNameHttp')]",
+                        "properties": {
+                            "intervalInSeconds": 15,
+                            "numberOfProbes": 3,
+                            "port": {{ backend_port }},
+                            "protocol": "Tcp"
+                        }
+                    },
+                    {
+                        "name": "[variables('lbTcpProbeNameHttps')]",
+                        "properties": {
+                            "intervalInSeconds": 15,
+                            "numberOfProbes": 3,
+                            "port": {{ backend_port_https }},
+                            "protocol": "Tcp"
+                        }
+                    }
+                ]
+                {%- else -%}
+                [
+                    {
+                        "name": "httpsProbe",
+                        "properties": {
+                            "intervalInSeconds": 15,
+                            "numberOfProbes": 3,
+                            "port": 443,
+                            "protocol": "Tcp"
+                        }
+                    }
+                ]
+                {%- endif %}
+        },
+  {% else %}
+           },
+  {% endif %}
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "sku": {
+                "name": "Standard"
+            },
+            "type": "Microsoft.Network/loadBalancers"
+        },
+{%- endif %}
+{#- Internal LB -#}
+{% if type == 'failover' and lb_method == 'via-lb'  and nics == '3' -%}
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "condition": "[equals(parameters('provisionInternalLoadBalancer'),'Yes')]",
+            "dependsOn": [
+                {{ depends_on_ext }}
+            ],
+            "location": "[variables('location')]",
+            "name": "[variables('internalLoadBalancerName')]",
+            "properties": {
+                "backendAddressPools": [
+                    {
+                        "name": "LoadBalancerBackEnd"
+                    }
+                ],
+                "frontendIPConfigurations": [
+                    {
+                        "name": "LoadBalancerFrontEnd",
+                        "properties": {
+                            {% if stack == 'existing-stack' %}
+                            "privateIPAddress": "[if(equals(parameters('internalIpAddressRangeStart'), 'DYNAMIC'), json('null'), variables('internalLoadBalancerAddress'))]",
+                            "privateIPAllocationMethod": "[if(equals(parameters('internalIpAddressRangeStart'), 'DYNAMIC'), 'Dynamic', 'Static')]",
+                            {% else %}
+                            "privateIPAddress": "[variables('internalLoadBalancerAddress')]",
+                            "privateIPAllocationMethod": "Static",
+                            {% endif %}
+                            "subnet": {
+                                "id": "[variables('intSubnetId')]"
+                            }
+                        }
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "allProtocolLbRule",
+                        "properties": {
+                            "backendAddressPool": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+                            },
+                            "backendPort": 0,
+                            "enableFloatingIP": false,
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
+                            },
+                            "frontendPort": 0,
+                            "idleTimeoutInMinutes": 15,
+                            "loadDistribution": "Default",
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancerName')), '/probes/tcp-probe-', parameters('internalLoadBalancerProbePort'))]"
+                            },
+                            "protocol": "All"
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "[concat('tcp-probe-', parameters('internalLoadBalancerProbePort'))]",
+                        "properties": {
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 2,
+                            "port": "[parameters('internalLoadBalancerProbePort')]",
+                            "protocol": "Tcp"
+                        }
+                    }
+                ]
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "sku": {
+                "name": "Standard"
+            },
+            "type": "Microsoft.Network/loadBalancers"
+        },
+{%- endif %}
+
+{#- ##### Load Balancer Inbound NAT Rule(s) ##### -#}
+{% if type  == 'failover' and lb_method  == 'via-lb' and  nics =='1' -%}
+       {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "copy": {
+                "count": "[parameters('numberOfInstances')]",
+                "name": "lbNatLoop"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'))]"
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('externalLoadBalancerName'),'/guimgt', copyIndex())]",
+            "properties": {
+                "backendPort": "[variables('bigIpMgmtPort')]",
+                "enableFloatingIP": false,
+                "frontendIPConfiguration": {
+                    "id": "[variables('frontEndIPConfigID')]"
+                },
+                "frontendPort": "[copyIndex(8443)]",
+                "protocol": "Tcp"
+            },
+            "type": "Microsoft.Network/loadBalancers/inboundNatRules"
+        },
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "copy": {
+                "count": "[parameters('numberOfInstances')]",
+                "name": "lbNatLoop"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'))]"
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('externalLoadBalancerName'),'/sshmgt', copyIndex())]",
+            "properties": {
+                "backendPort": 22,
+                "enableFloatingIP": false,
+                "frontendIPConfiguration": {
+                    "id": "[variables('frontEndIPConfigID')]"
+                },
+                "frontendPort": "[copyIndex(8022)]",
+                "protocol": "Tcp"
+            },
+            "type": "Microsoft.Network/loadBalancers/inboundNatRules"
+        },
+{%- endif %}
+{#- ####### Availability Set Resource(s) ##### -#}
+{% if type in ('standalone', 'failover') %}
+        {
+            "apiVersion": "[variables('computeApiVersion')]",
+            "location": "[variables('location')]",
+            "name": "[variables('availabilitySetName')]",
+            "sku": {
+                "name": "Aligned"
+            },
+            "properties": {
+                "PlatformFaultDomainCount": 2,
+                "PlatformUpdateDomainCount": 2
+            },
+  {%- if type =='standalone' and stack in ('existing-stack') -%}
+            "condition": "[and(not(variables('zonesAvailable')), equals(toUpper(parameters('avSetChoice')), 'CREATE_NEW'))]",
+  {% else %}
+            "condition": "[not(variables('zonesAvailable'))]",
+  {%- endif %}
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Compute/availabilitySets"
+        },
+{%- endif %}
+{#- ##### Storage Account Resource(s) ##### -#}
+       {
+            "apiVersion": "[variables('storageApiVersion')]",
+            "kind": "Storage",
+            "location": "[variables('location')]",
+            "name": "[variables('newDataStorageAccountName')]",
+            "properties": {
+                "supportsHttpsTrafficOnly": true
+            },
+            "sku": {
+                "name": "[variables('dataStorageAccountType')]",
+                "tier": "Standard"
+            },
+{%- if type =='failover' and lb_method == 'api' %}
+            "tags": "[variables('cloudFailoverTagValue')]",
+{%- else -%}
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+{%- endif -%}
+            "type": "Microsoft.Storage/storageAccounts"
+        },
+{#- ##### Compute/image Resource(s) ##### -#}
+{% if environment == 'azure' %}
+       {
+            "apiVersion": "[variables('computeApiVersion')]",
+            "condition": "[and(variables('useCustomImage'), variables('createNewCustomImage'))]",
+            "location": "[variables('location')]",
+            "name": "[variables('newCustomImageName')]",
+            "properties": {
+                "storageProfile": {
+                    "osDisk": {
+                        "blobUri": "[variables('customImage')]",
+                        "osState": "Generalized",
+                        "osType": "Linux",
+                        "storageAccountType": "[if(contains(variables('premiumInstanceArray'), parameters('instanceType')), 'Premium_LRS', 'Standard_LRS')]"
+                    }
+                }
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Compute/images"
+        },
+{% endif %}
+{#- ##### Compute/VM Resource(s) ##### -#}
+{% set basic_depends_on %}
+    "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
+    {% if not (type == 'failover' and nics == '1') %}
+        ,"[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]"
+    {% endif %}
+{% endset %}
+
+{% set vm_depends_on %}
+  {{ basic_depends_on }}
+  {% if environment == 'azure' and not (type == 'failover' and nics == '1') %}
+        ,"[variables('newCustomImageName')]"
+  {% endif %}
+  {% if type == 'standalone' %}
+    {% for nic in nic_names %}
+                ,"[concat('Microsoft.Network/networkInterfaces/', variables('{{ nic }}NicName'))]"
+    {% endfor %}
+  {% endif %}
+  {% if type == 'standalone' and nics =='n' %}
+                ,"addtlniccopy"
+  {% endif %}
+  {% if type == 'failover' and nics =='n' %}
+                ,"addtlniccopy0",
+                "addtlniccopy1"
+  {% endif %}
+{% endset %}
+
+{% macro nic_reference(vm) %}
+    {% if type == 'failover' and lb_method == 'via-lb' and nics =='1' %}
+                        [
+                        {
+                            "id": "[concat(resourceId('Microsoft.Network/networkInterfaces',variables('mgmtNicName')),copyindex())]"
+                        }
+                        ]
+    {% elif nics == 'n' %}
+                           {% if type == 'standalone'%}"[concat(take(variables('selfNicConfigArray'), 3), take(variables('addtlNicConfigArray').values, parameters('numberOfAdditionalNics')))]"{% else %}"[concat(take(variables('selfNicConfigArray')['{{ vm }}'], 3), take(variables('addtlNicConfigArray')['values{{ vm }}'], parameters('numberOfAdditionalNics')))]"{% endif %}
+    {% else%}
+            [
+        {% for nic in nic_names %}
+                        {
+                            "id":{% if type == 'standalone'%} "[resourceId('Microsoft.Network/networkInterfaces', variables('{{ nic }}NicName'))]"{% else %}"[resourceId('Microsoft.Network/networkInterfaces/', concat(variables('{{ nic }}NicName'), '{{ vm }}'))]"{% endif %},
+                            "properties": {
+                                "primary": {% if loop.index ==1 %}true{% else %}false{% endif %}
+                            }
+                        }{% if nic_names[loop.index] %}, {% endif %}
+        {% endfor %}
+             ]
+    {% endif %}
+{% endmacro%}
+
+{% macro failover_depends_on(vm) %}
+                {% for nic in nic_names %}
+                  {% if nics in ('3', 'n') %}
+                  "[concat('Microsoft.Network/networkInterfaces/', variables('{{ nic }}NicName'), '{{ vm }}')]"
+                  {% else %}
+                  "[concat('Microsoft.Network/networkInterfaces/', variables('{{ nic }}NicName'), copyindex())]"
+                  {% endif %}
+                  {%if nic_names[loop.index] %}, {% endif %}
+                {% endfor %}
+{% endmacro %}
+
+
+
+{% if type == 'failover' and nics != '1' %}
+{% set vms = [0, 1] %}
+{% else %}
+{% set vms = [0,] %}
+{% endif %}
+{% if type in ('standalone', 'failover' ) %}
+{% for vm in vms %}
+           {
+            "apiVersion": "[variables('computeApiVersion')]",
+            "dependsOn": [
+              {{ vm_depends_on }}
+   {% if type == 'failover' %}
+                ,{{ failover_depends_on(vm)}}
+   {% endif %}
+            ],
+  {% if type ==  'failover' and nics == '1' %}
+           "copy": {
+                "count": "[parameters('numberOfInstances')]",
+                "name": "devicecopy"
+           },
+  {% endif %}
+  {%- if type =='failover' and lb_method == 'api' %}
+            "identity": "[variables('identityArray')[variables('identityType')]]",
+  {%- endif -%}
+           "location": "[variables('location')]",
+  {% if type == 'standalone' %}
+            "name": "[variables('instanceName')]",
+  {% elif type ==  'failover' and nics == '1' %}
+            "name": "[concat(variables('deviceNamePrefix'),copyindex())]",
+
+  {% elif type ==  'failover' and nics in ('3' ,'n')%}
+            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '{{ vm }}')]",
+  {% endif %}
+        {% if license_type in ('byol', 'bigiq') %}
+            "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]",
+        {% else %}
+            "plan": "[variables('imagePlan')]",
+        {% endif %}
+            "properties": {
+                "availabilitySet": "[if(not(variables('zonesAvailable')), variables('availabilitySetId'), json('null'))]",
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
+                    }
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('instanceType')]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": {{ nic_reference(vm) }}
+
+                },
+                "osProfile": "[variables('osProfiles')[parameters('authenticationType')]]",
+  {% if environment == 'azurestack' -%}
+               {
+                    "imageReference": "[if(variables('useCustomImage'), json('null'), variables('imageReference'))]",
+                    "osDisk": {"image": "[if(variables('useCustomImage'), variables('customImageReference'), json('null'))]",
+                    "caching": "ReadWrite",
+                    "createOption": "FromImage",
+                    "name": "osdisk",
+                    "osType": "Linux",
+                    "vhd": {"uri": "[if(variables('useCustomImage'), concat(variables('customImage'), '-', variables('instanceName'), '.vhd'), concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, 'osdisks/', variables('instanceName'), '.vhd'))]"}
+               }
+  {%- else -%}
+                    "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
+  {% endif -%}
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            {%- if type =='standalone' and stack in ('existing-stack') -%}
+                "zones": "[if(variables('zonesAvailable'), array(parameters('zoneChoice')), json('null'))]",
+            {% else %}
+                "zones": "[if(variables('zonesAvailable'), array({{ vm + 1 }}), json('null'))]",
+            {%- endif %}
+            "type": "Microsoft.Compute/virtualMachines"
+        },
+{% endfor %}
+{% endif %}
+
+{%- if type =='failover' and lb_method == 'api' %}
+            {
+              "apiVersion": "[variables('authApiVersion')]",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "condition": "[equals(variables('identityType'), 'system')]",
+              "name": "[variables('roleAssignmentNameForInstance0')]",
+              "properties": {
+              "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+              "principalId": "[reference(concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '0'), variables('computeApiVersion'), 'Full').identity.principalId]",
+                "scope": "[resourceGroup().id]"
+              },
+              "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '0')]"
+              ]
+            },
+            {
+              "apiVersion": "[variables('authApiVersion')]",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "condition": "[equals(variables('identityType'), 'system')]",
+              "name": "[variables('roleAssignmentNameForInstance1')]",
+              "properties": {
+              "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+              "principalId": "[reference(concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '1'), variables('computeApiVersion'), 'Full').identity.principalId]",
+                "scope": "[resourceGroup().id]"
+              },
+              "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '1')]"
+              ]
+            },
+        {% if stack == 'existing-stack' %}
+            {
+                "type": "Microsoft.Resources/deployments",
+                "name": "[concat(variables('dnsLabel'), '-', 'template-role')]",
+                "apiVersion": "[variables('deployApiVersion')]",
+                "condition": "[and(equals(variables('identityType'), 'system'), not(equals(parameters('vnetResourceGroupName'), resourceGroup().name)))]",
+                "resourceGroup": "[parameters('vnetResourceGroupName')]",
+                "dependsOn": [
+                    "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '0')]",
+                    "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '1')]"
+                ],
+                "properties": {
+                    "mode": "Incremental",
+                    "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "resources": [
+                            {
+                                "apiVersion": "[variables('authApiVersion')]",
+                                "type": "Microsoft.Authorization/roleAssignments",
+                                "name": "[variables('roleAssignementNameForVnet0')]",
+                                "properties": {
+                                    "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+                                    "principalId": "[reference(concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '0'), variables('computeApiVersion'), 'Full').identity.principalId]",
+                                    "scope": "[concat('/subscriptions/', variables('subscriptionID'), '/resourcegroups/', parameters('vnetResourceGroupName'))]"
+                                }
+                            },
+                            {
+                                "apiVersion": "[variables('authApiVersion')]",
+                                "type": "Microsoft.Authorization/roleAssignments",
+                                "name": "[variables('roleAssignementNameForVnet1')]",
+                                "properties": {
+                                    "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+                                    "principalId": "[reference(concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '1'), variables('computeApiVersion'), 'Full').identity.principalId]",
+                                    "scope": "[concat('/subscriptions/', variables('subscriptionID'), '/resourcegroups/', parameters('vnetResourceGroupName'))]"
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+        {%- endif -%}
+{%- endif -%}
+
+{# Add learning-stack stack VM(s) #}
+{% if stack == 'learning-stack' %}
+   {
+        "apiVersion": "[variables('computeApiVersion')]",
+        "type": "Microsoft.Compute/virtualMachines",
+        "dependsOn": [
+            "[concat('Microsoft.Network/networkInterfaces/', variables('webVmName'), '-nic')]",
+            "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
+         ],
+         "location": "[variables('location')]",
+         "name": "[variables('webVmName')]",
+         "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+         "properties": {
+            "hardwareProfile": {
+            "vmSize": "[parameters('instanceType')]" },
+            "networkProfile": {
+                "networkInterfaces":  [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('webVmName'), '-nic'))]"
+                        }
+                    ]
+                },
+            "osProfile": "[variables('osProfiles')[parameters('authenticationType')]]",
+            "storageProfile": {
+                "imageReference": {
+                    "offer": "UbuntuServer",
+                    "publisher": "Canonical",
+                    "sku": "16.04.0-LTS",
+                    "version": "latest"
+                },
+                "osDisk":
+                    {
+                        "createOption": "FromImage"
+                    }
+                }
+         }
+   },
+{% endif %}
+{# # Define base file(s) to download #}
+
+{% set file_uris %}
+    "[concat('https://cdn.f5.com/product/cloudsolutions/f5-cloud-libs/', variables('f5CloudLibsTag'), '/f5-cloud-libs.tar.gz')]",
+    "[concat('https://cdn.f5.com/product/cloudsolutions/f5-appsvcs-extension/', variables('f5AS3Tag'), '/', variables('f5AS3Build'))]"
+    {% if type == 'failover' and nics =='n'%},
+    "[concat('https://cdn.f5.com/product/cloudsolutions/f5-cloud-libs-azure/', variables('f5CloudLibsAzureTag'), '/f5-cloud-libs-azure.tar.gz')]",
+    "[concat('https://github.com/F5Networks/f5-cloud-failover-extension/releases/download/', variables('f5CloudFailoverTag'), '/', variables('f5CloudFailoverBuild'))]"
+    {% endif %}
+{% endset %}
+
+{% if type == 'standalone' %}
+    {% macro name(i) -%}
+    "[concat(variables('instanceName'),'/start')]"
+     {%- endmacro %}
+    {% macro depends_on(i) %}
+    "[concat('Microsoft.Compute/virtualMachines/', variables('instanceName'))]"
+    {% endmacro %}
+{% endif %}
+{% if type == 'failover' and nics == '1' %}
+    {% macro depends_on(i) %}
+    {% if i == 0 %}
+    "[concat('Microsoft.Compute/virtualMachines/',variables('deviceNamePrefix'),0)]"
+    {% elif i == 1 %}
+    "[concat('Microsoft.Compute/virtualMachines/',variables('deviceNamePrefix'),add(copyindex(),1))]"
+    {% endif %}
+    {% endmacro %}
+    {% macro name(i) %}
+    {% if i == 0 %}
+    "[concat(variables('deviceNamePrefix'),{{ i }},'/start')]"
+    {% elif i == 1 %}
+    "[concat(variables('deviceNamePrefix'),add(copyindex(),{{ i }}),'/start')]"
+    {% endif %}
+    {% endmacro %}
+{% endif %}
+{% if type == 'failover' and nics in ('3', 'n') %}
+    {% macro name(i) %}
+"[concat(variables('dnsLabel'), '-', variables('instanceName'), '{{ i }}/start')]"
+    {% endmacro %}
+    {% macro depends_on(i) %}
+     "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '{{ i }}')]"
+    {% endmacro %}
+{% endif %}
+
+{#- # Define command to execute(s) -#}
+{% if type == 'failover' %}
+{% set vms = [0, 1] %}
+{% else %}
+{% set vms = [0,] %}
+{% endif %}
+{% if type in ('standalone', 'failover') %}
+{% for vm in vms %}
+    {
+            "apiVersion": "[variables('computeApiVersion')]",
+{%- if type =='failover' and lb_method == 'api' %}
+        {% if stack == 'new-stack' %}
+          "dependsOn": [
+              "[concat('Microsoft.Authorization/roleAssignments/', guid(concat(variables('dnsLabel'), '-', variables('instanceName'), '{{loop.index - 1}}-role')))]"
+          ],
+        {%- else -%}
+          "dependsOn": [
+                "[concat('Microsoft.Authorization/roleAssignments/', variables('roleAssignmentNameForInstance{{loop.index - 1}}'))]",
+                "[concat('Microsoft.Resources/deployments/', variables('dnsLabel'), '-', 'template-role')]"
+            ],
+        {%- endif -%}
+{%- else -%}
+            "dependsOn": [
+            {{ depends_on(vm) }}
+            ],
+{%- endif -%}
+            {% if type == 'failover'  and nics == '1' and vm == 1 %}
+            "copy": {
+                "count": "[sub(parameters('numberOfInstances'), 1)]",
+                "name": "extensionLoop"
+            },
+            {% endif %}
+            "location": "[variables('location')]",
+            "name": {{ name(vm) }},
+            "properties": {
+            {%- if type == 'failover' and nics in ('3', 'n') -%}
+                "autoUpgradeMinorVersion":"true",
+            {% endif %}
+                "protectedSettings": {
+                    "commandToExecute": "{{ command_to_execute.command_to_execute(vm)}}"
+                },
+                "publisher": "Microsoft.Azure.Extensions",
+                "settings": {
+                    "fileUris": [
+                        {{ file_uris }}
+                    ]
+                },
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Compute/virtualMachines/extensions"
+        }{%if vms[loop.index] %}, {% endif %}
+{% endfor %}
+{% endif %}
+{# Add learning-stack stack Custom Script Extension(s) #}
+{% if stack == 'learning-stack' %}
+  {% set file_uris = "[concat('https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/', variables('f5NetworksTag'), '/experimental/reference/learning-stack/scripts/init_web.sh')]" %}
+  {% set command_to_execute = "[concat('./init_web.sh ', variables('f5NetworksTag'))]" %}
+  ,{
+     "apiVersion": "[variables('computeApiVersion')]",
+     "dependsOn": [
+         "[concat('Microsoft.Compute/virtualMachines/', variables('webVmName'))]"
+     ],
+     "location": "[variables('location')]",
+     "name": "[concat(variables('webVmName'), '/webstart')]",
+     "properties": {
+         "protectedSettings": {
+            "commandToExecute": "{{ command_to_execute }}"
+         },
+         "publisher": "Microsoft.Azure.Extensions",
+         "settings": {
+            "fileUris": [
+                "{{ file_uris }}"
+            ]
+         },
+         "type": "CustomScript",
+         "typeHandlerVersion": "2.0",
+         "autoUpgradeMinorVersion":"true"
+      },
+      "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+      "type": "Microsoft.Compute/virtualMachines/extensions"
+  }
+{% endif %}
+
+
+{% if type == 'autoscale' %}
+  {% if solution in ('ltm', 'waf') and lb_method =='via-lb' %}
+    {% if license_type == 'bigiq-payg' %}
+        {% set static_lb_inbound_nat_pools %}
+                                                    {
+                                                        "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/inboundNatPools/sshnatpool-static')]"
+                                                    },
+                                                    {
+                                                        "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/inboundNatPools/mgmtnatpool-static')]"
+                                                    }
+        {% endset %}
+        {% set static_ip_config_properties %}
+                                                "loadBalancerBackendAddressPools": [
+                                                    {
+                                                        "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]"
+                                                    }
+                                                ],
+                                                "loadBalancerInboundNatPools": [
+                                                    {{static_lb_inbound_nat_pools }}
+                                                ],
+                                                "subnet": {
+                                                    "id": "[variables('mgmtSubnetId')]"
+                                                }
+       {% endset %}
+
+    {% endif %}
+    {% set lb_inbound_nat_pools %}
+                                                    {
+                                                        "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/inboundNatPools/sshnatpool')]"
+                                                    },
+                                                    {
+                                                        "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/inboundNatPools/mgmtnatpool')]"
+                                                    }
+    {% endset %}
+    {% set ip_config_properties %}
+    {% if stack == 'existing-stack' %}
+                                               "loadBalancerBackendAddressPools": "[take(variables('loadBalancerBackendAddressPoolsArray'), if(variables('attachInternalLoadBalancer'), 2, 1))]",
+    {% else %}
+                                                "loadBalancerBackendAddressPools": [
+                                                    {
+                                                      "id": "[concat('/subscriptions/', variables('subscriptionID'),'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('externalLoadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]"
+                                                    }
+                                                ],
+     {% endif %}
+                                                "loadBalancerInboundNatPools": [
+                                                    {{ lb_inbound_nat_pools }}
+                                                ],
+                                                "publicIpAddressConfiguration": "[if(equals(toLower(parameters('provisionPublicIP')), 'no'), json('null'), variables('publicIpAddressConfiguration'))]",
+                                                "subnet": {
+                                                    "id": "[variables('mgmtSubnetId')]"
+                                                }
+    {% endset %}
+  {% elif solution in ('ltm', 'waf') and lb_method =='dns' %}
+    {% set ip_config_properties %}
+                                                        "publicIpAddressConfiguration": "[variables('publicIpAddressConfiguration')]",
+                                                        "subnet": {
+                                                            "id": "[variables('mgmtSubnetId')]"
+                                                        }
+    {% endset %}
+  {% endif %}
+
+  {% if license_type == 'bigiq-payg' %}
+    {% set vms = [0 ,1] %}
+  {% else %}
+    {% set vms = [0 ] %}
+  {% endif %}
+  {% for vm in vms %}
+    {
+            "apiVersion": "[variables('computeApiVersion')]",
+
+            "dependsOn": [
+                {% if stack == 'new-stack' %}"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",{% endif %}
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
+            ],
+
+            "location": "[variables('location')]",
+    {% if vm == 0 %}
+            "name": "[variables('vmssName')]",
+            "plan": "[variables('imagePlan')]",
+    {% elif vm == 1 %} {# bigiq-payg #}
+            "name": "[variables('staticVmssName')]",
+            "plan": "[variables('staticImagePlan')]",
+    {% endif %}
+            "properties": {
+                "overprovision": false,
+                "upgradePolicy": {
+                    "mode": "Manual"
+                },
+                "virtualMachineProfile": {
+                    "extensionProfile": {
+                        "extensions": [
+                            {
+                                "name": "main",
+                                "properties": {
+                                    "protectedSettings": {
+                                        "commandToExecute": "{{ autoscale_command_to_exec.autoscale_command_to_execute(vm) }}"
+                                    },
+                                    "publisher": "Microsoft.Azure.Extensions",
+                                    "settings": {
+                                        "fileUris": [
+                                           {{ constants.autoscale_file_uris }}
+                                        ]
+                                    },
+                                    "type": "CustomScript",
+                                    "typeHandlerVersion": "2.0"
+                                }
+                            }
+                        ]
+                    },
+                    "networkProfile": {
+                        "networkInterfaceConfigurations": [
+                            {
+                                "name": "nic1",
+                                "properties": {
+                                    "ipConfigurations": [
+                                        {
+                                            "name": "ipconfig1",
+                                            "properties": {
+                                                {% if vm == 0 %}{{ ip_config_properties }}{% else %}{{ static_ip_config_properties }}{% endif %}
+                                            }
+                                        }
+                                    ],
+                                    "networkSecurityGroup": {
+                                        "id": "[variables('mgmtNsgID')]"
+                                    },
+                                    "primary": true
+                                }
+                            }
+                        ]
+                    },
+                    {% if license_type == 'bigiq-payg' and vm == 1 %}
+                    "osProfile": {
+                        "adminPassword": "[variables('adminPasswordOrKey')]",
+                        "adminUsername": "[parameters('adminUsername')]",
+                        "computerNamePrefix": "[variables('vmssName')]",
+                        "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+                   },
+                   {% else %}
+                    "osProfile": "[variables('osProfiles')[parameters('authenticationType')]]",
+                   {% endif %}
+                    {% if vm == 1 %} {# bigiq-payg#}
+                        {% set storage_profile_array = "staticStorageProfileArray" %}
+                    {% else%}
+                        {% set storage_profile_array = "storageProfileArray" %}
+                    {% endif %}
+                    "storageProfile": "[if(variables('useCustomImage'), variables('{{storage_profile_array}}').customImage, variables('{{ storage_profile_array}}').platformImage)]"
+                }
+            },
+            "sku": {
+                {% if vm == 1 %} {# bigiq-payg#}
+                    {%- set capacity = "[parameters('numberOfStaticInstances')]" %}
+                {% else %}
+                    {%- set capacity = "[parameters('vmScaleSetMinCount')]" %}
+                {% endif %}
+                "capacity": "{{ capacity }}",
+                "name": "[parameters('instanceType')]",
+                "tier": "Standard"
+            },
+    {% if vm == 0 %}
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+    {% elif vm ==1 %}
+            "tags": "[if(empty(variables('tagValues')), union(json('{}'), variables('staticVmssTagValues')), union(variables('tagValues'), variables('staticVmssTagValues')))]",
+    {% endif %}
+            "zones": "[if(variables('useAvailabilityZones'), createArray(1, 2, 3), json('null'))]",
+            "type": "Microsoft.Compute/virtualMachineScaleSets"
+        },
+  {% endfor %}
+
+
+  {# ##### Compute VM Scale Set(s) AutoScale Settings ##### #}
+
+
+    {
+            "apiVersion": "[variables('appInsightsApiVersion')]",
+            "dependsOn": [
+                "[variables('vmssId')]"
+   {% if license_type == 'bigiq-payg' %},
+                "[variables('staticVmssId')]"
+   {% endif %}
+
+            ],
+            "location": "[variables('location')]",
+            "name": "[concat(variables('dnsLabel'), '-autoscaleconfig')]",
+            "properties": {
+                "enabled": true,
+                "name": "[concat(variables('dnsLabel'), '-autoscaleconfig')]",
+                "notifications": [
+                    {
+                        "email": {
+                            "customEmails": "[variables('customEmail')]",
+                            "sendToSubscriptionAdministrator": false,
+                            "sendToSubscriptionCoAdministrators": false
+                        },
+                        "operation": "Scale",
+                        "webhooks": []
+                    }
+                ],
+                "profiles": [
+                    {
+                        "capacity": {
+                            "default": "[parameters('vmScaleSetMinCount')]",
+                            "maximum": "[parameters('vmScaleSetMaxCount')]",
+                            "minimum": "[parameters('vmScaleSetMinCount')]"
+                        },
+                        "name": "Profile1",
+                        "rules": [
+                            {
+                                "metricTrigger": {
+                                    "metricName": "[variables('scaleMetricMap')[variables('cpuMetricName')].metricName]",
+                                    "metricNamespace": "",
+                                    "metricResourceUri": "[variables('scaleMetricMap')[variables('cpuMetricName')].metricResourceUri]",
+                                    "operator": "GreaterThan",
+                                    "statistic": "Average",
+                                    "threshold": "[variables('scaleMetricMap')[variables('cpuMetricName')].thresholdOut]",
+                                    "timeAggregation": "Average",
+                                    "timeGrain": "PT1M",
+                                    "timeWindow": "[variables('scaleOutTimeWindow')]"
+                                },
+                                "scaleAction": {
+                                    "cooldown": "PT1M",
+                                    "direction": "Increase",
+                                    "type": "ChangeCount",
+                                    "value": "1"
+                                }
+                            },
+                            {
+                                "metricTrigger": {
+                                    "metricName": "[variables('scaleMetricMap')[variables('cpuMetricName')].metricName]",
+                                    "metricNamespace": "",
+                                    "metricResourceUri": "[variables('scaleMetricMap')[variables('cpuMetricName')].metricResourceUri]",
+                                    "operator": "LessThan",
+                                    "statistic": "Average",
+                                    "threshold": "[variables('scaleMetricMap')[variables('cpuMetricName')].thresholdIn]",
+                                    "timeAggregation": "Average",
+                                    "timeGrain": "PT1M",
+                                    "timeWindow": "[variables('scaleInTimeWindow')]"
+                                },
+                                "scaleAction": {
+                                    "cooldown": "PT1M",
+                                    "direction": "Decrease",
+                                    "type": "ChangeCount",
+                                    "value": "1"
+                                }
+                            },
+                            {
+                                "metricTrigger": {
+                                    "metricName": "[variables('scaleMetricMap')[variables('throughputMetricName')].metricName]",
+                                    "metricNamespace": "",
+                                    "metricResourceUri": "[variables('scaleMetricMap')[variables('throughputMetricName')].metricResourceUri]",
+                                    "operator": "GreaterThan",
+                                    "statistic": "Average",
+                                    "threshold": "[variables('scaleMetricMap')[variables('throughputMetricName')].thresholdOut]",
+                                    "timeAggregation": "Average",
+                                    "timeGrain": "PT1M",
+                                    "timeWindow": "[variables('scaleOutTimeWindow')]"
+                                },
+                                "scaleAction": {
+                                    "cooldown": "PT1M",
+                                    "direction": "Increase",
+                                    "type": "ChangeCount",
+                                    "value": "1"
+                                }
+                            },
+                            {
+                                "metricTrigger": {
+                                    "metricName": "[variables('scaleMetricMap')[variables('throughputMetricName')].metricName]",
+                                    "metricNamespace": "",
+                                    "metricResourceUri": "[variables('scaleMetricMap')[variables('throughputMetricName')].metricResourceUri]",
+                                    "operator": "LessThan",
+                                    "statistic": "Average",
+                                    "threshold": "[variables('scaleMetricMap')[variables('throughputMetricName')].thresholdIn]",
+                                    "timeAggregation": "Average",
+                                    "timeGrain": "PT1M",
+                                    "timeWindow": "[variables('scaleInTimeWindow')]"
+                                },
+                                "scaleAction": {
+                                    "cooldown": "PT1M",
+                                    "direction": "Decrease",
+                                    "type": "ChangeCount",
+                                    "value": "1"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "targetResourceUri": "[variables('vmssId')]"
+            },
+            "type": "Microsoft.Insights/autoscaleSettings"
+        },
+        {
+            "apiVersion": "[variables('appInsightsComponentsApiVersion')]",
+            "condition": "[contains(toUpper(parameters('appInsights')), 'CREATE_NEW')]",
+            "dependsOn": [],
+            "kind": "other",
+            "location": "[variables('appInsightsLocation')]",
+            "name": "[variables('appInsightsName')]",
+            "properties": {
+                "ApplicationId": "[variables('appInsightsName')]",
+                "Application_Type": "other"
+            },
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Insights/components"
+        }
+{% endif %}

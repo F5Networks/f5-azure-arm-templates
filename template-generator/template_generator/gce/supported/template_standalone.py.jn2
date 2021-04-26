@@ -1,0 +1,550 @@
+{% import 'constants.jn2'  as constants with context -%}
+# Copyright {{ constants.copyright }} F5 Networks All rights reserved.
+#
+# Version {{ constants.version}}
+
+""" Creates Deployment """
+COMPUTE_URL_BASE = 'https://www.googleapis.com/compute/v1/'
+{% set mgmt_port %}{%if nics == '1' %}8443{% else %}443{% endif %}{% endset -%}
+{%- if nics =="1" %}
+  {%- set network1 = "mgmtNetwork"-%}
+  {%- set  subnet1 = "mgmtSubnet"-%}
+  {%- set mgmt_int_num = 0-%}
+{%- else -%}
+  {%- set mgmt_int_num = 1 -%}
+  {%- set network = "network1" -%}
+  {%- set  subnet1 = "subnet1" -%}
+{%- endif -%}
+
+
+def FirewallRuleApp(context):
+    # Build Application firewall rule
+    ports = str(context.properties['applicationPort']).split()
+    source_list = str(context.properties['restrictedSrcAddressApp']).split()
+    firewallRuleApp = {
+        'name': 'appfw-' + context.env['deployment'],
+        'type': 'compute.v1.firewall',
+        'properties': {
+            'network': ''.join([COMPUTE_URL_BASE, 'projects/',
+                                context.env['project'], '/global/networks/',
+                                {%if nics == '1' %} context.properties['mgmtNetwork']]){% else %} context.properties['network1']]){% endif %},
+            'sourceRanges': source_list,
+            'targetTags': ['appfw-'+ context.env['deployment']],
+            'allowed': [{
+                "IPProtocol": "TCP",
+                "ports": ports,
+                },
+            ]
+        }
+    }
+    return firewallRuleApp
+
+def FirewallRuleMgmt(context):
+    # Build Management firewall rule
+    source_list = str(context.properties['restrictedSrcAddress']).split()
+    firewallRuleMgmt = {
+        'name': 'mgmtfw-' + context.env['deployment'],
+        'type': 'compute.v1.firewall',
+        'properties': {
+            'network': ''.join([COMPUTE_URL_BASE, 'projects/',
+                                context.env['project'], '/global/networks/',
+                                context.properties['mgmtNetwork']]),
+            'sourceRanges': source_list,
+            'targetTags': ['mgmtfw-'+ context.env['deployment']],
+            'allowed': [{
+                "IPProtocol": "TCP",
+                "ports": [str(context.properties['mgmtGuiPort']),'22'],
+                },
+            ]
+        }
+    }
+    return firewallRuleMgmt
+
+{%- set machine_type %}
+        ''.join([COMPUTE_URL_BASE, 'projects/',
+        context.env['project'], '/zones/',
+        context.properties['availabilityZone1'], '/machineTypes/',
+        context.properties['instanceType']]),
+
+{%- endset %}
+
+{%- set ident = "    " %}
+
+{%- set vm_properties -%}
+'canIpForward': True,
+        {{ ident }}'description': 'F5 BIG-IP configured with {{ nics }} interface(s).',
+        {{ ident }}'hostname': ''.join(['bigip1-', context.env['deployment'], '.c.', context.env['project'], '.internal']),
+        {{ ident }}'disks': [{
+            {{ ident }}'deviceName': 'boot',
+            {{ ident }}'type': 'PERSISTENT',
+            {{ ident }}'boot': True,
+            {{ ident }}'autoDelete': True,
+            {{ ident }}'initializeParams': {
+                {{ ident }}'sourceImage': ''.join([COMPUTE_URL_BASE, 'projects/f5-7626-networks-public',
+                                        {{ ident }}'/global/images/',
+                                        {{ ident }}context.properties['imageName'],
+                                        {{ ident }}])
+            {{ ident }}}
+        {{ ident }}}],
+        {{ ident }}'machineType': {{ machine_type }}
+        {{ ident }}'networkInterfaces': network_interfaces,
+        {{ ident }}'tags': {
+              'items': [
+                  'mgmtfw-' + context.env['deployment'],
+                  'appfw-' + context.env['deployment']
+              ]
+        {{ ident }}},
+        {{ ident }}'zone': context.properties['availabilityZone1'],
+        {{ ident }}'metadata': Metadata(context)
+{%- endset %}
+def Instance(context,{%if nics == '1' %} mgmtSharedVpc{% elif nics in ('2', '3') %} network1SharedVpc{% endif %}):
+    # declare specific instance properties ahead of time as they may change
+    network_interfaces = [
+    {%- if nics in ("2", "3") -%}
+    {
+                'network': ''.join([COMPUTE_URL_BASE, 'projects/',
+                                    network1SharedVpc, '/global/networks/',
+                                    context.properties['network1']]),
+                'subnetwork': ''.join([COMPUTE_URL_BASE, 'projects/',
+                                    network1SharedVpc, '/regions/',
+                                    context.properties['region'], '/subnetworks/',
+                                    context.properties['subnet1']]),
+      {%- if stack == "existing-stack" %}
+                'accessConfigs': []
+      {%- endif %}
+            },
+    {%- endif %}
+            {
+                'network': ''.join([COMPUTE_URL_BASE, 'projects/',
+                                    {% if nics == "1" %} mgmtSharedVpc{% else %} context.env['project']{% endif %}, '/global/networks/',
+                                    context.properties['mgmtNetwork']]),
+                'subnetwork': ''.join([COMPUTE_URL_BASE, 'projects/',
+                                    {% if nics == "1" %} mgmtSharedVpc{% else %} context.env['project']{% endif %}, '/regions/',
+                                    context.properties['region'], '/subnetworks/',
+                                    context.properties['mgmtSubnet']]),
+    {%- if stack == "existing-stack" %}
+                'accessConfigs': []
+    {%- endif %}
+
+            }
+    {%- if nics == "3" %},
+                {
+                'network': ''.join([COMPUTE_URL_BASE, 'projects/',
+                                    context.env['project'], '/global/networks/',
+                                    context.properties['network2']]),
+                'subnetwork': ''.join([COMPUTE_URL_BASE, 'projects/',
+                                    context.env['project'], '/regions/',
+                                    context.properties['region'], '/subnetworks/',
+                                    context.properties['subnet2']]),
+    }
+
+    {%- endif -%}
+    ]
+
+    # access config - conditional on provisionPublicIP parameter (boolean yes/no)
+    if str(context.properties['provisionPublicIP']).lower() in ['yes', 'true']:
+    {%- if nics in ("1") %}
+        network_interfaces[0]['accessConfigs'] = [{
+            'name': 'Management NAT',
+            'type': 'ONE_TO_ONE_NAT'
+        }]
+    {%- endif %}
+    {%- if nics in ("2", "3") %}
+        network_interfaces[0]['accessConfigs'] = [{
+            'name': 'External NAT',
+            'type': 'ONE_TO_ONE_NAT'
+        }]
+        network_interfaces[1]['accessConfigs'] = [{
+            'name': 'Management NAT',
+            'type': 'ONE_TO_ONE_NAT'
+        }]
+    {%- endif %}
+
+    {%- if nics == "1" %}
+      {% set int_num = 0 %}
+    {%- else -%}
+      {% set int_num = 1 %}
+    {%- endif %}
+
+    # If not 'DYNAMIC'|'' assume a static address is needed
+    mgmtSubnetAddress = context.properties['mgmtSubnetAddress'].upper()
+    if mgmtSubnetAddress != "DYNAMIC" and mgmtSubnetAddress != "":
+        network_interfaces[{{int_num}}]['networkIP'] = mgmtSubnetAddress
+    {%- if nics in ("2", "3") %}
+    subnet1Address = context.properties['subnet1Address'].upper()
+    if subnet1Address != "DYNAMIC" and {{subnet1}}Address != "":
+        network_interfaces[0]['networkIP'] = {{subnet1}}Address
+    {%- endif %}
+    {%- if nics == "3" %}
+    subnet2Address = context.properties['subnet2Address'].upper()
+    if subnet2Address != "DYNAMIC" and subnet2Address != "":
+        network_interfaces[2]['networkIP'] = subnet2Address
+    {%- endif %}
+    # Build instance template
+    instance = {
+        'name': 'bigip1-' + context.env['deployment'],
+        'type': 'compute.v1.instance',
+        'properties': {
+            {{ vm_properties }}
+
+        }
+    }
+
+    # add no-ip tag if provisionPublicIP = no
+    if str(context.properties['provisionPublicIP']).lower() in ['no', 'false']:
+        instance['properties']['tags']['items'].append('no-ip')
+    return instance
+
+def Metadata(context):
+
+    ALLOWUSAGEANALYTICS = str(context.properties['allowUsageAnalytics']).lower()
+    if ALLOWUSAGEANALYTICS == 'yes':
+        CUSTHASH = 'CUSTOMERID=`/usr/bin/curl -s "http://metadata.google.internal/computeMetadata/v1/project/numeric-project-id" -H "Metadata-Flavor: Google" |sha512sum|cut -d " " -f 1`;\nDEPLOYMENTID=`/usr/bin/curl -s "http://metadata.google.internal/computeMetadata/v1/instance/id" -H "Metadata-Flavor: Google"|sha512sum|cut -d " " -f 1`;'
+        SENDANALYTICS = ' --metrics "cloudName:google,region:' + context.properties['region'] + ',bigipVersion:' + context.properties['imageName'] + ',customerId:${CUSTOMERID},deploymentId:${DEPLOYMENTID},templateName:f5-{{ stack }}-{{license_type}}-{{nics}}nic-bigip.py,templateVersion:{{ constants.version }},licenseType:{{ license_type}}"'
+    else:
+        CUSTHASH = 'echo "No analytics."'
+        SENDANALYTICS = ''
+
+    ## Phone home
+    ALLOWPHONEHOME = str(context.properties['allowPhoneHome']).lower()
+    if ALLOWPHONEHOME in ['yes', 'true']:
+        PHONEHOME = '"tmsh modify sys software update auto-phonehome enabled"'
+    else:
+        PHONEHOME = '"tmsh modify sys software update auto-phonehome disabled"'
+
+    # Provisioning modules
+    PROVISIONING_MODULES = ','.join(context.properties['bigIpModules'].split('-'))
+
+    ntp_servers = str(context.properties['ntpServer']).split()
+    ntp_list = ''
+    for ntp_server in ntp_servers:
+        ntp_list = ntp_list + ' --ntp ' + ntp_server
+
+    timezone = ' --tz UTC'
+    if context.properties['timezone']:
+       timezone = " --tz {0}".format(str(context.properties['timezone']))
+
+    metadata = {
+                'items': [{
+                    'key': 'startup-script',
+                    'value': ('\n'.join(['#!/bin/bash',
+                                    'if [ -f /config/startupFinished ]; then',
+                                    '    exit',
+                                    'fi',
+                                    'if [ ! -f /config/cloud/gce/FIRST_BOOT_COMPLETE ]; then',
+                                    'mkdir -p /config/cloud/gce',
+                                    'cat <<\'EOF\' > /config/installCloudLibs.sh',
+                                    '#!/bin/bash',
+                                    'echo about to execute',
+                                    'checks=0',
+                                    'while [ $checks -lt 120 ]; do echo checking mcpd',
+                                    '    tmsh -a show sys mcp-state field-fmt | grep -q running',
+                                    '    if [ $? == 0 ]; then',
+                                    '        echo mcpd ready',
+                                    '        break',
+                                    '    fi',
+                                    '    echo mcpd not ready yet',
+                                    '    let checks=checks+1',
+                                    '    sleep 10',
+                                    'done',
+                                    'echo loading verifyHash script',
+                                    'if ! tmsh load sys config merge file /config/verifyHash; then',
+                                    '    echo cannot validate signature of /config/verifyHash',
+                                    '    exit',
+                                    'fi',
+                                    'echo loaded verifyHash',
+                                    'declare -a filesToVerify=(\"/config/cloud/f5-cloud-libs.tar.gz\" \"/config/cloud/f5-cloud-libs-gce.tar.gz\" \"/var/config/rest/downloads/{{ f5_as3_latest_build }}\")',
+                                    'for fileToVerify in \"${filesToVerify[@]}\"',
+                                    'do',
+                                    '    echo verifying \"$fileToVerify\"',
+                                    '    if ! tmsh run cli script verifyHash \"$fileToVerify\"; then',
+                                    '        echo \"$fileToVerify\" is not valid',
+                                    '        exit 1',
+                                    '    fi',
+                                    '    echo verified \"$fileToVerify\"',
+                                    'done',
+                                    'mkdir -p /config/cloud/gce/node_modules/@f5devcentral',
+                                    'echo expanding f5-cloud-libs.tar.gz\n',
+                                    'tar xvfz /config/cloud/f5-cloud-libs.tar.gz -C /config/cloud/gce/node_modules/@f5devcentral',
+                                    'echo expanding f5-cloud-libs-gce.tar.gz',
+                                    'tar xvfz /config/cloud/f5-cloud-libs-gce.tar.gz -C /config/cloud/gce/node_modules/@f5devcentral',
+                                    'echo cloud libs install complete',
+                                    'touch /config/cloud/cloudLibsReady',
+                                    'EOF',
+                                    'echo \'{{ verify_hash }}\' | base64 -d > /config/verifyHash',
+                                    'cat <<\'EOF\' > /config/waitThenRun.sh',
+                                    '#!/bin/bash',
+                                    'while true; do echo \"waiting for cloud libs install to complete\"',
+                                    '    if [ -f /config/cloud/cloudLibsReady ]; then',
+                                    '        echo "Running f5-cloud-libs Version:"',
+                                    '        f5-rest-node /config/cloud/gce/node_modules/@f5devcentral/f5-cloud-libs/scripts/onboard.js --version',
+                                    '        break',
+                                    '    else',
+                                    '        sleep 10',
+                                    '    fi',
+                                    'done',
+                                    '\"$@\"',
+                                    'EOF',
+  {%- if nics in ("2", "3") %}
+                                    'cat <<\'EOF\' > /config/cloud/gce/collect-interface.sh',
+                                    '#!/bin/bash',
+                                    'echo "MGMTADDRESS=$(/usr/bin/curl -s -f --retry 20 \'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/1/ip\' -H \'Metadata-Flavor: Google\')" >> /config/cloud/gce/interface.config',
+                                    'echo "MGMTMASK=$(/usr/bin/curl -s -f --retry 20 \'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/1/subnetmask\' -H \'Metadata-Flavor: Google\')" >> /config/cloud/gce/interface.config',
+                                    'echo "MGMTGATEWAY=$(/usr/bin/curl -s -f --retry 20 \'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/1/gateway\' -H \'Metadata-Flavor: Google\')" >> /config/cloud/gce/interface.config',
+                                    'echo "INT1ADDRESS=$(/usr/bin/curl -s -f --retry 20 \'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip\' -H \'Metadata-Flavor: Google\')" >> /config/cloud/gce/interface.config',
+                                    'echo "INT1MASK=$(/usr/bin/curl -s -f --retry 20 \'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/subnetmask\' -H \'Metadata-Flavor: Google\')" >> /config/cloud/gce/interface.config',
+                                    'echo "INT1GATEWAY=$(/usr/bin/curl -s -f --retry 20 \'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/gateway\' -H \'Metadata-Flavor: Google\')" >> /config/cloud/gce/interface.config',
+    {%- if nics == "3" %}
+                                    'echo "INT2ADDRESS=$(/usr/bin/curl -s -f --retry 20 \'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/2/ip\' -H \'Metadata-Flavor: Google\')" >> /config/cloud/gce/interface.config',
+                                    'echo "INT2MASK=$(/usr/bin/curl -s -f --retry 20 \'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/2/subnetmask\' -H \'Metadata-Flavor: Google\')" >> /config/cloud/gce/interface.config',
+                                    'echo "INT2GATEWAY=$(/usr/bin/curl -s -f --retry 20 \'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/2/gateway\' -H \'Metadata-Flavor: Google\')" >> /config/cloud/gce/interface.config',
+    {%- endif %}
+                                    'chmod 755 /config/cloud/gce/interface.config',
+                                    'reboot',
+                                    'EOF',
+  {%- endif %}
+                                    'cat <<\'EOF\' > /config/cloud/gce/custom-config.sh',
+                                    '#!/bin/bash',
+    {%- if nics in ("2", "3") %}
+                                    'source /config/cloud/gce/interface.config',
+                                    'MGMTNETWORK=$(/bin/ipcalc -n ${MGMTADDRESS} ${MGMTMASK} | cut -d= -f2)',
+                                    'INT1NETWORK=$(/bin/ipcalc -n ${INT1ADDRESS} ${INT1MASK} | cut -d= -f2)',
+      {%- if nics == "3" %}
+                                    'INT2NETWORK=$(/bin/ipcalc -n ${INT2ADDRESS} ${INT2MASK} | cut -d= -f2)',
+      {%- endif %}
+    {%- endif %}
+                                    'PROGNAME=$(basename $0)',
+                                    'function error_exit {',
+                                    'echo \"${PROGNAME}: ${1:-\\\"Unknown Error\\\"}\" 1>&2',
+                                    'exit 1',
+                                    '}',
+                                    'function wait_for_ready {',
+                                    '   checks=0',
+                                    '   ready_response=""',
+                                    '   while [ $checks -lt 120 ] ; do',
+                                    '      ready_response=$(/usr/bin/curl -sku admin:$passwd -w "%{http_code}" -X GET  https://localhost:${mgmtGuiPort}/mgmt/shared/appsvcs/info -o /dev/null)',
+                                    '      if [[ $ready_response == *200 ]]; then',
+                                    '          echo "AS3 is ready"',
+                                    '          break',
+                                    '      else',
+                                    '         echo "AS3" is not ready: $checks, response: $ready_response',
+                                    '         let checks=checks+1',
+                                    '         if [[ $checks == 60 ]]; then',
+                                    '           bigstart restart restnoded',
+                                    '         fi',
+                                    '         sleep 5',
+                                    '      fi',
+                                    '   done',
+                                    '   if [[ $ready_response != *200 ]]; then',
+                                    '      error_exit "$LINENO: AS3 was not installed correctly. Exit."',
+                                    '   fi',
+                                    '}',
+                                    'declare -a tmsh=()',
+                                    'date',
+                                    'echo \'starting custom-config.sh\'',
+                                    'source /usr/lib/bigstart/bigip-ready-functions',
+                                    'wait_bigip_ready',
+                                    'tmsh+=(',
+                                    PHONEHOME,
+    {%- if nics in ("2", "3") %}
+                                    '"tmsh modify sys global-settings mgmt-dhcp disabled"',
+                                    '"tmsh delete sys management-route all"',
+                                    '"tmsh delete sys management-ip all"',
+                                    '"tmsh create sys management-ip ${MGMTADDRESS}/32"',
+                                    '"tmsh create sys management-route mgmt_gw network ${MGMTGATEWAY}/32 type interface"',
+                                    '"tmsh create sys management-route mgmt_net network ${MGMTNETWORK}/${MGMTMASK} gateway ${MGMTGATEWAY}"',
+                                    '"tmsh create sys management-route default gateway ${MGMTGATEWAY}"',
+                                    '"tmsh create net vlan external interfaces add { 1.0 } mtu 1460"\n',
+                                    '"tmsh create net self self_external address ${INT1ADDRESS}/32 vlan external"',
+                                    '"tmsh create net route ext_gw_interface network ${INT1GATEWAY}/32 interface external"',
+                                    '"tmsh create net route ext_rt network ${INT1NETWORK}/${INT1MASK} gw ${INT1GATEWAY}"',
+                                    '"tmsh create net route default gw ${INT1GATEWAY}"',
+      {%- if nics == "3" %}
+                                    '"tmsh create net vlan internal interfaces add { 1.2 } mtu 1460"',
+                                    '"tmsh create net self self_internal address ${INT2ADDRESS}/32 vlan internal"',
+                                    '"tmsh create net route int_gw_interface network ${INT2GATEWAY}/32 interface internal"',
+                                    '"tmsh create net route int_rt network ${INT2NETWORK}/${INT2MASK} gw ${INT2GATEWAY}"',
+      {%- endif %}
+    {%- endif %}
+                                    '"tmsh modify sys management-dhcp sys-mgmt-dhcp-config request-options delete { ntp-servers }"',
+                                    '\'tmsh save /sys config\'',
+                                    ')',
+                                    'for CMD in "${tmsh[@]}"',
+                                    'do',
+                                    '    if $CMD;then',
+                                    '        echo "command $CMD successfully executed."',
+                                    '    else',
+                                    '        error_exit "$LINENO: An error has occurred while executing $CMD. Aborting!"',
+                                    '    fi',
+                                    'done',
+                                    '{{ident}}wait_bigip_ready',
+                                    '{{ident}}date',
+                                    '{{ident}}### START CUSTOM TMSH CONFIGURATION',
+                                    '{{ident}}mgmtGuiPort="' + str(context.properties['mgmtGuiPort']) + '"',
+                                    '{{ident}}passwd=$(f5-rest-node /config/cloud/gce/node_modules/@f5devcentral/f5-cloud-libs/scripts/decryptDataFromFile.js --data-file /config/cloud/gce/.adminPassword)',
+                                    '{{ident}}file_loc="/config/cloud/custom_config"',
+                                    '{{ident}}url_regex="^(https?|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]$"',
+                                    '{{ident}}if [[ ' + str(context.properties['declarationUrl']) + ' =~ $url_regex ]]; then',
+                                    '{{ident}}   response_code=$(/usr/bin/curl -sk -w "%{http_code}" ' + str(context.properties['declarationUrl']) + ' -o $file_loc)',
+                                    '{{ident}}   if [[ $response_code == 200 ]]; then',
+                                    '{{ident}}       echo "Custom config download complete; checking for valid JSON."',
+                                    '{{ident}}       cat $file_loc | jq .class',
+                                    '{{ident}}       if [[ $? == 0 ]]; then',
+                                    '{{ident}}           wait_for_ready',
+                                    '{{ident}}           response_code=$(/usr/bin/curl -skvvu admin:$passwd -w "%{http_code}" -X POST -H "Content-Type: application/json" -H "Expect:" https://localhost:${mgmtGuiPort}/mgmt/shared/appsvcs/declare -d @$file_loc -o /dev/null)',
+                                    '{{ident}}           if [[ $response_code == *200 || $response_code == *502 ]]; then',
+                                    '{{ident}}               echo "Deployment of custom application succeeded."',
+                                    '{{ident}}           else',
+                                    '{{ident}}               echo "Failed to deploy custom application; continuing..."',
+                                    '{{ident}}               echo "Response code: ${response_code}"',
+                                    '{{ident}}           fi',
+                                    '{{ident}}       else',
+                                    '{{ident}}           echo "Custom config was not valid JSON, continuing..."',
+                                    '{{ident}}       fi',
+                                    '{{ident}}   else',
+                                    '{{ident}}       echo "Failed to download custom config; continuing..."',
+                                    '{{ident}}       echo "Response code: ${response_code}"',
+                                    '{{ident}}   fi',
+                                    '{{ident}}else',
+                                    '{{ident}}   echo "Custom config was not a URL, continuing..."',
+                                    '{{ident}}fi',
+                                    '### END CUSTOM TMSH CONFIGURATION',
+                                    'EOF',
+    {%- if nics in ("2", "3") %}
+                                    'cat <<\'EOF\' > /config/cloud/gce/custom-config2.sh',
+                                    '#!/bin/bash',
+                                    'echo about to execute',
+                                    'checks=0',
+                                    'while [ $checks -lt 120 ]; do echo checking mcpd',
+                                    '    tmsh -a show sys mcp-state field-fmt | grep -q running',
+                                    '    if [ $? == 0 ]; then',
+                                    '        echo mcpd ready',
+                                    '        break',
+                                    '    fi',
+                                    '    echo mcpd not ready yet',
+                                    '    let checks=checks+1',
+                                    '    sleep 10',
+                                    'done',
+                                    'source /config/cloud/gce/interface.config',
+                                    'tmsh delete sys management-ip all',
+                                    'tmsh create sys management-ip ${MGMTADDRESS}/32',
+                                    'tmsh save sys config',
+                                    'EOF',
+    {%- endif %}
+                                    'checks=0',
+                                    'while [ $checks -lt 12 ]; do echo checking downloads directory',
+                                    '    if [ -d "/var/config/rest/downloads" ]; then',
+                                    '        echo downloads directory ready',
+                                    '        break',
+                                    '    fi',
+                                    '    echo downloads directory not ready yet',
+                                    '    let checks=checks+1',
+                                    '    sleep 10',
+                                    'done',
+                                    'if [ ! -d "/var/config/rest/downloads" ]; then',
+                                    '    mkdir -p /var/config/rest/downloads',
+                                    'fi',
+                                    '/usr/bin/curl -s -f --retry 20 -o /config/cloud/f5-cloud-libs.tar.gz https://cdn.f5.com/product/cloudsolutions/f5-cloud-libs/{{ f5_cloud_libs_latest_tag }}/f5-cloud-libs.tar.gz',
+                                    '/usr/bin/curl -s -f --retry 20 -o /config/cloud/f5-cloud-libs-gce.tar.gz https://cdn.f5.com/product/cloudsolutions/f5-cloud-libs-gce/{{ f5_cloud_libs_gce_latest_tag }}/f5-cloud-libs-gce.tar.gz',
+                                    '/usr/bin/curl -s -f --retry 20 -o /var/config/rest/downloads/{{ f5_as3_latest_build }} https://cdn.f5.com/product/cloudsolutions/f5-appsvcs-extension/{{ f5_as3_latest_tag }}/{{ f5_as3_latest_build }}',
+                                    'chmod 755 /config/verifyHash',
+                                    'chmod 755 /config/installCloudLibs.sh',
+                                    'chmod 755 /config/waitThenRun.sh',
+                                    'chmod 755 /config/cloud/gce/custom-config.sh',
+    {%- if nics in ("2", "3") %}
+                                    'chmod 755 /config/cloud/gce/custom-config2.sh',
+                                    'chmod 755 /config/cloud/gce/collect-interface.sh',
+    {%- endif %}
+                                    'mkdir -p /var/log/cloud/google',
+                                    CUSTHASH,
+    {%- if nics in ("1") %}
+                                    'touch /config/cloud/gce/FIRST_BOOT_COMPLETE',
+                                    'nohup /usr/bin/setdb provision.extramb 1000 &>> /var/log/cloud/google/install.log < /dev/null &',
+                                    'nohup /usr/bin/setdb restjavad.useextramb true &>> /var/log/cloud/google/install.log < /dev/null &',
+                                    'nohup /usr/bin/curl -s -f -u admin: -H "Content-Type: application/json" -d \'{"maxMessageBodySize":134217728}\' -X POST http://localhost:8100/mgmt/shared/server/messaging/settings/8100 | jq . &>> /var/log/cloud/google/install.log < /dev/null &',
+                                    'nohup /config/installCloudLibs.sh >> /var/log/cloud/google/install.log < /dev/null &',
+        {%- if license_type == "byol" %}
+                                    'nohup /config/waitThenRun.sh f5-rest-node /config/cloud/gce/node_modules/@f5devcentral/f5-cloud-libs/scripts/onboard.js --host localhost --signal ONBOARD_DONE --port 8443 --ssl-port ' + str(context.properties['mgmtGuiPort']) + ' -o /var/log/cloud/google/onboard.log --log-level ' + str(context.properties['logLevel']) + ' --license ' + str(context.properties['licenseKey1']) + ' --install-ilx-package file:///var/config/rest/downloads/{{ f5_as3_latest_build }} ' + ntp_list + timezone + ' --modules ' + PROVISIONING_MODULES + SENDANALYTICS + ' >> /var/log/cloud/google/install.log < /dev/null & ',
+        {%- endif %}
+        {%- if license_type == "payg" %}
+                                    'nohup /config/waitThenRun.sh f5-rest-node /config/cloud/gce/node_modules/@f5devcentral/f5-cloud-libs/scripts/onboard.js --host localhost --signal ONBOARD_DONE --port 8443 --ssl-port ' + str(context.properties['mgmtGuiPort']) + ' -o /var/log/cloud/google/onboard.log --log-level ' + str(context.properties['logLevel']) + ' --install-ilx-package file:///var/config/rest/downloads/{{ f5_as3_latest_build }} ' + ntp_list + timezone + ' --modules ' + PROVISIONING_MODULES + SENDANALYTICS + ' >> /var/log/cloud/google/install.log < /dev/null & ',
+        {%- endif %}                                    
+                                    'nohup /config/waitThenRun.sh f5-rest-node /config/cloud/gce/node_modules/@f5devcentral/f5-cloud-libs/scripts/runScript.js --file /config/cloud/gce/custom-config.sh --cwd /config/cloud/gce -o /var/log/cloud/google/custom-config.log --wait-for ONBOARD_DONE --signal CUSTOM_CONFIG_DONE --log-level ' + str(context.properties['logLevel']) + ' >> /var/log/cloud/google/install.log < /dev/null &',
+    {%- endif %}
+    {%- if nics in ("2", "3") %}
+                                    'touch /config/cloud/gce/FIRST_BOOT_COMPLETE',
+                                    'nohup /usr/bin/setdb provision.extramb 1000 &>> /var/log/cloud/google/install.log < /dev/null &',
+                                    'nohup /usr/bin/setdb restjavad.useextramb true &>> /var/log/cloud/google/install.log < /dev/null &',
+                                    'nohup /usr/bin/curl -s -f -u admin: -H "Content-Type: application/json" -d \'{"maxMessageBodySize":134217728}\' -X POST http://localhost:8100/mgmt/shared/server/messaging/settings/8100 | jq . &>> /var/log/cloud/google/install.log < /dev/null &',
+                                    'nohup /config/installCloudLibs.sh >> /var/log/cloud/google/install.log < /dev/null &',
+        {%- if license_type == "byol" %}
+                                    'nohup /config/waitThenRun.sh f5-rest-node /config/cloud/gce/node_modules/@f5devcentral/f5-cloud-libs/scripts/onboard.js --db provision.managementeth:eth1 --host localhost --license ' + str(context.properties['licenseKey1']) + ' -o /var/log/cloud/google/mgmt-swap.log --log-level ' + str(context.properties['logLevel']) + ' --signal MGMT_SWAP_DONE >> /var/log/cloud/google/install.log < /dev/null &',
+        {%- endif %}
+        {%- if license_type == "payg" %}
+                                    'nohup /config/waitThenRun.sh f5-rest-node /config/cloud/gce/node_modules/@f5devcentral/f5-cloud-libs/scripts/onboard.js --db provision.managementeth:eth1 --host localhost -o /var/log/cloud/google/mgmt-swap.log --log-level ' + str(context.properties['logLevel']) + ' --signal MGMT_SWAP_DONE >> /var/log/cloud/google/install.log < /dev/null &',
+        {%- endif %}
+                                    'nohup /config/waitThenRun.sh f5-rest-node /config/cloud/gce/node_modules/@f5devcentral/f5-cloud-libs/scripts/runScript.js --file /config/cloud/gce/collect-interface.sh --cwd /config/cloud/gce -o /var/log/cloud/google/interface-config.log --wait-for MGMT_SWAP_DONE --log-level ' + str(context.properties['logLevel']) + ' >> /var/log/cloud/google/install.log < /dev/null &',
+                                    'elif [ ! -f /config/cloud/gce/SECOND_BOOT_COMPLETE ]; then',
+                                    'nohup /config/waitThenRun.sh f5-rest-node /config/cloud/gce/node_modules/@f5devcentral/f5-cloud-libs/scripts/onboard.js --host localhost --signal ONBOARD_DONE --port 443 --ssl-port ' + str(context.properties['mgmtGuiPort']) + ' -o /var/log/cloud/google/onboard.log --log-level ' + str(context.properties['logLevel']) + ' --install-ilx-package file:///var/config/rest/downloads/{{ f5_as3_latest_build }} ' + ntp_list + timezone + ' --modules ' + PROVISIONING_MODULES + SENDANALYTICS + ' >> /var/log/cloud/google/install.log < /dev/null & ',
+                                    'nohup /config/waitThenRun.sh f5-rest-node /config/cloud/gce/node_modules/@f5devcentral/f5-cloud-libs/scripts/runScript.js --file /config/cloud/gce/custom-config.sh --cwd /config/cloud/gce -o /var/log/cloud/google/custom-config.log --wait-for ONBOARD_DONE --signal CUSTOM_CONFIG_DONE --log-level ' + str(context.properties['logLevel']) + ' >> /var/log/cloud/google/install.log < /dev/null &',
+                                    'touch /config/cloud/gce/SECOND_BOOT_COMPLETE',
+                                    'else',
+                                    'nohup /config/waitThenRun.sh f5-rest-node /config/cloud/gce/node_modules/@f5devcentral/f5-cloud-libs/scripts/runScript.js --file /config/cloud/gce/custom-config2.sh --cwd /config/cloud/gce -o /var/log/cloud/google/custom-config2.log --signal CUSTOM_CONFIG2_DONE --log-level ' + str(context.properties['logLevel']) + ' >> /var/log/cloud/google/install.log < /dev/null &',
+    {%- endif %}
+                                    'touch /config/startupFinished',
+                                    'fi'
+                                    ])
+                            )
+                }]
+    }
+    return metadata
+
+def Outputs(context):
+    output_ip_options = {
+        'public': '.accessConfigs[0].natIP',
+        'private': '.networkIP'
+    }
+    pub_or_priv = 'public' if str(context.properties['provisionPublicIP']).lower() == 'yes' else 'private'
+
+    outputs = [{
+        'name': 'region',
+        'value': context.properties['region']
+    },
+    {
+        'name': 'selfLink',
+        'value': '$(ref.{}.selfLink)'.format('bigip1-' + context.env['deployment'])
+    },
+    {
+        'name': 'mgmtURL',
+        'value': 'https://$(ref.bigip1-' + context.env['deployment'] + '.networkInterfaces[{{mgmt_int_num}}]' + output_ip_options[pub_or_priv] + '):' + str(context.properties['mgmtGuiPort'])
+    },
+    {
+        'name': 'appTrafficAddress',
+        'value': '$(ref.bigip1-' + context.env['deployment'] + '.networkInterfaces[0]' + output_ip_options[pub_or_priv] + ')'
+    }]
+    return outputs
+
+def GenerateConfig(context):
+    ## set variables
+    # Set project names for networks
+    {%if nics == '1' %}
+    mgmtSharedVpc = context.env['project']
+    if str(context.properties['mgmtSharedVpc']).lower() != 'none':
+        mgmtSharedVpc = context.properties['mgmtSharedVpc']{% endif %}
+    {% if nics in ("2", "3") %}network1SharedVpc = context.env['project']
+    if str(context.properties['network1SharedVpc']).lower() != 'none':
+        network1SharedVpc = context.properties['network1SharedVpc']{% endif %}
+
+    # build resources
+    resources = [Instance(context{%if nics == '1' %}, mgmtSharedVpc{% elif nics in ('2', '3') %}, network1SharedVpc{% endif %}),]
+    {% if nics == "1" %}
+    if mgmtSharedVpc == context.env['project']:
+        resources = resources + [FirewallRuleApp(context), FirewallRuleMgmt(context)]{% endif %}
+    {% if nics in ("2", "3") %}
+    if network1SharedVpc == context.env['project']:
+        resources = resources + [FirewallRuleApp(context), FirewallRuleMgmt(context)]
+    else:
+        resources = resources + [FirewallRuleMgmt(context)]{% endif %}
+    
+    outputs = Outputs(context)
+    return {'resources': resources, 'outputs': outputs}

@@ -1,0 +1,48 @@
+{%- macro big_iq_mgmt_ip_ref(i) -%}
+{%- if type == 'standalone' and stack == 'existing-stack' -%}
+  if(equals(parameters('provisionPublicIP'), 'Yes'), reference(variables('mgmtPublicIPAddressId')).ipAddress, reference(variables('mgmtNicId')).ipConfigurations[0].properties.privateIPAddress),
+{%- elif type =='standalone'-%}
+  reference(variables('mgmtPublicIPAddressId')).ipAddress,
+{%- endif -%}
+{%- if type =='failover' -%}
+  {%- if lb_method  == 'via-lb' and nics =='1' -%}
+    variables('singleQuote'), variables('singleQuote'), ' --big-ip-mgmt-port {{ 8443 + i}}',
+  {%- endif -%}
+  {%- if lb_method == 'api' or (lb_method == 'via-lb' and nics == '3') -%}
+    {%- if stack == 'existing-stack' -%}
+      if(equals(parameters('provisionPublicIP'),'Yes'), reference(concat(variables('mgmtPublicIPAddressId'), '{{ i }}')).ipAddress, reference(concat(variables('mgmtNicId'), '{{ i }}')).ipConfigurations[0].properties.privateIPAddress),
+    {%- else -%}
+      reference(concat(variables('mgmtPublicIPAddressId'), '{{ i }}')).ipAddress,
+    {%- endif -%}
+  {%- endif -%}
+{%- endif -%}
+{%- endmacro -%}
+
+{%- set big_ip_ext_params -%}
+    {%- if type == 'autoscale' and solution in ('waf', 'ltm') -%}
+      {%- if lb_method=='dns' -%} --bigIpExtMgmtAddress via-api --bigIpExtMgmtPort ', variables('bigIpMgmtPort') {%- endif -%}
+      {%- if lb_method=='via-lb' -%} --bigIpExtMgmtAddress private --bigIpExtMgmtPort via-api --clusterUpdateInterval 300'{% endif -%}
+    {%- endif -%}
+{%- endset -%}
+
+{% set static_license1_command = ", ' --bigIqAddress ', parameters('bigIqAddress'), ' --bigIqUsername ', parameters('bigIqUsername'), ' --bigIqPassword /config/cloud/.bigIqPasswd --bigIqLicensePoolName ', parameters('bigIqLicensePoolName'), ' --bigIqExtraLicenseOptions \\\\\"$(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ')\\\\\" ".replace("\"", "\\\"") ~big_ip_ext_params~", ' --static --natBase mgmtnatpool-static. --externalTag key:f5ClusterTag,value:', variables('dnsLabel')".replace("\"", "\\\"") %}
+
+{%- macro license1_command(vm) -%}
+{%- if license_type == 'byol' -%}
+' --license ', parameters('licenseKey{{vm +1}}'),
+{%- endif -%}
+{%- if license_type in ('bigiq', 'bigiq-payg') -%}
+  {%- if type == 'autoscale' and  solution in ('ltm', 'waf')  and lb_method in ('via-lb', 'dns') -%}
+    {%- if license_type == 'bigiq-payg' -%}
+, ' --externalTag key:f5ClusterTag,value:', variables('dnsLabel')
+    {%- else -%}
+, ' --bigIqAddress ', parameters('bigIqAddress'), ' --bigIqUsername ', parameters('bigIqUsername'), ' --bigIqPassword /config/cloud/.bigIqPasswd --bigIqLicensePoolName ', parameters('bigIqLicensePoolName'), ' --bigIqExtraLicenseOptions \\\"$(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ')\\\" {{ big_ip_ext_params }}
+    {%- endif -%}
+  {%- else -%}
+' --license-pool --big-iq-host ', parameters('bigIqAddress'), ' --big-iq-user ', parameters('bigIqUsername'), ' --big-iq-password-uri file:///config/cloud/.bigIqPasswd --big-iq-password-encrypted --license-pool-name ', parameters('bigIqLicensePoolName'), ' $(format_args sku-keyword-1:', parameters('bigIqLicenseSkuKeyWord1'), ',unit-of-measure:', parameters('bigIqLicenseUnitOfMeasure'), ') --big-ip-mgmt-address ', {{ big_iq_mgmt_ip_ref(vm) }}
+  {%- endif -%}
+{%- endif -%}
+{%- endmacro -%}
+
+
+

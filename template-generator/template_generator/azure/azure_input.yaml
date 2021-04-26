@@ -1,0 +1,586 @@
+  #  azure-> supported -> faiover - > same-net -> via-api ->n-nic       azure-> supported -> standalone -> 1nic ->existing-stack
+  - name: cloud
+    value: azure
+    path: f5-azure-arm-templates
+    output: azure_standalone.json
+    subtypes:
+     - name: state
+       value: supported
+       path: supported
+       subtypes:
+        - name: type
+          value: standalone
+          path: standalone
+          subtypes:
+          - name: nics
+            value: '1'
+            path: 1nic
+            subtypes:
+            - name: stack
+              value: existing-stack
+              path: existing-stack
+              subtypes:
+                - name: license_type
+                  value: byol
+                  path: byol
+                - name: license_type
+                  value: payg
+                  path: payg
+                - name: license_type
+                  value: bigiq
+                  path: bigiq
+          - name: nics
+            value: '2'
+            path: 2nic
+            subtypes:
+              - name: stack
+                value: existing-stack
+                path: existing-stack
+                subtypes:
+                - name: license_type
+                  value: byol
+                  path: byol
+                - name: license_type
+                  value: payg
+                  path: payg
+                - name: license_type
+                  value: bigiq
+                  path: bigiq
+          - name: nics
+            value: '3'
+            path: 3nic
+            subtypes:
+             - name: stack
+               value: existing-stack
+               path: existing-stack
+               subtypes:
+                - name: license_type
+                  value: byol
+                  path: byol
+                - name: license_type
+                  value: payg
+                  path: payg
+                - name: license_type
+                  value: bigiq
+                  path: bigiq
+          - name: nics
+            value: n
+            path: n-nic
+            subtypes:
+              - name: stack
+                value: existing-stack
+                path: existing-stack
+                subtypes:
+                  - name: license_type
+                    value: byol
+                    path: byol
+                  - name: license_type
+                    value: payg
+                    path: payg
+                  - name: license_type
+                    value: bigiq
+                    path: bigiq
+        - name: type
+          value: failover
+          path: failover
+          subtypes:
+          - name: net
+            value: same-net
+            path: same-net
+            subtypes:
+            - name: lb_method
+              value: api
+              path: via-api
+              subtypes:
+              - name: nics
+                value: 'n'
+                path: 'n-nic'
+                subtypes:
+                - name: stack
+                  value: existing-stack
+                  path: existing-stack
+                  subtypes:
+                    - name: license_type
+                      value: byol
+                      path: byol
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+            - name: lb_method
+              value: via-lb
+              path: via-lb
+              subtypes:
+              - name: nics
+                value: '1'
+                path: '1nic'
+                subtypes:
+                - name: stack
+                  value: existing-stack
+                  path: existing-stack
+                  subtypes:
+                    - name: license_type
+                      value: byol
+                      path: byol
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+              - name: nics
+                value: '3'
+                path: '3nic'
+                subtypes:
+                - name: stack
+                  value: existing-stack
+                  path: existing-stack
+                  subtypes:
+                    - name: license_type
+                      value: byol
+                      path: byol
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+        - name: type
+          value: autoscale
+          path: autoscale
+          subtypes:
+            - name: solution
+              value: ltm
+              path: ltm
+              subtypes:
+              - name: lb_method
+                value: dns
+                path: via-dns
+                subtypes:
+                - name: nics
+                  value: '1'
+                  path: '1nic'
+                  subtypes:
+                  - name: stack
+                    value: existing-stack
+                    path: existing-stack
+                    subtypes:
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+              - name: lb_method
+                value: via-lb
+                path: via-lb
+                subtypes:
+                - name: nics
+                  value: '1'
+                  path: '1nic'
+                  subtypes:
+                  - name: stack
+                    value: existing-stack
+                    path: existing-stack
+                    subtypes:
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+            - name: solution
+              value: waf
+              path: waf
+              subtypes:
+              - name: lb_method
+                value: dns
+                path: via-dns
+                subtypes:
+                - name: nics
+                  value: '1'
+                  path: '1nic'
+                  subtypes:
+                  - name: stack
+                    value: existing-stack
+                    path: existing-stack
+                    subtypes:
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+              - name: lb_method
+                value: via-lb
+                path: via-lb
+                subtypes:
+                - name: nics
+                  value: '1'
+                  path: '1nic'
+                  subtypes:
+                  - name: stack
+                    value: existing-stack
+                    path: existing-stack
+                    subtypes:
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+     - name: state
+       value: experimental
+       path: experimental
+       subtypes:
+        - name: type
+          value: bigiq
+          path: bigiq
+          subtypes:
+            - name: bigiq_feature
+              value: licenseManagement
+              path: licenseManagement
+              subtypes:
+              - name: bigiq_solution
+                value: cluster
+                path: cluster
+                subtypes:
+                - name: nics
+                  value: '2'
+                  path: 2nic
+                  subtypes:
+                    - name: stack
+                      value: existing-stack
+                      path: existing-stack
+                      subtypes:
+                        - name: license_type
+                          value: byol
+                          path: byol
+                    - name: stack
+                      value: new-stack
+                      path: new-stack
+                      subtypes:
+                        - name: license_type
+                          value: byol
+                          path: byol
+              - name: bigiq_solution
+                value: standalone
+                path: standalone
+                subtypes:
+                - name: nics
+                  value: '2'
+                  path: 2nic
+                  subtypes:
+                  - name: stack
+                    value: existing-stack
+                    path: existing-stack
+                    subtypes:
+                    - name: license_type
+                      value: byol
+                      path: byol
+        - name: type
+          value: autoscale
+          path: autoscale
+          subtypes:
+            - name: solution
+              value: waf
+              path: waf
+              subtypes:
+              - name: lb_method
+                value: dns
+                path: via-dns
+                subtypes:
+                - name: nics
+                  value: '1'
+                  path: '1nic'
+                  subtypes:
+                  - name: stack
+                    value: new-stack
+                    path: new-stack
+                    subtypes:
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+              - name: lb_method
+                value: via-lb
+                path: via-lb
+                subtypes:
+                - name: nics
+                  value: '1'
+                  path: '1nic'
+                  subtypes:
+                  - name: stack
+                    value: new-stack
+                    path: new-stack
+                    subtypes:
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+              - name: lb_method
+                value: via-lb
+                path: via-lb
+                subtypes:
+                - name: nics
+                  value: '1'
+                  path: '1nic'
+                  subtypes:
+                  - name: stack
+                    value: new-stack
+                    path: new-stack
+                    subtypes:
+                    - name: license_type
+                      value: bigiq-payg
+                      path: bigiq-payg
+                  - name: stack
+                    value: existing-stack
+                    path: existing-stack
+                    subtypes:
+                    - name: license_type
+                      value: bigiq-payg
+                      path: bigiq-payg
+            - name: solution
+              value: ltm
+              path: ltm
+              subtypes:
+              - name: lb_method
+                value: dns
+                path: via-dns
+                subtypes:
+                - name: nics
+                  value: '1'
+                  path: '1nic'
+                  subtypes:
+                  - name: stack
+                    value: new-stack
+                    path: new-stack
+                    subtypes:
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+              - name: lb_method
+                value: via-lb
+                path: via-lb
+                subtypes:
+                - name: nics
+                  value: '1'
+                  path: '1nic'
+                  subtypes:
+                  - name: stack
+                    value: new-stack
+                    path: new-stack
+                    subtypes:
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+              - name: lb_method
+                value: via-lb
+                path: via-lb
+                subtypes:
+                - name: nics
+                  value: '1'
+                  path: '1nic'
+                  subtypes:
+                  - name: stack
+                    value: new-stack
+                    path: new-stack
+                    subtypes:
+                    - name: license_type
+                      value: bigiq-payg
+                      path: bigiq-payg
+                  - name: stack
+                    value: existing-stack
+                    path: existing-stack
+                    subtypes:
+                    - name: license_type
+                      value: bigiq-payg
+                      path: bigiq-payg
+        - name: type
+          value: standalone
+          path: standalone
+          subtypes:
+          - name: nics
+            value: '1'
+            path: 1nic
+            subtypes:
+            - name: stack
+              value: new-stack
+              path: new-stack
+              subtypes:
+                - name: license_type
+                  value: byol
+                  path: byol
+                - name: license_type
+                  value: payg
+                  path: payg
+                - name: license_type
+                  value: bigiq
+                  path: bigiq
+          - name: nics
+            value: '2'
+            path: 2nic
+            subtypes:
+              - name: stack
+                value: new-stack
+                path: new-stack
+                subtypes:
+                 - name: license_type
+                   value: byol
+                   path: byol
+                 - name: license_type
+                   value: payg
+                   path: payg
+                 - name: license_type
+                   value: bigiq
+                   path: bigiq
+          - name: nics
+            value: '3'
+            path: 3nic
+            subtypes:
+             - name: stack
+               value: new-stack
+               path: new-stack
+               subtypes:
+                - name: license_type
+                  value: byol
+                  path: byol
+                - name: license_type
+                  value: payg
+                  path: payg
+                - name: license_type
+                  value: bigiq
+                  path: bigiq
+             - name: stack
+               value: learning-stack
+               path: learning-stack
+               subtypes:
+                - name: license_type
+                  value: byol
+                  path: byol
+                - name: license_type
+                  value: payg
+                  path: payg
+                - name: license_type
+                  value: bigiq
+                  path: bigiq
+          - name: nics
+            value: n
+            path: n-nic
+            subtypes:
+              - name: stack
+                value: new-stack
+                path: new-stack
+                subtypes:
+                - name: license_type
+                  value: byol
+                  path: byol
+                - name: license_type
+                  value: payg
+                  path: payg
+                - name: license_type
+                  value: bigiq
+                  path: bigiq
+        - name: type
+          value: failover
+          path: failover
+          subtypes:
+          - name: net
+            value: same-net
+            path: same-net
+            subtypes:
+            - name: lb_method
+              value: via-lb
+              path: via-lb
+              subtypes:
+              - name: nics
+                value: '1'
+                path: '1nic'
+                subtypes:
+                - name: stack
+                  value: new-stack
+                  path: new-stack
+                  subtypes:
+                    - name: license_type
+                      value: byol
+                      path: byol
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+              - name: nics
+                value: '3'
+                path: '3nic'
+                subtypes:
+                - name: stack
+                  value: new-stack
+                  path: new-stack
+                  subtypes:
+                    - name: license_type
+                      value: byol
+                      path: byol
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+            - name: lb_method
+              value: api
+              path: via-api
+              subtypes:
+              - name: nics
+                value: 'n'
+                path: 'n-nic'
+                subtypes:
+                - name: stack
+                  value: new-stack
+                  path: new-stack
+                  subtypes:
+                    - name: license_type
+                      value: byol
+                      path: byol
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+                - name: stack
+                  value: learning-stack
+                  path: learning-stack
+                  subtypes:
+                    - name: license_type
+                      value: byol
+                      path: byol
+                    - name: license_type
+                      value: payg
+                      path: payg
+                    - name: license_type
+                      value: bigiq
+                      path: bigiq
+
+
+                      # General:
+# template_list="standalone/1nic standalone/2nic standalone/3nic standalone/n-nic failover/same-net/via-lb/1nic failover/same-net/via-lb/3nic failover/same-net/via-api/n-nic"
+# stack_list="new-stack existing-stack production-stack"
+
+# solutions:
+# template_list="autoscale/ltm/via-lb/1nic autoscale/ltm/via-dns/1nic autoscale/waf/via-lb/1nic autoscale/waf/via-dns/1nic"
+
+# experimental:
+# template_list="standalone/1nic standalone/2nic standalone/3nic standalone/n-nic failover/same-net/via-lb/1nic failover/same-net/via-lb/3nic failover/same-net/via-api/n-nic"
