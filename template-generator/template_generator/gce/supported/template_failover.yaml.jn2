@@ -1,0 +1,121 @@
+{%- import 'constants.jn2'  as constants with context -%}
+# Copyright {{ constants.copyright }} F5 Networks All rights reserved.
+#
+# Version {{ constants.version }}
+
+# NOTE: When filling out the parameter values for this deployment:
+# Deployments leverage .schema files to help enforce requirements/parameter typing and defaults.
+# '###' Will be used above each parameter and contain description of values required
+# REQUIRED parameters values are left empty and value MUST be entered.
+# OPTIONAL parameters contain defaults (same default from schema file). However, some are deployment specific and generally should be modified to match your environment.
+
+# CAUTION:
+# Use single quotes around strings when supplying special characters or list of values. Example: applicationPort '443 444 445'.
+# Required fields left empty or faulty values (ex. typos, incorrect timezone strings, etc.)
+# can result in various classes of failures, from template launch failures to silent BIG-IP deployment failures.
+# Use the Troubleshooting section at the bottom of this .yaml to understand if the template and BIG-IP deployed correctly.
+
+imports:
+- path: {{ name }}.py
+resources:
+- name: same-net-cluster-{{nics}}nic-setup
+  type: {{ name }}.py
+  properties:
+   ### (REQUIRED) Enter the Google Region in which you want to deploy BIG-IP, for example 'us-west1'.
+   region:
+   ### (REQUIRED) Enter the availability zone where you want to deploy the BIG-IP VE instance, for example 'us-west1-a'.
+   availabilityZone1:
+{%- if lb_method != "via-lb"%}
+   ### (REQUIRED) Enter the availability zone where you want to deploy the BIG-IP VE instance, for example 'us-west1-b'.
+   availabilityZone2:
+{%- endif %}
+   ### (REQUIRED) Specify the name of the network to use for management traffic, for example 'my-management-network'.
+   mgmtNetwork:
+   ### (REQUIRED) Specify the name of the subnet to use for management traffic, for example 'my-management-subnetwork'.
+   mgmtSubnet:
+   ### (REQUIRED) This field restricts management access to specific networks or addresses. Enter an IP address or address range in CIDR notation separated by a space.  **IMPORTANT** This solution requires your Management's subnet at a minimum in order for the peers to cluster.  For example, '10.0.11.0/24 55.55.55.55/32' where 10.0.11.0/24 is your local management subnet and 55.55.55.55/32 is a specific address (ex. orchestration host/desktop/etc.).
+   restrictedSrcAddress:
+{%- if lb_method == "via-lb"%}
+   ### (REQUIRED) This field restricts web application access (ports 80 and 443) to a specific network or address. Enter an IP address or address range in CIDR notation separated by a space.
+   restrictedSrcAddressApp:
+   ### (REQUIRED) This field restricts web application access to a specific private network or address. Enter an IP address or address range in CIDR notation separated by a space. This is only required when using an internal load balancer (numberOfForwardingRules equals 1).
+   restrictedSrcAddressIntApp:
+{%- endif %}
+{%- if nics in ("2", "3")%}
+   ### (REQUIRED) Specify the Network name for BIG-IP application traffic, for example 'my-application-network'.
+   network1:
+   ### (OPTIONAL) If using a shared VPC, specify the name of the host project to use for management traffic. Leave default value of None when not using shared VPC. **Note** template does not create firewall policy for shared VPC. Create policy on shared VPC within in host project to allow appropriate traffic.
+   network1SharedVpc: None
+   ### (REQUIRED) Specify the subnet of the Network that the BIG-IP should use for application traffic, for example 'my-application-subnetwork'.
+   subnet1:
+   ### (OPTIONAL) Enter None if alias IP failover is not required. Enter the alias IP address(es) to be used for application traffic, including CIDR suffix. This address must belong to the subnet noted above in key 'subnet1'. A list of alias IPs can be provided, separated by a space. For example, 'IE 10.x.x.16/28 10.x.x.32/28'.
+   aliasIp: None
+ {%- if stack == "existing-stack" %}
+   ### (OPTIONAL) Enter the number of forwarding rules to create, for example '1'.  All integers from 1 to the max quota for the forwarding rules resource type are allowed.
+   numberOfForwardingRules: 1
+ {%- endif %}
+ {%- if lb_method == "via-lb"%}
+   ### (OPTIONAL) Specify the number of forwarding rules to create for internal application traffic, for example, '0' or '1'.
+   numberOfIntForwardingRules: 0
+ {%- endif %}
+ {%- if nics == "3"  %}
+   ### (REQUIRED) Specify the Network name for BIG-IP internal application traffic, for example 'my-internal-network'.
+   network2:
+   ### (REQUIRED) Specify the name of the Subnet of the Network that BIG-IP should use for internal application traffic, for example 'my-internal-subnetwork'.
+   subnet2:
+ {%- endif %}
+{%- endif %}
+{%- if license_type == "byol"%}
+   ### (REQUIRED) Enter the BIG-IP license key, for example 'CTASW-GVZHE-FYVIM-XMOUP-SJSTBXX'.
+   licenseKey1:
+   ### (REQUIRED) Enter the second BIG-IP license key.
+   licenseKey2:
+{%- endif %}
+   ## (OPTIONAL) Provision Public IP addresses for BIG-IP Network Interfaces. By default it is set to provision public IPs.
+   provisionPublicIP: yes
+   ### If you would like to view all available images, run the following command from the **gcloud** command line: ```$ gcloud compute images list --project f5-7626-networks-public | grep f5```
+   ### (OPTIONAL) BIG-IP image, valid choices include:
+   {{ constants.images_list }}
+   imageName: {{ constants.images_list_default}}
+   ### (OPTIONAL) Instance type assigned to BIG-IP, for example 'n1-standard-4'.
+   instanceType: n1-standard-4
+   ### (OPTIONAL) Enter the BIG-IP Management Port, the default is '443'.
+   mgmtGuiPort: 443
+{%- if lb_method == "via-lb" %}
+   ### (OPTIONAL) List application port(s) separated by a space, for example '443' or '443 444 445'.
+   applicationPort: 443
+   ### (OPTIONAL) List application port(s) for internal google load balancer separated by a space. A maximum of 5 ports can be specified. This is only required when using internal loadbalancer (numberOfForwardingRules equals 1).
+   applicationIntPort: 443
+{%- endif %}
+   ## (OPTIONAL) List NTP servers separated by a space, for example '0.pool.ntp.org 1.pool.ntp.org'. The default is 'time.google.com'.
+   ntpServer: time.google.com
+   ## (OPTIONAL) Enter the Olson timezone string from /usr/share/zoneinfo. The default is 'UTC'. See the TZ column here (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for legal values. For example, 'US/Eastern'.
+   timezone: UTC
+   ## (OPTIONAL) Enter a comma-separated list of modules and provisioning level, for example 'ltm:nominal' or 'ltm:nominal,asm:nominal'.
+   bigIpModules: ltm:nominal
+   ### (REQUIRED) Enter the Google service account to use for failover API calls, for example 'username@projectname.iam.serviceaccount.com'.
+   serviceAccount:
+   ### (OPTIONAL) Enter the Google service account to use for autoscale API calls, for example 'username@projectname.iam.serviceaccount.com'. Please note that this service account is necessary for one BIG-IP to communicate with the other, so the permissions should include access to the storage bucket. Refer [here](https://clouddocs.f5.com/products/extensions/f5-cloud-failover/latest/userguide/gcp.html#create-and-assign-an-iam-role) for instructions on how to create the IAM service account with sufficient access.
+   allowUsageAnalytics: yes
+   ### (OPTIONAL) This deployment can provide F5 with high-level device use information to optimize development resources. If you select **no** the information is not sent.
+   allowPhoneHome: yes
+   ### (OPTIONAL) Log setting, used to set log level on scripts used during deployment. Acceptable values are - error, warn, info, verbose, debug, silly. The default is 'info'.
+   logLevel: info
+   ### (OPTIONAL) URL for the AS3 declaration JSON file to be deployed. If left at **default**, the recommended F5 WAF configuration will be applied. Enter **none** to deploy without a service configuration. For example, ' https://cdn.f5.com/product/cloudsolutions/declarations/sample_01.json '
+   declarationUrl: default
+
+
+# TROUBLESHOOTING:
+# * If template did not successfully deploy, go to console.cloud.google.com Navigation Menu -> Deployment Manager -> Your Deployment Name for more details
+#   TIP: See "Expanded Config" to see what the final template that was rendered/created with python script and parameters you provided
+# * If template succeeded, wait ~ 6-10 Minutes (Instance needs to swap management NIC and reboot).
+#.      * Try Logging in via SSH to confirm BIG-IP deployment was successful (for instance, if startup scripts completed as expected on the BIG-IPs)
+#           To obtain Management IP (eth0 on Single NIC, eth1 on Multi-NIC BIG-IP):
+#           > Go to Console -> Compute Engine -> VM Instances -> YOUR_INSTANCE_NAME -> Network Interfaces
+#           > gcloud compute instances describe YOUR_INSTANCE_NAME --zone YOUR_ZONE --format="text(networkInterfaces)"
+#         Check logs: /var/log/cloud/google/*, /var/log/cloud*, /var/log/restnoded/restnoded.log, etc.
+#       * If not able to log in, check "Serial port 1 (console)" output for any errors.
+#           > Go to Console -> Compute Engine -> VM Instances -> YOUR_INSTANCE_NAME -> Logs
+#           > gcloud compute instances get-serial-port-output YOUR_INSTANCE_NAME --port 1 --zone YOUR_ZONE
+#           See: https://cloud.google.com/compute/docs/instances/viewing-serial-port-output
+#         * See README for additional guidance on troubleshooting, filing issues, getting Support, etc.

@@ -1,0 +1,55 @@
+ADDITIONAL NIC LOCATION: OPTIONAL
+ADDTL NIC PARAM: ',"numberOfAdditionalNics":{"value":<NUMBER OF ADDITIONAL NICS>},"additionalNicLocation":{"value":"<ADDITIONAL
+  NIC LOCATION>"}'
+BASE VLAN NAME: external;internal
+BIGIP MODULES: ltm:nominal
+BIGIP VERSION: 15.1.201000
+BIGIQ CONFIG FILE: ''
+BRANCH: master
+CLIENT ID: d40aad56-b0bd-466d-a6c4-6c9c4d0f9aa7
+CONFIG FILES: .passwd;.azCredentials
+CREATE PUBLIC IP: 'Yes'
+CREATE PUBLIC IP APP: 'null'
+CUSTOM IMAGE: OPTIONAL
+CUSTOM IMAGE MAP: ''
+CUSTOM IMAGE MAP LIC: OPTIONAL
+CUSTOM IMAGE PARAM: OPTIONAL
+DECLARATION URL: NOT_SPECIFIED
+DNS LABEL: ',"dnsLabel":{"value":"<RESOURCE GROUP>"}'
+EXT ALB EXISTS: 'No'
+EXTERNAL IP COUNT: 1
+IMAGE NAME: Best25Mbps
+IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly:15.1.201000
+INSTANCE TYPE: Standard_DS4_v2
+LICENSE PARAM: ''
+LICENSE POOL: clpv2
+LICENSE POOL PARAM: ''
+LICENSE TYPE: payg
+MGMT PIP1: mgmt-pip0
+MGMT PIP2: mgmt-pip1
+NETWORK PARAM: ',"instanceName":{"value":"f5vm"},"numberOfExternalIps":{"value":<EXTERNAL
+  IP COUNT>}'
+NIC COUNT: 3
+NTP SERVER: 0.pool.ntp.org
+NUMBER OF ADDITIONAL NICS: 0
+PASSWORD TYPE: password
+PHONEHOME: 'No'
+PROVISION INT LB: 'null'
+REGION: westus2
+RESOURCE GROUP: dd-cl-api-<DEWPOINT JOB ID>
+SEQUENCE NUMBER: 0
+SERVICE PRINCIPAL: D9T91uX_A_8.v6KNgOX6FD~F2rbU.kB9y_
+SOLUTION LOGS: install.log;onboard.log;cluster.log;network.log
+SSH PORT: 22
+STACK PARAM: ''
+STACK TYPE: existing-stack
+STACK TYPE SHORT: es
+TEMPLATE URL: https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/<BRANCH>/supported/failover/same-net/via-api/n-nic/<STACK
+  TYPE>/<LICENSE TYPE>/azuredeploy.json
+TENANT ID: d106871e-7b91-4733-8423-f98586303b68
+TIMEZONE: UTC
+USAGE ANALYTICS CHOICE: 'No'
+USER IDENTITY: <RESOURCE GROUP>id
+VNET PARAM: ',"vnetName":{"value":"existingStackVnet"},"vnetResourceGroupName":{"value":"<VNET
+  RESOURCE GROUP>"},"mgmtSubnetName":{"value":"mgmt"},"mgmtIpAddressRangeStart":{"value":"DYNAMIC"},"externalSubnetName":{"value":"external"},"externalIpSelfAddressRangeStart":{"value":"DYNAMIC"},"externalIpAddressRangeStart":{"value":"DYNAMIC"},"internalSubnetName":{"value":"internal"},"internalIpAddressRangeStart":{"value":"DYNAMIC"}'
+VNET RESOURCE GROUP: <RESOURCE GROUP>

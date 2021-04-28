@@ -1,0 +1,28 @@
+{%- import 'constants.jn2'  as constants with context -%}
+# Copyright {{ constants.copyright }} F5 Networks All rights reserved.
+#
+# Version {{ constants.version }}
+
+imports:
+- path: f5-full-stack-{{ license_type }}-{{ nics }}nic-bigip.py
+resources:
+- name: bigip-{{ nics }}nic-setup
+  type: f5-full-stack-{{ license_type }}-{{ nics }}nic-bigip.py
+  properties:
+   ### Enter the availability zone where you want to deploy the BIG-IP VE instance, for example 'us-west1-a'.
+   availabilityZone1: <availability zone>
+   ### Enter the BIG-IP license key, for example 'CTASW-GVZHE-FYVIM-XMOUP-SJSTBXX'.
+   licenseKey1: <lic key>
+   ### BIG-IP image, valid choices include:
+   {{ constants.images_list }}
+   imageName: <image>
+   ### Instance type assigned to the BIG-IP, for example 'n1-standard-4'.
+   instanceType: n1-standard-4
+   ### Enter the BIG-IP Management Port, the default is '8443'.
+   manGuiPort: 8443
+   ### This deployment can send anonymous statistics to F5 to help us determine how to improve our solutions. If you enter **no** statistics are not sent.
+   allowUsageAnalytics: 'yes'
+   ### URL for the AS3 declaration JSON file to be deployed. If left at **default**, the recommended F5 WAF configuration will be applied. Enter **none** to deploy without a service configuration. For example, ' https://cdn.f5.com/product/cloudsolutions/declarations/sample_01.json '
+   declarationUrl: default
+   ## Enter a comma-separated list of modules and provisioning level, for example 'ltm:nominal' or 'ltm:nominal,asm:nominal'.
+   bigIpModules: asm:nominal

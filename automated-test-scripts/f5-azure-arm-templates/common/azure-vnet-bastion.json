@@ -1,0 +1,482 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "stackType": {
+            "type": "string",
+            "defaultValue": "existing-stack",
+            "allowedValues": [
+                "existing-stack",
+                "production-stack",
+                "new-stack"
+            ]
+        },
+        "routeTableName": {
+            "type": "string",
+            "defaultValue": "existingRouteTable",
+            "metadata": {
+                "description": "vNet name"
+            }
+        },
+        "vnetName": {
+            "type": "string",
+            "defaultValue": "existingStackVnet",
+            "metadata": {
+                "description": "vNet name"
+            }
+        },
+        "vnetAddressPrefix": {
+            "type": "string",
+            "defaultValue": "192.168.0.0/16",
+            "metadata": {
+                "description": "Address prefix"
+            }
+        },
+        "mgmtSubnetPrefix": {
+            "type": "string",
+            "defaultValue": "192.168.1.0/24",
+            "metadata": {
+                "description": "Management Subnet Prefix"
+            }
+        },
+        "mgmtSubnetName": {
+            "type": "string",
+            "defaultValue": "mgmt",
+            "metadata": {
+                "description": "Subnet 1 Name"
+            }
+        },
+        "internalSubnetPrefix": {
+            "type": "string",
+            "defaultValue": "192.168.2.0/24",
+            "metadata": {
+                "description": "Internal subnet Prefix"
+            }
+        },
+        "internalSubnetName": {
+            "type": "string",
+            "defaultValue": "internal",
+            "metadata": {
+                "description": "Subnet 2 Name"
+            }
+        },
+        "externalSubnetPrefix": {
+            "type": "string",
+            "defaultValue": "192.168.3.0/24",
+            "metadata": {
+                "description": "External Subnet Prefix"
+            }
+        },
+        "externalSubnetName": {
+            "type": "string",
+            "defaultValue": "external",
+            "metadata": {
+                "description": "Subnet 3 Name"
+            }
+        },
+        "subnet4Prefix": {
+            "type": "string",
+            "defaultValue": "192.168.4.0/24",
+            "metadata": {
+                "description": "Subnet 4 Prefix"
+            }
+        },
+        "subnet4Name": {
+            "type": "string",
+            "defaultValue": "internal2",
+            "metadata": {
+                "description": "Subnet 4 Name"
+            }
+        },
+        "subnet5Prefix": {
+            "type": "string",
+            "defaultValue": "192.168.5.0/24",
+            "metadata": {
+                "description": "Subnet 5 Prefix"
+            }
+        },
+        "subnet5Name": {
+            "type": "string",
+            "defaultValue": "internal3",
+            "metadata": {
+                "description": "Subnet 5 Name"
+            }
+        },
+        "subnet6Prefix": {
+            "type": "string",
+            "defaultValue": "192.168.6.0/24",
+            "metadata": {
+                "description": "Subnet 6 Prefix"
+            }
+        },
+        "subnet6Name": {
+            "type": "string",
+            "defaultValue": "internal4",
+            "metadata": {
+                "description": "Subnet 6 Name"
+            }
+        },
+        "subnet7Prefix": {
+            "type": "string",
+            "defaultValue": "192.168.7.0/24",
+            "metadata": {
+                "description": "Subnet 7 Prefix"
+            }
+        },
+        "subnet7Name": {
+            "type": "string",
+            "defaultValue": "internal5",
+            "metadata": {
+                "description": "Subnet 7 Name"
+            }
+        },
+        "subnet8Prefix": {
+            "type": "string",
+            "defaultValue": "192.168.8.0/24",
+            "metadata": {
+                "description": "Subnet 8 Prefix"
+            }
+        },
+        "subnet8Name": {
+            "type": "string",
+            "defaultValue": "internal6",
+            "metadata": {
+                "description": "Subnet 8 Name"
+            }
+        },
+        "vmName": {
+            "type": "string",
+            "defaultValue": "bastion",
+            "metadata": {
+                "description": "String used as a base for naming resources. Must be 3-61 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended."
+            },
+            "maxLength": 61
+        },
+        "adminUsername": {
+            "type": "string",
+            "defaultValue": "dewpoint",
+            "metadata": {
+                "description": "Admin username on all VMs."
+            }
+        },
+        "adminKey": {
+            "metadata": {
+                "description": "SSH public key to login to the Virtual Machine. Note: This should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**."
+            },
+            "type": "securestring"
+        },
+        "tagValues": {
+            "defaultValue": {
+                "application": "APP",
+                "cost": "COST",
+                "environment": "ENV",
+                "group": "GROUP",
+                "owner": "OWNER"
+            },
+            "type": "object"
+        }
+    },
+    "variables": {
+        "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+        "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', parameters('mgmtSubnetName'))]",
+        "namingInfix": "[toLower(substring(concat(parameters('vmName'), uniqueString(resourceGroup().id)), 0, 9))]",
+        "newStorageAccountSuffix": "[concat(variables('namingInfix'), '-sa')]",
+        "bastionSAName": "[concat(uniqueString(concat(resourceGroup().id, variables('newStorageAccountSuffix'), 'bastionsa')), 'jb')]",
+        "bastionOSDiskName": "[concat(parameters('vmName'), '-osdisk')]",
+        "bastionVHDContainerName": "[concat(parameters('vmName'), '-vhd')]",
+        "bastionVmName": "[concat(parameters('vmName'), '-vm')]",
+        "bastionIPConfigName": "[concat(parameters('vmName'), '-ipconfig')]",
+        "bastionNicName": "[concat(parameters('vmName'), '-nic')]",
+        "storageAccountType": "Standard_LRS",
+        "publicIPAddressName": "[concat(parameters('vmName'), '-pip')]",
+        "adminKey": "[replace(parameters('adminKey'),'\\n', '\n')]",
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+                "publicKeys": [
+                    {
+                        "keyData": "[variables('adminKey')]",
+                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]"
+                    }
+                ]
+            }
+        },
+        "tagValues": "[parameters('tagValues')]",
+        "cfeTag": {
+            "f5_cloud_failover_label": "[replace(resourceGroup().name, '-vnet', '')]"
+        },
+        "cloudFailoverTagValue": "[union(if(empty(variables('tagValues')), json('null'), variables('tagValues')), variables('cfeTag'))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2018-10-01",
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[parameters('vnetName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('vnetAddressPrefix')]"
+                    ]
+                }
+            },
+            "resources": [
+                {
+                    "type": "Microsoft.Network/routeTables",
+                    "name": "[parameters('routeTableName')]",
+                    "apiVersion": "2018-10-01",
+                    "location": "[resourceGroup().location]",
+                    "properties": {
+                        "routes": [
+                          {
+                            "name": "route1",
+                            "properties": {
+                              "addressPrefix": "192.168.3.0/24",
+                              "nextHopType": "VirtualAppliance",
+                              "nextHopIpAddress": "192.168.3.4"
+                            }
+                          }
+                        ]
+                    },
+                    "dependsOn": [
+                        "[parameters('vnetName')]"
+                    ],
+                    "tags": "[variables('cloudFailoverTagValue')]"
+                },
+                {
+                    "apiVersion": "2018-10-01",
+                    "type": "subnets",
+                    "location": "[resourceGroup().location]",
+                    "name": "[parameters('mgmtSubnetName')]",
+                    "dependsOn": [
+                        "[parameters('vnetName')]"
+                    ],
+                    "properties": {
+                        "addressPrefix": "[parameters('mgmtSubnetPrefix')]"
+                    }
+                },
+                {
+                    "apiVersion": "2018-10-01",
+                    "type": "subnets",
+                    "location": "[resourceGroup().location]",
+                    "name": "[parameters('internalSubnetName')]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Network/routeTables/', parameters('routeTableName'))]",
+                        "[parameters('vnetName')]",
+                        "[parameters('mgmtSubnetName')]"
+                    ],
+                    "properties": {
+                        "addressPrefix": "[parameters('internalSubnetPrefix')]",
+                        "routeTable": {
+                            "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTableName'))]"
+                        }
+                    }
+                },
+                {
+                    "apiVersion": "2018-10-01",
+                    "type": "subnets",
+                    "location": "[resourceGroup().location]",
+                    "name": "[parameters('externalSubnetName')]",
+                    "dependsOn": [
+                        "[parameters('vnetName')]",
+                        "[parameters('internalSubnetName')]"
+                    ],
+                    "properties": {
+                        "addressPrefix": "[parameters('externalSubnetPrefix')]"
+                    }
+                },
+                {
+                    "apiVersion": "2018-10-01",
+                    "type": "subnets",
+                    "location": "[resourceGroup().location]",
+                    "name": "[parameters('subnet4Name')]",
+                    "dependsOn": [
+                        "[parameters('vnetName')]",
+                        "[parameters('externalSubnetName')]"
+                    ],
+                    "properties": {
+                        "addressPrefix": "[parameters('subnet4Prefix')]"
+                    }
+                },
+                {
+                    "apiVersion": "2018-10-01",
+                    "type": "subnets",
+                    "location": "[resourceGroup().location]",
+                    "name": "[parameters('subnet5Name')]",
+                    "dependsOn": [
+                        "[parameters('vnetName')]",
+                        "[parameters('subnet4Name')]"
+                    ],
+                    "properties": {
+                        "addressPrefix": "[parameters('subnet5Prefix')]"
+                    }
+                },
+                {
+                    "apiVersion": "2018-10-01",
+                    "type": "subnets",
+                    "location": "[resourceGroup().location]",
+                    "name": "[parameters('subnet6Name')]",
+                    "dependsOn": [
+                        "[parameters('vnetName')]",
+                        "[parameters('subnet5Name')]"
+                    ],
+                    "properties": {
+                        "addressPrefix": "[parameters('subnet6Prefix')]"
+                    }
+                },
+                {
+                    "apiVersion": "2018-10-01",
+                    "type": "subnets",
+                    "location": "[resourceGroup().location]",
+                    "name": "[parameters('subnet7Name')]",
+                    "dependsOn": [
+                        "[parameters('vnetName')]",
+                        "[parameters('subnet6Name')]"
+                    ],
+                    "properties": {
+                        "addressPrefix": "[parameters('subnet7Prefix')]"
+                    }
+                },
+                {
+                    "apiVersion": "2018-10-01",
+                    "type": "subnets",
+                    "location": "[resourceGroup().location]",
+                    "name": "[parameters('subnet8Name')]",
+                    "dependsOn": [
+                        "[parameters('vnetName')]",
+                        "[parameters('subnet7Name')]"
+                    ],
+                    "properties": {
+                        "addressPrefix": "[parameters('subnet8Prefix')]"
+                    }
+                }
+            ]
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "condition": "[equals(parameters('stackType'),'production-stack')]",
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('bastionSAName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "apiVersion": "2017-04-01",
+            "condition": "[equals(parameters('stackType'),'production-stack')]",
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('publicIPAddressName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publicIPAllocationMethod": "Static"
+            }
+        },
+        {
+            "apiVersion": "2017-04-01",
+            "condition": "[equals(parameters('stackType'),'production-stack')]",
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[variables('bastionNicName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+                "[parameters('mgmtSubnetName')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "[variables('bastionIPConfigName')]",
+                        "properties": {
+                            "privateIPAddress": "192.168.1.200",
+                            "privateIPAllocationMethod": "Static",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+                            },
+                            "subnet": {
+                                "id": "[variables('mgmtSubnetId')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2017-03-30",
+            "condition": "[equals(parameters('stackType'),'production-stack')]",
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[variables('bastionVmName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('bastionSAName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('bastionNicName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_A1"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "linuxConfiguration": "[variables('linuxConfiguration')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "16.04-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[variables('bastionOSDiskName')]",
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('bastionNicName'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('http://',variables('bastionSAName'),'.blob.core.windows.net')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-03-30",
+            "condition": "[equals(parameters('stackType'),'production-stack')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('bastionVmName'))]"
+            ],
+            "location": "[resourceGroup().location]",
+            "name": "[concat(variables('bastionVmName'), '/start')]",
+            "properties": {
+                "autoUpgradeMinorVersion": "true",
+                "protectedSettings": {
+                    "commandToExecute": "sleep 20; apt-get update; apt-get dist-upgrade; apt-get install -y jq sshpass"
+                },
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0"
+            },
+            "type": "Microsoft.Compute/virtualMachines/extensions"
+        }
+    ],
+    "outputs": {
+        "bastionIp": {
+            "condition": "[equals(parameters('stackType'),'production-stack')]",
+            "type": "string",
+            "value": "[reference(variables('publicIPAddressName')).ipAddress]"
+        }
+    }
+}

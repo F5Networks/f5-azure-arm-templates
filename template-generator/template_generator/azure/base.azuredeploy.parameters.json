@@ -1,0 +1,6 @@
+{% import 'constants.json' as constants with context %}
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "{{ constants.content_version }}",
+    "parameters": {{ parameters }}
+}

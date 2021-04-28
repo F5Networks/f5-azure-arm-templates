@@ -1,0 +1,171 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "9.4.0.0",
+    "parameters": {
+        "adminUsername": {
+            "value": "azureuser"
+        },
+        "authenticationType": {
+            "value": "password"
+        },
+        "adminPasswordOrKey": {
+            "value": ""
+        },
+        "dnsLabel": {
+            "value": ""
+        },
+        "instanceType": {
+            "value": "Standard_DS2_v2"
+        },
+        "imageName": {
+            "value": "Best1Gbps"
+        },
+        "bigIpVersion": {
+            "value": "15.1.201000"
+        },
+        "bigIpModules": {
+            "value": "asm:nominal"
+        },
+        "vnetName": {
+            "value": ""
+        },
+        "vnetResourceGroupName": {
+            "value": ""
+        },
+        "mgmtSubnetName": {
+            "value": ""
+        },
+        "declarationUrl": {
+            "value": "NOT_SPECIFIED"
+        },
+        "ntpServer": {
+            "value": "0.pool.ntp.org"
+        },
+        "timeZone": {
+            "value": "UTC"
+        },
+        "customImageUrn": {
+            "value": "OPTIONAL"
+        },
+        "customImage": {
+            "value": "OPTIONAL"
+        },
+        "restrictedSrcAddress": {
+            "value": ""
+        },
+        "tagValues": {
+            "value": {
+                "application": "APP",
+                "cost": "COST",
+                "environment": "ENV",
+                "group": "GROUP",
+                "owner": "OWNER"
+            }
+        },
+        "allowUsageAnalytics": {
+            "value": "Yes"
+        },
+        "allowPhoneHome": {
+            "value": "Yes"
+        },
+        "vmScaleSetMinCount": {
+            "value": 2
+        },
+        "vmScaleSetMaxCount": {
+            "value": 4
+        },
+        "appInsights": {
+            "value": "CREATE_NEW"
+        },
+        "scaleOutCpuThreshold": {
+            "value": 80
+        },
+        "scaleInCpuThreshold": {
+            "value": 20
+        },
+        "scaleOutThroughputThreshold": {
+            "value": 20000000
+        },
+        "scaleInThroughputThreshold": {
+            "value": 10000000
+        },
+        "scaleOutTimeWindow": {
+            "value": 10
+        },
+        "scaleInTimeWindow": {
+            "value": 10
+        },
+        "notificationEmail": {
+            "value": "OPTIONAL"
+        },
+        "useAvailabilityZones": {
+            "value": "Yes"
+        },
+        "autoscaleTimeout": {
+            "value": 10
+        },
+        "provisionPublicIP": {
+            "value": "Yes"
+        },
+        "applicationProtocols": {
+            "value": "http-https"
+        },
+        "applicationAddress": {
+            "value": ""
+        },
+        "applicationPort": {
+            "value": "80"
+        },
+        "applicationSecurePort": {
+            "value": "443"
+        },
+        "sslCert": {
+            "value": "NOT_SPECIFIED"
+        },
+        "sslPswd": {
+            "value": "NOT_SPECIFIED"
+        },
+        "applicationType": {
+            "value": "Linux"
+        },
+        "blockingLevel": {
+            "value": "medium"
+        },
+        "customPolicy": {
+            "value": "NOT_SPECIFIED"
+        },
+        "dnsMemberIpType": {
+            "value": "private"
+        },
+        "dnsMemberPort": {
+            "value": "80"
+        },
+        "dnsProviderHost": {
+            "value": ""
+        },
+        "dnsProviderPort": {
+            "value": "443"
+        },
+        "dnsProviderUser": {
+            "value": ""
+        },
+        "dnsProviderPassword": {
+            "value": ""
+        },
+        "dnsProviderPool": {
+            "value": "autoscale_pool"
+        },
+        "dnsProviderDataCenter": {
+            "value": "azure_datacenter"
+        },
+        "tenantId": {
+            "value": ""
+        },
+        "clientId": {
+            "value": ""
+        },
+        "servicePrincipalSecret": {
+            "value": ""
+        }
+    }
+}

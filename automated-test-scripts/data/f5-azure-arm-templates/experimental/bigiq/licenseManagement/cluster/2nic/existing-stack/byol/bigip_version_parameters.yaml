@@ -1,0 +1,45 @@
+ADDITIONAL NIC LOCATION: ''
+ADDTL NIC PARAM: ''
+ADMIN USER: dewpoint
+BASE VLAN NAME: internal
+BIGIP MODULES: ltm:nominal
+BIGIQ VERSION: 6.0.101000
+BRANCH: remove-existing-stack-azure
+CLUSTER: 'Yes'
+CLUSTER FOLDER: cluster
+CUSTOM IMAGE PARAM: OPTIONAL
+DNS LABEL: ',"dnsLabel":{"value":"<RESOURCE GROUP>"}'
+INSTANCE NAME: f5bigiqvm
+INSTANCE TYPE: Standard_D4s_v3
+INTERNAL IP COUNT: 0
+LIC POOL PARAM: ',"licensePoolKeys":{"value":"Do_Not_Create"}'
+LICENSE PARAM: ',"bigIqLicenseKey1":{"value":"GHZVH-LQPWQZ-SQZ-FSGZUTT-GJWPORB"},"bigIqLicenseKey2":{"value":"KCDYN-PUPDST-BXY-CDIZLNQ-BELAZTT"}'
+LICENSE POOL KEYS: Do Not Create
+LICENSE TYPE: byol
+MGMT PIP1: mgmt-pip
+MGMT PIP2: mgmt-pip1
+NETWORK PARAM: ''
+NIC COUNT: 2
+NTP SERVER: 0.pool.ntp.org
+NUMBER OF ADDITIONAL NICS: 0
+PASSWORD TYPE: password
+REG POOL PARAM: ',"regPoolKeys":{"value":"Do_Not_Create"}'
+REGION: westus
+REGISTRATION POOL KEYS: Do Not Create
+RESOURCE GROUP: dd-az-bigiq-cluster-<DEWPOINT JOB ID>
+SEQUENCE NUMBER: 0
+SOLUTION LOGS: install.log;onboard.log;network.log
+SSH PORT: 22
+STACK PARAM: ',"mgmtSubnetName":{"value":"mgmt"},"mgmtIpAddressRangeStart":{"value":"192.168.1.4"}<SUBNET
+  PARAM>'
+STACK TYPE: existing-stack
+STACK TYPE SHORT: es
+SUBNET PARAM: ',"internalSubnetName":{"value":"internal"},"internalIpAddressRangeStart":{"value":"192.168.2.4"}'
+SUBNET PARAM SELF: ',"internalIpSelfAddressRangeStart":{"value":"192.168.2.10"}'
+TEMPLATE NAME: <NIC COUNT>nic
+TEMPLATE URL: file://$PWD/experimental/bigiq/licenseManagement/<CLUSTER
+  FOLDER>/<NIC COUNT>nic/existing-stack/<LICENSE TYPE>/azuredeploy.json
+TIMEZONE: UTC
+USAGE ANALYTICS CHOICE: 'No'
+VNET PARAM: ',"vnetName":{"value":"existingStackVnet"},"vnetResourceGroupName":{"value":"<RESOURCE
+  GROUP>"}'

@@ -1,0 +1,48 @@
+{
+     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+     "contentVersion": "3.2.0.0",
+     "parameters": {
+          "numberOfInstances": {
+               "value": "2"
+          },
+          "instanceType": {
+               "value": "Standard_A4"
+          },
+          "imageName": {
+               "value": "Good"
+          },
+          "adminUsername": {
+               "value": "azureuser"
+          },
+          "dnsLabel": {
+               "value": "GEN-UNIQUE"
+          },
+          "licenseKey1": {
+               "value": "GEN-UNIQUE"
+          },
+          "licenseKey2": {
+               "value": "GEN-UNIQUE"
+          },
+          "applicationProtocols": {
+               "value": "http"
+          },
+          "applicationAddress": {
+               "value": "GEN-UNIQUE"
+          },
+          "applicationPort": {
+               "value": "80"
+          },
+          "restrictedSrcAddress": {
+               "value": "*"
+          },
+          "tagValues": {
+               "value": {
+                    "application": "APP",
+                    "environment": "ENV",
+                    "group": "GROUP",
+                    "owner": "OWNER",
+                    "cost": "COST"
+               }
+         }
+     }
+}

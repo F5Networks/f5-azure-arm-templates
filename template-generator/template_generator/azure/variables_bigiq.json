@@ -1,0 +1,193 @@
+{%- import 'constants.json'  as constants with context -%}
+{%- block variables %}
+        "computeApiVersion": "{{constants.compute_api_version}}",
+        "networkApiVersion": "{{constants.network_api_version}}",
+        "storageApiVersion": "{{constants.storage_api_version}}",
+        "customImage": "[replace(parameters('customImage'), 'OPTIONAL', '')]",
+        "useCustomImage": "[not(empty(variables('customImage')))]",
+        "createNewCustomImage": "[contains(variables('customImage'), 'https://')]",
+        "newCustomImageName": "[concat(variables('dnsLabel'), 'image')]",
+        "storageProfileArray": {
+            "customImage": {
+                "imageReference": {
+                    "id": "[if(variables('createNewCustomImage'), resourceId('Microsoft.Compute/images', variables('newCustomImageName')), variables('customImage'))]"
+                }
+            },
+            "platformImage": {
+                "imageReference": "[variables('imageReference')]",
+                "osDisk": {
+                    "createOption": "FromImage"
+                }
+            }
+        },
+        "premiumInstanceArray": [
+            {{constants.premium_instance_type_list}}
+        ],
+        "location": "[resourceGroup().location]",
+        "adminPassword": "[replace(parameters('adminPassword'),'\\n', '\n')]",
+{%- if bigiq_solution == 'cluster' %}
+    {%- if stack == 'existing-stack' %}
+        "userAssignedIdentityName": "[parameters('userAssignedIdentityName')]",
+        "userAssignedIdentityId": "[resourceId(parameters('userAssignedIdentityResourceGroupName'),'Microsoft.ManagedIdentity/userAssignedIdentities',variables('userAssignedIdentityName'))]",
+    {% else %}
+        "Owner": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]",
+        "Contributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+        "Reader": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
+    {%- endif -%}
+{%- endif %}
+        "initScript": {{ constants.init_script }},
+        "subscriptionID": "[subscription().subscriptionId]",
+        "resourceGroupName": "[resourceGroup().name]",
+        "resourceGroupId": "[concat(resourceGroup().id, '-vip')]",
+        "singleQuote": "'",
+        "f5CloudLibsTag": "{{ constants.f5_cloud_libs_tag }}",
+        "f5CloudLibsAzureTag": "{{ constants.f5_cloud_libs_azure_tag }}",
+        "f5CloudIappsTag": "{{ constants.f5_cloud_iapps_tag }}",
+        "dnsLabel": "[toLower(parameters('dnsLabel'))]",
+        "skuToUse": {{ constants.sku_to_use }},
+        "offerToUse": {{ constants.offer_to_use }},
+        "imagePlan": {
+            "name": "[variables('skuToUse')]",
+            "product": "[variables('offerToUse')]",
+            "publisher": "f5-networks"
+        },
+        "imageReference": {
+            "offer": "[variables('offerToUse')]",
+            "publisher": "f5-networks",
+            "sku": "[variables('skuToUse')]",
+            "version": "[parameters('bigIqVersion')]"
+        },
+        "bigIpMgmtPort": "443",
+        "instanceName": "[toLower(parameters('instanceName'))]",
+{# repeated  throuhg different template consolidate in single place #}
+{%- if stack == 'existing-stack' -%}
+     {% set vnet_id = "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]" %}
+     {% set mgmt_subnet_name = "[parameters('mgmtSubnetName')]" %}
+     {% set virtual_network_name = "[parameters('vnetName')]" %}
+     {% set int_subnet_name = "[parameters('internalSubnetName')]" %}
+{%- elif stack == 'new-stack' -%}
+     {% set vnet_id = "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]" %}
+     {% set mgmt_subnet_name = "mgmt" %}
+     {% set virtual_network_name = "[concat(variables('dnsLabel'), '-vnet')]" %}
+     {% set int_subnet_name = "internal" %}
+{%- endif -%}
+        "virtualNetworkName": "{{ virtual_network_name }}",
+        "mgmtSubnetName": "{{ mgmt_subnet_name }}",
+        "vnetId": "{{ vnet_id }}",
+        {%- if stack == 'new-stack' -%}
+        "vnetAddressPrefix": "[concat(parameters('vnetAddressPrefix'),'.0.0/16')]",
+        {%- endif -%}
+        "availabilitySetName": "[concat(variables('dnsLabel'), '-avset')]",
+{#- general from helper - #}
+        "publicIPAddressType": "Static",
+        "mgmtPublicIPAddressName": "[concat(variables('dnsLabel'), '-mgmt-pip')]",
+        "mgmtPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('mgmtPublicIPAddressName'))]",
+        "mgmtNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-mgmt-nsg'))]",
+        "mgmtNicName": "[concat(variables('dnsLabel'), '-mgmt')]",
+        "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]",
+        "intNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-int-nsg'))]",
+        "intNicName": "[concat(variables('dnsLabel'), '-int')]",
+        "intSubnetName": "{{ int_subnet_name }}",
+        "intSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('intSubnetName'))]",
+        "tagValues": "[parameters('tagValues')]",
+        {%- if bigiq_solution == 'cluster' -%}
+        "vipTagValues": {
+            "application": "[parameters('tagValues').application]",
+            "cost": "[parameters('tagValues').cost]",
+            "environment": "[parameters('tagValues').environment]",
+            "group": "[parameters('tagValues').group]",
+            "owner": "[parameters('tagValues').owner]",
+            "f5_deployment": "[variables('resourceGroupId')]"
+        },
+        {%- endif -%}
+        "newDataStorageAccountName": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data000')]",
+        "dataStorageAccountType": "Standard_LRS",
+        "deploymentId": "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('dnsLabel'))]",
+{% if bigiq_solution == 'standalone' %}
+        "mgmtSubnetPrivateAddress": "[parameters('mgmtIpAddress')]",
+        "intSubnetPrivateAddress": "[parameters('internalIpAddressRangeStart')]",
+        "intSubnetPrivateAddressPrefixArray": "[split(parameters('internalIpAddressRangeStart'), '.')]",
+        "intSubnetPrivateAddressPrefix": "[concat(variables('intSubnetPrivateAddressPrefixArray')[0], '.', variables('intSubnetPrivateAddressPrefixArray')[1], '.', variables('intSubnetPrivateAddressPrefixArray')[2], '.')]",
+        "intSubnetPrivateAddressSuffixInt": "[int(variables('intSubnetPrivateAddressPrefixArray')[3])]",
+        "numberOfInternalIps": "[parameters('numberOfInternalIps')]"
+{% elif bigiq_solution == 'cluster' and  stack == 'existing-stack' %}
+        "mgmtSubnetPrivateAddressPrefixArray": "[split(parameters('mgmtIpAddressRangeStart'), '.')]",
+        "mgmtSubnetPrivateAddressPrefix": "[concat(variables('mgmtSubnetPrivateAddressPrefixArray')[0], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[1], '.', variables('mgmtSubnetPrivateAddressPrefixArray')[2], '.')]",
+        "mgmtSubnetPrivateAddressSuffixInt": "[int(variables('mgmtSubnetPrivateAddressPrefixArray')[3])]",
+        "mgmtSubnetPrivateAddressSuffix": "[add(variables('mgmtSubnetPrivateAddressSuffixInt'), 1)]",
+        "mgmtSubnetPrivateAddress0": "[parameters('mgmtIpAddressRangeStart')]",
+        "mgmtSubnetPrivateAddress1": "[concat(variables('mgmtSubnetPrivateAddressPrefix'), variables('mgmtSubnetPrivateAddressSuffix'))]",
+        "intSelfPublicIpAddressNamePrefix": "[concat(variables('dnsLabel'), '-self-pip')]",
+        "intSelfPublicIpAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('intSelfPublicIpAddressNamePrefix'))]",
+        "intpublicIPAddressNamePrefix": "[concat(variables('dnsLabel'), '-int-pip')]",
+        "intPublicIPAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('intPublicIPAddressNamePrefix'))]",
+        "intSubnetSelfPrivateAddressPrefixArray": "[split(parameters('internalIpSelfAddressRangeStart'), '.')]",
+        "intSubnetSelfPrivateAddressPrefix": "[concat(variables('intSubnetSelfPrivateAddressPrefixArray')[0], '.', variables('intSubnetSelfPrivateAddressPrefixArray')[1], '.', variables('intSubnetSelfPrivateAddressPrefixArray')[2], '.')]",
+        "intSubnetSelfPrivateAddressSuffixInt": "[int(variables('intSubnetSelfPrivateAddressPrefixArray')[3])]",
+        "intSubnetSelfPrivateAddressSuffix": "[add(variables('intSubnetSelfPrivateAddressSuffixInt'), 1)]",
+        "intSubnetPrivateAddress": "[parameters('internalIpSelfAddressRangeStart')]",
+        "intSubnetPrivateAddress1": "[concat(variables('intSubnetSelfPrivateAddressPrefix'), variables('intSubnetSelfPrivateAddressSuffix'))]",
+        "intSubnetPrivateAddress2": "[concat(variables('intSubnetPrivateAddressPrefix'), variables('intSubnetPrivateAddressSuffix0'))]",
+        "intSubnetPrivateAddress3": "[concat(variables('intSubnetPrivateAddressPrefix'), variables('intSubnetPrivateAddressSuffix1'))]",
+        "intSubnetPrivateAddressPrefixArray": "[split(parameters('internalIpAddressRangeStart'), '.')]",
+        "intSubnetPrivateAddressPrefix": "[concat(variables('intSubnetPrivateAddressPrefixArray')[0], '.', variables('intSubnetPrivateAddressPrefixArray')[1], '.', variables('intSubnetPrivateAddressPrefixArray')[2], '.')]",
+        "intSubnetPrivateAddressSuffixInt": "[int(variables('intSubnetPrivateAddressPrefixArray')[3])]",
+        "intSubnetPrivateAddressSuffix0": "[add(variables('intSubnetPrivateAddressSuffixInt'), 1)]",
+        "intSubnetPrivateAddressSuffix1": "[add(variables('intSubnetPrivateAddressSuffixInt'), 2)]",
+        "numberOfinternalIps": 1,
+{% elif bigiq_solution == 'cluster' and  stack == 'new-stack' %}
+        "mgmtSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.1.0/24')]",
+        "mgmtSubnetPrivateAddress0": "[concat(parameters('vnetAddressPrefix'), '.1.4')]",
+        "mgmtSubnetPrivateAddress1": "[concat(parameters('vnetAddressPrefix'), '.1.5')]",
+        "intSelfPublicIpAddressNamePrefix": "[concat(variables('dnsLabel'), '-self-pip')]", 
+        "intSelfPublicIpAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('intSelfPublicIpAddressNamePrefix'))]", 
+        "intpublicIPAddressNamePrefix": "[concat(variables('dnsLabel'), '-int-pip')]", 
+        "intPublicIPAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('intPublicIPAddressNamePrefix'))]",
+        "intNicNameVm1": "[concat(variables('intNicName'), '0')]",
+        "intNicNameVm2": "[concat(variables('intNicName'), '1')]", 
+        "intSubnetName": "internal",
+        "intSubnetPrefix": "[concat(parameters('vnetAddressPrefix'), '.2.0/24')]", 
+        "intSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]",
+        "intSubnetPrivateAddress": "[concat(parameters('vnetAddressPrefix'), '.2.30')]", 
+        "intSubnetPrivateAddress1": "[concat(parameters('vnetAddressPrefix'), '.2.31')]", 
+        "intSubnetPrivateAddress2": "[concat(parameters('vnetAddressPrefix'), '.2.100')]", 
+        "intSubnetPrivateAddress3": "[concat(parameters('vnetAddressPrefix'), '.2.101')]",
+        "numberOfinternalIps": 1,
+{% endif -%}
+{%- set nic_indices = (0, 1) -%}
+{%- if bigiq_solution == 'cluster' %}
+        "selfNicConfigArray": {
+        {%- for nic_idx in nic_indices %}
+            "{{ nic_idx }}": [
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('mgmtNicName'), '{{ nic_idx }}'))]",
+                    "properties": {
+                        "primary": true
+                    }
+                },
+                {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('intNicName'), '{{ nic_idx }}'))]",
+                    "properties": {
+                        "primary": false
+                    }
+                }
+            ]{% if nic_idx == 0%},{% endif %}
+        {%- endfor %}
+        },
+        "addtlNicConfigArray": {
+        "copy": [
+        {%- for nic_idx in nic_indices %}
+            {
+                "count": 5,
+                "input": {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(toLower(parameters('dnsLabel')), '-addtlnic', copyIndex('values{{ nic_idx }}', 1), '{{ nic_idx }}'))]",
+                    "properties": {
+                        "primary": false
+                    }
+                },
+                "name": "values{{ nic_idx }}"
+            }{% if nic_idx == 0%},{% endif %}
+        {%- endfor %}]
+        }
+{%- endif %}
+{%- endblock %}

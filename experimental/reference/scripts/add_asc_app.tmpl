@@ -1,0 +1,1233 @@
+cli script f5.iapp.1.4.0.cli {
+
+#  Initialization proc for all templates.
+#  Parameters "start" and "stop" or "end".
+proc iapp_template { action } {
+    switch $action {
+        start {
+            catch { tmsh::modify sys scriptd log-level debug }
+            set ::clock_clicks [clock clicks]
+            puts "\nStarting iApp $tmsh::app_template_name [clock format \
+                [clock seconds] -format {%m/%d/%Y %T}]\n"
+            tmsh::log info "Starting iApp template $tmsh::app_template_name"
+        }
+        stop -
+        end {
+            if { [info exists ::substa_debug] } {
+                puts $::substa_debug
+            }
+            puts "\nEnding iApp $tmsh::app_template_name [clock format \
+                [clock seconds] -format {%m/%d/%Y %T}]\nRun time [expr \
+                { ([clock clicks] - $::clock_clicks) / 1000 }] msec\n"
+            tmsh::log info "Ending iApp template $tmsh::app_template_name"
+        }
+    }
+    set ::HTTP_CONTENT_TYPES { application/(css\|css-stylesheet\|doc\|excel\|javascript\|json\|lotus123\|mdb\|mpp\|msaccess\|msexcel\|ms-excel\|mspowerpoint\|ms-powerpoint\|msproject\|msword\|ms-word\|photoshop\|postscript\|powerpoint\|ps\|psd\|quarkexpress\|rtf\|txt\|visio\|vnd\\.excel\|vnd\\.msaccess\|vnd\\.ms-access\|vnd\\.msexcel\|vnd\\.ms-excel\|vnd\\.mspowerpoint\|vnd\\.ms-powerpoint\|vnd\\.ms-pps\|vnd\\.ms-project\|vnd\\.msword\|vnd\\.ms-word\|vnd\\.ms-works\|vnd\\.ms-works-db\|vnd\\.powerpoint\|vnd\\.visio\|vnd\\.wap\\.cmlscriptc\|vnd\\.wap\\.wmlc\|vnd\\.wap\\.xhtml\\+xml\|vnd\\.word\|vsd\|winword\|wks\|word\|x-excel\|xhtml\\+xml\|x-java-jnlp-file\|x-javascript\|x-json\|x-lotus123\|xls\|x-mdb\|xml\|x-mscardfile\|x-msclip\|x-msexcel\|x-ms-excel\|x-mspowerpoint\|x-msproject\|x-ms-project\|x-msword\|x-msworks-db\|x-msworks-wps\|x-photoshop\|x-postscript\|x-powerpoint\|x-ps\|x-quark-express\|x-rtf\|x-vermeer-rpc\|x-visio\|x-vsd\|x-wks\|x-word\|x-xls\|x-xml) image/(photoshop\|psd\|x-photoshop\|x-vsd) text/(css\|html\|javascript\|json\|plain\|postscript\|richtext\|rtf\|vnd\\.wap\\.wml\|vnd\\.wap\\.wmlscript\|wap\|wml\|x-component\|xml\|x-vcalendar\|x-vcard) }
+}
+
+proc iapp_is { args } {
+    set up_var [lindex $args 0]
+    upvar $up_var var
+    if { [info exists var] } {
+        foreach val [lrange $args 1 end] {
+            if { [subst $var] eq $val } {
+                return 1
+            }
+        }
+    }
+    return 0
+}
+
+proc iapp_substa { args } {
+    upvar substa_in  argx \
+          substa_out rval
+    set   argx $args
+
+    # check the explicit value first.
+    # multiple layers of variable substitution requires multiple subst.
+    # error occurs here if any of the substituted variables do not exist
+    # valid wildcard (*) array entries will fail here first.
+    uplevel {
+        append ::substa_debug "\n$substa_in"
+        if { [info exists [set substa_in]] } {
+            set substa_out [subst $$substa_in]
+            set substa_out [subst $substa_out]
+        } else {
+            # since explicit value did not exist, try a wildcard value.
+            # substitute "*" as the array key and repeat.
+            set substa_tmp [split $substa_in "()"]
+            set substa_in "[lindex $substa_tmp 0](*)"
+            append ::substa_debug "*"
+            if { [info exists [set substa_in]] } {
+                set substa_out [subst $$substa_in]
+                set substa_out [subst $substa_out]
+            } else {
+                error "substa \"$substa_in\" array value not found"
+            }
+        }
+    }
+    return $rval
+}
+
+proc iapp_conf { args } {
+
+    # Return value $object_name is set to the first word in $arg that
+    # contains an underscore, since the position of the object name in
+    # tmsh syntax is not consistent.
+    set args [join $args]
+    set object_name [lindex $args [lsearch -glob $args "*_*"]]
+
+    # Global array ::tmsh_history persists between calls to iapp_conf
+    # in order to suppress duplicate commands.
+    if { ![info exists ::tmsh_history($args)] } {
+        set ::tmsh_history($args) 1
+        iapp_debug $args
+        switch -exact -- [string range $args 0 5] {
+            create { tmsh::create [string range $args 7 end] }
+            modify { tmsh::modify [string range $args 7 end] }
+            delete { tmsh::delete [string range $args 7 end] }
+            default { error "iapp_conf illegal parameter" }
+        }
+    }
+    return $object_name
+}
+
+proc iapp_make_safe_password { password } {
+    return [string map { \' \\\' \" \\\" \{ \\\{ \} \\\} \; \\\; \| \\\| \# \\\# \  \\\  \\ \\\\ } $password]
+}
+
+proc iapp_pull { loc items_list } {
+    upvar $items_list items
+    if { [set item [lindex $items $loc]] != "" } {
+        set items [lreplace $items $loc $loc]
+    }
+    return $item
+}
+
+proc iapp_process_flags { flags_array args_list } {
+    upvar $flags_array flags
+    upvar $args_list args
+
+    if { [set dubdash [lsearch $args "--"]] != -1 } {
+        set args [lreplace $args $dubdash $dubdash];
+    } else {
+        set dubdash end
+    }
+
+    foreach flag [array names flags] {
+        while { [set ptr [lsearch [lrange $args 0 $dubdash] $flag]] != -1 } {
+            set args [lreplace $args $ptr $ptr];
+
+            # we want to run the code in the flags_array at the calling
+            # proc's level so that the variables that it sets up are
+            # available there.
+            set access_var [format "$%s(%s)" $flags_array $flag]
+            set command [subst -nocommands { set ptr $ptr ; subst $access_var }]
+
+            uplevel 1 $command
+        }
+    }
+    return $args
+}
+
+proc iapp_tmos_version { args } {
+    set cversion [tmsh::version]
+    if { $cversion eq "" } {
+        tmsh::log err "unable to determine TMOS version"
+        error "unable to determine TMOS version"
+    }
+
+    # if no op+version was specified, just return the version
+    if { $args eq "" } { return $cversion }
+    if { [llength $args] > 2 } {
+        error "Too many arguments"
+    }
+
+    set op [lindex $args 0]; # operator
+    set NOTFOUND -1
+    # constrain to valid operators - adding more is fine as long as
+    # they are supported by [expr] (and makes sense)
+    if { [lsearch -exact { < > <= >= == != } $op] == $NOTFOUND } {
+        tmsh::log err "illegal operator: $op"
+        error "illegal operator: $op"
+    }
+
+    set tversion [lindex $args 1]; # target version
+    # one or two decimal digits, optionally followed by 0-2 complete groups of
+    # dots followed by one or two decimal digits with nothing before or after
+    set regex {^\d{1,2}(\.\d{1,2}){0,2}$}
+    if { ! [regexp -- $regex $tversion] } {
+        tmsh::log err "cannot parse version from: $tversion"
+        error "cannot parse version from: $tversion"
+    }
+
+    # p=>prefix, c=>current, t=>target
+    foreach p { c t } {
+        # extract major/minor/point components
+        scan [set [set p]version] "%d.%d.%d" [set p]mjr [set p]mnr [set p]pnt
+        # ensure that these are each set to at least 0
+        foreach level { mjr mnr pnt } {
+            if { ! [info exists [set p]${level}] } { set [set p]${level} 0 }
+        }
+        # turn them into one big number that we can compare
+        # leave room in-between just to be safe
+        set [set p]num [expr {
+            [set [set p]mjr]*1000000 +
+            [set [set p]mnr]*10000 +
+            [set [set p]pnt]*100
+        }]
+    }
+    # a simple numeric comparison is all that is needed at this point
+    return [eval expr $cnum $op $tnum ]
+}
+
+proc iapp_safe_display { args } {
+    # strings sent to APL must be truncated to 65535 bytes, see BZ435592
+    if { [string length [set [set args]]] > 65535 } {
+        set last_newline [string last "\n" [set [set args]] 65500]
+        return "[string range [set [set args]] 0 $last_newline]Error: Too many items for display"
+    } else {
+        return [set [set args]]
+    }
+}
+
+proc iapp_get_items { args } {
+
+    # Set default values.
+    set error_msg  "iapp_get_items $args:"
+    set do_binary  0
+    set nocomplain 0
+    set items      ""
+    set join_char  "\n"
+    set recursive  "recursive"
+    set com_dir    "/Common"
+    set loc_dir    "[tmsh::pwd]"
+
+    # Set up flag-related work.
+    array set flags  {
+        -exists      { [set do_binary 1] }
+        -nocomplain  { [set nocomplain 1] }
+        -list        { [set join_char " "] }
+        -norecursive { [set recursive ""] }
+        -local       { [set com_dir   ""] }
+        -dir         { [set loc_dir      [iapp_pull $ptr args]] }
+        -filter      { [set filter_field [iapp_pull $ptr args]] \
+                       [set filter_op    [iapp_pull $ptr args]] \
+                       [set filter_value [iapp_pull $ptr args]] }
+    }
+    iapp_process_flags flags args
+
+    # Get system object names in all requested directories.
+    set save_dir [tmsh::pwd]
+    foreach dir [lsort -unique "$com_dir $loc_dir"] {
+        tmsh::cd $dir
+        set tmsh_rval [catch {
+            foreach obj [tmsh::get_config $args $recursive] {
+
+                if { [info exists filter_field] } {
+                    if { $filter_field eq "NAME" } {
+                        set val [tmsh::get_name $obj]
+                    } else {
+                        # If get_field_value throws error, assume "none" value
+                        if { [catch {
+                            set val [tmsh::get_field_value $obj $filter_field]
+                            # strip quotes per BZ442531
+                            set val [string map {\" ""} $val]
+                        }]} { set val none }
+                    }
+                    # Non-Tcl operators =~ and !~ added for extra flexibility
+                    if { $filter_op eq "=~" } {
+                        set filter "\[regexp \"$filter_value\" \"$val\"\]"
+                    } elseif { $filter_op eq "!~" } {
+                        set filter "!\[regexp \"$filter_value\" \"$val\"\]"
+                    } else {
+                        set filter "\\\"$val\\\" $filter_op \\\"$filter_value\\\""
+                    }
+                    # If filter fails, skip to next object
+                    if { ![eval expr $filter] } {
+                        continue
+                    }
+                }
+                # string map catches /Common added by ltm profile ntlm,
+                # which is unlike all other ltm profile return values.
+                lappend items $dir/[string map {/Common/ ""} [tmsh::get_name $obj]]
+            }
+        } err ]
+    }
+    tmsh::cd $save_dir
+
+    # array keys: $do_binary,$tmsh_rval,$nocomplain. Do not insert whitespace.
+    array set rval {
+        0,0,0 {[join $items $join_char]}
+        0,0,1 {[join $items $join_char]}
+        0,1,0 {[error "$error_msg $err"]}
+        0,1,1 {}
+        1,0,0 {[llength $items]}
+        1,0,1 {[llength $items]}
+        1,1,0 {0}
+        1,1,1 {0}
+    }
+
+    return [subst $rval($do_binary,$tmsh_rval,$nocomplain)]
+}
+
+proc iapp_get_provisioned { args } {
+
+    array set lnum {
+        none      0
+        minimum   1
+        nominal   2
+        dedicated 3
+    }
+
+    # Set defaults.
+    set required minimum
+    set do_binary 1
+
+    # Set up flag-related work.
+    array set flags  {
+        -is          { [set required [iapp_pull $ptr args]] }
+        -level       { [set do_binary 0] }
+    }
+    iapp_process_flags flags args
+    if { [llength $args] > 1 } {
+        error "Too many arguments"
+    }
+
+    # If checking for AM provisioning on TMOS < 11.4,
+    # check for WAM provisioning instead.
+    if { $args eq "am" && [iapp_tmos_version < 11.4] } {
+        set args "wam"
+    }
+
+    # Get the provisioning level. If blank, assume none.
+    # Proc only checks 1 module at a time, so only 1 object is returned.
+    if { [catch {
+        set obj [tmsh::get_config sys provision $args]
+        set level [tmsh::get_field_value [lindex $obj 0] level]
+    }]} { set level none }
+
+    if { $do_binary } {
+        return [expr { $lnum($level) >= $lnum($required) }]
+    } else {
+        return $level
+    }
+}
+
+proc iapp_get_user { args } {
+
+    # Set defaults.
+    set do_role 0
+    set do_binary 0
+
+    # Set up flag-related work.
+    array set flags  {
+        -is_admin    { [set do_binary 1] }
+    }
+    iapp_process_flags flags args
+    if { [llength $args] > 1 } {
+        error "Too many arguments"
+    }
+
+    # Show user auth was introduced in v11.6
+    set user "unknown"
+    catch {
+        set user [tmsh::show auth user field-fmt]
+    } err
+    if { $do_binary } {
+        return [expr { $user == "unknown"
+        || [string first "role " $user] == -1
+        || [string first "role admin" $user] != -1
+        || [string first "role resource-admin" $user] != -1 }]
+    } else {
+        return $user
+    }
+}
+
+proc iapp_destination { args } {
+    # Set defaults. Flag actions may overwrite defaults later.
+    set route_domain    0
+    set do_mask         0
+    set port            0
+
+    # Set up flag-based actions.
+    array set flags  {
+        -route_domain { [set route_domain [iapp_pull $ptr args]] }
+        -mask         { [set do_mask 1] }
+        -length       { [set cidr_bits [iapp_pull $ptr args]] }
+    }
+
+    if { [llength [set non_switches [iapp_process_flags flags args]]] > 2 } {
+        error "Too many arguments"
+    }
+    if { [llength $non_switches] == 2 } { set port [lindex $non_switches 1] }
+    set addr [lindex $non_switches 0]
+
+
+    # Detect a CIDR mask and pull it off the addr string
+    if { [set loc [string first "/" $addr end-4]] != -1 } {
+        set cidr_bits [string range $addr [expr {$loc + 1}] end]
+        set addr [string range $addr 0 [expr {$loc - 1}]]
+    }
+
+    # Pull the route-domain off the addr string, but only use it as the
+    # route domain if it wasn't overridden by -route_domain flag.
+    if { [string first "%" $addr] != -1 } {
+        if { $route_domain == 0 } {
+            # route-domain is still default, so use value from addr string
+            set route_domain [lindex [split $addr "%"] 1]
+        }
+        set addr [lindex [split $addr "%"] 0]
+    }
+
+    if { $do_mask } {
+
+        # Define the delta between ipv4 and ipv6.
+        # length: ipv4 mask is 32 bits, ipv6 is 128 bits.
+        # group: ipv4 is grouped in octets, ipv6 as 16 bit words.
+        # format: ipv4 is decimal notation, ipv6 is hex.
+        # format1 also has the delimiter, format2 does not.
+        array set v {
+            0,length  32
+            0,group   8
+            0,format1 d.
+            0,format2 d
+            1,length  128
+            1,group   16
+            1,format1 .4x:
+            1,format2 .4x
+        }
+        set is_ipv6 [string match "*:*:*" $addr]
+
+        # Soften result of an illegal -length parameter.
+        if { ![info exists cidr_bits] || $cidr_bits > $v($is_ipv6,length) } {
+            set cidr_bits $v($is_ipv6,length)
+        } elseif { $cidr_bits < 0 } {
+            set cidr_bits 0
+        }
+
+        # Loop on the full length of the mask: 32 bits for ipv4, 128 for ipv6
+        for { set octet 0; set i 0 } { $i < $v($is_ipv6,length) } { incr i } {
+
+           # Take a break at intervals to save the grouping and add delimiter.
+           # Interval is 8 bits for ipv4 and 16 bits for ipv6.
+           if { $i && ![expr {$i % $v($is_ipv6,group)}] } {
+
+               # Add the grouping and delimiter to the mask, then reset.
+               append mask [format %$v($is_ipv6,format1) $octet]
+               set octet 0
+           }
+           # Shift the prior bits left by multiplying by 2.
+           # Then add the current bit, which is 1 if part of the mask, 0 if not.
+           # Current bit is part of the mask if $i < number of bits in the mask.
+           set octet [expr { 2 * $octet + ($i < $cidr_bits) }]
+        }
+        # Add the final grouping, then return the finished mask.
+        set ret_val [format $mask%$v($is_ipv6,format2) $octet]
+
+    } else {
+
+        # calculate a destination
+        # the route domain might be a name and we need a number.
+        if { ![string is integer $route_domain] } {
+            set route_domains [tmsh::get_config "/ net route-domain $route_domain"]
+            if { [llength $route_domains] != 1 } {
+                error "no such route domain: $route_domain"
+            }
+            # since we have already determined that the list is 1 long,
+            # this explicit reference to element 0 is safe
+            set route_domain [tmsh::get_field_value [lindex $route_domains 0] "id"]
+        }
+
+        set route_domain [expr { $route_domain == 0 ? "" : "%$route_domain" }]
+
+        # 0 and * represent wildcard port assignments in the GUI,
+        # but TMSH requires the string 'any' to specify a wildcard.
+        if { $port == 0 || $port == "*" } {
+            set port any
+        }
+
+        # Build the final destination. Use ":" for node names even if ipv6.
+        set is_ipv6_literal [string match "*:*:*" $addr]
+        set addr_delimiter  [expr { $is_ipv6_literal ? "." : ":" }]
+        set ret_val ${addr}${route_domain}${addr_delimiter}${port}
+    }
+    return $ret_val
+}
+
+proc iapp_pool_members { args } {
+
+    # Set defaults.
+    array set fields {
+        address          addr
+        port             port
+        port-secure      port_secure
+        connection-limit connection_limit
+        priority-group   priority
+        ratio            ratio
+    }
+    set route_domain ""
+    set port_override -1
+    set aaa_domain 0
+    set aaa_priority -1
+
+    # Set up flag-related work.
+    array set flags {
+        -fields       { [array set fields  [iapp_pull $ptr args]] }
+        -route_domain { [set route_domain  [iapp_pull $ptr args]] }
+        -port         { [set port_override [iapp_pull $ptr args]] }
+        -aaa_domain   { [set aaa_domain    1] }
+        -aaa_pool     { [set aaa_priority  0] }
+    }
+    iapp_process_flags flags args
+
+    # Identify the non-address/non-port fields. These go inside braces in tmsh.
+    set nonport_fields [lsearch -all -not -inline -regexp \
+        [array names fields] {address|port|port-secure}]
+
+    set members ""
+    foreach row [join $args] {
+
+        # Skip invalid table rows.
+        if { [llength [join $row]] %2 == 1 } {
+            continue
+        }
+
+        # Import APL table into an array for processing.
+        array unset columns
+        array set columns [join $row]
+        set addr $columns($fields(address))
+
+        # Identify the port number, either from table columns or by -port flag.
+        if { $port_override != -1 } {
+            set port $port_override
+        } elseif { [info exists columns($fields(port))] } {
+            set port $columns($fields(port))
+        } elseif { [info exists columns($fields(port-secure))] } {
+            set port $columns($fields(port-secure))
+        } else {
+            set port 80
+        }
+
+        # If specified, strip entered route domain and append the flag value.
+        if { $route_domain != "" } {
+            set addr [lindex [split $addr "%"] 0]
+            set addr "$addr%$route_domain"
+        }
+
+        # If -aaa_domain, use domain controller format, otherwise use pool format
+        if { $aaa_domain } {
+            append members " $columns($fields(host)) \{ ip $addr \}"
+        } else {
+            append members " [iapp_destination $addr $port] \{"
+
+            # Transfer non-port fields from the table to the tmsh string.
+            foreach name $nonport_fields {
+                if { [info exists columns($fields($name))] } {
+                    append members " $name $columns($fields($name))"
+                }
+            }
+
+            # If -aaa_pool, add priority field with incrementing value.
+            # This is required by APM.
+            if { $aaa_priority >= 0 } {
+                append members " priority-group [incr aaa_priority]"
+            }
+            append members " \}"
+        }
+    }
+
+    return "[expr { $aaa_domain ? "" : "members " }][expr { $members eq "" \
+        ? "none" : "replace-all-with \{ $members \}" }]"
+}
+
+proc iapp_debug { args } {
+
+    # Passwords should be obscured in all logs. Fields shown here are handled
+    # in this proc, but the global variable may be overwritten if alternate
+    # fields should be obscured.
+    if { ![info exists ::SENSITIVES] } {
+        set ::SENSITIVES {
+            account-password
+            admin-encrypted-password
+            password
+            passwd
+            secret
+        }
+    }
+
+    # look for any of the sensitive words, and replace the word that follows it
+    set regex "(\\m([join $::SENSITIVES |])\\M)\\s+\[^\\s\]*"
+    regsub -all $regex [join $args] {\1 -OBSCURED-} args
+    regsub -all "(<Password.*>).*(</Password>)" $args {\1-OBSCURED-\2} args
+
+    set lev [tmsh::get_field_value [lindex [tmsh::get_config sys scriptd \
+        log-level] 0] log-level]
+    if { $lev eq {debug} } {
+        puts $args
+    }
+}
+
+# The apm_config proc provides a tmsh pre-processor for APM
+# configuration, which in most cases will drastically reduce
+# implementation code. To configure APM with this proc, pass
+# it an array of object names and associated meta-tag substitutions.
+# Each object must be categorized as a profile, a resource, or
+# a policy-item. APM agents and customization-groups are derived
+# from these 3 categories as needed.
+#
+# apm_config's return value is a list of the APM profiles defined
+# in the argument and instantiated by the proc. This allows the
+# procedure call to be embedded directly into a virtual server
+# definition.
+#
+# These universal meta-tags may be placed anywhere in the array:
+# <ITEM> The object name, eg. apm_access
+# <PREFIX> The app name, including folder, eg. /Common/my_app.app/my_app
+#
+# Profile objects require the following meta-tags:
+# <PROFILE_TYPE> The tmsh object type, eg. "apm profile access"
+# <PROFILE_DEF>  The body of the object, eg.:
+#     "access-policy <PREFIX>
+#      defaults-from /Common/access
+#      eps-group <PREFIX>_eps
+#      errormap-group <PREFIX>_errormap
+#      general-ui-group <PREFIX>_general_ui"
+#
+# apm_config will automatically create default customization-groups
+# for the "-group" lines specified in access profile definitions.
+# In the above example, there is no need to additionally specify a
+# customization-group for errormap and general-ui.
+#
+# <PROFILE_TYPE> is a catch-all for other APM types, eg:
+#      apm_sso {
+#          <PROFILE_TYPE> {apm sso kerberos}
+#          <PROFILE_DEF>  "account-name <USER>
+#                          account-password <PASS>
+#                          realm <REALM>" }
+#
+# In the example above, <PROFILE_TYPE> and <PROFILE_DEF> are
+# apm_config meta-tags, while <USER>, <PASS>, and <REALM> must
+# be substituted before calling apm_config, eg. if these tags are
+# defined in $pre_proc_map, they may be substituted with:
+# array set apm_map [string map [subst $pre_proc_map] [array get apm_map]]
+#
+# Resource objects require the following meta-tags:
+# <RESOURCE_TYPE> The apm resource object type, eg. "webtop"
+# <RESOURCE_DEF>  The body of the object, eg.:
+#     "customization-group <ITEM>
+#      minimize-to-tray false
+#      webtop-type full"
+#
+# In the above example, a customization-group is specified. Any
+# customization-group is assumed to be blank unless further defined by the
+# <GROUP_DEF> meta-tag, eg. <GROUP_DEF> {type webtop}
+#
+# Policy-item objects are defined by the following meta-tags:
+# <AGENT_TYPE>   default "resource-assign"
+# <AGENT_DEF>    default "customization-group <ITEM>"
+# <ITEM_AGENT>   default "agents { <ITEM>_ag { type <AGENT_TYPE> }}"
+# <ITEM_CAPTION> default "<ITEM>"
+# <ITEM_COLOR>   default "1"
+# <ITEM_TYPE>    default "action"
+# <ITEM_RULES>   defaults to a set of expressions/next-items where specified
+# <RULE_CAPTION_0> default "fallback"
+# <RULE_CAPTION_1> default "Successful"
+# <RULE_CAPTION_2> default "successful"
+#
+# apm_config generates the APM agent and customization-group definitions
+# as required for each policy-item, but specific objects may be defined
+# by using the <AGENT_DEF> and <GROUP_DEF> meta-tags.
+# To suppress the formation of an APM agent, specify <ITEM_AGENT> {}.
+
+proc iapp_apm_config { args } {
+
+    set app_service ""
+    array set flags  {
+        -noapp       { [set app_service "app-service none\n   "] }
+    }
+    iapp_process_flags flags args
+
+    upvar [lindex $args 0] map_array
+
+    # Pull $prefix from the array
+    set prefix $map_array(prefix)
+    unset map_array(prefix)
+
+    # Stencils for creating apm objects
+    set access_form \
+       "<TMSH_CREATE> apm policy access-policy <ITEM> {\n   \
+          $app_service    caption general\n   \
+          start-item <ACCESS_START_ITEM>\n   \
+          default-ending <ACCESS_ENDING>\n   \
+          items replace-all-with {\n<ACCESS_ITEMS>    }\n}"
+
+    set profile_form "<TMSH_CREATE> <PROFILE_TYPE> <ITEM> {\n   \
+        $app_service    <PROFILE_DEF>\n}"
+
+    set resource_form "<TMSH_CREATE> apm resource <RESOURCE_TYPE> <ITEM> {\n   \
+        $app_service    <RESOURCE_DEF>\n}"
+
+    set agent_form "<TMSH_CREATE> apm policy agent <AGENT_TYPE> <ITEM>_ag {\n   \
+        $app_service    <AGENT_DEF>\n}"
+
+    set group_form "<TMSH_CREATE> apm policy customization-group <ITEM> {\
+        $app_service    <GROUP_DEF>}"
+
+    set agent_group_form "<TMSH_CREATE> apm policy customization-group <ITEM>_ag {\
+        $app_service    <GROUP_DEF>}"
+
+    set policy_item_form "<TMSH_CREATE> apm policy policy-item <ITEM> {
+    $app_service    <ITEM_AGENT>caption <ITEM_CAPTION>
+    color <ITEM_COLOR>
+    <ITEM_TYPE>
+    <ITEM_RULES>\n}"
+
+    # 1st round apm string map
+    set default_map_1 {
+        <ACCESS_ITEM> {}
+        <AGENT_DEF> "customization-group <ITEM>_ag"
+        <ITEM_AGENT> "agents replace-all-with {
+        <ITEM>_ag { type <AGENT_TYPE> }}\n    "
+        <ITEM_CAPTION> <ITEM>
+        <ITEM_COLOR> {1}
+        <ITEM_TYPE> "item-type action"
+        <ITEM_RULES> "rules
+        {[expr {[string first <RULE_NEXT_2> $map_array($item)] != -1 ? "{
+            caption <RULE_CAPTION_2>
+            expression <RULE_EXPR_2>
+            next-item ${prefix}_<RULE_NEXT_2>
+        }":""}][expr {[string first <RULE_NEXT_1> $map_array($item)] != -1 ? "{
+            caption <RULE_CAPTION_1>
+            expression <RULE_EXPR_1>
+            next-item ${prefix}_<RULE_NEXT_1>
+        }":""}]{
+            caption <RULE_CAPTION_0>
+            next-item ${prefix}_<RULE_NEXT_0>
+        }}"
+    }
+
+    # 2nd round apm string map
+    set default_map_2 {
+        <ITEM> [expr { $item eq {default} ? "$prefix" : "${prefix}_$item" }]
+        <PREFIX> $prefix
+        <LOCAL_PATH> [string map {/ :} $prefix]
+        <GROUP_DEF> ""
+        <AGENT_TYPE> "resource-assign"
+        <RULE_CAPTION_2> "successful"
+        <RULE_CAPTION_1> "Successful"
+        <RULE_CAPTION_0> "fallback"
+    }
+
+    # Build APM access profile and access-policy from the access_form.
+    # Tags <ACCESS_ITEM> and <ACCESS_ENDING> are picked up from
+    # $map_array items. <ITEM> and <GROUP_DEF> are picked up from
+    # $default_map_2.
+    foreach item [lsort [array names map_array]] {
+
+        # Pick up the <ACCESS_ENDING> tag. There should be just 1.
+        set access_form [string map $map_array($item) $access_form]
+
+        # Filter out items that do not belong in the access-policy.
+        # Anything with an ITEM_xxx tag belongs
+        if { [string first <ITEM_ $map_array($item)] == -1 } {
+            continue
+        }
+
+        # Add to the items list for the access-policy, e.g. priority
+        append access_items "        ${prefix}_$item {<ACCESS_ITEM>}\n"
+        set access_items [string map $map_array($item) $access_items]
+        set access_items [string map [subst $default_map_1] $access_items]
+    }
+
+    # Build APM resources, policy-items, agents, and customization-groups from
+    # the policy_item_form and resource_form.
+    foreach item [lsort [array names map_array]] {
+
+        # Each item starts as a profile, a resource, or a policy-item.
+        # Profiles are free-form, so other apm objects can use the profile form.
+        # In most cases, a policy-item spawns an agent.
+        # Any definition specifying a customization-group will spawn that group.
+        if { [string first "<PROFILE_DEF>" $map_array($item)] != -1 } {
+
+            # Collect profile names for attachment to the virtual server
+            if { [string first "apm profile " $map_array($item)] != -1 } {
+                lappend profiles [expr { $item eq {default}
+                                 ? "$prefix" : "${prefix}_$item" }]
+                # When an access profile is found, built a policy of the same name
+                if { [string first "apm profile access" $map_array($item)] != -1 } {
+                    set def [string map "<ACCESS_ITEMS> {$access_items}" $access_form]
+                    append cmds "[string map [subst $default_map_2] $def]\n"
+                }
+            }
+            set def $profile_form
+        } elseif { [string first "<RESOURCE_DEF>" $map_array($item)] != -1 } {
+            set def $resource_form
+        } else {
+            set def $policy_item_form
+            if { [string first "<ITEM_AGENT> {}" $map_array($item)] == -1 } {
+                append def $agent_form
+            }
+        }
+
+        # Apply 1st pass of string maps
+        set def [string map $map_array($item) $def]
+        set def [string map [subst $default_map_1] $def]
+
+        # If a customization-group is specified, add its definition
+        if { [string first "customization-group" $def] != -1 } {
+            if { [string first "apm policy agent" $def] != -1 } {
+                append def $agent_group_form
+            } elseif { [string first "apm profile access" $def] == -1 } {
+                append def $group_form
+            }
+        }
+
+        # Apply 2nd pass of string maps
+        set def [string map $map_array($item) $def]
+        append cmds [string map [subst $default_map_2] $def]
+    }
+
+    # Divide and execute tmsh commands
+    set tag "<TMSH_CREATE>"
+    set tag_length [string length $tag]
+    set last [expr { [string first $tag $cmds] + $tag_length }]
+    while { [set pos [string first $tag $cmds $last]] != -1 } {
+        incr pos -1
+        iapp_conf create [string range $cmds $last $pos]
+        set last [expr { $pos + $tag_length + 1 }]
+    }
+    iapp_conf create [string range $cmds $last end]
+    return $profiles
+}
+}
+
+sys application template f5.add_asc_app {
+     actions {
+          definition {
+            html-help {
+            <p><b>Azure Security Center WAF Application Template</b></p>
+
+<p>This template creates a complete configuration for protecting application traffic with an F5 WAF in Azure. <br> Before you start </p>
+<ul>
+    <li>For help configuring this iApp template, enable the template's inline help, or see the associated deployment guide at http://www.f5.com/.</li>
+</ul>
+               }
+implementation {
+    tmsh::include f5.iapp.1.4.0.cli
+    iapp_template start
+
+    set ::script {
+        #!/bin/bash
+
+        ###
+        # example usage:
+        # bash -x .\deploy_waf_application.sh -m http -d mydeployment -p 1.2.3.4 -v 881 -s 8446 -o 80 -l 443 -t linux -e medium -i NOT_SPECIFIED -c NOT_SPECIFIED -a NOT_SPECIFIED -r NOT_SPECIFIED -u azureuser -h 13.88.13.118 -g 8443
+        # variables:
+        # mode: the protocol(s) used by clients to access your application (http, https, http-https, https-offload)
+        # deployment: a name for the deployment (must be unique for each deployment)
+        # pool_member: the IP address or FQDN of the application or App Service Environment (1.2.3.4, myapp.azure.com)
+        # vs_http_port: the port used for unencrypted traffic on WAF (must be unique for each deployment) (880)
+        # vs_https_port: the port used for encrypted traffic on the WAF (must be unique for each deployment) (8445)
+        # pool_http_port: the unencryptedport used by your application (80)
+        # pool_https_port: the encrypted port used by your applicatoin (443)
+        # type: the OS of the application server(s) (linux, windows)
+        # level: the blocking level of the ASM security policy (high, medium, low, off)
+        # policy: the URL of a custom ASM security policy to apply to the deployment (NOT_SPECIFIED)
+        # ssl_cert: the URL of a .pfx archive that is accessible to this WAF device (NOT_SPECIFIED)
+        # ssl_passwd: the password for the specified .pfx archive (NOT_SPECIFIED)
+        # rewrite: the FQDN of your application, if not the same as pool_member (myapp1.contoso.com)
+        # user: the user name for the account create at provisioning time (azureuser)
+        # host: the management IP address of the WAF device
+        # mgmt_port: the management port of the WAF device (8443)
+        ###
+
+        export PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin/"
+
+        function passwd() {
+          echo | awk '{print $1}' /config/cloud/passwd
+        }
+
+        function cdr2mask () {
+           set -- $(( 5 - ($1 / 8) )) 255 255 255 255 $(( (255 << (8 - ($1 % 8))) & 255 )) 0 0 0
+           [ $1 -gt 1 ] && shift $1 || shift
+           echo ${1-0}.${2-0}.${3-0}.${4-0}
+        }
+
+        while getopts m:d:p:n:f:v:s:o:l:t:e:i:c:a:r:u: option
+        do	case "$option"  in
+                m) mode=$OPTARG;;
+                d) deployment=$OPTARG;;
+        	    p) pool_member=$OPTARG;;
+                n) vs_destination=$OPTARG;;
+                f ) vs_cidr=$OPTARG;;
+                v) vs_http_port=$OPTARG;;
+                s) vs_https_port=$OPTARG;;
+                o) pool_http_port=$OPTARG;;
+                l) pool_https_port=$OPTARG;;
+                t) type=$OPTARG;;
+                e) level=$OPTARG;;
+                i) policy=$OPTARG;;
+                c) ssl_cert=$OPTARG;;
+                a) ssl_passwd=$OPTARG;;
+                r) rewrite=$OPTARG;;
+                u) user=$OPTARG;;
+            esac
+        done
+
+        IP_REGEX='^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
+        FQDN_REGEX="(?=^.{1,254}$)(^(?:(?!\d+\.|-)[a-zA-Z0-9_\-]{1,63}(?<!-)\.?)+(?:[a-zA-Z]{2,})$)"
+        dfl_mgmt_port=`tmsh list sys httpd ssl-port | grep ssl-port | sed 's/ssl-port //;s/ //g'`
+        vs_mask=$(cdr2mask $vs_cidr)
+
+        sleep 10
+
+        # check for existence of device-group
+        response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X GET -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/cm/device-group/~Common~Sync  -o /dev/null)
+
+        if [[ $response_code != 200 ]]; then
+             echo "We are one, set device group to none"
+             device_group="none"
+        else
+             echo "We are two, set device group to Sync"
+             device_group="/Common/Sync"
+        fi
+
+        # install iApp templates
+        template_location="/var/lib/waagent/custom-script/download/0"
+
+        for template in f5.http.v1.2.0rc7.tmpl f5.policy_creator_t2.tmpl f5.asm_log_creator_t2.tmpl
+        do
+             curl -sk -u $user:$passwd -X POST -H "Content-type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/util/bash -d '{ "command":"run","utilCmdArgs":"-c \"cp $template_location/$template /config/$template\"" }'
+             response_code=$(curl -sku $user:$passwd -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/sys/config -d '{"command": "load","name": "merge","options": [ { "file": "/config/'"$template"'" } ] }' -o /dev/null)
+
+             if [[ $response_code != 200  ]]; then
+                  echo "Failed to install iApp template; exiting with response code '"$response_code"'"
+                  exit 1
+             fi
+             sleep 10
+        done
+
+        # deploy logging profiles
+        # profile names
+        deployment_name="azure-log"
+        asm_log_name="/Common/${deployment_name}.app/${deployment_name}_lp_asm_remote"
+        dos_log_name="/Common/${deployment_name}.app/${deployment_name}_lp_l7dos_remote"
+        local_asm_log_name="/Common/${deployment_name}.app/${deployment_name}_lp_asm_local"
+
+        #check for existence of previously deployed logging app
+        response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X GET -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/sys/application/service/~Common~$deployment_name.app~$deployment_name -o /dev/null)
+
+        if [[ $response_code != 200  ]]; then
+             response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment_name"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.asm_log_creator_t2","trafficGroup":"none"}' -o /dev/null)
+
+             if [[ $response_code != 200  ]]; then
+                  echo "Failed to install logging profiles; exiting with response code '"$response_code"'"
+                  exit 1
+             fi
+        else
+             echo "Logging deployment already exists, continuing deployment"
+        fi
+
+        # download canned or custom security policy and create accompanying ltm policy
+        custom_policy="none"
+        ltm_policy_name="/Common/$deployment-ltm_policy"
+
+        if [[ $level == "custom" ]]; then
+             if [[ -n $policy && $policy != "NOT_SPECIFIED" ]]; then
+                  custom_policy=$policy
+             else
+                  level="high"
+             fi
+        fi
+
+        # deploy policies
+        # profile name
+        l7dos_name="/Common/$deployment-l7dos"
+        deployment_name="$deployment-policy"
+
+        if [[ -n $rewrite && $rewrite != "NOT_SPECIFIED" ]]; then
+             rewrite_fqdn=$rewrite
+             server_host=$pool_member
+             scheme=$mode
+             rewrite_profile_name="/Common/$deployment-uri_rewrite"
+        else
+             rewrite_fqdn="false"
+             server_host="none"
+             scheme="none"
+             rewrite_profile_name=""
+        fi
+
+        response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment_name"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.policy_creator_t2","trafficGroup":"none","lists":[],"variables":[{"name":"variables__deployment","value":"'"$deployment"'"},{"name":"variables__type","value":"'"$type"'"},{"name":"variables__level","value":"'"$level"'"},{"name":"variables__do_asm","value":"true"},{"name":"variables__do_l7dos","value":"true"},{"name":"variables__custom_asm_policy","value":"'"$custom_policy"'"},{"name":"variables__do_uri_rewrite","value":"'"$rewrite_fqdn"'"},{"name":"variables__server_host","value":"'"$server_host"'"},{"name":"variables__rewrite_scheme","value":"'"$scheme"'"}]}' -o /dev/null)
+
+        if [[ $response_code != 200  ]]; then
+             echo "Failed to install LTM policy; exiting with response code '"$response_code"'"
+             exit 1
+        fi
+
+        # pre-create node
+        if [[ $pool_member =~ $IP_REGEX ]]; then
+             response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/ltm/node -d '{"name": "'"$pool_member"'","partition": "Common","address": "'"$pool_member"'"}' -o /dev/null)
+        else
+             response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/ltm/node -d '{"name": "'"$pool_member"'","partition": "Common","fqdn": {"autopopulate": "enabled","tmName": "'"$pool_member"'"}}' -o /dev/null)
+        fi
+
+        if [[ $response_code != 200  ]]; then
+             echo "Failed to create node; with response code '"$response_code"'"
+        fi
+
+        sleep 10
+
+        # deploy unencrypted application
+        if [[ $mode == "http" || $mode == "http-https" ]]; then
+             response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment"'-'"$vs_http_port"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.http.v1.2.0rc7","trafficGroup":"none","tables":[{"name":"pool__hosts","columnNames":["name"],"rows":[{"row":["'"$deployment"'"]}]},{"name":"pool__members","columnNames":["addr","port","connection_limit"],"rows":[{"row":["'"$pool_member"'","'"$pool_http_port"'","0"]}]},{"name":"server_pools__servers"}],"lists":[{"name":"asm__security_logging","value":["'"$asm_log_name"'","'"$local_asm_log_name"'", "'"$dos_log_name"'"]}],"variables":[{"name":"asm__use_asm","value":"'"$ltm_policy_name"'"},{"name":"monitor__monitor","value":"/Common/http"},{"name":"pool__addr","value":"'"$vs_destination"'"},{"name":"pool__mask","value":"'"$vs_mask"'"},{"name":"pool__persist","value":"/#cookie#"},{"name":"pool__port","value":"'"$vs_http_port"'"},{"name":"pool__profiles","value":"'"$l7dos_name $rewrite_profile_name"'"},{"name":"ssl__mode","value":"no_ssl"}]}' -o /dev/null)
+
+             if [[ $response_code != 200  ]]; then
+                  echo "Failed to deploy unencrypted application; exiting with response code '"$response_code"'"
+                  exit 1
+             else
+                  echo "Deployment of unencrypted application succeeded."
+             fi
+        fi
+
+        if [[ $mode == "https" || $mode == "http-https" || $mode == "https-offload" ]]; then
+             chain="/Common/ca-bundle.crt"
+             cert_name="/Common/$deployment.crt"
+             key_name="/Common/$deployment.key"
+
+             # download and install Certificate
+             echo "Starting Certificate download"
+
+             certificate_location=$ssl_cert
+
+             curl -sk -u $user:$(passwd) -X POST -H "Content-type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/util/bash -d '{ "command":"run","utilCmdArgs":"-c \"curl -k -s -f --retry 5 --retry-delay 10 --retry-max-time 10 -o /config/tmp.pfx '$certificate_location'\"" }'
+
+             response_code=$(curl -sku $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/sys/crypto/pkcs12 -d '{"command": "install","name": "'"$deployment"'","options": [ { "from-local-file": "/config/tmp.pfx" }, { "passphrase": "'"$ssl_passwd"'" } ] }' -o /dev/null)
+
+             if [[ $response_code != 200  ]]; then
+                  echo "Failed to install SSL cert; exiting with response code '"$response_code"'"
+                  exit 1
+             else
+                  echo "Certificate download complete."
+             fi
+        fi
+
+        if [[ $mode == "https" || $mode == "https-offload" ]]; then
+             do_redirect="yes"
+        else
+             do_redirect="no"
+        fi
+
+        # deploy encrypted application
+        if [[ $mode == "https" || $mode == "http-https" ]]; then
+             response_code=$(curl -sk -u $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment"'-'"$vs_https_port"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.http.v1.2.0rc7","trafficGroup":"none","tables":[{"name":"pool__hosts","columnNames":["name"],"rows":[{"row":["'"$deployment"'"]}]},{"name":"pool__members","columnNames":["addr","port_secure","connection_limit"],"rows":[{"row":["'"$pool_member"'","'"$pool_https_port"'","0"]}]},{"name":"server_pools__servers"}],"lists":[{"name":"asm__security_logging","value":["'"$asm_log_name"'","'"$local_asm_log_name"'", "'"$dos_log_name"'"]}],"variables":[{"name":"asm__use_asm","value":"'"$ltm_policy_name"'"},{"name":"monitor__monitor","value":"/Common/https"},{"name":"pool__addr","value":"'"$vs_destination"'"},{"name":"pool__mask","value":"'"$vs_mask"'"},{"name":"pool__persist","value":"/#cookie#"},{"name":"pool__port","value":"'"$vs_http_port"'"},{"name":"pool__port_secure","value":"'"$vs_https_port"'"},{"name":"pool__redirect_to_https","value":"'"$do_redirect"'"},{"name":"pool__redirect_port","value":"'"$vs_http_port"'"},{"name":"pool__redirect_to_port","value":"'"$pool_https_port"'"},{"name":"pool__profiles","value":"'"$l7dos_name $rewrite_profile_name"'"},{"name":"ssl__cert","value":"'"$cert_name"'"},{"name":"ssl__key","value":"'"$key_name"'"},{"name":"ssl__mode","value":"client_ssl_server_ssl"},{"name":"ssl__server_ssl_profile","value":"/#default#"},{"name":"ssl__use_chain_cert","value":"'"$chain"'"}]}' -o /dev/null)
+
+             if [[ $response_code != 200  ]]; then
+                  echo "Failed to deploy encrypted application; exiting with response code '"$response_code"'"
+                  exit 1
+            else
+                   echo "Deployment of encrypted application succeeded."
+             fi
+        fi
+
+        # deploy offloaded application
+        if [[ $mode == "https-offload" ]]; then
+             response_code=$(curl -sk -u $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/sys/application/service/ -d '{"name":"'"$deployment"'-'"$vs_https_port"'","partition":"Common","deviceGroup":"'"$device_group"'","strictUpdates":"disabled","template":"/Common/f5.http.v1.2.0rc7","trafficGroup":"none","tables":[{"name":"pool__hosts","columnNames":["name"],"rows":[{"row":["'"$deployment"'"]}]},{"name":"pool__members","columnNames":["addr","port","connection_limit"],"rows":[{"row":["'"$pool_member"'","'"$pool_http_port"'","0"]}]},{"name":"server_pools__servers"}],"lists":[{"name":"asm__security_logging","value":["'"$asm_log_name"'","'"$local_asm_log_name"'", "'"$dos_log_name"'"]}],"variables":[{"name":"asm__use_asm","value":"'"$ltm_policy_name"'"},{"name":"monitor__monitor","value":"/Common/http"},{"name":"pool__addr","value":"'"$vs_destination"'"},{"name":"pool__mask","value":"'"$vs_mask"'"},{"name":"pool__persist","value":"/#cookie#"},{"name":"pool__port_secure","value":"'"$vs_https_port"'"},{"name":"pool__redirect_to_https","value":"'"$do_redirect"'"},{"name":"pool__redirect_port","value":"'"$vs_http_port"'"},{"name":"pool__redirect_to_port","value":"'"$pool_https_port"'"},{"name":"pool__profiles","value":"'"$l7dos_name $rewrite_profile_name"'"},{"name":"ssl__cert","value":"'"$cert_name"'"},{"name":"ssl__key","value":"'"$key_name"'"},{"name":"ssl__mode","value":"client_ssl"},{"name":"ssl__use_chain_cert","value":"'"$chain"'"}]}' -o /dev/null)
+
+             if [[ $response_code != 200  ]]; then
+                  echo "Failed to deploy SSL offloaded application; exiting with response code '"$response_code"'"
+                  exit 1
+             else
+                   echo "Deployment of offloaded application succeeded."
+             fi
+        fi
+
+        # save the config
+        response_code=$(curl -sk -u $user:$(passwd) -w "%{http_code}" -X POST -H "Content-Type: application/json" https://localhost:$dfl_mgmt_port/mgmt/tm/sys/config -d '{"command": "save"}' -o /dev/null)
+
+        if [[ $response_code != 200  ]]; then
+             echo "Failed to save the configuration with response code '"$response_code"'"
+        fi
+
+        echo "Deployment complete."
+        exit
+    }
+
+    proc configure_waf {  } {
+        tmsh::include f5.iapp.1.4.0.cli
+        set app $tmsh::app_name
+
+        #Set variables, if they dont exist then use defaults
+        set vs_destination [expr { [info exists ::application__subnet_prefix] ? [lindex [split $::application__subnet_prefix "/"] 0] : "0.0.0.0" }]
+        set vs_cidr [expr { [info exists ::application__subnet_prefix] ? [lindex [split $::application__subnet_prefix "/"] 1] : "0" }]
+        set mode [expr { [info exists ::application__mode] ? "$::application__mode" : "http" }]
+        set vs_http_port [expr { [info exists ::application__vs_http_port] ? "$::application__vs_http_port" : "880" }]
+        set vs_https_port [expr { [info exists ::application__vs_https_port] ? "$::application__vs_https_port" : "8445" }]
+        set pool_http_port [expr { [info exists ::application__pool_http_port] ? "$::application__pool_http_port" : "80" }]
+        set pool_https_port [expr { [info exists ::application__pool_https_port] ? "$::application__pool_https_port" : "443" }]
+        set type [expr { [info exists ::application__type] ? "$::application__type" : "linux" }]
+        set level [expr { [info exists ::application__level] ? "$::application__level" : "high" }]
+        set custom_policy [expr { [info exists ::application__policy] ? "$::application__policy" : "NOT_SPECIFIED" }]
+        set ssl_pfx [expr { [info exists ::application__ssl_pfx] ? "$::application__ssl_pfx" : "NOT_SPECIFIED" }]
+        set passphrase [expr { [info exists ::application__passphrase] ? "$::application__passphrase" : "NOT_SPECIFIED" }]
+        set platform [expr { [info exists ::application__platform] ? "$::application__platform" : "IaaS" }]
+        set rewrite_fqdn [expr { [info exists ::application__rewrite_fqdn] ? "$::application__rewrite_fqdn" : "NOT_SPECIFIED" }]
+
+        set script_path "/config/deploy_waf_application.sh"
+
+        if {[catch {
+               set fn $script_path
+               set fh [open $fn w]
+               puts $fh $::script
+               close $fh
+               exec chmod 754 $fn
+          } err]} {
+               puts "Could not create the script, exiting with error.\n$err"
+          } else {
+               puts "Successfully created script at $script_path"
+          }
+
+        if {[catch {
+               exec bash -x /config/deploy_waf_application.sh -m $mode -d ${app}_waf -p $::application__pool_member -n $vs_destination -f $vs_cidr -v $vs_http_port -s $vs_https_port -o $pool_http_port -l $pool_https_port -t $type -e $level -i $custom_policy -c $ssl_pfx -a $passphrase -r $rewrite_fqdn -u admin
+          } err]} {
+               puts "Could not create the deployment, exiting with error.\n$err"
+          } else {
+               puts "Successfully created deployment!"
+          }
+
+    }
+
+    # MAIN
+    configure_waf
+    iapp_template stop
+}
+
+presentation {
+    section intro {
+        message intro "Deploy an ASM-protected application for use with Azure Security Center."
+        message check_for_updates "Check for new versions of this template on DevCentral (https://devcentral.f5.com/wiki/iApp.Microsoft-Applications.ashx)."
+        message post_deployment "After deploying applications with this template, you must configure additional Azure resources to forward application traffic to this WAF device. New Azure TCP probes, load balancing rules, and inbound security rules must be configured on the Azure Load Balancer for the WAF TCP ports specified in this deployment."
+        message reconfigure "If you need to change the deployment, do not reconfigure this template; instead, create a new deployment with the desired settings using a unique set of encrypted/unencrypted WAF TCP ports. Reconfigure Azure resources to reflect the new WAF ports, verify functionality, then delete the previous deployment."
+        optional ( intro == "HIDE_THIS" ) {
+            choice ltm_provisioned tcl {
+                return [expr {[tmsh::run_proc f5.iapp.1.4.0.cli:iapp_get_provisioned ltm] ? "yes" : "no"}]
+            }
+            choice asm_provisioned tcl {
+                return [expr {[tmsh::run_proc f5.iapp.1.4.0.cli:iapp_get_provisioned asm] ? "yes" : "no"}]
+            }
+        }
+        optional ( ltm_provisioned == "no" || asm_provisioned == "no" ) {
+            message sorry "You must license and provision the Local Traffic Manager (LTM) and Application Security Manager (ASM) modules to use this template."
+        }
+    }
+
+    section application {
+        choice nic display "xxlarge" default "single" {
+            "This BIG-IP has a single network interface" => "single",
+            "This BIG-IP has multiple network interfaces" => "multi"
+        }
+        message nic_help "When deploying with a single network interface, a wildcard virtual server is used for application traffic."
+        optional ( nic == "multi" ) {
+            string subnet_prefix display "xxlarge" required
+            message subnet_prefix_help "Enter the subnet prefix of the external Azure subnet for your deployment, in CIDR format (for example: 192.168.1.0/24). The template will configure a network virtual server at this address to receive application traffic."
+        }
+        choice mode display "xxlarge" default "http-https" {
+            "HTTP" => "http",
+            "HTTPS" => "https",
+            "HTTP and HTTPS" => "http-https",
+            "SSL Offload" => "https-offload"
+        }
+        message mode_help "Selecting HTTP will create an unencrypted BIG-IP virtual server; HTTPS creates an encrypted virtual server with redirect; HTTP and HTTP creates both unencrypted and encrypted virtual servers; SSL Offload creates an encrypted virtual server forwarding unencrypted traffic to the application server(s)"
+        string pool_member display "xxlarge" required validator "IpOrFqdn"
+        message pool_member_help "A single IP address or FQDN of an Azure Load Balancer or subdomain name of the Azure App Service."
+        optional ( mode != "https" ) {
+            string pool_http_port display "xxlarge" required default "80" validator "PortNumber"
+            message pool_http_port_help "The TCP port on which the server(s) listen for unencrypted traffic."
+        }
+        string vs_http_port display "xxlarge" required default "880" validator "PortNumber"
+        message vs_http_port_help "The TCP port on which the BIG-IP listens for unencrypted traffic. This port MUST be unique for each deployment. When deploying HTTPS or SSL Offload, this port is used to create a redirect virtual server."
+        optional ( mode == "https" || mode == "http-https" ) {
+            string pool_https_port display "xxlarge" required default "443" validator "PortNumber"
+            message pool_https_port_help "The TCP port on which the server(s) listen for encrypted traffic."
+        }
+        optional ( mode != "http" ) {
+            string vs_https_port display "xxlarge" required default "8445" validator "PortNumber"
+            message vs_https_port_help "The TCP port on which the BIG-IP listens for encrypted traffic. This port MUST be unique for each deployment."
+        }
+        choice type display "xxlarge" default "linux" {
+            "Linux" => "linux",
+            "Windows" => "windows"
+        }
+        choice level display "xxlarge" default "medium" {
+            "High" => "high",
+            "Medium" => "medium",
+            "Low" => "low",
+            "Off" => "off",
+            "Custom" => "custom"
+        }
+        optional ( level == "custom" ) {
+            string policy display "xxlarge" required
+            message policy_help "The URL of a custom ASM policy, in .xml format, that is accessible from the BIG-IP device."
+        }
+        optional ( mode == "https" || mode == "http-https" || mode == "https-offload") {
+            string ssl_pfx display "xxlarge" required
+            password passphrase display "xxlarge" required
+            message ssl_pfx_help "The URL of a certificate archive file, in .pfx format, that is accessible from the BIG-IP device."
+        }
+        choice platform display "xxlarge" default "IaaS" {
+            "Infrastructure as a service - VM" => "IaaS",
+            "Platform as a service - App Service" => "PaaS"
+        }
+        message platform_help "Select Infrastructure as a service if using a single Azure virtual machine or multiple VMs behind an Azure Load Balancer. Select Platform as a service if your application is part of an Azure App Service."
+        optional ( platform == "PaaS" ) {
+            string rewrite_fqdn display "xxlarge" required validator "Fqdn"
+            message rewrite_fqdn_help "The hostname clients use to access your Azure App Service. BIG-IP maps the request to the subdomain name of the App Service."
+        }
+    }
+
+    text {
+             intro "Welcome to the F5 Azure Security Center Deployment iApp Template"
+             intro.intro "Introduction"
+             intro.check_for_updates "Check for updates"
+             intro.sorry "We're sorry"
+             intro.post_deployment "Post-deployment steps"
+             intro.reconfigure "Reconfiguration note"
+
+             application "Application Information"
+             application.nic "Does this BIG-IP have one or more network interfaces?"
+             application.nic_help ""
+             application.subnet_prefix "Enter the address prefix for the external subnet:"
+             application.subnet_prefix_help ""
+             application.mode "Select the protocol(s) used by clients to access your application:"
+             application.mode_help ""
+             application.pool_member "Enter the IP address or FQDN of the application or App Service Environment:"
+             application.pool_member_help ""
+             application.vs_http_port "Enter the port used for unencrypted traffic on WAF:"
+             application.vs_http_port_help ""
+             application.vs_https_port "Enter the port used for encrypted traffic on the WAF:"
+             application.vs_https_port_help ""
+             application.pool_http_port "Enter the unencrypted port used by your application:"
+             application.pool_http_port_help ""
+             application.pool_https_port "Enter the encrypted port used by your application:"
+             application.pool_https_port_help ""
+             application.type "Enter the OS type of the application server(s):"
+             application.level "Select the blocking level of the ASM security policy:"
+             application.policy "Enter the URL of a custom ASM security policy to apply to the deployment:"
+             application.policy_help ""
+             application.ssl_pfx "Enter the URL of a .pfx archive that is accessible to this WAF device:"
+             application.ssl_pfx_help ""
+             application.passphrase "Enter the password for the specified .pfx archive:"
+             application.platform "Select the Azure platform of your application:"
+             application.platform_help ""
+             application.rewrite_fqdn "Enter the hostname clients will use to access your PaaS application:"
+             application.rewrite_fqdn_help ""
+    }
+}
+               role-acl { admin manager resource-admin }
+               run-as none
+          }
+     }
+     requires-bigip-version-max none
+     requires-bigip-version-min 12.1.2
+     requires-modules { ltm asm }
+}

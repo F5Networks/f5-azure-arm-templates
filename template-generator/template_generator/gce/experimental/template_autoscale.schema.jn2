@@ -1,0 +1,105 @@
+# Copyright 2019 F5 Networks All rights reserved.
+
+info:
+  title: F5 BIG-IP Autoscale with Google API
+  author: F5 Networks
+  description: This solution uses a GDM template to launch the deployment of F5 BIG-IP Local Traffic Manager (LTM) and Application Security Manager (ASM) Virtual Edition (VE) instances in a Google Instance Group that is configured for auto scaling
+  version: 2.1.2
+imports:
+  - path: f5-payg-autoscale-bigip-waf.py
+required:
+  - region
+  - availabilityZone1
+  - allowUsageAnalytics
+  - mgmtNetwork
+  - mgmtSubnet
+  - targetSize
+  - minReplicas
+  - manGuiPort
+  - maxReplicas
+  - imageName
+  - cpuUtilization
+  - coolDownPeriod
+  - policyLevel
+  - applicationPort
+  - instanceType
+  - serviceAccount
+  - declarationUrl
+properties:
+  region:
+    description: Enter the Google Region in which you want to deploy BIG-IP, for example 'us-west1'.
+    type: string
+  availabilityZone1:
+    description: Enter the availability zone where you want to deploy the BIG-IP VE instance, for example 'us-west1-a'.
+    type: string
+  mgmtNetwork:
+    description: Specify the name of the network to use for management traffic, for example 'my-management-network'.
+    type: string
+  manGuiPort:
+    description: Enter the BIG-IP Management Port, the default is '8443'.
+    type: integer
+    default: 8443
+  mgmtSubnet:
+    description: Specify the name of the subnet to use for management traffic, for example 'my-management-subnetwork'.
+    type: string
+  imageName:
+    description: BIG-IP image name.
+    type: string
+  instanceType:
+    description: Instance type assigned to BIG-IP, for example 'n1-standard-4'.
+    type: string
+  bigIpModules:
+    description: Enter a comma-separated list of modules and provisioning level, for example 'ltm:nominal' or 'ltm:nominal,asm:nominal'.
+    type: string
+    default: ltm:nominal
+  serviceAccount:
+    description: Enter the Google service account to use for autoscale API calls, for example 'username@projectname.iam.serviceaccount.com'. Please note that this service account is necessary for one BIG-IP to communicate with the other, so the permissions should include access to the storage bucket. Refer [here](https://clouddocs.f5.com/products/extensions/f5-cloud-failover/latest/userguide/gcp.html#create-and-assign-an-iam-role) for instructions on how to create the IAM service account with sufficient access.
+    type: string
+  targetSize:
+    description: Enter the number of instances to start.
+    type: integer
+    default: 2
+  minReplicas:
+    description: Enter the minimum number of instances autoscale policy will scale down to.
+    type: integer
+    default: 2
+  maxReplicas:
+    description: Enter the maximum number of instances autoscale policy will allow.
+    type: integer
+    default: 8
+  cpuUtilization:
+    description: Enter the target percent of BIG-IP managed instance group utilization. A new instance is created once this target is met for the entire group.
+    type: number
+    default: 0.8
+  coolDownPeriod:
+    description: Enter the amount of time, in seconds, before collecting information from a new instance. This should be at least the time it takes to initialize the instance. In most cases, the default value of 10 minutes should be used.
+    type: integer
+    default: 600
+  policyLevel:
+    description: Choose asm policy; valid values include - 'high', 'medium', or 'low'.
+    type: string
+    default: ''
+  applicationPort:
+    description: List application port(s) separated by a space, for example '443' or '443 444 445'.
+    type: integer
+    default: 80
+  applicationDnsName:
+    description: Enter the DNS name used by application.
+    type: string
+    default: ''
+  allowUsageAnalytics:
+    description:  This deployment can send anonymous statistics to F5 to help us determine how to improve our solutions. If you enter **no** statistics are not sent.
+    type: boolean
+    default: yes
+  logLevel:
+    description: Log setting, used to set log level on scripts used during deployment. Acceptable values are - error, warn, info, verbose, debug, silly. The default is 'info'.
+    type: string
+    default: info
+  declarationUrl:
+    description: URL for the AS3 declaration JSON file to be deployed. If left at **default**, the recommended F5 WAF configuration will be applied. Enter **none** to deploy without a service configuration. For example, ' https://cdn.f5.com/product/cloudsolutions/declarations/sample_01.json '
+    type: string
+    default: default
+documentation:
+  - README.md
+examples:
+  - f5-existing-stack-same-net-vi-api-payg-3nic-bigip.yaml
