@@ -1,0 +1,30 @@
+---
+name: Azure <CLUSTER FOLDER> <NIC COUNT>NIC-BIGIQ-LICMGMT <LICENSE TYPE> <INSTANCE TYPE> <REGION> <BRANCH>
+onStart:
+- ../../../../../../../common/helper_init.sh
+- ../../../../../../../common/create_resource_group.sh
+- ../../../../../../../common/create_environment.sh
+- ../../../../../../../../sleep/3_minutes.sh
+- ../../../../../../../common/verify_create_env.sh
+- ../../../../../../../common/create_bigiq_deployment.sh
+- ../../../../../../../../sleep/5_minutes.sh
+- ../../../../../../../common/verify_create.sh
+- ../../../../../../../../sleep/10_minutes.sh
+- ../../../../../../../common/verify_onboard_bigiq.sh
+- ../../../../../../../common/verify_registration_key.sh
+- ../../../../../../../common/verify_reg_pool_keys.sh
+- ../../../../../../../common/verify_lic_pool_keys.sh
+- ../../../../../../../common/verify_ntp.sh
+- ../../../../../../../common/verify_time_zone.sh
+- ./verify_cluster.sh
+- ./verify_pip_on_1.sh
+- ./promote_secondary.sh
+- ../../../../../../../../sleep/3_minutes.sh
+- ./verify_failover_to_0.sh
+- ./verify_pip_on_0.sh
+- ../../../../../../../common/delete_deployment.sh
+- ../../../../../../../common/verify_delete.sh
+onFail:
+- ../../../../../../../common/capture_logs_bigiq.sh
+- ../../../../../../../common/delete_deployment.sh
+- ../../../../../../../common/verify_delete.sh

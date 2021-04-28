@@ -1,0 +1,631 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "3.2.0.0",
+  "parameters": {
+    "solutionDeploymentName": {
+      "type": "string",
+      "metadata": {
+        "description": "A unique name for this deployment."
+      }
+    },
+    "numberOfInstances": {
+      "type": "int",
+      "defaultValue": 2,
+      "allowedValues": [ 2 ],
+      "metadata": {
+        "description": "The number of BIG-IP VEs that will be deployed in front of your application."
+      }
+    },
+    "instanceType": {
+      "type": "string",
+      "defaultValue": "Standard_A4",
+      "metadata": {
+        "description": "The size of the Virtual Hardware Instance."
+      },
+      "allowedValues": [
+        "Standard_A3",
+        "Standard_A4",
+        "Standard_D2",
+        "Standard_D3",
+        "Standard_D5",
+        "Standard_D2_v2",
+        "Standard_D3_v2",
+        "Standard_D5_v2",
+        "Standard_F2",
+        "Standard_F4"
+      ]
+    },
+    "imageName": {
+      "defaultValue": "Good",
+      "allowedValues": [
+        "Good",
+        "Better",
+        "Best"
+      ],
+      "metadata": {
+        "description": "F5 SKU (image) to deploy"
+      },
+      "type": "string"
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "azureuser",
+      "metadata": {
+        "description": "User name to login to the BIG-IP VE."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password to login to the BIG-IP VE."
+      }
+    },
+    "dnsLabel": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique DNS Name for the Public IP used to access the BIG-IP VEs for management."
+      }
+    },
+    "licenseKey1": {
+      "type": "string",
+      "defaultValue": "REQUIRED",
+      "metadata": {
+        "description": "The license token for the first F5 BIG-IP VE."
+      }
+    },
+    "licenseKey2": {
+      "type": "string",
+      "defaultValue": "REQUIRED",
+      "metadata": {
+        "description": "The license token for the second F5 BIG-IP VE. This field is required when deploying two or more devices."
+      }
+    },
+    "applicationProtocols": {
+      "type": "string",
+      "defaultValue": "https-offload",
+      "allowedValues": [ "https-offload" ],
+      "metadata": {
+        "description": "The protocol(s) that will be used to configure the device VIPs."
+      }
+    },
+    "applicationAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The public IP address or DNS FQDN of the application that this device will front."
+      }
+    },
+    "applicationPort": {
+      "type": "string",
+      "defaultValue": "80",
+      "metadata": {
+        "description": "If deploying an HTTP application, the port on which your service listens for unencrypted traffic. This field is not required when deploying https only."
+      }
+    },
+    "applicationSecurePort": {
+      "type": "string",
+      "defaultValue": "443",
+      "metadata": {
+        "description": "If deploying an HTTPS application, the port on which your service listens for encrypted traffic. This field is not required when deploying http only."
+      }
+    },
+    "vaultName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The Azure Key Vault where SSL certificates are stored. This field is not required when deploying http only."
+      }
+    },
+    "vaultResourceGroup": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Resource Group of the Azure Key Vault. This field is not required when deploying http only."
+      }
+    },
+    "secretUrl": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Full Key Vault Id to the secret that stores the SSL cert. This field is not required when deploying http only."
+      }
+    },
+    "certThumbprint": {
+      "type": "string",
+      "defaultValue": "NOT_SPECIFIED",
+      "metadata": {
+        "description": "The thumbprint of the SSL certificate you have stored in the Azure Key Vault."
+      }
+    },
+    "restrictedSrcAddress": {
+      "type": "string",
+      "defaultValue": "*",
+      "metadata": {
+        "description": "Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources."
+      }
+    },
+    "tagValues": {
+      "type": "object",
+      "defaultValue": {
+        "application": "APP",
+        "environment": "ENV",
+        "group": "GROUP",
+        "owner": "OWNER",
+        "cost": "COST"
+      }
+    }
+  },
+  "variables": {
+    "f5CloudLibsTag": "v1.0.0",
+    "location": "[resourceGroup().location]",
+    "imageNameToLower": "[toLower(parameters('imageName'))]",
+    "skuToUse": "[concat('f5-bigip-virtual-edition-', variables('imageNameToLower'),'-byol')]",
+    "virtualNetworkName": "[concat(parameters('dnsLabel'),'-vnet1')]",
+    "vnetAddressPrefix": "10.10.0.0/16",
+    "subnetName": "[concat(parameters('dnsLabel'),'-subnet1')]",
+    "subnetPrefix": "10.10.1.0/24",
+    "ipAddress": "10.10.1.",
+    "nicNamePrefix": "[concat(parameters('dnsLabel'),'-nic')]",
+    "loadBalancerName": "[concat(parameters('dnsLabel'),'-lb')]",
+    "availabilitySetName": "[concat(parameters('dnsLabel'),'-as')]",
+    "newStorageAccountName": "[concat(parameters('dnsLabel'),'st')]",
+    "deviceNamePrefix": "[concat(parameters('dnsLabel'),'-device')]",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('dnsLabel'),'-nsg'))]",
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
+    "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
+    "guiMgtID": "[concat(variables('lbID'),'/inboundNatRules/guimgt')]",
+    "sshMgtID": "[concat(variables('lbID'),'/inboundNatRules/sshmgt')]",
+    "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('dnsLabel'))]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+    "singleQuote": "'",
+    "commandArgs": "[concat('-m ', parameters('applicationProtocols'), ' -d ', parameters('solutionDeploymentName'), ' -n ', parameters('applicationAddress'), ' -h ', parameters('applicationPort'), ' -c ', parameters('certThumbprint'), ' -u ', parameters('adminUsername'), ' -p ', parameters('adminPassword'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[parameters('dnsLabel')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "PublicIPAddress",
+        "application": "[parameters('tagValues').application]",
+        "environment": "[parameters('tagValues').environment]",
+        "group": "[parameters('tagValues').group]",
+        "owner": "[parameters('tagValues').owner]",
+        "costCenter": "[parameters('tagValues').cost]"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsLabel')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "VirtualNetwork",
+        "application": "[parameters('tagValues').application]",
+        "environment": "[parameters('tagValues').environment]",
+        "group": "[parameters('tagValues').group]",
+        "owner": "[parameters('tagValues').owner]",
+        "costCenter": "[parameters('tagValues').cost]"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('vnetAddressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('nicNamePrefix'),copyindex())]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "NetworkInterface",
+        "application": "[parameters('tagValues').application]",
+        "environment": "[parameters('tagValues').environment]",
+        "group": "[parameters('tagValues').group]",
+        "owner": "[parameters('tagValues').owner]",
+        "costCenter": "[parameters('tagValues').cost]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]",
+        "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/guimgt',copyindex())]",
+        "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'),'/inboundNatRules/sshmgt',copyindex())]",
+        "[concat('Microsoft.Network/networkSecurityGroups/', parameters('dnsLabel'),'-nsg')]"
+      ],
+      "copy": {
+        "count": "[parameters('numberOfInstances')]",
+        "name": "niccopy"
+      },
+      "properties": {
+        "networkSecurityGroup": {
+          "id": "[variables('nsgID')]"
+        },
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[concat(variables('ipAddress'),add(4,copyindex()))]",
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
+                }
+              ],
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "[concat(variables('lbID'), '/inboundNatRules/', 'guimgt',copyIndex())]"
+                },
+                {
+                  "id": "[concat(variables('lbID'), '/inboundNatRules/', 'sshmgt',copyIndex())]"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[concat(parameters('dnsLabel'), '-nsg')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "NetworkSecurityGroup",
+        "application": "[parameters('tagValues').application]",
+        "environment": "[parameters('tagValues').environment]",
+        "group": "[parameters('tagValues').group]",
+        "owner": "[parameters('tagValues').owner]",
+        "costCenter": "[parameters('tagValues').cost]"
+      },
+      "properties": {
+        "securityRules": [
+          {
+            "name": "mgmt_allow_443",
+            "properties": {
+              "description": "",
+              "priority": 101,
+              "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443",
+              "protocol": "TCP",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
+          },
+          {
+            "name": "ssh_allow_22",
+            "properties": {
+              "description": "",
+              "priority": 102,
+              "sourceAddressPrefix": "[parameters('restrictedSrcAddress')]",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22",
+              "protocol": "TCP",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
+          },
+          {
+            "name": "app_allow_8445",
+            "properties": {
+              "description": "",
+              "priority": 104,
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "8445",
+              "protocol": "TCP",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', parameters('dnsLabel'))]"
+      ],
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "LoadBalancer",
+        "application": "[parameters('tagValues').application]",
+        "environment": "[parameters('tagValues').environment]",
+        "group": "[parameters('tagValues').group]",
+        "owner": "[parameters('tagValues').owner]",
+        "costCenter": "[parameters('tagValues').cost]"
+      },
+      "name": "[variables('loadBalancerName')]",
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "loadBalancerFrontEnd",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[variables('publicIPID')]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "loadBalancerBackEnd"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "Name": "https-8445",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/tcp-8445')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": "[parameters('applicationSecurePort')]",
+              "backendPort": 8445,
+              "idleTimeoutInMinutes": 15
+            }
+          }
+        ],
+        "probes": [
+          {
+            "properties": {
+              "protocol": "Tcp",
+              "port": 8445,
+              "intervalInSeconds": 15,
+              "numberOfProbes": 2
+            },
+            "name": "tcp-8445"
+          }
+        ]
+      },
+      "type": "Microsoft.Network/loadBalancers"
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+      "name": "[concat(variables('loadBalancerName'),'/guimgt', copyIndex())]",
+      "location": "[variables('location')]",
+      "copy": {
+        "name": "lbNatLoop",
+        "count": "[parameters('numberOfInstances')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
+      ],
+      "properties": {
+        "frontendIPConfiguration": {
+          "id": "[variables('frontEndIPConfigID')]"
+        },
+        "protocol": "tcp",
+        "frontendPort": "[copyIndex(8443)]",
+        "backendPort": 443,
+        "enableFloatingIP": false
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+      "name": "[concat(variables('loadBalancerName'),'/sshmgt', copyIndex())]",
+      "location": "[variables('location')]",
+      "copy": {
+        "name": "lbNatLoop",
+        "count": "[parameters('numberOfInstances')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]"
+      ],
+      "properties": {
+        "frontendIPConfiguration": {
+          "id": "[variables('frontEndIPConfigID')]"
+        },
+        "protocol": "tcp",
+        "frontendPort": "[copyIndex(8022)]",
+        "backendPort": 22,
+        "enableFloatingIP": false
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "AvailabilitySet",
+        "application": "[parameters('tagValues').application]",
+        "environment": "[parameters('tagValues').environment]",
+        "group": "[parameters('tagValues').group]",
+        "owner": "[parameters('tagValues').owner]",
+        "costCenter": "[parameters('tagValues').cost]"
+      },
+      "name": "[variables('availabilitySetName')]",
+      "type": "Microsoft.Compute/availabilitySets"
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(variables('deviceNamePrefix'),copyindex())]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "VirtualMachine",
+        "application": "[parameters('tagValues').application]",
+        "environment": "[parameters('tagValues').environment]",
+        "group": "[parameters('tagValues').group]",
+        "owner": "[parameters('tagValues').owner]",
+        "costCenter": "[parameters('tagValues').cost]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicNamePrefix'), copyindex())]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]"
+      ],
+      "copy": {
+        "count": "[parameters('numberOfInstances')]",
+        "name": "devicecopy"
+      },
+     "plan": {
+           "name": "[variables('skuToUse')]",
+           "publisher": "f5-networks",
+           "product": "f5-big-ip"
+       },
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('instanceType')]"
+        },
+        "osProfile": {
+          "computerName": "[concat(variables('deviceNamePrefix'),copyindex())]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "secrets": [
+              {
+                "sourceVault": {
+                  "id": "[resourceId(parameters('vaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
+                },
+                "vaultCertificates": [
+                  {
+                    "certificateUrl": "[parameters('secretUrl')]"
+                  }
+                ]
+              }
+            ]
+        },
+        "storageProfile": {
+          "imageReference": {
+              "publisher": "f5-networks",
+              "offer": "f5-big-ip",
+              "sku": "[variables('skuToUse')]",
+              "version": "latest"
+          },
+          "osDisk": {
+            "name": "[concat('osdisk',copyindex())]",
+            "vhd": {
+              "uri": "[concat('http://',variables('newStorageAccountName'),'.blob.core.windows.net/',variables('newStorageAccountName'),'/osDisk',copyindex(),'.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[concat(resourceId('Microsoft.Network/networkInterfaces',variables('nicNamePrefix')),copyindex())]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[concat('http://',variables('newstorageAccountName'),'.blob.core.windows.net')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "[variables('newStorageAccountName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "StorageAccount",
+        "application": "[parameters('tagValues').application]",
+        "environment": "[parameters('tagValues').environment]",
+        "group": "[parameters('tagValues').group]",
+        "owner": "[parameters('tagValues').owner]",
+        "costCenter": "[parameters('tagValues').cost]"
+      },
+      "apiVersion": "2015-06-15",
+      "properties": {
+        "accountType": "Standard_LRS"
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('deviceNamePrefix'),0,'/start')]",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/',variables('deviceNamePrefix'),0)]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "settings": {
+          "fileUris": [
+            "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/scripts/azure/runScripts.js')]",
+            "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', variables('f5CloudLibsTag'))]"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', variables('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', concat(variables('ipAddress'), 4), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(variables('deviceNamePrefix'), 0, '.azuresecurity.com'), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseKey1'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module afm:none --signal ONBOARD_DONE \" --cluster \" --wait-for ONBOARD_DONE --output /var/log/cluster.log --log-level debug --host ', concat(variables('ipAddress'), 4), ' -u admin -p ', parameters('adminPassword'), ' --config-sync-ip ', concat(variables('ipAddress'), 4), ' --create-group --device-group Sync --sync-type sync-failover --device ', concat(variables('deviceNamePrefix'), 0, '.azuresecurity.com'), ' --auto-sync --save-on-auto-sync', '\"')]"
+        }
+      }
+     },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "copy": {
+        "name": "extensionLoop",
+        "count": "[sub(parameters('numberOfInstances'), 1)]"
+      },
+      "name": "[concat(variables('deviceNamePrefix'),add(copyindex(),1),'/start')]",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/',variables('deviceNamePrefix'),add(copyindex(),1))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "settings": {
+          "fileUris": [
+            "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/scripts/azure/runScripts.js')]",
+            "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', variables('f5CloudLibsTag'))]"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', variables('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', concat(variables('ipAddress'), 5), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(variables('deviceNamePrefix'), copyindex(1), '.azuresecurity.com'), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseKey2'), ' --db provision.1nicautoconfig:disable --db tmm.maxremoteloglength:2048 --module ltm:nominal --module asm:none --module afm:none --signal ONBOARD_DONE \" --cluster \" --wait-for ONBOARD_DONE --output /var/log/cluster.log --log-level debug --host ', concat(variables('ipAddress'), 5), ' -u admin -p ', parameters('adminPassword'), ' --config-sync-ip ', concat(variables('ipAddress'), 5), ' --join-group --device-group Sync --sync --remote-host ', concat(variables('ipAddress'), 4), ' --remote-user admin --remote-password ', parameters('adminPassword'), ' --signal CLUSTER_DONE \" --script \" --wait-for CLUSTER_DONE --output /var/log/runScript.log --log-level debug --url http://cdn-prod-ore-f5.s3-website-us-west-2.amazonaws.com/product/blackbox/staging/azure/deploy_ha.sh --cl-args ', variables('singleQuote'), variables('commandArgs'), variables('singleQuote'), '\"')]"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "GUI-URL": {
+      "type": "string",
+      "value": "[concat('https://',reference(variables('publicIPID')).dnsSettings.fqdn,':8443')]"
+    },
+    "SSH-URL": {
+      "type": "string",
+      "value": "[concat(reference(variables('publicIPID')).dnsSettings.fqdn,' ',8022)]"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+---
+name: Azure autoscale-<AUTOSCALE TYPE> <STACK TYPE> <LICENSE TYPE> <IMAGE NAME> <REGION> <BIGIP VERSION>
+onStart:
+- ../../common/helper_init.sh
+- ../../common/create_resource_group.sh
+- ../../common/create_environment.sh
+- ../../common/verify_create_env.sh
+- ../../common/verify_bigiq_ready_env.sh
+- ./create_enviroment_svcs.sh
+- ./verify_create_env_svcs.sh
+- ../../common/create_deployment.sh
+- ../../common/verify_create.sh
+- ../../common/verify_image_version.sh
+- ../../common/update_user.sh
+- ../../common/verify_mcp_ready.sh
+- ../../common/verify_license.sh
+- ../../common/verify_vlans.sh
+- ../../common/verify_networking.sh
+- ../../common/verify_ntp.sh
+- ../../common/verify_provisioned_modules.sh
+- ../../common/verify_sync.sh
+- ../../common/verify_phone_home.sh
+- ../../common/verify_declaration_url_AS3.sh
+- ../../common/verify_logs.sh
+- ../../common/verify_file_permissions.sh
+- ../../common/verify_AS3.sh
+- ./verify_autoscale_metrics.sh
+- ./verify_inst_pub_ip.sh
+- ./verify_dns_provider.sh
+- ../../../sleep/1_minute.sh
+- ./scale_up.sh
+- ../../../sleep/5_minutes.sh
+- ./verify_scale_up_sync.sh
+- ../../common/verify_sync.sh
+- ../../../sleep/1_minute.sh
+- ./scale_down.sh
+- ../../../sleep/5_minutes.sh
+- ./verify_scale_down.sh
+- ../../common/delete_deployment.sh
+- ../../common/verify_delete.sh
+onFail:
+- ../../common/capture_logs.sh
+- ../../common/delete_deployment.sh
+- ../../common/verify_delete.sh

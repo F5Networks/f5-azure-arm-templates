@@ -1,0 +1,38 @@
+---
+### This is only being used for bigiq-payg currently as all other autoscale variations are supported
+name: Azure autoscale-<AUTOSCALE TYPE> <STACK TYPE> <LICENSE TYPE> <REGION> <BIGIP VERSION>
+onStart:
+- ../../common/helper_init.sh
+- ../../common/create_bigiq_payg_deployment.sh
+- ../../../sleep/5_minutes.sh
+- ../../common/verify_create.sh
+- ../../common/update_user.sh
+- ../../common/verify_mcp_ready.sh
+- ../../common/verify_license.sh
+- ../../common/verify_vlans.sh
+- ../../common/verify_networking.sh
+- ../../common/verify_ntp.sh
+- ../../common/verify_sync.sh
+- ../../common/verify_iapps.sh
+- ../../common/verify_iapp_services.sh
+- ../../common/verify_logs.sh
+- ../../common/verify_file_permissions.sh
+- ./verify_autoscale_metrics.sh
+- ./verify_inst_pub_ip.sh
+- ./verify_dns_provider.sh
+- ./verify_static_vmss_image.sh
+- ../../../sleep/1_minute.sh
+- ./scale_up.sh
+- ../../../sleep/5_minutes.sh
+- ./verify_scale_up_sync.sh
+- ../../common/verify_sync.sh
+- ../../../sleep/1_minute.sh
+- ./scale_down.sh
+- ../../../sleep/5_minutes.sh
+- ./verify_scale_down.sh
+- ../../common/delete_deployment.sh
+- ../../common/verify_delete.sh
+onFail:
+- ../../common/capture_logs.sh
+- ../../common/delete_deployment.sh
+- ../../common/verify_delete.sh

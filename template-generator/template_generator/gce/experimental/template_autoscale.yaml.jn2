@@ -1,0 +1,52 @@
+{%- import 'constants.jn2'  as constants with context -%}
+# Copyright {{ constants.copyright }} F5 Networks All rights reserved.
+#
+# Version {{ constants.version }}
+## note deployment name can not excede 23 charactors.
+
+imports:
+- path: f5-{{ license_type }}-{{ type }}-bigip-{{ solution }}.py
+resources:
+- name: f5-{{ license_type }}-{{ type }}-bigip-{{ solution }}
+  type: f5-{{ license_type }}-{{ type }}-bigip-{{ solution }}.py
+  properties:
+   ### Enter the Google Region in which you want to deploy BIG-IP, for example 'us-west1'.  
+   region: <region>
+   ### Enter the availability zone where you want to deploy the BIG-IP VE instance, for example 'us-west1-a'.
+   availabilityZone1: <availability zone>
+   ### Specify the name of the network to use for management traffic, for example 'my-management-network'.
+   mgmtNetwork: <managment network>
+   ### Specify the name of the subnet to use for management traffic, for example 'my-management-subnetwork'.
+   mgmtSubnet: <management subnet>
+   ### BIG-IP image, valid choices include:
+   {{ constants.images_list }}
+   imageName: <image>
+   ### Instance type assigned to BIG-IP, for example 'n1-standard-4'.
+   instanceType: n1-standard-4
+   ### Enter the BIG-IP Management Port, the default is '8443'.
+   manGuiPort: 8443
+   ## Enter a comma-separated list of modules and provisioning level, for example 'ltm:nominal' or 'ltm:nominal,asm:nominal'.
+   bigIpModules: asm:nominal
+   ### Enter the Google service account to use for autoscale API calls, for example 'username@projectname.iam.gserviceaccount.com'.
+   serviceAccount: <service account>
+   ### Enter the number of instances to start.
+   targetSize: 2
+   ### Enter the minimum number of instances autoscale policy will scale down to.
+   minReplicas: 2
+   ### Enter the maximum number of instances autoscale policy will allow.
+   maxReplicas: 8
+   ### Enter the target percent of BIG-IP managed instance group utilization. A new instance is created once this target is met for the entire group.
+   cpuUtilization: 0.8
+   ### Enter the amount of time, in seconds, before collecting information from a new instance. This should be at least the time it takes to initialize the instance. In most cases, the default value of 10 minutes should be used.
+   coolDownPeriod: 600
+   ### Choose asm policy
+   # valid values include: 'high', 'medium', or 'low'.
+   policyLevel: <policy level>
+   ### List application port(s) separated by a space, for example '443' or '443 444 445'.
+   applicationPort: 80
+   ### What DNS will this application use?
+   applicationDnsName: <DNS value of your application>
+   ### This deployment can send anonymous statistics to F5 to help us determine how to improve our solutions. If you enter **no** statistics are not sent.
+   allowUsageAnalytics: yes
+   ### URL for the AS3 declaration JSON file to be deployed. If left at **default**, the recommended F5 WAF configuration will be applied. Enter **none** to deploy without a service configuration. For example, ' https://cdn.f5.com/product/cloudsolutions/declarations/sample_01.json '
+   declarationUrl: default
