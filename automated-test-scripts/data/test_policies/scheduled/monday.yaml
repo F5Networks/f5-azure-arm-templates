@@ -1,9 +1,0 @@
-# Daily Scheduled test plan
-# Azure v1 autoscale tests
-azure-autoscale-test:
-  test-url: "file://automated-test-scripts/f5-azure-arm-templates/supported/autoscale/daily_test.yaml"
-  run: "all"
-  parameters-files:
-    - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-lb/1nic/existing-stack/bigiq/postpub_parameters.yaml"
-    - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/waf/via-dns/1nic/existing-stack/payg/postpub_parameters.yaml"
--scripts/data/f5-google-gdm-templates/experimental/autoscale/waf/via-lb/existing-stack/payg/postpub_parameters.yaml"
