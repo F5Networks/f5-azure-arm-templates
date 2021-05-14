@@ -411,7 +411,7 @@
         "declarationUrl": {
               "defaultValue": "NOT_SPECIFIED",
               "metadata": {
-              "description": "URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.25.0/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration."
+              "description": "URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration."
           },
           "type": "string"
         },
