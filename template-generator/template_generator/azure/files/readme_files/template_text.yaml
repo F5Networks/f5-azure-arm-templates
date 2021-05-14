@@ -433,7 +433,7 @@ parameter_list:
     environment:
       azureStack: 'If you would like to deploy using a local BIG-IP image, provide the full URL to the VHD in Azure Stack storage. **Note**: Unless specifically required, leave the default of **OPTIONAL**.'
   customPolicy: "Specify the publicly available URL of a custom ASM security policy in XML format. This policy will be applied in place of the standard High/Medium/Low policy."
-  declarationUrl: "URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.25.0/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration."
+  declarationUrl: "URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration."
   dnsLabel: "Unique DNS Name for the Public IP address used to access the Virtual Machine."
   dnsMemberIpType: "The IP type to add as the record when updating the DNS provider."
   dnsMemberPort: "The port for the DNS member to use for monitoring the members status."
