@@ -214,7 +214,7 @@ templates:
       default: "- In the *installCloudLibs* variable: **tmsh load sys config merge file /config/verifyHash**.\n- In the *installCloudLibs* variable: ensure this includes **tmsh run cli script verifyHash /config/cloud/f5-cloud-libs.tar.gz**."
     support_notes: "While this template has been created by F5 Networks, it is in the experimental directory and therefore has not completed full testing and is subject to change.  F5 Networks does not offer technical support for templates in the experimental directory. For supported templates, see the templates in the **supported** directory."
     supported_bigip_versions:
-      default: "## Supported BIG-IP versions\nThe following is a map that shows the available options for the template parameter **bigIpVersion** as it corresponds to the BIG-IP version itself. Only the latest version of BIG-IP VE is posted in the GCE Marketplace. For older versions, see downloads.f5.com.\n| Google BIG-IP Image Version | BIG-IP Version |\n| --- | --- |\n| 15.1.00000 | 15.1.0 Build 0.0.6 |"
+      default: "## Supported BIG-IP versions\nThe following is a map that shows the available options for the template parameter **bigIpVersion** as it corresponds to the BIG-IP version itself. Only the latest version of BIG-IP VE is posted in the GCE Marketplace. For older versions, see downloads.f5.com.\n| Google BIG-IP Image Version | BIG-IP Version |\n| --- | --- |\n| 16.0.101000 | 16.0.1.1 Build 0.0.6 |"
     backup_and_recovery: "### Backup BIG-IP configuration for cluster recovery\n\nThe template now automatically saves a BIG-IP back up UCS file (into the **backup** container of the storage account ending in **data000**) every night at 12am, and saves 7 days of back up UCS files.  If you make manual changes to the configuration, we recommend immediately making a backup of your BIG-IP configuration manually and storing the resulting UCS file in the backup container to ensure the master election process functions properly.  Note: If it is necessary to recover from this UCS backup, the system picks the backup file with the latest timestamp.\n\nTo manually save the BIG-IP configuration to a UCS file:\n1. Backup your BIG-IP configuration (ideally the cluster primary) by creating a [UCS](https://support.f5.com/csp/article/K13132) archive.  Use the following syntax to save the backup UCS file:\n  - From the CLI command: ```# tmsh save /sys ucs /var/tmp/original.ucs```\n  - From the Configuration utility: **System > Archives > Create**\n2. Upload the UCS into the **backup** container of the storage account ending in **data000**."
 ######################### Additional documentation items #########################
 note_text:
@@ -359,6 +359,9 @@ license_text:
   bigiq: ': This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s).'
   bigiq-payg: ': This allows you to launch the template using an existing BIG-IQ device with a pool of licenses to license the BIG-IP VE(s), as well as use PAYG instances.'
 license_map:
+  16.0.101000:
+    build: '16.0.1.1 Build 0.0.6'
+    bootLocations: 'Both One and Two Boot Location options are available'
   15.1.000000:
     build: '15.1.0.4 Build 0.0.6'
     bootLocations: 'Both One and Two Boot Location options are available'

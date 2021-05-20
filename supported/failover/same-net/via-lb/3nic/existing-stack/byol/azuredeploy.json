@@ -163,7 +163,7 @@
             "type": "string"
         },
         "bigIpVersion": {
-            "defaultValue": "15.1.201000",
+            "defaultValue": "16.0.101000",
             "metadata": {
                 "description": "F5 BIG-IP version you want to use."
             },
@@ -294,7 +294,7 @@
         "customImageUrn": {
             "defaultValue": "OPTIONAL",
             "metadata": {
-                "description": "If you would like to deploy using a specific image in Azure marketplace, specify the URN of the image. **Note**: Unless specifically required, leave the default of **OPTIONAL**. Example value: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:15.1.201000. You can find the URNs of F5 marketplace images in the README for this template or by running the command: az vm image list --output yaml --publisher f5-networks --all"
+                "description": "If you would like to deploy using a specific image in Azure marketplace, specify the URN of the image. **Note**: Unless specifically required, leave the default of **OPTIONAL**. Example value: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:16.0.101000. You can find the URNs of F5 marketplace images in the README for this template or by running the command: az vm image list --output yaml --publisher f5-networks --all"
             },
             "type": "string"
         },
@@ -542,6 +542,12 @@
         ],
         "imageNameSub": "[variables('imageNameArray')[variables('bigIpMajorVersion')][parameters('imageName')]]",
         "imageNameArray": {
+            "16": {
+                "AllOneBootLocation": "big-all-1slot",
+                "AllTwoBootLocations": "big-all-2slot",
+                "LTMOneBootLocation": "big-ltm-1slot",
+                "LTMTwoBootLocations": "big-ltm-2slot"
+            },
             "15": {
                 "AllOneBootLocation": "big-all-1slot",
                 "AllTwoBootLocations": "big-all-2slot",
