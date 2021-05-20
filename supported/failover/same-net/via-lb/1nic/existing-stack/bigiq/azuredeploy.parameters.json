@@ -39,7 +39,7 @@
             "value": "OPTIONAL"
         },
         "bigIpVersion": {
-            "value": "15.1.201000"
+            "value": "16.0.101000"
         },
         "bigIpModules": {
             "value": "ltm:nominal"

@@ -216,16 +216,19 @@ dewdrop_test_run:
     - python /dewdrop/dewdrop-docker.py
 
 publish_to_github:
+  image: ${ARTIFACTORY_SERVER}/dockerhub-remote/node:8
   stage: release
   only:
-    - /(^publish-(\d+\.){1,2}(\d)-(\d+)?$)/
+    - /(^publish-(v\d*[1-9]*\.)(\d).(\d).(\d))/
   script:
-    - apk add --no-cache jq
+    # install jq
+    - apt-get update
+    - apt-get install -y jq
     # Execute Release script to push source to github repo
-    - ./release-tool/publish_github.sh "$ALLOWED_DIRS" "$ALLOWED_FILES"
+    - ./cloud-tools/release-tool/publish_github.sh "$ALLOWED_DIRS" "$ALLOWED_FILES"
   variables:
     ALLOWED_DIRS: "examples .github images"
     ALLOWED_FILES: ".gitignore README.md azure-offer-list.yaml azure-timezone-list.md SUPPORT.md"
-    GITLAB_API_URL: "$AZURE_V2_URL"
-    GIT_HUB_API_TOKEN: "$AZURE_V2_GITHUB_API_TOKEN"
-    GITLAB_PRIVATE_TOKEN: "$AZURE_V2_GITLAB_API_TOKEN"
+    GITLAB_API_URL: "$AZURE_URL"
+    GITHUB_API_TOKEN: "$AZURE_GITHUB_API_TOKEN"
+    GITLAB_PRIVATE_TOKEN: "$AZURE_GITLAB_API_TOKEN"
