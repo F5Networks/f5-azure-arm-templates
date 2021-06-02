@@ -81,7 +81,7 @@ run_generator_and_validate_no_diff:
     - if git diff | grep 'diff --git'; then exit 1; else exit 0; fi
 
 
-# run template generator smoke tests - validate file contents, etc.
+#run template generator smoke tests - validate file contents, etc.
 run_smoke_tests:
   stage: smoke-tests
   tags:
@@ -118,7 +118,7 @@ pre_release_test_job:
       - triggers
       - pipelines
   variables:
-    TEST_POLICY: automated-test-scripts/data/test_policies/pre_release_test.yaml
+    TEST_POLICY: automated-test-scripts/data/test_policies/azure_pre_release_test.yaml
     STACK_TYPE: dewdrop-preproduction
   script:
     - pip install -r cloud-tools/master-job/requirements.txt

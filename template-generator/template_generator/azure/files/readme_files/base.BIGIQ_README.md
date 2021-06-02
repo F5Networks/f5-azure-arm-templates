@@ -102,7 +102,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 ```
 
 ## Documentation
-- For more information on BIG-IQ VE, see https://support.f5.com/kb/en-us/products/big-iq-centralized-mgmt/manuals/product/big-iq-centralized-management-device-6-0-1.html and https://support.f5.com/kb/en-us/products/big-iq-centralized-mgmt/manuals/product/big-iq-centralized-management-and-amazon-web-services-setup-6-0-0.html
+- For more information on BIG-IQ VE, see https://support.f5.com/csp/knowledge-center/software/BIG-IQ?module=BIG-IQ%20Centralized%20Management&version=6.1.0 and https://support.f5.com/csp/knowledge-center/cloud/Public%20Cloud/Amazon%20Web%20Services
 - For more information on F5 solutions for Azure, including manual configuration procedures for some deployment scenarios, see the Azure section of [Public Cloud Docs](http://clouddocs.f5.com/cloud/public/v1/).
 
 {% if type == 'bigiq' and bigiq_solution == 'cluster' and stack == 'existing-stack' -%}
