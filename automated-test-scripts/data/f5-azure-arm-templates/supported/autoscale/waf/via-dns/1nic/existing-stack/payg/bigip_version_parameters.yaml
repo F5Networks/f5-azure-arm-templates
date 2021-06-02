@@ -6,7 +6,7 @@ AUTOSCALE TYPE: waf-via-dns
 AUTOSCALE TYPE URL: waf/via-dns
 BASE VLAN NAME: internal
 BIGIP MODULES: ltm:nominal,asm:nominal
-BIGIP VERSION: 15.1.201000
+BIGIP VERSION: 16.0.101000
 BIGIQ CONFIG FILE: ''
 CLIENT ID: d40aad56-b0bd-466d-a6c4-6c9c4d0f9aa7
 CONFIG FILES: .passwd;.azCredentials;.dnsPasswd

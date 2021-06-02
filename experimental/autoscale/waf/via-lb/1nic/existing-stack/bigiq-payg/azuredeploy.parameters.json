@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "9.4.0.0",
+    "contentVersion": "9.5.0.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -45,7 +45,7 @@
             "value": ""
         },
         "bigIpVersion": {
-            "value": "15.1.201000"
+            "value": "16.0.101000"
         },
         "bigIpModules": {
             "value": "asm:nominal"

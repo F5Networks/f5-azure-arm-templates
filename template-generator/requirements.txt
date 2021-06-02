@@ -1,6 +1,6 @@
 ## required production packages
 pyyaml
-jinja2
+jinja2==2.11.3
 pygithub
 ## required dev packages
 pyflakes==2.1.1 # force this version, for flake8
