@@ -118,7 +118,7 @@ pre_release_test_job:
       - triggers
       - pipelines
   variables:
-    TEST_POLICY: automated-test-scripts/data/test_policies/pre_release_test.yaml
+    TEST_POLICY: automated-test-scripts/data/test_policies/azure_pre_release_test.yaml
     STACK_TYPE: dewdrop-preproduction
   script:
     - pip install -r cloud-tools/master-job/requirements.txt
