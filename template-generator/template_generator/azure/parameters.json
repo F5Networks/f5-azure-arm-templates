@@ -182,7 +182,7 @@
         },
 {% endif %}
         "bigIpVersion": {
-            "defaultValue": "15.1.201000",
+            "defaultValue": "16.0.101000",
             "metadata": {
                 "description": "F5 BIG-IP version you want to use."
             },
@@ -411,7 +411,7 @@
         "declarationUrl": {
               "defaultValue": "NOT_SPECIFIED",
               "metadata": {
-              "description": "URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.25.0/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration."
+              "description": "URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration."
           },
           "type": "string"
         },
@@ -432,7 +432,7 @@
         "customImageUrn": {
             "defaultValue": "OPTIONAL",
             "metadata": {
-                "description": "If you would like to deploy using a specific image in Azure marketplace, specify the URN of the image. **Note**: Unless specifically required, leave the default of **OPTIONAL**. Example value: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:15.1.201000. You can find the URNs of F5 marketplace images in the README for this template or by running the command: az vm image list --output yaml --publisher f5-networks --all"
+                "description": "If you would like to deploy using a specific image in Azure marketplace, specify the URN of the image. **Note**: Unless specifically required, leave the default of **OPTIONAL**. Example value: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:16.0.101000. You can find the URNs of F5 marketplace images in the README for this template or by running the command: az vm image list --output yaml --publisher f5-networks --all"
             },
             "type": "string"
         },

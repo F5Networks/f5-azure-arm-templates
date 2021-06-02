@@ -244,12 +244,12 @@
 {%- endset %}
 
 {% set big_ip_versions -%}
-"15.1.201000",
+"16.0.101000",
 "14.1.003000",
 "latest"
 {%- endset %}
 {%- set big_ip_version_default %}
-"15.1.201000"
+"16.0.101000"
 {%- endset %}
 
 {% set big_iq_versions -%}
@@ -421,6 +421,12 @@ BIG-IP
 {%- endset %}
 
 {% set byol_image_name_array -%}
+"16": {
+"AllOneBootLocation": "big-all-1slot",
+"AllTwoBootLocations": "big-all-2slot",
+"LTMOneBootLocation": "big-ltm-1slot",
+"LTMTwoBootLocations": "big-ltm-2slot"
+},
 "15": {
 "AllOneBootLocation": "big-all-1slot",
 "AllTwoBootLocations": "big-all-2slot",
@@ -551,7 +557,7 @@ BIG-IP
 }
 {%- endset %}
 {% set version_port_map -%}
-"15.1.201000": {
+"16.0.101000": {
 "Port": 8443
 },
 "14.1.003000": {
@@ -716,7 +722,7 @@ variables('paygImageMap')[variables('imageNameToLower')]['offer']
 {% endset %}
 
 {%- set hashed_file_list -%}
-${config_loc}f5-cloud-libs.tar.gz f5-appsvcs-3.25.0-3.noarch.rpm
+${config_loc}f5-cloud-libs.tar.gz {{ f5_as3_latest_build }}
 {%- if type == "autoscale" and lb_method in ('via-lb', 'dns') and solution == 'ltm' or type == 'failover' and lb_method == 'api' -%}
 {{ " " }}${config_loc}f5-cloud-libs-azure.tar.gz
 {%- elif  type == "autoscale" and lb_method in ('via-lb', 'dns') and solution == 'waf' -%}

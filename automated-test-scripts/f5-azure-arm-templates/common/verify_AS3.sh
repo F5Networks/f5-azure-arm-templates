@@ -27,6 +27,6 @@ esac
 
 echo "Response: $response"
 
-if echo $response | grep '3.25.0'; then
+if echo $response | grep '3.26.1'; then
     echo "SUCCESS"
 fi
