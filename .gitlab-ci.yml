@@ -219,7 +219,7 @@ publish_to_github:
   image: ${ARTIFACTORY_SERVER}/dockerhub-remote/node:8
   stage: release
   only:
-    - /(^publish-(v\d*[1-9]*\.)(\d).(\d).(\d))/
+    - /(^publish-(v\d*[1-9]*\.)(\d*[1-9]*\.)(\d).(\d))/
   script:
     # install jq
     - apt-get update
@@ -227,8 +227,8 @@ publish_to_github:
     # Execute Release script to push source to github repo
     - ./cloud-tools/release-tool/publish_github.sh "$ALLOWED_DIRS" "$ALLOWED_FILES"
   variables:
-    ALLOWED_DIRS: "examples .github images"
-    ALLOWED_FILES: ".gitignore README.md azure-offer-list.yaml azure-timezone-list.md SUPPORT.md"
+    ALLOWED_DIRS: ".github experimental images supported"
+    ALLOWED_FILES: ".gitignore README.md azure-bigip-version-matrix.md azure-offer-list.yaml azure-timezone-list.md azure-update-bigip-image.md bigip-12-note.md iapp-migration.md slack-channel-statement.md template-index.md"
     GITLAB_API_URL: "$AZURE_URL"
     GITHUB_API_TOKEN: "$AZURE_GITHUB_API_TOKEN"
     GITLAB_PRIVATE_TOKEN: "$AZURE_GITLAB_API_TOKEN"
