@@ -1,9 +1,0 @@
-azure-failover-lb-test:
-  parameters-files:
-    - automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-lb/1nic/existing-stack/byol/postpub_parameters.yaml
-    #- automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-lb/1nic/existing-stack/bigiq/postpub_parameters.yaml
-    - automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-lb/3nic/existing-stack/payg/postpub_parameters.yaml
-    - automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-lb/3nic/existing-stack/byol/postpub_parameters.yaml
-  run: random
-  random-num-of-tests: 1
-  test-url: 'file://automated-test-scripts/f5-azure-arm-templates/supported/failover/via-lb/daily_test.yaml'
