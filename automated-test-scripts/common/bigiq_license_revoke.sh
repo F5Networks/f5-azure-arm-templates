@@ -22,7 +22,7 @@ for HOST in $HOSTS; do
     printf "\nBIG-IQ Version: $bigiq_version"
     if [[ $bigiq_version == "5.3"* ]]; then
         for POOL in $POOLS; do
-            if [ $POOL != "clpv2" ]; then
+            if [ $POOL != "production" ]; then
                 POOLID=`curl -sku ${USER}:"${PSWD}" https://${HOST}/mgmt/cm/device/licensing/pool/regkey/licenses | jq -r '.items[] | select(.name == "'${POOL}'") | .id'`
                 printf "\nPool ID for $POOL is $POOLID"
                 # for each license key in the pool, get the regKey:

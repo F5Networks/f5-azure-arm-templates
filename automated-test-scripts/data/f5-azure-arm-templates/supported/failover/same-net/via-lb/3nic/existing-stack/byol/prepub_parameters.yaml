@@ -23,7 +23,7 @@ INSTANCE PARAM: ',"numberOfInstances":{"value":2}'
 INSTANCE TYPE: Standard_DS3_v2
 LICENSE PARAM: ',"licenseKey1":{"value":"<AUTOFILL EVAL LICENSE KEY>"},"licenseKey2":{"value":"<AUTOFILL
   EVAL LICENSE KEY 2>"}'
-LICENSE POOL: clpv2
+LICENSE POOL: production
 LICENSE POOL PARAM: ''
 LICENSE TYPE: byol
 MGMT PIP1: mgmt-pip0

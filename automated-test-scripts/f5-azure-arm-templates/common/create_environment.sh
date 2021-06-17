@@ -14,7 +14,7 @@ GTM_LICENSE='DO_NOT_USE'
 ROUTER_LICENSE='DO_NOT_USE'
 
 # download and use --template-file because --template-uri is limiting
-curl -k https://s3.amazonaws.com/f5-cft/QA/azure-environment.json -o ${TMP_DIR}/azure-environment.json
+cp automated-test-scripts/common/azure-environment.json ${TMP_DIR}/azure-environment.json
 
 # get the public key from key vault
 SSH_KEY=$(az keyvault secret show --vault-name dewdropKeyVault -n dewpt-public | jq .value --raw-output)
@@ -45,7 +45,7 @@ case <LICENSE TYPE> in
 bigiq)
     DEPLOY_BIGIQ='Yes'
     BIG_IQ_LICENSE='<AUTOFILL BIGIQ LICENSE KEY>'
-    BIG_IQ_LICENSE_POOL='clpv2:<AUTOFILL CLPV2 LICENSE KEY>'
+    BIG_IQ_LICENSE_POOL='<AUTOFILL CLPV2 LICENSE KEY>'
     echo "Deploying BIG-IQ" ;;
 *)
     echo "Not deploying BIG-IQ" ;;

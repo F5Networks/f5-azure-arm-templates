@@ -1,6 +1,6 @@
 azure-failover-api-test:
   parameters-files:
-    #- automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-api/n-nic/existing-stack/bigiq/prepub_parameters.yaml
+    - automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-api/n-nic/existing-stack/bigiq/prepub_parameters.yaml
     - automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-api/n-nic/existing-stack/byol/prepub_parameters.yaml
     - automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-api/n-nic/existing-stack/payg/prepub_parameters.yaml
   run: random
