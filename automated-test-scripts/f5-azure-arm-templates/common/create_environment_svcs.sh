@@ -12,10 +12,10 @@ bigiq)
     curl -k https://s3.amazonaws.com/f5-cft/QA/azure-bigiq-standalone.json -o ${TMP_DIR}/azure-bigiq-standalone.json
 
     # validate the template
-    VALIDATION=$(az deployment group validate --resource-group <RESOURCE GROUP> --template-file ${TMP_DIR}/azure-bigiq-standalone.json --parameters '{"adminPassword":{"value":"B!giq2017"},"dnsLabel":{"value":"<RESOURCE GROUP>-bigiq"},"bigIqLicenseKey1":{"value":"<AUTOFILL BIGIQ LICENSE KEY>"},"vnetResourceGroupName":{"value":"<RESOURCE GROUP>"},"licensePoolKeys":{"value":"clpv2:<AUTOFILL CLPV2 LICENSE KEY>"}}' | jq .properties.provisioningState)
+    VALIDATION=$(az deployment group validate --resource-group <RESOURCE GROUP> --template-file ${TMP_DIR}/azure-bigiq-standalone.json --parameters '{"adminPassword":{"value":"B!giq2017"},"dnsLabel":{"value":"<RESOURCE GROUP>-bigiq"},"bigIqLicenseKey1":{"value":"<AUTOFILL BIGIQ LICENSE KEY>"},"vnetResourceGroupName":{"value":"<RESOURCE GROUP>"},"licensePoolKeys":{"value":"<AUTOFILL CLPV2 LICENSE KEY>"}}' | jq .properties.provisioningState)
 
     if [[ $VALIDATION == \"Succeeded\" ]]; then
-        az deployment group create --verbose --no-wait --template-file ${TMP_DIR}/azure-bigiq-standalone.json -g <RESOURCE GROUP> -n <RESOURCE GROUP>-bigiq --parameters '{"adminPassword":{"value":"B!giq2017"},"dnsLabel":{"value":"<RESOURCE GROUP>-bigiq"},"bigIqLicenseKey1":{"value":"<AUTOFILL BIGIQ LICENSE KEY>"},"vnetResourceGroupName":{"value":"<RESOURCE GROUP>"},"licensePoolKeys":{"value":"clpv2:<AUTOFILL CLPV2 LICENSE KEY>"}}'
+        az deployment group create --verbose --no-wait --template-file ${TMP_DIR}/azure-bigiq-standalone.json -g <RESOURCE GROUP> -n <RESOURCE GROUP>-bigiq --parameters '{"adminPassword":{"value":"B!giq2017"},"dnsLabel":{"value":"<RESOURCE GROUP>-bigiq"},"bigIqLicenseKey1":{"value":"<AUTOFILL BIGIQ LICENSE KEY>"},"vnetResourceGroupName":{"value":"<RESOURCE GROUP>"},"licensePoolKeys":{"value":"<AUTOFILL CLPV2 LICENSE KEY>"}}'
     else
         echo "Template validation failed"
     fi

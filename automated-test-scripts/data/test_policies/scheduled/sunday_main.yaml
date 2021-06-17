@@ -1,9 +1,9 @@
 azure-autoscale-test:
   parameters-files:
     - automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/waf/via-dns/1nic/existing-stack/payg/postpub_parameters.yaml
-    #- automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-lb/1nic/existing-stack/bigiq/postpub_parameters.yaml
+    - automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-lb/1nic/existing-stack/bigiq/postpub_parameters.yaml
     - automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-lb/1nic/existing-stack/payg/postpub_parameters.yaml
-    #- automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-dns/1nic/existing-stack/bigiq/postpub_parameters.yaml
+    - automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-dns/1nic/existing-stack/bigiq/postpub_parameters.yaml
     - automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-dns/1nic/existing-stack/payg/postpub_parameters.yaml
   run: random
   random-num-of-tests: 1

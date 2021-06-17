@@ -14,6 +14,7 @@ bigiq)
     if [[ $ACTIVATED == \"READY\" ]]; then
         echo "license valid"
     else
+        echo "Status: $ACTIVATED"
         echo "sleep 2 minutes before retry"
         sleep 120
     fi

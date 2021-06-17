@@ -19,7 +19,7 @@ INSTANCE PARAM: ',"instanceName":{"value":"f5vm"},"numberOfExternalIps":{"value"
   <EXTERNAL IP COUNT>}'
 INSTANCE TYPE: Standard_DS3_v2
 LICENSE PARAM: ''
-LICENSE POOL: clpv2
+LICENSE POOL: production
 LICENSE POOL PARAM: ''
 LICENSE TYPE: payg
 MGMT PIP1: mgmt-pip

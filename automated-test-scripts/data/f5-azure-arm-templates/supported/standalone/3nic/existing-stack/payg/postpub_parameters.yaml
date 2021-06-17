@@ -20,7 +20,7 @@ IMAGE NAME: Better1Gbps
 IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:15.1.201000
 INSTANCE TYPE: Standard_DS3_v2
 LICENSE PARAM: ''
-LICENSE POOL: clpv2
+LICENSE POOL: production
 LICENSE POOL PARAM: ''
 LICENSE TYPE: payg
 MGMT PIP1: mgmt-pip

@@ -1,5 +1,6 @@
 {% set failover_cmd_array %}
 {% if nics == 'n'%}
+"16": "tmsh modify sys db failover.selinuxallowscripts value enable",
 "15": "tmsh modify sys db failover.selinuxallowscripts value enable",
 "14": "tmsh modify sys db failover.selinuxallowscripts value enable",
 "13": "tmsh list sys db",

@@ -492,6 +492,7 @@
         "bigIpMgmtPort": "443",
         "instanceName": "[toLower(parameters('instanceName'))]",
         "failoverCmdArray": {
+            "16": "tmsh modify sys db failover.selinuxallowscripts value enable",
             "15": "tmsh modify sys db failover.selinuxallowscripts value enable",
             "14": "tmsh modify sys db failover.selinuxallowscripts value enable",
             "13": "tmsh list sys db",
