@@ -17,7 +17,7 @@ DNS LABEL: ',"dnsLabel":{"value":"<RESOURCE GROUP>"}'
 EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IMAGE NAME: AllTwoBootLocations
-IMAGE URN: f5-networks:f5-big-ip-byol:f5-big-all-2slot-byol:15.1.201000
+IMAGE URN: f5-networks:f5-big-ip-byol:f5-big-all-2slot-byol:16.0.101000
 INSTANCE TYPE: Standard_DS3_v2
 LICENSE PARAM: ',"licenseKey1":{"value":"<AUTOFILL EVAL LICENSE KEY>"}'
 LICENSE POOL: production

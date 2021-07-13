@@ -185,7 +185,7 @@
         "skuToUse": "[if(equals(length(variables('customImageUrnArray')), 4), variables('customImageUrnArray')[2], {{ constants.sku_to_use }})]",
         "offerToUse": "[if(equals(length(variables('customImageUrnArray')), 4), variables('customImageUrnArray')[1], {{ constants.offer_to_use }})]",
         "versionToUse": "[if(equals(length(variables('customImageUrnArray')), 4), variables('customImageUrnArray')[3], parameters('bigIpVersion'))]",
-        "bigIpMajorVersion": "[if(equals(parameters('bigIpVersion'), 'latest'), '15', split(variables('versionToUse'), '.')[0])]",
+        "bigIpMajorVersion": "[if(equals(parameters('bigIpVersion'), 'latest'), '16', split(variables('versionToUse'), '.')[0])]",
         "bigIpMajorVersionInt": "[int(variables('bigipMajorVersion'))]",
         "imagePlan": {
             "name": "[variables('skuToUse')]",
@@ -686,7 +686,7 @@
         "staticSkuToUse": "[if(equals(length(variables('customImageUrnArray')), 4), variables('customImageUrnArray')[2], {{ constants.sku_to_use }})]",
         "staticOfferToUse": "[if(equals(length(variables('customImageUrnArray')), 4), variables('customImageUrnArray')[1], {{ constants.offer_to_use }})]",
         "staticVersionToUse": "[if(equals(length(variables('customImageUrnArray')), 4), variables('customImageUrnArray')[3], parameters('bigIpVersion'))]",
-        "bigIpMajorVersion": "[if(equals(parameters('bigIpVersion'), 'latest'), '15', split(variables('versionToUse'), '.')[0])]",
+        "bigIpMajorVersion": "[if(equals(parameters('bigIpVersion'), 'latest'), '16', split(variables('versionToUse'), '.')[0])]",
         "bigIpMajorVersionInt": "[int(variables('bigipMajorVersion'))]",
         "staticImageReference": {
             "offer": "[variables('staticOfferToUse')]",
