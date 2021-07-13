@@ -6,7 +6,7 @@ azure-standalone-1nic-test:
   random-num-of-tests: 1
   parameters-files:
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/1nic/existing-stack/byol/prepub_parameters.yaml"
-    #- "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/1nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/1nic/existing-stack/payg/prepub_parameters.yaml"
 
 azure-standalone-2nic-test:
   test-url: "file://automated-test-scripts/f5-azure-arm-templates/supported/standalone/daily_test.yaml"
@@ -22,7 +22,7 @@ azure-standalone-3nic-test:
   random-num-of-tests: 1
   parameters-files:
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/3nic/existing-stack/payg/prepub_parameters.yaml"
-    #- "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/3nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/3nic/existing-stack/byol/prepub_parameters.yaml"
 
 azure-standalone-nnic-test:
   test-url: "file://automated-test-scripts/f5-azure-arm-templates/supported/standalone/daily_test.yaml"
@@ -30,16 +30,16 @@ azure-standalone-nnic-test:
   random-num-of-tests: 1
   parameters-files:
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/n-nic/existing-stack/payg/prepub_parameters.yaml"
-    # - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/n-nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/n-nic/existing-stack/byol/prepub_parameters.yaml"
 
 #Azure failover-api tests
 azure-failover-api-test:
   test-url: "file://automated-test-scripts/f5-azure-arm-templates/supported/failover/via-api/daily_test.yaml"
   run: "random"
-  random-num-of-tests: 1
+  random-num-of-tests: 2
   parameters-files:
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-api/n-nic/existing-stack/byol/prepub_parameters.yaml"
-    #- "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-api/n-nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-api/n-nic/existing-stack/payg/prepub_parameters.yaml"
 
  #Azure failover-lb tests
 azure-failover-lb-test:

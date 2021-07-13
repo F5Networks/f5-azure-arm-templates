@@ -421,7 +421,7 @@
         "skuToUse": "[if(equals(length(variables('customImageUrnArray')), 4), variables('customImageUrnArray')[2], concat('f5-', variables('imageNameSub'),'-byol'))]",
         "offerToUse": "[if(equals(length(variables('customImageUrnArray')), 4), variables('customImageUrnArray')[1], concat('f5-big-ip-', variables('imageNameArray').offerPostfix[variables('imageNameSub')]))]",
         "versionToUse": "[if(equals(length(variables('customImageUrnArray')), 4), variables('customImageUrnArray')[3], parameters('bigIpVersion'))]",
-        "bigIpMajorVersion": "[if(equals(parameters('bigIpVersion'), 'latest'), '15', split(variables('versionToUse'), '.')[0])]",
+        "bigIpMajorVersion": "[if(equals(parameters('bigIpVersion'), 'latest'), '16', split(variables('versionToUse'), '.')[0])]",
         "bigIpMajorVersionInt": "[int(variables('bigipMajorVersion'))]",
         "imagePlan": {
             "name": "[variables('skuToUse')]",

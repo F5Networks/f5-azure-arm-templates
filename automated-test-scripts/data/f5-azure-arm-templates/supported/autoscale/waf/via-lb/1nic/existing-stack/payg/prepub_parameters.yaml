@@ -24,7 +24,7 @@ EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IAPP SERVICE LIST: dewpt-waf-service
 IMAGE NAME: Best25Mbps
-IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:15.1.201000
+IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:16.0.101000
 INSTANCE TYPE: Standard_DS4_v2
 LICENSE PARAM: ''
 LICENSE POOL: production
