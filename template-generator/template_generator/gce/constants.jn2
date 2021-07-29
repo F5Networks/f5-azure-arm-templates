@@ -1,5 +1,5 @@
 {% set version = latest_content_version %}
-{% set copyright = "2019" %}
+{% set copyright = "2021" %}
 {%- set images_list %}
   {%- if license_type == "payg" -%}
     # f5-bigip-15-1-2-1-0-0-10-payg-best-10gbps-210115161130   
