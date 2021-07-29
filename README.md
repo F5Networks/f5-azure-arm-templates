@@ -25,7 +25,6 @@ Welcome to the GitHub repository for F5's ARM templates for Azure deployments. A
   - Package updates and critical bug fixes will be considered for deprecated cloud templates.
   - No additional legacy cloud verification testing will take place on new versions of TMOS (16.0+).
   - No new features nor legacy cloud templates will be developed.
-  - The Experimental legacy CST1 templates will be removed over time as additional CST2 use cases are delivered.
 
 
 ## Template information
@@ -53,7 +52,7 @@ All known issues are on GitHub for better tracking and visibility. See issues wi
 
 ### Copyright
 
-Copyright 2014-2020 F5 Networks Inc.
+Copyright 2014-2021 F5 Networks Inc.
 
 ### License
 
