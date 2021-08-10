@@ -1,5 +1,5 @@
 # Pre release test plan
-#Azure standalone tests
+# Azure standalone tests
 azure-standalone-1nic-test:
   test-url: "file://automated-test-scripts/f5-azure-arm-templates/supported/standalone/daily_test.yaml"
   run: "random"
@@ -32,7 +32,7 @@ azure-standalone-nnic-test:
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/n-nic/existing-stack/payg/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/n-nic/existing-stack/bigiq/prepub_parameters.yaml"
 
-#Azure failover-api tests
+# Azure failover-api tests
 azure-failover-api-test:
   test-url: "file://automated-test-scripts/f5-azure-arm-templates/supported/failover/via-api/daily_test.yaml"
   run: "random"
@@ -41,7 +41,7 @@ azure-failover-api-test:
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-api/n-nic/existing-stack/byol/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-api/n-nic/existing-stack/bigiq/prepub_parameters.yaml"
 
- #Azure failover-lb tests
+# Azure failover-lb tests
 azure-failover-lb-test:
   test-url: "file://automated-test-scripts/f5-azure-arm-templates/supported/failover/via-lb/daily_test.yaml"
   run: "random"
