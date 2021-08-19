@@ -24,8 +24,8 @@ INSTANCE PARAM: ',"numberOfInstances":{"value":2}'
 INSTANCE TYPE: Standard_DS3_v2
 LICENSE PARAM: ',"bigIqUsername":{"value":"admin"},"bigIqPassword":{"value":"B!giq2017"},<LICENSE
   POOL PARAM>'
-LICENSE POOL: clpv2
-LICENSE POOL PARAM: '"bigIqLicensePoolName":{"value":"clpv2"},"bigIqLicenseSkuKeyword1":{"value":"F5-BIG-MSP-BT-1G"},"bigIqLicenseUnitOfMeasure":{"value":"yearly"}'
+LICENSE POOL: production
+LICENSE POOL PARAM: '"bigIqLicensePoolName":{"value":"<LICENSE POOL>"},"bigIqLicenseSkuKeyword1":{"value":"F5-BIG-MSP-BT-1G"},"bigIqLicenseUnitOfMeasure":{"value":"yearly"}'
 LICENSE TYPE: bigiq
 MGMT PIP1: mgmt-pip0
 MGMT PIP2: mgmt-pip1

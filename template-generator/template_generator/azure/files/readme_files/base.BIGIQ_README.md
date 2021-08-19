@@ -33,7 +33,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - This solution uses SKU with BIG-IQ v6.0.1 or later.
 - After deploying the template, if you need to change your BIG-IQ VE password, there are a number of special characters that you should avoid using for F5 product user accounts.  See https://support.f5.com/csp/article/K2873 for details.
 - This template can send non-identifiable statistical information to F5 Networks to help us improve our templates.  See [Sending statistical information to F5](#sending-statistical-information-to-f5).
-- F5 has created a matrix that contains all of the tagged releases of the F5 ARM Templates for Microsoft Azure ARM, and the corresponding BIG-IQ versions, license types and throughput levels available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md.
+- F5 has created a matrix that contains all of the tagged releases of the F5 ARM Templates for Microsoft Azure ARM, and the corresponding BIG-IQ versions, license types and throughput levels available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/main/azure-bigip-version-matrix.md.
 - These ARM templates incorporate an existing Virtual Network (VNet).
 - F5 Azure ARM templates now capture all deployment logs to the BIG-IQ VE in /var/log/cloud/azure. Depending on which template you are using, this includes deployment logs (stdout/stderr), Cloud Libs execution logs, recurring solution logs (metrics, failover, and so on), and more.
 {{ EXTRA_CONFIG_NOTES }}
@@ -60,10 +60,6 @@ The following is a map that shows the available options for the template paramet
 ## Getting Help
 
 {{ HELP_TEXT }}
-
-### Community Help
-
-We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on F5 ARM templates. There are F5 employees who are members of this community who typically monitor the channel Monday-Friday 9-5 PST and will offer best-effort assistance. This slack channel community support should **not** be considered a substitute for F5 Technical Support for supported templates. See the [Slack Channel Statement](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/slack-channel-statement.md) for guidelines on using this channel.
 
 ## Installation
 
@@ -189,7 +185,7 @@ You have a choice when it comes to filing issues:
 
 ## Copyright
 
-Copyright 2014-2019 F5 Networks Inc.
+Copyright 2014-2021 F5 Networks Inc.
 
 ## License
 

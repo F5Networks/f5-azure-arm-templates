@@ -331,7 +331,7 @@ Simply deploying the ARM template and completing use case fulfills a functional 
 
 ## Copyright
 
-Copyright 2014-2016 F5 Networks Inc.
+Copyright 2014-2021 F5 Networks Inc.
 
 
 ## License

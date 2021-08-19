@@ -36,6 +36,7 @@ run_link_checker:
       - $RELEASE_RUNTIME_INIT_TESTS == "true"
   script:
     - make link_check
+  allow_failure: true
 
 # lint
 lint_generator:

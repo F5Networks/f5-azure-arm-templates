@@ -4,13 +4,13 @@ azure-autoscale-test:
   run: "random"
   random-num-of-tests: 3
   parameters-files:
-    # - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/waf/via-lb/1nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/waf/via-lb/1nic/existing-stack/bigiq/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/waf/via-lb/1nic/existing-stack/payg/prepub_parameters.yaml"
-    # - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/waf/via-dns/1nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/waf/via-dns/1nic/existing-stack/bigiq/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/waf/via-dns/1nic/existing-stack/payg/prepub_parameters.yaml"
-    # - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-lb/1nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-lb/1nic/existing-stack/bigiq/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-lb/1nic/existing-stack/payg/prepub_parameters.yaml"
-    # - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-dns/1nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-dns/1nic/existing-stack/bigiq/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/autoscale/ltm/via-dns/1nic/existing-stack/payg/prepub_parameters.yaml"
 
 # Azure failover-api tests
@@ -19,7 +19,7 @@ azure-failover-api-test:
   run: "random"
   random-num-of-tests: 1
   parameters-files:
-    # - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-api/n-nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-api/n-nic/existing-stack/bigiq/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-api/n-nic/existing-stack/byol/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-api/n-nic/existing-stack/payg/prepub_parameters.yaml"
 
@@ -31,10 +31,10 @@ azure-failover-lb-test:
   parameters-files:
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-lb/1nic/existing-stack/payg/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-lb/1nic/existing-stack/byol/prepub_parameters.yaml"
-    # - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-lb/1nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-lb/1nic/existing-stack/bigiq/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-lb/3nic/existing-stack/payg/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-lb/3nic/existing-stack/byol/prepub_parameters.yaml"
-    # - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-lb/3nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/failover/same-net/via-lb/3nic/existing-stack/bigiq/prepub_parameters.yaml"
 
 # Azure standalone tests
 azure-standalone-test:
@@ -42,13 +42,13 @@ azure-standalone-test:
   run: "random"
   random-num-of-tests: 1
   parameters-files:
-    # - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/1nic/existing-stack/bigiq/prepub_parameters.yaml"
-    # - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/1nic/existing-stack/payg/prepub_parameters.yaml"
-    # - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/1nic/existing-stack/byol/prepub_parameters.yaml"
-    # - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/2nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/1nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/1nic/existing-stack/payg/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/1nic/existing-stack/byol/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/2nic/existing-stack/bigiq/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/2nic/existing-stack/payg/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/2nic/existing-stack/byol/prepub_parameters.yaml"
-    # - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/3nic/existing-stack/bigiq/prepub_parameters.yaml"
+    - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/3nic/existing-stack/bigiq/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/3nic/existing-stack/payg/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/3nic/existing-stack/byol/prepub_parameters.yaml"
     - "automated-test-scripts/data/f5-azure-arm-templates/supported/standalone/n-nic/existing-stack/bigiq/prepub_parameters.yaml"
