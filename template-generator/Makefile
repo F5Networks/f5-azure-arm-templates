@@ -28,4 +28,4 @@ all:
 
 .PHONY: release
 release:
-	build/generate_templates.sh --azure --gce --release-prep
+	build/generate_templates.sh --azure --release-prep
