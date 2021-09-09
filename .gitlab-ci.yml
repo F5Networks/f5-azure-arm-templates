@@ -12,11 +12,14 @@ stages:
   - droplets
   - publish
   - release
+  - post-release-tests
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
 # validate README file(s) only contain links that respond with 200 OK
+# this pre-release job only checks internal links to avoid failures
+# when tag version is unpublished
 run_link_checker:
   image: ${ARTIFACTORY_SERVER}/dockerhub-remote/node:10
   stage: smoke-tests
@@ -24,9 +27,9 @@ run_link_checker:
     - docker-executor
   only:
     refs:
-      # the current intent is to run only on main and release branches
-      - main
+      # run only on release branch and develop
       - /^R.*/
+      - develop
   except:
     refs:
       - schedules
@@ -36,7 +39,6 @@ run_link_checker:
       - $RELEASE_RUNTIME_INIT_TESTS == "true"
   script:
     - make link_check
-  allow_failure: true
 
 # lint
 lint_generator:
@@ -233,3 +235,22 @@ publish_to_github:
     GITLAB_API_URL: "$AZURE_URL"
     GITHUB_API_TOKEN: "$AZURE_GITHUB_API_TOKEN"
     GITLAB_PRIVATE_TOKEN: "$AZURE_GITLAB_API_TOKEN"
+
+# validate README file(s) only contain links that respond with 200 OK
+run_link_checker_release:
+  image: ${ARTIFACTORY_SERVER}/dockerhub-remote/node:10
+  stage: post-release-tests
+  tags:
+    - docker-executor
+  only:
+    # run only after release has been published
+    - /(^publish-(v\d*[1-9]*\.)(\d*[1-9]*\.)(\d).(\d))/
+  except:
+    refs:
+      - schedules
+      - triggers
+      - pipelines
+    variables:
+      - $RELEASE_RUNTIME_INIT_TESTS == "true"
+  script:
+    - make link_check_release

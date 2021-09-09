@@ -32,11 +32,11 @@ For additional information, including how the templates are generated, and assis
 
 ### Matrix for tagged releases
 
-F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughput levels available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md
+F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughput levels available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/main/azure-bigip-version-matrix.md
 
 ## List of F5 ARM templates for Azure deployments
 
-To see a list of all of our supported Azure ARM templates, see the **[Azure Supported Template index](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/template-index.md)**. See the **experimental** directory for experimental templates.
+To see a list of all of our supported Azure ARM templates, see the **[Azure Supported Template index](https://github.com/F5Networks/f5-azure-arm-templates/blob/main/template-index.md)**. See the **experimental** directory for experimental templates.
 Note that many of the solutions now include the *provisionPublicIP* option.  This means that the templates deploy without creating or attaching any public IP addresses to the BIG-IP VEs, see the individual README files for more information.
 Standalone and HA production stack templates have been deprecated.
 
