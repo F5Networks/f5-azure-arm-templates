@@ -4,7 +4,7 @@ The following table contains all of the tagged releases of the F5 ARM templates 
 
 **Note:** If using a BYOL (Bring Your Own License) some versions of BIG-IP only have two boot locations available, even though the option for one boot location may appear in the template. See the BIG-IP version table in the individual README file for details.
 
-> **_CRITICAL:_**  As of F5 ARM template GitHub release 7.6.0.0, all templates allow deployment of images from any public or private F5 offer. The F5 ARM templates have been tested and validated using the BIG-IP versions listed in the matrix below. You can find the complete list of public F5 offers here: https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-offer-list.yaml  
+> **_CRITICAL:_**  As of F5 ARM template GitHub release 7.6.0.0, all templates allow deployment of images from any public or private F5 offer. The F5 ARM templates have been tested and validated using the BIG-IP versions listed in the matrix below. You can find the complete list of public F5 offers here: https://github.com/F5Networks/f5-azure-arm-templates/blob/main/azure-offer-list.yaml  
 
 | Release Tag | Template Family | BIG-IP Versions | BIG-IQ Versions | PAYG License Bundles and Throughput | BYOL/BIG-IQ Image options |
 | --- | --- | --- | --- | --- | --- |
