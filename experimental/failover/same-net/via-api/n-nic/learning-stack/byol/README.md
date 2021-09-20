@@ -95,11 +95,11 @@ The following table lists the versions of BIG-IP that have been tested and valid
 
 | Azure BIG-IP Image Version | BIG-IP Version | Build | Solution | Status | Notes |
 | --- | --- | --- | --- | --- | --- |
-| 16.0.101000 | 16.0.1 | 0.0.6 | Standalone, Failover, Autoscale | Validated | |
+| 16.1.000000 | 16.1.0 | 0.0.0 | Standalone, Failover, Autoscale | Validated | |
 | 15.1.201000 | 15.1.2 | 0.0.1 | Standalone, Failover, Autoscale | Validated | |
-| 14.1.402000 | 14.1.4 | 0.0.2 | Standalone, Failover, Autoscale | Validated | |
-| 13.1.304000 | 13.1.3 | 0.0.4 | Standalone, Failover, Autoscale | Not Validated | F5 CFE requires BIG-IP 14.1 or later |
-| 12.1.502000 | 12.1.5 | 0.0.2 | Standalone, Failover, Autoscale | Not Validated | F5 CFE requires BIG-IP 14.1 or later |
+| 14.1.404001 | 14.1.4.4 | 0.0.1 | Standalone, Failover, Autoscale | Validated | |
+| 13.1.400000 | 13.1.4 | 0.0.0 | Standalone, Failover, Autoscale | Not Validated | F5 CFE requires BIG-IP 14.1 or later |
+| 12.1.600000 | 12.1.6 | 0.0.0 | Standalone, Failover, Autoscale | Not Validated | F5 CFE requires BIG-IP 14.1 or later |
 
 
 ## Supported instance types and hypervisors
@@ -167,7 +167,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### PowerShell Script Example
 
 ```powershell
-## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -instanceType Standard_DS3_v2 -imageName AllTwoBootLocations -bigIpVersion 16.0.101000 -bigIpModules ltm:nominal -licenseKey1 <value> -licenseKey2 <value> -vnetAddressPrefix 10.0 -routeTableName defaultRouteTable -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImageUrn OPTIONAL -customImage OPTIONAL -allowUsageAnalytics Yes -allowPhoneHome Yes -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -userAssignedManagedIdentity NOT_SPECIFIED -roleNameGuid [newGuid()] -resourceGroupName <value>
+## Example Command: .\Deploy_via_PS.ps1 -adminUsername azureuser -authenticationType password -adminPasswordOrKey <value> -dnsLabel <value> -instanceName f5vm01 -numberOfExternalIps 1 -instanceType Standard_DS3_v2 -imageName AllTwoBootLocations -bigIpVersion 16.1.000000 -bigIpModules ltm:nominal -licenseKey1 <value> -licenseKey2 <value> -vnetAddressPrefix 10.0 -routeTableName defaultRouteTable -declarationUrl NOT_SPECIFIED -ntpServer 0.pool.ntp.org -timeZone UTC -customImageUrn OPTIONAL -customImage OPTIONAL -allowUsageAnalytics Yes -allowPhoneHome Yes -numberOfAdditionalNics 0 -additionalNicLocation OPTIONAL -userAssignedManagedIdentity NOT_SPECIFIED -roleNameGuid [newGuid()] -resourceGroupName <value>
 ```
 
 =======
@@ -175,7 +175,7 @@ As an alternative to deploying through the Azure Portal (GUI) each solution prov
 #### Azure CLI (1.0) Script Example
 
 ```bash
-## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --instanceType Standard_DS3_v2 --imageName AllTwoBootLocations --bigIpVersion 16.0.101000 --bigIpModules ltm:nominal --licenseKey1 <value> --licenseKey2 <value> --vnetAddressPrefix 10.0 --routeTableName defaultRouteTable --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImageUrn OPTIONAL --customImage OPTIONAL --allowUsageAnalytics Yes --allowPhoneHome Yes --numberOfAdditionalNics 0 --additionalNicLocation OPTIONAL --userAssignedManagedIdentity NOT_SPECIFIED --roleNameGuid [newGuid()] --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
+## Example Command: ./deploy_via_bash.sh --adminUsername azureuser --authenticationType password --adminPasswordOrKey <value> --dnsLabel <value> --instanceName f5vm01 --numberOfExternalIps 1 --instanceType Standard_DS3_v2 --imageName AllTwoBootLocations --bigIpVersion 16.1.000000 --bigIpModules ltm:nominal --licenseKey1 <value> --licenseKey2 <value> --vnetAddressPrefix 10.0 --routeTableName defaultRouteTable --declarationUrl NOT_SPECIFIED --ntpServer 0.pool.ntp.org --timeZone UTC --customImageUrn OPTIONAL --customImage OPTIONAL --allowUsageAnalytics Yes --allowPhoneHome Yes --numberOfAdditionalNics 0 --additionalNicLocation OPTIONAL --userAssignedManagedIdentity NOT_SPECIFIED --roleNameGuid [newGuid()] --resourceGroupName <value> --azureLoginUser <value> --azureLoginPassword <value>
 ```
 
 ## Configuration Example

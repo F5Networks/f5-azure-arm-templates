@@ -179,7 +179,7 @@
             "type": "string"
         },
         "bigIpVersion": {
-            "defaultValue": "16.0.101000",
+            "defaultValue": "16.1.000000",
             "metadata": {
                 "description": "F5 BIG-IP version you want to use."
             },
