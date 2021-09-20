@@ -2,7 +2,7 @@ ADDITIONAL NIC LOCATION: ''
 ADDTL NIC PARAM: ''
 BASE VLAN NAME: external;internal
 BIGIP MODULES: ltm:nominal
-BIGIP VERSION: 16.0.101000
+BIGIP VERSION: 16.1.000000
 BIGIQ CONFIG FILE: ''
 BRANCH: master
 CONFIG FILES: .passwd
@@ -17,7 +17,7 @@ DNS LABEL: ',"dnsLabel":{"value":"<RESOURCE GROUP>"}'
 EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IMAGE NAME: Better1Gbps
-IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:16.0.101000
+IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:16.1.000000
 INSTANCE TYPE: Standard_DS3_v2
 LICENSE PARAM: ''
 LICENSE POOL: production

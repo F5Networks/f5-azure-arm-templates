@@ -39,7 +39,7 @@
             "value": "OPTIONAL"
         },
         "bigIpVersion": {
-            "value": "16.0.101000"
+            "value": "16.1.000000"
         },
         "bigIpModules": {
             "value": "asm:nominal"
