@@ -383,14 +383,14 @@ license_map:
   16.1.000000:
     build: '16.1.0 Build 0.0.0'
     bootLocations: 'Both One and Two Boot Location options are available'
-  15.1.201000:
-    build: '15.1.2.1 Build 0.0.10'
+  15.1.400000:
+    build: '15.1.4.0 Build 0.0.47'
     bootLocations: 'Both One and Two Boot Location options are available'
   14.1.404001:
     build: '14.1.4.4 Build 0.0.1'
     bootLocations: 'Both One and Two Boot Location options are available'
-  13.1.400000:
-    build: '13.1.4 Build 0.0.0'
+  13.1.401000:
+    build: '13.1.4.1 Build 0.0.3'
     bootLocations: 'Both One and Two Boot Location options are available'
   12.1.600000:
     build: '12.1.6 Build 0.0.0'
