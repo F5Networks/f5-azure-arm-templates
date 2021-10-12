@@ -7,7 +7,7 @@
 
 ## F5 Azure ARM Templates 1.0
 
-| :eyes:    | ***Notice***: These legacy templates have been deprecated and are being replaced by our next-generation templates available in the [Cloud Templates 2.0 GitHub repo](https://github.com/F5Networks/f5-azure-arm-templates-v2). We recommend you adopt the next-generation templates as soon as is feasible. |
+| :eyes:    | ***Notice***: These legacy templates are now in maintenance mode and are being replaced by our next-generation templates available in the [Cloud Templates 2.0 GitHub repo](https://github.com/F5Networks/f5-azure-arm-templates-v2). We recommend you adopt the next-generation templates as soon as is feasible. |
 |---------------|:------------------------|  
 
 ## Introduction
@@ -15,13 +15,13 @@
 Welcome to the GitHub repository for F5's ARM templates for Azure deployments. All of the templates in this repository have been developed by F5 Networks engineers. This repository contains one main directory: *supported*.
 
 - **supported**<br>
-  The supported directory contains our legacy Azure ARM templates that have been created and fully tested by F5 Networks. These legacy cloud solution templates (CST1) are fully supported by F5, meaning you can get assistance if necessary from F5 Technical Support via your typical methods. These legacy templates have been deprecated and are being replaced by our next-generation cloud solution templates (CST2) available at https://github.com/F5Networks/f5-azure-arm-templates-v2. We recommend you adopt the next-generation templates as soon as is feasible.
+  The supported directory contains our legacy Azure ARM templates that have been created and fully tested by F5 Networks. These legacy cloud solution templates (CST1) are fully supported by F5, meaning you can get assistance if necessary from F5 Technical Support via your typical methods. These legacy templates are now in maintenance mode and are being replaced by our next-generation cloud solution templates (CST2) available at https://github.com/F5Networks/f5-azure-arm-templates-v2. We recommend you adopt the next-generation templates as soon as is feasible.
   
-  - Deprecation does NOT mean we are removing nor disabling legacy templates.
+  - Maintenance mode does NOT mean we are removing nor disabling legacy templates.
   - Customers are free to continue using legacy cloud templates.
-  - Deprecated legacy cloud templates are officially in sustaining/maintenance mode.
-  - Package updates and critical bug fixes will be considered for deprecated cloud templates.
-  - No additional legacy cloud verification testing will take place on versions of TMOS later than 16.1+.
+  - Legacy cloud templates are officially in sustaining/maintenance mode.
+  - Package updates and critical bug fixes will be considered for maintenance mode cloud templates.
+  - TMOS 16.1 is the final TMOS version for which legacy cloud verification testing will take place.
   - No new features nor legacy cloud templates will be developed.
 
 
@@ -32,11 +32,11 @@ For additional information, including how the templates are generated, and assis
 
 ### Matrix for tagged releases
 
-F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughput levels available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/master/azure-bigip-version-matrix.md
+F5 has created a matrix that contains all of the tagged releases of the F5 ARM templates for Microsoft Azure and the corresponding BIG-IP versions, license types and throughput levels available for a specific tagged release. See https://github.com/F5Networks/f5-azure-arm-templates/blob/main/azure-bigip-version-matrix.md
 
 ## List of F5 ARM templates for Azure deployments
 
-To see a list of all of our supported Azure ARM templates, see the **[Azure Supported Template index](https://github.com/F5Networks/f5-azure-arm-templates/blob/master/template-index.md)**. See the **experimental** directory for experimental templates.
+To see a list of all of our supported Azure ARM templates, see the **[Azure Supported Template index](https://github.com/F5Networks/f5-azure-arm-templates/blob/main/template-index.md)**. See the **experimental** directory for experimental templates.
 Note that many of the solutions now include the *provisionPublicIP* option.  This means that the templates deploy without creating or attaching any public IP addresses to the BIG-IP VEs, see the individual README files for more information.
 Standalone and HA production stack templates have been deprecated.
 

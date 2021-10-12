@@ -52,7 +52,7 @@ Use this section to modify a template file so that it does not attempt to valida
 
 You can compare the difference between an existing template file and our modified version to see the changes described above.
 
-For example, compare the Failover via-LB 3 NIC existing stack template: https://github.com/F5Networks/f5-azure-arm-templates/blob/master/supported/failover/same-net/via-lb/3nic/existing-stack/byol/azuredeploy.json
+For example, compare the Failover via-LB 3 NIC existing stack template: https://github.com/F5Networks/f5-azure-arm-templates/blob/main/supported/failover/same-net/via-lb/3nic/existing-stack/byol/azuredeploy.json
 
 With our modified template: https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental/reference/example-image-removed/azuredeploy.json.
 

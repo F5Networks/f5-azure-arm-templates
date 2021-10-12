@@ -1430,7 +1430,7 @@
     "[concat('https://cdn.f5.com/product/cloudsolutions/f5-appsvcs-extension/', variables('f5AS3Tag'), '/', variables('f5AS3Build'))]"
     {% if type == 'failover' and nics =='n'%},
     "[concat('https://cdn.f5.com/product/cloudsolutions/f5-cloud-libs-azure/', variables('f5CloudLibsAzureTag'), '/f5-cloud-libs-azure.tar.gz')]",
-    "[concat('https://github.com/F5Networks/f5-cloud-failover-extension/releases/download/', variables('f5CloudFailoverTag'), '/', variables('f5CloudFailoverBuild'))]"
+    "[concat('https://cdn.f5.com/product/cloudsolutions/f5-cloud-failover-extension/', variables('f5CloudFailoverTag'), '/', variables('f5CloudFailoverBuild'))]"
     {% endif %}
 {% endset %}
 
