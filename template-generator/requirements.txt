@@ -1,5 +1,5 @@
 ## required production packages
-pyyaml
+pyyaml==5.4.1
 jinja2==2.11.3
 pygithub
 ## required dev packages
