@@ -12,7 +12,11 @@ test:
         - /^master*/
         - triggers
     script:
+<<<<<<< HEAD
         - python -B -m unittest discover -s build/test/lib -p "*Tst*.py"
+=======
+        - python -B -m unittest discover -s build/test/lib -p "*Test*.py"
+>>>>>>> 02fcff4fe062c3bc6f3ea2675b1e6dc7e1cc5d24
 
 package:
     tags:
