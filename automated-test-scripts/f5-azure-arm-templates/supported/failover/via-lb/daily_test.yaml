@@ -2,10 +2,11 @@
 name: Azure failover via-lb <STACK TYPE> <NIC COUNT>-nic <LICENSE TYPE> <REGION> <BIGIP VERSION>
 onStart:
 - ../../../common/helper_init.sh
+- ../../../common/find_bigiq.sh
 - ../../../common/create_resource_group.sh
 - ../../../common/create_environment.sh
 - ../../../common/verify_create_env.sh
-- ../../../common/verify_bigiq_ready_env.sh
+# - ../../../common/verify_bigiq_ready_env.sh
 - ../../../common/create_deployment.sh
 - ../../../common/verify_create.sh
 - ../verify_sync.sh
