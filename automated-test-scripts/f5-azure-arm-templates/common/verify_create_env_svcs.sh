@@ -9,7 +9,8 @@ DEPLOYMENT_COUNT=1
 
 case <LICENSE TYPE> in
 bigiq)
-    ((DEPLOYMENT_COUNT++)) ;;
+    # ((DEPLOYMENT_COUNT++)) 
+    echo "Licensed with BIG-IQ" ;;
 *)
     echo "Not licensed with BIG-IQ" ;;
 esac

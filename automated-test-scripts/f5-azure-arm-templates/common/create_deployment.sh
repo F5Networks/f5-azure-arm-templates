@@ -1,5 +1,5 @@
 #  expectValue = "Template validation succeeded"
-#  expectFailValue = "Template validation failed"
+#  expectFailValue = "failed"
 #  scriptTimeout = 15
 #  replayEnabled = false
 #  replayTimeout = 0
@@ -19,7 +19,7 @@ sshPublicKey)
     PASSWORD=$(az keyvault secret show --vault-name dewdropKeyVault -n dewpt-public | jq .value --raw-output) ;;
 esac
 
-LICENSE_HOST_PARAM=''
+LICENSE_PARAM=''
 DNS_PROVIDER_HOST_PARAM=''
 PUBLIC_IP_PARAM=''
 EXISTENT_LB_PARAM=''
@@ -27,8 +27,17 @@ USER_IDENTITY_PARAM=''
 
 case <LICENSE TYPE> in
 bigiq)
-    LICENSE_HOST=`az deployment group show -g <RESOURCE GROUP> -n <RESOURCE GROUP>-env | jq '.properties.outputs["bigiqIp"].value' --raw-output | cut -d' ' -f1`
-    LICENSE_HOST_PARAM=',"bigIqAddress":{"value":"'"${LICENSE_HOST}"'"}' ;;
+    bigiq_address=''
+    bigiq_password=''
+    if [ -f "${TMP_DIR}/bigiq_info.json" ]; then
+      echo "Found existing BIG-IQ"
+      cat ${TMP_DIR}/bigiq_info.json
+      bigiq_address=$(cat ${TMP_DIR}/bigiq_info.json | jq -r .bigiq_address)
+      bigiq_password=$(cat ${TMP_DIR}/bigiq_info.json | jq -r .bigiq_password)
+    else
+        echo "failed - No BIG-IQ found"
+    fi
+    LICENSE_PARAM=',"bigIqAddress":{"value":"'"${bigiq_address}"'"},"bigIqUsername":{"value":"admin"},"bigIqPassword":{"value":"'"${bigiq_password}"'"},"bigIqLicensePoolName":{"value":"production"},"bigIqLicenseSkuKeyword1":{"value":"F5-BIG-MSP-BT-1G"},"bigIqLicenseUnitOfMeasure":{"value":"yearly"}' ;;
 *)
     echo "Not licensed with BIG-IQ" ;;
 esac
@@ -65,7 +74,7 @@ if [[ $(echo <TEMPLATE URL> | grep -E '(failover/same-net/via-api/)') ]]; then
     USER_IDENTITY_PARAM=',"userAssignedManagedIdentity":{"value":"<USER IDENTITY>"}'
 fi
 
-DEPLOY_PARAMS='{"authenticationType":{"value":"<PASSWORD TYPE>"},"adminPasswordOrKey":{"value":"'"${PASSWORD}"'"},"adminUsername":{"value":"dewpoint"},"instanceType":{"value":"<INSTANCE TYPE>"},"bigIpVersion":{"value":"<BIGIP VERSION>"},"bigIpModules":{"value":"<BIGIP MODULES>"},"imageName":{"value":"<IMAGE NAME>"},"ntpServer":{"value":"<NTP SERVER>"},"declarationUrl":{"value":"<DECLARATION URL>"},"timeZone":{"value":"<TIMEZONE>"},"customImage":{"value":"<CUSTOM IMAGE PARAM>"},"customImageUrn":{"value":"<IMAGE URN>"},"restrictedSrcAddress":{"value":"*"},"allowUsageAnalytics":{"value":"<USAGE ANALYTICS CHOICE>"},"allowPhoneHome":{"value":"<PHONEHOME>"}<DNS LABEL><LICENSE PARAM><NETWORK PARAM><STACK PARAM><VNET PARAM><ADDTL NIC PARAM>'${LICENSE_HOST_PARAM}''${DNS_PROVIDER_HOST_PARAM}''${PUBLIC_IP_PARAM}''${PUBLIC_IP_APP_PARAM}''${PROVISION_INT_LB_PARAM}''${EXISTENT_LB_PARAM}''${ROUTE_TABLE_NAME}''${USER_IDENTITY_PARAM}'}'
+DEPLOY_PARAMS='{"authenticationType":{"value":"<PASSWORD TYPE>"},"adminPasswordOrKey":{"value":"'"${PASSWORD}"'"},"adminUsername":{"value":"dewpoint"},"instanceType":{"value":"<INSTANCE TYPE>"},"bigIpVersion":{"value":"<BIGIP VERSION>"},"bigIpModules":{"value":"<BIGIP MODULES>"},"imageName":{"value":"<IMAGE NAME>"},"ntpServer":{"value":"<NTP SERVER>"},"declarationUrl":{"value":"<DECLARATION URL>"},"timeZone":{"value":"<TIMEZONE>"},"customImage":{"value":"<CUSTOM IMAGE PARAM>"},"customImageUrn":{"value":"<IMAGE URN>"},"restrictedSrcAddress":{"value":"*"},"allowUsageAnalytics":{"value":"<USAGE ANALYTICS CHOICE>"},"allowPhoneHome":{"value":"<PHONEHOME>"}<DNS LABEL><NETWORK PARAM><STACK PARAM><VNET PARAM><ADDTL NIC PARAM>'${LICENSE_PARAM}''${DNS_PROVIDER_HOST_PARAM}''${PUBLIC_IP_PARAM}''${PUBLIC_IP_APP_PARAM}''${PROVISION_INT_LB_PARAM}''${EXISTENT_LB_PARAM}''${ROUTE_TABLE_NAME}''${USER_IDENTITY_PARAM}'}'
 DEPLOY_PARAMS_FILE=${TMP_DIR}/deploy_params.json
 
 # save deployment parameters to a file, to avoid weird parameter parsing errors with certain values

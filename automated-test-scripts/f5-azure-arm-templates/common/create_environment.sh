@@ -43,9 +43,9 @@ echo "Stack type: $STACK_TYPE"
 # deploy services
 case <LICENSE TYPE> in
 bigiq)
-    DEPLOY_BIGIQ='Yes'
-    BIG_IQ_LICENSE='<AUTOFILL BIGIQ LICENSE KEY>'
-    BIG_IQ_LICENSE_POOL='<AUTOFILL CLPV2 LICENSE KEY>'
+    DEPLOY_BIGIQ='No'
+    BIG_IQ_LICENSE='USE_EXISTING_BIGIQ'
+    BIG_IQ_LICENSE_POOL='USE_EXISTING_BIGIQ'
     echo "Deploying BIG-IQ" ;;
 *)
     echo "Not deploying BIG-IQ" ;;
