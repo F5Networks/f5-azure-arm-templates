@@ -99,6 +99,7 @@ templates:
       - bigiq_note
       - image_note
       - previous_versions
+      - enable_network_failover_note
       - standard_public_ip_sku_note
       - provision_public_ip_number_of_external_ips_via_lb
       - provison_public_ip_app_note
@@ -292,6 +293,7 @@ note_text:
     exclude:
       stackType:
         - new-stack
+  enable_network_failover_note: 'When you select Yes for **enableNetworkFailover**, you must specify a static IP address for the **internalIpAddressRangeStart** parameter.'
   availability_zone_support_note: 'All templates deploy Azure Virtual Machines and Virtual Machine Scale Sets into Availability Zones in supported regions; Availability Sets are still created in unsupported regions. Virtual Machine Scale Sets are distributed across zones 1, 2, and 3; failover Virtual Machines across zones 1 and 2. Standalone Virtual Machines are placed in zone 1 by default; however, you may select zone 1, 2, or 3 using the new zoneChoice parameter.'
   standard_alb_sku_note:
     default: 'All autoscale via-lb and failover via-lb templates now deploy Standard SKU Azure Load Balancers.'
