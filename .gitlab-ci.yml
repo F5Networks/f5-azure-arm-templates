@@ -55,6 +55,7 @@ lint_generator:
       - $RELEASE_RUNTIME_INIT_TESTS == "true"
   script:
     - apk add --no-cache build-base
+    - apk add libffi-dev
     - cd template-generator
     - pip install -r requirements.txt
     - make lint

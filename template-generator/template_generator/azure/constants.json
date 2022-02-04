@@ -6,15 +6,6 @@
 "13": "tmsh list sys db",
 "12": "tmsh list sys db",
 "latest": "tmsh modify sys db failover.selinuxallowscripts value enable"
-{% elif nics == '3' %}
-"No": {
-"first": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '0.', variables('location'), '.cloudapp.azure.com'), ' unicast-address none')]",
-"second": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '1.', variables('location'), '.cloudapp.azure.com'), ' unicast-address none')]"
-},
-"Yes": {
-"first": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '0.', variables('location'), '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress'))]",
-"second": "[concat('tmsh modify cm device ', concat(variables('instanceName'), '1.', variables('location'), '.cloudapp.azure.com'), ' unicast-address { { ip ', variables('intSubnetPrivateAddress1'), ' port 1026 } } mirror-ip ', variables('intSubnetPrivateAddress1'))]"
-}
 {% endif %}
 {% endset %}
 {% if environment == 'azure' %}
