@@ -19,7 +19,7 @@ sshPublicKey)
     PASSWORD=$(az keyvault secret show --vault-name dewdropKeyVault -n dewpt-public | jq .value --raw-output) ;;
 esac
 
-LICENSE_PARAM=''
+LICENSE_PARAM='<LICENSE PARAM>'
 DNS_PROVIDER_HOST_PARAM=''
 PUBLIC_IP_PARAM=''
 EXISTENT_LB_PARAM=''

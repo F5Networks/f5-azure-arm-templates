@@ -150,7 +150,7 @@ variables('tmmRouteGw')
           '
         {%- endif -%}
         {%- if type == 'failover' and nics == '3' -%}
-            ; ', variables('failoverCmdArray')[parameters('enableNetworkFailover')].{%if vm == 0 %}first{% else %}second{%endif%}, ';
+            ; ', if(equals(parameters('enableNetworkFailover'), 'Yes'), concat('tmsh modify cm device ', concat(variables('instanceName'), '{{ vm }}.', variables('location'), '.cloudapp.azure.com'), ' unicast-address { { ip ', {{ int_subnet_private_ip }}, ' port 1026 } } mirror-ip ', {{ int_subnet_private_ip }}), concat('tmsh modify cm device ', concat(variables('instanceName'), '{{ vm }}.', variables('location'), '.cloudapp.azure.com'), ' unicast-address none')), ';
         {%- endif -%}
         {%- if type == 'failover' and nics == 'n' -%}
             ; tmsh modify cm device ', concat(variables('instanceName'), '{{ vm }}.', variables('location'), '.cloudapp.azure.com'), ' unicast-address { { ip ', {{ int_subnet_private_ip }}, ' port 1026 } } mirror-ip ', {{ int_subnet_private_ip }}, '; ', variables('failoverCmdArray')[variables('bigIpMajorVersion')], ';

@@ -42,11 +42,11 @@ SSH PORT: 22
 STACK PARAM: <SUBNET PARAM>
 STACK TYPE: existing-stack
 STACK TYPE SHORT: es
-SUBNET PARAM: ',"enableNetworkFailover":{"value":"Yes"},"externalSubnetName":{"value":"external"},"externalIpSelfAddressRangeStart":{"value":"192.168.3.4"},"externalIpAddressRangeStart":{"value":"192.168.3.10"},"internalSubnetName":{"value":"internal"},"internalIpAddressRangeStart":{"value":"192.168.2.4"},"instanceName":{"value":"f5vm"},"numberOfExternalIps":{"value":<EXTERNAL IP COUNT>}'
+SUBNET PARAM: ',"enableNetworkFailover":{"value":"Yes"},"externalSubnetName":{"value":"external"},"externalIpSelfAddressRangeStart":{"value":"DYNAMIC"},"externalIpAddressRangeStart":{"value":"DYNAMIC"},"internalSubnetName":{"value":"internal"},"internalIpAddressRangeStart":{"value":"DYNAMIC"},"instanceName":{"value":"f5vm"},"numberOfExternalIps":{"value":<EXTERNAL IP COUNT>}'
 TEMPLATE URL: file://$PWD/supported/failover/same-net/via-lb/<NIC
   COUNT>nic/<STACK TYPE>/<LICENSE TYPE>/azuredeploy.json
 TIMEZONE: UTC
 USAGE ANALYTICS CHOICE: 'No'
 USER IDENTITY: NOT_SPECIFIED
-VNET PARAM: ',"vnetName":{"value":"existingStackVnet"},"vnetResourceGroupName":{"value":"<RESOURCE GROUP>"},"mgmtSubnetName":{"value":"mgmt"},"mgmtIpAddressRangeStart":{"value":"192.168.1.4"}'
+VNET PARAM: ',"vnetName":{"value":"existingStackVnet"},"vnetResourceGroupName":{"value":"<RESOURCE GROUP>"},"mgmtSubnetName":{"value":"mgmt"},"mgmtIpAddressRangeStart":{"value":"DYNAMIC"}'
 VNET RESOURCE GROUP: <RESOURCE GROUP>

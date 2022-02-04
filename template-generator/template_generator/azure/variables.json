@@ -212,7 +212,7 @@
     "internalLoadBalancerName": "[concat(variables('dnsLabel'),'-int-ilb')]",
     "intLbId": "[resourceId('Microsoft.Network/loadBalancers',variables('internalLoadBalancerName'))]",
 {% endif %}
-{% if type == 'failover' and nics in ('3', 'n') %}
+{% if type == 'failover' and nics in ('n') %}
     "failoverCmdArray": {
         {{ constants.failover_cmd_array}}
      },
