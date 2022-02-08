@@ -21,7 +21,7 @@ EXTERNAL IP COUNT: 1
 IMAGE NAME: AllTwoBootLocations
 IMAGE URN: OPTIONAL
 INSTANCE PARAM: ',"numberOfInstances":{"value":2}'
-INSTANCE TYPE: Standard_DS3_v2
+INSTANCE TYPE: Standard_D8s_v3
 LICENSE PARAM: ',"licenseKey1":{"value":"<AUTOFILL EVAL LICENSE KEY>"},"licenseKey2":{"value":"<AUTOFILL
   EVAL LICENSE KEY 2>"}'
 LICENSE POOL: production

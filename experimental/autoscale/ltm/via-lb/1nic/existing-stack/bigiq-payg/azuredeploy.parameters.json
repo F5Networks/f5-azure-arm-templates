@@ -15,7 +15,7 @@
             "value": ""
         },
         "instanceType": {
-            "value": "Standard_DS2_v2"
+            "value": "Standard_D2s_v3"
         },
         "imageName": {
             "value": "Best1Gbps"

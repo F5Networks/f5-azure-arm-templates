@@ -18,7 +18,7 @@ EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IMAGE NAME: AllTwoBootLocations
 INSTANCE PARAM: ',"numberOfInstances":{"value":2}'
-INSTANCE TYPE: Standard_DS3_v2
+INSTANCE TYPE: Standard_D8s_v3
 LICENSE PARAM: ',"bigIqUsername":{"value":"admin"},"bigIqPassword":{"value":"B!giq2017"},<LICENSE
   POOL PARAM>'
 LICENSE POOL: production
