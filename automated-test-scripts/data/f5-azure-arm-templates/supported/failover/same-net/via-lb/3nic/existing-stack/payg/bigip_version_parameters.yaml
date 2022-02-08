@@ -16,7 +16,7 @@ EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IMAGE NAME: Better10Gbps
 INSTANCE PARAM: ',"numberOfInstances":{"value":2}'
-INSTANCE TYPE: Standard_DS3_v2
+INSTANCE TYPE: Standard_D8s_v3
 LICENSE PARAM: ''
 LICENSE POOL: production
 LICENSE POOL PARAM: ''
