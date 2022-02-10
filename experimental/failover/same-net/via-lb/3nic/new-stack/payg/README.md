@@ -63,7 +63,7 @@ For information on getting started using F5's ARM templates on GitHub, see [Micr
 - Previous tagged releases can be used to reference functionality that has been changed or removed.
 - All templates now deploy Standard SKU Azure Public IP Addresses.
 - The provisionInternalLoadBalancer parameter controls the creation of an internal Azure load balancer targeting the internal BIG-IP network interfaces.  Selecting Yes deploys an internal load balancer with the HA Ports feature (all-protocol load balancing rule) enabled. NOTE: In order to download required libraries, the BIG-IP internal interfaces are not configured in the load balancer backend pool by default. You must update the load balancer configuration after deployment completes.
-- All templates deploy Azure Virtual Machines and Virtual Machine Scale Sets into Availability Zones in supported regions; Availability Sets are still created in unsupported regions. Virtual Machine Scale Sets are distributed across zones 1, 2, and 3; failover Virtual Machines across zones 1 and 2. Standalone Virtual Machines are placed in zone 1 by default; however, you may select zone 1, 2, or 3 using the new zoneChoice parameter.
+- All templates deploy Azure Virtual Machines and Virtual Machine Scale Sets into Availability Zones in supported regions; Availability Sets are still created in unsupported regions. Virtual Machine Scale Sets are distributed across zones 1, 2, and 3; failover Virtual Machines across zones 1 and 2. Standalone Virtual Machines are placed in zone 1 by default.
 
 ## Security
 
