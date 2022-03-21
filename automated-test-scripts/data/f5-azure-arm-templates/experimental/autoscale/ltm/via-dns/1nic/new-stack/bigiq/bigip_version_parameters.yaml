@@ -8,7 +8,7 @@ AUTOSCALE TYPE: ltm-via-dns
 AUTOSCALE TYPE URL: ltm/via-dns
 BASE VLAN NAME: internal
 BIGIP MODULES: ltm:nominal
-BIGIP VERSION: 16.1.000000
+BIGIP VERSION: 16.1.201000
 BIGIQ CONFIG FILE: .bigIqPasswd
 BRANCH: remove-existing-stack-azure
 CLIENT ID: d40aad56-b0bd-466d-a6c4-6c9c4d0f9aa7

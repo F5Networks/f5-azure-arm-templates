@@ -5,7 +5,7 @@ AUTOFILL EVAL LICENSE KEY: ''
 AUTOFILL EVAL LICENSE KEY 2: ''
 BASE VLAN NAME: external;internal
 BIGIP MODULES: ltm:nominal
-BIGIP VERSION: 16.1.000000
+BIGIP VERSION: 16.1.201000
 BIGIQ CONFIG FILE: ''
 CLIENT ID: d40aad56-b0bd-466d-a6c4-6c9c4d0f9aa7
 CONFIG FILES: ""
@@ -20,7 +20,7 @@ DNS LABEL: ',"dnsLabel":{"value":"<RESOURCE GROUP>"}'
 EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IMAGE NAME: AllTwoBootLocations
-IMAGE URN: f5-networks:f5-big-ip-byol:f5-big-all-2slot-byol:16.1.000000
+IMAGE URN: f5-networks:f5-big-ip-byol:f5-big-all-2slot-byol:16.1.201000
 INSTANCE TYPE: Standard_D8s_v3
 LICENSE PARAM: ',"licenseKey1":{"value":"<AUTOFILL EVAL LICENSE KEY>"},"licenseKey2":{"value":"<AUTOFILL
   EVAL LICENSE KEY 2>"}'

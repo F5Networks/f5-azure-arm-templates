@@ -304,12 +304,12 @@
 {%- endset %}
 
 {% set big_ip_versions -%}
-"16.1.000000",
+"16.1.201000",
 "14.1.404001",
 "latest"
 {%- endset %}
 {%- set big_ip_version_default %}
-"16.1.000000"
+"16.1.201000"
 {%- endset %}
 
 {% set big_iq_versions -%}
@@ -617,7 +617,7 @@ BIG-IP
 }
 {%- endset %}
 {% set version_port_map -%}
-"16.1.000000": {
+"16.1.201000": {
 "Port": 8443
 },
 "14.1.404001": {
@@ -698,6 +698,10 @@ BIG-IP
 {% set f5_as3_build = f5_as3_latest_build -%}
 
 {% set f5_as3_tag = f5_as3_latest_tag -%}
+
+{% set f5_runtime_build = 'f5-bigip-runtime-init-1.4.1-1.gz.run' -%}
+
+{% set f5_runtime_tag = 'v1.4.1' -%}
 
 {% set content_version = latest_content_version %}
 
@@ -805,7 +809,6 @@ variables('paygImageMap')[variables('imageNameToLower')]['offer']
 
 {% set autoscale_file_uris %}
 "[concat('https://cdn.f5.com/product/cloudsolutions/f5-cloud-libs/', variables('f5CloudLibsTag'), '/f5-cloud-libs.tar.gz')]",
-"[concat('https://cdn.f5.com/product/cloudsolutions/f5-appsvcs-extension/', variables('f5AS3Tag'), '/', variables('f5AS3Build'))]",
 "[concat('https://cdn.f5.com/product/cloudsolutions/f5-cloud-libs-azure/', variables('f5CloudLibsAzureTag'), '/f5-cloud-libs-azure.tar.gz')]"
 {% if type == 'autoscale'  and solution =='waf' and lb_method in ('via-lb', 'dns') %}
 ,"[concat(variables('f5NetworksSolutionScripts'), 'asm-policy.tar.gz')]"
@@ -813,14 +816,11 @@ variables('paygImageMap')[variables('imageNameToLower')]['offer']
 {% endset %}
 
 {%- set hashed_file_list -%}
-${config_loc}f5-cloud-libs.tar.gz {{ f5_as3_latest_build }}
+${config_loc}f5-cloud-libs.tar.gz
 {%- if type == "autoscale" and lb_method in ('via-lb', 'dns') and solution == 'ltm' or type == 'failover' and lb_method == 'api' -%}
 {{ " " }}${config_loc}f5-cloud-libs-azure.tar.gz
 {%- elif  type == "autoscale" and lb_method in ('via-lb', 'dns') and solution == 'waf' -%}
 {{ " " }}${config_loc}f5-cloud-libs-azure.tar.gz asm-policy.tar.gz
-{%- endif -%}
-{%- if lb_method == 'api' -%}
-{{ " " }}{{ f5_cfe_latest_build }}
 {%- endif -%}
 {%- endset -%}
 {%- if type == 'autoscale' or type =='failover' and nics == 'n' -%}

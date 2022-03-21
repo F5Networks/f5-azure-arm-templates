@@ -20,13 +20,13 @@ case <CREATE PUBLIC IP> in
 "No")
     BASTION_HOST=`az deployment group show -g <RESOURCE GROUP> -n <RESOURCE GROUP>-env | jq '.properties.outputs["bastionIp"].value' --raw-output | cut -d' ' -f1`
     echo "Verify bastion host: $BASTION_HOST"
-    response=$(ssh -o "StrictHostKeyChecking no" -i $SSH_KEY dewpoint@${BASTION_HOST} "curl -ku dewpoint:'<AUTOFILL PASSWORD>' --connect-timeout 10 $HOST/mgmt/shared/appsvcs/info | jq .version") ;;
+    response=$(ssh -o "StrictHostKeyChecking no" -i $SSH_KEY dewpoint@${BASTION_HOST} "curl -ku dewpoint:'<AUTOFILL PASSWORD>' --connect-timeout 10 $HOST/mgmt/shared/appsvcs/info | jq .") ;;
 *)
-    response=$(curl -ku dewpoint:'<AUTOFILL PASSWORD>' --connect-timeout 10 $HOST/mgmt/shared/appsvcs/info | jq .version) ;;
+    response=$(curl -ku dewpoint:'<AUTOFILL PASSWORD>' --connect-timeout 10 $HOST/mgmt/shared/appsvcs/info | jq .) ;;
 esac
 
 echo "Response: $response"
 
-if echo $response | grep '3.31.0'; then
+if echo $response | grep 'version'; then
     echo "SUCCESS"
 fi
