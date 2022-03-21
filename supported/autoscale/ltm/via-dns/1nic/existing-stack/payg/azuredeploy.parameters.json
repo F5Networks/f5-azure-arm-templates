@@ -21,7 +21,7 @@
             "value": "Best1Gbps"
         },
         "bigIpVersion": {
-            "value": "16.1.000000"
+            "value": "16.1.201000"
         },
         "bigIpModules": {
             "value": "ltm:nominal"

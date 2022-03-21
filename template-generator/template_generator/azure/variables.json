@@ -175,8 +175,8 @@
         "f5CloudLibsTag": "{{ constants.f5_cloud_libs_tag }}",
         "f5CloudLibsAzureTag": "{{ constants.f5_cloud_libs_azure_tag }}",
         "f5NetworksTag": "{{ constants.f5_networks_tag }}",
-        "f5AS3Build": "{{ constants.f5_as3_build }}",
-        "f5AS3Tag": "{{ constants.f5_as3_tag }}",
+        "f5RuntimeInitBuild": "{{ constants.f5_runtime_build }}",
+        "f5RuntimeInitTag": "{{ constants.f5_runtime_tag }}",
         "verifyHash": "[concat(variables('singleQuote'), '{{ verify_hash }}', variables('singleQuote'))]",
         "installCloudLibs": "{{ constants.install_cloud_libs }}",
         "dnsLabel": "[toLower(parameters('dnsLabel'))]",
@@ -774,22 +774,39 @@
     {# Modify Custom Config #}
     {% if type == 'failover' and nics == '1' %}
         "customConfig":  "[concat('### START (INPUT) CUSTOM CONFIGURATION HERE\nbranch=\"', variables('f5NetworksTag'), '\"\nhttp_iapp=\"f5.http.v1.2.0rc7.tmpl\"\ncurl https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/$branch/experimental/reference/learning-stack/iapps/$http_iapp > $http_iapp\ntmsh load sys application template $http_iapp\ntmsh create sys application service exampleApp template ${http_iapp//.tmpl} traffic-group none tables replace-all-with { pool__hosts { column-names { name } rows { { row { exampleapp.f5.com } } } } pool__members { column-names { addr port connection_limit } rows { { row { ', variables('webVmSubnetPrivateAddress'), ' ', variables('webVmVsPort'), ' 0 } } } } } variables replace-all-with { pool__addr { value ', variables('webVmVsAddr'), '} pool__mask { value 255.255.255.255 } pool__port { value ', variables('webVmVsPort'), ' } }\ntmsh save sys config\n')]",
+        "customData": "controls:\n  logLevel: info\n  logFilename: /var/log/cloud/bigIpRuntimeInit.log\nextension_packages:\n  install_operations:\n    - extensionType: as3\n      extensionVersion: 3.34.0\n      extensionHash: 05a80ec0848dc5b8876b78a8fbee2980d5a1671d635655b3af604dc830d5fed4\n",
     {% elif type == 'failover' %}
         "customConfig":  "[concat('### START (INPUT) CUSTOM CONFIGURATION HERE\nbranch=\"', variables('f5NetworksTag'), '\"\nhttp_iapp=\"f5.http.v1.2.0rc7.tmpl\"\ncurl https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/$branch/experimental/reference/learning-stack/iapps/$http_iapp > $http_iapp\ntmsh load sys application template $http_iapp\ntmsh create sys application service exampleApp template ${http_iapp//.tmpl} traffic-group none tables replace-all-with { pool__hosts { column-names { name } rows { { row { exampleapp.f5.com } } } } pool__members { column-names { addr port connection_limit } rows { { row { ', variables('webVmSubnetPrivateAddress'), ' ', variables('webVmVsPort'), ' 0 } } } } } variables replace-all-with { pool__addr { value ', variables('webVmVsAddr'), '} pool__mask { value 255.255.255.255 } pool__port { value ', variables('webVmVsPort'), ' } }\ntmsh modify cm device-group Sync devices modify { ', variables('instanceName'), '0.', variables('location'), '.cloudapp.azure.com { set-sync-leader } }\ntmsh save sys config\n')]",
+        {% if nics == '3' %}
+            "customData": "controls:\n  logLevel: info\n  logFilename: /var/log/cloud/bigIpRuntimeInit.log\nextension_packages:\n  install_operations:\n    - extensionType: as3\n      extensionVersion: 3.34.0\n      extensionHash: 05a80ec0848dc5b8876b78a8fbee2980d5a1671d635655b3af604dc830d5fed4\n",
+        {%- else -%}
+            "customData": "controls:\n  logLevel: info\n  logFilename: /var/log/cloud/bigIpRuntimeInit.log\nextension_packages:\n  install_operations:\n    - extensionType: as3\n      extensionVersion: 3.34.0\n      extensionHash: 05a80ec0848dc5b8876b78a8fbee2980d5a1671d635655b3af604dc830d5fed4\n    - extensionType: cf\n      extensionVersion: 1.10.0\n      extensionHash: d758c985cac4dbef4b0732fe5900317ae97e67c6efca621a5b2b02c8c4bbeace\n",
+        {%- endif %}
     {% elif type == 'autoscale' %}
         "customConfig":  "[concat('### START (INPUT) CUSTOM CONFIGURATION HERE\nbranch=\"', variables('f5NetworksTag'), '\"\nhttp_iapp=\"f5.http.v1.2.0rc7.tmpl\"\ncurl https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/$branch/experimental/reference/learning-stack/iapps/$http_iapp > $http_iapp\ntmsh load sys application template $http_iapp\ntmsh create sys application service exampleApp template ${http_iapp//.tmpl} traffic-group none tables replace-all-with { pool__hosts { column-names { name } rows { { row { exampleapp.f5.com } } } } pool__members { column-names { addr port connection_limit } rows { { row { ', variables('webVmSubnetPrivateAddress'), ' ', variables('webVmVsPort'), ' 0 } } } } } variables replace-all-with { pool__addr { value ', variables('webVmVsAddr'), '} pool__mask { value 255.255.255.255 } pool__port { value ', variables('webVmVsPort'), ' } }')]\n"
+        "customData": "controls:\n  logLevel: info\n  logFilename: /var/log/cloud/bigIpRuntimeInit.log\nextension_packages:\n  install_operations:\n    - extensionType: as3\n      extensionVersion: 3.34.0\n      extensionHash: 05a80ec0848dc5b8876b78a8fbee2980d5a1671d635655b3af604dc830d5fed4\n    - extensionType: ts\n      extensionVersion: 1.26.0\n      extensionHash: 128ec4fb6fd93e4dd7f43520a58f4810a9e20d45b60e7098a3c65ee960964bfa\n",
     {%- else -%}
         "customConfig":  "[concat('### START (INPUT) CUSTOM CONFIGURATION HERE\nbranch=\"', variables('f5NetworksTag'), '\"\nhttp_iapp=\"f5.http.v1.2.0rc7.tmpl\"\ncurl https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/$branch/experimental/reference/learning-stack/iapps/$http_iapp > $http_iapp\ntmsh load sys application template $http_iapp\ntmsh create sys application service exampleApp template ${http_iapp//.tmpl} traffic-group none tables replace-all-with { pool__hosts { column-names { name } rows { { row { exampleapp.f5.com } } } } pool__members { column-names { addr port connection_limit } rows { { row { ', variables('webVmSubnetPrivateAddress'), ' ', variables('webVmVsPort'), ' 0 } } } } } variables replace-all-with { pool__addr { value ', variables('webVmVsAddr'), '} pool__mask { value 255.255.255.255 } pool__port { value ', variables('webVmVsPort'), ' } }')]\ntmsh save sys config\n",
+        "customData": "controls:\n  logLevel: info\n  logFilename: /var/log/cloud/bigIpRuntimeInit.log\nextension_packages:\n  install_operations:\n    - extensionType: as3\n      extensionVersion: 3.34.0\n      extensionHash: 05a80ec0848dc5b8876b78a8fbee2980d5a1671d635655b3af604dc830d5fed4\n",
     {%- endif %}
 {%- else -%}
-    {% if type == 'failover' and nics == '1' %}
-    "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\ntmsh save sys config\n",
-    {% elif type == 'failover' %}
-    "customConfig": "[concat('### START (INPUT) CUSTOM CONFIGURATION HERE\ntmsh modify cm device-group Sync devices modify { ', variables('instanceName'), '1.', variables('location'), '.cloudapp.azure.com { set-sync-leader } }\ntmsh save sys config\n')]",
+    {% if type == 'failover' %}
+        {% if nics == 'n' %}
+            "customConfig": "[concat('### START (INPUT) CUSTOM CONFIGURATION HERE\ntmsh modify cm device-group Sync devices modify { ', variables('instanceName'), '1.', variables('location'), '.cloudapp.azure.com { set-sync-leader } }\ntmsh save sys config\n')]",
+            "customData": "controls:\n  logLevel: info\n  logFilename: /var/log/cloud/bigIpRuntimeInit.log\nextension_packages:\n  install_operations:\n    - extensionType: as3\n      extensionVersion: 3.34.0\n      extensionHash: 05a80ec0848dc5b8876b78a8fbee2980d5a1671d635655b3af604dc830d5fed4\n    - extensionType: cf\n      extensionVersion: 1.10.0\n      extensionHash: d758c985cac4dbef4b0732fe5900317ae97e67c6efca621a5b2b02c8c4bbeace\n",
+        {% elif nics == '3' %}
+            "customConfig": "[concat('### START (INPUT) CUSTOM CONFIGURATION HERE\ntmsh modify cm device-group Sync devices modify { ', variables('instanceName'), '1.', variables('location'), '.cloudapp.azure.com { set-sync-leader } }\ntmsh save sys config\n')]",
+            "customData": "controls:\n  logLevel: info\n  logFilename: /var/log/cloud/bigIpRuntimeInit.log\nextension_packages:\n  install_operations:\n    - extensionType: as3\n      extensionVersion: 3.34.0\n      extensionHash: 05a80ec0848dc5b8876b78a8fbee2980d5a1671d635655b3af604dc830d5fed4\n",
+        {%- else -%}
+            "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\ntmsh save sys config\n",
+            "customData": "controls:\n  logLevel: info\n  logFilename: /var/log/cloud/bigIpRuntimeInit.log\nextension_packages:\n  install_operations:\n    - extensionType: as3\n      extensionVersion: 3.34.0\n      extensionHash: 05a80ec0848dc5b8876b78a8fbee2980d5a1671d635655b3af604dc830d5fed4\n",
+        {%- endif %}
     {% elif type == 'autoscale' %}
-    "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\nsystemctl restart crond\n",
+        "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\nsystemctl restart crond\n",
+        "customData": "controls:\n  logLevel: info\n  logFilename: /var/log/cloud/bigIpRuntimeInit.log\nextension_packages:\n  install_operations:\n    - extensionType: as3\n      extensionVersion: 3.34.0\n      extensionHash: 05a80ec0848dc5b8876b78a8fbee2980d5a1671d635655b3af604dc830d5fed4\n    - extensionType: ts\n      extensionVersion: 1.26.0\n      extensionHash: 128ec4fb6fd93e4dd7f43520a58f4810a9e20d45b60e7098a3c65ee960964bfa\n",
     {%- else -%}
-    "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\ntmsh save sys config\n",
+        "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\ntmsh save sys config\n",
+        "customData": "controls:\n  logLevel: info\n  logFilename: /var/log/cloud/bigIpRuntimeInit.log\nextension_packages:\n  install_operations:\n    - extensionType: as3\n      extensionVersion: 3.34.0\n      extensionHash: 05a80ec0848dc5b8876b78a8fbee2980d5a1671d635655b3af604dc830d5fed4\n",
     {%- endif %}
 {%- endif %}
         "allowUsageAnalytics": {
