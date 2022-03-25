@@ -1,9 +1,0 @@
-## required production packages
-pyyaml==5.4.1
-jinja2==2.11.3
-MarkupSafe==2.0.1
-pygithub
-## required dev packages
-pyflakes==2.1.1 # force this version, for flake8
-flake8==3.7.7
-pylint==2.3.1 ; python_version > '3.0'
