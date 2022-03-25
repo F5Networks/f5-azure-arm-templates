@@ -1,7 +1,7 @@
 #  expectValue = "is in sync-status"
 #  scriptTimeout = 3
 #  replayEnabled = true
-#  replayTimeout = 30
+#  replayTimeout = 90
 
 ## Account for it possibly being autoscale DNS
 if [[ $(echo <TEMPLATE URL> | grep -E '(via-dns)') ]]; then
