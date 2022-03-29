@@ -21,8 +21,18 @@
 - offer: f5-big-ip-advanced-waf
   publisher: f5-networks
   sku: f5-big-awf-plus-hourly-200mbps
+  urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-200mbps:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-advanced-waf
+  publisher: f5-networks
+  sku: f5-big-awf-plus-hourly-200mbps
   urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-200mbps:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-advanced-waf
+  publisher: f5-networks
+  sku: f5-big-awf-plus-hourly-200mbps
+  urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-200mbps:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-advanced-waf
   publisher: f5-networks
   sku: f5-big-awf-plus-hourly-200mbps
@@ -38,6 +48,16 @@
   sku: f5-big-awf-plus-hourly-200mbps
   urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-200mbps:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-advanced-waf
+  publisher: f5-networks
+  sku: f5-big-awf-plus-hourly-200mbps
+  urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-200mbps:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-advanced-waf
+  publisher: f5-networks
+  sku: f5-big-awf-plus-hourly-200mbps
+  urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-200mbps:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-advanced-waf
   publisher: f5-networks
   sku: f5-big-awf-plus-hourly-25mbps
@@ -61,8 +81,18 @@
 - offer: f5-big-ip-advanced-waf
   publisher: f5-networks
   sku: f5-big-awf-plus-hourly-25mbps
+  urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-25mbps:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-advanced-waf
+  publisher: f5-networks
+  sku: f5-big-awf-plus-hourly-25mbps
   urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-25mbps:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-advanced-waf
+  publisher: f5-networks
+  sku: f5-big-awf-plus-hourly-25mbps
+  urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-25mbps:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-advanced-waf
   publisher: f5-networks
   sku: f5-big-awf-plus-hourly-25mbps
@@ -78,6 +108,16 @@
   sku: f5-big-awf-plus-hourly-25mbps
   urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-25mbps:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-advanced-waf
+  publisher: f5-networks
+  sku: f5-big-awf-plus-hourly-25mbps
+  urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-25mbps:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-advanced-waf
+  publisher: f5-networks
+  sku: f5-big-awf-plus-hourly-25mbps
+  urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-25mbps:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-advanced-waf
   publisher: f5-networks
   sku: f5-big-awf-plus-hourly-3gbps
@@ -101,8 +141,18 @@
 - offer: f5-big-ip-advanced-waf
   publisher: f5-networks
   sku: f5-big-awf-plus-hourly-3gbps
+  urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-3gbps:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-advanced-waf
+  publisher: f5-networks
+  sku: f5-big-awf-plus-hourly-3gbps
   urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-3gbps:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-advanced-waf
+  publisher: f5-networks
+  sku: f5-big-awf-plus-hourly-3gbps
+  urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-3gbps:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-advanced-waf
   publisher: f5-networks
   sku: f5-big-awf-plus-hourly-3gbps
@@ -118,11 +168,86 @@
   sku: f5-big-awf-plus-hourly-3gbps
   urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-3gbps:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-advanced-waf
+  publisher: f5-networks
+  sku: f5-big-awf-plus-hourly-3gbps
+  urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-3gbps:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-advanced-waf
+  publisher: f5-networks
+  sku: f5-big-awf-plus-hourly-3gbps
+  urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-3gbps:16.1.201000
+  version: 16.1.201000
+- offer: f5-big-ip-advanced-waf
+  publisher: f5-networks
+  sku: f5-big-awf-plus-hourly-hp16
+  urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-hp16:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-advanced-waf
+  publisher: f5-networks
+  sku: f5-big-awf-plus-hourly-hp16
+  urn: f5-networks:f5-big-ip-advanced-waf:f5-big-awf-plus-hourly-hp16:16.1.201000
+  version: 16.1.201000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-big-best-plus-hourly-10gbps
+  urn: f5-networks:f5-big-ip-best:f5-big-best-plus-hourly-10gbps:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-big-best-plus-hourly-10gbps
+  urn: f5-networks:f5-big-ip-best:f5-big-best-plus-hourly-10gbps:16.1.201000
+  version: 16.1.201000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-big-best-plus-hourly-1gbps
+  urn: f5-networks:f5-big-ip-best:f5-big-best-plus-hourly-1gbps:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-big-best-plus-hourly-1gbps
+  urn: f5-networks:f5-big-ip-best:f5-big-best-plus-hourly-1gbps:16.1.201000
+  version: 16.1.201000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-big-best-plus-hourly-200mbps
+  urn: f5-networks:f5-big-ip-best:f5-big-best-plus-hourly-200mbps:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-big-best-plus-hourly-200mbps
+  urn: f5-networks:f5-big-ip-best:f5-big-best-plus-hourly-200mbps:16.1.201000
+  version: 16.1.201000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-big-best-plus-hourly-25mbps
+  urn: f5-networks:f5-big-ip-best:f5-big-best-plus-hourly-25mbps:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-big-best-plus-hourly-25mbps
+  urn: f5-networks:f5-big-ip-best:f5-big-best-plus-hourly-25mbps:16.1.201000
+  version: 16.1.201000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-big-best-plus-hourly-5gbps
+  urn: f5-networks:f5-big-ip-best:f5-big-best-plus-hourly-5gbps:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-big-best-plus-hourly-5gbps
+  urn: f5-networks:f5-big-ip-best:f5-big-best-plus-hourly-5gbps:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-10g-best-hourly
   urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-10g-best-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-10g-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-10g-best-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-10g-best-hourly
@@ -138,6 +263,16 @@
   sku: f5-bigip-virtual-edition-10g-best-hourly
   urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-10g-best-hourly:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-10g-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-10g-best-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-10g-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-10g-best-hourly:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-1g-best-hourly
@@ -161,6 +296,11 @@
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-1g-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-1g-best-hourly:13.1.401000
+  version: 13.1.401000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-best-hourly
   urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-1g-best-hourly:14.1.400000
   version: 14.1.400000
 - offer: f5-big-ip-best
@@ -181,6 +321,11 @@
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-1g-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-1g-best-hourly:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-best-hourly
   urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-1g-best-hourly:15.1.004000
   version: 15.1.004000
 - offer: f5-big-ip-best
@@ -188,6 +333,11 @@
   sku: f5-bigip-virtual-edition-1g-best-hourly
   urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-1g-best-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-1g-best-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-1g-best-hourly
@@ -203,6 +353,16 @@
   sku: f5-bigip-virtual-edition-1g-best-hourly
   urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-1g-best-hourly:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-1g-best-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-1g-best-hourly:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-200m-best-hourly
@@ -223,6 +383,11 @@
   sku: f5-bigip-virtual-edition-200m-best-hourly
   urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-200m-best-hourly:13.1.400000
   version: 13.1.400000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-200m-best-hourly:13.1.401000
+  version: 13.1.401000
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-200m-best-hourly
@@ -251,8 +416,18 @@
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-200m-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-200m-best-hourly:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-best-hourly
   urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-200m-best-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-200m-best-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-200m-best-hourly
@@ -268,6 +443,16 @@
   sku: f5-bigip-virtual-edition-200m-best-hourly
   urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-200m-best-hourly:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-200m-best-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-200m-best-hourly:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-25m-best-hourly
@@ -296,6 +481,11 @@
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-25m-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly:13.1.401000
+  version: 13.1.401000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-best-hourly
   urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly:14.1.400000
   version: 14.1.400000
 - offer: f5-big-ip-best
@@ -316,8 +506,18 @@
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-25m-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-best-hourly
   urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-25m-best-hourly
@@ -335,9 +535,24 @@
   version: 16.1.000000
 - offer: f5-big-ip-best
   publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly:16.1.201000
+  version: 16.1.201000
+- offer: f5-big-ip-best
+  publisher: f5-networks
   sku: f5-bigip-virtual-edition-5g-best-hourly
   urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-5g-best-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-5g-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-5g-best-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-best
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-5g-best-hourly
@@ -353,11 +568,26 @@
   sku: f5-bigip-virtual-edition-5g-best-hourly
   urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-5g-best-hourly:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-5g-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-5g-best-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-best
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-5g-best-hourly
+  urn: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-5g-best-hourly:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-10g-better-hourly
   urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-10g-better-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-10g-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-10g-better-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-10g-better-hourly
@@ -373,6 +603,16 @@
   sku: f5-bigip-virtual-edition-10g-better-hourly
   urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-10g-better-hourly:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-10g-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-10g-better-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-10g-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-10g-better-hourly:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-1g-better-hourly
@@ -396,6 +636,11 @@
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-1g-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-1g-better-hourly:13.1.401000
+  version: 13.1.401000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-better-hourly
   urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-1g-better-hourly:14.1.400000
   version: 14.1.400000
 - offer: f5-big-ip-better
@@ -416,8 +661,18 @@
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-1g-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-1g-better-hourly:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-better-hourly
   urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-1g-better-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-1g-better-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-1g-better-hourly
@@ -433,6 +688,16 @@
   sku: f5-bigip-virtual-edition-1g-better-hourly
   urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-1g-better-hourly:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-1g-better-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-1g-better-hourly:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-200m-better-hourly
@@ -456,6 +721,11 @@
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-200m-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-200m-better-hourly:13.1.401000
+  version: 13.1.401000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-better-hourly
   urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-200m-better-hourly:14.1.400000
   version: 14.1.400000
 - offer: f5-big-ip-better
@@ -476,8 +746,18 @@
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-200m-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-200m-better-hourly:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-better-hourly
   urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-200m-better-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-200m-better-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-200m-better-hourly
@@ -493,6 +773,16 @@
   sku: f5-bigip-virtual-edition-200m-better-hourly
   urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-200m-better-hourly:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-200m-better-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-200m-better-hourly:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-25m-better-hourly
@@ -516,6 +806,11 @@
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-25m-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-25m-better-hourly:13.1.401000
+  version: 13.1.401000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-better-hourly
   urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-25m-better-hourly:14.1.400000
   version: 14.1.400000
 - offer: f5-big-ip-better
@@ -536,8 +831,18 @@
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-25m-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-25m-better-hourly:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-better-hourly
   urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-25m-better-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-25m-better-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-25m-better-hourly
@@ -555,9 +860,24 @@
   version: 16.1.000000
 - offer: f5-big-ip-better
   publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-25m-better-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-25m-better-hourly:16.1.201000
+  version: 16.1.201000
+- offer: f5-big-ip-better
+  publisher: f5-networks
   sku: f5-bigip-virtual-edition-5g-better-hourly
   urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-5g-better-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-5g-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-5g-better-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-better
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-5g-better-hourly
@@ -573,6 +893,16 @@
   sku: f5-bigip-virtual-edition-5g-better-hourly
   urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-5g-better-hourly:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-5g-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-5g-better-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-better
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-5g-better-hourly
+  urn: f5-networks:f5-big-ip-better:f5-bigip-virtual-edition-5g-better-hourly:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-all-1slot-byol
@@ -588,6 +918,11 @@
   sku: f5-big-all-1slot-byol
   urn: f5-networks:f5-big-ip-byol:f5-big-all-1slot-byol:13.1.400000
   version: 13.1.400000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-all-1slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-all-1slot-byol:13.1.401000
+  version: 13.1.401000
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-all-1slot-byol
@@ -611,8 +946,18 @@
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-all-1slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-all-1slot-byol:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-all-1slot-byol
   urn: f5-networks:f5-big-ip-byol:f5-big-all-1slot-byol:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-all-1slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-all-1slot-byol:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-all-1slot-byol
@@ -628,6 +973,16 @@
   sku: f5-big-all-1slot-byol
   urn: f5-networks:f5-big-ip-byol:f5-big-all-1slot-byol:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-all-1slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-all-1slot-byol:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-all-1slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-all-1slot-byol:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-all-2slot-byol
@@ -656,6 +1011,11 @@
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-all-2slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-all-2slot-byol:13.1.401000
+  version: 13.1.401000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-all-2slot-byol
   urn: f5-networks:f5-big-ip-byol:f5-big-all-2slot-byol:14.1.206000
   version: 14.1.206000
 - offer: f5-big-ip-byol
@@ -681,6 +1041,11 @@
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-all-2slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-all-2slot-byol:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-all-2slot-byol
   urn: f5-networks:f5-big-ip-byol:f5-big-all-2slot-byol:15.0.100000
   version: 15.0.100000
 - offer: f5-big-ip-byol
@@ -688,6 +1053,11 @@
   sku: f5-big-all-2slot-byol
   urn: f5-networks:f5-big-ip-byol:f5-big-all-2slot-byol:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-all-2slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-all-2slot-byol:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-all-2slot-byol
@@ -705,6 +1075,16 @@
   version: 16.1.000000
 - offer: f5-big-ip-byol
   publisher: f5-networks
+  sku: f5-big-all-2slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-all-2slot-byol:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-all-2slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-all-2slot-byol:16.1.201000
+  version: 16.1.201000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
   sku: f5-big-ltm-1slot-byol
   urn: f5-networks:f5-big-ip-byol:f5-big-ltm-1slot-byol:13.1.306000
   version: 13.1.306000
@@ -713,6 +1093,11 @@
   sku: f5-big-ltm-1slot-byol
   urn: f5-networks:f5-big-ip-byol:f5-big-ltm-1slot-byol:13.1.400000
   version: 13.1.400000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-ltm-1slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-ltm-1slot-byol:13.1.401000
+  version: 13.1.401000
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-ltm-1slot-byol
@@ -736,8 +1121,18 @@
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-ltm-1slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-ltm-1slot-byol:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-ltm-1slot-byol
   urn: f5-networks:f5-big-ip-byol:f5-big-ltm-1slot-byol:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-ltm-1slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-ltm-1slot-byol:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-ltm-1slot-byol
@@ -753,6 +1148,16 @@
   sku: f5-big-ltm-1slot-byol
   urn: f5-networks:f5-big-ip-byol:f5-big-ltm-1slot-byol:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-ltm-1slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-ltm-1slot-byol:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-ltm-1slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-ltm-1slot-byol:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-ltm-2slot-byol
@@ -776,6 +1181,11 @@
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-ltm-2slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:13.1.401000
+  version: 13.1.401000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-ltm-2slot-byol
   urn: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:14.1.400000
   version: 14.1.400000
 - offer: f5-big-ip-byol
@@ -796,8 +1206,18 @@
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-ltm-2slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-ltm-2slot-byol
   urn: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-byol
+  publisher: f5-networks
+  sku: f5-big-ltm-2slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-byol
   publisher: f5-networks
   sku: f5-big-ltm-2slot-byol
@@ -813,101 +1233,26 @@
   sku: f5-big-ltm-2slot-byol
   urn: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:16.1.000000
   version: 16.1.000000
-- offer: f5-big-ip-cloud-edition
+- offer: f5-big-ip-byol
   publisher: f5-networks
-  sku: f5-big-ip-per-app-ve-awf-200m-hourly
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-big-ip-per-app-ve-awf-200m-hourly:13.1.306000
-  version: 13.1.306000
-- offer: f5-big-ip-cloud-edition
+  sku: f5-big-ltm-2slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-byol
   publisher: f5-networks
-  sku: f5-big-ip-per-app-ve-awf-200m-hourly
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-big-ip-per-app-ve-awf-200m-hourly:13.1.400000
-  version: 13.1.400000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-big-ip-per-app-ve-awf-25m-hourly
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-big-ip-per-app-ve-awf-25m-hourly:13.1.306000
-  version: 13.1.306000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-big-ip-per-app-ve-awf-25m-hourly
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-big-ip-per-app-ve-awf-25m-hourly:13.1.400000
-  version: 13.1.400000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-big-ip-per-app-ve-awf-byol
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-big-ip-per-app-ve-awf-byol:13.1.306000
-  version: 13.1.306000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-big-ip-per-app-ve-awf-byol
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-big-ip-per-app-ve-awf-byol:13.1.400000
-  version: 13.1.400000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-big-ip-per-app-ve-ltm-200m-hourly
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-big-ip-per-app-ve-ltm-200m-hourly:13.1.306000
-  version: 13.1.306000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-big-ip-per-app-ve-ltm-200m-hourly
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-big-ip-per-app-ve-ltm-200m-hourly:13.1.400000
-  version: 13.1.400000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-big-ip-per-app-ve-ltm-25m-hourly
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-big-ip-per-app-ve-ltm-25m-hourly:13.1.306000
-  version: 13.1.306000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-big-ip-per-app-ve-ltm-25m-hourly
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-big-ip-per-app-ve-ltm-25m-hourly:13.1.400000
-  version: 13.1.400000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-big-ip-per-app-ve-ltm-byol
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-big-ip-per-app-ve-ltm-byol:13.1.306000
-  version: 13.1.306000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-big-ip-per-app-ve-ltm-byol
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-big-ip-per-app-ve-ltm-byol:13.1.400000
-  version: 13.1.400000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-bigiq-virtual-edition-byol
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-bigiq-virtual-edition-byol:7.0.002001
-  version: 7.0.002001
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-bigiq-virtual-edition-byol
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-bigiq-virtual-edition-byol:7.1.003000
-  version: 7.1.003000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-bigiq-virtual-edition-byol
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-bigiq-virtual-edition-byol:8.0.000000
-  version: 8.0.000000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-bigiq-virtual-edition-byol
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-bigiq-virtual-edition-byol:8.0.001000
-  version: 8.0.001000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-bigiq-virtual-edition-byol
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-bigiq-virtual-edition-byol:8.1.000000
-  version: 8.1.000000
-- offer: f5-big-ip-cloud-edition
-  publisher: f5-networks
-  sku: f5-bigiq-virtual-edition-byol
-  urn: f5-networks:f5-big-ip-cloud-edition:f5-bigiq-virtual-edition-byol:8.1.001000
-  version: 8.1.001000
+  sku: f5-big-ltm-2slot-byol
+  urn: f5-networks:f5-big-ip-byol:f5-big-ltm-2slot-byol:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-10g-good-hourly
   urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-10g-good-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-10g-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-10g-good-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-10g-good-hourly
@@ -923,6 +1268,16 @@
   sku: f5-bigip-virtual-edition-10g-good-hourly
   urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-10g-good-hourly:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-10g-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-10g-good-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-10g-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-10g-good-hourly:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-1g-good-hourly
@@ -946,6 +1301,11 @@
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-1g-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-1g-good-hourly:13.1.401000
+  version: 13.1.401000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-good-hourly
   urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-1g-good-hourly:14.1.400000
   version: 14.1.400000
 - offer: f5-big-ip-good
@@ -966,8 +1326,18 @@
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-1g-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-1g-good-hourly:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-good-hourly
   urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-1g-good-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-1g-good-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-1g-good-hourly
@@ -983,6 +1353,16 @@
   sku: f5-bigip-virtual-edition-1g-good-hourly
   urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-1g-good-hourly:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-1g-good-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-1g-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-1g-good-hourly:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-200m-good-hourly
@@ -1006,6 +1386,11 @@
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-200m-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-200m-good-hourly:13.1.401000
+  version: 13.1.401000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-good-hourly
   urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-200m-good-hourly:14.1.400000
   version: 14.1.400000
 - offer: f5-big-ip-good
@@ -1026,8 +1411,18 @@
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-200m-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-200m-good-hourly:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-good-hourly
   urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-200m-good-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-200m-good-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-200m-good-hourly
@@ -1043,6 +1438,16 @@
   sku: f5-bigip-virtual-edition-200m-good-hourly
   urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-200m-good-hourly:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-200m-good-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-200m-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-200m-good-hourly:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-25m-good-hourly
@@ -1066,6 +1471,11 @@
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-25m-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-25m-good-hourly:13.1.401000
+  version: 13.1.401000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-good-hourly
   urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-25m-good-hourly:14.1.400000
   version: 14.1.400000
 - offer: f5-big-ip-good
@@ -1086,6 +1496,11 @@
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-25m-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-25m-good-hourly:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-good-hourly
   urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-25m-good-hourly:15.1.004000
   version: 15.1.004000
 - offer: f5-big-ip-good
@@ -1093,6 +1508,11 @@
   sku: f5-bigip-virtual-edition-25m-good-hourly
   urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-25m-good-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-25m-good-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-25m-good-hourly
@@ -1110,9 +1530,24 @@
   version: 16.1.000000
 - offer: f5-big-ip-good
   publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-25m-good-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-25m-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-25m-good-hourly:16.1.201000
+  version: 16.1.201000
+- offer: f5-big-ip-good
+  publisher: f5-networks
   sku: f5-bigip-virtual-edition-5g-good-hourly
   urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-5g-good-hourly:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-5g-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-5g-good-hourly:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-good
   publisher: f5-networks
   sku: f5-bigip-virtual-edition-5g-good-hourly
@@ -1128,6 +1563,16 @@
   sku: f5-bigip-virtual-edition-5g-good-hourly
   urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-5g-good-hourly:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-5g-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-5g-good-hourly:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-good
+  publisher: f5-networks
+  sku: f5-bigip-virtual-edition-5g-good-hourly
+  urn: f5-networks:f5-big-ip-good:f5-bigip-virtual-edition-5g-good-hourly:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-per-app-ve
   publisher: f5-networks
   sku: f5-big-awf-plus-pve-hourly-200mbps
@@ -1151,8 +1596,18 @@
 - offer: f5-big-ip-per-app-ve
   publisher: f5-networks
   sku: f5-big-awf-plus-pve-hourly-200mbps
+  urn: f5-networks:f5-big-ip-per-app-ve:f5-big-awf-plus-pve-hourly-200mbps:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-per-app-ve
+  publisher: f5-networks
+  sku: f5-big-awf-plus-pve-hourly-200mbps
   urn: f5-networks:f5-big-ip-per-app-ve:f5-big-awf-plus-pve-hourly-200mbps:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-per-app-ve
+  publisher: f5-networks
+  sku: f5-big-awf-plus-pve-hourly-200mbps
+  urn: f5-networks:f5-big-ip-per-app-ve:f5-big-awf-plus-pve-hourly-200mbps:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-per-app-ve
   publisher: f5-networks
   sku: f5-big-awf-plus-pve-hourly-200mbps
@@ -1168,6 +1623,16 @@
   sku: f5-big-awf-plus-pve-hourly-200mbps
   urn: f5-networks:f5-big-ip-per-app-ve:f5-big-awf-plus-pve-hourly-200mbps:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-per-app-ve
+  publisher: f5-networks
+  sku: f5-big-awf-plus-pve-hourly-200mbps
+  urn: f5-networks:f5-big-ip-per-app-ve:f5-big-awf-plus-pve-hourly-200mbps:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-per-app-ve
+  publisher: f5-networks
+  sku: f5-big-awf-plus-pve-hourly-200mbps
+  urn: f5-networks:f5-big-ip-per-app-ve:f5-big-awf-plus-pve-hourly-200mbps:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-ip-per-app-ve
   publisher: f5-networks
   sku: f5-big-awf-plus-pve-hourly-25mbps
@@ -1191,8 +1656,18 @@
 - offer: f5-big-ip-per-app-ve
   publisher: f5-networks
   sku: f5-big-awf-plus-pve-hourly-25mbps
+  urn: f5-networks:f5-big-ip-per-app-ve:f5-big-awf-plus-pve-hourly-25mbps:14.1.405000
+  version: 14.1.405000
+- offer: f5-big-ip-per-app-ve
+  publisher: f5-networks
+  sku: f5-big-awf-plus-pve-hourly-25mbps
   urn: f5-networks:f5-big-ip-per-app-ve:f5-big-awf-plus-pve-hourly-25mbps:15.1.201000
   version: 15.1.201000
+- offer: f5-big-ip-per-app-ve
+  publisher: f5-networks
+  sku: f5-big-awf-plus-pve-hourly-25mbps
+  urn: f5-networks:f5-big-ip-per-app-ve:f5-big-awf-plus-pve-hourly-25mbps:15.1.400000
+  version: 15.1.400000
 - offer: f5-big-ip-per-app-ve
   publisher: f5-networks
   sku: f5-big-awf-plus-pve-hourly-25mbps
@@ -1208,6 +1683,16 @@
   sku: f5-big-awf-plus-pve-hourly-25mbps
   urn: f5-networks:f5-big-ip-per-app-ve:f5-big-awf-plus-pve-hourly-25mbps:16.1.000000
   version: 16.1.000000
+- offer: f5-big-ip-per-app-ve
+  publisher: f5-networks
+  sku: f5-big-awf-plus-pve-hourly-25mbps
+  urn: f5-networks:f5-big-ip-per-app-ve:f5-big-awf-plus-pve-hourly-25mbps:16.1.100000
+  version: 16.1.100000
+- offer: f5-big-ip-per-app-ve
+  publisher: f5-networks
+  sku: f5-big-awf-plus-pve-hourly-25mbps
+  urn: f5-networks:f5-big-ip-per-app-ve:f5-big-awf-plus-pve-hourly-25mbps:16.1.201000
+  version: 16.1.201000
 - offer: f5-big-iq
   publisher: f5-networks
   sku: f5-bigiq-virtual-edition-byol
@@ -1238,6 +1723,11 @@
   sku: f5-bigiq-virtual-edition-byol
   urn: f5-networks:f5-big-iq:f5-bigiq-virtual-edition-byol:8.1.001000
   version: 8.1.001000
+- offer: f5-big-iq
+  publisher: f5-networks
+  sku: f5-bigiq-virtual-edition-byol
+  urn: f5-networks:f5-big-iq:f5-bigiq-virtual-edition-byol:8.1.002000
+  version: 8.1.002000
 - offer: f5-web-application-firewall
   publisher: f5-networks
   sku: f5-waf-solution-1gbps-hourly

@@ -5,7 +5,7 @@ AUTOSCALE TYPE: ltm-via-lb
 AUTOSCALE TYPE URL: ltm/via-lb
 BASE VLAN NAME: internal
 BIGIP MODULES: ltm:nominal
-BIGIP VERSION: 16.1.000000
+BIGIP VERSION: 16.1.201000
 BIGIQ CONFIG FILE: ''
 BRANCH: master
 CLIENT ID: d40aad56-b0bd-466d-a6c4-6c9c4d0f9aa7
@@ -25,8 +25,8 @@ EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IAPP SERVICE LIST: ''
 IMAGE NAME: Best25Mbps
-IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:16.1.000000
-INSTANCE TYPE: Standard_DS3_v2
+IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:16.1.201000
+INSTANCE TYPE: Standard_D4s_v3
 LICENSE PARAM: ''
 LICENSE POOL: production
 LICENSE POOL PARAM: ''

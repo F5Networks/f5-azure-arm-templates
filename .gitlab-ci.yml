@@ -3,7 +3,6 @@ image: ${ARTIFACTORY_SERVER}/dockerhub-remote/python:3.7-alpine
 services:
   - ${ARTIFACTORY_SERVER}/dockerhub-remote/docker:dind
 
-
 stages:
   - lint-tests
   - smoke-tests
@@ -55,7 +54,8 @@ lint_generator:
       - $RELEASE_RUNTIME_INIT_TESTS == "true"
   script:
     - apk add --no-cache build-base
-    - cd template-generator
+    - apk add libffi-dev
+    - cd cloud-tools/template-generator
     - pip install -r requirements.txt
     - make lint
 
@@ -63,7 +63,6 @@ lint_generator:
 # generated content - i.e. running 'make all' after checking out a stable branch
 # should never result in different generated content
 run_generator_and_validate_no_diff:
-  image: ${ARTIFACTORY_SERVER}/dockerhub-remote/python:3.7-alpine
   stage: smoke-tests
   tags:
     - docker-executor
@@ -75,14 +74,17 @@ run_generator_and_validate_no_diff:
     variables:
       - $RELEASE_RUNTIME_INIT_TESTS == "true"
   script:
-    - apk add --no-cache build-base
+    - apk add --no-cache build-base gcc musl-dev python3-dev libffi-dev
     - apk add --no-cache git
-    - apk add libffi-dev
-    - cd template-generator
-    - pip3 install -r requirements.txt
+    - apk add --no-cache jq
+    - apk add --no-cache curl
+    - curl https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz > /tmp/google-cloud-sdk.tar.gz
+    - mkdir -p /usr/local/gcloud && tar -C /usr/local/gcloud -xvf /tmp/google-cloud-sdk.tar.gz && /usr/local/gcloud/google-cloud-sdk/install.sh --quiet && rm /tmp/google-cloud-sdk.tar.gz
+    - PATH="$PATH:/usr/local/gcloud/google-cloud-sdk/bin"
+    - cd cloud-tools/template-generator
+    - pip install -r requirements.txt
     - python template_generator/main.py --azure
     - if git diff | grep 'diff --git'; then exit 1; else exit 0; fi
-
 
 # run template generator smoke tests - validate file contents, etc.
 run_smoke_tests:
