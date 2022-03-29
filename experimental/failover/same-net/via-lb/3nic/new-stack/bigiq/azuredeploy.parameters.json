@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "9.7.0.0",
+    "contentVersion": "9.8.0.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -30,7 +30,7 @@
             "value": "3456"
         },
         "instanceType": {
-            "value": "Standard_DS3_v2"
+            "value": "Standard_D8s_v3"
         },
         "imageName": {
             "value": "AllTwoBootLocations"
@@ -54,7 +54,7 @@
             "value": "OPTIONAL"
         },
         "bigIpVersion": {
-            "value": "16.1.000000"
+            "value": "16.1.201000"
         },
         "bigIpModules": {
             "value": "ltm:nominal"

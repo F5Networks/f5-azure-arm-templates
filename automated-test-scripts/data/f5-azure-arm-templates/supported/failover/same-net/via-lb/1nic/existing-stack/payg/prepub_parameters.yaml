@@ -2,7 +2,7 @@ ADDITIONAL NIC LOCATION: ''
 ADDTL NIC PARAM: ''
 BASE VLAN NAME: ''
 BIGIP MODULES: ltm:nominal
-BIGIP VERSION: 16.1.000000
+BIGIP VERSION: 16.1.201000
 BIGIQ CONFIG FILE: ''
 CONFIG FILES: ""
 CREATE PUBLIC IP: 'No'
@@ -16,9 +16,9 @@ DNS LABEL: ',"dnsLabel":{"value":"<RESOURCE GROUP>"}'
 EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IMAGE NAME: Best25Mbps
-IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:16.1.000000
+IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:16.1.201000
 INSTANCE PARAM: ',"numberOfInstances":{"value":2}'
-INSTANCE TYPE: Standard_DS3_v2
+INSTANCE TYPE: Standard_D8s_v3
 LICENSE PARAM: ''
 LICENSE POOL: production
 LICENSE POOL PARAM: ''

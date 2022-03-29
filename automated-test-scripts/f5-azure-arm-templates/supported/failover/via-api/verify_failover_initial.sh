@@ -64,7 +64,7 @@ case <CREATE PUBLIC IP> in
     PROVISIONING_STATE=$(az network nic show -g <RESOURCE GROUP> -n <RESOURCE GROUP>-ext${INDEX} | jq .provisioningState)
     echo "IPCONFIG_ID: $IPCONFIG_ID"
     echo "PROVISIONING STATE: $PROVISIONING_STATE"
-    if echo $IPCONFIG_ID | grep -i <RESOURCE GROUP>-ext-ipconfig${INDEX} && echo $PROVISIONING_STATE | grep -i "Succeeded"; then
+    if echo $IPCONFIG_ID | grep -i <RESOURCE GROUP>-ext${INDEX} && echo $PROVISIONING_STATE | grep -i "Succeeded"; then
         echo "IP is associated with device"
     fi ;;
 esac

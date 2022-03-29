@@ -17,7 +17,7 @@ EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IMAGE NAME: PerAppVeAdvancedWaf25Mbps
 IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:15.1.400000
-INSTANCE TYPE: Standard_DS3_v2
+INSTANCE TYPE: Standard_D4s_v3
 LICENSE PARAM: ''
 LICENSE POOL: production
 LICENSE POOL PARAM: ''
