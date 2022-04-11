@@ -25,7 +25,7 @@ EXT ALB EXISTS: 'Yes'
 IAPP SERVICE LIST: ''
 IMAGE NAME: Best25Mbps
 IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:16.1.201000
-INSTANCE TYPE: Standard_D4s_v3
+INSTANCE TYPE: Standard_D4s_v4
 LICENSE PARAM: ''
 LICENSE POOL: production
 LICENSE POOL PARAM: ''
