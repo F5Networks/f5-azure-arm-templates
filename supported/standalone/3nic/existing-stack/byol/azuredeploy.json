@@ -228,7 +228,7 @@
         },
         "restrictedSrcAddress": {
             "metadata": {
-                "description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation, or asterisk for all sources"
+                "description": "This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation. Please do NOT use 0.0.0.0/0. Instead, restrict the IP address range to your client or trusted network, for example 55.55.55.55/32. Production should never expose the BIG-IP Management interface to the Internet. "
             },
             "type": "string"
         },
