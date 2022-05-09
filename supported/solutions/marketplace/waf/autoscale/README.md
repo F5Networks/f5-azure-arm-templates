@@ -159,7 +159,7 @@ The end result should be possession of a client(application) ID, tenant ID and s
 
 #### 1. Azure Portal
 
-Follow the steps outlined in the [Azure Portal documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-group-create-service-principal-portal/) to generate the service principal.
+Follow the steps outlined in the [Azure Portal documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal/) to generate the service principal.
 
 #### 2. Azure CLI
 

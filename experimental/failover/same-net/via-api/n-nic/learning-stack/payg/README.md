@@ -125,7 +125,7 @@ Use the appropriate button below to deploy:
 
 - **PAYG**: This allows you to use pay-as-you-go hourly billing.
 
-  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv9.8.0.0%2Fexperimental%2Ffailover%2Fsame-net%2Fvia-api%2Fn-nic%2Flearning-stack%2Fpayg%2Fazuredeploy.json)
+  [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FF5Networks%2Ff5-azure-arm-templates%2Fv9.9.0.0%2Fexperimental%2Ffailover%2Fsame-net%2Fvia-api%2Fn-nic%2Flearning-stack%2Fpayg%2Fazuredeploy.json)
 
 ### Template parameters
 
