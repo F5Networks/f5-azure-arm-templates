@@ -79,7 +79,7 @@ Use the appropriate button, depending on whether you are using BYOL or PAYG lice
 | licensedBandwidth | | For PAYG only. PAYG licensed bandwidth(Mbps) image to deploy. |
 | numberOfExternalIps | x | The number of public/private IP's to deploy for the application traffic(external) nic on the BIG-IP to be used for virtual servers. |
 | vnetAddressPrefix | x | The start of the CIDR block(/16) used by the BIG-IP's when creating the vnet and subnets.  What is supplied MUST be just the first two octets of the /16 virtual network that will be created.  Such as '10.0', '10.100', 192.168', etc... |
-| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
+| restrictedSrcAddress | x | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation. Please do NOT use "0.0.0.0/0". Instead, restrict the IP address range to your client or trusted network, for example '55.55.55.55/32'. Production should never expose the BIG-IP Management interface to the Internet.  |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
 ### <a name="powershell"></a>PowerShell Script Example
