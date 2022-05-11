@@ -18,7 +18,7 @@ EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IMAGE NAME: Best25Mbps
 IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:14.1.404001
-INSTANCE TYPE: Standard_D8s_v3
+INSTANCE TYPE: Standard_D8s_v4
 LICENSE PARAM: ''
 LICENSE POOL: production
 LICENSE POOL PARAM: ''

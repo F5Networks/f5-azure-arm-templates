@@ -21,7 +21,7 @@ EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IMAGE NAME: AllTwoBootLocations
 IMAGE URN: f5-networks:f5-big-ip-byol:f5-big-all-2slot-byol:16.1.201000
-INSTANCE TYPE: Standard_D8s_v3
+INSTANCE TYPE: Standard_D8s_v4
 LICENSE PARAM: ',"licenseKey1":{"value":"<AUTOFILL EVAL LICENSE KEY>"},"licenseKey2":{"value":"<AUTOFILL
   EVAL LICENSE KEY 2>"}'
 LICENSE POOL: ''

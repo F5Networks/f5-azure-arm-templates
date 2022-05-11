@@ -28,7 +28,7 @@ EXTERNAL IP COUNT: 1
 IAPP SERVICE LIST: ''
 IMAGE NAME: AllTwoBootLocations
 IMAGE URN: OPTIONAL
-INSTANCE TYPE: Standard_D4s_v3
+INSTANCE TYPE: Standard_D4s_v4
 LICENSE PARAM: ',"bigIqUsername":{"value":"admin"},"bigIqPassword":{"value":"B!giq2017"},<LICENSE
   POOL PARAM>'
 LICENSE POOL: production

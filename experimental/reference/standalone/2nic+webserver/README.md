@@ -50,7 +50,7 @@ Use this button to deploy the template:
 | licenseKey1 | x | The license token from the F5 licensing server. This license will be used for the first F5 BIG-IP. |
 | webServer | x | The example web server to deploy. |
 | vsPort | x | The virtual server port to use when configuring the BIG-IP. |
-| restrictedSrcAddress | x | Restricts management access to a specific network or address. Enter a IP address or address range in CIDR notation, or asterisk for all sources. |
+| restrictedSrcAddress | x | This field restricts management access to a specific network or address. Enter an IP address or address range in CIDR notation. Please do NOT use "0.0.0.0/0". Instead, restrict the IP address range to your client or trusted network, for example '55.55.55.55/32'. Production should never expose the BIG-IP Management interface to the Internet.  |
 | tagValues | x | Additional key-value pair tags to be added to each Azure resource. |
 
 

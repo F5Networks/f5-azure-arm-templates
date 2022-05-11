@@ -1,4 +1,4 @@
-# Pre release test plan
+# Personal test plan
 # Azure standalone tests
 azure-standalone-1nic-test:
   test-url: "file://automated-test-scripts/f5-azure-arm-templates/supported/standalone/daily_test.yaml"
