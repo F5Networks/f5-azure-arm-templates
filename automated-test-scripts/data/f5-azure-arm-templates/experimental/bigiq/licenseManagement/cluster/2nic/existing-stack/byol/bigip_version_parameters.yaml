@@ -10,7 +10,7 @@ CLUSTER FOLDER: cluster
 CUSTOM IMAGE PARAM: OPTIONAL
 DNS LABEL: ',"dnsLabel":{"value":"<RESOURCE GROUP>"}'
 INSTANCE NAME: f5bigiqvm
-INSTANCE TYPE: Standard_D4s_v3
+INSTANCE TYPE: Standard_D4s_v4
 INTERNAL IP COUNT: 0
 LIC POOL PARAM: ',"licensePoolKeys":{"value":"Do_Not_Create"}'
 LICENSE PARAM: ',"bigIqLicenseKey1":{"value":"GHZVH-LQPWQZ-SQZ-FSGZUTT-GJWPORB"},"bigIqLicenseKey2":{"value":"KCDYN-PUPDST-BXY-CDIZLNQ-BELAZTT"}'

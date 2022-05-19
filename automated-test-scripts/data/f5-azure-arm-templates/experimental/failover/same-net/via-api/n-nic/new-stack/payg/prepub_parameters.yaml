@@ -3,7 +3,7 @@ ADDTL NIC PARAM: ',"numberOfAdditionalNics":{"value":<NUMBER OF ADDITIONAL NICS>
   NIC LOCATION>"}'
 BASE VLAN NAME: external;internal
 BIGIP MODULES: ltm:nominal,asm:nominal
-BIGIP VERSION: 16.1.201000
+BIGIP VERSION: 16.1.202000
 BIGIQ CONFIG FILE: ''
 CLIENT ID: d40aad56-b0bd-466d-a6c4-6c9c4d0f9aa7
 CONFIG FILES: .passwd;.azCredentials
@@ -18,7 +18,7 @@ DNS LABEL: ',"dnsLabel":{"value":"<RESOURCE GROUP>"}'
 EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IMAGE NAME: Best25Mbps
-IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:15.1.201000
+IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:15.1.501000
 INSTANCE TYPE: Standard_DS4_v2
 LICENSE PARAM: ''
 LICENSE POOL: production
@@ -37,7 +37,7 @@ PROVISION INT LB: 'null'
 REGION: westus2
 RESOURCE GROUP: dd-cl-api-<DEWPOINT JOB ID>
 SEQUENCE NUMBER: 0
-SERVICE PRINCIPAL: D9T91uX_A_8.v6KNgOX6FD~F2rbU.kB9y_
+SERVICE PRINCIPAL: XjC8Q~kh63kn6SsQuvakzaNRmzCC4Oly5dMyLcm.
 SOLUTION LOGS: install.log;onboard.log;cluster.log;network.log
 SSH PORT: 22
 STACK PARAM: ''

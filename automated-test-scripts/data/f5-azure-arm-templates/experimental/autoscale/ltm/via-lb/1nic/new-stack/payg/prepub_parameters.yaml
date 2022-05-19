@@ -5,7 +5,7 @@ AUTOSCALE TYPE: ltm-via-lb
 AUTOSCALE TYPE URL: ltm/via-lb
 BASE VLAN NAME: internal
 BIGIP MODULES: ltm:nominal
-BIGIP VERSION: 16.1.201000
+BIGIP VERSION: 16.1.202000
 BIGIQ CONFIG FILE: ''
 CLIENT ID: d40aad56-b0bd-466d-a6c4-6c9c4d0f9aa7
 CONFIG FILES: .passwd;.azCredentials
@@ -24,8 +24,8 @@ EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IAPP SERVICE LIST: ''
 IMAGE NAME: Best25Mbps
-IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:15.1.201000
-INSTANCE TYPE: Standard_D4s_v3
+IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:15.1.501000
+INSTANCE TYPE: Standard_D4s_v4
 LICENSE PARAM: ''
 LICENSE POOL: production
 LICENSE POOL PARAM: ''
@@ -45,7 +45,7 @@ PROVISION INT LB: 'null'
 REGION: westus
 RESOURCE GROUP: dd-as-<DEWPOINT JOB ID>
 SEQUENCE NUMBER: 1
-SERVICE PRINCIPAL: D9T91uX_A_8.v6KNgOX6FD~F2rbU.kB9y_
+SERVICE PRINCIPAL: XjC8Q~kh63kn6SsQuvakzaNRmzCC4Oly5dMyLcm.
 SOLUTION DEPLOY NAME: ''
 SOLUTION LOGS: install.log;onboard.log;autoscale.log
 SSH PORT: 50001
