@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
-    "contentVersion": "9.9.0.0",
+    "contentVersion": "9.9.1.0",
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser",
@@ -273,7 +273,7 @@
         "resourceGroupName": "[resourceGroup().name]",
         "resourceGroupId": "[concat(resourceGroup().id, '-vip')]",
         "singleQuote": "'",
-        "f5CloudLibsTag": "v4.26.9",
+        "f5CloudLibsTag": "v4.27.0",
         "f5CloudLibsAzureTag": "v2.17.1",
         "f5CloudIappsTag": "",
         "dnsLabel": "[toLower(parameters('dnsLabel'))]",
