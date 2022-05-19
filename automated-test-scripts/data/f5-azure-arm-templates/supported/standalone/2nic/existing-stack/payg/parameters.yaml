@@ -2,7 +2,7 @@ ADDITIONAL NIC LOCATION: ''
 ADDTL NIC PARAM: ''
 BASE VLAN NAME: external
 BIGIP MODULES: ltm:nominal
-BIGIP VERSION: 16.1.201000
+BIGIP VERSION: 16.1.202000
 BIGIQ CONFIG FILE: ''
 BRANCH: R19-3-2
 CONFIG FILES: .passwd
@@ -17,7 +17,7 @@ DNS LABEL: ',"dnsLabel":{"value":"<RESOURCE GROUP>"}'
 EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IMAGE NAME: PerAppVeAdvancedWaf25Mbps
-IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:16.1.201000
+IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:16.1.202000
 INSTANCE TYPE: Standard_D4s_v4
 LICENSE PARAM: ''
 LICENSE POOL: production
