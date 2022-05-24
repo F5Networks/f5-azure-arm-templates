@@ -6,6 +6,13 @@
 
 TMP_DIR='/tmp/<DEWPOINT JOB ID>'
 
+if [[ <CREATE PUBLIC IP> == "Yes" ]]; then
+  source_cidr=$(curl ifconfig.me)/32
+else
+  source_cidr='0.0.0.0/0'
+fi
+echo "source_cidr=$source_cidr"
+
 # download and use --template-file because --template-uri is limiting
 TEMPLATE_FILE=${TMP_DIR}/<RESOURCE GROUP>.json
 curl -k <TEMPLATE URL> -o ${TEMPLATE_FILE}
@@ -74,7 +81,7 @@ if [[ $(echo <TEMPLATE URL> | grep -E '(failover/same-net/via-api/)') ]]; then
     USER_IDENTITY_PARAM=',"userAssignedManagedIdentity":{"value":"<USER IDENTITY>"}'
 fi
 
-DEPLOY_PARAMS='{"authenticationType":{"value":"<PASSWORD TYPE>"},"adminPasswordOrKey":{"value":"'"${PASSWORD}"'"},"adminUsername":{"value":"dewpoint"},"instanceType":{"value":"<INSTANCE TYPE>"},"bigIpVersion":{"value":"<BIGIP VERSION>"},"bigIpModules":{"value":"<BIGIP MODULES>"},"imageName":{"value":"<IMAGE NAME>"},"ntpServer":{"value":"<NTP SERVER>"},"declarationUrl":{"value":"<DECLARATION URL>"},"timeZone":{"value":"<TIMEZONE>"},"customImage":{"value":"<CUSTOM IMAGE PARAM>"},"customImageUrn":{"value":"<IMAGE URN>"},"restrictedSrcAddress":{"value":"*"},"allowUsageAnalytics":{"value":"<USAGE ANALYTICS CHOICE>"},"allowPhoneHome":{"value":"<PHONEHOME>"}<DNS LABEL><NETWORK PARAM><STACK PARAM><VNET PARAM><ADDTL NIC PARAM>'${LICENSE_PARAM}''${DNS_PROVIDER_HOST_PARAM}''${PUBLIC_IP_PARAM}''${PUBLIC_IP_APP_PARAM}''${PROVISION_INT_LB_PARAM}''${EXISTENT_LB_PARAM}''${ROUTE_TABLE_NAME}''${USER_IDENTITY_PARAM}'}'
+DEPLOY_PARAMS='{"authenticationType":{"value":"<PASSWORD TYPE>"},"adminPasswordOrKey":{"value":"'"${PASSWORD}"'"},"adminUsername":{"value":"dewpoint"},"instanceType":{"value":"<INSTANCE TYPE>"},"bigIpVersion":{"value":"<BIGIP VERSION>"},"bigIpModules":{"value":"<BIGIP MODULES>"},"imageName":{"value":"<IMAGE NAME>"},"ntpServer":{"value":"<NTP SERVER>"},"declarationUrl":{"value":"<DECLARATION URL>"},"timeZone":{"value":"<TIMEZONE>"},"customImage":{"value":"<CUSTOM IMAGE PARAM>"},"customImageUrn":{"value":"<IMAGE URN>"},"restrictedSrcAddress":{"value":"'"${source_cidr}"'"},"allowUsageAnalytics":{"value":"<USAGE ANALYTICS CHOICE>"},"allowPhoneHome":{"value":"<PHONEHOME>"}<DNS LABEL><NETWORK PARAM><STACK PARAM><VNET PARAM><ADDTL NIC PARAM>'${LICENSE_PARAM}''${DNS_PROVIDER_HOST_PARAM}''${PUBLIC_IP_PARAM}''${PUBLIC_IP_APP_PARAM}''${PROVISION_INT_LB_PARAM}''${EXISTENT_LB_PARAM}''${ROUTE_TABLE_NAME}''${USER_IDENTITY_PARAM}'}'
 DEPLOY_PARAMS_FILE=${TMP_DIR}/deploy_params.json
 
 # save deployment parameters to a file, to avoid weird parameter parsing errors with certain values
