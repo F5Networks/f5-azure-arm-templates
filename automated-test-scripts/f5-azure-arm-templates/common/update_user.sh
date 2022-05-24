@@ -31,7 +31,7 @@ if echo <PASSWORD TYPE> | grep -iq "sshPublicKey"; then
         ssh -o "StrictHostKeyChecking no" -i $SSH_KEY -o ProxyCommand="ssh -o 'StrictHostKeyChecking no' -i $SSH_KEY -W %h:%p dewpoint@${BASTION_HOST}" admin@"$IP" 'modify auth user dewpoint password <AUTOFILL PASSWORD>' ;;
     *)
         ssh-keygen -R $IP 2>/dev/null
-        ssh -o "StrictHostKeyChecking no" -i $SSH_KEY dewpoint@${IP} -p $PORT 'modify auth user dewpoint password <AUTOFILL PASSWORD>' ;;
+        ssh -o "StrictHostKeyChecking no" -i $SSH_KEY admin@${IP} -p $PORT 'modify auth user dewpoint password <AUTOFILL PASSWORD>' ;;
     esac
     if [ $? -eq 0 ]; then
         echo "User Updated"
