@@ -1,6 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "9.9.1.0",
+    "contentVersion": "9.9.2.0",
     "parameters": {
         "adminUsername": {
             "value": "azureuser"
@@ -21,7 +21,7 @@
             "value": 1
         },
         "instanceType": {
-            "value": "Standard_D2s_v3"
+            "value": "Standard_D2s_v4"
         },
         "imageName": {
             "value": "Best1Gbps"
