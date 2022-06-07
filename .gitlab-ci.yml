@@ -12,6 +12,7 @@ stages:
   - publish
   - release
   - post-release-tests
+  - admin
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
@@ -148,6 +149,7 @@ post_release_test_job:
       - $REAPER_RUN == "true"
       - $DAILY_TESTS_MONITOR == "true"
       - $RELEASE_RUNTIME_INIT_TESTS == "true"
+      - $UPDATE_SCHEDULES == "true"
   variables:
     TEST_POLICY: automated-test-scripts/data/test_policies/post_release_test.yaml
     STACK_TYPE: dewdrop-preproduction
@@ -175,6 +177,7 @@ scheduled_test_job:
       - $VERIFY_REGKEY_COUNT == "true"
       - $REAPER_RUN == "true"
       - $DAILY_TESTS_MONITOR == "true"
+      - $UPDATE_SCHEDULES == "true"
   variables:
     TEST_POLICY: set in schedule!
     STACK_TYPE: dewdrop-production
@@ -232,7 +235,7 @@ publish_to_github:
     # Execute Release script to push source to github repo
     - ./cloud-tools/release-tool/publish_github.sh "$ALLOWED_DIRS" "$ALLOWED_FILES"
   variables:
-    ALLOWED_DIRS: ".github experimental images supported"
+    ALLOWED_DIRS: ".github images supported"
     ALLOWED_FILES: ".gitignore README.md azure-bigip-version-matrix.md azure-offer-list.yaml azure-timezone-list.md azure-update-bigip-image.md bigip-12-note.md iapp-migration.md slack-channel-statement.md template-index.md"
     GITLAB_API_URL: "$AZURE_URL"
     GITHUB_API_TOKEN: "$AZURE_GITHUB_API_TOKEN"
@@ -256,3 +259,20 @@ run_link_checker_release:
       - $RELEASE_RUNTIME_INIT_TESTS == "true"
   script:
     - make link_check_release
+
+# manually scheduled job to enable/disable daily scheduled test jobs
+update_daily_test_schedules:
+  image: ${ARTIFACTORY_SERVER}/dockerhub-remote/node:8
+  stage: admin
+  only:
+    variables:
+      - $UPDATE_SCHEDULES == "true"
+  script:
+    - apt-get update
+    - apt-get install -y jq
+    - ./cloud-tools/scheduler-tool/activate-schedule.sh
+  variables:
+    FILTER: "$FILTER"
+    GIT_LAB_API_URL: "$AZURE_URL"
+    GIT_LAB_PRIVATE_TOKEN: "$AZURE_GITLAB_API_TOKEN"
+    STATE: "$STATE"

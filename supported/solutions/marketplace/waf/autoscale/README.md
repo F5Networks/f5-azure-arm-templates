@@ -100,8 +100,6 @@ The following is an example configuration diagram for this solution deployment. 
 
 ![Configuration Example](images/azure-example-diagram-waf.png)
 
-## Post-Deployment Configuration
-If you need to add more applications to this deployment, see https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental/reference/scripts.
 
 ### Additional Optional Configuration Items
 Here are some post-deployment options that are entirely optional but could be useful based on your needs.

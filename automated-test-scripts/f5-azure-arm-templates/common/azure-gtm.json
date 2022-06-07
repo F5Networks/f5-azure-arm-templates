@@ -57,7 +57,8 @@
                 "Standard_DS11", 
                 "Standard_DS12", 
                 "Standard_DS13", 
-                "Standard_DS14", 
+                "Standard_DS14",
+                "Standard_D8s_v4", 
                 "Standard_D3_v2", 
                 "Standard_D4_v2", 
                 "Standard_D5_v2", 
@@ -86,7 +87,7 @@
                 "Standard_GS4", 
                 "Standard_GS5"
             ], 
-            "defaultValue": "Standard_DS3_v2", 
+            "defaultValue": "Standard_D8s_v4", 
             "metadata": {
                 "description": "Instance size of the Virtual Machine."
             }, 
@@ -107,11 +108,11 @@
         }, 
         "bigIpVersion": {
             "allowedValues": [
-                "13.1.100000", 
+                "13.1.500000", 
                 "12.1.303000", 
                 "latest"
             ], 
-            "defaultValue": "13.1.100000", 
+            "defaultValue": "13.1.500000", 
             "metadata": {
                 "description": "F5 BIG-IP version you want to use."
             }, 
@@ -284,7 +285,7 @@
                 "LTMOneBootLocation": "big-ltm-2slot", 
                 "LTMTwoBootLocations": "big-ltm-2slot"
             }, 
-            "13.1.100000": {
+            "13.1.500000": {
                 "AllOneBootLocation": "big-all-1slot", 
                 "AllTwoBootLocations": "big-all-2slot", 
                 "LTMOneBootLocation": "big-ltm-1slot", 
@@ -330,7 +331,7 @@
             "12.1.303000": {
                 "Port": 443
             }, 
-            "13.1.100000": {
+            "13.1.500000": {
                 "Port": 8443
             }, 
             "443": {
@@ -423,7 +424,7 @@
         "mgmtRouteGw": "`tmsh list sys management-route default gateway | grep gateway | sed 's/gateway //;s/ //g'`", 
         "routeCmdArray": {
             "12.1.303000": "[concat('tmsh create sys management-route waagent_route network 168.63.129.16/32 gateway ', variables('mgmtRouteGw'), '; tmsh save sys config')]", 
-            "13.1.100000": "route", 
+            "13.1.500000": "route", 
             "latest": "route"
         }, 
         "commandArgs": "[concat('-o ', parameters('declarationUrl'), ' -u svc_user')]", 
@@ -467,7 +468,8 @@
             "Standard_DS12", 
             "Standard_DS13", 
             "Standard_DS14", 
-            "Standard_DS2_v2", 
+            "Standard_DS2_v2",
+            "Standard_D8s_v4", 
             "Standard_DS3_v2", 
             "Standard_DS4_v2", 
             "Standard_DS5_v2", 
