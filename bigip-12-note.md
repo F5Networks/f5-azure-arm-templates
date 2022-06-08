@@ -46,14 +46,3 @@ Use this section to modify a template file so that it does not attempt to valida
   8.  After ensuring there are no errors in the code from missing brackets or missing/extra commas, save the file with the same name (**azuredeploy.json**). 
 
   9.  Deploy the template using your typical method.
-
-
-### Example template
-
-You can compare the difference between an existing template file and our modified version to see the changes described above.
-
-For example, compare the Failover via-LB 3 NIC existing stack template: https://github.com/F5Networks/f5-azure-arm-templates/blob/main/supported/failover/same-net/via-lb/3nic/existing-stack/byol/azuredeploy.json
-
-With our modified template: https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental/reference/example-image-removed/azuredeploy.json.
-
-

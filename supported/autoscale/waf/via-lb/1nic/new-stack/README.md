@@ -1,2 +1,0 @@
-## Template Moved
-F5 Azure ARM templates that create a new virtual network stack have been moved to the experimental folder.  You can find this template here: [Experimental Templates](https://github.com/F5Networks/f5-azure-arm-templates/tree/master/experimental)
