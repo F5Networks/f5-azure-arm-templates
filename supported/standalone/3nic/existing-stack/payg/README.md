@@ -251,7 +251,6 @@ None of the information we collect is personally identifiable, and only includes
 - BIG-IP version
 - F5 license type
 - F5 Cloud libs version
-- F5 script name
 
 This information is critical to the future improvements of templates, but should you decide to select **No**, information will not be sent to F5.
 
