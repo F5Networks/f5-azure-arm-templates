@@ -7,7 +7,7 @@ AUTOSCALE TYPE: waf-via-lb
 AUTOSCALE TYPE URL: waf/via-lb
 BASE VLAN NAME: internal
 BIGIP MODULES: ltm:nominal,asm:nominal
-BIGIP VERSION: 16.1.202000
+BIGIP VERSION: 16.1.301000
 BIGIQ CONFIG FILE: .bigIqPasswd
 BRANCH: master
 CLIENT ID: d40aad56-b0bd-466d-a6c4-6c9c4d0f9aa7
