@@ -590,7 +590,7 @@
         "dataStorageAccountType": "Standard_LRS",
         "deploymentId": "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('dnsLabel'))]",
         "customConfig": "[concat('### START (INPUT) CUSTOM CONFIGURATION HERE\ntmsh modify cm device-group Sync devices modify { ', variables('instanceName'), '1.', variables('location'), '.cloudapp.azure.com { set-sync-leader } }\ntmsh save sys config\n')]",
-        "customData": "controls:\n  logLevel: info\n  logFilename: /var/log/cloud/bigIpRuntimeInit.log\nextension_packages:\n  install_operations:\n    - extensionType: as3\n      extensionVersion: 3.36.1\n      extensionHash: 48876a92d3d8fe7da70310882dc9fd1499d209579d798394715e18c12138daf3\n    - extensionType: cf\n      extensionVersion: 1.10.0\n      extensionHash: d758c985cac4dbef4b0732fe5900317ae97e67c6efca621a5b2b02c8c4bbeace\n",
+        "customData": "controls:\n  logLevel: info\n  logFilename: /var/log/cloud/bigIpRuntimeInit.log\nextension_packages:\n  install_operations:\n    - extensionType: as3\n      extensionVersion: 3.39.0\n      extensionHash: 54d82a0844b46555c023e22a7887debd8ce49dd3ab4a4a4afca9ee30541dca23\n    - extensionType: cf\n      extensionVersion: 1.13.0\n      extensionHash: 93be496d250838697d8a9aca8bd0e6fe7480549ecd43280279f0a63fc741ab50\n",
         "allowUsageAnalytics": {
             "No": {
                 "hashCmd": "echo AllowUsageAnalytics:No",

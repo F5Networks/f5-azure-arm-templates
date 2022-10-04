@@ -671,7 +671,7 @@
         "dataStorageAccountType": "Standard_LRS",
         "deploymentId": "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('dnsLabel'))]",
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\nsystemctl restart crond\n",
-        "customData": "controls:\n  logLevel: info\n  logFilename: /var/log/cloud/bigIpRuntimeInit.log\nextension_packages:\n  install_operations:\n    - extensionType: as3\n      extensionVersion: 3.36.1\n      extensionHash: 48876a92d3d8fe7da70310882dc9fd1499d209579d798394715e18c12138daf3\n",
+        "customData": "controls:\n  logLevel: info\n  logFilename: /var/log/cloud/bigIpRuntimeInit.log\nextension_packages:\n  install_operations:\n    - extensionType: as3\n      extensionVersion: 3.39.0\n      extensionHash: 54d82a0844b46555c023e22a7887debd8ce49dd3ab4a4a4afca9ee30541dca23\n",
         "allowUsageAnalytics": {
             "No": {
                 "hashCmd": "echo AllowUsageAnalytics:No",
