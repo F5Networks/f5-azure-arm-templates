@@ -24,7 +24,7 @@ NTP SERVER: 0.pool.ntp.org
 NUMBER OF ADDITIONAL NICS: 0
 PASSWORD TYPE: password
 REG POOL PARAM: ',"regPoolKeys":{"value":"Do_Not_Create"}'
-REGION: westus
+REGION: eastus
 REGISTRATION POOL KEYS: Do Not Create
 RESOURCE GROUP: dd-az-bigiq-cluster-<DEWPOINT JOB ID>
 SEQUENCE NUMBER: 0

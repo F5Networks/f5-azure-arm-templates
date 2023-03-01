@@ -2,7 +2,7 @@ ADDITIONAL NIC LOCATION: ''
 ADDTL NIC PARAM: ''
 BASE VLAN NAME: ''
 BIGIP MODULES: ltm:nominal
-BIGIP VERSION: 16.1.301000
+BIGIP VERSION: 16.1.303000
 BIGIQ CONFIG FILE: ''
 CONFIG FILES: ""
 CREATE PUBLIC IP: 'No'
@@ -16,7 +16,7 @@ DNS LABEL: ',"dnsLabel":{"value":"<RESOURCE GROUP>"}'
 EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IMAGE NAME: Best25Mbps
-IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:16.1.301000
+IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:16.1.303000
 INSTANCE PARAM: ',"numberOfInstances":{"value":2}'
 INSTANCE TYPE: Standard_D8s_v4
 LICENSE PARAM: ''
@@ -32,7 +32,7 @@ NUMBER OF ADDITIONAL NICS: 0
 PASSWORD TYPE: password
 PHONEHOME: 'No'
 PROVISION INT LB: null
-REGION: westus
+REGION: eastus
 RESOURCE GROUP: dd-via-lb-<DEWPOINT JOB ID>
 SEQUENCE NUMBER: 0
 SERVICE PRINCIPAL: cd035b5e-2a51-42f6-8ada-f254abba58c0
