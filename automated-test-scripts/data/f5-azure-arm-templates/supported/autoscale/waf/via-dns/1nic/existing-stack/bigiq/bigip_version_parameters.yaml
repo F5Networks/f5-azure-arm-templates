@@ -8,7 +8,7 @@ AUTOSCALE TYPE: waf-via-dns
 AUTOSCALE TYPE URL: waf/via-dns
 BASE VLAN NAME: internal
 BIGIP MODULES: ltm:nominal,asm:nominal
-BIGIP VERSION: 16.1.301000
+BIGIP VERSION: 16.1.303000
 BIGIQ CONFIG FILE: .bigIqPasswd
 CLIENT ID: d40aad56-b0bd-466d-a6c4-6c9c4d0f9aa7
 CONFIG FILES: .passwd;.azCredentials;.dnsPasswd
@@ -42,7 +42,7 @@ NETWORK PARAM: ',"tenantId":{"value":"<TENANT ID>"},"clientId":{"value":"<CLIENT
 NTP SERVER: 0.pool.ntp.org
 NUMBER OF ADDITIONAL NICS: 0
 PASSWORD TYPE: password
-REGION: westus2
+REGION: eastus2
 RESOURCE GROUP: dd-as-<DEWPOINT JOB ID>
 SEQUENCE NUMBER: 1
 SERVICE PRINCIPAL: XjC8Q~kh63kn6SsQuvakzaNRmzCC4Oly5dMyLcm.
