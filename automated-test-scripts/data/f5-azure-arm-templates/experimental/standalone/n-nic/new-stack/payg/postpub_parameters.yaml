@@ -3,7 +3,7 @@ ADDTL NIC PARAM: ',"numberOfAdditionalNics":{"value":<NUMBER OF ADDITIONAL NICS>
   NIC LOCATION>"}'
 BASE VLAN NAME: external;internal
 BIGIP MODULES: ltm:nominal
-BIGIP VERSION: 16.1.301000
+BIGIP VERSION: 16.1.303000
 BIGIQ CONFIG FILE: ''
 BRANCH: master
 CONFIG FILES: .passwd
@@ -18,7 +18,7 @@ DNS LABEL: ',"dnsLabel":{"value":"<RESOURCE GROUP>"}'
 EXT ALB EXISTS: 'No'
 EXTERNAL IP COUNT: 1
 IMAGE NAME: Best25Mbps
-IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:15.1.501000
+IMAGE URN: f5-networks:f5-big-ip-best:f5-bigip-virtual-edition-25m-best-hourly-po-f5:15.1.801000
 INSTANCE TYPE: Standard_DS4_v2
 LICENSE PARAM: ''
 LICENSE POOL: production
@@ -33,7 +33,7 @@ NUMBER OF ADDITIONAL NICS: 1
 PASSWORD TYPE: password
 PHONEHOME: 'No'
 PROVISION INT LB: 'null'
-REGION: westus
+REGION: eastus
 RESOURCE GROUP: dd-n-<DEWPOINT JOB ID>
 SEQUENCE NUMBER: 0
 SOLUTION LOGS: install.log;onboard.log;network.log

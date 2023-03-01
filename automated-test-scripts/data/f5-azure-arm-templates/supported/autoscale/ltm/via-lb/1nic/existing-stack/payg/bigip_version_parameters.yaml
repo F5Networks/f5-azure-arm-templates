@@ -5,7 +5,7 @@ AUTOSCALE TYPE: ltm-via-lb
 AUTOSCALE TYPE URL: ltm/via-lb
 BASE VLAN NAME: internal
 BIGIP MODULES: ltm:nominal
-BIGIP VERSION: 16.1.301000
+BIGIP VERSION: 16.1.303000
 BIGIQ CONFIG FILE: ''
 CLIENT ID: d40aad56-b0bd-466d-a6c4-6c9c4d0f9aa7
 CONFIG FILES: .passwd;.azCredentials
@@ -36,7 +36,7 @@ NETWORK PARAM: ',"tenantId":{"value":"<TENANT ID>"},"clientId":{"value":"<CLIENT
   INSIGHTS>"},"scaleOutCpuThreshold":{"value":80},"autoscaleTimeout":{"value":5},"mgmtNsgName":{"value":"<MGMT NSG NAME>"},"scaleInCpuThreshold":{"value":20},"scaleOutThroughputThreshold":{"value":2000000},"scaleInThroughputThreshold":{"value":1000000},"scaleInTimeWindow":{"value":10},"scaleOutTimeWindow":{"value":10}'
 NTP SERVER: 0.pool.ntp.org
 PASSWORD TYPE: password
-REGION: westus2
+REGION: eastus2
 RESOURCE GROUP: dd-as-<DEWPOINT JOB ID>
 SEQUENCE NUMBER: 1
 SERVICE PRINCIPAL: XjC8Q~kh63kn6SsQuvakzaNRmzCC4Oly5dMyLcm.
