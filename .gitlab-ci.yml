@@ -59,7 +59,6 @@ lint_generator:
     - cd cloud-tools/template-generator
     - pip install -r requirements.txt
     - make lint
-  allow_failure: true
 
 # validate the template generator 'source' file(s) are always in sync with the
 # generated content - i.e. running 'make all' after checking out a stable branch
@@ -87,7 +86,6 @@ run_generator_and_validate_no_diff:
     - pip install -r requirements.txt
     - python template_generator/main.py --azure
     - if git diff | grep 'diff --git'; then exit 1; else exit 0; fi
-  allow_failure: true
 
 # run template generator smoke tests - validate file contents, etc.
 run_smoke_tests:
@@ -105,7 +103,6 @@ run_smoke_tests:
     - apk add --no-cache build-base
     - apk add --no-cache bash
     - make run_smoke_tests
-  allow_failure: true
 
 pre_release_test_job:
   stage: sprinkle-tests
